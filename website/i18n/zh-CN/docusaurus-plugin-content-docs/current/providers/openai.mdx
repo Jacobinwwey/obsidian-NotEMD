@@ -1,67 +1,60 @@
 ---
 id: openai
 title: OpenAI
-description: 配置 OpenAI（GPT-4，GPT-4o）
+description: 为 Notemd 共享 Chat Completions 传输配置原生 OpenAI 端点，并核对模型访问权限。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI 提供商
+# OpenAI Provider
 
 <TLDR>
-**OpenAI** 使用与 OpenAI 兼容的共享传输协议。当前的预设默认为 `gpt-4o`、`https://api.openai.com/v1`、`temperature: 0.5` 以及 `models-then-chat` 连接测试。当需要精确的字段语义时，请使用此页面；如需按类别进行选择，则可查看 [LLM 提供商](/docs/providers/overview) 的概览。
-
-这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
+OpenAI 预设使用共享 OpenAI-compatible Chat Completions 运行时。配置 API key 和支持该协议的模型。默认模型只是起点，不保证账户当前可访问，也不是所有任务的推荐。
 </TLDR>
 
 ## 设置
 
-创建一个 OpenAI API 密钥，在 Notemd 设置中添加一个 `OpenAI` 提供商配置文件，除非有意指向兼容 OpenAI 的网关，否则保持默认的 Base URL。模型字段在常规工作中可以保持在 `gpt-4o`，或者替换为您账户能够调用的其他 OpenAI 模型 ID。
+选择 **OpenAI**，填写 API key，官方端点保留 `https://api.openai.com/v1`。选择账户可用且支持 chat completions 的模型；只支持其他 API 的模型不会因出现在列表中而自动兼容。
 
-采用针对特定任务的模型来控制成本：将更强大的模型用于研究、概念提取以及长文本重组；而将成本更低或速度更快的模型用于翻译、链接推荐以及简短摘要生成。
+网关应使用匹配预设以获得正确端点和请求头。Azure 部署选择 **Azure OpenAI**，单独设置 deployment 与 API version。
 
-## 端点与身份验证
+## 端点与认证
 
-| 字段 | 当前预设 |
-|-------|----------------|
-| 传输 | `openai-compatible` |
-| API 键 | 必需 |
+| 字段 | 预设值 |
+| ------- | -------------- |
+| 传输协议 | `openai-compatible` |
+| API key | 必填 |
 | 基础 URL | `https://api.openai.com/v1` |
 | 默认模型 | `gpt-4o` |
-| 温度 | `0.5` |
-| 连接测试 | `/models`，然后是 `/chat/completions` |
+| Temperature | `0.5` |
+| 连接测试 | `models-then-chat` |
 
-Notemd 会在追加 `chat/completions` 或 `models` 之前，将兼容 OpenAI 的基础 URLs 规范化。在 Base URL 中不要包含尾随的 `/chat/completions`，否则会导致路径重复。
+运行时会规范已知基础 URL 形式后构建列表或聊天路由。调试应从预设 URL 开始，检查最终路由，避免猜测并叠加路径段。
 
 ## 模型发现
 
-OpenAI 使用通用的、与 OpenAI 兼容的模型发现路径。设置 UI 会首先询问 `/v1/models`，然后通过简化的聊天请求来验证所选模型。如果模型发现失败但聊天功能仍然正常，需检查您的密钥是否具有模型列表权限，或者是否有网关阻断了模型列表的显示。
+**获取模型** 查询已配置端点，**测试连接** 可在模型列表请求成功后结束，未必验证聊天。测试连通性后，用实际 provider/model 处理可丢弃笔记。
 
-推理模型被视为协议中的边缘情况：Notemd 会合并系统提示与用户提示的内容，生成用于 OpenAI 推理的标识符，这些标识符不支持单独的 `system` 角色；同时，它仅在提供方定义支持的情况下才会暴露 `reasoningEffort`。
+Reasoning、thinking、采样和输出 token 控制取决于预设和模型规则，应验证任务实际组合；模型上榜不保证接受所有参数。
 
-## 故障排除
+## 故障排查
 
-- `401` 或 `403`：验证密钥、项目访问权限、账单状态，以及所选模型是否已为该密钥启用。
-- 聊天中的`404`：Base URL通常是不正确的，或者已经包含了`/chat/completions`。
-- 该模型在文档中有所显示，但并未出现在选择器中：model-list 访问和 chat 访问是两个独立的故障点；请在提供商配置文件中手动测试确切的模型编号。
-- 推理模型拒绝接收消息：请使用属于 OpenAI 推理处理路径的模型 ID，或切换为非推理型聊天模型。
+- `401`／`403`：检查密钥、项目权限、模型授权和账户状态。
+- `404`：检查端点、模型 ID，以及 API 是否支持该模型。
+- 列表正常但任务失败：检查实际聊天错误和模型／参数。
+- 长输出失败或截断：检查输出上限、源文大小和响应；短连接测试不能复现所有长请求失败。
 
-## 何时使用
+## 适用场景
 
-当您需要最可预测的默认托管路径、 `/v1/models` 发现功能非常重要，或者工作流依赖于 OpenAI 推理模型的语义时，请使用 OpenAI。如果在路由、隐私或成本控制方面比直接的 OpenAI API 行为更为重要，建议选择网关或本地提供商。
+适用于直接访问实现的 Chat Completions 协议所支持的 OpenAI 模型。先用代表性笔记评估；价格和模型可用性可独立于 Notemd 发布发生变化。
 
----
+## 后续阅读
 
-## 后续步骤
-
-- [LLM 提供商](/docs/providers/overview) -- 完整配置、任务级模型以及重试逻辑
-- [故障排除](/docs/advanced/troubleshooting) -- 解决 401/403 错误及速率限制错误
+- [Provider 概览](./overview)：任务路由与协议。
+- [故障排查](../advanced/troubleshooting)：脱敏证据与输出失败。

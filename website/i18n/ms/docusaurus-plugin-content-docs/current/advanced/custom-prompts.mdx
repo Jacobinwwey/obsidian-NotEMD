@@ -1,134 +1,90 @@
 ---
 id: custom-prompts
-title: "Prompt Khas"
-description: "Sesuaikan prompt LLM mengikut keperluan anda"
+title: Prompt tersuai
+description: >-
+  Gantikan prompt tugas yang disokong sambil mengekalkan format keluaran yang
+  diperlukan.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [custom prompts, prompts, focused learning, domain]
-concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: LLM Prompt Engineering
-    url: https://platform.openai.com/docs/guides/prompt-engineering
+keywords:
+  - Prompt tersuai
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Prompt Khas
+# Prompt tersuai
 
-<TLDR>
-**Notemd membolehkan anda menggantikan prompt LLM lalai untuk setiap jenis tugas.** Prompt khas memberi anda kawalan ke atas apa yang akan diberi keutamaan oleh model: anda boleh mengehadkan pengeluaran konsep kepada disiplin tertentu, mengubah gaya pautan, atau mengarahkan nada terjemahan. Pembolehubah prompt seperti `{{content}}` dan `{{concept}}` akan digantikan semasa pelaksanaan. Ciri domain pembelajaran yang ditumpukan akan menambah awalan bidang kajian anda untuk membataskan hasil pengeluaran secara automatik.
+<TLDR>Prompt tersuai menggantikan prompt terbina apabila suis global dan tugas aktif serta teks tersuai tidak kosong. Anda perlu mengekalkan kontrak keluaran tugas. Tiada sistem templat automatik yang memulihkan setiap arahan format yang digugurkan.</TLDR>
 
-Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Gambaran keseluruhan
 
-## Gambaran Keseluruhan
+Uji prompt lalai pada nota perwakilan dahulu. Gunakan pembelajaran tertumpu atau penindasan sinonim jika mencukupi. Tulis prompt tersuai apabila memerlukan dasar ekstraksi, struktur atau gaya terjemahan khusus, kemudian bandingkan hasil sebelum kelompok.
 
-Prompt lalai Notemd ditulis untuk kerja pengetahuan guna umum. Ia berfungsi dengan baik merentas pelbagai domain, tetapi masih memerlukan penambahbaikan khusus untuk setiap domain. Prompt khas membolehkan anda memberitahu LLM secara tepat bagaimana ia harus berkelakuan untuk kes penggunaan anda — sama ada untuk mengekstrak hanya istilah perubatan, menghubungkan hanya entiti bernama, atau menterjemahkan dalam gaya rasmi.
+## Cara kerja
 
-Prompt khas tidak menggantikan keseluruhan prompt sistem. Ia menggantikan atau menambah bahagian arahan khusus tugas sambil mengekalkan format output struktur (contohnya baris `CONCEPT:`, sintaks pautan wiki) yang diperlukan oleh Notemd untuk pemprosesan.
+### Struktur prompt
 
-## Cara Ia Berfungsi
+Notemd memilih prompt terbina atau tersuai yang diaktifkan, menambah arahan bidang/bahasa yang berkenaan dan menggantikan pemegang tempat yang dibekalkan tugas. Kandungan nota juga boleh dihantar dalam mesej berasingan. Input berbeza antara tugas; pemboleh ubah penyelidikan bukan tersedia di mana-mana.
 
-### Arkitektur Prompt
+Mengganti prompt ekstraksi boleh menggugurkan `CONCEPT:`. Mengganti prompt penyelidikan boleh menghilangkan konteks dapatan. Permintaan yang terbentuk dengan baik tidak membuktikan hasil boleh dihuraikan atau disokong bukti.
 
-Setiap tugas Notemd mengikut struktur prompt yang sama:
+### Pemboleh ubah prompt
 
-```
-[System role: You are a helpful assistant...]
-[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
-[Custom task prompt]                                <-- your override (optional)
-[Output format instructions]                        <-- always preserved
-[Content: {{content}}]                              <-- runtime substitution
-```
+Gunakan huruf besar dan satu pasang kurungan berombak tepat seperti berikut:
 
-1. **Prompt sistem asas** -- Menetapkan personaliti pembantu. Tidak boleh digantikan.
-2. **Domain pembelajaran yang ditumpukan** -- Menambah awalan `Relevant Fields: [medicine / law / computer science / ...]` untuk membataskan skop. Ini merupakan suis tetapan, bukan prompt mentah.
-3. **Prompt tugas khas** -- Menggantikan arahan tugas lalai (contohnya jenis konsep yang perlu diekstrak, sejauh mana pautan perlu dibuat).
-4. **Format output** -- Peraturan struktur (baris `CONCEPT:`, format pautan wiki). Sentiasa ditambah oleh Notemd untuk memastikan ia boleh diproses.
-5. **Kandungan** -- Teks nota sebenar, yang digantikan semasa pelaksanaan melalui `{{content}}`.
+| Tugas | Pemegang tempat dibekalkan |
+| ------ | ----------------------- |
+| Penjanaan tajuk | `{TITLE}`, `{RESEARCH_CONTEXT_SECTION}` |
+| Ringkasan penyelidikan | `{TOPIC}`, `{LANGUAGE}`, `{SEARCH_RESULTS_CONTEXT}` |
+| Terjemahan | `{LANGUAGE}`, `{TEXT}` |
+| Ekstraksi teks asal | `{REFERENCE_CONTENT}`, `{USER_INPUT}` |
 
-### Pembolehubah Prompt
+`{LANGUAGE}` diselesaikan melalui dasar bahasa tugas. Tambah pautan dan ekstraksi konsep kendiri menghantar teks sebagai kandungan tugas; jangan mencipta pemegang tempat kandungan untuknya. Nama tidak dikenali tidak diisi secara automatik. Ini penggantian prompt tugas, bukan templat fail nota konsep.
 
-Pembolehubah akan digantikan semasa masa pelaksanaan. Pembolehubah yang tersedia berbeza mengikut tugas:
+### Bidang pembelajaran tertumpu
 
-| Pembolehubah | Tugas | Digantikan Dengan |
-|----------|-------|---------------|
-| `{{content}}` | Semua | Teks nota atau pilihan |
-| `{{concept}}` | Templat nota konsep | Nama konsep yang diekstrak |
-| `{{description}}` | Templat nota konsep | Penerangan konsep yang dijana oleh LLM |
-| `{{backlinks}}` | Templat nota konsep | Senarai nota sumber dengan pautan |
-| `{{date}}` | Templat nota konsep | Tarikh semasa (YYYY-MM-DD) |
-| `{{language}}` | Terjemahan | Bahasa output sasaran |
-| `{{source}}` | Templat nota konsep | Nama fail asal nota |
-
-### Domain Pembelajaran Terfokus
-
-Ciri pembelajaran terfokus merupakan pintasan untuk menentukan skop domain. Daripada menulis promp yang khusus yang menyebut bidang anda, anda tetapkan `focusedLearningDomain` dalam tetapan:
-
-```
-Settings → Advanced → Focused Learning Domain
-Example: "medicine" or "computer science" or "Chinese philosophy"
-```
-
-Ini akan menambahkan `Relevant Fields: [medicine]` di hadapan promp pengeluaran, menyebabkan LLM mengutamakan konsep yang berkaitan dengan domain dan menekan konsep umum. Ia lebih ringan berbanding promp khusus sepenuhnya dan berfungsi untuk semua tugas pengeluaran.
+Aktifkan pembelajaran tertumpu dan masukkan bidang seperti `electrical engineering`. Prompt menerima arahan `Relevant Fields`. Ini membimbing perhatian model, bukan penapis mutlak atau bukti konsep luar bidang akan dikecualikan.
 
 ## Konfigurasi
 
-| Pengaturan | Lalai | Kesan |
-|---------|---------|--------|
-| `customAddLinksPrompt` | `''` | Atur semula promp tugas tambah pautan lalai |
-| `customExtractConceptsPrompt` | `''` | Atur semula promp pengeluaran konsep lalai |
-| `customResearchPrompt` | `''` | Atur semula promp penyelidikan + ringkasan lalai |
-| `customTranslatePrompt` | `''` | Atur semula promp terjemahan lalai |
-| `customDiagramPrompt` | `''` | Atur semula promp penjanaan diagram lalai |
-| `focusedLearningDomain` | `''` | Tambahkan konteks disiplin di hadapan promp pengeluaran dan pautan |
-| `extractConceptsMinimalTemplate` | `true` | Guna templat nota konsep hanya tajuk (mempengaruhi skop templat `{{concept}}`) |
-| `customConceptNoteTemplate` | `''` | Atur semula templat fail nota konsep dengan sokongan pembolehubah penuh |
+| Tugas | Suis pengaktifan | Medan prompt |
+| ------ | --------------- | -------------- |
+| Tambah pautan | `useCustomPromptForAddLinks` | `customPromptAddLinks` |
+| Penjanaan tajuk | `useCustomPromptForGenerateTitle` | `customPromptGenerateTitle` |
+| Ringkasan penyelidikan | `useCustomPromptForResearchSummarize` | `customPromptResearchSummarize` |
+| Ringkasan Mermaid | `useCustomPromptForSummarizeToMermaid` | `customPromptSummarizeToMermaid` |
+| Ekstraksi konsep | `useCustomPromptForExtractConcepts` | `customPromptExtractConcepts` |
+| Terjemahan | `useCustomPromptForTranslate` | `translatePrompt` |
+| Ekstraksi teks asal | `useCustomPromptForExtractOriginalText` | `customPromptExtractOriginalText` |
 
-**Apabila medan promp khusus kosong, promp lalai yang sedia ada akan digunakan.**
+Semuanya memerlukan `enableGlobalCustomPrompts`. Teks tersuai kosong kembali kepada prompt terbina. Ekstraksi teks asal tergabung mempunyai format terbina sendiri dan tidak berkongsi gantian ekstraksi biasa. Penjanaan rajah mempunyai keperluan keluaran berjenis sendiri; gantian ringkasan Mermaid bukan prompt rajah sejagat.
 
 ## Contoh
 
-Anda ialah penyelidik perubatan yang mengeluarkan konsep daripada nota ujian klinikal. Promp lalai mengeluarkan kata nama umum bersama istilah perubatan, yang menyebabkan folder konsep anda menjadi kacau.
+Untuk konsep nota litar, aktifkan suis global dan ekstraksi, lalu kekalkan kontrak penghurai dalam arahan tertumpu:
 
-**Penyelesaian:** Tetapkan domain pembelajaran terfokus dan promp pengeluaran khusus.
-
-1. Tetapkan `focusedLearningDomain` kepada `medicine`
-2. Tetapkan `customExtractConceptsPrompt` kepada:
-
-```
-Extract only clinically relevant concepts: diseases, drug names,
-anatomical terms, measurement endpoints, and statistical methods.
-Ignore generic English nouns, brand names, and institutional names.
-Prioritize MeSH terminology where applicable.
+```text
+Ekstrak konsep utama kejuruteraan elektrik daripada nota yang dibekalkan.
+Utamakan nama komponen khusus dan mekanisme fizikal berbanding kata nama umum.
+Kembalikan satu konsep setiap baris dengan format tepat berikut:
+CONCEPT: Nama Istilah
+Jangan tambah huraian atau blok kod pembungkus.
 ```
 
-Sekarang apabila anda menjalankan "Extract concepts" pada nota klinikal, LLM menghasilkan:
+Uji pada salinan nota. Semak entri, nama fail dan konsep yang hilang, kemudian bandingkan dengan lalai. Simpan prompt asal sebelum menyunting agar boleh dipulihkan.
 
-```
-CONCEPT: Randomized Controlled Trial
-CONCEPT: Double-Blind Method
-CONCEPT: Myocardial Infarction
-CONCEPT: Creatine Kinase-MB
-CONCEPT: Kaplan-Meier Estimate
-```
+## Petua
 
-Bukan seperti tingkah laku lalai yang mungkin juga mengekstrak istilah umum yang tidak diingini seperti "hospital" atau "month".
+- Uji satu tugas pada satu masa; perincikan skop sebelum membesarkan kelompok.
+- Kekalkan bukti sumber dalam penyelidikan dan petikan tepat dalam ekstraksi.
+- Kekalkan pengecam boleh laku dan penanda keluaran ketika menterjemah arahan.
+- Uji semula selepas menukar model/penyedia; arahan bukan jaminan pengesahan.
 
-## Tips
+## Seterusnya
 
-- **Mulakan dengan domain pembelajaran yang ditumpukan** sebelum menulis prompt khas sepenuhnya. Ia meliputi 80% kes penggunaan dengan satu tetapan sahaja.
-- **Pertahankan format output** -- Jangan pernah padam arahan format seperti "satu per baris" atau "CONCEPT: prefix" daripada prompt khas. Pemproses Notemd bergantung pada arahan tersebut.
-- **Uji dengan satu nota terlebih dahulu** -- Prompt khas boleh memberi kesan yang tidak dijangka terhadap keluasan ekstraksi. Sahkan pada satu nota sebelum pemprosesan berkumpulan.
-- **Jadikan prompt ringkas** -- Prompt khas yang terlalu panjang akan menggunakan lebih banyak token dan boleh mengurangkan fokus model.
-
----
-
-## Langkah Seterusnya
-
-- [Wiki-Links](/docs/features/wiki-links) -- Apa yang akan dipautkan apabila anda menyesuaikan prompt add-links
-- [Concept Notes](/docs/features/concept-notes) -- Templat nota konsep dan pembolehubah `{{concept}}`
-- [Batch Processing](/docs/advanced/batch-processing) -- Terapkan prompt khas ke seluruh folder
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Perbaiki masalah di mana prompt khas menghasilkan output yang tidak dijangka
+- [Nota konsep](../features/concept-notes): templat fail disokong.
+- [Penyelidikan](../features/research): konteks dan semakan sumber.
+- [Terjemahan](../features/translation): bahasa serta hasil.
+- [Penyelesaian masalah](./troubleshooting): respons kosong atau salah format.

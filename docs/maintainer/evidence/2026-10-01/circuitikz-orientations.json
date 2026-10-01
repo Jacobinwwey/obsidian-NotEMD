@@ -1,0 +1,257 @@
+[
+  {
+    "variant": "cmos-nand2-v1-right-left",
+    "circuitKind": "cmos-nand2",
+    "goldenReferenceId": "cmos-nand2-v1",
+    "inputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nand2-v1-right-left.json",
+    "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nand2-v1-right-left.tex",
+    "componentCount": 4,
+    "connectionCount": 11,
+    "topologyReferencePath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-nand2-v1.json",
+    "topologyCheck": {
+      "ok": true,
+      "referenceSignature": "{\"circuitKind\":\"cmos-nand2\",\"goldenReferenceId\":\"cmos-nand2-v1\",\"nets\":[\"GND\",\"VDD\",\"pull_down_mid\",\"va\",\"vb\",\"vout\"],\"components\":[{\"id\":\"MNA\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"va\"],[\"S\",\"pull_down_mid\"]]},{\"id\":\"MNB\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"pull_down_mid\"],[\"G\",\"vb\"],[\"S\",\"GND\"]]},{\"id\":\"MPA\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"va\"],[\"S\",\"VDD\"]]},{\"id\":\"MPB\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"vb\"],[\"S\",\"VDD\"]]}],\"connections\":[[\"GND\",\"MNB.S\"],[\"MNA.D\",\"vout\"],[\"MNA.G\",\"va\"],[\"MNA.S\",\"MNB.D\"],[\"MNB.G\",\"vb\"],[\"MPA.D\",\"vout\"],[\"MPA.G\",\"va\"],[\"MPA.S\",\"VDD\"],[\"MPB.D\",\"vout\"],[\"MPB.G\",\"vb\"],[\"MPB.S\",\"VDD\"]]}",
+      "candidateSignature": "{\"circuitKind\":\"cmos-nand2\",\"goldenReferenceId\":\"cmos-nand2-v1\",\"nets\":[\"GND\",\"VDD\",\"pull_down_mid\",\"va\",\"vb\",\"vout\"],\"components\":[{\"id\":\"MNA\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"va\"],[\"S\",\"pull_down_mid\"]]},{\"id\":\"MNB\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"pull_down_mid\"],[\"G\",\"vb\"],[\"S\",\"GND\"]]},{\"id\":\"MPA\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"va\"],[\"S\",\"VDD\"]]},{\"id\":\"MPB\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"vb\"],[\"S\",\"VDD\"]]}],\"connections\":[[\"GND\",\"MNB.S\"],[\"MNA.D\",\"vout\"],[\"MNA.G\",\"va\"],[\"MNA.S\",\"MNB.D\"],[\"MNB.G\",\"vb\"],[\"MPA.D\",\"vout\"],[\"MPA.G\",\"va\"],[\"MPA.S\",\"VDD\"],[\"MPB.D\",\"vout\"],[\"MPB.G\",\"vb\"],[\"MPB.S\",\"VDD\"]]}"
+    },
+    "compileExecution": {
+      "executable": "<repo>\\.cache\\plan-audit-2026-09-12\\tectonic.exe",
+      "args": [
+        "--untrusted",
+        "--only-cached",
+        "--keep-logs",
+        "--outdir",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nand2-v1-right-left.tex"
+      ],
+      "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "stdout": "note: using only cached resource files\nnote: Running TeX ...\nnote: Rerunning TeX because \"cmos-nand2-v1-right-left.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nand2-v1-right-left.pdf` (5.9072265625 KiB)\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nand2-v1-right-left.log` (12.220703125 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+      "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+      "logPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nand2-v1-right-left.log",
+      "renderSmoke": {
+        "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nand2-v1-right-left.pdf",
+        "artifactExists": true,
+        "artifactSizeBytes": 6049,
+        "nonEmptyArtifact": true,
+        "artifactKind": "opaque",
+        "diagnostics": []
+      },
+      "diagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      }
+    },
+    "compileDiagnostics": {
+      "ok": true,
+      "summary": "0 error(s), 0 warning(s)",
+      "diagnostics": []
+    }
+  },
+  {
+    "variant": "cmos-nor2-v1-right-left",
+    "circuitKind": "cmos-nor2",
+    "goldenReferenceId": "cmos-nor2-v1",
+    "inputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nor2-v1-right-left.json",
+    "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nor2-v1-right-left.tex",
+    "componentCount": 4,
+    "connectionCount": 11,
+    "topologyReferencePath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-nor2-v1.json",
+    "topologyCheck": {
+      "ok": true,
+      "referenceSignature": "{\"circuitKind\":\"cmos-nor2\",\"goldenReferenceId\":\"cmos-nor2-v1\",\"nets\":[\"GND\",\"VDD\",\"pull_up_mid\",\"va\",\"vb\",\"vout\"],\"components\":[{\"id\":\"MNA\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"va\"],[\"S\",\"GND\"]]},{\"id\":\"MNB\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"vb\"],[\"S\",\"GND\"]]},{\"id\":\"MPA\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"pull_up_mid\"],[\"G\",\"va\"],[\"S\",\"VDD\"]]},{\"id\":\"MPB\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"vb\"],[\"S\",\"pull_up_mid\"]]}],\"connections\":[[\"GND\",\"MNA.S\"],[\"GND\",\"MNB.S\"],[\"MNA.D\",\"vout\"],[\"MNA.G\",\"va\"],[\"MNB.D\",\"vout\"],[\"MNB.G\",\"vb\"],[\"MPA.D\",\"MPB.S\"],[\"MPA.G\",\"va\"],[\"MPA.S\",\"VDD\"],[\"MPB.D\",\"vout\"],[\"MPB.G\",\"vb\"]]}",
+      "candidateSignature": "{\"circuitKind\":\"cmos-nor2\",\"goldenReferenceId\":\"cmos-nor2-v1\",\"nets\":[\"GND\",\"VDD\",\"pull_up_mid\",\"va\",\"vb\",\"vout\"],\"components\":[{\"id\":\"MNA\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"va\"],[\"S\",\"GND\"]]},{\"id\":\"MNB\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"vb\"],[\"S\",\"GND\"]]},{\"id\":\"MPA\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"pull_up_mid\"],[\"G\",\"va\"],[\"S\",\"VDD\"]]},{\"id\":\"MPB\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"vb\"],[\"S\",\"pull_up_mid\"]]}],\"connections\":[[\"GND\",\"MNA.S\"],[\"GND\",\"MNB.S\"],[\"MNA.D\",\"vout\"],[\"MNA.G\",\"va\"],[\"MNB.D\",\"vout\"],[\"MNB.G\",\"vb\"],[\"MPA.D\",\"MPB.S\"],[\"MPA.G\",\"va\"],[\"MPA.S\",\"VDD\"],[\"MPB.D\",\"vout\"],[\"MPB.G\",\"vb\"]]}"
+    },
+    "compileExecution": {
+      "executable": "<repo>\\.cache\\plan-audit-2026-09-12\\tectonic.exe",
+      "args": [
+        "--untrusted",
+        "--only-cached",
+        "--keep-logs",
+        "--outdir",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nor2-v1-right-left.tex"
+      ],
+      "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "stdout": "note: using only cached resource files\nnote: Running TeX ...\nnote: Rerunning TeX because \"cmos-nor2-v1-right-left.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nor2-v1-right-left.log` (12.2138671875 KiB)\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nor2-v1-right-left.pdf` (5.8505859375 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+      "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+      "logPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nor2-v1-right-left.log",
+      "renderSmoke": {
+        "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-nor2-v1-right-left.pdf",
+        "artifactExists": true,
+        "artifactSizeBytes": 5991,
+        "nonEmptyArtifact": true,
+        "artifactKind": "opaque",
+        "diagnostics": []
+      },
+      "diagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      }
+    },
+    "compileDiagnostics": {
+      "ok": true,
+      "summary": "0 error(s), 0 warning(s)",
+      "diagnostics": []
+    }
+  },
+  {
+    "variant": "cmos-transmission-gate-v1-right-left",
+    "circuitKind": "cmos-transmission-gate",
+    "goldenReferenceId": "cmos-transmission-gate-v1",
+    "inputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-left.json",
+    "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-left.tex",
+    "componentCount": 2,
+    "connectionCount": 8,
+    "topologyReferencePath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-transmission-gate-v1.json",
+    "topologyCheck": {
+      "ok": true,
+      "referenceSignature": "{\"circuitKind\":\"cmos-transmission-gate\",\"goldenReferenceId\":\"cmos-transmission-gate-v1\",\"nets\":[\"phi\",\"phib\",\"vin\",\"vout\"],\"components\":[{\"id\":\"MN\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vin\"],[\"G\",\"phi\"],[\"S\",\"vout\"]]},{\"id\":\"MP\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"phib\"],[\"S\",\"vin\"]]}],\"connections\":[[\"MN.D\",\"MP.S\"],[\"MN.D\",\"vin\"],[\"MN.G\",\"phi\"],[\"MN.S\",\"MP.D\"],[\"MN.S\",\"vout\"],[\"MP.D\",\"vout\"],[\"MP.G\",\"phib\"],[\"MP.S\",\"vin\"]]}",
+      "candidateSignature": "{\"circuitKind\":\"cmos-transmission-gate\",\"goldenReferenceId\":\"cmos-transmission-gate-v1\",\"nets\":[\"phi\",\"phib\",\"vin\",\"vout\"],\"components\":[{\"id\":\"MN\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vin\"],[\"G\",\"phi\"],[\"S\",\"vout\"]]},{\"id\":\"MP\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"phib\"],[\"S\",\"vin\"]]}],\"connections\":[[\"MN.D\",\"MP.S\"],[\"MN.D\",\"vin\"],[\"MN.G\",\"phi\"],[\"MN.S\",\"MP.D\"],[\"MN.S\",\"vout\"],[\"MP.D\",\"vout\"],[\"MP.G\",\"phib\"],[\"MP.S\",\"vin\"]]}"
+    },
+    "compileExecution": {
+      "executable": "<repo>\\.cache\\plan-audit-2026-09-12\\tectonic.exe",
+      "args": [
+        "--untrusted",
+        "--only-cached",
+        "--keep-logs",
+        "--outdir",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-left.tex"
+      ],
+      "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "stdout": "note: using only cached resource files\nnote: Running TeX ...\nnote: Rerunning TeX because \"cmos-transmission-gate-v1-right-left.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-left.pdf` (6.009765625 KiB)\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-left.log` (12.2783203125 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+      "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+      "logPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-left.log",
+      "renderSmoke": {
+        "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-left.pdf",
+        "artifactExists": true,
+        "artifactSizeBytes": 6154,
+        "nonEmptyArtifact": true,
+        "artifactKind": "opaque",
+        "diagnostics": []
+      },
+      "diagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      }
+    },
+    "compileDiagnostics": {
+      "ok": true,
+      "summary": "0 error(s), 0 warning(s)",
+      "diagnostics": []
+    }
+  },
+  {
+    "variant": "cmos-transmission-gate-v1-right-right",
+    "circuitKind": "cmos-transmission-gate",
+    "goldenReferenceId": "cmos-transmission-gate-v1",
+    "inputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-right.json",
+    "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-right.tex",
+    "componentCount": 2,
+    "connectionCount": 8,
+    "topologyReferencePath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-transmission-gate-v1.json",
+    "topologyCheck": {
+      "ok": true,
+      "referenceSignature": "{\"circuitKind\":\"cmos-transmission-gate\",\"goldenReferenceId\":\"cmos-transmission-gate-v1\",\"nets\":[\"phi\",\"phib\",\"vin\",\"vout\"],\"components\":[{\"id\":\"MN\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vin\"],[\"G\",\"phi\"],[\"S\",\"vout\"]]},{\"id\":\"MP\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"phib\"],[\"S\",\"vin\"]]}],\"connections\":[[\"MN.D\",\"MP.S\"],[\"MN.D\",\"vin\"],[\"MN.G\",\"phi\"],[\"MN.S\",\"MP.D\"],[\"MN.S\",\"vout\"],[\"MP.D\",\"vout\"],[\"MP.G\",\"phib\"],[\"MP.S\",\"vin\"]]}",
+      "candidateSignature": "{\"circuitKind\":\"cmos-transmission-gate\",\"goldenReferenceId\":\"cmos-transmission-gate-v1\",\"nets\":[\"phi\",\"phib\",\"vin\",\"vout\"],\"components\":[{\"id\":\"MN\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vin\"],[\"G\",\"phi\"],[\"S\",\"vout\"]]},{\"id\":\"MP\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"phib\"],[\"S\",\"vin\"]]}],\"connections\":[[\"MN.D\",\"MP.S\"],[\"MN.D\",\"vin\"],[\"MN.G\",\"phi\"],[\"MN.S\",\"MP.D\"],[\"MN.S\",\"vout\"],[\"MP.D\",\"vout\"],[\"MP.G\",\"phib\"],[\"MP.S\",\"vin\"]]}"
+    },
+    "compileExecution": {
+      "executable": "<repo>\\.cache\\plan-audit-2026-09-12\\tectonic.exe",
+      "args": [
+        "--untrusted",
+        "--only-cached",
+        "--keep-logs",
+        "--outdir",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-right.tex"
+      ],
+      "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "stdout": "note: using only cached resource files\nnote: Running TeX ...\nnote: Rerunning TeX because \"cmos-transmission-gate-v1-right-right.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-right.log` (12.283203125 KiB)\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-right.pdf` (6.0107421875 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+      "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+      "logPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-right.log",
+      "renderSmoke": {
+        "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-right-right.pdf",
+        "artifactExists": true,
+        "artifactSizeBytes": 6155,
+        "nonEmptyArtifact": true,
+        "artifactKind": "opaque",
+        "diagnostics": []
+      },
+      "diagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      }
+    },
+    "compileDiagnostics": {
+      "ok": true,
+      "summary": "0 error(s), 0 warning(s)",
+      "diagnostics": []
+    }
+  },
+  {
+    "variant": "cmos-transmission-gate-v1-left-left",
+    "circuitKind": "cmos-transmission-gate",
+    "goldenReferenceId": "cmos-transmission-gate-v1",
+    "inputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-left-left.json",
+    "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-left-left.tex",
+    "componentCount": 2,
+    "connectionCount": 8,
+    "topologyReferencePath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-transmission-gate-v1.json",
+    "topologyCheck": {
+      "ok": true,
+      "referenceSignature": "{\"circuitKind\":\"cmos-transmission-gate\",\"goldenReferenceId\":\"cmos-transmission-gate-v1\",\"nets\":[\"phi\",\"phib\",\"vin\",\"vout\"],\"components\":[{\"id\":\"MN\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vin\"],[\"G\",\"phi\"],[\"S\",\"vout\"]]},{\"id\":\"MP\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"phib\"],[\"S\",\"vin\"]]}],\"connections\":[[\"MN.D\",\"MP.S\"],[\"MN.D\",\"vin\"],[\"MN.G\",\"phi\"],[\"MN.S\",\"MP.D\"],[\"MN.S\",\"vout\"],[\"MP.D\",\"vout\"],[\"MP.G\",\"phib\"],[\"MP.S\",\"vin\"]]}",
+      "candidateSignature": "{\"circuitKind\":\"cmos-transmission-gate\",\"goldenReferenceId\":\"cmos-transmission-gate-v1\",\"nets\":[\"phi\",\"phib\",\"vin\",\"vout\"],\"components\":[{\"id\":\"MN\",\"type\":\"nmos\",\"terminals\":[[\"D\",\"vin\"],[\"G\",\"phi\"],[\"S\",\"vout\"]]},{\"id\":\"MP\",\"type\":\"pmos\",\"terminals\":[[\"D\",\"vout\"],[\"G\",\"phib\"],[\"S\",\"vin\"]]}],\"connections\":[[\"MN.D\",\"MP.S\"],[\"MN.D\",\"vin\"],[\"MN.G\",\"phi\"],[\"MN.S\",\"MP.D\"],[\"MN.S\",\"vout\"],[\"MP.D\",\"vout\"],[\"MP.G\",\"phib\"],[\"MP.S\",\"vin\"]]}"
+    },
+    "compileExecution": {
+      "executable": "<repo>\\.cache\\plan-audit-2026-09-12\\tectonic.exe",
+      "args": [
+        "--untrusted",
+        "--only-cached",
+        "--keep-logs",
+        "--outdir",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+        "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-left-left.tex"
+      ],
+      "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "stdout": "note: using only cached resource files\nnote: Running TeX ...\nnote: Rerunning TeX because \"cmos-transmission-gate-v1-left-left.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-left-left.pdf` (6.00390625 KiB)\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-left-left.log` (12.2734375 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+      "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+      "logPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-left-left.log",
+      "renderSmoke": {
+        "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz-orientations\\cmos-transmission-gate-v1-left-left.pdf",
+        "artifactExists": true,
+        "artifactSizeBytes": 6148,
+        "nonEmptyArtifact": true,
+        "artifactKind": "opaque",
+        "diagnostics": []
+      },
+      "diagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      }
+    },
+    "compileDiagnostics": {
+      "ok": true,
+      "summary": "0 error(s), 0 warning(s)",
+      "diagnostics": []
+    }
+  }
+]

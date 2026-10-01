@@ -428,6 +428,9 @@ export async function researchAndSummarizeFile(
         );
 
         const currentContent = await app.vault.read(file);
+        if (progressReporter.cancelled || progressReporter.abortController?.signal.aborted) {
+            throw new Error('Research cancelled by user before appending.');
+        }
         const nextContent = appendResearchSummaryToMarkdown(
             currentContent,
             prepared.sourceLabel,

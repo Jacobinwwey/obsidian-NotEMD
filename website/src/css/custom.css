@@ -32,6 +32,12 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0;
 }
 
+/* Keep Korean words readable; long identifiers can still wrap on narrow screens. */
+html:lang(ko) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
 /* Readability: Heading sizes with primary-color accent on H1 */
 h1 {
   font-size: 2.5rem;
@@ -58,6 +64,13 @@ article p {
   margin-bottom: 1.25rem;
 }
 
+/* Keep identifier punctuation in source order inside right-to-left prose. */
+.markdown :not(pre) > code {
+  /* rtl:ignore */
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
 /* Readability: List spacing for scanability */
 article ul, article ol {
   margin-bottom: 1.5rem;
@@ -79,12 +92,9 @@ table {
   width: 100%;
   margin: 1.5rem 0;
   border-collapse: collapse;
-}
-
-thead {
-  background: var(--ifm-color-primary);
-  color: white;
-  font-weight: 700;
+  /* Infima paints each th; setting only thead leaves its higher-specificity paint intact. */
+  --ifm-table-head-background: var(--ifm-color-primary);
+  --ifm-table-head-color: var(--ifm-color-content-inverse);
 }
 
 th, td {
@@ -95,6 +105,21 @@ th, td {
 
 tbody tr:nth-child(even) {
   background: rgba(0, 0, 0, 0.02);
+}
+
+.markdown a:not(.hash-link),
+.footer__copyright a {
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+.footer__copyright a {
+  color: var(--ifm-footer-link-color);
+}
+
+.markdown table:focus-visible {
+  outline: 3px solid var(--ifm-color-primary);
+  outline-offset: 3px;
 }
 
 [data-theme='dark'] tbody tr:nth-child(even) {

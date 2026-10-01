@@ -4,19 +4,39 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Logo não encontrado",
+    "message": "Logo do Notemd",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "Docs",
+    "message": "Documentação",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Perguntas frequentes",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Começar",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Primeiros passos",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Uso diário",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Desenvolvimento",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agentes",
+    "description": "Navbar label: Agents"
   }
 }

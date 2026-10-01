@@ -1,18 +1,18 @@
 {
   "version.label": {
-    "message": "Næste",
-    "description": "The label for version current"
+    "message": "Aktuel dokumentation",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Start med",
+    "message": "Kom i gang",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Kernfunktioner",
+    "message": "Kernefunktioner",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM-providere",
+    "message": "LLM-udbydere",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

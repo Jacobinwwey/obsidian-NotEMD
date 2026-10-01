@@ -1,14 +1,13 @@
 ---
 id: configuration
 title: 設定
-description: 設定 Notemd 的參數與偏好選項
+description: 查找 Notemd 設定，選擇 provider，控制輸出位置及語言、任務模型與工作流程。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 設定
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,431 +15,102 @@ import TLDR from '@site/src/components/TLDR';
 # 設定
 
 <TLDR>
-**Notemd** 的設定涵蓋 6 個主要領域：(1) LLM 提供者與 API 金鑰，(2) 每個任務的模型選擇，(3) 输出路徑與範本，(4) UI 語言與輸出語言，(5) 搜尋服務 (Tavily/DuckDuckGo)，(6) 自訂工作流程。所有設定皆位於 Obsidian 設定 → Notemd 中。更改會立即生效。
+開啟**設定 → Notemd**，用設定搜尋定位欄位。處理前先配置 provider 與輸出位置。先以單篇筆記驗證，再套用至資料夾；執行中的操作可能保留啟動時擷取的設定。
 </TLDR>
 
 ## 設定概覽
 
-存取方式：**Obsidian 設定 (⚙️) → Notemd**
-
-### 主要章節
-
-1. **供應商設定** — API 金鑰、基礎 URLs、模型
-2. **任務設定** — 每個任務的模型選擇
-3. **輸出設定** — 用於儲存生成的檔案的位置
-4. **語言設定** — UI 與輸出語言
-5. **搜尋整合** — Tavily/DuckDuckGo 設定
-6. **工作流程** — 自訂按鈕串聯
-7. **進階** — 診斷、批次處理、分塊處理
+預設啟用 DeepSeek，帳號憑證初始為空。選擇預設不會建立帳號、安裝模型或授予雲端模型權限。協定與模型探索見[Provider 設定](../providers/overview)。
 
 <!-- notemd-settings-favorites-guide -->
-## Notemd 設定搜尋與收藏功能說明
+## 設定探索與收藏
 
-此設定頁面旨在供反複使用，而非僅用於一次性的配置：
+- **搜尋設定**比對名稱、說明、別名與可見分類，並跳至欄位。
+- **★ 收藏**列出收藏設定的說明、分類與入口，儲存在當前 Vault，重新啟動仍保留；失效 ID 會清除。
+- 箭頭可收合探索工具列以節省空間，再開啟會恢復查詢。
+- 收藏清單與「僅搜尋收藏」是不同控制項。
 
-- 使用具備欄位辨識功能的 **Search settings** 欄位，可透過設定的名稱、描述、別名或顯示類別來搜尋。搜尋結果會依相關度排序，並直接跳轉至對應的設定。
-- 使用 **★ Favorites** 可將經常調整的設定保留在目前的 Vault 中。點擊該按鈕後，會開啟一個專用的清單，顯示設定的名稱、描述、類別以及直接跳轉的連結。您可以在不離開設定頁面的情況下，從清單中移除收藏項目。
-- 探索工具列預設是展開狀態。當需要更多垂直空間時，可使用箭頭按鈕將其收縮為右上角的浮動控制項；再次展開時，目前的搜尋條件會被保留並恢復。
-- 收藏清單與僅顯示收藏項目的過濾功能是相互獨立的。收藏的設定會使用穩定的設定 ID，即使在 Obsidian 重新啟動後仍會保留；而當某個設定不再存在時，舊的 ID 也會被安全地移除。
+圖表預覽匯出預設 **300 PPI**，範圍 **72–600**，只影響 PNG 點陣化。所選匯出支援時，SVG／PDF 保留向量幾何。**同時匯出完整 Mermaid 視覺內容**控制配套檔案，不控制 Drawnix 中的 Mermaid 可見性。
 
-**Diagram preview export PPI** 設定的預設值為 **300 PPI**，且可接受的範圍為 **72-600**。此設定僅用於控制 PNG 的光柵化處理；SVG 與 PDF 則會保留向量幾何結構。**Also export complete Mermaid visuals** 設定用於控制是否要同時匯出完整的 Mermaid 圖像，但無法控制 Mermaid 在 Drawnix 預覽中的顯示狀態。
----
+## 1. Provider 設定
 
-## 1. 提供者設定
+選擇 provider、填寫必要憑證，保留符合協定的端點並選擇可用模型。支援時取得模型清單，再測試連線。列出模型與成功生成回應是不同驗證。
 
-### 新增供應商
+本地 provider 需執行中的伺服器和已下載／載入模型；雲端或閘道會收到任務內容。處理私密材料時，活動 provider 和各任務的獨立 provider 都要檢查。
 
-1. 從下拉式選單中選擇供應商（有 30 頭以上可供選擇）
-2. **輸入 API 鍵**
-3. **選用**：設定自訂基礎 URL（用於代理伺服器/閘道）
-4. **點擊「取得模型清單」**以確認連線狀態
-5. **選擇預設模型**
+## 2. 任務專用模型
 
-### 常見供應商
+啟用 `useMultiModelSettings` 可為連結、標題生成、研究、翻譯、概念擷取、原文擷取及 Mermaid 摘要設定獨立 provider/model。模型覆寫值為空時使用該 provider 的模型；未啟用時使用活動 provider。
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
-
-#### Anthropic（Claude）
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
-
-#### Ollama（本地）
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
-```
-
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
-
-### 多個供應商
-
-您可以配置多個供應商，並根據任務在它們之間切換：
-- **主要供應商**：用於備用方案
-- **任務特定提供者**：為特定任務覆寫設定
-
----
-
-## 2. 專案特定模型
-
-為了優化成本與品質，可針對不同任務配置不同的模型：
-
-### 任務類型
-
-| 任務 | 預設模型 | 用途 |
-|------|--------------|---------|
-| **連結** | 主要供應商 | 確定維基連結的相關概念 |
-| **概念生成** | 主要供應商 | 提取並描述概念 |
-| **研究** | 主要供應商 | 總結網路搜尋結果 |
-| **翻譯** | 主要供應商 | 翻譯文字 |
-| **圖表產生** | 主要供應商 | 產生 Mermaid/Canvas 圖表 |
-
-### 範例：成本優化設定
-
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### 如何進行設定
-
-1. **設定 → Notemd → 任務設定**
-2. 對於每個任務，請選擇：
-   - ✅ **使用主要供應商**（預設值）
-   - 🔄 **使用自訂供應商** → 選擇供應商 + 模型
-
----
+以代表性筆記比較準確性、延遲和實際帳號費用，本文不提供模型排名或持續可用性保證。
 
 ## 3. 輸出設定
 
-### 概念說明輸出
+| 任務 | 預設輸出 |
+| ------ | ------------------------- |
+| 添加連結 | 原檔旁的獨立 `_processed.md`；不移動原文 |
+| 獨立概念擷取 | 需指定概念資料夾，僅標題且無反向連結 |
+| 翻譯 | 原檔旁獨立 `_<language>.md`；既有目標可能覆寫 |
+| 研究 | 將研究摘要附加至活動 Markdown 筆記 |
+| 批次標題生成 | 寫入正文，目標允許時移至報告中的同層 `<folder>_complete` |
+| 圖表預覽／匯出 | 選擇支援的源格式或視覺匯出，核對實際目標 |
 
-**新概念備忘錄的儲存位置：**
+概念資料夾初始為空，`concepts` 是自選名稱。獨立概念模板僅有最小／完整形式，沒有通用筆記模板變數引擎，見[概念筆記](../features/concept-notes)。
 
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**範本：**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### 資料夾結構選項
-
-**選項 1：扁平式（所有概念都在同一個資料夾中）**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**選項 2：階層式（依來源資料夾）**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-設定：**Settings → Output → Use Hierarchical Folders**
-
-### 圖表輸出
-
-**圖表儲存位置：**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**格式：**
-- `.mmd` (Mermaid 來源)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
+連結後綴、處理後目錄、翻譯後綴和翻譯儲存位置分別設定。重跑前檢查既有目標。復原與衝突提示會指出需關注的產物；取消不回復已完成寫入。
 
 ## 4. 語言設定
 
-### UI 語言
+外掛有 **21 個 UI locale**，網站有 **34 個語言路由**。`uiLocale: auto` 使用可用的 UI 語言對應，不支援時回退英文。
 
-**介面語言**（按鈕、選單、對話方塊）：
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-支援的語言：英文、簡體中文、繁體中文、日文、韓文、西班牙文、法文、德文、俄文、阿拉伯文，以及更多語言。
-
-### 輸出語言
-
-**產生內容的語言**（概念說明、研究摘要）：
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**使用場景：** 中文 UI + 英文輸出，用於雙語研究。
-
-### 翻譯目標
-
-翻譯任務的**預設目標語言**：
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
+生成語言獨立設定且預設英文。連結、標題生成、研究、概念擷取與 Mermaid 摘要可啟用專用輸出語言。翻譯使用所選 `language`，與 UI 無關；模型語言能力也不等於 UI／網站語言數。
 
 ## 5. 搜尋整合
 
-### Tavily（推薦）
+明確選擇有 API key 的 **Tavily** 或 **DuckDuckGo**。Tavily 金鑰空白不自動切換 DuckDuckGo。兩者都連網，DuckDuckGo 還可能擷取結果網頁。
 
-**AI 最佳化搜尋服務：**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-取得金鑰：[tavily.com](https://tavily.com/)
-
-**功能特點：**
-- 高品質的結果
-- 經 AI 最優化之摘要
-- 資料來源引用
-
-### DuckDuckGo（測試中）
-
-**不需要 API 金鑰：**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**注意：** 品質較低，無法自訂。
-
----
+標題生成預設不研究，需要時啟用 `enableResearchInGenerateContent`。本地知識檢索預設也關閉，範圍和任務分別設定。索引在本地，但用作上下文的片段仍會傳送至任務 LLM。
 
 ## 6. 工作流程設定
 
-### 建立自訂工作流程
+使用建構器或每行一個有名稱的 DSL 定義，預設：
 
-**工作流程可將多個任務串聯在一個按鈕上。**
-
-1. **設定 → 工作流程 → 添加工作流程**
-2. **名稱**：「紙張分析流程」
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **儲存**
-
-新的按鈕出現在左側邊欄中。
-
-### DSL 語法
-
-**格式：** `action1>action2>action3`
-
-**可用動作：**
-- `process-current-add-links` — 在目前筆記中加入維基連結
-- `extract-concepts-current` — 產生概念說明文件
-- `research-and-summarize` — 網路資料搜尋 + 摘要
-- `translate-current` — 將目前筆記翻譯
-- `summarize-as-mermaid` — 產生 Mermaid 圖表
-- `process-folder-add-links` — 批量處理資料夾
-
-**範例工作流程：**
-
-**快速概念抽取：**
-```
-process-current-add-links>extract-concepts-current
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-**深入研究：**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
+`::` 分隔名稱與動作清單，`>` 分隔 ID。預設在步驟回報失敗時停止。有效 ID、資料夾上下文及忽略錯誤的後果見[工作流程](../features/workflows)。
 
-**多語言分析：**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
+## 7. 進階設定
 
----
+| 設定 | 預設 | 作用 |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | 無任務專用路由時使用的 provider |
+| `useMultiModelSettings` | `false` | 啟用任務 provider/model |
+| `useCustomConceptNoteFolder` | `true` | 指定目錄後允許概念檔案 |
+| `conceptNoteFolder` | `''` | 初始未選擇概念資料夾 |
+| `extractConceptsMinimalTemplate` | `true` | 獨立擷取產生僅標題筆記 |
+| `extractConceptsAddBacklink` | `false` | 明確啟用後添加來源連結 |
+| `moveOriginalFileOnProcess` | `false` | 添加連結時保留源檔 |
+| `chunkWordCount` | `3000` | 近似文字區塊大小，不是 provider token 上限 |
+| `batchConcurrency` | `1` | 預設批次並行數 |
+| `enableBatchParallelism` | `false` | 在採用此開關的批次路徑啟用平行 |
+| `enableStableApiCall` | `false` | 明確穩定請求模式 |
+| `customWorkflowErrorStrategy` | `stop_on_error` | 報告錯誤後停止流程 |
 
-## 7.進階設定
+分塊與輸出 token 預算不同。較小區塊不保證符合上下文限制；低並行數可降低壓力，但不能杜絕 429。
 
-### 批次處理
+## 設定備份與 Profile
 
-**同時處理多個檔案：**
+設定屬於 Vault 外掛資料，改動可用配置前先備份。Provider profile 匯出有獨立去識別化契約，不是完整 Vault 備份。分享前仍須核對端點與元資料，不公開原始設定或含私密筆記的診斷。
 
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
+## 設定疑難排解
 
-數值越高 = 速度越快，但 API 呼叫次數也越多。
+用實際 provider/model 測試，再重跑短筆記。欄位似乎遺失時，按名稱搜尋、檢查分類與開發者模式可見性，並確認 Vault。附版本和去識別化設定回報可重現問題。
 
-### 智慧分塊
+## 延伸閱讀
 
-**對於長篇筆記，請分割成多個段落：**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-防止令牌數量限制錯誤。
-
-### 診斷面板
-
-**查看詳細日誌：**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-顯示：
-- API 請求/回應
-- 令牌使用量
-- 處理時間
-- 錯誤
-
-### 重複概念檢測
-
-**避免近乎重複的概念：**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-數值越高 = 合併時的侵略性越強。
-
----
-
-## 設定檔案
-
-### 匯出/匯入設定
-
-**在多台裝置之間分享設定：**
-
-1. **設定 → 進階 → 匯出設定**
-2. 儲存 `notemd-config.json`
-3. 在全新裝置上：**匯入設定**
-
-**包含內容：**
-- 供應商 API 金鑰（可選）
-- 模型選擇
-- 輸出路徑
-- 自訂工作流程
-
----
-
-## 推薦的設定
-
-### 適用於學生
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### 給研究人員
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### 專為重視隱私的使用者設計
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### 用於雙語工作
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## 配置故障排除
-
-### 設定未儲存
-- 檢查 `.obsidian/plugins/notemd/` 中的檔案權限
-- 試試看：關閉外掛 → 重新啟用
-
-### API 金鑰無效
-- 不要額外空格
-- 檢查有效期
-- 在供應商儀表板中驗證點數
-
-### 模型無法載入
-- 點擊「取得模型清單」以重新取得資料。
-- 檢查網路連線狀態
-- 試試不同的供應商
-
----
-
-## 接下來的步驟
-
-- 📖 [探索功能](../features/wiki-links)
-- 🔌 [供應商設定指南](../providers/overview)
-- ❓ [常見問題](../faq)
+- [快速開始](./quick-start)：核對首個輸出。
+- [批次處理](../advanced/batch-processing)：範圍與並行。
+- [自訂提示詞](../advanced/custom-prompts)：替換變數與輸出契約。
+- [疑難排解](../advanced/troubleshooting)：診斷與回報。

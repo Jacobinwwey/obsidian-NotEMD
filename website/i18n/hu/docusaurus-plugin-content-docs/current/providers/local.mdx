@@ -1,63 +1,55 @@
 ---
 id: local
-title: "Lokális modellek"
-description: "Konfiguráljuk a Ollama-t és a helyi LLM-eket"
+title: Helyi modellek
+description: >-
+  Készítse elő az Ollama, LM Studio vagy OVMS kiszolgálót, és ellenőrizze a
+  protokollt és adathatárokat.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Helyi modellek
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Lokális modellek
+# Helyi modellek
 
-<TLDR>
-**A helyi fornalmazók nem tárolják a felülvizsgált tartalmat a hosteltetett APIs-ben.** A jelenlegi helyi út kezelje az Ollama-t a natív `ollama` transzporttal, és az LMStudio-t a OpenAI-kompatibilis transzporttal. Két esetben is nincs szükség API kulcsra, de a helyi szerver és a modellnek már el kell futni.
+<TLDR>Futó modellkiszolgálóval feladatok végezhetők a saját eszközön. Először a modellt és protokollt készítse elő. Webes kutatás, távoli végpont, függőségtelepítés és külön felhőre irányított feladat ettől nem válik offline-ná.</TLDR>
 
-Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
-</TLDR>
+## Előkészítés
 
-## Elhajtás
+Telepítsen szervert/modellt az [Ollamához](https://ollama.com/), vagy töltsön modellt és indítson API-szervert az [LM Studióban](https://lmstudio.ai/). OVMS telepítést külön készítsen elő. A Notemd nem telepít modelleket és nem indítja ezeket a szervereket. Pontos nevet/profilt válasszon, és valódi feladatot is teszteljen.
 
-Ollama esetén telepítsenek meg a Ollama-t, hozzák le a kívánt modellt, indítják a szervert, és adják hozzá egy `Ollama` fornalmi profilt a Notemd-ben. LMStudio esetén töltse be egy modellt a LM Studio helyi szerverébe, és adjon hozzá egy `LMStudio` fornalmi profilt.
+## Végpont és hitelesítés
 
-A helyi modellek operatív függőségek, nem csupán beállítások. Notemd csak azt lehet hívni, amit a helyi folyamat nyílt meg, így előtt, hogy hibaközvetelje a plugint, ellenőrizze a helyi modellt az Obsidian körül.
+| Profil | Alap-URL | Példamodell | Protokoll / hozzáférés |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Natív Ollama; nem kötelező kulcs |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI-compatible; opcionális kulcs, alapból `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI-compatible; modellt és hozzáférést a telepítés ad |
 
-## Végpont és autentikáció
+A `localhost` az Obsidian eszközét jelenti. Telefonról ezzel nem a számítógépet éri el. LAN-végponthoz valódi cím és megfelelő védelem kell. Ne tegyen védtelen szervert nem megbízható hálózatra.
 
-| Társító | Base URL | Alapértelmezett modell | API kulcs | Megjegyzések |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Nem elvárható | NDJSON streamelés; modellkeresés `/api/tags` segítségével |
-| LMStudio | `localhost:1234/v1` | `local-model` | Nem elvárható | Írja el `"EMPTY"`-t bárrer tokenként; OpenAI-kompatibilis |
+## Modellek
 
-Ollama használja a helyi `/chat` útját a Base URL alatt. LMStudio követi a OpenAI-kompatibilis `chat/completions` útmutatást és oczekli egy a helyi szerverben betöltött modellt.
-
-## Model felfedezése
-
-Ollama használja a `ollama-tags` felfedezési módot és listázza a helyi szinten bevonott tagokat. LMStudio használja a OpenAI-kompatibilis modellfelfedezést, ha az ő szervere elérhető a `/v1/models` formájban.
-
-Ha a keresés semmit nem ad vissza, az általában helyi szerveri állapoti probléma: a modell nem került lekérdezésre, nem töltődött be, vagy a szerver egy másik host/porttal van kötve a profillal.
+Ollama a `/api/tags`, LM Studio esetleg a `/v1/models` útvonalat használja; OVMS telepítésfüggő. Lista nem bizonyít elegendő memóriát vagy alkalmas kimeneti formát. Próbáljon valódi kérést.
 
 ## Hibaelhárítás
 
-- Kapcsolat elutasítva: indítsa el a Ollama vagy a LM Studio-t, és ellenőrizze a konfigurált portot.
-- Nem található modell: húzzon le a Ollama tagot vagy töltsön be a LM Studio modellt, mielőtt tesztelje.
-- Lentes kiadás: csökkentsd a kontextus méretét, használj kevésbé erős helyi modellt, vagy küldd a súlyos munkákat egy hostelt fornalmazóhoz.
-- Türelmes vagy hibás válaszok: ellenőrizze, hogy a kiválasztott fornalmazó profil megfelel a helyi szerver protokollájával; Ollama és LMStudio nem lehetnek cserélhetők.
+- Kapcsolat elutasítva: szerver, figyelési cím és port.
+- Hiányzó modell: letöltés/betöltés és pontos alias.
+- Hitelesítés: ahol kell, valódi token, ne automatikusan `EMPTY`.
+- Lassú/hiányos válasz: memória, kontextus és keret; egy kéréssel kezdjen.
+- Rossz formátum: köteghangolás előtt protokoll, prompt és modell vizsgálata.
 
-## Kikorlátlan használat
+## Mikor megfelelő?
 
-Használj helyi fornítókat privát tárgyárakhoz, offline munkához vagy olcsó, repetitív feladatokhoz. Ne feltételezd, hogy a helyi megoldás automatikusan jobb a kutatási összeállításoknál vagy hosszú távolságú gondolkodásnál; a modellek minősége és a hardver korlátai az átmeneti kockázatok.
+Ha az adatkezelési határ, hozzáférés és mért eredmény illeszkedik a feladathoz. Leválasztás előtt készítse elő a függőségeket. Ellenőrizzen minden útvonalat; helyi részlet felhő-LLM-hez is kerülhet. Tavily/DuckDuckGo hálózatos marad, exporthoz külön eszköz kellhet.
 
----
+## Tovább
 
-## További lépések
-
-- [LLM Fornítók](/docs/providers/overview) -- Teljes konfiguráció és modellek beállítása egyes feladatokhoz
-- [Hibaelhárítás](/docs/advanced/troubleshooting) -- Előre megelőzés a connection-refused hibákat, ha a helyi szerver nem fut
+- [Szolgáltatók](./overview).
+- [Beállítások](../getting-started/configuration).
+- [Hibaelhárítás](../advanced/troubleshooting).

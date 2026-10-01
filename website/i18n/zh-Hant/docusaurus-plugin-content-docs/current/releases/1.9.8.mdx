@@ -1,0 +1,77 @@
+---
+id: 1.9.8
+title: Notemd 1.9.8 升級指南
+description: 了解 1.9.7 起的可靠性、原生匯出和文件改進，進行可核驗升級。
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Notemd 1.9.8 升級指南
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.8 升級指南
+
+<TLDR>
+1.9.8 著重取消與輸出歸屬、批次檢索一致性、原生匯出正確性及精確文件。以公開 GitHub Release 確認可用性，所有執行檔案來自同一版本。Provider 與圖表數量是既有能力，不是本版新增。
+</TLDR>
+
+## 自 1.9.7 起的變更
+
+| 範圍 | 影響 |
+| ------ | ------------- |
+| 取消 | 取消狀態傳到調度、provider 和重試，晚到回應不能繼續受保護寫入 |
+| 產物持久化 | 重疊儲存／復原追蹤歸屬，含同名源檔及共用附件 |
+| 本地檢索 | 批次標題生成採一致快照，記錄保留記憶體與凍結語料測量 |
+| 原生輸出 | 修復 PowerPoint 合併儲存格下分隔線及 CircuitikZ 導線／標籤 |
+| 驗證 | Linux／Windows CI、逐診斷 lint 回歸、程序測試與原生應用證據 |
+| 文件 | 校正預設，提供新人／使用者／開發者／Agent 入口，直接撰寫譯文並受控發布 |
+
+歷史搜尋在非同步刷新時保留連續輸入和游標。預覽歷史抽屜將 Tab 導覽限制在內部，載入時正確取得焦點，Escape 不再關閉父預覽；重試與過期回應已有瀏覽器回歸。
+
+36 個 provider 與 33 項可執行圖表在 1.9.7 已存在。說明區分執行行為、文件和合併紀錄，避免重複計算。
+
+研究與翻譯在最後一次源檔讀取或輸出目錄準備後、追加／建立／覆寫檔案之前再次檢查取消狀態。Vault 已接受的寫入仍保留完成結果。
+
+若另一項任務在建立譯文目錄的等待期間先建好目標目錄，翻譯會重用它，不將其算作本次任務建立。目標是衝突檔案或目錄仍不存在時，繼續回報錯誤並退回來源資料夾。
+
+## 安全升級
+
+1. 停止任務，備份 Vault 和設定。
+2. 透過社群外掛更新，或從同一公開 [1.9.8 Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) 下載 `main.js`、`manifest.json`、`styles.css`。
+3. 手動安裝僅替換執行檔案，保留設定和產物。
+4. 重新載入並核對版本。
+5. 先跑可捨棄筆記和小資料夾，檢查目標後再恢復大量工作。
+
+保留既有命令 ID 和設定。One-Click Extract 仍是連結、批次標題生成、Mermaid 修復；校正文件不是在預設鏈條新增研究。
+
+## 取消與復原
+
+取消不是復原交易。完成檔案保留，已接受的請求或寫入仍可能完成，遠端生成與計費由 provider 控制。等待收斂並核對輸出後再重跑。
+
+復原衝突會顯式回報，不靜默當成替換成功。比較當前筆記與復原檔再決定刪除；即使新匯出可內嵌視覺，仍保留舊產物引用的配套目錄。
+
+## 匯出與相容性限制
+
+- PowerPoint 表格有針對性原生斷言，全頁圖片評分曾漏掉合併邊框缺陷。
+- PPTX 內 Mermaid／SVG 可能以圖片回退，不保證原生可編輯形狀。
+- Drawnix 靜態跨分支關係不證明重排後箭頭仍附著。
+- CircuitikZ 預覽與原生 TeX 編譯有不同檢查和依賴。
+- 實體行動裝置、Obsidian 0.15.0 尚未驗證，manifest 下限不是新相容性測試。
+- 凍結詞法檢索證據不證明語意搜尋或任意 Vault 效能。
+
+## 發布完整性
+
+發布器核驗版本及本地／遠端 tag，從乾淨 tag 源碼重建，先上傳草稿，下載核對資產雜湊再公開。必備附件 `main.js`、`manifest.json`、`styles.css`、`README.md`，重試不能靜默替換公開位元組。
+
+網站在確認公開版本可用後部署。本輪譯文由 Codex 直接撰寫並審核，無 LM Studio 或翻譯引擎呼叫；AI 撰寫不表示獨立母語者審查。
+
+## 延伸閱讀
+
+- [公開版本與雙語說明](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8)。
+- [快速開始](../getting-started/quick-start)：升級後首個任務。
+- [批次處理](../advanced/batch-processing)：範圍與復原。
+- [開發者](../developers/overview)、[Agent](../agents/overview)：實作與整合。
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)：精確版本及去識別化證據。

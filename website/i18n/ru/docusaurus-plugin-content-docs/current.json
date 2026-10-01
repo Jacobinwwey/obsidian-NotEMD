@@ -1,7 +1,7 @@
 {
   "version.label": {
-    "message": "Следующий",
-    "description": "The label for version current"
+    "message": "Актуальная документация",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "Начало работы",
@@ -16,7 +16,7 @@
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Расширенные возможности",
+    "message": "Дополнительно",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

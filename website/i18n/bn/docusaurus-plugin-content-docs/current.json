@@ -1,18 +1,18 @@
 {
   "version.label": {
-    "message": "পরবর্তী",
-    "description": "The label for version current"
+    "message": "বর্তমান নির্দেশিকা",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "শুরু করা",
+    "message": "শুরু করুন",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "মূল বৈশিষ্ট্যসমূহ",
+    "message": "মূল সুবিধা",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM প্রদানকারীসমূহ",
+    "message": "LLM প্রদানকারী",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

@@ -1,102 +1,107 @@
 ---
 id: diagrams
-title: "Diagramok"
-description: "Egy spec-first architektúra segítségével a jegyzékeidből Mermaid, JSON Canvas, Vega-Lite, HTML, módosítható képformátkú artefektumok, Draw.io, Drawnix, valamint korlátozott circuitikz diagramok készülnek ki."
+title: Diagramok
+description: >-
+  Generáljon diagramokat, nézze együtt a Drawnix- és Mermaid-paneleket,
+  exportáljon SVG, PNG vagy PDF formátumba.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, circuitikz, TikZJax, Intent Detection, Spec-First Architecture]
-citations:
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Diagramok
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Diagramák
+# Diagramok
 
-<TLDR>
-Válassza ki **milyen típusú diagramot szeretne**, majd válassza az ő **redigeálható forrásformátumát**. Először megtekintse a teljes eredményt Obsidian-ban, beleértve egy Drawnix táblázatot és benne található Mermaid visuálaikat, és kiszolgálja minden panelt SVG-, PNG- vagy PDF-formátumban.
-</TLDR>
+<TLDR>Előbb a diagram típusát, majd szerkeszthető forrásformátumát válassza ki. Az Obsidianban a teljes eredményt ellenőrizheti, a Drawnix-táblával és beágyazott Mermaid-ábrákkal együtt. Minden panel exportálható SVG, PNG vagy PDF formátumba.</TLDR>
 
-## A három választás megértése
+## Három külön választás
 
-| Választás | Mit kontrollál | Példák |
-|---|---|---|
-| Diagram típusa | Milyen jelentésű a diagram | Folyamatdiagram, sorrenddiagram, személyesítődiagram, adatdiagram |
-| Forrásformátum | A redigeálható vagy újrahasználható fájl, amit Notemd készít ki | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Kiszolgálási formátum | Az image vagy dokumentum, amit osztogatunk meg | SVG, PNG, PDF |
+| Választás | Mit szabályoz? | Példák |
+| --- | --- | --- |
+| Diagramtípus | A diagram jelentése | Folyamatábra, szekvenciadiagram, áramkör, adatgrafikon |
+| Forrásformátum | A Notemd által létrehozott szerkeszthető vagy újrahasználható fájl | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Exportformátum | Megosztott kép vagy dokumentum | SVG, PNG, PDF |
 
-Draw.io és Drawnix **forrásformátumok** vannak, nem diagram típusai. A CircuitikZ egy forrásformátum, amely kifejezetten személyesítődiagramokhoz tervezett. Ugyanazt a előnyelési képet több visuális formátumban is kiszolgálhatók, így a CircuitikZ választása nem korlátozza Önt az SVG használatára.
+Draw.io és Drawnix forrásformátum, nem diagramtípus. CircuitikZ áramkörökre készült forrás. Ugyanaz az előnézet több vizuális formára exportálható; CircuitikZ választásával sem csak SVG készülhet.
 
-## Forrásformátum választása
+## Forrás választása
 
-| Formátum | Legjobb használati terület | Forrásfájl |
-|---|---|---|
-| Mermaid | Diagramok, amelyek közvetlenül a Markdown-ban maradnak | Mermaid kódblokk |
-| JSON Canvas | Obsidian belső táblázatokkal működő folyamatok | `.canvas` |
-| Draw.io | Későbbi módosítások Drawnix.net vagy egyéb kompatibilis eszközökben | `.drawio` |
-| Drawnix | Kézzel végzett vagy táblázatstílusú módosítások | `.drawnix` |
-| CircuitikZ | Struktúrállott elektrikai és tranzisztordiagramok | `.tex` |
+| Formátum | Ajánlott cél | Forrásfájl |
+| --- | --- | --- |
+| Mermaid | Diagram közvetlenül Markdownban | Mermaid-kódblokk |
+| JSON Canvas | Natív Obsidian canvas munkafolyamat | `.canvas` |
+| Draw.io | Későbbi szerkesztés diagrams.net vagy kompatibilis eszközben | `.drawio` |
+| Drawnix | Kézi rajzú vagy fehértáblás szerkesztés | `.drawnix` |
+| CircuitikZ | Strukturált elektromos és tranzisztoros áramkörök | `.tex` |
 
-Ha nem használja szükséges külön eszközt, hagyja **Preferred source format**-ot **Auto** állapotban. Notemd válaszol egy kompatibilis formátumra a választott diagram típusához.
+Ha nincs kijelölt szerkesztő, a **Preferred source format** maradjon **Auto**. A Notemd a típushoz kompatibilis formát választ.
 
-## Diagram készítése és kiszolgálása
+## Generálás és export
 
-1. Nyitja meg az emléket vagy válassza ki a szöveget, amit szeretne vizuálisan megjeleníteni.
-2. Válassza a Notemd oldalsó menüből vagy parancssorpaletából a **Generate diagram** opciót.
-3. Válassza egy **diagram típusot**, vagy hagyja azt **Auto-detect** állapotban.
-4. Válassza egy **forrásformátumot**, vagy hagyja azt **Auto** állapotban. Ha szeretne egy redigeálható nodokkal és benne található Mermaid visuálaikkal rendelkező tudományos térképet, válassza a **Drawnix**-ot.
-5. Megtekintse az előnyelési képet. A több panelből álló eredményben a Drawnix táblázat és minden Mermaid panel forrásrendjében marad egyetlen, vertikálisan szürgő előnyelési shellben; a Mermaid panelek az ő rendelkezésére álló magasságot használnak, így nem kerülnek leomlásra.
-6. Válassza egy panel **Export SVG**, **Export PNG** vagy **Export PDF** opciót egyetlen visuálhoz, vagy használja a felső szintű image kiszolgálást mindenképpen az panelekhez. Kételpanelos esetekben válassza a forrásmappát vagy egy külön Vault-relatív mappát; Notemd ír le egy deterministikus fájlt minden panelhoz, és továbbműködik bármi egyéb hibának után is.
-7. Ha szüksége van a redigeálható forrásfájlra is, használja a **Save source file** opciót.
+1. Nyisson támogatott forrásjegyzetet. Egy részletet külön jegyzetbe másoljon; a kijelölés nem szűkíti a fájlműveletet.
+2. Válasszon **diagram type** értéket vagy **Auto-detect** módot.
+3. Válasszon **source format** értéket vagy **Auto** módot. A **Drawnix** támogatott tudástérképhez szerkeszthető csomópontokat és Mermaid-ábrákat ad.
+4. Indítsa a **Generate diagram** műveletet a panelből vagy palettáról.
+5. Nézze át a függőlegesen görgethető közös előnézetet: Drawnix után minden Mermaid-panel a forrás sorrendjében, teljes renderelt magassággal jelenik meg.
+6. Panelenként használja az **Export SVG**, **Export PNG**, **Export PDF** gombot, vagy felül az összes panel képexportját. Több panelnél forrásmappát vagy egyedi vault-relatív mappát válasszon. Panelenként kiszámítható nevű fájl készül; egyedi hibánál a többi folytatódik.
+7. A **Save source file** menti a szerkeszthető forrást.
 
-A Kiszolgálás menüben található **Export SVG**, **Export PNG** és **Export PDF** opciók aktuális visuális előnyeléshez szolgálnak. Minden panel címze is azonos opciókat biztosít egyetlen Mermaid vagy Drawnix visuálnak, így nem kell nagy előnyelési képet egyetlen, némű imageként kiszolgálni.
+Az Export menü és a panel fejléce azonos SVG/PNG/PDF műveleteket kínál. Nagy előnézetet nem kell egyetlen nehezen kezelhető képpé összevonni.
 
-A előnyelésben válassza a **History** opciót, hogy nyitja meg a Vault történeti ablakot, anélkül hogy elrejtse a diagramot. Itt lehet keresni és filtrezni a már készült diagramokat, újra nyitni egy előnyeléset vagy megnyitni a mentett forrásfájlokat. A diagram története elérhető azonosan a parancssorpaletából és Notemd oldalsó menüből is, még akkor is, ha nincs aktív emlék.
+A **History** a diagram eltakarása nélkül nyitja a vault előzményfiókját. Kereshet, szűrhet, előnézetet vagy mentett fájlt nyithat. Az előzmény a parancspalettáról és oldalsávból aktív jegyzet nélkül is elérhető.
 
-Az SVG és PDF formátumok vektorgeometriával készülnek; a PDF azonos SVG layoutot és szövegmetrikákat használ, így nem kerül az összes előnyelés rasterizálására. A Notemd beállításainak PPI értéke csak a PNG rasterizálást kontrollálja (72–600 PPI, 300 a helyettesérték).
+SVG és PDF vektorgeometriából készül. A PDF az SVG elrendezését és szövegmetrikáját használja, nem teljes képet raszterizál. PPI csak PNG-re hat: 72–600, alapérték 300.
 
-## Olvasható előnézetek sűrű diagramokhoz
+## Sűrű diagramok olvashatósága
 
-A szerkeszthető HTML/SVG lane-grid diagramok előbb megmérik és sortörik az összefoglalót, majd elhelyezik a címet és a lane fejlécét. A fejléc a védett összefoglaló-régió alá kerül, a cellák pedig a csatlakozók és élcímkék előtt rajzolódnak ki. A lane-ek közötti élek ütközésérzékeny, ortogonális rácsútvonalakat használnak, és helyet foglalnak a lane-címkéknek és a foglalt celláknak, így a hosszú leírások nem takarják el a szöveget, és nem kell vízszintesen pásztázni.
+A szerkeszthető HTML/SVG sávrácsdiagram előbb méri és tördeli az összefoglalót, utána helyezi el a címet és fejlécet. A cellák a kötővonalak és címkék előtt rajzolódnak. A sávközi ortogonális útvonalak kikerülik a foglalt cellákat és sávfeliratokat, hogy a hosszú szöveg se fedjen tartalmat és ne kényszerítsen oldalirányú pásztázást.
 
-A Mermaid quadrant diagramok family-specifikus normalizálási lépést kapnak. A `quadrantChart` esetén kimaradnak a kizárólag flowcharthoz tartozó idézőjel- és alakzatjavítások, miközben a címekben, tengelyeken és kvadránsnevekben szándékos zárójelek megmaradnak. A provider által bemásolt nyitó zárójel csak akkor törlődik, ha egy pontcímke nem illeszkedő záró karaktere.
+A Mermaid `quadrantChart` saját normalizálást kap. A csak flowchartra való idézőjel- és alakjavítás kimarad. Modell által másolt nyitó zárójel csak pontcímke pár nélküli utolsó karaktereként távolítható el. Szándékos zárójel címben, tengelyben és negyednévben megmarad.
 
-A repository minden futtatható diagramtípushoz valódi Vaultból származó tanulási és bizonyítékkészletet tart fenn. Kétnyelvű bemeneti jegyzetekért, generált SVG/PNG eredményekért és géppel olvasható állapot-manifestért lásd: [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples). A `passed` bejegyzések a betöltött plugin bundle futását jelzik, nem statikus screenshot-fixture-t.
+A [docs/diagram-examples/](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) kétnyelvű bemeneteket, SVG/PNG fájlokat és gépi manifestet tartalmaz valódi vaultfutásból minden végrehajtható típushoz. A `passed` a rögzített futásra és bundle-azonosságra vonatkozik, nem újabb kiadás minden típusának friss próbájára.
 
-## Drawnix előnyelésekben benne található Mermaid visuálaik
+A végrehajtható katalógus 33 sor, az UI 21 nyelv, a webhely 34 nyelvi út. Külön felületek. Öt pontos referencianyelvtan a választón kívül marad elrendezési szerződésük független igazolásáig.
 
-Ha egy Drawnix forrásfájlban Mermaid visuálaik vannak, Notemd szanitálja az elrendezett SVG-t és tárolja a Mermaid forráskódot is a `.drawnix` metadata-ban. Ezért az előnyelésben lehet megjeleníteni a Mermaid image-t a Drawnix tudományos térképben, anélkül hogy szükség lenne a Drawnix vagy Plait futtatási környezetére. A biztonságosan benne található Mermaid visuálaik nem hozzanak létre külön `.assets` mappát; az externális bináris média vagy nem részletes visuálaiknak van egy társfája, így semmilyen adat nem hullik el.
+## Drawnix beágyazott Mermaiddel
 
-Az előnyelés intenzívan egyetlen, szürgő felületként kialakított: az elsőben jelenik meg a fő Drawnix táblázat, majd azon következik minden benne található Mermaid panel forrásrendjében. Egy mentett történeti bejegyzést zárni és újra nyitni újra készíti az egyetlen panellistát, a méreteket és a kiszolgálási opciókat.
+A Notemd megtisztítja a renderelt SVG-t, és a Mermaid-forrást a `.drawnix` metaadatban őrzi. Az előnézet Drawnix/Plait runtime nélkül is megjelenhet. Az alapút önálló, külön `.assets` nélkül. Átadáshoz vagy külső szerkesztéshez az **Also export complete Mermaid visuals** külön Mermaid-forrást, SVG-t és manifestet ad. Régi `.assets` támogatott; hiányzó SVG visszaépíthető a metaadatban őrzött forrásból.
 
-## Személyesítődiagramok
+Feloldott képek lehetőség szerint beágyazott adatú SVG-előnézetet kapnak. Betöltéskor az adat, majd régi kísérőfájl, végül rendelkezésre álló forrásszöveg az elsőbbségi sorrend. Tartsa meg a még hivatkozott kísérőket; új önálló export nem bizonyítja, hogy régi közös könyvtár felesleges.
 
-A támogatott személyesítődiagramokhoz válassza a **Circuit diagram**-ot, és használja a **CircuitikZ forrásfájlt**. Notemd kialakítja először egy struktúrállott személyesítődiagram leírását, majd írja be az CircuitikZ forráskódot. Ez biztonságosabb módszer, mint hogy a modellt kérje, hogy szerkeszthető LaTeX-kódot írjon.
+Az egyetlen görgethető felületen előbb a Drawnix-tábla, majd forrássorrendben a Mermaid-panelek jelennek meg. Mentett előzmény újranyitása ugyanazt a panellistát, méreteket és exportműveleteket állítja vissza.
 
-A jelenlegi CircuitikZ támogatása intenzívan korlátozott. A közösen használt NMOS felmegek és a támogatott CMOS elemek legjobban működnek. Használja mindig előnyelését és forrásfájlt, mielőtt használja egy készített személyesítődiagramot technikai vagy publikációs munkáknak.
+A Drawnix-előnézet helyet tart címeknek, összefoglalónak és kapcsolatfeliratoknak, statikus vonalait a csomópontok körül vezeti. Nem előállítható támogatott, olvasható elrendezés formátumhibát ad. Ágközi nyilak statikus kapcsolatokként tárolódnak; átrendezés utáni csatlakozásuk nem támogatott a jelenlegi bizonyíték szerint. Vizsgálja a célként használt szerkesztőben.
 
-Az SVG előnyelés Notemd által kialakított egy ellenőrzési segédfogalom. Ez nem bizonyítja, hogy helyi LaTeX vagy TikZJax telepítése sikerülten kompilálta a `.tex` fájlt.
+## Natív export határai
 
-**Választható natív kompiláció.** A plugin belső előnyeléshez, SVG-, PNG- és PDF-kiszolgálásokhoz nem szüksége van LaTeX-re. Asztali gépen, ha szeretne kompilációs diagnosztikát vagy natív LaTeX PDF-t, nyitja meg a **CircuitikZ native compile environment**-ot a diagram beállításaiból vagy a parancssorpaletából. Notemd lehetőséges, hogy használja a rendszeri `tectonic` vagy `pdflatex`-et, egy külön eszközt, vagy az **Install** opciót választva telepítsen a beállított Tectonic futtatási környezetét. A környezeti panel azonos idejű előrépülést és hibákat mutat be, és lehetőséget ad arra, hogy később távolítsa el a beállított futtatási környezetet.
+Forrásexport és vizuális export külön eredmény. Terjesztés előtt reprezentatív fájlt teszteljen a célalkalmazásban. PowerPoint-táblák támogatott szerkeszthető szerkezetet őriznek, az egyesített cellák alatti javított elválasztókkal. Mermaid/SVG képi fallbacket használhat natív alakzatok helyett. Előnézet vagy teljesoldalas képpontszám nem helyettesít natív alkalmazástesztet.
 
-## Hibakeresés
+## Áramkörök
 
-### A eredmény nem az igazi diagram típusa
+Válassza a **Circuit diagram** és **CircuitikZ source file** opciót. Előbb strukturált áramkörleírás, majd abból CircuitikZ készül, korlátlan LaTeX-generálás helyett.
 
-Válassza ki nyilvánosan a diagram típusát, helyett hogy használja a Auto-detect opciót. Személyesítődiagramoknál válassza a **Circuit diagram**-ot és használja a **Generate diagram** parancsot, nem a régi **Summarise as Mermaid diagram** parancsot.
+A támogatás szándékosan korlátozott: közös forrású NMOS-erősítők és támogatott CMOS-építőelemek a fő célok. Műszaki vagy publikációs felhasználás előtt vizsgálja a forrást és előnézetet. Az SVG ellenőrzési kísérő, nem bizonyíték a `.tex` sikeres helyi LaTeX/TikZJax-fordítására.
 
-### A forrásformátum nem megfelel
+**Opcionális natív fordítás.** Az előnézet és annak SVG/PNG/PDF exportja nem igényel LaTeX-et. Asztali környezetben a **CircuitikZ native compile environment** ad fordítási diagnosztikát vagy natív LaTeX PDF-et. Rendszerbeli `tectonic`/`pdflatex`, saját futtatható fájl vagy explicit **Install** után rögzített kezelt Tectonic használható. A panel helyben mutatja a folyamatot/hibát és később eltávolíthatóvá teszi a runtime-ot.
 
-Válassza vissza a forrásformátumot **Auto** állapotba, vagy válassza egy formátumot, amely megfelel az adott diagram típusának. A CircuitikZ csak személyesítődiagramokhoz alkalmas; Draw.io és Drawnix pedig csak a támogatott struktúrállott diagramokhoz.
+## Hibaelhárítás
 
-### A Kiszolgálás menü nem látható
+### Rossz diagramtípus
 
-Az SVG-, PNG- és PDF-kiszolgálásokhoz szükség van egy visuális előnyelésre. Ha csak forrásszöveg van, mentse el a forrásfájlt és nyitja meg azt az illeszkedő externális eszközzel.
+Válasszon típust kifejezetten. Áramkörhöz **Circuit diagram** és **Generate diagram** kell, nem a régi **Summarise as Mermaid diagram**.
 
-### Egy CircuitikZ fájl nem kompilálható externálisan
+### Nem megfelelő forrás
 
-Nyitja meg a **CircuitikZ native compile environment**-ot és futtassa el a környezeti ellenőrzést. Reparálja a beállított futtatási környezetet, vagy ellenőrizze, hogy a személyes/rendszeri kompilálója tudja megkeresni a `circuitikz` paketet. Notemd nem tartalmaz egy teljes TeX distribúciót a plugin fájlában.
+Állítsa vissza **Auto** módra, vagy válasszon a típushoz való formát. CircuitikZ áramkörökre, Draw.io/Drawnix támogatott strukturált diagramokra készült.
+
+### Hiányzik az Export menü
+
+SVG/PNG/PDF vizuális előnézetet igényel. Csak forrásszöveg esetén mentse a fájlt, és nyissa meg megfelelő külső eszközben.
+
+### A CircuitikZ nem fordul külső eszközzel
+
+A **CircuitikZ native compile environment** felületén ellenőrizze a környezetet. Javítsa a kezelt runtime-ot, vagy ellenőrizze, hogy saját/rendszerfordítója eléri-e a `circuitikz` csomagot. A plugin nem tartalmaz teljes TeX-disztribúciót.

@@ -1,75 +1,62 @@
 ---
 id: china
-title: "Penyedia di Cina"
-description: "Konfigurasi Qwen, DeepSeek, GLM, dan seterusnya."
+title: Penyedia Tiongkok
+description: 'Cocokkan akun regional, jalur endpoint, dan ID model/deployment di Notemd.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - Penyedia Tiongkok
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Penyedia di Cina
+# Penyedia Tiongkok
 
-<TLDR>
-**Notemd mendukung penyedia dari wilayah Cina dan asal Cina melalui endpoint yang sebagian besar kompatibel dengan OpenAI.** Daftar saat ini mencakup DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS, dan Z AI. Manfaatnya adalah jangkauan regional dan pengendalian biaya; risikonya adalah penamaan model khusus penyedia serta pembatasan akun.
-
-Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Gunakan preset sesuai akun dan deployment. Jalur regional, nama model, dan izin tidak saling menggantikan meski sama-sama kompatibel OpenAI. Uji tugas kecil dahulu.</TLDR>
 
 ## Pengaturan
 
-Buat akun penyedia, hasilkan kunci API, lalu pilih preset penyedia Notemd yang sesuai alih-alih menggunakan profil umum OpenAI. Preset tersebut memiliki Base URL default, mode uji API, perilaku penemuan model, serta field UI khusus penyedia.
+Buat akun API, dapatkan kunci, dan pilih preset terkait. Pastikan wilayah endpoint dan izin model. Jalankan **Uji koneksi** serta tugas uji; nilai bawaan tidak menjamin model tersedia sekarang.
 
-Gunakan pemilihan model per-tugas secara agresif di sini. Misalnya, gunakan DeepSeek atau GLM untuk pekerjaan yang membutuhkan penalaran intensif, gunakan Qwen atau Moonshot untuk pekerjaan berbahasa Cina yang luas, dan arahkan tugas pemrograman ke Qwen Code bila akun tersebut menyediakan model pemrograman.
+## Endpoint dan autentikasi
 
-## Endpoint dan Autentikasi
+| Preset | Model bawaan | URL dasar bawaan |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-| Penyedia | Model Default | Base URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (ID endpoint diperlukan) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+Ganti placeholder Doubao dengan endpoint ID Ark atau model ID yang didukung deployment. GLM dan Z AI memiliki preset wilayah berbeda. Kunci wilayah/langganan tertentu mungkin tidak berlaku pada endpoint lain; ikuti petunjuk akun, bukan lokasi fisik saja.
 
-**Catatan:** Doubao memerlukan ID endpoint Ark (format: `ep-xxxxxxxx-xxxx-xxxx`) bukan nama model standar.
+## Penemuan model
 
-Sebagian besar penyedia ini menggunakan runtime yang kompatibel dengan OpenAI, tetapi semantik akun dan model mereka berbeda. Pertahankan Base URL khusus preset kecuali Anda telah memverifikasi endpoint alternatif akun tersebut.
+Gunakan discovery jika diizinkan. Huawei Cloud MaaS memakai penemuan sesuai deployment; preset lainnya memakai jalur kompatibel OpenAI jika didukung. Tidak bisa mendaftar belum tentu berarti model eksplisit tidak dapat menghasilkan.
 
-## Penemuan Model
+Tes koneksi berbeda tiap preset. DeepSeek dapat sukses dari daftar saja, sementara beberapa preset regional melakukan chat pendek. Tugas nyata tetap diperlukan untuk kontrak prompt/hasil.
 
-DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan, dan SiliconFlow menggunakan penemuan model yang kompatibel dengan OpenAI bila penyedia mendukung daftar. Huawei Cloud MaaS menggunakan mode `huaweicloud-modelarts-models` karena metadata penyebaran ModelArts tidak sama dengan daftar umum `/v1/models`.
+## Pemecahan masalah
 
-Jangan anggap kegagalan penemuan sebagai bukti bahwa chat tidak mungkin dilakukan. Beberapa penyedia memungkinkan chat sambil membatasi hak akses daftar model. Dalam kasus itu, simpan ID model yang eksplisit di profil dan verifikasi dengan tes koneksi.
+- Kunci diterima tetapi generasi ditolak: periksa hak model, deployment, wilayah.
+- Model Ark ditolak: konfirmasi kebutuhan deployment ID atau model ID.
+- Respons reasoning terpotong: lihat batas keluaran dan thinking khusus penyedia.
+- Jaringan: uji endpoint dari perangkat Obsidian dan baca kesalahan transport.
 
-## Pemecahan Masalah
+## Kapan digunakan
 
-- Autentikasi berhasil tetapi chat gagal: nama model mungkin berada di luar hak atau wilayah akun.
-- Doubao gagal dengan nama model biasa: gunakan ID endpoint Ark di field model bila penyebaran Anda memerlukannya.
-- Respons penalaran terpotong: periksa batas token keluaran khusus penyedia dan pengaturan batas token berbasis model dari Notemd.
-- Jaringan regional bervariasi: gunakan endpoint wilayah Cina penyedia bila mesin vault berada di Cina; gunakan endpoint internasional hanya bila akun dan jalur jaringan keduanya valid.
+Pilih berdasarkan endpoint akun terjangkau, kebutuhan penanganan data, dan hasil tugas terukur. Wilayah/merek bukan jaminan kualitas, privasi, atau biaya. [Ikhtisar](./overview) juga mencantumkan gateway dan server lokal.
 
-## Kapan Digunakan
+## Selanjutnya
 
-Gunakan penyedia di Tiongkok ketika latensi regional, akses pembayaran/akun, kualitas bahasa Mandarin, atau biaya merupakan batasan utama. Pilih OpenAI, Anthropic, Google, atau penyedia lokal secara langsung bila Anda membutuhkan batas protokol yang lebih sederhana atau konsistensi debugging antar penyedia yang lebih baik.
-
----
-
-## Langkah Selanjutnya
-
-- [LLM Providers](/docs/providers/overview) -- Konfigurasi lengkap, model per tugas, dan logika pengulangan
-- [Pemecahan Masalah](/docs/advanced/troubleshooting) -- Perbaiki masalah koneksi regional dan kesalahan autentikasi
+- [Ikhtisar](./overview): 36 preset dan perutean.
+- [Pemecahan masalah](../advanced/troubleshooting): autentikasi/model.

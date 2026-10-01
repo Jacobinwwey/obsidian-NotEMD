@@ -1,134 +1,88 @@
 ---
 id: custom-prompts
-title: "कस्टम प्रॉम्प्ट्स"
-description: "अपनी आवश्यकताओं के अनुसार LLM प्रॉम्प्ट्स को कस्टमाइज़ करें"
+title: अपने prompts
+description: >-
+  समर्थित कार्यों के निर्देश बदलें और आवश्यक variables तथा output contract बनाए
+  रखें।
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [custom prompts, prompts, focused learning, domain]
-concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: LLM Prompt Engineering
-    url: https://platform.openai.com/docs/guides/prompt-engineering
+keywords:
+  - अपने prompts
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# कस्टम प्रॉम्प्ट्स
+# अपने prompts
 
-<TLDR>
-**Notemd आपको हर टास्क प्रकार के लिए डिफ़ॉल्ट LLM प्रॉम्प्ट को ओवरराइड करने की सुविधा देता है.** कस्टम प्रॉम्प्ट्स आपको यह नियंत्रण देते हैं कि मॉडल किस चीज़ को प्राथमिकता दे: आप अवधारणा निष्कर्षण को किसी विशेष क्षेत्र तक सीमित कर सकते हैं, लिंकिंग शैली बदल सकते हैं, या अनुवाद के स्वर को पुनः निर्देशित कर सकते हैं. `{{content}}` और `{{concept}}` जैसे प्रॉम्प्ट वेरिएबल रनटाइम पर प्रतिस्थापित किए जाते हैं. ‘फोकस्ड लर्निंग डोमेन’ सुविधा आपके अध्ययन क्षेत्र को शुरुआत में जोड़कर निष्कर्षण परिणामों को स्वचालित रूप से सीमित करती है.
-
-यह [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) का हिस्सा है.
-</TLDR>
+<TLDR>Global और task switch चालू तथा custom text गैरखाली हो तो अपना prompt आंतरिक निर्देश बदलता है। आवश्यक output format बचाएँ; हटाई गई हर शर्त स्वतः लौटाने वाला template system नहीं है।</TLDR>
 
 ## अवलोकन
 
-Notemd के बिल्ट-इन प्रॉम्प्ट्स सामान्य उद्देश्यों के ज्ञान कार्यों के लिए लिखे गए हैं. ये विभिन्न क्षेत्रों में अच्छी तरह काम करते हैं, लेकिन क्षेत्र-विशिष्ट सुधार के लिए भी जगह छोड़ते हैं. कस्टम प्रॉम्प्ट्स आपको LLM को यह बताने की सुविधा देते हैं कि आपके उपयोग के मामले में उसे कैसे व्यवहार करना चाहिए -- चाहे वह केवल चिकित्सा संबंधी शब्दावली निकालना हो, केवल नामित इकाइयों को जोड़ना हो, या औपचारिक शैली में अनुवाद करना हो.
+पहले नमूने पर default prompt देखें। Focused domain या समानार्थी रोक पर्याप्त हो सकती है। extraction नीति, संरचना या अनुवाद शैली चाहिए तो बदलकर बैच से पहले तुलना करें।
 
-कस्टम प्रॉम्प्ट्स पूरे सिस्टम प्रॉम्प्ट को प्रतिस्थापित नहीं करते. वे **टास्क-विशिष्ट निर्देश भाग** को ओवरराइड या पूरक बनाते हैं, जबकि Notemd द्वारा पार्स करने हेतु आवश्यक संरचनात्मक आउटपुट प्रारूप (जैसे `CONCEPT:` पंक्तियाँ, विकी-लिंक सिंटैक्स) को बरकरार रखते हैं.
+## काम कैसे होता है
 
-## यह कैसे काम करता है
+### Prompt संरचना
 
-### प्रॉम्प्ट आर्किटेक्चर
+आंतरिक या अपना prompt चुना, संबंधित domain/भाषा निर्देश जुड़ते और कार्य के variables भरे जाते हैं। सामग्री अलग message भी हो सकती है। Variables सार्वभौमिक नहीं हैं। `CONCEPT:` हटाने से parsing और research context हटाने से प्रमाण बिगड़ सकता है; सही request सही output नहीं सिद्ध करती।
 
-हर Notemd टास्क एक ही प्रॉम्प्ट संरचना का पालन करता है:
+### Variables
 
-```
-[System role: You are a helpful assistant...]
-[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
-[Custom task prompt]                                <-- your override (optional)
-[Output format instructions]                        <-- always preserved
-[Content: {{content}}]                              <-- runtime substitution
-```
+सही uppercase नाम और एकल braces रखें:
 
-1. **बेस सिस्टम प्रॉम्प्ट** -- सहायक का व्यक्तित्व निर्धारित करता है. इसे ओवरराइड नहीं किया जा सकता.
-2. **फोकस्ड लर्निंग डोमेन** -- `Relevant Fields: [medicine / law / computer science / ...]` को शुरुआत में जोड़कर दायरे को सीमित करता है. यह एक सेटिंग टॉगल है, कोई कच्चा प्रॉम्प्ट नहीं है.
-3. **कस्टम टास्क प्रॉम्प्ट** -- डिफ़ॉल्ट टास्क निर्देशों को प्रतिस्थापित करता है (जैसे किस प्रकार की अवधारणाओं को निकालना है, कितनी आक्रामकता से लिंक करना है).
-4. **आउटपुट प्रारूप** -- संरचनात्मक नियम (`CONCEPT:` पंक्तियाँ, विकी-लिंक प्रारूप). Notemd द्वारा हमेशा अंत में जोड़ा जाता है ताकि पार्स करना संभव रहे.
-5. **कंटेंट** -- वास्तविक नोट टेक्स्ट, जिसे रनटाइम पर `{{content}}` के माध्यम से प्रतिस्थापित किया जाता है.
+| कार्य | उपलब्ध placeholders |
+| ------ | ----------------------- |
+| शीर्षक जनरेशन | `{TITLE}`, `{RESEARCH_CONTEXT_SECTION}` |
+| शोध सारांश | `{TOPIC}`, `{LANGUAGE}`, `{SEARCH_RESULTS_CONTEXT}` |
+| अनुवाद | `{LANGUAGE}`, `{TEXT}` |
+| मूल पाठ निष्कर्षण | `{REFERENCE_CONTENT}`, `{USER_INPUT}` |
 
-### प्रॉम्प्ट वेरिएबल्स
+`{LANGUAGE}` कार्य की भाषा नीति से आता है। लिंक और स्वतंत्र अवधारणा काम पाठ को content की तरह भेजते हैं; उनके लिए नया placeholder न गढ़ें। अज्ञात नाम नहीं भरते। ये prompt substitutions हैं, concept-file templates नहीं।
 
-वेरिएबल्स निष्पादन समय पर प्रतिस्थापित किए जाते हैं. उपलब्ध वेरिएबल्स टास्क के अनुसार भिन्न होते हैं:
+### केंद्रित क्षेत्र
 
-| वेरिएबल | कार्य | प्रतिस्थापित किया गया |
-|----------|-------|---------------|
-| `{{content}}` | सभी | नोट या चयनित पाठ |
-| `{{concept}}` | कॉन्सेप्ट नोट टेम्पलेट | निकाला गया कॉन्सेप्ट नाम |
-| `{{description}}` | कॉन्सेप्ट नोट टेम्पलेट | LLM-जनरेटेड कॉन्सेप्ट विवरण |
-| `{{backlinks}}` | कॉन्सेप्ट नोट टेम्पलेट | लिंक के साथ स्रोत नोट्स की सूची |
-| `{{date}}` | कॉन्सेप्ट नोट टेम्पलेट | वर्तमान तिथि (YYYY-MM-DD) |
-| `{{language}}` | अनुवाद | लक्ष्य आउटपुट भाषा |
-| `{{source}}` | कॉन्सेप्ट नोट टेम्पलेट | स्रोत नोट का मूल नाम |
+Focused learning में `इलेक्ट्रिकल इंजीनियरिंग` जैसे domain से `Relevant Fields` निर्देश आता है। यह ध्यान निर्देशित करता है, कठोर filter या अप्रासंगिक अवधारणाओं के हटने का प्रमाण नहीं।
 
-### केंद्रित सीखने का क्षेत्र
+## सेटिंग्स
 
-केंद्रित सीखने की सुविधा डोमेन सीमांकन हेतु एक शॉर्टकट है। अपने क्षेत्र का उल्लेख करने वाला कस्टम प्रॉम्प्ट लिखने के बजाय, आप सेटिंग्स में `focusedLearningDomain` सेट करते हैं:
+| कार्य | सक्रिय switch | Prompt field |
+| ------ | --------------- | -------------- |
+| लिंक | `useCustomPromptForAddLinks` | `customPromptAddLinks` |
+| शीर्षक | `useCustomPromptForGenerateTitle` | `customPromptGenerateTitle` |
+| शोध | `useCustomPromptForResearchSummarize` | `customPromptResearchSummarize` |
+| Mermaid सारांश | `useCustomPromptForSummarizeToMermaid` | `customPromptSummarizeToMermaid` |
+| अवधारणा | `useCustomPromptForExtractConcepts` | `customPromptExtractConcepts` |
+| अनुवाद | `useCustomPromptForTranslate` | `translatePrompt` |
+| मूल पाठ | `useCustomPromptForExtractOriginalText` | `customPromptExtractOriginalText` |
 
-```
-Settings → Advanced → Focused Learning Domain
-Example: "medicine" or "computer science" or "Chinese philosophy"
-```
-
-यह निष्कर्षण प्रॉम्प्ट के आगे `Relevant Fields: [medicine]` जोड़ देता है, जिससे LLM डोमेन-संबंधी अवधारणाओं को प्राथमिकता देता है एवं सामान्य अवधारणाओं को दबा देता है। यह पूर्ण कस्टम प्रॉम्प्ट की तुलना में हल्का है एवं सभी निष्कर्षण कार्यों में कार्य करता है.
-
-## कॉन्फ़िगरेशन
-
-| सेटिंग | डिफ़ॉल्ट | प्रभाव |
-|---------|---------|--------|
-| `customAddLinksPrompt` | `''` | डिफ़ॉल्ट ‘add-links’ कार्य प्रॉम्प्ट को ओवरराइड करें |
-| `customExtractConceptsPrompt` | `''` | डिफ़ॉल्ट ‘concept extraction’ प्रॉम्प्ट को ओवरराइड करें |
-| `customResearchPrompt` | `''` | डिफ़ॉल्ट ‘research + summarize’ प्रॉम्प्ट को ओवरराइड करें |
-| `customTranslatePrompt` | `''` | डिफ़ॉल्ट ‘translation’ प्रॉम्प्ट को ओवरराइड करें |
-| `customDiagramPrompt` | `''` | डिफ़ॉल्ट ‘diagram generation’ प्रॉम्प्ट को ओवरराइड करें |
-| `focusedLearningDomain` | `''` | निष्कर्षण एवं लिंकिंग प्रॉम्प्ट्स में विषय-संबंधी संदर्भ जोड़ें |
-| `extractConceptsMinimalTemplate` | `true` | केवल शीर्षक वाला ‘concept note’ टेम्पलेट उपयोग करें (यह `{{concept}}` टेम्पलेट के दायरे को प्रभावित करता है) |
-| `customConceptNoteTemplate` | `''` | पूर्ण वेरिएबल समर्थन वाला ‘concept note’ फ़ाइल टेम्पलेट ओवरराइड करें |
-
-**जब कस्टम प्रॉम्प्ट फ़ील्ड खाली होता है, तो अंतर्निहित डिफ़ॉल्ट प्रॉम्प्ट ही उपयोग में आता है.**
+सभी को `enableGlobalCustomPrompts` चाहिए। खाली text आंतरिक prompt लेता है। Merged original-text extraction का अलग built-in रूप है और सामान्य override लागू नहीं। Diagram generation के typed output नियम हैं; Mermaid summary prompt सभी diagram का नहीं है।
 
 ## उदाहरण
 
-आप एक चिकित्सा शोधकर्ता हैं जो क्लिनिकल ट्रायल नोट्स से अवधारणाएँ निकाल रहे हैं। डिफ़ॉल्ट प्रॉम्प्ट चिकित्सा शब्दों के साथ-साथ सामान्य संज्ञाओं को भी निकालता है, जिससे आपका ‘concept’ फ़ोल्डर अस्त-व्यस्त हो जाता है.
+Global और concept switches चालू करके parser marker रखें:
 
-**समाधान:** एक केंद्रित सीखने का क्षेत्र एवं एक कस्टम निष्कर्षण प्रॉम्प्ट सेट करें.
-
-1. `focusedLearningDomain` को `medicine` पर सेट करें
-2. `customExtractConceptsPrompt` को इस प्रकार सेट करें:
-
-```
-Extract only clinically relevant concepts: diseases, drug names,
-anatomical terms, measurement endpoints, and statistical methods.
-Ignore generic English nouns, brand names, and institutional names.
-Prioritize MeSH terminology where applicable.
+```text
+दिए नोट से मुख्य इलेक्ट्रिकल इंजीनियरिंग अवधारणाएँ निकालें।
+सामान्य संज्ञाओं के बजाय ठोस घटक और भौतिक तंत्र चुनें।
+हर अवधारणा अलग पंक्ति में इस सटीक रूप में दें:
+CONCEPT: शब्द का नाम
+अतिरिक्त व्याख्या या बाहर का code block न जोड़ें।
 ```
 
-जब आप किसी क्लिनिकल नोट पर "Extract concepts" चलाते हैं, तो LLM निम्नलिखित उत्पन्न करता है:
-
-```
-CONCEPT: Randomized Controlled Trial
-CONCEPT: Double-Blind Method
-CONCEPT: Myocardial Infarction
-CONCEPT: Creatine Kinase-MB
-CONCEPT: Kaplan-Meier Estimate
-```
-
-डिफ़ॉल्ट व्यवहार के बजाय, जिसमें "hospital" या "month" जैसे अनावश्यक सामान्य शब्द भी निकाले जा सकते हैं.
+कॉपी पर entries, फ़ाइलनाम और छूटी अवधारणाएँ default से मिलाएँ। वापस लौटने को पुराना prompt रखें।
 
 ## सुझाव
 
-- पूरा कस्टम प्रॉम्प्ट लिखने से पहले **केंद्रित सीखने के क्षेत्र** से शुरू करें। एक ही सेटिंग से 80% उपयोग मामले कवर हो जाते हैं.
-- **आउटपुट प्रारूप को बनाए रखें** -- कस्टम प्रॉम्प्ट से "one per line" या "CONCEPT: prefix" जैसे प्रारूप निर्देश कभी न हटाएँ। Notemd का पार्सर इन्हीं पर निर्भर करता है.
-- **पहले एक ही नोट से परीक्षण करें** -- कस्टम प्रॉम्प्ट से निकालने की सीमा पर अप्रत्याशित प्रभाव पड़ सकते हैं। बैच प्रोसेसिंग से पहले एक नोट पर ही सत्यापन करें.
-- **प्रॉम्प्ट्स को संक्षिप्त रखें** -- अत्यधिक लंबे कस्टम प्रॉम्प्ट्स टोकन खपत करते हैं और मॉडल का ध्यान भंग कर सकते हैं.
+- बैच बढ़ाने से पहले एक कार्य जाँचें।
+- शोध प्रमाण और मूल उद्धरण रखें।
+- निर्देश अनुवाद करें, ID और markers नहीं।
+- मॉडल बदलने पर फिर टेस्ट करें; prompt validation की गारंटी नहीं।
 
----
+## आगे
 
-## अगले चरण
-
-- [Wiki-Links](/docs/features/wiki-links) -- जब आप add-links प्रॉम्प्ट को कस्टमाइज़ करते हैं तो क्या लिंक होता है
-- [Concept Notes](/docs/features/concept-notes) -- कॉन्सेप्ट नोट टेम्पलेट और `{{concept}}` वेरिएबल
-- [Batch Processing](/docs/advanced/batch-processing) -- पूरे फ़ोल्डरों में कस्टम प्रॉम्प्ट्स लागू करें
-- [Troubleshooting](/docs/advanced/troubleshooting) -- ऐसी समस्याओं को ठीक करें जहाँ कस्टम प्रॉम्प्ट्स से अप्रत्याशित आउटपुट प्राप्त होता है
+- [अवधारणाएँ](../features/concept-notes)।
+- [शोध](../features/research)।
+- [अनुवाद](../features/translation)।
+- [समस्या निवारण](./troubleshooting)।

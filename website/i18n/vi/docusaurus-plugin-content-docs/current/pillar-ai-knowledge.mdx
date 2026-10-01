@@ -1,341 +1,135 @@
 ---
 id: pillar-ai-knowledge
-title: "Obsidian Hướng dẫn Quản lý Kiến thức AI"
-description: "Hướng dẫn toàn diện để xây dựng cơ sở kiến thức kết nối với AI — từ liên kết wiki và trích xuất khái niệm đến nghiên cứu, dịch thuật và tạo sơ đồ"
+title: Quản lý kiến thức với AI trong Obsidian
+description: >-
+  Xây quy trình có thể kiểm tra: giữ nguồn, chọn phạm vi, xem đầu ra và mở rộng
+  tự động hóa có chủ đích.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [obsidian, AI, knowledge management, wiki-links, concept notes, LLM, diagrams, research, translation, workflows, Copilot alternative, Smart Connections alternative, obsidian AI plugin]
-concepts: [Notemd, Obsidian, AI Knowledge Management, Wiki-Links, Concept Notes, LLM Integration, Diagrams, Research, Translation, Workflows, Copilot Alternative]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Tavily
-    url: https://tavily.com
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Quản lý kiến thức với AI trong Obsidian
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Obsidian Hướng dẫn Quản lý Kiến thức AI
+# Quản lý kiến thức với AI trong Obsidian
 
-<TLDR>
-**Notemd biến việc đọc dựa trên LLM thành kiến thức bền vững: liên kết wiki kết nối các khái niệm, ghi chú khái niệm tạo ra một đồ thị có thể truy xuất, nghiên cứu đưa nội dung web vào kho lưu trữ của bạn, dịch thuật phá vỡ rào cản ngôn ngữ, sơ đồ làm cho cấu trúc trở nên hiển thị, và các công việc luồng kết hợp tất cả chỉ với một cú nhấp.** Hướng dẫn này bao phủ toàn bộ quy trình — từ ghi chú thô đến một cơ sở kiến thức kết nối, trực quan và đa ngôn ngữ.
-</TLDR>
+<TLDR>Quy trình hữu ích phân biệt nguồn, đầu ra mô hình và phần bạn sửa. Notemd có liên kết, trích xuất, nghiên cứu, dịch và sơ đồ để ghi tệp kiểm tra được. Bắt đầu từ một nguồn, xác minh kết quả rồi tự động hóa thư mục có phạm vi.</TLDR>
 
-## Tại sao lại quản lý kiến thức bằng AI?
+## Xác định kết quả cần có
 
-Việc ghi chú truyền thống tạo ra các tệp đơn giản. Ngay cả khi có liên kết wiki thủ công, hầu hết các ghi chú vẫn còn tách rời. Notemd sử dụng LLM để tự động hóa lớp kết nối:
+Chọn sản phẩm cần: ghi chú đọc có liên kết, bộ khái niệm, tóm tắt có nguồn, bản dịch hoặc sơ đồ. Nhiều tệp và liên kết không tự tăng hiểu biết hay khả năng tìm lại. Quyết định cách kiểm tra đúng sai và tìm tài liệu sau này.
 
-- **LLMs đọc nội dung của bạn** và xác định những điều quan trọng — thuật ngữ, phương pháp, người, lý thuyết
-- **Liên kết được chèn tự động** tại mỗi lần xuất hiện khái niệm, không bị giấu trong mục "xem thêm"
-- **Ghi chú khái niệm được tạo ra** dưới dạng các tệp có thể truy xuất độc lập
-- **Nghiên cứu làm giàu ghi chú** bằng ngữ cảnh từ web
-- **Sơ đồ làm cho cấu trúc trở nên hiển thị** — sơ đồ tư duy, biểu đồ luồng, biểu đồ dữ liệu từ cùng một nội dung
-
-Kết quả: một đồ thị kiến thức phát triển theo từng ghi chú bạn xử lý, chứ không chỉ khi bạn nhớ thêm liên kết.
-
-## Toàn bộ quy trình
+## Luồng tổng thể
 
 ```mermaid
-graph TD
-    A[Raw Note] --> B[Add Links]
-    B --> C[Wiki-Linked Note]
-    B --> D[Concept Notes]
-    C --> E[Connected Knowledge Graph]
+flowchart TD
+    A["Bản sao ghi chú nguồn"] --> B["Chọn tác vụ và phạm vi đầu ra"]
+    B --> C["Ghi chú có liên kết hoặc khái niệm"]
+    B --> D["Nghiên cứu, dịch hoặc sơ đồ"]
+    C --> E["So với nguồn và bằng chứng"]
     D --> E
-    F[Web Research] --> E
-    G[Translation] --> E
-    H[Diagram Generation] --> I[Visual Structure]
-    E --> H
-    I --> E
-    J[One-Click Workflow] --> B
-    J --> F
-    J --> G
-    J --> H
+    E --> F["Giữ kết quả đã sửa trong kho"]
 ```
 
-Mỗi bước đều độc lập. Bạn có thể sử dụng một hoặc tất cả. Trình tự mang lại hiệu quả cao nhất: **Thêm Liên kết → Ghi chú Khái niệm → Sơ đồ**.
+Đây là các tác vụ sẵn có, không có nghĩa một nút mặc định thực hiện tất cả. Giữ nguồn và kiểm tra đích từng tác vụ trước khi ghép quy trình.
 
----
+## 1. Wiki-link: làm rõ kết nối
 
-## 1. Liên kết wiki: Làm rõ các mối kết nối
+Chạy **Xử lý tệp (thêm liên kết)** trên ghi chú thử. Mặc định xem tệp `_processed.md` bên cạnh. Đánh giá thuật ngữ có hữu ích để điều hướng không, trích dẫn/mã/công thức có còn trung thực không.
 
-Liên kết wiki là xương sống của đồ thị kiến thức. Notemd sử dụng một LLM để:
+Chỉ dẫn trọng tâm và hạn chế đồng nghĩa hướng mô hình, không cưỡng chế tương đương khái niệm hay ngưỡng tương đồng số. Nếu ưu tiên tái lập theo tên ghi chú hiện có, dùng đối chiếu tiêu đề xác định.
 
-1. Đọc nội dung ghi chú của bạn (chia thành các phần cho các tài liệu dài)
-2. Xác định các khái niệm cốt lõi — ưu tiên các thuật ngữ kỹ thuật cụ thể hơn là các danh từ chung
-3. Chèn `[[wiki-links]]` vào mỗi lần xuất hiện
-4. Ứng chế các từ đồng nghĩa để "ML" và "Machine Learning" không tạo ra các nút riêng biệt
+[Hướng dẫn wiki-link](./features/wiki-links)
 
-### Khi nào nên sử dụng
+## 2. Khái niệm: tách thuật ngữ khỏi giải thích
 
-- **Mọi ghi chú >100 từ** — các ghi chú ngắn hơn sẽ cho ít khái niệm hơn
-- **Các bài báo nghiên cứu, tài liệu kỹ thuật, ghi chú cuộc họp** — giàu các thuật ngữ chuyên ngành
-- **Sau khi nội dung đã ổn định** — đừng xử lý lại các bản thảo nhiều lần
+Chọn thư mục trước khi trích. Trích độc lập mặc định chỉ có tiêu đề và giữ nguồn. Bật liên kết ngược và tắt mẫu tối giản nếu cần `Linked From` trong ghi chú độc lập mới.
 
-### Cài đặt chính
+Trích xuất và sinh giải thích là hai thao tác. **Tạo hàng loạt từ tiêu đề** có thể điền ghi chú đủ điều kiện đã có lẫn vừa tạo trong thư mục chọn. Thử bằng thư mục riêng, xem hành vi chuyển sang complete được báo.
 
-| Thiết lập | Khuyến nghị | Lý do |
-|---------|-----------|-----|
-| `addLinksProvider` | DeepSeek hoặc GPT-4o-mini | Độ chính xác tốt với chi phí thấp |
-| Ứng chế từ đồng nghĩa | Bật | Ngăn chặn các nút trùng lặp |
-| Cửa sổ ngữ cảnh | Đoạn văn | Cân bằng giữa độ chính xác và chi phí |
+Dò trùng dùng quy tắc tên tệp. Duyệt trước khi xóa; tên gần nhau có thể là khái niệm kỹ thuật khác.
 
-→ [Wiki-Links deep dive](/docs/features/wiki-links)
+[Hướng dẫn khái niệm](./features/concept-notes)
 
----
+## 3. Nghiên cứu: giữ dấu vết bằng chứng
 
-## 2. Ghi chú khái niệm: Các nút kiến thức có thể truy xuất được
+Chọn chủ đề hoặc dùng tiêu đề hiện tại, chọn Tavily/DuckDuckGo rồi chạy **Nghiên cứu và tóm tắt**. Thiếu khóa Tavily không tự chọn DuckDuckGo. Mở URL và kiểm chứng nhận định trong tóm tắt.
 
-Các liên kết wiki kết nối các ý tưởng ngay trong văn bản, nhưng ghi chú khái niệm giúp mỗi ý tưởng có thể được truy xuất một cách độc lập. Mỗi khái niệm sẽ có file `.md` riêng của mình:
+Truy xuất cục bộ có thể bổ sung trích đoạn theo phạm vi. Chỉ mục hiện tại là từ vựng; văn bản truy xuất được gửi đến mô hình của tác vụ. Lập chỉ mục cục bộ không có nghĩa toàn luồng ngoại tuyến hoặc dữ liệu chỉ ở máy.
 
-```markdown
-# Machine Learning
+[Hướng dẫn nghiên cứu](./features/research)
 
-## Linked From
-- [[My Research Notes]]
-- [[Neural Networks Explained]]
+## 4. Dịch: kiểm tra ý nghĩa và cấu trúc
+
+Chọn ngôn ngữ rồi dịch tệp. Đầu ra mặc định có hậu tố `_<language>.md`, đích có sẵn có thể bị ghi đè. Muốn dịch đoạn riêng, chép vào ghi chú tạm trước.
+
+So thuật ngữ, số, mã, liên kết và ký hiệu toán với nguồn. Chia đoạn có thể làm mất ngữ cảnh. 21 ngôn ngữ giao diện và 34 tuyến website không chứng minh chất lượng cặp dịch.
+
+[Hướng dẫn dịch](./features/translation)
+
+## 5. Sơ đồ: chọn sản phẩm có thể chỉnh sửa
+
+Chọn loại và nguồn tương thích. Kiểm tra xem trước rồi lưu nguồn cùng SVG/PNG/PDF được hỗ trợ. Ảnh dựng không chứng minh trình sửa khác giữ mọi quan hệ ngữ nghĩa.
+
+Chọn theo danh mục hỗ trợ. CircuitikZ có giới hạn và kiểm tra môi trường biên dịch riêng. Mũi tên tĩnh Drawnix giữa nhánh không bảo đảm gắn sau sắp xếp lại. Sửa bảng PowerPoint cải thiện đầu ra gốc, nhưng Mermaid/SVG vẫn có thể là ảnh.
+
+[Hướng dẫn sơ đồ](./features/diagrams)
+
+## 6. Quy trình: tự động hóa chuỗi đã kiểm chứng
+
+Quy trình dùng tên, `::` và ID tách bằng `>`. Mặc định:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### Quy trình trích xuất
+Chuỗi gồm liên kết, sinh theo tiêu đề thư mục và sửa Mermaid. Không tự thêm nghiên cứu hoặc tạo sơ đồ tổng quát. Mỗi bước giữ điều kiện và đầu ra riêng; không phải đường ống văn bản tùy ý.
 
-Mẫu lệnh LLM được thiết kế rất có cấu trúc:
-- Chuyển sang dạng số ít
-- Ưu tiên các khái niệm gồm nhiều từ thay vì các từ đơn lẻ ("Dielectric Relaxation" chứ không phải "Relaxation")
-- Bỏ qua các phần tham khảo/tài liệu tham khảo
-- Đầu ra dưới dạng các dòng `CONCEPT:` để dễ dàng phân tích một cách chắc chắn
+Mặc định dừng khi lỗi được báo. Tiếp tục sau lỗi chỉ phù hợp khi bước sau dùng được phần đầu vào còn lại. Hủy giữ kết quả đã xong, không hoàn tác.
 
-Các khái niệm được loại bỏ trùng lặp giữa các phần thông qua `Set<string>`. Các lỗi LLM trên từng phần sẽ không làm dừng toàn bộ quy trình.
+[Hướng dẫn quy trình](./features/workflows)
 
-### Liên kết ngược
+## 7. Mô hình: khớp giao thức với công việc
 
-Khi được bật, mỗi ghi chú khái niệm sẽ theo dõi những ghi chú nguồn nào đã đề cập đến nó. Bảng liên kết ngược tích hợp sẵn của Obsidian cũng hiển thị các kết nối ngược lại.
+36 hồ sơ bao phủ năm nhóm giao thức. Chọn theo điểm cuối, quyền mô hình, chính sách dữ liệu và kết quả đo được. Dùng cùng nguồn/lời nhắc trước khi so tốc độ hay chi phí.
 
-### Loại bỏ trùng lặp
+Định tuyến nhà cung cấp/mô hình riêng mặc định tắt. Chỉ bật khi muốn các tác vụ dùng hồ sơ khác nhau; kiểm tra từng lựa chọn trước khi coi cả chuỗi là cục bộ.
 
-Động cơ loại bỏ trùng lặp gồm 4 bước của Notemd có thể phát hiện ra:
-1. **Trùng khớp hoàn toàn** — so sánh tên file một cách không phân biệt chữ viết in hoa và in thường
-2. **Dạng số nhiều** — "Models.md" so với "Model.md"
-3. **Bình thường hóa ký hiệu** — "A-B.md" so với "A B.md"
-4. **Chứa một từ duy nhất** — "ML.md" bị đánh dấu khi có "Machine Learning.md" tồn tại
+[Tổng quan nhà cung cấp](./providers/overview)
 
-### Cài đặt khóa
+## Các bước bắt đầu
 
-| Thiết lập | Được khuyến nghị | Lý do |
-|---------|-----------|-----|
-| `conceptNoteFolder` | `concepts/` hoặc `🧠 concepts/` | Giúp sắp xếp kho lưu trữ một cách ngăn nắp |
-| `extractConceptsAddBacklink` | Bật | Kích hoạt việc tìm kiếm ngược |
-| `extractConceptsMinimalTemplate` | Tắt | Mẫu đầy đủ với Linked From |
-| Mô hình theo nhiệm vụ | DeepSeek | Rút gọn khái niệm không cần mô hình tốn kém |
-| Ức chế từ đồng nghĩa | Bật | Cùng một cài đặt ảnh hưởng đến cả việc liên kết và rút gọn |
+1. Cài Notemd và sao lưu nguồn.
+2. Cấu hình/thử đúng mô hình.
+3. Chọn thư mục khái niệm và đích riêng.
+4. Chạy một tác vụ trên bản sao.
+5. So nguồn và giữ sửa chữa.
+6. Mở rộng sang thư mục nhỏ, xem phần hoàn thành trước khi ghép chuỗi dài.
 
-→ [Giải thích chi tiết về Ghi chú Khái niệm](/docs/features/concept-notes)
+## Cách áp dụng thường gặp
 
----
+### Xử lý bài báo
 
-## 3. Nghiên cứu: Đưa Web vào
+Chuyển bài báo sang Markdown bằng công cụ ngoài phù hợp, kiểm tra công thức, hình và bảng trước. Trích khái niệm/nguyên văn, nghiên cứu câu hỏi chọn và chỉ vẽ sơ đồ khi giúp làm rõ quan hệ kiểm chứng được. Giữ liên kết bài gốc và sửa chữa.
 
-Notemd tích hợp tìm kiếm web vào quy trình ghi chép của bạn:
+### Duy trì bộ khái niệm
 
-1. **Xây dựng truy vấn** — tiêu đề hoặc phần được chọn trong ghi chú sẽ trở thành truy vấn tìm kiếm
-2. **Tìm kiếm web** — Tavily (được khuyến nghị, cần khóa API) hoặc DuckDuckGo (miễn phí, không cần khóa)
-3. **Tóm tắt LLM** — kết quả tìm kiếm được rút gọn thành một bản tóm tắt liên quan
-4. **Thêm vào ghi chú** — bản tóm tắt được thêm vào vị trí con trỏ hoặc như một mục mới
+Dùng thư mục riêng, kiểm tra thuật ngữ sau trích xuất, sinh giải thích cho tập được chọn có chủ ý. Sao lưu trước khi dọn trùng. Số lượng không thay thế định nghĩa đúng và điều hướng hữu ích.
 
-### Khi nào nên sử dụng
+### Làm việc với dữ liệu riêng tư
 
-- Trước khi xử lý một chủ đề mới — hãy thu thập thông tin từ Web trước tiên
-- Khi ghi chú khái niệm cần được bổ sung — nghiên cứu rồi thêm liên kết
-- Đối với các bài tổng quan tài liệu — nghiên cứu hàng loạt các ghi chú trong một thư mục
+Chuẩn bị máy chủ cục bộ, mô hình và phụ thuộc; xem định tuyến theo tác vụ và tránh nghiên cứu cần mạng khi yêu cầu ngoại tuyến. Lọc chẩn đoán trước khi chia sẻ. Địa chỉ loopback mặc định không ngăn hồ sơ được đổi sang máy chủ từ xa.
 
-### Cài đặt chính
+### Khôi phục đợt xử lý bị gián đoạn
 
-| Thiết lập | Được khuyến nghị | Lý do |
-|---------|-----------|-----|
-| `researchProvider` | GPT-4o hoặc Claude | Nghiên cứu yêu cầu bản tóm tắt có chất lượng cao hơn |
-| Dịch vụ tìm kiếm | Tavily | Độ liên quan tốt hơn, độ sâu có thể thiết lập |
-| `maxResearchContentTokens` | 4000 | Sự cân bằng giữa độ sâu và chi phí |
+Chờ hủy/lỗi ổn định. Đọc báo cáo, xem kết quả hoàn thành và khôi phục, so xung đột rồi chạy lại phần muốn. Không suy ra không có đầu ra từ trạng thái đã hủy; không xóa tệp đi kèm trước khi kiểm tra tham chiếu.
 
-→ [Nghiên cứu chuyên sâu](/docs/features/research)
+## Tiếp theo
 
----
-
-## 4. Dịch: Phá vỡ rào cản ngôn ngữ
-
-Notemd dịch ghi chú bằng công cụ LLM đã được cấu hình của bạn — chứ không phải công cụ dịch chuyên dụng API. Điều này có nghĩa là:
-
-- **Dịch có hiểu ngữ cảnh** — LLM hiểu toàn bộ tài liệu, chứ không phải từng câu một
-- **Xử lý thuật ngữ kỹ thuật** — “gradient descent” vẫn được giữ nguyên là “梯度下降” chứ không phải “坡度向下”
-- **Hỗ trợ xử lý theo nhóm** — dịch toàn bộ thư mục ghi chú trong một thao tác duy nhất
-- **Mô hình theo nhiệm vụ** — sử dụng Gemini Flash để dịch (nhanh, rẻ, đa ngôn ngữ)
-
-### Hỗ trợ ngôn ngữ
-
-Notemd tự thân hỗ trợ 21 ngôn ngữ UI. Ngôn ngữ dịch đích có thể được cấu hình tùy theo từng nhiệm vụ. Các cặp phổ biến: EN↔ZH, EN↔JA, EN↔KO, EN↔DE, EN↔FR, EN↔ES.
-
-→ [Phân tích chi tiết bản dịch](/docs/features/translation)
-
----
-
-## 5. Sơ đồ: Làm cho cấu trúc trở nên hiển thị
-
-Quy trình xây dựng sơ đồ của Notemd lấy yêu cầu làm ưu tiên hàng đầu: LLM tạo ra một dạng `DiagramSpec` JSON có cấu trúc rõ ràng, sau đó các bộ chuyển đổi sẽ chuyển nó sang định dạng mục tiêu. Cách này cho kết quả đáng tin cậy hơn so với việc yêu cầu LLM xử lý ngôn ngữ cú pháp thô Mermaid.
-
-### Nhận diện ý định
-
-Notemd suy luận loại sơ đồ tốt nhất từ nội dung:
-
-- **Bảng có số liệu** → biểu đồ dữ liệu (Vega-Lite)
-- **Từ vựng client/server** → sơ đồ trình tự (Mermaid)
-- **Thực thể/khóa chính** → sơ đồ ER (Mermaid)
-- **Bước/quy trình** → biểu đồ luồng (Mermaid)
-- **Từ khóa bản đồ khái niệm** → JSON Canvas (Obsidian nguyên bản)
-- **Mặc định** → bản đồ tư duy (Mermaid)
-
-### Chuỗi hiển thị
-
-Mục tiêu chính → phương án dự phòng → phương án dự phòng → HTML. Nếu cú pháp Mermaid thất bại, nó sẽ thử lại một lần với ngữ cảnh lỗi gửi đến LLM, sau đó chuyển sang sơ đồ tối giản.
-
-### Cài đặt chính
-
-| Thiết lập | Khuyến nghị | Lý do |
-|---------|-----------|-----|
-| `enableExperimentalDiagramPipeline` | Bật | Chất lượng tốt hơn nhờ tiêu chuẩn trước |
-| `experimentalDiagramCompatibilityMode` | `best-fit` | Mục tiêu nguyên bản theo mục đích |
-| `summarizeToMermaidProvider` | GPT-4o hoặc Claude | Tiêu chuẩn sơ đồ cần khả năng suy luận không gian |
-| `autoMermaidFixAfterGenerate` | Bật | Phát hiện lỗi cú pháp LLM tự động |
-| Tăng cường kiến thức địa phương | Bật cho các lĩnh vực cụ thể | Nâng cao độ chính xác nhờ ngữ cảnh kho lưu trữ |
-
-→ [Phân tích sâu về sơ đồ](/docs/features/diagrams)
-
----
-
-## 6. Công việc: Tự động hóa một cú nhấp
-
-Công việc kết nối nhiều nhiệm vụ thành một nút bên thanh công cụ duy nhất. Định dạng DSL là:
-
-```
-task1 | task2 | task3
-```
-
-Ví dụ: `addLinks | extractConcepts | generateDiagram` — xử lý một ghi chú từ văn bản thô thành một nút kiến thức trực quan, có kết nối đầy đủ chỉ trong một cú nhấp.
-
-### Các công việc được khuyến nghị
-
-| Quy trình làm việc | Chuỗi | Trường hợp sử dụng |
-|----------|-------|----------|
-| Quy trình hoàn chỉnh | `addLinks \| extractConcepts \| generateDiagram` | Ghi chú mới |
-| Nghiên cứu trước | `research \| addLinks` | Chủ đề chưa quen thuộc |
-| Đa ngôn ngữ | `translate \| addLinks` | Ghi chú đa ngôn ngữ |
-| Chỉ sơ đồ | `generateDiagram` | Trực quan hóa nhanh |
-
-→ [Tìm hiểu sâu về Workflows](/docs/features/workflows)
-
----
-
-## 7. LLM Nhà cung cấp: 36 lựa chọn từ đám mây đến máy cục bộ
-
-Notemd hỗ trợ 36 nhà cung cấp trên 4 loại giao thức. Các nhóm chính là.
-
-- **Đám mây quốc tế**: OpenAI, Anthropic, Google, Mistral, xAI
-- **Đám mây Trung Quốc**: DeepSeek, Qwen, Doubao, Moonshot, GLM, Baidu, SiliconFlow
-- **Cổng kết nối**: OpenRouter, GitHub Models, Hugging Face, Vercel
-- **Máy cục bộ**: Ollama, LMStudio, OVMS — không có khóa API, dữ liệu không rời máy của bạn
-
-### Chiến lược mô hình theo nhiệm vụ
-
-Cách thiết lập tiết kiệm chi phí nhất là sử dụng các mô hình giá rẻ cho các nhiệm vụ đơn giản và các mô hình mạnh mẽ cho các nhiệm vụ phức tạp:
-
-```
-extractConcepts  → DeepSeek (fast, cheap, accurate enough)
-addLinks          → DeepSeek or GPT-4o-mini
-research          → GPT-4o or Claude (needs quality)
-generateDiagram   → GPT-4o or Claude (needs spatial reasoning)
-translate         → Gemini Flash (fast, multilingual)
-```
-
-→ [Tổng quan về LLM Nhà cung cấp](/docs/providers/overview)
-
----
-
-## Danh sách kiểm tra khi bắt đầu
-
-1. **Cài đặt Notemd** — [Community Plugins](/docs/getting-started/installation) (được khuyến nghị) hoặc thủ công
-2. **Cấu hình nhà cung cấp** — DeepSeek (dễ nhất), OpenAI, hoặc Ollama (miễn phí)
-3. **Xử lý ghi chú đầu tiên** — nhấp chuột phải → "Xử lý tệp (thêm liên kết)"
-4. **Đặt thư mục khái niệm** — Cài đặt → Notemd → Đầu ra → Thư mục khái niệm
-5. **Trích xuất khái niệm** — chạy lệnh "Trích xuất khái niệm" trên cùng một ghi chú
-6. **Tạo sơ đồ** — chạy lệnh "Tạo sơ đồ" để hiển thị các mối liên kết
-7. **Tạo quy trình công việc** — kết nối các bước trên thành một nút nhấp một lần
-
-## Các cấu hình được khuyến nghị
-
-### Học sinh (Ngân sách)
-
-```
-Provider: DeepSeek (free tier available)
-Concept extraction: DeepSeek
-Research: DuckDuckGo (free) + DeepSeek
-Diagrams: Off (or legacy Mermaid)
-Workflows: addLinks | extractConcepts
-```
-
-### Nhà nghiên cứu (Chất lượng)
-
-```
-Provider: GPT-4o (primary)
-Concept extraction: DeepSeek (cost savings)
-Research: GPT-4o + Tavily
-Diagrams: best-fit mode, GPT-4o
-Workflows: research | addLinks | extractConcepts | generateDiagram
-```
-
-### Ưu tiên quyền riêng tư (Chỉ địa phương)
-
-```
-Provider: Ollama (llama3 or qwen2.5:7b)
-All tasks: Ollama
-Research: DuckDuckGo (free, no API key)
-Diagrams: legacy Mermaid mode
-```
-
-### Song ngữ (ZH + EN)
-
-```
-Primary: DeepSeek (Chinese queries)
-Translation: Google Gemini Flash
-Research: Tavily + DeepSeek (Chinese search context)
-Language output: per-task (extractConceptsLanguage: zh-CN)
-```
-
----
-
-## Các mẫu phổ biến
-
-### Mẫu: Xử lý bài báo nghiên cứu
-
-1. Nhập nội dung PDF (hoặc dán vào)
-2. **Nghiên cứu** — thu thập thông tin web về chủ đề
-3. **Thêm liên kết** — xác định và liên kết các khái niệm chính
-4. **Trích xuất khái niệm** — tạo các ghi chú riêng biệt
-5. **Tạo sơ đồ** — hiển thị cấu trúc của bài báo
-
-### Mẫu: Bổ sung nội dung cho ghi chú hàng ngày
-
-1. Viết ghi chú hàng ngày
-2. **Thêm Liên kết** — kết nối các ý tưởng hôm nay với các khái niệm hiện có
-3. Ghi chú khái niệm tự động cập nhật cùng các liên kết ngược
-
-### Mẫu: Tổng quan tài liệu
-
-1. Tạo thư mục chứa các bài báo/ghi chú
-2. **Thêm Liên kết theo Nhóm** — xử lý toàn bộ thư mục
-3. **Loại bỏ các khái niệm trùng lặp** — dọn dẹp các ghi chú gần giống nhau
-4. **Tạo Sơ đồ** — sơ đồ tư duy của toàn bộ tài liệu nghiên cứu
-
----
-
-*Notemd là mã nguồn mở (MIT) và hoạt động với Obsidian 0.15.0+ trên mọi nền tảng. [Cài đặt ngay](/docs/getting-started/installation) hoặc [xem trên GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD).*
+- [Bắt đầu nhanh](./getting-started/quick-start): hoàn thành tác vụ đầu.
+- [Xử lý hàng loạt](./advanced/batch-processing): chọn phạm vi và sở hữu đầu ra.
+- [Nhà phát triển](./developers/overview): mở rộng và xác minh.
+- [Agent](./agents/overview): hợp đồng công khai thực tế.

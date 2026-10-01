@@ -1,359 +1,198 @@
 ---
 id: faq
-title: "Câu hỏi thường gặp"
-description: "Những câu hỏi phổ biến về việc cài đặt, tính năng và cách sử dụng Notemd"
-keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+title: Câu hỏi thường gặp
+description: >-
+  Câu trả lời về cài đặt, nhà cung cấp, đầu ra, quyền riêng tư, hủy và hỗ trợ
+  Agent.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Ollama
-    url: https://ollama.com
+keywords:
+  - Câu hỏi thường gặp
+  - Notemd
+  - Obsidian
 faqItems:
-  - question: "Làm thế nào để cài đặt Notemd trong Obsidian?"
-    answer: "Mở Cài đặt của Obsidian, chuyển đến mục Community Plugins, tìm kiếm Notemd, nhấn Install rồi Enable. Yêu cầu phiên bản Obsidian 0.15.0 trở lên. Bạn cũng có thể tự cài đặt thông qua GitHub Releases."
-  - question: "Notemd hỗ trợ những nhà cung cấp LLM nào?"
-    answer: "Notemd hỗ trợ hơn 30 nhà cung cấp bao gồm OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter và nhiều nhà cung cấp tập trung vào thị trường Trung Quốc như Qwen, Doubao, Moonshot và GLM."
-  - question: "Notemd có thể hoạt động với các mô hình LLM cục bộ không?"
-    answer: "Có. Notemd hoạt động được với Ollama, LM Studio, vLLM, LocalAI và bất kỳ endpoint tương thích OpenAI nào. Tất cả các công việc như liên kết, tạo ghi chú khái niệm, dịch thuật, nghiên cứu và tạo sơ đồ đều có thể thực hiện với các mô hình cục bộ."
-  - question: "Notemd khác biệt với ChatGPT như thế nào?"
-    answer: "ChatGPT tạo ra các câu trả lời chat tạm thời. Trong khi đó, Notemd ghi lại kết quả có cấu trúc một cách vĩnh viễn trực tiếp vào kho lưu trữ Obsidian của bạn dưới dạng các tệp được liên kết wiki, ghi chú khái niệm, sơ đồ và bản dịch, từ đó tích lũy thành một cơ sở kiến thức."
-  - question: "So với Copilot hay Smart Connections, Notemd có điểm gì khác biệt?"
-    answer: "Copilot tập trung vào việc trò chuyện để xem xét các ghi chú. Smart Connections tập trung vào việc tìm kiếm những ghi chú tương tự. Notemd thì tập trung vào việc soạn thảo, xử lý ghi chú bằng AI và viết ra kết quả có cấu trúc vào kho lưu trữ của bạn. Cả ba công cụ này đều bổ sung cho nhau."
-  - question: "Những dịch vụ tìm kiếm nào hoạt động được với chức năng nghiên cứu của Notemd?"
-    answer: "Tavily (được khuyến nghị, tìm kiếm tối ưu hóa bằng AI, yêu cầu API key) và DuckDuckGo (thử nghiệm, không cần API key). Kết quả nghiên cứu sẽ được LLM tổng kết và gắn thêm nguồn trích dẫn vào ghi chú của bạn."
-  - question: "Notemd có hỗ trợ tiếng Trung hoặc các ngôn ngữ khác không?"
-    answer: "Giao diện người dùng hỗ trợ hơn 21 ngôn ngữ. Ngôn ngữ đầu ra của các tác vụ cũng có thể được thiết lập riêng biệt, cho phép kết hợp như giao diện tiếng Trung nhưng đầu ra bằng tiếng Anh hoặc ngược lại."
-  - question: "Tôi có thể sử dụng Notemd để đọc tài liệu giấy hoặc PDF không?"
-    answer: "Có. Hãy chuyển đổi PDF sang Markdown bằng MinerU, mở tệp trong Obsidian, sau đó chạy các tác vụ của Notemd để thêm liên kết wiki, tạo ghi chú khái niệm, trích xuất văn bản, nghiên cứu nền tảng, dịch các phần và tạo sơ đồ Mermaid."
-  - question: "Notemd có thể tạo ra những loại sơ đồ nào?"
-    answer: "Mermaid (sơ đồ luồng, trình tự, lớp, trạng thái, ER, Gantt với chức năng tự sửa cú pháp), JSON Canvas (được hỗ trợ ngay trong Obsidian), Vega-Lite (biểu đồ dữ liệu), phiên bản fallback HTML, và các tệp HTML/SVG có thể chỉnh sửa trực tiếp. Các định dạng xuất XML của Draw.io và JSON của Drawnix cũng được hỗ trợ để kiểm tra kết quả một cách chắc chắn."
-  - question: "Notemd có miễn phí và mã nguồn mở không?"
-    answer: "Có. Được cấp phép theo MIT, không có gói trả phí, không bị ràng buộc vào dịch vụ đám mây, không thu thập dữ liệu theo dõi. Mã nguồn nằm trên GitHub với hơn 234 sao. Chúng tôi hoan nghênh các pull request."
-  - question: "Notemd có thể hoạt động hoàn toàn ngoại tuyến không?"
-    answer: "Có với Ollama. Không cần API key và không cần kết nối internet. Tất cả các tính năng như liên kết wiki, ghi chú khái niệm, dịch thuật và sơ đồ đều hoạt động được ngoại tuyến. Chức năng nghiên cứu với DuckDuckGo cũng không cần API key."
-  - question: "Dữ liệu của tôi có bị gửi lên đám mây không?"
-    answer: "Khi sử dụng Ollama hoặc LM Studio, dữ liệu sẽ không rời khỏi máy tính của bạn. Khi sử dụng các nhà cung cấp đám mây như OpenAI hay Anthropic, nội dung ghi chú của bạn sẽ được gửi đi như đầu vào API. Bản thân Notemd không thu thập bất kỳ dữ liệu theo dõi hay thông tin người dùng nào."
+  - question: Cài Notemd trong Obsidian thế nào?
+    answer: >-
+      Mở Settings → Community plugins → Browse, tìm Notemd rồi cài và bật. Cài
+      thủ công dùng main.js, manifest.json và styles.css cùng GitHub Release.
+      Manifest khai báo tối thiểu Obsidian 0.15.0; phiên bản cũ đó và các thiết
+      bị di động thực tế hiện chưa được bằng chứng phát hành xác minh.
+  - question: Notemd hỗ trợ nhà cung cấp nào?
+    answer: >-
+      Danh mục có 36 hồ sơ thuộc năm nhóm: tương thích OpenAI, Anthropic,
+      Google, Azure OpenAI và Ollama. API đám mây, cổng và máy chủ cục bộ cần
+      điểm cuối, xác thực và mô hình riêng. Có hồ sơ hoặc tên trong danh sách
+      không bảo đảm mô hình còn khả dụng hay được phép sinh nội dung.
+  - question: Có dùng mô hình cục bộ được không?
+    answer: >-
+      Có. Cấu hình Ollama, LM Studio, OVMS đang chạy hoặc điểm cuối tự vận hành
+      tương thích. Tải/nạp mô hình trước và thử đúng tác vụ. Suy luận cục bộ
+      không làm nghiên cứu web, cài phụ thuộc hoặc tác vụ định tuyến đám mây
+      thành ngoại tuyến.
+  - question: Notemd khác ChatGPT thế nào?
+    answer: >-
+      Notemd tập trung vào thao tác tệp Obsidian rõ ràng: liên kết ghi chú, tạo
+      khái niệm, thêm nghiên cứu, dịch và tạo sản phẩm. Chọn khi các quy trình
+      kho ghi chú đó phù hợp. Đánh giá công cụ khác bằng khả năng lưu trữ, xuất
+      và tích hợp hiện tại; công cụ hội thoại cũng có thể giữ lịch sử và tạo
+      tệp.
+  - question: So với Copilot hoặc Smart Connections thì sao?
+    answer: >-
+      So đúng tác vụ cần dùng cùng phiên bản, cấu hình và tài liệu hiện tại của
+      mỗi dự án. Notemd có biến đổi ghi chú và truy xuất cục bộ từ vựng có giới
+      hạn; không có giao diện trò chuyện với toàn kho tổng quát hay tìm kiếm ngữ
+      nghĩa bằng embedding. Website không đưa ra bảng xếp hạng tính năng hiện
+      tại của dự án khác.
+  - question: Nghiên cứu hỗ trợ công cụ tìm kiếm nào?
+    answer: >-
+      Chọn Tavily cùng khóa API hoặc chủ động chọn DuckDuckGo. Khóa Tavily trống
+      không tự chuyển sang DuckDuckGo. Cả hai dùng mạng. Mô hình tóm tắt ngữ
+      cảnh web và cục bộ tùy chọn, rồi thêm vào ghi chú Markdown hiện tại. Kiểm
+      tra URL nguồn và nhận định quan trọng.
+  - question: Có hỗ trợ tiếng Trung và ngôn ngữ khác không?
+    answer: >-
+      Giao diện tiện ích có 21 ngôn ngữ, website có 34 tuyến ngôn ngữ. Ngôn ngữ
+      nội dung sinh được cấu hình riêng, có ghi đè theo tác vụ nơi hỗ trợ. Khả
+      năng và chất lượng dịch phụ thuộc mô hình, không phụ thuộc số bản dịch
+      giao diện hoặc website.
+  - question: Có thể dùng để đọc bài báo hoặc PDF không?
+    answer: >-
+      Chuyển bài báo thành Markdown đọc được bằng công cụ bên ngoài phù hợp, rồi
+      kiểm tra lỗi chuyển công thức, bảng và hình. Dùng Notemd để liên kết khái
+      niệm, trích nguyên văn, nghiên cứu câu hỏi, dịch hoặc vẽ sơ đồ. Quy trình
+      ghi chú chuẩn không hứa OCR PDF gốc hay trích trung thực mọi tài liệu nhị
+      phân.
+  - question: Notemd tạo được những sơ đồ nào?
+    answer: >-
+      Danh mục thực thi có 33 mục cùng nguồn và đường xem trước tương thích.
+      Mermaid, JSON Canvas, Vega-Lite, HTML/SVG chỉnh sửa được, Draw.io, Drawnix
+      và CircuitikZ có giới hạn phục vụ nhu cầu khác nhau. Chọn tổ hợp được hỗ
+      trợ và xem trong ứng dụng đích; bản xem trước không chứng minh độ trung
+      thực chỉnh sửa hoặc biên dịch gốc.
+  - question: Notemd có miễn phí và mã nguồn mở không?
+    answer: >-
+      Notemd dùng giấy phép MIT. Tài khoản nhà cung cấp, suy luận, tìm kiếm và
+      công cụ ngoài có chi phí và điều khoản riêng. Kho mã công khai và đón nhận
+      đóng góp. Giấy phép tự do không có nghĩa mọi dịch vụ được cấu hình đều
+      miễn phí.
+  - question: Có hoạt động hoàn toàn ngoại tuyến không?
+    answer: >-
+      Một số tác vụ ghi chú dùng được mô hình cục bộ sau khi cài máy chủ, tệp mô
+      hình và phụ thuộc. Nghiên cứu web vẫn cần mạng, kể cả DuckDuckGo. Kiểm tra
+      nhà cung cấp riêng của từng tác vụ và phụ thuộc xuất trước khi ngắt mạng.
+      Không có bảo đảm ngoại tuyến cho mọi tính năng.
+  - question: Dữ liệu có được gửi lên đám mây không?
+    answer: >-
+      Lời nhắc và nội dung đi đến điểm cuối mô hình đã cấu hình. Công cụ tìm
+      kiếm nhận truy vấn, tải trang liên hệ website. Truy xuất cục bộ có thể đưa
+      trích đoạn kho vào lời nhắc gửi đám mây. Hồ sơ cục bộ cũng có thể đổi sang
+      địa chỉ từ xa. Kiểm tra định tuyến và lọc nhật ký trước khi chia sẻ; lưu
+      tại máy không chứng minh dữ liệu chỉ ở thiết bị.
+  - question: One-Click Extract thực sự chạy gì?
+    answer: >-
+      Chuỗi mặc định thêm liên kết vào ghi chú hiện tại, sinh nội dung cho ghi
+      chú đủ điều kiện trong thư mục khái niệm hoặc thư mục chọn, rồi sửa
+      Mermaid trong complete. Có thể xử lý ghi chú khái niệm đã tồn tại. Không
+      tự thêm nghiên cứu web hay tạo sơ đồ. Xem hướng dẫn quy trình để dùng đúng
+      cú pháp name::action>action.
+  - question: Hủy tác vụ có hoàn tác thay đổi không?
+    answer: >-
+      Không. Hủy dừng phần việc tiếp theo nơi hỗ trợ và giữ đầu ra đã hoàn
+      thành. Yêu cầu hoặc ghi đã được chấp nhận có thể kết thúc sau đó; nhà cung
+      cấp quyết định tính phí. Chờ tác vụ ổn định, xem đường dẫn và xung đột
+      khôi phục, rồi chỉ chạy lại phần mong muốn.
+  - question: Agent có thể tự động hóa Notemd không?
+    answer: >-
+      Bốn lệnh xuất công khai có giới hạn cung cấp hồ sơ đã lọc bí mật, khả
+      năng, hợp đồng gọi và bề mặt CLI qua host Obsidian cùng kho đang khả dụng.
+      Chúng có thể ghi tệp xuất. Thao tác bảo trì repo có hợp đồng riêng; số
+      thao tác nội bộ không phải API tự động hóa công khai. Bắt đầu từ hướng dẫn
+      Agent.
+  - question: Nhà phát triển và người đóng góp bắt đầu ở đâu?
+    answer: >-
+      Dùng hướng dẫn nhà phát triển để thiết lập repo, xem lệnh build/toàn bộ
+      test, mô-đun sở hữu và quy tắc mở rộng. AGENTS.md là tài liệu thực thi có
+      trong repo. Báo lỗi tái hiện được với phiên bản và bằng chứng đã lọc, rồi
+      xác minh thay đổi trước khi đề xuất tích hợp.
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Câu hỏi thường gặp
 
-<TLDR>
-**Các câu trả lời nhanh cho những câu hỏi Notemd phổ biến nhất.** Bao gồm cài đặt (cấu hình trong 5 phút), hỗ trợ hơn 30 nhà cung cấp LLM, các tùy chọn mô hình địa phương/cloud, quy trình làm việc một cú nhấp chuột, UI đa ngôn ngữ (21 ngôn ngữ), tự động hóa liên kết wiki, tích hợp nghiên cứu, quy trình đọc PDF, tạo sơ đồ, và giấy phép mã nguồn mở. Tất cả các tính năng đều hoạt động ngoại tuyến với Ollama.
-</TLDR>
+<TLDR>Bắt đầu với ghi chú thử, nhà cung cấp truy cập được và đích đầu ra rõ ràng. Các câu trả lời mô tả giới hạn tác vụ đã triển khai; theo liên kết để xem thiết lập và kiểm chứng đầy đủ.</TLDR>
 
----
+## Câu hỏi
 
-## Cài đặt & Thiết lập
+### Cài Notemd trong Obsidian thế nào?
 
-### Làm thế nào để cài đặt Notemd trong Obsidian?
+Mở Settings → Community plugins → Browse, tìm Notemd rồi cài và bật. Cài thủ công dùng main.js, manifest.json và styles.css cùng GitHub Release. Manifest khai báo tối thiểu Obsidian 0.15.0; phiên bản cũ đó và các thiết bị di động thực tế hiện chưa được bằng chứng phát hành xác minh.
 
-Mở Obsidian → **Settings → Community Plugins → Browse** → tìm kiếm **"Notemd"** → **Install** → **Enable**.
+### Notemd hỗ trợ nhà cung cấp nào?
 
-**Yêu cầu:**
-- Obsidian 0.15.0+
-- Hỗ trợ trên máy tính để bàn (Windows, macOS, Linux) và thiết bị di động (iOS, Android)
+Danh mục có 36 hồ sơ thuộc năm nhóm: tương thích OpenAI, Anthropic, Google, Azure OpenAI và Ollama. API đám mây, cổng và máy chủ cục bộ cần điểm cuối, xác thực và mô hình riêng. Có hồ sơ hoặc tên trong danh sách không bảo đảm mô hình còn khả dụng hay được phép sinh nội dung.
 
-**Cài đặt thủ công:**
-1. Tải về `main.js`, `styles.css`, `manifest.json` từ [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)
-2. Đặt chúng vào `<your-vault>/.obsidian/plugins/notemd/`
-3. Tải lại Obsidian và kích hoạt plugin
+### Có dùng mô hình cục bộ được không?
 
-**Thống kê:** hơn 4k lần tải xuống, 44 phiên bản phát hành, được cấp phép MIT.
+Có. Cấu hình Ollama, LM Studio, OVMS đang chạy hoặc điểm cuối tự vận hành tương thích. Tải/nạp mô hình trước và thử đúng tác vụ. Suy luận cục bộ không làm nghiên cứu web, cài phụ thuộc hoặc tác vụ định tuyến đám mây thành ngoại tuyến.
 
----
+### Notemd khác ChatGPT thế nào?
 
-## Cấu hình LLM
+Notemd tập trung vào thao tác tệp Obsidian rõ ràng: liên kết ghi chú, tạo khái niệm, thêm nghiên cứu, dịch và tạo sản phẩm. Chọn khi các quy trình kho ghi chú đó phù hợp. Đánh giá công cụ khác bằng khả năng lưu trữ, xuất và tích hợp hiện tại; công cụ hội thoại cũng có thể giữ lịch sử và tạo tệp.
 
-### Notemd hỗ trợ những nhà cung cấp LLM nào?
+### So với Copilot hoặc Smart Connections thì sao?
 
-Notemd hỗ trợ **hơn 30 nhà cung cấp**:
+So đúng tác vụ cần dùng cùng phiên bản, cấu hình và tài liệu hiện tại của mỗi dự án. Notemd có biến đổi ghi chú và truy xuất cục bộ từ vựng có giới hạn; không có giao diện trò chuyện với toàn kho tổng quát hay tìm kiếm ngữ nghĩa bằng embedding. Website không đưa ra bảng xếp hạng tính năng hiện tại của dự án khác.
 
-**Các nhà cung cấp đám mây:**
-- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
-- Anthropic (Claude Opus, Sonnet, Haiku)
-- Google (Gemini Pro, Flash, Ultra)
-- xAI (Grok)
-- Mistral, DeepSeek, Qwen, Moonshot, GLM
+### Nghiên cứu hỗ trợ công cụ tìm kiếm nào?
 
-**Tập trung vào Trung Quốc:**
-- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
-- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+Chọn Tavily cùng khóa API hoặc chủ động chọn DuckDuckGo. Khóa Tavily trống không tự chuyển sang DuckDuckGo. Cả hai dùng mạng. Mô hình tóm tắt ngữ cảnh web và cục bộ tùy chọn, rồi thêm vào ghi chú Markdown hiện tại. Kiểm tra URL nguồn và nhận định quan trọng.
 
-**Địa phương/tự cài đặt:**
-- Ollama
-- LM Studio
-- Bất kỳ điểm cuối tương thích OpenAI nào
+### Có hỗ trợ tiếng Trung và ngôn ngữ khác không?
 
-**Các cổng:**
-- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
-- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
-- Hugging Face, Vercel AI Gateway, Requesty
+Giao diện tiện ích có 21 ngôn ngữ, website có 34 tuyến ngôn ngữ. Ngôn ngữ nội dung sinh được cấu hình riêng, có ghi đè theo tác vụ nơi hỗ trợ. Khả năng và chất lượng dịch phụ thuộc mô hình, không phụ thuộc số bản dịch giao diện hoặc website.
 
-### Liệu Notemd có thể hoạt động với các LLM cục bộ không?
+### Có thể dùng để đọc bài báo hoặc PDF không?
 
-**Có, được hỗ trợ đầy đủ.** Notemd hoạt động với:
-- **Ollama** ( tích hợp sẵn)
-- **LM Studio** (thông qua điểm cuối tương thích OpenAI)
-- **vLLM, LocalAI, text-generation-webui** (thông qua chế độ tương thích OpenAI)
+Chuyển bài báo thành Markdown đọc được bằng công cụ bên ngoài phù hợp, rồi kiểm tra lỗi chuyển công thức, bảng và hình. Dùng Notemd để liên kết khái niệm, trích nguyên văn, nghiên cứu câu hỏi, dịch hoặc vẽ sơ đồ. Quy trình ghi chú chuẩn không hứa OCR PDF gốc hay trích trung thực mọi tài liệu nhị phân.
 
-Tất cả các nhiệm vụ đều hoạt động với các mô hình cục bộ: liên kết, tạo khái niệm, dịch thuật, nghiên cứu và tạo sơ đồ.
+### Notemd tạo được những sơ đồ nào?
 
-**Ví dụ kết hợp:**
-- Ollama (cục bộ) để liên kết → nhanh, riêng tư, không tốn phí
-- OpenAI cho công việc nghiên cứu → chất lượng cao, tích hợp tìm kiếm web
-- Gemini cho dịch thuật → hỗ trợ đa mô thức
+Danh mục thực thi có 33 mục cùng nguồn và đường xem trước tương thích. Mermaid, JSON Canvas, Vega-Lite, HTML/SVG chỉnh sửa được, Draw.io, Drawnix và CircuitikZ có giới hạn phục vụ nhu cầu khác nhau. Chọn tổ hợp được hỗ trợ và xem trong ứng dụng đích; bản xem trước không chứng minh độ trung thực chỉnh sửa hoặc biên dịch gốc.
 
-### Làm thế nào để cấu hình các mô hình khác nhau cho các nhiệm vụ khác nhau?
+### Notemd có miễn phí và mã nguồn mở không?
 
-Trong **Cài đặt Notemd**, mỗi nhiệm vụ có các bộ lựa chọn nhà cung cấp/mô hình riêng biệt:
+Notemd dùng giấy phép MIT. Tài khoản nhà cung cấp, suy luận, tìm kiếm và công cụ ngoài có chi phí và điều khoản riêng. Kho mã công khai và đón nhận đóng góp. Giấy phép tự do không có nghĩa mọi dịch vụ được cấu hình đều miễn phí.
 
-| Nhiệm vụ | Cấu hình ví dụ |
-|------|----------------------|
-| **Kết nối** | DeepSeek (nhanh, rẻ) |
-| **Tạo khái niệm** | Claude Opus (chất lượng cao) |
-| **Nghiên cứu** | Perplexity hoặc GPT-4o (dựa trên web) |
-| **Dịch thuật** | Gemini Flash (đa phương thức) |
-| **Tạo sơ đồ** | Ollama (địa phương, riêng tư) |
+### Có hoạt động hoàn toàn ngoại tuyến không?
 
-Việc tối ưu hóa theo từng nhiệm vụ này cân bằng giữa tốc độ, chi phí và chất lượng.
+Một số tác vụ ghi chú dùng được mô hình cục bộ sau khi cài máy chủ, tệp mô hình và phụ thuộc. Nghiên cứu web vẫn cần mạng, kể cả DuckDuckGo. Kiểm tra nhà cung cấp riêng của từng tác vụ và phụ thuộc xuất trước khi ngắt mạng. Không có bảo đảm ngoại tuyến cho mọi tính năng.
 
----
+### Dữ liệu có được gửi lên đám mây không?
 
-## Tính năng cốt lõi
+Lời nhắc và nội dung đi đến điểm cuối mô hình đã cấu hình. Công cụ tìm kiếm nhận truy vấn, tải trang liên hệ website. Truy xuất cục bộ có thể đưa trích đoạn kho vào lời nhắc gửi đám mây. Hồ sơ cục bộ cũng có thể đổi sang địa chỉ từ xa. Kiểm tra định tuyến và lọc nhật ký trước khi chia sẻ; lưu tại máy không chứng minh dữ liệu chỉ ở thiết bị.
 
-### Notemd khác biệt với ChatGPT như thế nào khi đọc tài liệu?
+### One-Click Extract thực sự chạy gì?
 
-| Chiều kích | ChatGPT | Notemd |
-|-----------|---------|--------|
-| **Vị trí xuất ra** | Lịch sử trò chuyện (tạm thời) | Obsidian kho lưu trữ (tệp bền vững) |
-| **Định dạng kết quả** | Trả lời dạng văn bản | Liên kết wiki, ghi chú khái niệm, sơ đồ, bản dịch |
-| **Giá trị lâu dài** | Biến mất sau phiên làm việc | Tích lũy thành cơ sở kiến thức |
-| **Khả năng tái sử dụng** | Phải truy vấn lại | Các tệp vẫn tồn tại, liên kết được cập nhật |
+Chuỗi mặc định thêm liên kết vào ghi chú hiện tại, sinh nội dung cho ghi chú đủ điều kiện trong thư mục khái niệm hoặc thư mục chọn, rồi sửa Mermaid trong complete. Có thể xử lý ghi chú khái niệm đã tồn tại. Không tự thêm nghiên cứu web hay tạo sơ đồ. Xem hướng dẫn quy trình để dùng đúng cú pháp name::action>action.
 
-**Sử dụng ChatGPT cho:** Câu hỏi và trả lời nhanh, giải thích một lần
-**Sử dụng Notemd cho:** Xây dựng cơ sở kiến thức có cấu trúc và bền vững trong vài tuần/tháng
+### Hủy tác vụ có hoàn tác thay đổi không?
 
-### Notemd thêm liên kết wiki vào ghi chú như thế nào?
+Không. Hủy dừng phần việc tiếp theo nơi hỗ trợ và giữ đầu ra đã hoàn thành. Yêu cầu hoặc ghi đã được chấp nhận có thể kết thúc sau đó; nhà cung cấp quyết định tính phí. Chờ tác vụ ổn định, xem đường dẫn và xung đột khôi phục, rồi chỉ chạy lại phần mong muốn.
 
-**Quy trình:**
-1. Bạn chạy lệnh "Xử lý tệp (thêm liên kết)" trên một ghi chú
-2. Notemd gửi văn bản đó đến LLM đã được cấu hình của bạn
-3. LLM xác định các khái niệm chính trong ngữ cảnh
-4. Notemd chèn `[[wiki-links]]` vào mỗi lần xuất hiện của khái niệm
-5. Tùy chọn, nó tự động tạo các ghi chú khái niệm trong thư mục mà bạn chỉ định
+### Agent có thể tự động hóa Notemd không?
 
-**Các tính năng:**
-- Loại bỏ từ đồng nghĩa (tránh sự trùng lặp giữa "transformer" và "transformers")
-- Liên kết ngược từ các ghi chú khái niệm đến nguồn gốc
-- Bảo toàn tính toàn vẹn liên kết khi đổi tên hoặc xóa
-- Chế độ trích xuất thuần túy (trích xuất khái niệm mà không sửa đổi bản gốc)
+Bốn lệnh xuất công khai có giới hạn cung cấp hồ sơ đã lọc bí mật, khả năng, hợp đồng gọi và bề mặt CLI qua host Obsidian cùng kho đang khả dụng. Chúng có thể ghi tệp xuất. Thao tác bảo trì repo có hợp đồng riêng; số thao tác nội bộ không phải API tự động hóa công khai. Bắt đầu từ hướng dẫn Agent.
 
-### Quy trình một cú nhấp chuột của Notemd là gì?
+### Nhà phát triển và người đóng góp bắt đầu ở đâu?
 
-**Các quy trình một cú nhấp chuột** kết hợp nhiều thao tác thành một **nút bên cạnh duy nhất**.
+Dùng hướng dẫn nhà phát triển để thiết lập repo, xem lệnh build/toàn bộ test, mô-đun sở hữu và quy tắc mở rộng. AGENTS.md là tài liệu thực thi có trong repo. Báo lỗi tái hiện được với phiên bản và bằng chứng đã lọc, rồi xác minh thay đổi trước khi đề xuất tích hợp.
 
-**Quy trình mặc định:** `One-Click Extract`
-```
-process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
-```
+## Tiếp theo
 
-**Kết quả:** Một cú nhấp sẽ thực hiện các việc sau:
-1. Thêm liên kết wiki vào ghi chú hiện tại
-2. Tạo ghi chú khái niệm cho các thuật ngữ mới
-3. Nghiên cứu và bổ sung thông tin nền
-4. Nén thành một sơ đồ Mermaid
-
-**Các quy trình làm việc tùy chỉnh:** Bạn có thể định nghĩa riêng chúng trong Phần thiết lập bằng định dạng DSL. Mỗi quy trình sẽ trở thành một nút bên cạnh có thể tái sử dụng.
-
-### Notemd so sánh như thế nào với Copilot hoặc Smart Connections?
-
-Các tiện ích mở rộng này giải quyết những vấn đề khác nhau:
-
-- **Copilot** — Ưu tiên trò chuyện. Bạn trò chuyện với AI về các ghi chú của mình. Các câu trả lời của AI sẽ ở trong bảng trò chuyện; chúng không thay đổi kho lưu trữ của bạn.
-- **Smart Connections** — Ưu tiên khám phá. Nó tìm các ghi chú có ý nghĩa tương tự bằng cách sử dụng embedding. Nó không tạo ra hay chỉnh sửa nội dung.
-- **Notemd** — Ưu tiên viết lách. AI xử lý các ghi chú của bạn và tạo ra các kết quả có cấu trúc (liên kết wiki, ghi chú khái niệm, nghiên cứu, sơ đồ, bản dịch) rồi lưu trực tiếp vào kho lưu trữ của bạn dưới dạng các tệp vĩnh viễn.
-
-| Những gì bạn cần | Tiện ích mở rộng được khuyến nghị |
-|----------------|-------------------|
-| Trò chuyện với AI về ghi chú | Copilot |
-| Tìm các ghi chú tương tự/kết nối | Smart Connections |
-| Chèn tự động liên kết wiki và xây dựng đồ thị kiến thức | **Notemd** |
-| Tạo ghi chú khái niệm kèm theo liên kết ngược | **Notemd** |
-| Tạo sơ đồ từ nội dung ghi chú | **Notemd** |
-| Nghiên cứu một chủ đề và thêm tóm tắt vào | **Notemd** |
-
-Cả ba có thể được sử dụng cùng nhau — chúng bổ sung cho nhau chứ không cạnh tranh với nhau.
-
----
-
-## Nghiên cứu & Dịch thuật
-
-### Những dịch vụ tìm kiếm nào hoạt động được với việc nghiên cứu Notemd?
-
-| Dịch vụ | Cần khóa API | Chất lượng | Ghi chú |
-|---------|-----------------|---------|-------|
-| **Tavily** | Có | Cao | Được khuyến nghị, tìm kiếm tối ưu hóa bằng AI |
-| **DuckDuckGo** | Không | Thử nghiệm | Không cần thiết lập, chất lượng thấp hơn |
-
-**Cách thức hoạt động của "Nghiên cứu và tóm tắt":**
-1. Bạn chọn một chủ đề hoặc chạy nó trên ghi chú hiện tại
-2. Notemd gửi yêu cầu đến dịch vụ tìm kiếm
-3. Kết quả → Tóm tắt bởi LLM
-4. Bản tóm tắt được thêm vào ghi chú của bạn kèm theo trích dẫn nguồn
-
-**Kết quả:** Dấu vết nghiên cứu lưu trữ vĩnh viễn trong kho lưu trữ của bạn, không phải trong các tab trình duyệt.
-
-### Notemd có hỗ trợ tiếng Trung hoặc các ngôn ngữ khác không?
-
-**Các ngôn ngữ UI hỗ trợ:** Hơn 21 ngôn ngữ
-- Tiếng Anh, 中文 (简体), 中文 (繁體), 日本語, 한국어
-- Tiếng Ả Rập, Tiếng Đức, Tiếng Pháp, Tiếng Tây Ban Nha, Tiếng Nga, Tiếng Bồ Đào Nha, Tiếng Ý
-- Tiếng Hindi, Tiếng Bengali, Tiếng Thái, Tiếng Việt, Tiếng Thổ Nhĩ Kỳ, Tiếng Ba Lan, Tiếng Séc và nhiều ngôn ngữ khác
-
-**Ngôn ngữ đầu ra của nhiệm vụ:** Có thể cấu hình riêng
-- UI bằng tiếng Trung + đầu ra bằng tiếng Anh: ✅
-- UI bằng tiếng Anh + đầu ra bằng tiếng Trung: ✅
-
-**Trường hợp sử dụng:** Các nhà nghiên cứu song ngữ có thể giữ UI bằng ngôn ngữ mẹ đẻ trong khi tạo ghi chú bằng tiếng Anh để xuất bản.
-
----
-
-## PDF và các quy trình công việc học thuật
-
-### Tôi có thể sử dụng Notemd để đọc bài báo/PDF không?
-
-**Có.** Quy trình như sau:
-1. **Chuyển đổi PDF thành Markdown** bằng [MinerU](https://github.com/opendatalab/MinerU) (được khuyến nghị cho các bài báo học thuật)
-2. Mở tệp Markdown trong Obsidian
-3. Thực hiện các nhiệm vụ của Notemd:
-   - **Thêm liên kết wiki** cho các thuật ngữ chính
-   - **Tạo ghi chú khái niệm** cho các thuật ngữ chưa quen thuộc
-   - **Trích xuất văn bản gốc** thông qua các câu hỏi tùy chỉnh (ví dụ: "Những hạn chế là gì?")
-   - **Nghiên cứu nền tảng** về các phương pháp/dataset được trích dẫn
-   - **Dịch** các phần khó hiểu
-   - **Nén thành sơ đồ Mermaid** để dễ hiểu cấu trúc
-
-**Phiên bản 1.9.1+:** Trích xuất cấu trúc chương kèm hỗ trợ mục lục
-
-**Kết quả:** Việc đọc bài báo của bạn sẽ trở thành một tài sản kiến thức có cấu trúc và có thể liên kết được trong kho lưu trữ của bạn.
-
----
-
-## Sơ đồ và trực quan hóa
-
-### Notemd có thể tạo ra những loại đồ thị/sơ đồ nào?
-
-| Loại | Hỗ trợ | Tính năng |
-|------|---------|----------|
-| **Mermaid** | Đầy đủ | Sơ đồ luồng, trình tự, lớp, trạng thái, ER, Gantt, tự sửa cú pháp, xác thực theo nhóm |
-| **JSON Canvas** | Đầy đủ | Bố cục bảng vẽ bản địa Obsidian |
-| **Vega-Lite** | Đầy đủ | Biểu đồ dữ liệu, chuỗi thời gian, biểu đồ thanh, biểu đồ rải rác, có thể tùy chỉnh |
-| **HTML** | Giải pháp thay thế | Dành cho các loại sơ đồ không được hỗ trợ |
-| **Có thể chỉnh sửa HTML/SVG** | Mục tiêu rõ ràng | Bộ tích hợp sẵn trong dòng SVG với ghi chú theo phong cách Draw.io-style |
-| **Các tệp Draw.io / Drawnix** | Giới hạn xuất khẩu | Giá trị XML/JSON được xác định rõ từ `SemanticFigureModel`; không cần phụ thuộc vào môi trường chạy của trình soạn thảo |
-
-**Tự sửa lỗi Mermaid:** Chế độ gỡ lỗi sâu sửa chữa:
-- Các mũi tên bị hỏng (`-->`, `-.->`, `==>`)
-- Nhãn và bình luận không hợp lệ
-- Lỗi cú pháp subgraph
-- Ký hiệu hình dạng (`[`, `(`, `{`, `((`)
-- Ký tự ống trong nhãn
-- Tệp đính kèm ghi chú
-
-**Quy trình làm việc:**
-1. Chạy lệnh "Tóm tắt thành sơ đồ Mermaid" trên một ghi chú
-2. Xem trước trong cửa sổ modal
-3. Xuất ra dạng SVG hoặc PNG
-4. Hoặc lưu dưới dạng tệp `.mmd` trong kho bảo mật
-
----
-
-## Nguồn mở và cộng đồng
-
-### Notemd có phải là phần mềm miễn phí và nguồn mở không?
-
-**Có.**
-- **Giấy phép:** MIT (linh hoạt, cho phép sử dụng thương mại)
-- **Mã nguồn:** https://github.com/Jacobinwwey/obsidian-NotEMD
-- **Không có gói trả phí, không bị ràng buộc bởi cloud, không theo dõi dữ liệu**
-- **Cộng đồng:** Hơn 234 ngôi sao trên GitHub, kênh Discord hoạt động tích cực
-
-**Bạn sở hữu:**
-- Dữ liệu của bạn (vẫn nằm trong kho bảo mật của bạn)
-- Các quy trình làm việc của bạn (tùy chỉnh lời nhắc, mô hình, chuỗi)
-- Quyền riêng tư của bạn (hỗ trợ LLM tại chỗ)
-
-**Đóng góp:** Chào đón các yêu cầu pull request. Xem [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
-
----
-
-## Khắc phục sự cố
-
-### Các cuộc gọi LLM của tôi bị thất bại. Tôi nên kiểm tra điều gì?
-
-1. **Khóa API có hợp lệ không?** Kiểm tra mục Settings → Provider Configuration
-2. **Tên mô hình có chính xác không?** Sử dụng nút “获取模型列表” (Get Model List) trong phần settings
-3. **Có thể truy cập mạng không?** Một số nhà cung cấp yêu cầu sử dụng VPN
-4. **Giới hạn tốc độ?** Kiểm tra bảng điều khiển của nhà cung cấp
-5. **Chẩn đoán:** Chạy "Connection Test" trong phần cài đặt để có các nhật ký lỗi chi tiết
-
-### Notemd chạy chậm. Làm thế nào để tăng tốc cho nó?
-
-1. **Sử dụng các mô hình nhanh hơn:** DeepSeek, Gemini Flash, GPT-4o-mini
-2. **Giảm kích thước khối dữ liệu:** Cài đặt → Smart Chunking → giảm số lượng từ
-3. **Xử lý song song:** Cài đặt → Batch Processing → tăng mức độ đồng thời
-4. **Các mô hình cục bộ:** Ollama dành cho các nhiệm vụ không cần tìm kiếm trên web
-
-### Notemd có thể hoạt động 100% ngoại tuyến không?
-
-**Có, với Ollama.** Không cần khóa API, không cần internet, dữ liệu sẽ không rời máy của bạn:
-
-1. Cài đặt [Ollama](https://ollama.com) và chạy `ollama serve`
-2. Trong cài đặt của Notemd, chọn **Ollama** làm nhà cung cấp của bạn
-3. Tải một mô hình: `ollama pull llama3` (hoặc qwen2.5, gemma2, v.v.)
-4. Tất cả các tính năng đều hoạt động: liên kết wiki, ghi chú khái niệm, dịch thuật, sơ đồ
-
-**Nghiên cứu DuckDuckGo** cũng hoạt động được mà không cần khóa API (chất lượng thử nghiệm).
-
-Với các nhà cung cấp dịch vụ đám mây (OpenAI, Anthropic, Google, DeepSeek, v.v.), nội dung ghi chú của bạn sẽ được gửi dưới dạng đầu vào API. Hãy kiểm tra chính sách bảo mật của từng nhà cung cấp để biết chi tiết về xử lý dữ liệu.
-
-### Dữ liệu của tôi có được gửi lên đám mây không?
-
-**Điều này phụ thuộc vào nhà cung cấp của bạn:**
-
-| Loại nhà cung cấp | Dữ liệu được gửi lên đám mây? | Ghi chú |
-|--------------|---------------------|-------|
-| **Ollama (loại cục bộ)** | Không | Mọi thứ vẫn ở trên máy của bạn |
-| **LMStudio (loại cục bộ)** | Không | Giống như Ollama |
-| **DeepSeek, OpenAI, v.v.** | Có | Nội dung ghi chú được gửi dưới dạng đầu vào API để xử lý |
-| **OpenRouter, AIHubMix** | Có | Cổng kết nối dùng để định tuyến đến các nhà cung cấp đám mây |
-
-Notemd tự thân không thu thập **không dữ liệu telemetry, không phân tích, không dữ liệu người dùng**. Tiện ích mở rộng này hoàn toàn mã nguồn mở (MIT). Dữ liệu duy nhất rời khỏi máy của bạn là những gì bạn gửi một cách rõ ràng đến nhà cung cấp LLM đã được cấu hình.
-
-### Tiện ích mở rộng AI Obsidian nào tốt nhất cho công tác nghiên cứu?
-
-Tùy thuộc vào quy trình làm việc nghiên cứu của bạn:
-
-| Cần | Tiện ích mở rộng | Lý do |
-|------|--------|-----|
-| Tìm các bài báo/ghi chú liên quan | Smart Connections | Phát hiện sự tương đồng ngữ nghĩa |
-| Trò chuyện về các nguồn tài liệu của bạn | Copilot | Trò chuyện với bối cảnh kho lưu trữ |
-| Liên kết tự động các khái niệm + tạo ghi chú | **Notemd** | AI xác định các khái niệm, chèn liên kết, tạo ghi chú |
-| Nghiên cứu trên web + tóm tắt thành ghi chú | **Notemd** | Tavily/DuckDuckGo tìm kiếm → LLM tóm tắt → được ghi thêm vào ghi chú |
-| Tạo sơ đồ từ nghiên cứu | **Notemd** | Mermaid/Canvas/Vega-Lite từ nội dung ghi chú |
-
-**Bộ kết hợp được khuyến nghị:** Smart Connections (khám phá) + Notemd (cấu trúc) + Copilot (thảo luận).
-
----
-
-## Nhận trợ giúp
-
-- **Tài liệu hướng dẫn:** https://jacobinwwey.github.io/obsidian-NotEMD/
-- **Vấn đề trên GitHub:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
-- **Discord:** https://discord.gg/qnGgsQ9W
-- **Nhà tài trợ:** https://github.com/sponsors/Jacobinwwey
+- [Bắt đầu nhanh](./getting-started/quick-start): cài, cấu hình và xem kết quả.
+- [Quy trình](./features/workflows): hành động mặc định và chính sách lỗi.
+- [Sơ đồ](./features/diagrams): giới hạn nguồn, hình và xuất gốc.
+- [Nhà phát triển](./developers/overview): build và mở rộng.
+- [Agent](./agents/overview): tìm hợp đồng công khai.
+- [Khắc phục sự cố](./advanced/troubleshooting): báo lỗi tái hiện.

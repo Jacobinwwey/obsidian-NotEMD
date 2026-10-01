@@ -18,5 +18,25 @@
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "เริ่มที่นี่",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "ผู้ใช้ใหม่",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "งานประจำ",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "นักพัฒนา",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

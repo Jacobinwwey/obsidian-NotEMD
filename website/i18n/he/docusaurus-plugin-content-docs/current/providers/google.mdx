@@ -1,67 +1,54 @@
 ---
 id: google
-title: "Google"
-description: "להגדיר Google Gemini"
+title: Google
+description: 'הגדירו Gemini Generative Language עם גרסת API, מפתח ומודל מתאימים.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords:
+  - Google
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google Provider
+# Google
 
-<TLDR>
-**Google משתמש במערכת ההעברה המובנית של שפת הייצור Gemini API.** ההגדרות המוגדרות מראש משתמשות באופן אוטומטי ב-`gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` ו-`temperature: 0.5`. זה אינו פרופיל תואם OpenAI.
+<TLDR>Google משתמש ב־Gemini Generative Language המקורי. הגדירו מפתח מורשה ומודל זמין. ל־Gemini דרך שער תואם בחרו בפרופיל השער.</TLDR>
 
-זהו חלק מה[Obsidian מדריך ניהול ידע AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## הכנה
 
-## הגדרה
+בחרו **Google**, מפתח, כתובת API מקורית ומודל בגרסה שנבחרה. בדקו חיבור והערה. זה אינו מגדיר אוטומטית פריסת Google Cloud/Vertex שרירותית.
 
-ליצור מפתח Cloud API של Google AI Studio או Google עם גישה ל-Gemini, להוסיף פרופיל ספק `Google`, ולשמור על הבסיס של שפת הייצור המובנית URL. השתמשו בפרופיל Gemini Flash המוגדר מראש לתרגום מהיר ולעבודות עם הערות נרחבות, ואז שנו את המודלים לפי משימה כאשר נדרש מודל Gemini גדול יותר או בעל יכולות גבוהות יותר.
+## נקודת קצה ואימות
 
-הימנעו מהכנסת מזהי מודלי Gemini לפרופיל תואם OpenAI אלא אם כן אתם משתמשים באופן מפורש בשער שמציג את Gemini דרך API תואם OpenAI.
-
-## קצה ואימות
-
-| שדה | ההגדרה הנוכחית |
-|-------|----------------|
-| תשלוח | `google` |
+| שדה | ערך התחלתי |
+| ------- | -------------- |
+| תעבורה | `google` |
 | מפתח API | נדרש |
-| Base URL | `https://generativelanguage.googleapis.com/v1` |
-| מודל ברירת המחדל | `gemini-2.0-flash-exp` |
+| כתובת בסיס | `https://generativelanguage.googleapis.com/v1` |
+| מודל | `gemini-2.0-flash-exp` |
 | טמפרטורה | `0.5` |
-| בדיקת חיבור | רק שיחה |
+| בדיקת חיבור | `chat-only` |
 
-הביצועים מקראים את `/models/{model}:generateContent?key={apiKey}`. המפתח נמסר כפרמטר של שאילתה מכיוון שזו הדרך שבה נקשר קצה Gemini המובנית בתוסף.
+נשלחת בקשת `generateContent` עם מפתח. מזהים היסטוריים אינם מבטיחים גישה. בדקו כתובות אבחון לפני שיתוף; הן עלולות להכיל פרטי אימות.
 
-## גילוי מודלים
+## מודלים
 
-Google משתמש במודול הגילוי `google-models`. הגילוי צריך להחזיר את מודלי Gemini הזמינים למפתח API; אם הבוחר ריק, בדקו את המפתח כנגד אותו בסיס URL ווודאו שמשפחת המודלים מאושרת עבור החשבון.
+השתמשו בגילוי הספק ואמתו יצירה ב־API הנבחר. רשימה ריקה עשויה לנבוע מהרשאות, כתובת או מודל חסר. אבחנו לפני החלפת פרוטוקול.
 
-הגבולות הידועים של טוקני הפלט תלויים במודל ברשומת הספקים. אם תרגום ארוך או הסבר של תרשים נקטע, בחרו מודל Gemini עם קיבולת פלט גדולה יותר או הפחיתו את גודל הפלט המבוקש.
+## תקלות
 
-## פתרון בעיות
+- 400: מזהה, פרמטרים וגבולות קלט/פלט.
+- 401/403: מגבלות מפתח, API פעיל והרשאות.
+- 404: האם המודל זמין בגרסת API זו?
+- דוגמאות שער: השתמשו בפרופיל OpenAI-compatible המתאים.
 
-- `400`: מזהה המודל בדרך כלל אינו תואם לנתיב המובנית של Gemini או הבקשה חורגת מהצורה התומכת של המודל.
-- `401` או `403`: בדקו את המגבלות של המפתח, את ההפעלה של הפרויקט/API, והאם המפתח יכול לגשת ל-Gemini.
-- `404`: מזהי המודל אינה זמינה בגרסה API המוגדרת.
-- דוגמאות של שערים כושלות תחת פרופיל זה: השתמשו בהגדרה של שער במקום בספק המובנית Google.
+## מתי לבחור
 
-## מתי להשתמש
+ל־Gemini דרך ה־API המקורי. בדקו תרגום, מחקר או תרשימים בחומר שלכם. אין הבטחת מהירות, מחיר או איכות כללית.
 
-השתמשו ב-Google לתרגום מהיר, לניקוי הערות בכמויות גדולות, ולעבודות שבהן האיזון בין עלות לביצועים של Gemini טוב יותר מאשר OpenAI או Anthropic ישירים. העדיפו ספק אחר לעבודות שדורשות טיפול במודלי היגיון תואמי OpenAI.
+## המשך
 
----
-
-## צעדים באופק
-
-- [LLM Providers](/docs/providers/overview) -- תצורה מלאה, מודלים לכל משימה, ולוגיקת ניסיונות חוזרים
-- [תרגום](/docs/features/translation) -- Gemini Flash מומלץ למשימות תרגום בכמויות גדולות
+- [ספקים](./overview).
+- [תרגום](../features/translation).

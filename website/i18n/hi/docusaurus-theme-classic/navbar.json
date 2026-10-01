@@ -4,7 +4,7 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "लोगो का विवरण नहीं",
+    "message": "Notemd का लोगो",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
@@ -12,11 +12,31 @@
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "एफएक्यू",
+    "message": "अक्सर पूछे जाने वाले प्रश्न",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "यहाँ शुरू करें",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "नए उपयोगकर्ता",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "दैनिक कार्य",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "डेवलपर",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

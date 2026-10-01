@@ -1,16 +1,13 @@
 ---
 id: openai
 title: OpenAI
-description: OpenAI（GPT-4、GPT-4o）を設定する
+description: 共有 Chat Completions 経路に OpenAI を設定し、モデルへのアクセスを確認します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,50 +15,46 @@ import TLDR from '@site/src/components/TLDR';
 # OpenAI プロバイダー
 
 <TLDR>
-**OpenAIは、共有されているOpenAI互換のトランスポートを使用しています。** 現在のプリセットでは、`gpt-4o`、`https://api.openai.com/v1`、`temperature: 0.5`、および`models-then-chat`接続テストがデフォルトで設定されています。正確なフィールドの意味を必要とする場合はこのページを使用し、カテゴリレベルでの選択については[LLMプロバイダー](/docs/providers/overview)の概要をご覧ください。
-
-これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
+OpenAI プリセットは共有の OpenAI-compatible Chat Completions 実装を使います。キーと対応モデルを設定してください。既定モデルは開始値で、現在の利用権や全タスクへの推奨を意味しません。
 </TLDR>
 
-## セットアップ
+## 導入
 
-OpenAI APIキーを作成し、Notemdの設定に`OpenAI`プロバイダープロファイルを追加します。意図的にOpenAI対応のゲートウェイを指定していない限り、デフォルトのBase URLのままにしておきます。モデルフィールドは一般的な作業では`gpt-4o`のままにしてもよく、またはアカウントで呼び出せる別のOpenAIモデルIDに置き換えても構いません。
+**OpenAI** を選び、API key と公式 URL `https://api.openai.com/v1` を設定します。アカウントで使える chat completions 対応モデルが必要です。別 API 専用モデルは一覧に出ても互換にはなりません。
 
-コスト管理のためにタスク別のモデルを利用しましょう。研究、概念抽出、長文の再構成にはより高性能なモデルを使用し、翻訳、リンク提案、短い要約にはより安価または高速なモデルを利用します。
+ゲートウェイには対応プリセットを使い、適切なヘッダーと URL を適用します。Azure は **Azure OpenAI** で deployment と API version を個別設定します。
 
 ## エンドポイントと認証
 
-| フィールド | 現在のプリセット |
-|-------|----------------|
-| 転送 | `openai-compatible` |
-| APIキー | 必要です |
-| ベース URL | `https://api.openai.com/v1` |
-| デフォルトモデル | `gpt-4o` |
-| 温度 | `0.5` |
-| 接続テスト | `/models`、次に`/chat/completions` |
+| 項目 | プリセット値 |
+| ------- | -------------- |
+| 通信プロトコル | `openai-compatible` |
+| API key | 必須 |
+| 基本 URL | `https://api.openai.com/v1` |
+| 既定モデル | `gpt-4o` |
+| Temperature | `0.5` |
+| 接続テスト | `models-then-chat` |
 
-Notemdは、`chat/completions`や`models`を追加する前に、OpenAI互換のベースURLsを正規化します。Base URLには末尾の`/chat/completions`を含めないでください。そうしないとパスが重複してしまいます。
+既知の基本 URL を正規化して一覧／チャット経路を組み立てます。デバッグではプリセット URL から始め、解決後の経路を確認します。推測でパスを付け足さないでください。
 
-## モデル検出
+## モデルの発見
 
-OpenAIは、汎用的なOpenAI互換のモデル検出パスを使用しています。設定UIではまず`/v1/models`に問い合わせ、その後軽量なチャットリクエストを使って選択されたモデルを検証します。検出に失敗してもチャットが正常に動作する場合は、ご自身のキーにモデル一覧の権限があるか、またはゲートウェイがモデル一覧をブロックしていないかを確認してください。
+**Fetch models** は設定エンドポイントを問い合わせます。**接続をテスト** は一覧取得だけで成功し得るため、続けて正確なモデルでノートを処理します。
 
-推論モデルはプロトコルのエッジケースとして扱われます。Notemdはシステム側のプロンプト内容とユーザー側のプロンプト内容を統合し、別途の`system`ロールを拒否するOpenAI推論IDを生成します。また、プロバイダ定義がそれをサポートしている場合にのみ`reasoningEffort`が公開されます。
+Reasoning、thinking、sampling、出力 token はプリセットとモデル別規則に依存します。一覧にあることは全パラメーターの受理を保証しません。
 
 ## トラブルシューティング
 
-- `401` または `403`: キー、プロジェクトへのアクセス権、請求状況、および選択したモデルがそのキーで有効になっているかを確認します。
-- `404`でのチャット内容：Base URLは通常間違っているか、既に`/chat/completions`が含まれています。
-- ドキュメントにはモデルが記載されているのにセレクターには表示されません。model-listアクセスとchatアクセスは別々の障害ポイントとなっているため、プロバイダープロファイル内で正確なモデルIDを手動でテストしてください。
-- 推論モデルがメッセージを拒否しています：OpenAIの推論処理パスで対応されているモデルIDを使用するか、推論機能のないチャットモデルに切り替えてください。
+- `401`／`403`：キー、プロジェクト権限、モデル利用権、アカウントを確認。
+- `404`：URL、モデル ID、選択 API の対応を確認。
+- 一覧だけ成功：実際のチャットエラーとモデル／設定を見る。
+- 長い出力の失敗：上限、入力サイズ、応答を調べる。短い接続テストだけでは再現できない場合があります。
 
-## いつ使用するか
+## 選ぶ場面
 
-最も予測可能なデフォルトのホストパスが必要な場合、`/v1/models`による検出が重要な場合、またはワークフローがOpenAIの推論モデルのセマンティクスに依存している場合は、OpenAIを使用してください。ルーティングやプライバシー、コスト管理が直接のOpenAI APIの動作よりも重要な場合は、ゲートウェイやローカルプロバイダを利用することを推奨します。
+実装された Chat Completions プロトコルを受け付ける直接 OpenAI モデルに使います。代表ノートで評価してください。料金とモデル提供は Notemd の公開とは独立して変化します。
 
----
+## 次に読む
 
-## 次のステップ
-
-- [LLM プロバイダー](/docs/providers/overview) -- 完全な設定、タスクごとのモデル、および再試行ロジック
-- [トラブルシューティング](/docs/advanced/troubleshooting) – 401/403エラーおよびレート制限エラーの修正
+- [プロバイダー概要](./overview)：ルーティングとプロトコル。
+- [トラブルシューティング](../advanced/troubleshooting)：接続とタスクの切り分け。

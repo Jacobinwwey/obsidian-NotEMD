@@ -1,75 +1,61 @@
 ---
 id: china
-title: "Hiina tarjoajat"
-description: "Konfiguroi Qwen, DeepSeek, GLM jne."
+title: Kiinalaiset palveluntarjoajat
+description: 'Sovita tilialue, osoite ja malli- tai deployment-tunniste oikeaan profiiliin.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - Kiinalaiset palveluntarjoajat
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Hiina tarjoajat
+# Kiinalaiset palveluntarjoajat
 
-<TLDR>
-**Notemd toetaa Hiina-alueen ja Hiinasta pärit tarjoajia perustuen suuresti OpenAI-sovelluksiin sopiville päätöspisteille.** Nykyinen valikoima sisältää DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS ja Z AI. Arvona ovat alueellinen laajuus ja kostohallinta; riskinä ovat tarjoajan omat mallin nimetysviisit ja kontoinnin rajoitteet.
+<TLDR>Valitse tilin ja käyttöönoton profiili. Yhteinen OpenAI-yhteensopiva protokolla ei tee alueista, poluista, malleista tai oikeuksista vaihtokelpoisia. Testaa pieni tehtävä.</TLDR>
 
-Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
-</TLDR>
+## Valmistelu
 
-## Asetukset
+Hanki tili ja avain, valitse profiili ja varmista alue/mallioikeudet. Oletukset eivät takaa nykyistä saatavuutta. Testaa sekä yhteys että muistiinpano.
 
-Luo tarjoajakonto, luo API-avain, valitse sitten sopiva Notemd-tarjoajapredefiniointi sijaan yleistä OpenAI-profiilia. Predefiniointi sisältää vaihtoehtoisen Base URL-, mallin, API-testimallin, mallien löytämisen toiminnan sekä kaikki tarjoajalle specificoidut UI-alueet.
+## Osoite ja tunnistautuminen
 
-Käytä tällä tilanteella aktiivisesti tehtäökohdan mukaista mallivalintaa. Esimerkiksi säilytä DeepSeek tai GLM logiikan raskaisille työprosessille, käytä Qwen tai Moonshot laajempilla hiina-kielillä tehtävillä ja suuntaa ohjelmistointitehtävät Qwen Code-ihin, jos se konto tarjoaa ohjelmistajamalleja.
+| Profiili | Alkumalli | Perusosoite |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-## Päätöspiste ja tunnistus
+Korvaa Doubao-esimerkki oikealla Ark-endpoint-ID:llä tai tuetulla mallilla. GLM ja Z AI ovat eri alueprofiileja. Toisen alueen tai tilaustyypin avain ei välttämättä toimi. Noudata tiliohjeita, älä vain fyysistä sijaintia.
 
-| Tarjoaja | Vaihtoehtoinen malli | Base URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (Päätöspisteiden ID on vaativaa) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+## Mallit
 
-**Huomio:** Doubao vaatii Ark-päätöspisteiden ID:ä (muoto: `ep-xxxxxxxx-xxxx-xxxx`) sijaan standardista mallin nimeä.
+Käytä listoja, kun sallittu. Huawei Cloud MaaS vaatii käyttöönoton tuntemusta; muut profiilit käyttävät tuettua OpenAI-yhteensopivaa löytämistä. Listaoikeuden puute ei aina estä generointia tarkalla tunnisteella. DeepSeek voi läpäistä yhteystestin listalla; useat alueprofiilit generoivat lyhyesti. Oikea tehtävä on silti testattava.
 
-Enimmäistä näistä tarjoajista käytetään yhteistä OpenAI-sovelluksiin sopivaa käyttöympäristöä, mutta heidän kontoinnin ja mallien merkityksensä erottuvat. Säilytä predefiniointille specificoitu Base URL, illessä olet varmistanut konton toisen päätöspisteen.
+## Ongelmat
 
-## Mallien löytö
+- Avain hyväksytään, generointi ei: mallioikeudet, käyttöönotto ja alue.
+- Ark-tunniste hylätään: vaaditaanko endpoint- vai malli-ID?
+- Päättely katkeaa: budjetti ja mallikohtainen thinking.
+- Verkko: tarkista osoite Obsidianista ja lue siirtovirhe.
 
-DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan ja SiliconFlow käyttävät OpenAI-sovelluksiin sopivaa mallien löytämistä, jos tarjoaja toetaa listausfunktiona. Huawei Cloud MaaS käyttää `huaweicloud-modelarts-models`-mallia, koska ModelArts-julkaisun meta-tietot eivät ole identtisi yleisen `/v1/models`-listan omien.
+## Milloin käyttää
 
-Älä käsittele mallien löytämisen epäonnistumista tõendina siitä, että chat on mahdoton. Monet tarjoajat mahdollistavat chatin, rajoittamalla mallilistan perusteet. Tällöin säilytä profiilissa selkeä mallin ID ja vahvista yhteyden testin avulla.
+Kun tilioikeudet, saatavuus ja tietoehdot sopivat. Maantiede ei todista kielilaatua tai edullisuutta. Vertaa samalla esimerkillä ja kirjaa asetukset.
 
-## Virheiden ratkaiseminen
+## Seuraavaksi
 
-- Autentointi on edunsaanut, mutta chat ei toimi: mallin nimi voi olla konton oikeuksien tai alueen ulkopuolella.
-- Doubao epäonnistuu normaalisella mallin nimen kanssa: käytä Ark-päätöspisteiden ID:tä mallin välilehdessä, jos sinun julkaissesi vaatii sitä.
-- Logiikan vastaukset on lühentetyt: tarkista tarjoajalle specificoitu maksimipalkintotokenin määrä sekä Notemd-mallitietoiset maksimipalkintotokenin asetukset.
-- Alueelliset verkonyhteydet ovat erilaisia: käytä tarjoajan Hiina-alueen päätöspisteä, kun avarakappalelaitteesi on Hiinas; käytä internaatioaalista päätöspisteä vain siis, kun konto ja verkon path ovat mõlemat validit.
-
-## Kun käyttää
-
-Käytä China-palveluntajia, kun piirkollinen viivästyminen, maksu-/tilillistä pääsy, kiinalankielisen laadun tai hinta ovat keskeisimmät rajoitteet. Ehdotetaan suoraa OpenAI-, Anthropic-, Google-tai paikallisia palveluntajia, kun tarvitset yksinkertainempaa protokollirajoitusta tai parempaa eri palveluntajien välistä vianohjelmistaa.
-
----
-
-## Järguvät toimet
-
-- [LLM Tukijat](/docs/providers/overview) -- Täysin konfigurointi, tehtävänkohdalliset mallit ja uudellepyyntologiikka
-- [Vianohjastus](/docs/advanced/troubleshooting) -- Korjaa piirkollisen yhteyden ja autentointivianon
+- [Tarjoajat](./overview).
+- [Asetukset](../getting-started/configuration).
+- [Vianmääritys](../advanced/troubleshooting).

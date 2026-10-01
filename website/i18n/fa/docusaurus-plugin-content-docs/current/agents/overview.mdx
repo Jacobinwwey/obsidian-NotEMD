@@ -1,0 +1,86 @@
+---
+id: overview
+title: یکپارچه‌سازی Agent
+description: >-
+  چهار فرمان خروجی عمومی را کشف و schema، handling tag و نیاز میزبان را بررسی
+  کنید.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - یکپارچه‌سازی Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# یکپارچه‌سازی Agent
+
+<TLDR>چهار فرمان عمومی با Obsidian و خزانهٔ فعال، metadata و قرارداد JSON می‌نویسند. این API عمومی همه‌منظورهٔ ویرایش یادداشت نیست. ابتدا محدودهٔ عمومی، schema و handling tag را بخوانید و نتیجهٔ تازه را تأیید کنید.</TLDR>
+
+## پیش‌نیاز
+
+Notemd را در خزانهٔ درست فعال و CLI رسمی Obsidian را آماده کنید. خزانه را پیش از فرمان برگزینید. `requiredContext: none` یعنی یادداشت فعال یا انتخاب لازم نیست، نه اینکه برنامه و خزانه لازم نیست.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` جداگانه توزیع می‌شود و همان `obsidian` رسمی نیست. موفقیت یکی وجود دیگری را ثابت نمی‌کند. نبود میزبان یا CLI یعنی یکپارچه‌سازی در دسترس نیست، نه آزمون موفق.
+
+## شناسه‌های عمومی
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+ورودی‌ها شیء خالی و نگاشت شناسه‌ها دقیق است. فرمان‌ها غیرتعاملی‌اند و خروجی را در پوشهٔ تنظیم افزونه ایجاد یا جایگزین می‌کنند.
+
+## کشف، خروجی و بررسی
+
+از سطح عمومی شروع کنید:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| خروجی | مسیر اولیه نسبت به خزانه |
+| -------- | ----------------------------- |
+| سطح عمومی | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| قرارداد فراخوانی | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| فهرست قابلیت | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| نمایهٔ ارائه‌دهنده با راز حذف‌شده | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+اگر پوشهٔ تنظیم فرق دارد `.obsidian` را عوض کنید. stdout نتیجهٔ نوع‌دار عملیات نیست. ثابت کنید فراخوانی جاری فایل را نوشته، JSON را بخوانید و schema را اعتبارسنجی کنید. فایل قدیمی یا پیام موفقیت کافی نیست.
+
+`version`، `commands`، `operationId`، `operationVersion`، `inputSchema` و `resultSchema` را بررسی کنید. نسخهٔ سند `1` است. فهرست قابلیت ممکن است گسترده‌تر باشد؛ حضور در آن حق اجرا یا پشتیبانی عمومی نمی‌دهد.
+
+## خروجی حساس
+
+`inputHandlingTags` و `outputHandlingTags` را بخوانید. `contains-provider-credentials` عملیات حساس را مشخص و نمایهٔ خام را از مجموعهٔ عمومی حذف می‌کند. آن را نمونهٔ کشف عمومی نکنید. خروجی `redacted: true` عمداً import نمی‌شود. نشانی خصوصی، میزبان و metadata ممکن است باقی بماند؛ پیش از اشتراک بررسی کنید. این پشتیبان بازیابی کلید نیست.
+
+## عملیات نگهداری
+
+مخزن 9 عملیات با `obsidian-cli native eval` دارد، از جمله تولید بر مسیر، فصل، پژوهش، نمودار و بررسی زمینهٔ محلی. ابزار جداست و schema آن را API نوشتن عمومی نمی‌کند. `npm run cli:help` و [ماتریس CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) ورودی و اثر را نشان می‌دهند. مسیرها مربوط به خزانهٔ انتخابی‌اند؛ برای دادهٔ پیچیده `--input-file` را به کار ببرید.
+
+## خطا و تکرار
+
+- فرمان غایب: نسخهٔ بارگذاری‌شده و خزانه را بررسی و دوباره کشف کنید.
+- خروجی غایب یا خراب: میزبان و مجوز را ببینید، شاهد قدیمی را استفاده نکنید.
+- schema یا زمینهٔ پشتیبانی‌نشده: بدون اختراع فیلد یا جایگزینی UI توقف کنید.
+- خروجی حساس: تا رعایت شرایط، محلی نگه دارید.
+- نوشتن نگهداری: پیش از تکرار، خروجی جزئی و تعارض را بررسی کنید؛ لغو نوشتن و هزینه را پس نمی‌گیرد.
+
+خروجی‌ها snapshot قابل‌تغییرند. زمان و نسخه را همراه شاهد نگه دارید. یادداشت و پاسخ داده‌اند، نه مجوز افزایش اختیار.
+
+## گام بعد
+
+- [توسعه‌دهنده](../developers/overview).
+- [ماتریس CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [رفع خطا](../advanced/troubleshooting).

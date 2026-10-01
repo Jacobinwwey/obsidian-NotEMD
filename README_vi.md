@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Tiện ích Notemd cho Obsidian
 
+> Notemd là tiện ích Obsidian theo giấy phép MIT để tạo Markdown có liên kết, ghi chú khái niệm, tóm tắt, bản dịch và sơ đồ. Tệp nằm trong kho; tác vụ đám mây gửi nội dung đến nhà cung cấp đã chọn, còn nghiên cứu web dùng mạng.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Bắt đầu tại đây
+
+| Người đọc | Lối vào | Mục tiêu |
+|---|---|---|
+| Người mới | [Bắt đầu nhanh](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/getting-started/quick-start) | Cấu hình nhà cung cấp và kiểm tra một ghi chú |
+| Người dùng | [Quy trình](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/features/workflows) | Kiểm soát thư mục, đầu ra và khôi phục |
+| Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
+| Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
+
+**Phiên bản:** 1.9.8
+
+- **Hủy và khôi phục:** trạng thái hủy có hiệu lực xuyên suốt lập lịch và thử lại, chặn ghi muộn của nghiên cứu và dịch. Đầu ra hoàn thành được giữ lại, xung đột khôi phục được báo rõ.
+- **Lịch sử và xuất định dạng gốc:** giữ nội dung tìm kiếm và tiêu điểm bàn phím. Sửa đường phân cách ô gộp PowerPoint cùng dây nối/nhãn CircuitikZ. Truy vấn cục bộ hàng loạt dùng ảnh chụp dữ liệu nhất quán.
+- **Phát hành và tài liệu:** kiểm tra nguồn gốc mã nguồn sạch và tệp tải xuống; có lối vào theo đối tượng và bản dịch được viết trực tiếp.
+
+36 cấu hình nhà cung cấp và 33 loại sơ đồ có thể thực thi đã tồn tại từ 1.9.7. [Hướng dẫn nâng cấp](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/releases/1.9.8) · [Kiểm tra bản phát hành công khai](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Mũi tên Drawnix giữa các nhánh vẫn có tọa độ tĩnh sau khi sắp xếp lại. Mermaid/SVG trong PPTX có thể dùng ảnh thay thế. Hủy không hoàn tác thay đổi đã lưu và không bảo đảm dừng tạo nội dung hay tính phí từ xa. Thiết bị di động thật và Obsidian 0.15.0 chưa được xác minh.
 
 Đọc tài liệu bằng nhiều ngôn ngữ hơn tại: [Trung tâm ngôn ngữ](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- Tăng cường cơ sở tri thức đa ngôn ngữ bằng AI
-==================================================
-```
-
-Một cách dễ dàng để xây dựng cơ sở tri thức của riêng bạn.
-
-Notemd nâng cấp quy trình làm việc trong Obsidian bằng cách tích hợp với nhiều Mô hình Ngôn ngữ Lớn, LLM, để xử lý ghi chú đa ngôn ngữ, tự động tạo wiki-link cho các khái niệm chính, tạo concept note tương ứng, thực hiện nghiên cứu web và giúp bạn xây dựng knowledge graph mạnh mẽ cùng nhiều khả năng khác.
-
 Nếu bạn yêu thích sử dụng Notemd, hãy cân nhắc [⭐ tặng một Sao trên GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) hoặc [☕️ mua cho tôi một ly cà phê](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Mục lục
 
@@ -50,13 +50,26 @@ Nếu bạn yêu thích sử dụng Notemd, hãy cân nhắc [⭐ tặng một S
 
 ## Bắt đầu nhanh
 
-1. **Cài đặt và bật**: lấy tiện ích từ Obsidian Marketplace.
-2. **Cấu hình LLM**: vào `Settings -> Notemd`, chọn nhà cung cấp LLM bạn muốn dùng, như OpenAI hoặc nhà cung cấp cục bộ như Ollama, rồi nhập API key hoặc URL.
-3. **Mở sidebar**: nhấp vào biểu tượng cây đũa thần Notemd trên ribbon bên trái để mở sidebar.
-4. **Xử lý một ghi chú**: mở bất kỳ ghi chú nào rồi nhấp **"Process File (Add Links)"** trong sidebar để tự động thêm `[[wiki-links]]` vào các khái niệm chính.
-5. **Chạy một quick workflow**: dùng nút mặc định **"One-Click Extract"** để nối chuỗi xử lý, tạo nội dung hàng loạt và dọn Mermaid chỉ từ một điểm vào.
+1. Cài và bật **Notemd** qua **Cài đặt → Tiện ích cộng đồng → Duyệt**.
+2. Nhập đúng điểm cuối, thông tin xác thực và mô hình. Kiểm tra kết nối rồi thử tạo nội dung thật; lấy được danh sách mô hình không chứng minh có quyền trò chuyện.
+3. Tạo thư mục trống `trial-concepts` và chọn làm thư mục ghi chú khái niệm; đường dẫn ban đầu trống. Tạo `Notemd trial.md` với đoạn thử có thể gửi đến nhà cung cấp.
+4. Chạy **Process File (Add Links)**. Kiểm tra `Notemd trial_processed.md` cạnh nguồn được giữ lại, các liên kết và ghi chú khái niệm.
+5. Mở lại ghi chú nguồn thử nghiệm rồi chạy **One-Click Extract** với thư mục đó: thêm liên kết, tạo nội dung từ tiêu đề các ghi chú đủ điều kiện, sửa Mermaid trong thư mục complete. Ghi chú đủ điều kiện đã tồn tại cũng có thể được xử lý.
 
-Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tính năng như nghiên cứu web, dịch thuật và tạo nội dung.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Nghiên cứu web và tạo sơ đồ là thao tác riêng. Sau khi hủy, đợi các tác vụ đang chạy kết thúc rồi kiểm tra đầu ra hoàn thành và tệp khôi phục trước khi chạy lại.
+
+<details>
+<summary>Ví dụ giao diện</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Hỗ trợ ngôn ngữ
 
@@ -89,9 +102,9 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 - **Gia cố chuỗi long request ổn định cho OpenAI-Compatible**: trong stable mode, các lời gọi OpenAI-compatible hiện dùng thứ tự 3 bước rõ ràng cho mỗi attempt: direct streaming transport chính, sau đó direct non-stream transport, rồi đến `requestUrl` fallback, và vẫn có thể nâng lên streamed parsing nếu cần. Cách này giảm false negative khi nhà cung cấp hoàn tất buffered response nhưng đường ống streaming không ổn định.
 - **Fallback streaming nhận biết giao thức trên toàn bộ LLM API**: các fallback attempt chạy lâu giờ chuyển sang streamed parsing có nhận biết giao thức trên mọi đường LLM tích hợp sẵn, không chỉ các endpoint OpenAI-compatible. Notemd hiện xử lý OpenAI/Azure-style SSE, Anthropic Messages streaming, phản hồi Google Gemini SSE và Ollama NDJSON trên cả `http/https` desktop lẫn `fetch` non-desktop, còn các entrypoint direct OpenAI-style khác cũng tái sử dụng cùng shared fallback path này.
 - **Preset sẵn sàng cho các nhà cung cấp Trung Quốc**: preset tích hợp hiện bao phủ `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` và `SiliconFlow`, ngoài các nhà cung cấp toàn cầu và cục bộ có sẵn.
-- **Xử lý hàng loạt đáng tin cậy**: cải thiện logic xử lý đồng thời bằng **các lệnh gọi API giãn cách** để tránh lỗi rate-limiting và đảm bảo hiệu năng ổn định khi chạy batch job lớn. Cách triển khai mới đảm bảo các tác vụ được khởi tạo theo các khoảng thời gian khác nhau thay vì đồng loạt.
-- **Báo cáo tiến độ chính xác**: đã sửa lỗi khiến progress bar có thể bị kẹt, bảo đảm UI luôn phản ánh đúng trạng thái thực của tác vụ.
-- **Xử lý batch song song vững chắc hơn**: đã giải quyết lỗi khiến các thao tác batch song song dừng sớm, giúp mọi file được xử lý đáng tin cậy và hiệu quả.
+- **Xử lý hàng loạt đáng tin cậy**: Các lệnh gọi API giãn cách giúp giảm đỉnh tải yêu cầu. Hạn ngạch và giới hạn tốc độ của nhà cung cấp vẫn áp dụng.
+- **Báo cáo tiến độ chính xác**: Tiến độ phân biệt tệp hoàn tất, thất bại và bị hủy. Kết thúc lượt chạy không có nghĩa là mọi tệp đều thành công.
+- **Xử lý batch song song vững chắc hơn**: Tác vụ đang chạy kết thúc trước khi tổng hợp. Hủy sẽ dừng công việc tiếp theo nhưng không hoàn tác thay đổi đã lưu; cả thư mục không phải một giao dịch duy nhất.
 - **Độ chính xác của progress bar**: đã sửa lỗi khiến progress bar của lệnh "Create Wiki-Link & Generate Note" bị dừng ở 95%, và giờ sẽ hiển thị đúng 100% khi hoàn tất.
 - **Gỡ lỗi API nâng cao**: "API Error Debugging Mode" hiện thu thập full response body từ nhà cung cấp LLM và các dịch vụ tìm kiếm như Tavily hoặc DuckDuckGo, đồng thời ghi lại transport timeline cho từng attempt với request URL đã được làm sạch, thời lượng, response headers, partial response body, nội dung stream đã parse một phần và dấu vết ngăn xếp để hỗ trợ tốt hơn cho việc khắc phục sự cố trên các đường OpenAI-compatible, Anthropic, Google, Azure OpenAI và Ollama.
 - **Bảng Developer Mode**: settings hiện có một bảng chẩn đoán dành riêng cho developer, chỉ hiển thị khi bật "Developer mode". Bảng này hỗ trợ chọn diagnostic call path và chạy lặp stability probe cho chế độ đã chọn.
@@ -105,7 +118,7 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 - **Tạo concept note, tùy chọn và có thể cấu hình**: tự động tạo các ghi chú mới cho những khái niệm được phát hiện trong thư mục vault đã chỉ định.
 - **Đường dẫn đầu ra có thể cấu hình**: thiết lập các đường dẫn tương đối riêng biệt trong vault để lưu file đã xử lý và concept note mới được tạo.
 - **Tên file đầu ra có thể cấu hình cho Add Links**: bạn có thể tùy chọn **ghi đè file gốc** hoặc dùng suffix hay replacement string tùy chỉnh thay cho `_processed.md` mặc định khi xử lý file để thêm liên kết.
-- **Duy trì tính toàn vẹn liên kết**: hỗ trợ cơ bản cho việc cập nhật liên kết khi ghi chú được đổi hoặc xóa khỏi vault.
+- **Duy trì tính toàn vẹn liên kết**: Việc cập nhật liên kết khi đổi tên phụ thuộc vào Obsidian và thiết lập của ứng dụng. Xóa ghi chú có thể để lại liên kết chưa giải quyết; cần kiểm tra các ghi chú trùng tên.
 - **Trích xuất khái niệm thuần túy**: trích xuất khái niệm và tạo concept note tương ứng mà *không* sửa tài liệu nguồn. Đây là cách hay để xây dựng cơ sở tri thức từ các tài liệu sẵn có mà không thay đổi chúng. Tính năng này có các tùy chọn có thể cấu hình cho concept note tối giản và backlink.
 
 ### Dịch thuật
@@ -115,10 +128,10 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
   - **Hỗ trợ file lớn**: file lớn được tự động chia thành nhiều phần nhỏ hơn theo tham số `Chunk word count` trước khi gửi tới LLM. Sau đó các đoạn đã dịch được ghép lại mượt mà thành một tài liệu duy nhất.
   - Hỗ trợ dịch giữa nhiều ngôn ngữ.
   - Có thể cấu hình ngôn ngữ đích trong settings hoặc trong UI.
-  - Tự động mở nội dung đã dịch ở panel bên phải nội dung gốc để đọc và so sánh thuận tiện hơn.
+  - Mở bản dịch đã lưu trong không gian làm việc Obsidian theo bố cục khả dụng.
 - **Dịch hàng loạt**:
-  - Dịch tất cả file trong thư mục đã chọn.
-  - Hỗ trợ xử lý song song khi bật "Enable Batch Parallelism".
+  - Mặc định dịch các tệp hợp lệ nằm trực tiếp trong thư mục đã chọn, không gồm thư mục con. Lựa chọn tệp nâng cao có thể thay đổi phạm vi; tệp đích hiện có có thể bị ghi đè.
+  - Dịch sử dụng trực tiếp `batchConcurrency` (mặc định 1), không phụ thuộc `enableBatchParallelism`.
   - Dùng custom prompt cho dịch thuật nếu bạn đã cấu hình.
   - Thêm mục "Batch translate this folder" vào menu chuột phải trong file explorer.
 - **Tắt dịch tự động**: khi tùy chọn này được bật, các tác vụ không phải Translate sẽ không còn ép đầu ra sang một ngôn ngữ cụ thể nữa và sẽ giữ nguyên ngữ cảnh ngôn ngữ nguồn. Tác vụ "Translate" rõ ràng vẫn dịch theo cấu hình đã thiết lập.
@@ -134,7 +147,7 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 - **Tạo nội dung từ tiêu đề**:
   - Dùng tiêu đề ghi chú để tạo nội dung ban đầu qua LLM, thay thế nội dung đang có.
   - **Tùy chọn nghiên cứu**: cấu hình có thực hiện web research bằng nhà cung cấp đã chọn để cung cấp ngữ cảnh cho việc tạo nội dung hay không.
-- **Tạo nội dung hàng loạt từ tiêu đề**: tạo nội dung cho mọi ghi chú trong một thư mục được chọn dựa trên tiêu đề của chúng, đồng thời tôn trọng thiết lập nghiên cứu tùy chọn. Các file xử lý thành công được chuyển vào **subfolder "complete" có thể cấu hình**, ví dụ `[foldername]_complete` hoặc tên tùy chỉnh, để tránh xử lý lại.
+- **Tạo nội dung hàng loạt từ tiêu đề**: Tạo và thay thế nội dung các tệp `.md` hợp lệ theo thiết lập nghiên cứu. Loại trừ `_processed.md` và toàn bộ cây thư mục complete được chỉ định. Sau khi tạo nội dung mới thử chuyển tệp vào thư mục complete. Đích đã tồn tại ngăn việc chuyển, không ngăn nội dung đã tạo và lưu; số tệp được tạo và được chuyển được tính riêng.
 - **Ghép với Mermaid auto-fix**: khi Mermaid auto-fix được bật, các luồng liên quan đến Mermaid sẽ tự động sửa file tạo ra hoặc thư mục đầu ra sau khi xử lý. Điều này bao phủ Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid và Translate.
 
 ### Tính năng tiện ích
@@ -289,8 +302,8 @@ Truy cập settings của tiện ích qua:
 
 #### Đầu ra ghi chú khái niệm
 - **Customize Concept Note Path**:
-  - **Tắt (mặc định)**: việc tự động tạo ghi chú cho `[[linked concepts]]` bị tắt.
-  - **Bật**: cho phép bạn chỉ định một thư mục nơi các concept note mới sẽ được tạo.
+  - **Tắt**: Không tự động tạo ghi chú cho khái niệm được liên kết.
+  - **Bật mặc định**: Đường dẫn ban đầu để trống. Trước khi tạo ghi chú khái niệm, hãy đặt đường dẫn tương đối hợp lệ trong kho.
 - **Concept Note Folder Path**: chỉ hiển thị khi bật tùy chọn trên. Nhập *đường dẫn tương đối* trong vault, ví dụ `Concepts` hoặc `Generated/Topics`, nơi concept note mới sẽ được lưu. Thư mục sẽ được tạo nếu chưa tồn tại. **Bắt buộc phải điền nếu đã bật tùy chỉnh.** **Không dùng đường dẫn tuyệt đối hoặc ký tự không hợp lệ.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -337,8 +350,8 @@ Truy cập settings của tiện ích qua:
 
 #### Sửa Mermaid hàng loạt
 - **Enable Mermaid Error Detection**:
-  - **Off (Default)**: bỏ qua bước phát hiện lỗi sau khi xử lý.
-  - **On**: quét file đã xử lý để tìm lỗi cú pháp Mermaid còn sót lại và tạo báo cáo `mermaid_error_{foldername}.md`.
+  - **Tắt**: Bỏ qua phát hiện lỗi sau xử lý.
+  - **Bật mặc định**: Tìm lỗi Mermaid còn lại và tạo `mermaid_error_{foldername}.md`.
 - **Move files with Mermaid errors to specified folder**:
   - **Off**: file có lỗi giữ nguyên tại chỗ.
   - **On**: di chuyển mọi file vẫn còn Mermaid syntax error sau lần sửa sang một thư mục riêng để review thủ công.
@@ -354,7 +367,7 @@ Truy cập settings của tiện ích qua:
 - **API Call Interval (ms)**: độ trễ tối thiểu tính bằng mili giây *trước và sau* mỗi cuộc gọi LLM API riêng lẻ. Rất quan trọng đối với API có hạn mức thấp hoặc để tránh lỗi 429. Đặt 0 nếu không muốn thêm độ trễ nhân tạo. Mặc định: 500 ms.
 - **Chunk Word Count**: số từ tối đa cho mỗi chunk gửi tới LLM. Ảnh hưởng tới số lượng API call đối với file lớn. Mặc định: 3000.
 - **Enable Duplicate Detection**: bật hoặc tắt việc kiểm tra cơ bản các từ trùng lặp trong nội dung đã xử lý, kết quả hiện trong console. Mặc định: bật.
-- **Max Tokens**: số token tối đa mà LLM nên tạo ra cho mỗi response chunk. Ảnh hưởng đến chi phí và mức độ chi tiết. Mặc định: 4096.
+- **Max Tokens**: số token tối đa mà LLM nên tạo ra cho mỗi response chunk. Ảnh hưởng đến chi phí và mức độ chi tiết. Mặc định: 8192. Giới hạn đầu ra riêng của nhà cung cấp có thể ghi đè giá trị này; cũng có giá trị mặc định theo mô hình.
 <img width="795" height="274" alt="Tham số xử lý   Cài đặt ngôn ngữ" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Dịch thuật
@@ -382,7 +395,7 @@ Truy cập settings của tiện ích qua:
   - **Change Prompt Word**: cho phép bạn thay đổi prompt word cho một tác vụ cụ thể.
   - **Custom Prompt Word**: nhập prompt word tùy chỉnh cho tác vụ đó.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Tắt (mặc định)**: các file được tạo thành công được chuyển đến một subfolder tên `[OriginalFolderName]_complete` nằm tương đối so với thư mục cha của thư mục gốc, hoặc `Vault_complete` nếu thư mục gốc là thư mục root.
+  - **Tắt (mặc định)**: Đích là thư mục cùng cấp `[foldername]_complete`, hoặc `Vault_complete` tại gốc kho. Bật tùy chọn để đặt tên riêng.
   - **Bật**: cho phép bạn chỉ định tên tùy chỉnh cho subfolder nơi các file hoàn thành được chuyển vào.
 - **Custom Output Folder Name**: chỉ hiển thị khi bật tùy chọn trên. Nhập tên mong muốn cho subfolder, ví dụ `Generated Content` hoặc `_complete`. Không cho phép ký tự không hợp lệ. Nếu để trống, sẽ dùng `_complete` làm mặc định. Thư mục này được tạo tương đối với thư mục cha của thư mục gốc.
 
@@ -487,11 +500,11 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
    - Chạy lệnh `Notemd: Translate Note/Selection` qua bảng lệnh hoặc nút trong sidebar.
    - Một modal sẽ hiện ra để bạn xác nhận hoặc thay đổi **Target Language**, mặc định lấy từ setting đã khai báo trong phần Cấu hình.
    - Tiện ích dùng **LLM Provider** đã cấu hình, theo Multi-Model settings, để thực hiện việc dịch.
-   - Nội dung được dịch sẽ được lưu vào **Translation Save Path** đã cấu hình, với suffix phù hợp, rồi mở trong **một pane mới ở bên phải** nội dung gốc để tiện so sánh.
+   - Lưu bản dịch với đường dẫn và hậu tố đã cấu hình, sau đó mở tệp đã lưu trong không gian làm việc Obsidian.
    - Bạn có thể hủy tác vụ này qua nút trong sidebar hoặc nút cancel của modal.
 3. **Dịch hàng loạt**:
    - Chạy lệnh `Notemd: Batch Translate Folder` từ bảng lệnh và chọn một thư mục, hoặc nhấp chuột phải vào một thư mục trong file explorer rồi chọn "Batch translate this folder".
-   - Tiện ích sẽ dịch tất cả Markdown file trong thư mục đã chọn.
+   - Mặc định dịch các tệp hợp lệ nằm trực tiếp trong thư mục đã chọn, không gồm thư mục con. Lựa chọn tệp nâng cao có thể thay đổi phạm vi; tệp đích hiện có có thể bị ghi đè.
    - Các file đã dịch được lưu vào translation path đã cấu hình nhưng không tự động mở ra.
    - Tiến trình này có thể bị hủy qua progress modal.
 
@@ -518,7 +531,7 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
    - Chạy lệnh `Notemd: Batch Generate Content from Titles` qua bảng lệnh hoặc nút trong sidebar.
    - Chọn thư mục chứa các ghi chú mà bạn muốn xử lý.
    - Tiện ích sẽ lặp qua từng file `.md` trong thư mục, loại trừ `_processed.md` file và các file trong thư mục "complete" được chỉ định, tạo nội dung dựa trên tiêu đề rồi thay thế nội dung hiện có. Các file được xử lý ở nền mà không mở trong editor.
-   - Các file được xử lý thành công sẽ được chuyển sang thư mục "complete" đã cấu hình.
+   - Sau khi tạo nội dung mới thử chuyển tệp vào thư mục complete. Đích đã tồn tại ngăn việc chuyển, không ngăn nội dung đã tạo và lưu; số tệp được tạo và được chuyển được tính riêng.
    - Lệnh này tôn trọng setting **"Enable Research in 'Generate from Title'"** cho từng ghi chú được xử lý.
    - Bạn có thể hủy tác vụ này qua nút trong sidebar hoặc nút cancel trên modal.
    - Tiến độ và kết quả, như số file được sửa và các lỗi, được hiển thị trong sidebar hoặc modal log.
@@ -570,6 +583,8 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
     - Bạn cũng có thể cấu hình để di chuyển những file có vấn đề này sang một thư mục riêng để review.
 
 ## Nhà cung cấp LLM được hỗ trợ
+
+Bảng trình bày một số ví dụ. Xem [hướng dẫn 36 nhà cung cấp](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/providers/overview) để biết các cấu hình sẵn và yêu cầu.
 
 | Provider           | Type    | API Key Required       | Notes                                                                 |
 |--------------------|---------|------------------------|-----------------------------------------------------------------------|
@@ -639,7 +654,7 @@ Notemd chạy cục bộ bên trong Obsidian, nhưng một số tính năng sẽ
 ### Các vấn đề thường gặp
 - **Tiện ích không tải**: hãy chắc chắn `manifest.json`, `main.js` và `styles.css` nằm đúng thư mục, tức `<Vault>/.obsidian/plugins/notemd/`, rồi khởi động lại Obsidian. Kiểm tra Developer Console, `Ctrl+Shift+I` hoặc `Cmd+Option+I`, để xem có lỗi nào lúc khởi động hay không.
 - **Lỗi xử lý / API error**:
-  1. **Kiểm tra định dạng file**: bảo đảm file bạn đang cố xử lý hoặc kiểm tra có đuôi `.md` hoặc `.txt`. Hiện tại Notemd chỉ hỗ trợ các định dạng dựa trên văn bản này.
+  1. **Kiểm tra định dạng**: Định dạng mặc định tùy tác vụ (`.md` hoặc `.md`/`.txt`). Chế độ nhà phát triển với đầu vào mở rộng cho phép văn bản khác và PDF ở một số tác vụ giữ nguyên nguồn, như dịch và trích xuất khái niệm. Thêm liên kết vẫn chỉ nhận `.md`/`.txt`.
   2. Dùng lệnh hoặc nút "Test LLM Connection" để xác minh settings cho nhà cung cấp đang hoạt động.
   3. Kiểm tra lại API Key, Base URL, Model Name và API Version, đối với Azure. Bảo đảm API key đúng và có đủ credits hoặc quyền.
   4. Bảo đảm máy chủ LLM cục bộ, LMStudio hoặc Ollama, đang chạy và Base URL là chính xác, ví dụ `http://localhost:1234/v1` cho LMStudio.
@@ -700,7 +715,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.7 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.8 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 

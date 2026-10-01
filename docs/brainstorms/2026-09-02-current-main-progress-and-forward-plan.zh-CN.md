@@ -64,7 +64,7 @@ Linux／Windows 验证和 lint 约束已建立，远端验收由链接的执行�
 | CLI operation 抽取与 registry 加固 | registry／host 抽取和有界生命周期修复已交付 | 29 个 operation 不等于 29 个 public-safe API；变更契约升级仍需具体调用方与契约。 |
 | 图表渲染路线图 | 核心已交付；保持内联的测量完成 | 桌面预算通过，物理移动设备／最旧 host 未验证；新增引擎和打包隔离需实测理由。 |
 | Vault 历史、设置导航、批处理文件夹 | 有限范围及操作可靠性已交付 | history 与 artifact 写入各有责任方；artifact 重叠串行化限定于单个 Vault，不是跨进程／崩溃 ACID。 |
-| 图表预览/历史自适应 | modal 架构已交付 | focus-trapped 内部 drawer 是新的交互系统变更，不是未修复 bug。 |
+| 图表预览/历史自适应 | 预览内抽屉与独立 modal 已交付 | 此前“仅 modal”分类错误。1.9.8 候选修复已复现的键盘边界与异步搜索焦点问题，新鲜宿主验收在 V5 跟踪。 |
 | Mermaid 规范化合并 | Phase 0-3 已交付 | 删除兼容导出前先盘点调用方；unknown family 继续采用 parser-backed 保守准入。 |
 | 图表能力目录与向前架构 | runtime 基础及逐 target consumer 评估已交付 | diagrams.net 通过；Drawnix 节点往返通过，但跨枝箭头不附着；逐项限制支持声明。 |
 | 参考扩展 | 已完成 | 33 个可执行行、有界 payload、确定性 adapter、preview/gallery/docs 门禁全部通过。 |

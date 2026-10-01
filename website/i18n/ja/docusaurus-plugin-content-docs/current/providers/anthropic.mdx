@@ -1,16 +1,13 @@
 ---
 id: anthropic
 title: Anthropic
-description: Anthropic Claudeを設定する
+description: ネイティブ Anthropic Messages API を使う Claude を設定します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [anthropic, claude, provider, configuration]
-concepts: [Anthropic, Claude, API Configuration]
-citations:
-  - title: Anthropic API
-    url: https://docs.anthropic.com
-  - title: Claude
-    url: https://www.anthropic.com/claude
+keywords:
+  - Anthropic
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,50 +15,42 @@ import TLDR from '@site/src/components/TLDR';
 # Anthropic プロバイダー
 
 <TLDR>
-**AnthropicはOpenAI互換のトランスポートではなく、ネイティブなMessages APIトランスポートを使用しています。** 現在のプリセットは`claude-3-5-sonnet-20240620`、`https://api.anthropic.com`、`temperature: 0.5`をデフォルトとしています。デバッグ時には別個のプロトコルとして扱ってください。
-
-これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
+ネイティブ Messages API には Anthropic プリセットを使います。OpenAI-compatible ゲートウェイの Claude にはそのゲートウェイを選びます。履歴上の既定モデルが退役している場合は変更が必要です。
 </TLDR>
 
-## セットアップ
+## 導入
 
-Anthropic APIキーを作成し、`Anthropic`プロバイダープロファイルを追加します。専用のゲートウェイプロファイルを経由していない限り、Base URLはネイティブエンドポイントのままにします。モデルフィールドには使用したいClaudeモデルIDを選択してください。デフォルト値をそのままにすると、既存の製品ベースラインが安定した状態のままになります。
-
-Anthropicは高品質な要約作成、研究の統合、概念抽出に適した候補です。より安価なサービスと組み合わせる場合は、その出力品質がメリットとなるタスクにのみ使用してください。
+**Anthropic** と API key を設定し、同じプロトコルの独自配信でない限りネイティブ URL を維持します。現在利用できる Claude ID を指定し、接続テストと対象タスクの試行を行います。
 
 ## エンドポイントと認証
 
-| フィールド | 現在のプリセット |
-|-------|----------------|
-| 転送 | `anthropic` |
-| APIキー | 必要です |
-| ベース URL | `https://api.anthropic.com` |
-| デフォルトモデル | `claude-3-5-sonnet-20240620` |
-| 温度 | `0.5` |
-| 接続テスト | チャットのみ |
+| 項目 | プリセット値 |
+| ------- | -------------- |
+| 通信プロトコル | `anthropic` |
+| API key | 必須 |
+| 基本 URL | `https://api.anthropic.com` |
+| 既定モデル | `claude-3-5-sonnet-20240620` |
+| Temperature | `0.5` |
+| 接続テスト | `chat-only` |
 
-実行時には、`x-api-key`および`anthropic-version: 2023-06-01`を使用して`/v1/messages`にリクエストが送信されます。このプリセットではOpenAIスタイルの`/v1/chat/completions`エンドポイントを設定しないでください。代わりにOpenAI対応のゲートウェイプリセットを使用してください。
+`/v1/messages` とネイティブのキー／API version ヘッダーを使います。OpenAI 形式のチャットパスを入れないでください。モデル既定値はリポジトリの設定記録で、現在の提供保証ではありません。
 
-## モデル検出
+## モデルの発見
 
-Anthropicはプロバイダーレジストリで`anthropic-models`のディスカバリーモードを使用しています。キーまたはアカウントでモデルを一覧表示できない場合は、プロファイルに既知のモデルIDを記載し、接続テストを通じて検証してください。
-
-このトランスポートはOpenAI互換のプロバイダーとは交換できません。OpenRouter、LiteLLM、または別のゲートウェイを経由してルーティングされたClaudeモデルは、ネイティブなAnthropicプロファイルではなく、そのゲートウェイプロファイルに属します。
+利用可能なら Anthropic のネイティブ一覧経路を使用します。一覧が制限される場合は既知のモデルを入力し、チャット接続テストを行います。長文や構造化出力は別途確認します。
 
 ## トラブルシューティング
 
-- `401` または `403`: キーのスコープ、ワークスペースへのアクセス権、請求状況、およびそのキーが期待される Anthropic ワークスペースに属しているかを確認します。
-- `404`: ベース URL が間違っているか、選択したモデルIDがアカウントで利用できません。
-- GatewayスタイルのClaudeモデルIDは使用できません。ネイティブなAnthropicはネイティブなモデル名を要求するため、プロファイルを対応するGatewayプロバイダーに移動してください。
-- 長いリクエストは後半で失敗する：タスクあたりのモデル出力サイズを小さくするか、既知の出力トークン上限が大きいモデルを使用してください。
+- `401`／`403`：キー、workspace／project、課金、モデル権限を確認。
+- `404`：URL と現在のモデル提供を確認。
+- ゲートウェイ ID の失敗：対応プリセットとその ID に変更。
+- 長い応答の失敗：再試行を増やす前に上限と応答エラーを調べる。
 
-## いつ使用するか
+## 選ぶ場面
 
-合成の品質や研究ノート、構造化された文章作成が単なるコストよりも重要な場合にはAnthropicを使用してください。汎用的なOpenAI互換の代替手段として使ってはいけません。別途トランスポートを行うことが重要であり、プロトコルを混在させると診断が困難になります。
+エンドポイントが Anthropic Messages を提供する場合に選びます。プロバイダーを品質順位とみなさず、自分の資料で評価します。タスク別設定で適した用途だけに限定できます。
 
----
+## 次に読む
 
-## 次のステップ
-
-- [LLM プロバイダー](/docs/providers/overview) -- 完全な設定、タスクごとのモデル、および再試行ロジック
-- [トラブルシューティング](/docs/advanced/troubleshooting) – 401/403エラーや接続エラーの修正
+- [プロバイダー概要](./overview)：ルーティングとプロトコル。
+- [トラブルシューティング](../advanced/troubleshooting)：接続とタスクの切り分け。

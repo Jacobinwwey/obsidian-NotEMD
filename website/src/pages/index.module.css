@@ -4,12 +4,12 @@
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 260px);
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: 3rem;
   align-items: center;
   max-width: 1120px;
   margin: 0 auto;
-  padding: 5rem 1.5rem 3rem;
+  padding: 4rem 1.5rem 3rem;
 }
 
 .heroCopy {
@@ -47,18 +47,70 @@
   margin-top: 1.75rem;
 }
 
-.logo {
-  width: min(100%, 240px);
-  justify-self: center;
+.example {
+  min-width: 0;
+  margin: 0;
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.example figcaption {
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.exampleLabel {
+  display: block;
+  margin: 1rem 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.example pre {
+  margin: 0;
+  padding: 0.85rem;
+  border: 0;
+  border-radius: 4px;
+  background: var(--ifm-background-color);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.example .exampleOutput {
+  border-inline-start: 3px solid var(--ifm-color-primary);
+}
+
+:global([dir='rtl']) .example code {
+  font-family: var(--ifm-font-family-base);
+  font-size: 1rem;
+}
+
+.example p {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.audienceSection {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3.5rem;
+}
+
+.audienceSection > h2 {
+  margin: 0 0 1.25rem;
+  font-size: 1.5rem;
 }
 
 .sectionGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 1.5rem 4rem;
+  margin: 0;
 }
 
 .factBand {
@@ -109,25 +161,69 @@
 }
 
 .sectionCard {
+  position: relative;
   display: block;
   min-height: 160px;
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 8px;
-  padding: 1.25rem;
+  padding: 1.25rem 1.25rem 2.75rem;
   color: inherit;
   text-decoration: none;
   background: var(--ifm-card-background-color);
+  transition: border-color 150ms ease, transform 150ms ease;
 }
 
 .sectionCard:hover {
   border-color: var(--ifm-color-primary);
   color: inherit;
   text-decoration: none;
+  transform: translateY(-2px);
 }
 
-.sectionCard h2 {
+.sectionCard h3 {
   margin: 0 0 0.75rem;
   font-size: 1.25rem;
+}
+
+.cardArrow {
+  position: absolute;
+  inset-inline-end: 1.25rem;
+  bottom: 0.75rem;
+  color: var(--ifm-color-primary);
+}
+
+:global([dir='rtl']) .cardArrow {
+  transform: scaleX(-1);
+}
+
+.main a:focus-visible {
+  outline: 3px solid var(--ifm-color-primary);
+  outline-offset: 4px;
+}
+
+.releaseSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem;
+}
+
+.releaseSection h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.6rem;
+}
+
+.releaseSection p:last-child {
+  margin: 0;
+  max-width: 680px;
+  line-height: 1.65;
+}
+
+.releaseSection > a {
+  flex-shrink: 0;
 }
 
 .sectionCard p {
@@ -202,16 +298,14 @@
     font-size: 3rem;
   }
 
-  .logo {
-    justify-self: start;
-    width: 160px;
-  }
-
   .sectionGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .factGrid,
+  .factGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .retrievalSection {
     grid-template-columns: 1fr;
   }
@@ -227,12 +321,33 @@
   }
 
   .factBandInner,
-  .sectionGrid,
+  .audienceSection,
+  .releaseSection,
   .retrievalSection {
     padding-inline: 1rem;
   }
 
   .factGrid {
+    grid-template-columns: 1fr;
     gap: 0.85rem;
+  }
+
+  .sectionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .releaseSection {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionCard {
+    transition: none;
+  }
+
+  .sectionCard:hover {
+    transform: none;
   }
 }

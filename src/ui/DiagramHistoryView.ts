@@ -42,6 +42,7 @@ class DiagramHistoryView implements DiagramHistoryViewController {
     private requestId = 0;
     private root: HTMLElement | null = null;
     private searchInput: HTMLInputElement | null = null;
+    private searchFocusOrigin: Element | null = null;
 
     constructor(private readonly options: DiagramHistoryViewOptions) {}
 
@@ -55,33 +56,51 @@ class DiagramHistoryView implements DiagramHistoryViewController {
         const requestId = ++this.requestId;
         const root = this.root;
         const copy = getI18nStrings({ uiLocale: this.options.uiLocale }).diagramHistory;
-        root.empty();
-        const loading = root.createDiv({ cls: 'notemd-diagram-history-loading', attr: { 'data-notemd-history-loading': 'true', role: 'status', 'aria-live': 'polite' } });
+        root.setAttribute('aria-busy', 'true');
+        // Keep the current controls alive while reading. Clearing the root on
+        // each keystroke discards the focused input before the next key arrives.
+        const loading = root.querySelector<HTMLElement>('[data-notemd-history-loading]')
+            ?? root.createDiv({ cls: 'notemd-diagram-history-loading', attr: { 'data-notemd-history-loading': 'true', role: 'status', 'aria-live': 'polite' } });
         loading.setText(copy.loading);
         try {
             const page = await this.options.store.loadPage({ ...this.query });
             if (requestId !== this.requestId || this.root !== root) return;
+            root.setAttribute('aria-busy', 'false');
             this.renderPage(page);
         } catch (error) {
             if (requestId !== this.requestId || this.root !== root) return;
-            root.empty();
+            root.setAttribute('aria-busy', 'false');
             this.renderError(error);
         }
     }
 
-    focusSearch(): void { this.searchInput?.focus(); }
+    focusSearch(): void {
+        if (this.searchInput) this.searchInput.focus();
+        else this.searchFocusOrigin = this.root?.ownerDocument.activeElement ?? null;
+    }
 
     destroy(): void {
         this.requestId++;
         this.root?.empty();
         this.root = null;
         this.searchInput = null;
+        this.searchFocusOrigin = null;
     }
 
     private renderPage(page: { items: DiagramHistoryEntry[]; page: number; totalPages: number; totalItems: number }): void {
         if (!this.root) return;
         const root = this.root;
         const copy = getI18nStrings({ uiLocale: this.options.uiLocale }).diagramHistory;
+        const active = root.ownerDocument.activeElement;
+        const focusInsideView = active !== null && root.contains(active);
+        const restoreSearch = focusInsideView
+            || (this.searchFocusOrigin !== null && active === this.searchFocusOrigin);
+        const selection = this.searchInput && active === this.searchInput
+            ? { start: this.searchInput.selectionStart, end: this.searchInput.selectionEnd }
+            : null;
+        const focusedFilterLabel = focusInsideView && active.hasAttribute('data-notemd-history-filter') ? active.getAttribute('aria-label') : null;
+        const restoreFilterToggle = focusInsideView && active.hasAttribute('data-notemd-history-filters-toggle');
+        this.searchFocusOrigin = null;
         root.empty();
         root.setAttribute('data-notemd-history-view', 'true');
         const toolbar = root.createDiv({ cls: 'notemd-diagram-history-header notemd-diagram-history-toolbar', attr: { role: 'search', 'aria-label': copy.title } });
@@ -116,6 +135,18 @@ class DiagramHistoryView implements DiagramHistoryViewController {
         const next = pager.createEl('button', { text: copy.next });
         next.disabled = page.page >= page.totalPages;
         next.onclick = () => { this.query.page = page.page + 1; void this.refresh(); };
+        if (focusedFilterLabel) {
+            const filter = Array.from(root.querySelectorAll<HTMLElement>('[data-notemd-history-filter]'))
+                .find(control => control.getAttribute('aria-label') === focusedFilterLabel);
+            (filter ?? filterToggle).focus();
+        } else if (restoreFilterToggle) {
+            filterToggle.focus();
+        } else if (restoreSearch) {
+            this.searchInput.focus();
+            if (selection && selection.start !== null && selection.end !== null) {
+                this.searchInput.setSelectionRange(selection.start, selection.end);
+            }
+        }
     }
 
     private renderFilters(toolbar: HTMLElement, copy: ReturnType<typeof getI18nStrings>['diagramHistory']): void {
@@ -198,10 +229,17 @@ class DiagramHistoryView implements DiagramHistoryViewController {
 
     private renderError(error: unknown): void {
         if (!this.root) return;
+        const active = this.root.ownerDocument.activeElement;
+        const restoreFocus = (active !== null && this.root.contains(active))
+            || (this.searchFocusOrigin !== null && active === this.searchFocusOrigin);
+        this.searchInput = null;
+        this.searchFocusOrigin = null;
+        this.root.empty();
         const copy = getI18nStrings({ uiLocale: this.options.uiLocale }).diagramHistory;
         const panel = this.root.createDiv({ cls: 'notemd-diagram-history-error' });
         panel.createEl('strong', { text: error instanceof Error ? error.message : String(error) });
         const retry = panel.createEl('button', { text: copy.retry, attr: { 'data-notemd-history-retry': 'true' } });
         retry.onclick = () => { void this.refresh(); };
+        if (restoreFocus) retry.focus();
     }
 }

@@ -1,189 +1,138 @@
 ---
 id: overview
-title: LLM 제공업체들
-description: 작업별 모델 선택 기능을 사용하여 클라우드, 게이트웨이, 로컬 형태의 36개 LLM 프로바이더를 구성합니다.
+title: LLM provider
+description: 다섯 프로토콜 계열의 36개 프로필을 설정하고 작업마다 실제 모델을 확인합니다.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
-concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: Anthropic API
-    url: https://docs.anthropic.com
+keywords:
+  - LLM provider
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# LLM 제공업체들
+# LLM provider
 
-<TLDR>
-**Notemd은 4가지 전송 유형에 걸쳐 36개의 LLM 제공업체를 지원합니다.** 모든 API 호출은 SDK 없이 원시 HTTP 형태로 이루어지며, 자동 재시도, 전송 대체 기능, 그리고 5분간의 응답 캐싱이 적용됩니다. 작업별 모델 선택 기능을 통해 개념 추출에는 저렴한 모델을, 연구에는 강력한 모델을 사용할 수 있습니다. 로컬 제공업체(Ollama, LMStudio)의 경우 API 키가 필요하지 않습니다.
-</TLDR>
+<TLDR>36개 프로필은 OpenAI-compatible, Anthropic, Google, Azure OpenAI, Ollama의 다섯 계열을 사용합니다. endpoint의 프로토콜에 맞춰 인증과 접근 가능한 모델을 설정하세요. 초기 값은 수정 가능한 출발점이며 현재 모델 가용성 보장이 아닙니다.</TLDR>
 
-이것은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
+## Provider 분류
 
-## 공급업체 카테고리
+다음 값은 등록된 프로필에서 가져옵니다. URL의 scheme과 경로를 유지하고 placeholder는 실제 deployment로 바꾸세요. 이용 권한, 가격과 모델 퇴역은 provider가 결정합니다.
 
-### 클라우드 제공업체
+### 클라우드
 
-| 제공업체 | 기본 베이스 URL | 기본 모델 | 온도 |
-|----------|-----------------|---------------|-------------|
-| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
-| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
-| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
-| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
-| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
-| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
-| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
-| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
-| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+| Provider | 초기 모델 | 초기 URL |
+| ---------- | -------------- | ----------------- |
+| **DeepSeek** | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| **Qwen** | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Qwen Code** | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Doubao** | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| **Moonshot** | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| **Xiaomi MiMo** | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| **Z AI** | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| **Baidu Qianfan** | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| **SiliconFlow** | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| **Huawei Cloud MaaS** | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
+| **OpenAI** | `gpt-4o` | `https://api.openai.com/v1` |
+| **Anthropic** | `claude-3-5-sonnet-20240620` | `https://api.anthropic.com` |
+| **Google** | `gemini-2.0-flash-exp` | `https://generativelanguage.googleapis.com/v1` |
+| **Mistral** | `mistral-large-latest` | `https://api.mistral.ai/v1` |
+| **Azure OpenAI** | `gpt-4o` | Azure 리소스 endpoint를 설정하세요 |
+| **xAI** | `grok-4` | `https://api.x.ai/v1` |
+| **Groq** | `moonshotai/kimi-k2-instruct-0905` | `https://api.groq.com/openai/v1` |
+| **Together** | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | `https://api.together.xyz/v1` |
+| **Fireworks** | `accounts/fireworks/models/kimi-k2p5` | `https://api.fireworks.ai/inference/v1` |
+| **Nebius** | `openai/gpt-oss-120b` | `https://api.studio.nebius.com/v1` |
+| **Cerebras** | `gpt-oss-120b` | `https://api.cerebras.ai/v1` |
 
-### 게이트웨이 / 프록시 제공업체
+### 게이트웨이·프록시
 
-| 제공업체 | 기본 베이스 URL | 기본 모델 | 메모들 |
-|----------|-----------------|---------------|-------|
-| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | `HTTP-Referer` + `X-Title` 헤더를 추가합니다 |
-| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | `X-GitHub-Api-Version` 헤더를 추가합니다. |
-| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | `APP-Code` 헤더를 추가합니다. |
-| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
-| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
-| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
-| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
-| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
-| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | 선택적 API 키 |
-| **새로운 API** | `localhost:3000/v1` | `gpt-4.1` | 선택적 API 키 |
-| **OpenAI Compatible** | (사용자가 설정함) | `your-model-id` | 커스텀 엔드포인트 |
+| Provider | 초기 모델 | 초기 URL |
+| ---------- | -------------- | ----------------- |
+| **OpenRouter** | `anthropic/claude-3.7-sonnet` | `https://openrouter.ai/api/v1` |
+| **AIHubMix** | `gpt-4o-mini` | `https://aihubmix.com/v1` |
+| **GitHub Models** | `gpt-4o-mini` | `https://models.github.ai/inference` |
+| **PPIO** | `qwen/qwen3-32b` | `https://api.ppinfra.com/v3/openai` |
+| **New API** | `gpt-4.1` | `http://localhost:3000/v1` |
+| **LiteLLM** | `your-proxy-model` | `http://localhost:4000/v1` |
+| **Hugging Face** | `openai/gpt-oss-120b` | `https://router.huggingface.co/v1` |
+| **Vercel AI Gateway** | `anthropic/claude-sonnet-4.5` | `https://ai-gateway.vercel.sh/v1` |
+| **Requesty** | `anthropic/claude-3-7-sonnet-latest` | `https://router.requesty.ai/v1` |
+| **OpenAI Compatible** | `your-model-id` | `https://your-openai-compatible-endpoint/v1` |
 
-### 중국 공급업체들
+### 로컬
 
-| 제공업체 | 기본 베이스 URL | 기본 모델 | 메모들 |
-|----------|-----------------|---------------|-------|
-| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | 알리바바 다시스코프 |
-| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | 코딩 중심 |
-| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (엔드포인트 ID가 필요합니다.) | ByteDance Volcengine |
-| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | 킴이 |
-| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
-| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | 중국의 지푸 엔드포인트 |
-| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, 국제 엔드포인트 |
-| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
-| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
-| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | 모델 호스팅 플랫폼 |
-| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+| Provider | 초기 모델 | 초기 URL |
+| ---------- | -------------- | ----------------- |
+| **OVMS** | `openvino-model` | `http://localhost:8000/v3` |
+| **LMStudio** | `local-model` | `http://localhost:1234/v1` |
+| **Ollama** | `llama3` | `http://localhost:11434/api` |
 
-**Doubao에는 Ark 엔드포인트 ID가 필요합니다** (형식: `ep-xxxxxxxx-xxxx-xxxx`). 기본으로 사용되는 플레이스홀더는 반드시 교체해야 합니다.
+### 중국 provider
 
-### 로컬 프로바이더
+[지역 설정](./china)을 참고하세요. 분류는 지리적 접근성이나 중국어 품질 보장이 아닙니다. 계정 지역, endpoint와 모델 권한을 맞추세요.
 
-| 제공업체 | 기본 베이스 URL | 기본 모델 | 메모들 |
-|----------|-----------------|---------------|-------|
-| **Ollama** | `localhost:11434/api` | `llama3` | API 키가 없습니다. NDJSON 스트리밍. `/api/tags`을 통한 모델 발견 |
-| **LMStudio** | `localhost:1234/v1` | `local-model` | `"EMPTY"`을 베어러 토큰으로 전송합니다. OpenAI과 호환되는 디스커버리 기능입니다. |
-| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO 모델 서버 |
-| **Azure OpenAI** | (사용자가 설정함) | `gpt-4o` | URL의 배포 이름입니다. `api-key` 헤더 |
+## 작업별 모델
 
-## 작업별 모델 선택
+`useMultiModelSettings`를 켜면 provider와 모델 override를 나눌 수 있습니다. 끄면 `activeProvider`를 사용합니다. 빈 override는 provider 설정 모델을 사용하고 잘못 저장된 provider는 설정 로드 시 활성 provider로 조정합니다.
 
-Notemd은 각 작업에 대해 별도의 공급자와 모델을 지원합니다. `useMultiModelSettings: true`을 사용하여 활성화할 수 있습니다.
+| 작업 | Provider 설정 | 모델 override |
+| ------ | ------------------ | ---------------- |
+| 링크 | `addLinksProvider` | `addLinksModel` |
+| 제목 생성 | `generateTitleProvider` | `generateTitleModel` |
+| 연구 요약 | `researchProvider` | `researchModel` |
+| 번역 | `translateProvider` | `translateModel` |
+| 개념 추출 | `extractConceptsProvider` | `extractConceptsModel` |
+| Mermaid 요약 | `summarizeToMermaidProvider` | `summarizeToMermaidModel` |
+| 원문 추출 | `extractOriginalTextProvider` | `extractOriginalTextModel` |
 
-### 사용 가능한 작업들
+활성 provider와 저장된 작업별 초기 provider는 DeepSeek입니다. 개별 경로가 켜져 있으면 활성 provider만 바꿔도 대체되지 않습니다. 비공개 자료 전에 각각 확인하세요.
 
-| 작업 | 설정 키 | 기본 제공자 |
-|------|-------------|-----------------|
-| 링크 추가 (위키 링크 삽입) | `addLinksProvider` / `addLinksModel` | DeepSeek |
-| 조사 (웹 검색 + 요약) | `researchProvider` / `researchModel` | DeepSeek |
-| 제목에서 생성하기 | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
-| 번역 | `translateProvider` / `translateModel` | DeepSeek |
-| 다이어그램 생성 | `summarizeToMermaidProvider` / `Model` | DeepSeek |
-| 개념 추출 | `extractConceptsProvider` / `Model` | DeepSeek |
-| 원본 텍스트 추출 | `extractOriginalTextProvider` / `Model` | DeepSeek |
-
-### 해상도 순서
-
-1. `useMultiModelSettings`가 활성화된 경우 → 작업별 프로바이더와 모델을 사용합니다.
-2. 작업 모델 재정의가 비어 있으면 → 제공자의 기본 모델로 복귀
-3. 작업 제공자가 유효하지 않은 경우 → 전역 `activeProvider`으로 대체
-4. `useMultiModelSettings`가 꺼져 있으면 → 모든 작업이 전역 `activeProvider`을 사용합니다.
-
-### 권장 설정
-
-```
-# Researcher: power for research, cheap for everything else
-activeProvider: DeepSeek
-extractConceptsProvider: DeepSeek
-researchProvider: OpenAI        # GPT-4o for better research quality
-summarizeToMermaidProvider: DeepSeek
-
-# Privacy-first: local only
-activeProvider: Ollama
-addLinksProvider: Ollama
-extractConceptsProvider: Ollama
-
-# Budget bilingual
-activeProvider: DeepSeek
-translateProvider: Google      # Gemini Flash for translation
-researchProvider: SiliconFlow  # Cheaper China-based routing
-```
-
-## API 호출 아키텍처
+## 호출 구조
 
 ### 전송 계층
 
-1. **Obsidian `requestUrl`** — 기본 (내장형, 모든 플랫폼에서 작동)
-2. **데스크톱 HTTP** — Node.js `http`/`https` 모듈 (스트리밍 + 장시간 요청)
-3. **Web `fetch`** — Node.js 모듈이 사용 불가능할 때의 대체 방안
+Obsidian 요청과 프로토콜을 이해하는 fallback을 사용합니다. 데스크톱은 Node HTTP stream, 다른 환경은 fetch가 가능합니다. OpenAI-compatible gateway의 Claude는 gateway 프로필을 사용하며 Anthropic 네이티브 프로필과 다릅니다.
 
-이 플러그인은 일시적인 네트워크 오류가 발생할 때 자동으로 전송 방식 간에 전환합니다.
+### 재시도
 
-### 재시도 로직
+안정 요청 모드는 기본 꺼짐이며 적용되는 경우 재시도 3회, 간격 5초가 초기 설정입니다. 일시 오류는 공통 재시도/fallback을 사용할 수 있지만 인증·모델 오류는 수정해야 합니다. 원격 timeout, 모델 한계, quota로 긴 요청은 여전히 실패할 수 있습니다.
 
-- **일반 모드** (`enableStableApiCall: false`): 한 번의 시도만 진행됩니다. 일시적인 실패가 발생하면 자동으로 안정적인 재시도로 전환됩니다.
-- **안정적 재시도 모드** (`enableStableApiCall: true`): 5초 간격으로 최대 4회 시도(1회 기본 시도 + 3회 재시도).
-- **재시도를 유발하는 일시적 오류**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
-- **재시도 불가능**: HTTP 400, 401, 403, 404
+### 응답 캐시
 
-### 응답 캐싱
+제한된 메모리 캐시가 성공 응답을 재사용할 수 있습니다. endpoint·모델·생성 설정·prompt·본문이 요청 식별에 포함됩니다. 영구 저장이나 비용 계측이 아니며 재실행 시 유료 요청이 없음을 보장하지 않습니다.
 
-제공자 + 모델 + 온도 + 프롬프트 + 콘텐츠를 키로 하는 5분간 유지되는 인메모리 LRU 캐시입니다. 5분 이내에 동일한 요청이 다시 들어오면 캐시된 결과가 즉시 반환됩니다.
+### 추론 모델
 
-### 추론 모델 처리
+지원 프로필/모델 규칙에 따라 reasoning/thinking을 설정합니다. 다른 프로토콜의 파라미터를 복사하지 마세요. 채팅이 되더라도 특정 추론·샘플링·token 설정을 거부할 수 있습니다.
 
-`system` 롤을 지원하지 않는 모델들(DeepSeek R1, OpenAI o1/o3/o4/gpt-5)의 경우 시스템 프롬프트와 사용자 프롬프트가 자동으로 하나의 사용자 메시지로 결합됩니다.
+### Token 추정
 
-DeepSeek-specific: `thinkingEnabled`은 요청에 `{ thinking: { type: 'enabled' } }`을 추가합니다. `reasoningEffort`(낮음/중간/높음)는 `reasoning_effort`로 전달됩니다. 사고 모드가 켜져 있을 때 최대 출력 토큰 수가 8000 이상인지 확인합니다.
+텍스트 길이와 출력 제한은 provider의 정확한 token 사용량이 아닙니다. 실제 과금은 provider 기록으로 확인하세요. 범용 비용 추정은 제공하지 않습니다.
 
-### 토큰 추정
+## 모델 찾기
 
-`estimateTokens(text)`: `Math.ceil(text.length / 4)` — 토큰당 4자 규칙. LLM로 전송하기 전에 `maxResearchContentTokens`를 적용하기 위해 사용됨.
+지원 프로필은 **Fetch models**를 사용합니다. 일부는 모델/deployment를 직접 입력해야 합니다. 목록 권한과 생성 권한은 별도입니다. **연결 테스트**의 `models-then-chat`는 목록만으로 성공할 수 있고 `chat-only`는 짧은 생성을 합니다. 실제 작업으로 모델/형식을 검증하세요.
 
-비용 추적 기능이 구현되어 있지 않습니다.
+- Anthropic/Google은 네이티브 목록을 사용합니다.
+- Ollama는 받은 태그, LM Studio는 서버가 노출한 모델을 나열합니다.
+- Azure는 deployment와 API 버전이 필요합니다.
+- gateway는 특정 모델 생성이 가능해도 목록을 제한할 수 있습니다.
 
-## 모델 발견
+## 빠른 설정
 
-| 모드 | 제공업체 | 엔드포인트 |
-|------|-----------|----------|
-| `ollama-tags` | Ollama | `/api/tags` |
-| `google-models` | Google | 모델 목록 API |
-| `anthropic-models` | Anthropic | 모델 목록 API |
-| `openai-compatible-models` | DeepSeek, Qwen, Mistral 등. | `/v1/models` |
-| `openrouter-models` | OpenRouter | 모델 목록 API |
-| `github-models` | GitHub Models | 추론 API |
-| `none` | Azure OpenAI | 비활성화됨 (배포 이름 필요) |
+1. **Settings → Notemd**에서 프로필을 선택합니다.
+2. endpoint·인증·실제 모델/deployment를 입력합니다.
+3. 연결 시험 후 임시 노트를 처리합니다.
+4. 출력과 보고서를 확인한 뒤 배치/작업별 경로를 켭니다.
 
-## 빠른 시작
-
-1. **제공업체 선택** — DeepSeek (중국), OpenAI (국제), 또는 Ollama (지역/무료)
-2. **API 키를 입력하세요** — 설정 → Notemd → 공급자 → API 키
-3. **연결 테스트** — 테스트 버튼을 클릭하세요
-4. **선택 사항: 작업별 모델** — `useMultiModelSettings`을 활성화하고 개별적으로 설정합니다.
-
-Ollama의 경우: API 키는 필요하지 않습니다. `ollama serve`이 실행 중인지만 확인하면 됩니다.
-
----
+로컬은 모델과 서버부터 준비하세요. Ollama는 키가 필요 없고 LM Studio는 선택적 키, 초기 `EMPTY`를 사용합니다. 서버 인증이 필요하면 실제 token을 설정하세요. 웹 검색까지 오프라인이 되는 것은 아닙니다.
 
 ## 다음 단계
 
-- 📝 [Concept Notes](/docs/features/concept-notes) — 작업별 추출 모델을 사용함
-- 🎨 [Diagrams](/docs/features/diagrams) — 작업별 다이어그램 모델 사용
-- 🔍 [Research](/docs/features/research) — 연구용 모델을 사용함
-- ⚙️ [Configuration](/docs/getting-started/configuration) — 전체 설정 참조
+- [OpenAI](./openai), [Anthropic](./anthropic), [Google](./google), [중국 provider](./china), [로컬](./local).
+- [설정](../getting-started/configuration).
+- [문제 해결](../advanced/troubleshooting).

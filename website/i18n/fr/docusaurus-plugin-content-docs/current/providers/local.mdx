@@ -1,16 +1,15 @@
 ---
 id: local
 title: Modèles locaux
-description: Configurez Ollama et les LLM locaux
+description: >-
+  Configurez Ollama, LM Studio ou OVMS avec un serveur actif et des limites
+  réseau explicites.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Modèles locaux
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,46 +17,45 @@ import TLDR from '@site/src/components/TLDR';
 # Modèles locaux
 
 <TLDR>
-**Les fournisseurs locaux empêchent que le contenu des notes ne soit stocké sur les API hébergés.** Le chemin local actuel couvre Ollama avec le transport natif `ollama` et LMStudio via le transport compatible avec OpenAI. Aucune clé API n’est requise pour aucun de ces chemins, mais le serveur local et le modèle doivent déjà être en cours d’exécution.
-
-Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
+Un serveur local peut traiter le contenu sur votre appareil. Installez ou chargez d’abord le modèle et choisissez le protocole correspondant. Cela ne rend pas hors ligne la recherche Web, les adresses distantes, l’installation des dépendances ou les tâches routées vers le cloud.
 </TLDR>
 
-## Installation
+## Configuration
 
-Pour Ollama, installez Ollama, téléchargez le modèle que vous souhaitez, lancez le serveur, et ajoutez un profil de fournisseur `Ollama` dans Notemd. Pour LMStudio, chargez un modèle sur le serveur local de LM Studio et ajoutez un profil de fournisseur `LMStudio`.
+Pour [Ollama](https://ollama.com/), installez le serveur et téléchargez un modèle. Pour [LM Studio](https://lmstudio.ai/), chargez le modèle et lancez le serveur API. Préparez le déploiement OVMS avant son profil Notemd.
 
-Les modèles locaux sont des dépendances opérationnelles, et non simplement des paramètres. Notemd ne peut appeler que ce que le processus local expose, il faut donc vérifier le modèle local en dehors de Obsidian avant de déboguer le plugin.
+Choisissez le préréglage, le nom exact exposé, testez la connexion puis une note. Notemd n’installe pas les modèles et ne lance pas les serveurs.
 
-## Point de terminaison et authentification
+## Adresse et authentification
 
-| Fournisseur | Base URL | Modèle par défaut | Clé API | Notes |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Pas requis | NDJSON streaming ; découverte de modèles via `/api/tags` |
-| LMStudio | `localhost:1234/v1` | `local-model` | Pas requis | Envoie `"EMPTY"` en tant que token porteur ; compatible avec OpenAI |
+| Préréglage | URL par défaut | Modèle d’exemple | Protocole / authentification |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Ollama natif ; sans clé obligatoire |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI-compatible ; clé facultative, valeur `EMPTY` par défaut |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI-compatible ; configurer modèle et accès du déploiement |
 
-Ollama utilise le chemin natif `/chat` situé en dessous de son Base URL. LMStudio suit la route `chat/completions` compatible avec OpenAI et attend un modèle chargé sur le serveur local.
+`localhost` désigne l’appareil exécutant Obsidian. Sur un téléphone, cette adresse ne désigne pas votre ordinateur. Un endpoint LAN est un service réseau : utilisez sa vraie adresse et l’authentification adaptée, sans exposer de serveur ouvert à un réseau non fiable.
 
-## Découverte de modèles
+## Découverte
 
-Ollama utilise le mode de découverte `ollama-tags` et affiche les étiquettes téléchargées localement. LMStudio utilise la découverte de modèles compatible avec OpenAI lorsque son serveur expose `/v1/models`.
+Ollama liste ses tags via `/api/tags`, LM Studio peut exposer `/v1/models`, et OVMS a des règles liées au déploiement. Une liste ne garantit ni mémoire suffisante ni capacité de sortie structurée ; testez une requête réelle.
 
-Si la découverte ne renvoie rien, c’est généralement un problème d’état du serveur local : le modèle n’a pas été récupéré ni chargé, ou bien le serveur est lié à un hôte/port différent de celui indiqué dans le profil.
+## Dépannage
 
-## Résolution de problèmes
+- Connexion refusée : état du serveur, écoute et port.
+- Modèle absent : téléchargement/chargement, nom exact ou alias.
+- Authentification refusée : vrai jeton, sans supposer `EMPTY` accepté.
+- Lenteur/troncature : mémoire, contexte et limites ; une requête à la fois.
+- Format invalide : protocole, prompt et capacité du modèle avant réglage du lot.
 
-- Connexion refusée : lancez Ollama ou LM Studio et vérifiez le port configuré.
-- Modèle non trouvé : téléchargez la balise Ollama ou chargez le modèle LM Studio avant de tester.
-- Sortie lente : réduisez la taille du contexte, utilisez un modèle local plus petit, ou transférez les tâches gourmandes à un fournisseur hébergé.
-- Réponses vides ou mal formatées : assurez-vous que le profil du fournisseur sélectionné correspond au protocole du serveur local ; Ollama et LMStudio ne sont pas interchangeables.
+## Cas d’usage
 
-## Quand l'utiliser
+Choisissez le local si confidentialité, disponibilité et résultats mesurés conviennent. Préparez modèles et dépendances d’export avant déconnexion. Vérifiez chaque fournisseur par tâche : des extraits indexés localement peuvent être envoyés à un LLM cloud.
 
-Utilisez des fournisseurs locaux pour les coffres-forts privés, le travail hors ligne ou les tâches répétitives peu coûteuses. Ne supposez pas que le mode local soit automatiquement supérieur pour la synthèse de recherches ou le raisonnement prolongé ; la qualité du modèle et les limites matérielles constituent l’équilibre à trouver.
+Tavily et DuckDuckGo restent connectés ; les exports natifs peuvent exiger des outils séparés. Un modèle local ne garantit pas que toutes les fonctions soient hors ligne.
 
----
+## Pour continuer
 
-## Prochaines étapes
-
-- [LLM Fournisseurs](/docs/providers/overview) -- Configuration complète et configuration du modèle par tâche
-- [Dépannage](/docs/advanced/troubleshooting) -- Corriger les erreurs connection-refused lorsque le serveur local n’est pas en cours d’exécution
+- [Fournisseurs](./overview).
+- [Configuration](../getting-started/configuration).
+- [Dépannage](../advanced/troubleshooting).

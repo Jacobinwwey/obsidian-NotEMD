@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "İş Akışları"
-description: "Tek tıklamalı düğmelerle birden fazla görevi zincirleyin"
+title: İş akışları
+description: >-
+  Mevcut eylemleri geçerli kimlikler, açık klasör bağlamı ve öngörülebilir hata
+  politikasıyla birleştirin.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - İş akışları
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# İş Akışları
+# İş akışları
 
-<TLDR>
-**Notemd iş akışları, birden fazla görevi tek bir tek tıklamalı eyleme dönüştürür.** `add-links > extract-concepts > research > diagram` gibi dizileri basit bir DSL kullanarak tanımlayın. İş akışları, mevcut notta veya klasörde tüm zinciri çalıştıran kenar çubuğu düğmeleri olarak görünür. Önceden tanımlanmış iş akışlarıyla birlikte gelir; ayarlarda özelleştirilmiş olanlar oluşturulabilir. Her adım, kendi görev özelindeki model yapılandırmasını kullanır.
+<TLDR>İş akışı, yan panel eylemlerini sırayla yürütür. Bir eylem klasör seçimi veya etkin düzenleyici isteyebilir. Bu bir metin boru hattı değildir: her adım kendi girdisini, çıktısını ve yan etkilerini korur. Deneme notu ve ayrı klasörle başlayın.</TLDR>
 
-Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
-</TLDR>
+## Genel bakış
 
-## Genel Bakış
+Hazır **One-Click Extract**:
 
-Bir iş akışı, görevleri tek tek çalıştırmanın getirdiği zorlukları ortadan kaldırır. Bağlantı ekleme, kavramlar çıkarma, bilinmeyen terimler üzerine araştırma yapma ve bir diyagram oluşturma için dört kez sağ tıklamak yerine, tek bir kenar çubuğu düğmesine basarsınız ve tüm zincir çalıştırılır. Notemd sıralama, hata yayılımı ve ilerleme raporlamasını üstlenir.
-
-İş akışları, hafif bir DSL (alan özelinde dil) kullanılarak tanımlanır. Ayarlarda bulunurlar, Obsidian kenar çubuğunda tıklanabilir düğmeler olarak görünür ve ya mevcut nota ya da tüm bir klasöre uygulanabilir.
-
-## Nasıl Çalışır
-
-### İş Akışı Yürütme İş Akışı
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Ayarla** -- DSL dizgesi `>` (veya `>`) ile bölünerek sıralı bir görev tanımlayıcıları listesine dönüştürülür.
-2. **Çöz** -- Her tanımlayıcı, içsel bir komuta (add-links, extract-concepts, research, translate, diagram vb.) ile eşleştirilir.
-3. **Yürüt** -- Adımlar sırayla çalıştırılır. Her adım, yapılandırılmış görev özelindeki sağlayıcı ve modelini kullanır.
-4. **Hata yönetimi** -- Bir adım başarısız olursa, iş akışı hata politikanıza bağlı olarak ya durdurulur ya da bir sonraki adıma devam eder.
-5. **Bitti** -- Bir bildirim kutusu başarıyı raporlar veya başarısız olan adımları listeler.
+1. Etkin nota bağlantı ekler; klasör ayarlıysa kavramlar oluşturur.
+2. Kavram/seçili klasördeki uygun notları, mevcut notlar dahil, başlıklardan üretir.
+3. Bu üretimin complete klasöründeki Mermaid’i onarır.
 
-### DSL Formatı
+Varsayılan zincir web araştırması yapmaz. Başlık üretimi bunu ayrı ayarla ekleyebilir. [Toplu işleme](../advanced/batch-processing).
 
-İş akışları, `>` ile ayrılmış görev tanımlayıcılarının bir dizisi olarak tanımlanır:
+## Nasıl çalışır
 
+### Yürütme
+
+Adımlar sırayla çalışır; yan panel etkin adımı ve hataları gösterir. İptal sonraki adımları durdurur ve desteklenen isteklere ulaşır. Tamamlanan dosyalar kalır; tüm zinciri kapsayan işlem geri alma yoktur. İlk klasör tercihi kavram klasörüdür. Toplu üretim kaynak/complete klasörünü hatırlar, Mermaid complete’i kullanır. Diğer eylemler dosya, seçim ve etkileşim koşullarını korur.
+
+### DSL
+
+Her satırda adlandırılmış bir düğme kullanın. `::` adı eylemlerden, `>` eylem kimliklerini ayırır. Boş veya `#` ile başlayan satırlar yok sayılır; bilinmeyen kimlikler reddedilir.
+
+```text
+Çıkar ve çiz::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Mevcut görev tanımlayıcıları:**
+Oluşturucuyu kullanın veya DSL’yi düzenleyin. Kimlikler sabittir, etiketler arayüz dilini izler. Klasör varyantlarının ayrı kimlikleri vardır; rastgele metin değişimiyle türetmeyin.
 
-| Tanımlayıcı | Eylem |
-|------------|--------|
-| `process-current-add-links` | Aktif notaya wiki bağlantıları ekle |
-| `extract-concepts-current` | Aktif notadan kavramlar çıkar |
-| `research-and-summarize` | Seçilen metin veya not başlığı üzerine araştırma yap |
-| `process-current-translate` | Aktif notayı çevir |
-| `summarize-to-mermaid` | Aktif notadan bir diyagram oluştur |
-| `generate-from-title` | Not başlığından içerik üret |
-| `extract-original-text` | OCR / taramalı içerik için orijinal metni çıkar |
+| Kimlik | Eylem / koşul |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Etkin nota bağlantı ekleme |
+| `process-folder-add-links` | Seçili klasöre bağlantı ekleme |
+| `extract-concepts-current` | Etkin nottan kavram çıkarma |
+| `extract-concepts-folder` | Seçili klasörden kavram çıkarma |
+| `generate-from-title` | Etkin başlıktan içerik üretme |
+| `batch-generate-from-titles` | Uygun klasör notları için içerik üretme |
+| `research-and-summarize` | Açık Markdown düzenleyicisinde seçim/başlık araştırma |
+| `summarize-as-mermaid` | Desteklenen etkin girdiyi Mermaid olarak özetleme |
+| `generate-diagram` | Desteklenen girdiden diyagram üretme |
+| `preview-diagram` | Desteklenen kaynak veya diyagramı önizleme |
+| `translate-current-file` | Etkin desteklenen dosyayı çevirme |
+| `batch-translate-folder` | Seçili klasörü çevirme |
+| `extract-original-text` | İstenen özgün metin parçalarını çıkarma |
+| `batch-extract-original-text` | Uygun klasör dosyalarından parçalar |
+| `split-note-by-chapters` | Etkin notu bölümlere ayırma |
+| `batch-mermaid-fix` | Seçili klasörde Mermaid kod bloklarını onarma |
+| `fix-formula-current` | Etkin notta formül ayraçlarını normalleştirme |
+| `batch-fix-formula` | Klasörde formül ayraçlarını normalleştirme |
+| `check-duplicates-current` | Etkin notta yinelemeleri kontrol etme |
+| `check-remove-duplicate-concepts` | Kavram yinelemelerini etkileşimli inceleme ve kaldırma |
+| `test-llm-connection` | Ayarlı sağlayıcıyı test etme |
+| `probe-slide-export-env` | Yerel slayt dışa aktarma ortamını kontrol etme |
+| `export-slides` | Etkin dosyayı slaytlara aktarma |
 
-**Klasör düzeyindeki varyantlar**: tanımlayıcı adlardaki `current` yerine `folder` kullanılır.
+### Hazır veya özel zincir
 
-### Önceden tanımlanmış iş akışları ile özel iş akışları
+One-Click Extract önceden tanımlıdır. Diğer düğmelerin adını ve sırasını siz belirleyin. Yan panel araç ipucunu kontrol edin ve ayrıştırma hatalarını kullanımdan önce giderin.
 
-Notemd, yaygın desenler için hazır iş akışlarıyla birlikte gelir:
+## Ayarlar
 
-| İş Akışı | Zincir | Kullanım Senaryosu |
-|----------|-------|----------|
-| **Tek Tıkla Çıkarma** | bağlantı ekle > kavram çıkar > araştırma | Bir araştırma makalesini tek seferde işle |
-| **Tam İşlem Akışı** | add-links > extract-concept > research > diagram | Görselleştirme ile tam bilgi çıkarma |
-| **Çevir + Bağlantı** | translate > add-links | Kavramları hedef dilde çevirip bağlayın |
+| Ayar | Başlangıç | Etkisi |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | İlk bildirilen adım hatasında durma |
+| `useMultiModelSettings` | `false` | Görev rotaları açılana kadar etkin sağlayıcı |
+| `enableResearchInGenerateContent` | `false` | Açılana kadar başlık üretiminde araştırma yok |
 
-**Özel iş akışları** ayarlarda oluşturulur:
+`continue_on_error` hata sonrası adımları sürdürür. Yalnız kalan girdilerle çalışabilecek adımlar için kullanın. Devam etmek kısmi akışı başarılı yapmaz.
 
-1. **Ayarlar** --> **Notemd** --> **İş Akışları**'na gidin
-2. **"İş Akışı Ekle"** butonuna tıklayın
-3. DSL zincirini girin (örneğin, `process-current-add-links>extract-concepts-current`)
-4. Bir görünüm adı verin (örneğin, "Hızlı Bağlantı + Çıkarma")
-5. Yeni düğme hemen kenar çubuğunda belirir
+### Adıma göre modeller
 
-## Yapılandırma
-
-| Ayar | Varsayılan | Etki |
-|---------|---------|--------|
-| `workflows` | Önceden tanımlanmış set | İş akışı tanımları dizisi (ad + DSL) |
-| `workflowContinueOnError` | `true` | Mevcut adım başarısız olursa bir sonraki adıma geçin |
-| `workflowShowProgress` | `true` | Her adım tamamlandıktan sonra ilerleme bildirimi gösterin |
-
-### İş Akışlarındaki Görev Bazlı Modeller
-
-Bir iş akışındaki her adım, kendi görev bazlı model yapılandırmasını kullanır. DSL içinde doğrudan modeller belirtmenize gerek yoktur. Çözüm sırası şu şekildedir:
-
-1. `useMultiModelSettings` mevcutsa görev bazlı sağlayıcı/model kullanılır
-2. Aksi takdirde küresel `activeProvider` kullanılır
-
-Bu, `add-links`'ın DeepSeek üzerinde çalışırken `research`'ın GPT-4o üzerinde çalışabileceği anlamına gelir -- hepsi aynı iş akışı tıklaması içinde gerçekleşir.
+Model seçimi göreve aittir. Boş model alanı seçilen sağlayıcının modelini kullanır. Özel içerikten önce tüm rotaları kontrol edin.
 
 ## Örnek
 
-Sadece bir makine öğrenimi makalesinin PDF versiyonunu kasanıza içe aktardınız ve tam bilgi çıkarma istiyorsunuz:
-
-1. İçe aktarılan notu açın
-2. **"Tam İş Akışı"** kenar çubuğu düğmesine tıklayın
-3. Notemd şunları gerçekleştirir:
-   - **Adım 1**: Wiki bağlantıları ekle -- `[[attention mechanism]]`, `[[transformer]]` vb.
-   - **Adım 2**: Kavramlar çıkar -- kavramlarınızı kavram klasörünüzde oluşturur
-   - **Adım 3**: Araştırma -- anahtar terimler için web kaynaklarını özetler
-   - **Adım 4**: Diyagram -- makalenin yapısının Mermaid şeklinde bir zihin haritası oluşturur
-4. Yaklaşık 30 saniye sonra notunuzda bağlantılar bulunur, kavram notları oluşur, araştırma eklenir ve bir diyagram dosyası kaydedilir
-
-Hepsi tek bir tıklamayla.
+Boş `trial-concepts` ve deneme kaynağı kullanın. Kavramları ve bildirilen complete klasörünü inceleyin. Hedef belirsizse adımları önce ayrı çalıştırın. İnceleme sonrası kapsamı artırın.
 
 ## İpuçları
 
-- **Önceden tanımlanmış iş akışlarından başlayın** -- bunlar en yaygın desenleri kapsar. Farklı bir sıra gerektiğinde yalnızca özelleştirin.
-- **`workflowContinueOnError`'ı etkinleştirin** -- başarısız bir diyagram adımı tüm iş akışını durdurmamalıdır.
-- Toplu işleme için **Klasör İş Akışları**nı kullanın -- bir klasöre sağ tıklayın, bir iş akışı seçin ve her not işlenir.
-- İş akışlarınızı **açık bir şekilde adlandırın** -- kenar çubuğu alanı sınırlıdır. "Hızlı Çıkarma" veya "Çevir + Bağlantı" gibi kısa ve eylem odaklı isimler kullanın.
+- Hataları ve dosya kökenini izleyebilecek kadar kısa zincirler kurun.
+- Silme işlemleri etkileşimli onayı korur; gözetimsiz zincirlerde bunlardan kaçının.
+- İptal veya kurtarma çakışmasından sonra günlükleri ve dosyaları kontrol edin.
+- Tam model/klasörü deneyin; bağlantı testi uzun işlerin kotasını kanıtlamaz.
 
----
+## Sonraki adımlar
 
-## Sonraki Adımlar
-
-- [Araştırma](./research) -- İş akışlarına eklemeden önce araştırma adımının ne yaptığını anlayın
-- [Wiki-Bağlantıları](./wiki-links) -- Çoğu iş akışında kullanılan temel bağlantı özelliği
-- [Kavram Notları](./concept-notes) -- Bir iş akışı adımı olarak kavram çıkarma
-- [Toplu İşleme](/docs/advanced/batch-processing) -- Klasör iş akışları için eş zamanlılık ve ilerleme raporlama
+- [Kavramlar](./concept-notes).
+- [Toplu işleme](../advanced/batch-processing).
+- [Araştırma](./research).

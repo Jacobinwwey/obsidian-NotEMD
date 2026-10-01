@@ -1,181 +1,82 @@
 ---
 id: quick-start
-title: "Nopea käyttöohje"
-description: "Alkaa käyttämään Notemd 5 minuutissa"
+title: Pika-aloitus
+description: >-
+  Valmistele malli, tarkista yhden muistiinpanon tulos ja laajenna sitten
+  kansioihin.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Pika-aloitus
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Nopea käyttöohje
+# Pika-aloitus
 
-<TLDR>
-**Alkaa käyttämään Notemd 5 minuutissa.** Kolme vaiheetta: (1) Lisää LLM API-avain (tai käytä lokalaista Ollama), (2) Avoi noti ja käynnistä „Process file (add links)", (3) Tarkkaile yhden painutuksen kanssa toimintatietoisuudet vasempuussa sivulla. Tukee 30+ tarjoajaa. Koodin kirjoittaminen ei ole tarpeen. Toimii offline Ollama-käytön kanssa.
-</TLDR>
+<TLDR>Aloita Markdown-testimuistiinpanolla ja palveluntarjoajalla, jota saat käyttää. Tarkista tulostiedosto ennen koko kansion käsittelyä. Pilvitehtävät lähettävät sisältöä; paikallinen malli tarvitsee käynnissä olevan palvelimen ja valmistellun mallin.</TLDR>
 
-## Vaihe 1: Konfiguroi oma ensimmäinen LLM-tarjoaja (2 minuutta)
+## 1. Määritä malli
 
-### Valinta A: Pilvetarjoaja (OpenAI, Anthropic jne.)
+1. [Asenna ja ota käyttöön](./installation), avaa **Settings → Notemd**.
+2. Valitse profiili, osoite, vaaditut tunnistetiedot ja saatavilla oleva malli. **Fetch models** ei korvaa generointitestiä.
+3. Suorita **Test connection** ja korjaa tili-, malli- tai osoiteongelmat.
+4. Etsi **Concept note folder path** ja valitse erillinen kansio, esimerkiksi `concepts`. Alkuarvo on tyhjä; nimi on oma valintasi.
 
-1. Avoa **Settings** → **Notemd**
-2. Valitse **LLM-tarjoajan konfigurointi**-alalla drop-down-listasta tarjoaja
-3. Sisesta oma **API-avain**
-4. (Valinta) Paina **„Get Model List"** näyttääkseen saatavilla olevat mallit
-5. Valitse malli iga tehtytypin jaoks
+Nouda Ollama-malli ensin ja käytä tarkkaa nimeä; oletusosoite on `http://localhost:11434/api`. Käynnistä LM Studion palvelin ja valitse `LMStudio`. Katso [paikalliset mallit](../providers/local). Verkkotutkimus tarvitsee verkkoyhteyden myös paikallisella yhteenvetomallilla.
 
-**Suosituimmat valintat:**
-- **OpenAI**: `gpt-4o-mini` (nopea, halpa)
-- **Anthropic**: `claude-sonnet-4-6` (korkea laatu)
-- **DeepSeek**: `deepseek-chat` (erittäin halpa)
+## 2. Ensimmäinen tehtävä
 
-### Valinta B: Lokalinen Ollama (Ei API-avainia tarvita)
+Lisää tiedostoon `Notemd trial.md` lyhyt teksti, jonka saa lähettää palveluntarjoajalle:
 
-1. Asenna [Ollama](https://ollama.com/)
-2. Lae alla malli: `ollama pull llama3.1`
-3. Valitse Notemd-asetuksissa tarjoajana **"Ollama"**
-4. Mallin nimi: `llama3.1` (tai jokin muu laadittu malli)
-
-## Toinen vaihe: Yritä ensimmäistäsi tehtävää (1 minuuti)
-
-### Lisää Wikipedia-linkkejä tiedoon
-
-1. Avoa jokainen merkittävä sisältöllinen tiedosto
-2. Klikkaa oikealla painikella muokkikossa
-3. Valitse **"Tulkita tiedosto (lisää linkkejä)"**
-4. Oota muutama sekunti
-5. Pääkäsitteet ovat nyt `[[wiki-linked]]`!
-
-**Esimerkki:**
-
-**Ennen:**
-```
-Machine learning models use neural networks to process data.
+```text
+Koneoppiminen käyttää neuroverkkoja säännönmukaisuuksien oppimiseen.
 ```
 
-**Jälkeen:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
+Suorita **Process file (add links)** sivupaneelista tai paletista. Tavallisesti alkuperäinen säilyy ja viereen syntyy `Notemd trial_processed.md`. Avaa oikea tulos. Mahdollinen esimerkki:
 
-## Kolmas vaihe: Tutkita ominaisuuksia (2 minuuttia)
-
-### Eritä käsityksennotat
-
-1. Oikeasta painikosta → **"Eritä käsitykset nykyisestä tiedostosta"**
-2. Notemd luoo erilliset tiedostot jokaiseen käsitykseen
-3. Tarkista oma konfiguroitu käsityskanssi (ominaisuus: `concepts/`)
-4. Jokaisella käsityksennotalla on palautuslinkki alkuperäiseen tiedostoon
-
-### Tutkinta & yhteenveto
-
-1. Esitä tavoitteesi tiedonnotkussasi
-2. Oikea klikka → **"Tutkita ja yhteenvetoa tehdä"**
-3. Notemd käsittelee webissä hakua (Tavily tai DuckDuckGo)
-4. Yhteenveto lisätään sinun merkintösiin lähtökohtien kanssa
-
-### Yhden klikkinin työprosessit
-
-1. Tarkista **vasempi sivupalkki** työprosessin painikeiden kanssa
-2. Klikkaa **"One-Click Extract"** mistä tahansa merkintässä
-3. Se toimii näin: lisää linkkejä → erottaa konsepttejä → tutkita → luoda diagramma
-4. Kaikki yhdellä klikkaamisella!
-
-## Yleisimmät ensimmäiset tehtävät
-
-### Tehtävä 1: Tarkista paperi/artikkeli
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```markdown
+[[Koneoppiminen]] käyttää [[neuroverkkoja]] säännönmukaisuuksien oppimiseen.
 ```
 
-### Tehtävä 2: Kääntä notat
+Myös valittuun käsitekansioon voi syntyä muistiinpanoja. Tarkista tiedostot ja linkit; malli ei takaa kaikkien olennaisten käsitteiden löytämistä oikein.
 
+## 3. Muut toiminnot
+
+### Käsitteiden poiminta
+
+**Extract concepts (current file)** säilyttää lähteen ja edellyttää käsitekansiota. Uusissa erillisissä muistiinpanoissa on aluksi vain otsikko, ei paluulinkkejä. Ota ne käyttöön tarvittaessa. [Käsitemuistiinpanot](../features/concept-notes).
+
+### Tutkimus ja yhteenveto
+
+Valitse Markdown-editorissa aihe tai käytä otsikkoa ja suorita **Research & summarize**. Valitse nimenomaisesti Tavily avaimineen tai DuckDuckGo. Yhteenveto lisätään aktiiviseen muistiinpanoon. Avaa lähteet ja varmista väitteet.
+
+### Yhden napsautuksen työnkulku
+
+Oletusarvoinen **One-Click Extract**:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
 
-### Tehtävä 3: Luo tietoisuusmaantausta
+Se lisää linkit, täydentää sopivat käsite-/valitun kansion muistiinpanot otsikoista ja korjaa Mermaidin complete-kansiossa. Vanhojakin muistiinpanoja voi tulla mukaan. Aloita testikansiosta. Verkkotutkimus ja yleinen kaavioiden generointi eivät sisälly automaattisesti.
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## Peruuttaminen ja tarkistus
 
-## Kohdannusvinkit
+**Cancel** pysäyttää tuetun jatkotyön. Valmiit tuotokset säilyvät; kyseessä ei ole palauttava transaktio eikä etägeneroinnin tai laskutuksen pysähtymistakuu. Odota päättymistä ja tarkista polut sekä palautusristiriidat ennen uusintaa.
 
-### Mallin valinta tehtävälle
+## Ongelmia
 
-Voit käyttää eri malleja eri tehtävissä:
+- Tili/malli: tarkista profiili ja yhteys.
+- Ei käsitteitä: määritä käytössä oleva, ei-tyhjä kansiopolku.
+- Ei hyödyllisiä linkkejä: tarkista vastaus ja kehote; mikään vähimmäissanamäärä ei takaa tulosta.
+- Rajoitukset: pidä rinnakkaisuus `1`, kun selvität kiintiöitä.
 
-| Tehtävä | Soovitatu malli | Miksi |
-|------|------------------|-----|
-| Lisää linkkejä | `gpt-4o-mini`, `deepseek-chat` | Nopea, monit kutsu |
-| Käytänteiden poistaminen | `claude-sonnet-4-6`, `gpt-4o` | Kvaliteettinen poistaminen |
-| Tutkimus | `perplexity`, `gpt-4o` | Web-grounded |
-| Käännös | `gemini-flash`, `gpt-4o` | Monikielinen |
-| Diagrammit | `claude-opus`, paikallinen malli | Monimutkainen syysteorettika |
+## Seuraavaksi
 
-Konfiguroi **Asetukset → Notemd → Tehtäökohdan malleet**
-
-### Omakustomiset työvoimat
-
-Luo oma painikka:
-
-1. Asetukset → Notemd → Työvoimat
-2. Painaa "Lisää työvoima"
-3. Sisesta DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Nimetä se: "Minun tutkimusohjoni"
-5. Uusi painikka ilmenee puolekaluun
-
-## Virheiden ratkaiseminen
-
-### "API Key Invalid"
-- Tarkista, onko avain oikea (ilmaisilla lisätiloilla)
-- Verraa, onko tilillä krediteja
-- Testoi se „Connection Test“-painikkeella asetuksissa
-
-### "Model Not Found"
-- Klikkaa „Get Model List", jotta näet saatavilla olevat mallit
-- Mõned tarjoajat vaativat konkreettisia mallinimejä (esim. `gpt-4o` ei `gpt-4`)
-
-### Linkkit eivät ilmene
-- Varmista, että tiedostossa on piisavasti sisältöä (>50 sanaa)
-- Proovi voimakampaa mallia
-- Tarkista, onko LLM-kutsu edunnut (katso diagnostikan paneeli)
-
-### Hyvin hyvä toiminta
-- Kasuta nopeamia mallia (`gpt-4o-mini` sijaan `gpt-4o`)
-- Vähenda osien suurustaa asetuksissa
-- Aktivoi parallinen käsitely paketitaskujen jaoks
-
-## Järguvät toimet
-
-- 📖 [Tutkita kaikki ominaisuudet](../features/wiki-links)
-- ⚙️ [Edistynyt konfigurointi](./configuration)
-- 🔧 [LLM - tarjoajan asentaminen](../providers/overview)
-- ❓ [Kysymyksiä ja vastauksia](../faq)
-
-## Videoopas
-
-Katsela 3-minuutinen nopeusturvallisuusvideo (kiinaani):
-[【Täysin avoimen lähtekoodin, ilmaista! NotEMD 3 minuuttia nopeasti】](https://b23.tv/lqR0RlA)
-
-## Apua
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Ongelmat**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Dokumentaatio**: [Täysin dokumentaatio](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Asetukset](./configuration).
+- [Työnkulut](../features/workflows).
+- [Vianmääritys](../advanced/troubleshooting).
+- Ilmoita ongelma [Issuesissa](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) ilman yksityisiä tietoja.

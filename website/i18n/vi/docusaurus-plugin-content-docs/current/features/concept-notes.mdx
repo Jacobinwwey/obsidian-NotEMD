@@ -1,184 +1,117 @@
 ---
 id: concept-notes
-title: "Ghi chú về ý tưởng"
-description: "Tạo và quản lý ghi chú ý tưởng — những ghi chú độc lập dành cho các khái niệm chính được trích xuất từ kho dữ liệu của bạn"
+title: Ghi chú khái niệm
+description: >-
+  Trích xuất khái niệm vào thư mục đã cấu hình, chọn mẫu được hỗ trợ và xem lại
+  bản trùng trước khi xóa.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - Ghi chú khái niệm
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Ghi chú về ý tưởng
+# Ghi chú khái niệm
 
-<TLDR>
-**Notemd** trích xuất các khái niệm chính từ ghi chú của bạn và tạo ra các tệp ghi chú khái niệm riêng biệt. LLM sẽ xác định các thuật ngữ cốt lõi, tạo một tệp `.md` cho mỗi khái niệm trong một thư mục có thể thiết lập được, và có thể thêm các liên kết ngược đến ghi chú gốc. Công cụ này hỗ trợ việc loại bỏ từ đồng nghĩa, chọn mô hình theo nhiệm vụ, làm sạch tên tệp, và có bộ máy loại bỏ trùng lặp gồm 4 bước. Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Trích xuất khái niệm độc lập đọc ghi chú nguồn rồi tạo các tệp Markdown trong thư mục bạn chọn. Đường dẫn thư mục ban đầu trống. Ghi chú mới mặc định chỉ có tiêu đề, không có liên kết ngược. Tác vụ thêm liên kết dùng mẫu ghi chú khái niệm khác.</TLDR>
 
 ## Tổng quan
 
-Ghi chú khái niệm là những thành phần cơ bản tạo nên một cơ sở kiến thức kết nối. Khi bạn xử lý một ghi chú, Notemd:
+Cấu hình **Đường dẫn thư mục ghi chú khái niệm** trước khi trích xuất. Dùng thư mục riêng để dễ kiểm tra kết quả, bản trùng và phạm vi sinh nội dung theo tiêu đề sau đó. Trích xuất tạo tệp khái niệm, không tự điền giải thích đã nghiên cứu cho từng tệp.
 
-1. **Gửi văn bản của bạn đến một LLM** kèm theo mẫu yêu cầu trích xuất có cấu trúc
-2. **Giải mã các dòng `CONCEPT:`** từ phản hồi LLM
-3. **Tạo một tập tin `.md` cho mỗi khái niệm** trong thư mục được chỉ định
-4. **Thêm các liên kết ngược** vào ghi chú nguồn (khi được bật)
+## Cách hoạt động
 
-## Cách thức hoạt động
+### Luồng trích xuất
 
-### Ống dẫn trích xuất
+Tác vụ gửi nội dung đến mô hình đã chọn, đọc các mục `CONCEPT:`, loại tên trùng trong lần chạy rồi tạo hoặc cập nhật tệp khái niệm. Ghi chú dài được chia đoạn. Xem báo cáo tiến độ để biết đoạn lỗi hay kết quả chưa đầy đủ; phản hồi mô hình không phải danh mục khái niệm toàn diện.
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### Lời nhắc trích xuất
 
-### Lệnh trích xuất
+Lời nhắc tích hợp yêu cầu các khái niệm cụ thể liên quan đến chủ đề. Học tập có trọng tâm và hạn chế từ đồng nghĩa là chỉ dẫn cho mô hình, không bảo đảm một bộ thuật ngữ chuẩn. Lời nhắc tùy chỉnh phải giữ hợp đồng đầu ra `CONCEPT: Term`. Xem [lời nhắc tùy chỉnh](../advanced/custom-prompts).
 
-LLM nhận được một lệnh yêu cầu nó thực hiện:
+### Chia đoạn
 
-- Trích xuất **danh từ hoặc cụm danh từ** trọng tâm của chủ đề tài liệu
-- **Ưu tiên tính cụ thể** — dùng “Dielectric Relaxation” thay vì “Relaxation”
-- **Chuyển sang dạng số ít** — “models” sẽ trở thành “model”
-- **Ứng chế các khái niệm phụ** — nếu xuất hiện “dielectric relaxation”, đừng rút xuất thêm “relaxation” nữa
-- Bỏ qua** các phần tham khảo/tài liệu tham khảo, danh từ thông thường, tên công ty/sản phẩm
-- Đầu ra một khái niệm mỗi dòng dưới dạng `CONCEPT: Term Name`
-
-**Ứng xử với từ đồng nghĩa** (tùy chọn): thêm vào đầu mẫu yêu cầu câu "Tránh trích xuất các từ đồng nghĩa, các khái niệm cốt lõi tương đồng về mặt ngữ nghĩa, hoặc từ khóa khi có thể".
-
-**Lĩnh vực học tập tập trung** (tùy chọn): thêm `Relevant Fields: [domain]` vào đầu để giới hạn việc trích xuất trong một ngành cụ thể.
-
-**Thay đổi ngôn ngữ** (tùy chọn): thêm vào cuối câu yêu cầu "Các khái niệm đầu ra PHẢI được viết bằng [language]."
-
-### Phân mảnh
-
-Các ghi chú dài sẽ được chia bằng `settings.chunkWordCount`. Mỗi mảnh được gửi riêng biệt. Các khái niệm từ tất cả các mảnh sẽ được tích hợp vào một `Set` — các giá trị trùng lặp giữa các mảnh sẽ bị xóa mà không thông báo. Lỗi LLM trên từng mảnh sẽ không làm dừng toàn bộ quy trình.
+`chunkWordCount` mặc định `3000`, là số từ xấp xỉ để chia đoạn, không phải ngân sách token của nhà cung cấp. Ngữ cảnh giữa các đoạn bị giới hạn; xem lại những khái niệm liên quan và tên mơ hồ sau khi xử lý.
 
 ## Tạo ghi chú khái niệm
 
-### Quy tắc đặt tên tập tin
+### Quy tắc tên tệp
 
-| Quy tắc | Hành vi |
-|------|----------|
-| Dấu gạch ngang/dấu gạch dưới | Thay thế bằng khoảng trắng |
-| Ký tự đặc biệt | Loại bỏ: dấu backslash, dấu forward slash, dấu hai chấm, dấu sao, dấu hỏi, dấu ngoặc kép, dấu ngoặc nhọn, dấu ống, dấu hash, dấu caret, dấu ngoặc vuông |
-| Khoảng trắng | Gộp và cắt bỏ |
-| Độ dài tối đa | 100 ký tự (bị cắt và cắt bỏ thừa) |
-| Kết quả trống/tất cả dấu chấm | Bị bỏ qua một cách lặng lẽ |
+Tên được làm sạch để dùng trong kho: bỏ ký tự đường dẫn không hỗ trợ, chuẩn hóa khoảng trắng và cắt tên quá dài. Tên rỗng bị bỏ qua. Các cụm từ khác nhau vì vậy có thể thành cùng một tên tệp; kiểm tra trước khi tạo số lượng lớn.
 
-Ví dụ: `A-B: Key*Term` sẽ trở thành `A B KeyTerm.md`
+### Mẫu ghi chú
 
-### Mẫu
-
-**Mẫu đầy đủ** (liên kết ngược được kích hoạt, mẫu tối giản bị tắt):
+Ghi chú độc lập mới mặc định dùng mẫu tối giản:
 
 ```markdown
-# Concept Name
+# Tên khái niệm
+```
+
+Để ghi chú độc lập mới có liên kết về nguồn, bật **Add "Linked From" backlink** và tắt **Create minimal concept notes**. Mẫu đầy đủ được hỗ trợ:
+
+```markdown
+# Tên khái niệm
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Ghi chú nguồn]]
 ```
 
-**Mẫu tối giản** (khi `extractConceptsMinimalTemplate: true`):
+Tác vụ thêm liên kết tạo ghi chú dạng đầy đủ có liên kết ngược khi bật đầu ra thư mục khái niệm. Công tắc của trích xuất độc lập không thay đổi hành vi đó.
 
-```markdown
-# Concept Name
-```
+### Cập nhật ghi chú có sẵn
 
-### Cập nhật Ghi chú hiện có
-
-Khi tệp khái niệm đã tồn tại:
-
-1. Nếu liên kết ngược được kích hoạt và ghi chú nguồn chưa được liệt kê, hãy thêm một liên kết ngược
-2. Nếu có phần `## Linked From`, hãy chèn trước tiêu đề `##` tiếp theo
-3. Nếu không có `## Linked From`, hãy thêm phần ở cuối
-4. Các liên kết ngược trùng lặp sẽ được kiểm tra và bỏ qua
+Khi bật liên kết ngược, ghi chú có sẵn có thể nhận liên kết nguồn còn thiếu trong `## Linked From`. Nội dung cũ được giữ, liên kết đã có không được thêm lần nữa. Liên kết nguồn dùng tên tệp không có thư mục; kiểm tra trường hợp các thư mục có ghi chú nguồn cùng tên.
 
 ### Cấu hình
 
-| Thiết lập | Mặc định | Tác động |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | Tùy chọn chính. Tắt = không tạo ghi chú nào |
-| `conceptNoteFolder` | `''` (bị vô hiệu hóa) | Đường dẫn thư mục cho ghi chú ý tưởng |
-| `extractConceptsMinimalTemplate` | `true` | Ghi chú chỉ có tiêu đề (không có Linked From) |
-| `extractConceptsAddBacklink` | `false` | Thêm liên kết ngược khi trích xuất độc lập |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM theo nhiệm vụ để trích xuất ý tưởng |
-| `extractConceptsLanguage` | `'en'` | Ngôn ngữ đầu ra cho tên ý tưởng |
-| `replaceSynonymsDuringConceptExtraction` | `false` | Kích hoạt việc ức chế từ đồng nghĩa trong mẫu yêu cầu |
-| `generateConceptLogFile` | `false` | Viết danh sách `.log` các ý tưởng được tạo ra |
+| Cài đặt | Mặc định | Tác dụng |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | Bật đầu ra khái niệm khi đã chọn thư mục |
+| `conceptNoteFolder` | `''` | Ban đầu chưa chọn thư mục |
+| `extractConceptsMinimalTemplate` | `true` | Tạo ghi chú độc lập chỉ có tiêu đề |
+| `extractConceptsAddBacklink` | `false` | Bật liên kết ngược trong trích xuất độc lập |
+| `extractConceptsProvider` | `DeepSeek` | Nhà cung cấp khi bật định tuyến theo tác vụ |
+| `extractConceptsModel` | `''` | Để trống để dùng mô hình của nhà cung cấp |
+| `extractConceptsLanguage` | `en` | Ngôn ngữ khi bật ngôn ngữ riêng theo tác vụ |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Thêm chỉ dẫn hạn chế từ đồng nghĩa |
+| `generateConceptLogFile` | `false` | Bật tạo nhật ký khái niệm |
 
-**Quan trọng:** Các thiết lập `extractConceptsAddBacklink` và `extractConceptsMinimalTemplate` chỉ ảnh hưởng đến **lệnh trích xuất chuyên dụng**. Lệnh “Thêm Liên kết” luôn tạo ra ghi chú theo mẫu đầy đủ kèm liên kết ngược.
+## Xem lại bản trùng
 
-## Loại bỏ trùng lặp
+Kiểm tra bản trùng dùng quy tắc trên tên tệp: không phân biệt hoa/thường, dạng số nhiều, chuẩn hóa ký hiệu và quan hệ chứa một từ khi phạm vi cho phép. Đây không phải bằng chứng tương đương về ngữ nghĩa; số nhiều bất quy tắc và ý nghĩa kỹ thuật khác nhau cần xem thủ công.
 
-Lệnh loại bỏ trùng lặp (`Notemd: Check & remove duplicate concept notes`) thực hiện phân tích 5 bước:
+Chọn **Kiểm tra và xóa trùng lặp**, xem danh sách đề xuất và chỉ xác nhận các tệp muốn xóa. Tệp được duyệt đi qua thao tác thùng rác của Obsidian. Thư mục khái niệm không phải bộ nhớ đệm có thể bỏ tùy ý; sao lưu trước khi dọn hàng loạt.
 
-### Bước 1: So sánh tên tệp chính xác
+### Phạm vi so sánh
 
-So sánh tên tệp không phân biệt chữ hoa chữ thường trong phạm vi đã cấu hình.
+Có thể so với cả kho, chính thư mục khái niệm, các thư mục được đưa vào hoặc phạm vi loại trừ thư mục chỉ định. Kiểm tra phạm vi trước khi duyệt xóa. Đổi phạm vi làm đổi ứng viên, không thay đổi ý nghĩa của sự trùng lặp.
 
-### Bước 2: Phát hiện dạng số nhiều
+## Sử dụng
 
-Loại bỏ các hậu tố: `-ies` thành `-y`, `-es` bị loại bỏ, `-s` bị loại bỏ. So sánh dạng số ít với các tệp trong phạm vi. Không xử lý các dạng số nhiều bất thường (children/child).
+### Trích xuất độc lập
 
-### Bước 3: Chuẩn hóa ký hiệu
+Mở ghi chú Markdown, xác nhận thư mục khái niệm rồi chạy **Trích xuất khái niệm (tệp hiện tại)**. Nguồn được giữ nguyên. Kiểm tra tên tệp, mức độ bao phủ khái niệm và liên kết ngược nếu bật.
 
-Áp dụng cho: `toLowerCase()`, thay dấu gạch chân/dưới bằng khoảng trắng, loại bỏ các ký tự không phải chữ số và ký tự đặc biệt, gộp các khoảng trắng lại. Những mục được chuẩn hóa giống hệt nhau sẽ được đánh dấu.
+### Trích xuất rồi sinh nội dung
 
-### Bước 4: Giới hạn một từ
+Chạy **Tạo hàng loạt từ tiêu đề** trên thư mục khái niệm để bổ sung giải thích. Tác vụ có thể xử lý cả ghi chú đủ điều kiện đã tồn tại, không chỉ tệp vừa trích xuất. Kiểm tra thư mục trước và đích complete được báo sau khi chạy.
 
-Các ghi chú khái niệm chỉ gồm một từ sẽ được kiểm tra so với tên tệp trong phạm vi nhiều từ. Không thực hiện khi phạm vi là `concept_folder_only`.
+### Tạo liên kết từ phần chọn
 
-### Bước 5: Xác nhận và xóa
+Hành động dành cho phần chọn có thể bọc thuật ngữ thành wiki-link và tạo ghi chú khái niệm khi đã cấu hình đích. Dùng khi muốn tự chọn thuật ngữ thay vì yêu cầu mô hình chọn từ cả ghi chú.
 
-Tất cả các ứng viên sẽ được hiển thị trong một cửa sổ xác nhận. Các mục được chấp thuận sẽ được chuyển vào thùng rác hệ thống. Thao tác có thể bị hủy giữa các lần xóa.
+## Gợi ý
 
-### Các chế độ phạm vi
+- Bắt đầu với nguồn nhỏ và thư mục riêng.
+- Chọn ngôn ngữ đầu ra trước khi tạo bộ khái niệm lớn.
+- Đánh giá đề xuất đồng nghĩa và ứng viên trùng thành hai việc riêng.
+- Giữ bản sao nhật ký cần dùng trước khi lần chạy sau ghi đè.
 
-| Chế độ | So sánh với |
-|------|-------------------|
-| `vault` (mặc định) | Tất cả các tệp `.md` trong kho báu trừ thư mục khái niệm |
-| `concept_folder_only` | Các ghi chú khái niệm khác trong thư mục |
-| `include` | Các tệp trong các thư mục được liệt kê cụ thể |
-| `exclude` | Tất cả các tệp trong kho báu trừ thư mục khái niệm và các thư mục được liệt kê |
+## Tiếp theo
 
-## Cách sử dụng
-
-### Trích xuất Khái niệm (Độc lập)
-
-1. Mở một ghi chú
-2. Chạy **"Notemd: Trích xuất khái niệm"** từ bảng điều khiển lệnh
-3. Các ghi chú khái niệm sẽ được tạo ra trong thư mục đã được cấu hình
-
-### Trích xuất + Tạo nội dung
-
-**"Notemd: Trích xuất khái niệm và tạo tiêu đề"** — trích xuất các khái niệm, sau đó chạy lệnh "Tạo từ Tiêu đề" trên mỗi ghi chú trong thư mục khái niệm. Điều này tạo nội dung cho **tất cả** các ghi chú khái niệm trong thư mục, không chỉ những ghi chú vừa được tạo.
-
-### Tạo liên kết wiki từ phần được chọn
-
-1. Đánh dấu văn bản trong trình soạn thảo
-2. Chạy lệnh **"Notemd: Tạo liên kết wiki từ phần được chọn"**
-3. Văn bản được bao bọc trong `[[...]]` và một ghi chú khái niệm sẽ được tạo ra
-
-## Mẹo
-
-- **Hãy thiết lập thư mục khái niệm trước** — nếu không, sẽ không tạo ra ghi chú nào. Nếu chưa thiết lập, một hộp cảnh báo sẽ xuất hiện.
-- **Sử dụng các mô hình riêng cho từng nhiệm vụ** — việc trích xuất khái niệm hoạt động tốt với các mô hình rẻ hơn (GPT-4o-mini, DeepSeek). Hãy dành các mô hình đắt tiền cho công việc nghiên cứu/dịch thuật.
-- **Bật chức năng ức chế từ đồng nghĩa** cho các lĩnh vực kỹ thuật nơi nhiều thuật ngữ chỉ một khái niệm duy nhất.
-- **Loại bỏ trùng lặp thường xuyên** — chạy lệnh loại bỏ trùng lặp sau khi xử lý theo nhóm để phát hiện các trường hợp gần giống nhau.
-- **Tập tin nhật ký sẽ bị ghi đè** mỗi lần chạy, không được thêm vào. Hãy sao chép nó nếu bạn cần kết quả trước đó.
-
----
-
-## Các bước tiếp theo
-
-- [Wiki-Links](./wiki-links) — Cách các khái niệm được liên kết ngay trong văn bản
-- [Diagrams](./diagrams) — Trực quan hóa mối quan hệ giữa các khái niệm
-- [Workflows](./workflows) — Kết hợp việc trích xuất với các nhiệm vụ khác
+- [Wiki-link](./wiki-links): ghi chú đã xử lý và tệp khái niệm liên quan.
+- [Quy trình](./workflows): chuỗi One-Click Extract chính xác.
+- [Xử lý hàng loạt](../advanced/batch-processing): sinh theo thư mục và hoàn thành một phần.

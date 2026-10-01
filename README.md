@@ -1,55 +1,40 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Notemd — AI-Powered Knowledge Base Builder for Obsidian
 
-> **Notemd** (Note + EMD — Enhanced Markdown Documents) turns LLM-powered reading into persistent knowledge: wiki-links, concept notes, research summaries, translations, and diagrams all write back to your Obsidian vault.
+> **Notemd** transforms notes into linked Markdown, concept notes, research summaries, translations and diagrams. Choose the model, inspect the output and keep the results in your Obsidian vault.
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-📚 Read docs in more languages: [Language Hub](./docs/i18n/README.md)  
-📖 Browse repository docs: [Docs Hub](./docs/README.md)  
-🖼️ Inspect shipped diagram types and production previews: [Diagram Gallery](./docs/diagram-gallery.md)
-❓ **New:** [Frequently Asked Questions (FAQ)](./docs/faq.md)
+## Start Here
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- AI-Powered Multi-Languages Knowledge Enhancement
-==================================================
-```
+| Reader | Entry point | Outcome |
+|---|---|---|
+| Newcomer | [Quick start](https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start) | Configure a provider and verify one note |
+| User | [Workflows](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/workflows) | Control folders, outputs and recovery |
+| Developer | [Developer guide](https://jacobinwwey.github.io/obsidian-NotEMD/docs/developers/overview) | Build, test and extend existing contracts |
+| Agent | [Agent guide](https://jacobinwwey.github.io/obsidian-NotEMD/docs/agents/overview) | Discover four supported export commands |
 
 ## What is Notemd?
 
-Notemd is an **open-source Obsidian plugin** that integrates with 30+ Large Language Models (LLMs) to transform your notes into a structured, searchable knowledge base.
+Notemd is an **MIT-licensed Obsidian plugin** for file-based knowledge work. It supports cloud providers, gateways and local model servers. Stored outputs stay in the vault; cloud tasks send content to the selected endpoint, and web research uses the network.
 
-Unlike chat-based AI tools where insights disappear after the session, Notemd writes results **directly into your vault** as:
-- **[[Wiki-links]]** connecting key concepts
-- **Concept notes** for terms and ideas
-- **Research summaries** with source citations
-- **Translations** for multilingual workflows
-- **Mermaid diagrams** and visual charts
+**Version:** 1.9.8
 
-**Result:** Your reading and research accumulate into a persistent, evolving knowledge graph that stays with you.
+- **Cancellation and recovery:** keep request cancellation active across scheduling and retries; block research/translation writes when cancellation arrives during final file preparation. Preserve completed outputs and report recovery conflicts.
+- **History and native exports:** retain search input and keyboard focus in the history drawer; correct PowerPoint merged-cell separators and CircuitikZ wiring/labels. Batch local retrieval uses a consistent snapshot.
+- **Release and documentation:** verify clean-source provenance and downloaded release assets; provide explicit audience paths and directly authored translations.
+
+The 36 provider presets and 33 executable diagram entries already existed in 1.9.7. Read the [upgrade guide](https://jacobinwwey.github.io/obsidian-NotEMD/docs/releases/1.9.8) and check the [public Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) for availability.
+
+Drawnix cross-branch arrows remain static after rearrangement. Mermaid/SVG in PPTX may use image fallback. Cancellation is not undo and does not guarantee remote generation or billing stops. Physical mobile devices and Obsidian 0.15.0 remain unverified.
+
+[Documentation hub](./docs/README.md) · [Language Hub](./docs/i18n/README.md) · [Diagram Gallery](./docs/diagram-gallery.md) · [FAQ](./docs/faq.md)
 
 If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
-
-**Version:** 1.9.7
-
-**Mainline reliability update (not a new release):** cancellation now reaches concurrent LLM work and retry waits; failed diagram saves preserve conflicting edits and report recovery copies. Existing Drawnix companion folders are retained for inspection. Local knowledge batches use an immutable read snapshot, and PowerPoint tables preserve individual border sides, opacity and merged-cell edges. Circuitikz NAND/NOR and transmission-gate exports have clearer wiring and readable labels in mirrored layouts. [Implementation and acceptance evidence](./docs/maintainer/reliability-acceptance-2026-09-12.md) records the tested environments and remaining limits.
-
-Drawnix supports native tree editing; its exported cross-branch arrows use fixed coordinates and can detach when Drawnix rearranges nodes. Use the SVG preview to inspect connectivity. Cancellation cannot undo earlier writes or stop provider-side work when the host transport cannot physically abort it.
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Table of Contents
 
@@ -68,13 +53,26 @@ Drawnix supports native tree editing; its exported cross-branch arrows use fixed
 
 ## Quick Start
 
-1.  **Install & Enable**: Get the plugin from the Obsidian Marketplace.
-2.  **Configure LLM**: Go to `Settings -> Notemd`, select your LLM provider (like OpenAI or a local one like Ollama), and enter your API key/URL.
-3.  **Open Sidebar**: Click the Notemd wand icon in the left ribbon to open the sidebar.
-4.  **Process a Note**: Open any note and click **"Process File (Add Links)"** in the sidebar to automatically add `[[wiki-links]]` to key concepts.
-5.  **Run a Quick Workflow**: Use the default **"One-Click Extract"** button to chain processing, batch generation, and Mermaid cleanup from one entry point.
+1. Install and enable **Notemd** from **Settings → Community plugins → Browse**. [Installation guide](https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/installation).
+2. In **Settings → Notemd**, configure the exact provider endpoint, credentials and model. Run **Test Connection**, then verify generation with the next task. A model-list response alone does not prove chat access.
+3. Create an empty `trial-concepts` folder and select it as **Concept note folder**; the initial setting is empty. Prepare a disposable `Notemd trial.md` containing a short paragraph you can send to the provider.
+4. Run **Process file (add links)** and inspect `Notemd trial_processed.md` beside the preserved source. Review links and any concept notes instead of assuming the model output is correct.
+5. Reopen the disposable source note, then try **One-Click Extract** with that test folder. It adds links, generates eligible folder notes from titles and repairs Mermaid in the complete folder; existing eligible notes can be included.
 
-That's it! Explore the settings to unlock more features like web research, translation, and content generation.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Research and diagram generation are separate actions. After cancellation, wait for the task to settle and inspect completed/recovery outputs before repeating.
+
+<details>
+<summary>Interface examples</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Language Support
 
@@ -107,9 +105,9 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **OpenAI-Compatible Stable Long-Request Chain Hardening**: In stable mode, OpenAI-compatible calls now use an explicit 3-stage order for each attempt: primary direct streaming transport, then direct non-stream transport, then `requestUrl` fallback (which can still upgrade to streamed parsing when needed). This reduces false negatives where providers complete buffered responses but streaming pipes are unstable.
 - **Protocol-Aware Streaming Fallback Across LLM APIs**: Long-running fallback attempts now upgrade to protocol-aware streamed parsing across every built-in LLM path, not just OpenAI-compatible endpoints. Notemd now handles OpenAI/Azure-style SSE, Anthropic Messages streaming, Google Gemini SSE responses, and Ollama NDJSON streams on both desktop `http/https` and non-desktop `fetch`, and the remaining direct OpenAI-style provider entrypoints reuse that same shared fallback path.
 - **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `Xiaomi MiMo`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, and `SiliconFlow` in addition to the existing global and local providers.
-- **Reliable Batch Processing**: Improved concurrent processing logic with **staggered API calls** to prevent rate-limiting errors and ensure stable performance during large batch jobs. The new implementation ensures that tasks are initiated at different intervals rather than all at once.
-- **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
-- **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
+- **Batch Request Scheduling**: Staggered calls reduce bursts during concurrent work. Provider request/token quotas and competing clients can still cause rate limits; measure a small batch before increasing concurrency.
+- **Accurate Progress Reporting**: Progress distinguishes completed, failed and cancelled work. Inspect per-file results and reported paths when a run is interrupted.
+- **Robust Parallel Batch Processing**: The scheduler settles active work and reports partial failures instead of treating an interrupted folder as an all-or-nothing transaction.
 - **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
 - **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), and also records a per-attempt transport timeline with sanitized request URLs, elapsed duration, response headers, partial response bodies, parsed partial stream content, and stack traces for better troubleshooting across OpenAI-compatible, Anthropic, Google, Azure OpenAI, and Ollama fallbacks.
 - **Developer Mode Panel**: Settings now include a dedicated developer-only diagnostics panel that stays hidden unless "Developer mode" is enabled. It supports selecting diagnostic call paths and running repeated stability probes for the selected mode.
@@ -128,7 +126,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Concept Note Creation (Optional & Customizable)**: Automatically creates new notes for discovered concepts in a specified vault folder.
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
-- **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
+- **Link Integrity Maintenance**: Obsidian owns link updates on rename according to its settings. Deleting a target can leave unresolved links; inspect ambiguous same-named notes.
 - **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks.
 - **Concept Extraction Guardrails**: When concept-note generation prerequisites are not configured correctly, relevant flows now warn before execution and can deep-link directly into the required settings.
 - **Concept Synonym Suppression**: An optional extraction rule can tell the model to avoid extracting synonyms, semantically similar core concepts, or near-duplicate keywords when processing notes.
@@ -143,10 +141,10 @@ That's it! Explore the settings to unlock more features like web research, trans
     - **Large File Support**: Automatically splits large files into smaller chunks based on the `Chunk word count` setting before sending them to the LLM. The translated chunks are then seamlessly combined back into a single document.
     - Supports translation between multiple languages.
     - Customizable target language in settings or in UI.
-    - Automatically open the translated text on the right side of the original text for easy reading.
+    - The single-file command opens the saved translation in the workspace. Inspect the reported output path; its pane position is not guaranteed.
 - **Batch Translate**:
-    - Translate all files within a selected folder.
-    - Supports parallel processing when "Enable Batch Parallelism" is on.
+    - Translate eligible direct-child files by default; advanced selection profiles can change the scope. Existing translated destinations can be overwritten.
+    - Uses the configured batch concurrency, which defaults to one.
     - Uses custom prompts for translation if configured.
 	- Adds a "Batch translate this folder" option to the file explorer context menu.
 - **Disable auto translation**: When this option is enabled, non-Translate tasks will no longer force outputs into a specific language, preserving the original language context. The explicit "Translate" task will still perform translation as configured.
@@ -163,7 +161,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Content Generation from Title**:
     - Use the note title to generate initial content via LLM, replacing existing content.
     - **Optional Research**: Configure whether to perform web research (using the selected provider) to provide context for generation.
-- **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting). Successfully processed files are moved to a **configurable "complete" subfolder** (e.g., `[foldername]_complete` or a custom name) to avoid reprocessing.
+- **Batch Content Generation from Titles**: Generate content for eligible folder notes, with optional research. The default destination is the sibling `[foldername]_complete` folder; a custom name can be configured. An occupied destination prevents the move, not the preceding generation. Generated and moved counts are reported separately.
 - **Mermaid Auto-Fix Coupling**: When Mermaid auto-fix is enabled, Mermaid-related workflows now automatically repair generated files or output folders after processing. This covers Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, and Translate flows.
 
 
@@ -498,7 +496,7 @@ Access plugin settings via:
     *   **Change Prompt Word**: Allows you to change the prompt word for a specific task.
     *   **Custom Prompt Word**: Enter your custom prompt word for the task.
 -   **Use Custom Output Folder for 'Generate from Title'**:
-    *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` relative to the original folder's parent (or `Vault_complete` if the original folder was the root).
+    *   **Disabled (Default)**: After generation, the plugin attempts to move each file to the sibling `[foldername]_complete` folder, or `Vault_complete` for the vault root. An occupied destination blocks the move while the generated content remains saved.
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
 -   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
 
@@ -603,11 +601,11 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Run the command `Notemd: Translate Note/Selection` (via command palette or sidebar button).
     *   A modal will appear allowing you to confirm or change the **Target Language** (defaulting to the setting specified in Configuration).
     *   The plugin uses the configured **LLM Provider** (based on Multi-Model settings) to perform the translation.
-    *   The translated content is saved to the configured **Translation Save Path** with the appropriate suffix, and opened in a **new pane to the right** of the original content for easy comparison.
+    *   The translated content is saved to the configured **Translation Save Path** with the appropriate suffix, then the saved file is opened in the Obsidian workspace. Its pane position depends on the available layout.
     *   You can cancel this task via the sidebar button or modal cancel button.
 3.  **Batch Translate**:
     *   Run the command `Notemd: Batch Translate Folder` from the command palette and select a folder, or right-click a folder in the file explorer and choose "Batch translate this folder".
-    *   The plugin will translate all Markdown files in the selected folder.
+    *   By default, the plugin translates eligible direct-child files in the selected folder without recursing into subfolders. Advanced file selection can change this scope; existing destination files may be overwritten.
     *   Translated files are saved to the configured translation path but are not opened automatically.
     *   This process can be cancelled via the progress modal.
 
@@ -634,7 +632,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Run the command `Notemd: Batch Generate Content from Titles` (via command palette or sidebar button).
     *   Select the folder containing the notes you want to process.
     *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files and files in the designated "complete" folder), generating content based on the note's title and replacing existing content. Files are processed in the background without being opened in the editor.
-    *   Successfully processed files are moved to the configured "complete" folder.
+    *   After generation, the plugin attempts to move the file to the configured "complete" folder. An occupied destination prevents the move, not the content generation already saved; generated and moved file counts are separate. The default destination is the sibling `[foldername]_complete` folder, or `Vault_complete` for the vault root.
     *   This command respects the **"Enable Research in 'Generate from Title'"** setting for each note processed.
     *   You can cancel this task via the sidebar button or modal cancel button.
     *   Progress and results (number of files modified, errors) are shown in the sidebar/modal log.
@@ -769,7 +767,7 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
 ### Common Issues
 -   **Plugin Not Loading**: Ensure `manifest.json`, `main.js`, `styles.css` are in the correct folder (`<Vault>/.obsidian/plugins/notemd/`) and restart Obsidian. Check the Developer Console (`Ctrl+Shift+I` or `Cmd+Option+I`) for errors on startup.
 -   **Processing Failures / API Errors**:
-    1.  **Check File Format**: Ensure the file you are trying to process or check has a `.md` or `.txt` extension. Notemd currently only supports these text-based formats.
+    1.  **Check File Format**: Default formats depend on the task (`.md`, or `.md`/`.txt`). Developer mode with relaxed input formats allows additional text formats and PDF for selected source-preserving tasks, including translation and concept extraction. Add Links remains restricted to `.md`/`.txt`.
     2.  Use the "Test LLM Connection" command/button to verify settings for the active provider.
     3.  Double-check API Key, Base URL, Model Name, and API Version (for Azure). Ensure the API key is correct and has sufficient credits/permissions.
     4.  Ensure your local LLM server (LMStudio, Ollama) is running and the Base URL is correct (e.g., `http://localhost:1234/v1` for LMStudio).
@@ -841,7 +839,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.7 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.8 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->

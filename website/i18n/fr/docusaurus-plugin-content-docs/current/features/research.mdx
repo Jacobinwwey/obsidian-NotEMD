@@ -1,125 +1,92 @@
 ---
 id: research
-title: Recherche et recherche sur le Web
-description: Intégrez la recherche web dans vos notes
+title: Recherche Web et synthèse
+description: >-
+  Choisissez le moteur de recherche, ajoutez une synthèse sourcée et distinguez
+  résultats Web et contexte local.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - Recherche Web et synthèse
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Recherche et recherche sur le Web
+# Recherche Web et synthèse
 
 <TLDR>
-**Notemd consulte le web et insère directement dans vos notes les résultats LLM résumés.** Tavily API constitue le moteur de recherche principal ; DuckDuckGo sert de solution de secours sans configuration requise. Les résultats sont résumés avec des citations sources et ajoutés sous un en-tête `## Research`. Il prend en charge la recherche dans une seule note, la recherche dans des dossiers par lots, ainsi que le choix d’un modèle pour l’étape de résumé selon chaque tâche.
-
-Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
+**Rechercher et résumer** recherche le sujet sélectionné ou le titre de la note, demande au LLM une synthèse du contexte disponible et l’ajoute à la note Markdown active. Choisissez Tavily ou DuckDuckGo explicitement. Résultats et citations générées doivent être vérifiés.
 </TLDR>
 
-## Aperçu général
+## Vue d’ensemble
 
-La recherche est l’une des intégrations les plus puissantes de Notemd : elle crée un cycle complet entre la lecture, la recherche et l’écriture. Au lieu de passer par un navigateur pour rechercher un terme inconnu, vous le mettez en surbrillance et laissez Notemd effectuer la recherche, rédiger un résumé et ajouter les résultats — tout cela directement dans votre coffre-fort.
+Le moteur de recherche et le LLM de synthèse se configurent séparément. Tavily exige une clé ; DuckDuckGo n’en exige pas mais peut limiter les requêtes. Un modèle local ne rend pas la recherche Web hors ligne.
 
-Le processus est entièrement configurable. Vous choisissez le fournisseur de recherche, le LLM qui rédige le résumé, ainsi que le fait de joindre les résultats à la note active ou de les enregistrer dans des fichiers séparés. Le mode par lots vous permet de rechercher toutes les notes d’un dossier d’un seul clic.
+## Fonctionnement
 
-## Comment ça marche
+### Rechercher puis synthétiser
 
-### Pipeline de recherche puis de résumé
+1. Ouvrez la note dans un éditeur Markdown ; sélectionnez un sujet court, ou laissez la sélection vide pour son titre.
+2. Lancez **Rechercher et résumer**.
+3. Notemd interroge le moteur choisi. Tavily fournit des extraits ; DuckDuckGo peut entraîner la lecture des pages trouvées.
+4. Le contexte local peut compléter le prompt si la recherche locale est activée pour cette tâche.
+5. Le LLM produit une synthèse, ajoutée sous `Research Summary` avec sujet et origine du contexte.
+6. Relisez et ouvrez les URL : récupérer une page ne prouve pas qu’elle soutient chaque assertion ou citation.
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+### Tavily ou DuckDuckGo
 
-1. **Extraction de la requête** -- Notemd extrait les termes de recherche à partir de votre sélection ou du titre de la note.
-2. **Recherche sur le Web** -- La tentative Tavily a lieu en premier. Si aucune clé API n’est configurée, DuckDuckGo est utilisé automatiquement (aucune clé requise).
-3. **LLM résumé** -- Les résultats de recherche bruts sont envoyés au LLM configuré, qui génère un résumé concis avec des citations sources intégrées.
-4. **Append** -- Le résumé formaté est ajouté sous un en-tête `## Research` dans la note active.
+| Choix | Configuration | Limite opérationnelle |
+| -------- | ------- | ---------------------- |
+| Tavily | Choisir Tavily et saisir sa clé | Quota du compte et extraits renvoyés |
+| DuckDuckGo | Choisir DuckDuckGo explicitement | Sans clé ; limitations de recherche et disponibilité des pages |
 
-### Tavily contre DuckDuckGo
+Une clé Tavily absente ou invalide ne sélectionne pas DuckDuckGo. Sans contexte Web utile, consultez le rapport. Des extraits locaux activés et disponibles peuvent suffire à une synthèse, dont l’étiquette de source distingue alors l’origine.
 
-| Apparence | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| Clé API | Obligatoire (niveau gratuit disponible) | Pas requis |
-| Qualité du résultat | Plus élevé (conçu spécialement pour l’IA) | Adéquat pour les requêtes générales |
-| Limites de débit | Niveau gratuit généreux | Sujet à un régulateur de débit |
-| Configuration | `tavilyApiKey` dans les paramètres | Zéro configuration -- fallback automatique |
+### Recherche pendant la génération depuis les titres
 
-### Recherche de dossiers par lots
-
-Cliquez avec le bouton droit sur un dossier et sélectionnez **"Notemd : Dossier de recherche"**. Chaque fichier `.md` dans le dossier est traité séquentiellement (ou en parallèle, selon la concurrence configurée). Chaque note reçoit son propre résumé de recherche.
+**Enable research in "Generate from title"** ajoute la recherche à la génération, y compris par lot. Ce réglage est désactivé par défaut. Il n’existe pas d’action générique autonome Research Folder.
 
 ## Configuration
 
-| Configuration | Par défaut | Appliquer |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Tavily API clé. Lorsqu’elle est vide, seuls DuckDuckGo sont utilisés. |
-| `researchProvider` / `researchModel` | DeepSeek | LLM par tâche pour résumer les résultats de recherche |
-| `maxResearchContentTokens` | `4000` | Budget de tokens pour le contenu envoyé à LLM. Le surplus est tronqué. |
-| `researchAppendToNote` | `true` | Ajoute un résumé à la note source. Si la valeur est fausse, un fichier séparé est créé. |
-| `researchLanguage` | `'en'` | Langue de sortie pour la recherche résumée |
+| Paramètre | Défaut | Effet |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Moteur de recherche |
+| `tavilyApiKey` | `''` | Clé obligatoire pour Tavily |
+| `tavilyMaxResults` | `5` | Nombre demandé de résultats Tavily |
+| `tavilySearchDepth` | `basic` | Profondeur Tavily |
+| `ddgMaxResults` | `5` | Nombre demandé de résultats DuckDuckGo |
+| `ddgFetchTimeout` | `15` | Délai de lecture des pages, en secondes |
+| `maxResearchContentTokens` | `3000` | Budget approximatif du contexte Web |
+| `researchProvider` | `DeepSeek` | LLM de synthèse avec routage par tâche |
+| `researchModel` | `''` | Modèle du fournisseur si vide |
+| `researchSummarizeLanguage` | `en` | Langue avec configuration par tâche |
+| `enableResearchInGenerateContent` | `false` | Ajouter la recherche à la génération depuis les titres |
+| `enableLocalKnowledgeRetrieval` | `false` | Activer séparément la recherche locale délimitée |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Utiliser le contexte local pour cette tâche |
 
-### Recommandation de modèle par tâche
+### Contexte et modèle
 
-La recherche bénéficie d’un modèle capable de gérer du contenu multilingue et de produire de la prose bien structurée. Considérez :
-
-- **DeepSeek** -- par défaut, abordable, bonne qualité
-- **GPT-4o** -- résumé de meilleure qualité, coût plus élevé
-- **Gemini Flash** -- rapide et peu coûteux, idéal pour des requêtes simples
+Les limites de contexte sont estimées, sans tokenisation exacte du fournisseur ; la troncature peut éliminer des preuves. Adaptez modèle et budget de sortie, et posez une question précise. L’index local est lexical, sans embeddings ni rappel exhaustif garanti.
 
 ## Exemple
 
-Vous lisez un article sur les *mécanismes d’attention Transformer* et vous tombez sur un terme inconnu : *encodage positionnel relatif*. Au lieu de laisser Obsidian :
+Créez une note intitulée `Encodage positionnel relatif`. Lancez la recherche, puis confrontez la synthèse aux articles originaux ou à la documentation officielle liés. Conservez question, URL réelles et corrections pour rendre la conclusion vérifiable. Un exemple de guide n’est pas un résultat obtenu dans votre coffre.
 
-1. Surligner **"relative positional encoding"**
-2. Clic droit --> **"Notemd : Recherche et résumé"**
-3. Notemd recherche sur le Web, résume les meilleurs résultats, et ajoute :
+## Annulation et confidentialité
 
-```markdown
-## Research
-
-### Relative Positional Encoding
-
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
-
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
-
-Le résumé fait désormais partie de votre coffre-fort : il est recherchable, lienable et accessible hors ligne.
+Les ajouts terminés restent présents après annulation. Des requêtes déjà en cours peuvent finir. Le moteur reçoit la question, les sites reçoivent des requêtes et le LLM reçoit le contexte collecté, y compris les extraits locaux activés. Expurgez les diagnostics avant partage.
 
 ## Conseils
 
-- **Définissez une clé Tavily pour obtenir de meilleurs résultats** – même le plan gratuit offre une plus grande pertinence que le DuckDuckGo brut.
-- **Utilisez un modèle de résumé performant** – les modèles bon marché peuvent simplifier à l’excès des contenus techniques nuancés.
-- **Recherche par lots** après une lecture initiale afin de combler les lacunes dans de nombreuses notes en même temps.
-- **Vérifier les résumés ajoutés** -- LLMs peuvent inventer des détails sur la source. Vérifiez les affirmations clés.
+- Distinguez source Web, note locale et inférence du modèle.
+- Vérifiez citations, dates et affirmations importantes dans l’original.
+- Isolez recherche et LLM avec une petite question d’essai.
+- Contrôlez les synthèses existantes avant relance pour éviter les ajouts redondants.
 
----
+## Pour continuer
 
-## Prochaines étapes
-
-- [Notes de concept](./concept-notes) -- Extraire et conserver les termes clés issus des résultats de recherche
-- [Liens-Wiki](./wiki-links) -- Reliez les concepts issus de recherches dans votre coffre-fort
-- [Traduction](./translation) -- Traduire les résumés de recherche dans une autre langue
-- [LLM Fournisseurs](/docs/providers/overview) -- Configurer le modèle utilisé pour la synthèse
+- [Configuration](../getting-started/configuration).
+- [Prompts](../advanced/custom-prompts).
+- [Dépannage](../advanced/troubleshooting).

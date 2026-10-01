@@ -1,184 +1,117 @@
 ---
 id: concept-notes
-title: "Nota Konsep"
-description: "Jana dan urus nota konsep — nota berdiri sendiri untuk konsep utama yang diekstrak daripada peti simpanan anda"
+title: Nota konsep
+description: >-
+  Ekstrak konsep ke folder pilihan, tetapkan bentuk nota yang disokong dan semak
+  pendua sebelum memadam.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - Nota konsep
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Nota Konsep
+# Nota konsep
 
-<TLDR>
-**Notemd mengekstrak konsep utama daripada nota anda dan mencipta fail nota konsep yang berdiri sendiri.** LLM mengenal pasti istilah utama, menjana satu fail `.md` untuk setiap konsep dalam folder yang boleh dikonfigurasikan, dan secara pilihan menambah pautan balik ke nota sumber. Ia menyokong penindasan sinonim, pemilihan model mengikut tugas, penyucian nama fail, dan enjin penghapusan duplikasi 4 langkah. Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Ekstraksi konsep kendiri membaca nota sumber dan mencipta fail Markdown konsep dalam folder pilihan. Tetapan folder pada awalnya kosong. Nota baharu lalai hanya mengandungi tajuk, tanpa pautan balik. Pemprosesan tambah pautan menggunakan templat konsep yang berbeza.</TLDR>
 
-## Gambaran Keseluruhan
+## Gambaran keseluruhan
 
-Nota konsep merupakan blok asas bagi pangkalan pengetahuan yang bersambung. Apabila anda memproses sebuah nota, Notemd:
+Tetapkan **Concept note folder path** sebelum mengekstrak. Folder khusus memudahkan pemeriksaan nota, pendua dan skop penjanaan daripada tajuk. Ekstraksi mencipta fail konsep; ia tidak mengisi setiap fail dengan huraian hasil penyelidikan secara automatik.
 
-1. **Menghantar teks anda ke LLM** dengan arahan ekstraksi yang terstruktur
-2. **Menganalisis baris `CONCEPT:`** daripada respons LLM
-3. **Mencipta satu fail `.md` untuk setiap konsep** dalam folder yang ditetapkan
-4. **Menambah pautan balik** ke nota sumber (jika diaktifkan)
+## Cara kerja
 
-## Cara Ia Berfungsi
+### Aliran ekstraksi
 
-### Pipelajn Ekstraksi
+Kandungan dihantar kepada LLM pilihan, entri `CONCEPT:` dihuraikan, nama dinyahgandakan dalam operasi, kemudian fail konsep dicipta atau dikemas kini. Nota panjang dipecah kepada cebisan. Semak laporan kemajuan untuk kegagalan cebisan dan hasil tidak lengkap; respons model bukan senarai konsep yang menyeluruh.
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### Prompt ekstraksi
 
-### Arahan Ekstraksi
+Prompt terbina meminta konsep khusus yang berkaitan dengan topik. Arahan pembelajaran tertumpu dan penindasan sinonim boleh mempengaruhi model, tetapi tidak menjamin istilah piawai. Prompt tersuai mesti mengekalkan kontrak keluaran `CONCEPT: Term`. Lihat [prompt tersuai](../advanced/custom-prompts).
 
-LLM menerima arahan yang menyuruhnya untuk:
+### Pemecahan cebisan
 
-- Ekstrak **kata nama atau frasa kata nama** yang menjadi inti topik dokumen
-- **Utamakan kekhususan** — “Dielectric Relaxation” berbanding “Relaxation”,
-- **Normalisasi kepada bentuk tunggal** — “models” menjadi “model”,
-- **Menindas konsep subordinat** — jika “dielectric relaxation” muncul, jangan ekstrak “relaxation” juga
-- **Lompat** bahagian rujukan/katalog, kata nama umum, nama syarikat/produk
-- Keluarkan satu konsep setiap baris sebagai `CONCEPT: Term Name`
+`chunkWordCount` lalai ialah 3000. Ini anggaran berdasarkan perkataan, bukan bajet token penyedia. Konteks antara cebisan terhad; semak konsep berkaitan dan nama kabur selepas pemprosesan.
 
-**Penindasan sinonim** (pilihan): tambahkan “Elakkan mengeluarkan sinonim, konsep asas yang serupa dari segi semantik, atau kata kunci setiap kali boleh” di hadapan gesaan.
+## Penciptaan nota konsep
 
-**Domain pembelajaran yang ditumpukan** (pilihan): menambahkan `Relevant Fields: [domain]` di hadapan untuk membataskan pengeluaran kepada satu bidang khusus.
+### Peraturan nama fail
 
-**Tetapan bahasa gantian** (pilihan): menambahkan “Konsep keluaran MESTI berada dalam [bahasa].”
-
-### Pemecahan kepada bahagian
-
-Nota yang panjang akan dipisahkan oleh `settings.chunkWordCount`. Setiap bahagian dihantar secara berasingan. Konsep daripada semua bahagian akan dikumpulkan dalam `Set` — duplikasi antara bahagian akan dibuang tanpa notis. Ralat LLM pada setiap bahagian tidak akan menghentikan operasi tersebut.
-
-## Penciptaan Nota Konsep
-
-### Peraturan Nama Fail
-
-| Peraturan | Kelakuan |
-|------|----------|
-| Tanda garis bawah/tanda garis sempang | Digantikan dengan ruang |
-| Akar aksara khas | Dibuang: backslash, forward slash, colon, asterisk, tanda soal, tanda petik, kurungan sudut, pipe, hash, caret, kurungan |
-| Ruang kosong | Runtuh dan dipotong |
-| Panjang maksimum | 100 aksara (dipotong + dipadatkan semula) |
-| Hasil kosong/semua titik | Dihabaikan secara senyap |
-
-Contoh: `A-B: Key*Term` menjadi `A B KeyTerm.md`
+Nama disesuaikan untuk fail Vault: aksara laluan yang tidak disokong dibuang, ruang dinormalkan dan nama panjang dipendekkan. Nama kosong dilangkau. Frasa berlainan boleh menjadi nama fail yang sama; semak sebelum mencipta koleksi besar.
 
 ### Templat
 
-**Templat penuh** (pautan balik diaktifkan, templat minimum dimatikan):
+Nota kendiri baharu menggunakan templat minimum secara lalai:
 
 ```markdown
-# Concept Name
+# Nama Konsep
+```
+
+Untuk menyertakan pautan balik dalam nota kendiri baharu, aktifkan **Add "Linked From" backlink** dan matikan **Create minimal concept notes**. Bentuk penuh yang disokong:
+
+```markdown
+# Nama Konsep
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Nota Sumber]]
 ```
 
-**Templat minimum** (apabila `extractConceptsMinimalTemplate: true`):
+Tambah pautan mencipta nota konsep bentuk penuh dengan pautan balik apabila keluaran folder konsep diaktifkan. Suis ekstraksi kendiri tidak mengubah tingkah laku tambah pautan ini.
 
-```markdown
-# Concept Name
-```
+### Mengemas kini nota sedia ada
 
-### Memperbaharui Nota Sedia Ada
-
-Apabila fail konsep sudah wujud:
-
-1. Jika pautan balik diaktifkan dan nota sumber belum disenaraikan, tambahkan pautan balik
-2. Jika terdapat bahagian `## Linked From`, masukkan sebelum tajuk `##` seterusnya
-3. Jika tiada `## Linked From`, tambahkan bahagian di akhir
-4. Pautan balik yang berulang akan diperiksa dan diabaikan
+Apabila pautan balik diaktifkan, pautan sumber yang belum ada boleh ditambah ke `## Linked From`. Isi sedia ada dikekalkan dan pautan sama tidak ditambah berulang kali. Pautan menggunakan nama asas nota sumber; semak kekaburan jika beberapa nota mempunyai nama sama.
 
 ### Konfigurasi
 
-| Pengaturan | Lalai | Kesan |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | Tombol utama. Dimatikan = tiada nota dibuat |
-| `conceptNoteFolder` | `''` (dihentikan) | Laluan folder untuk nota konsep |
-| `extractConceptsMinimalTemplate` | `true` | Nota hanya tajuk (tanpa Linked From) |
-| `extractConceptsAddBacklink` | `false` | Tambahkan pautan balik semasa pengekstrakan berdiri sendiri |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM setiap tugas untuk pengekstrakan konsep |
-| `extractConceptsLanguage` | `'en'` | Bahasa keluaran untuk nama konsep |
-| `replaceSynonymsDuringConceptExtraction` | `false` | Aktifkan penindasan sinonim dalam promp |
-| `generateConceptLogFile` | `false` | Tulis senarai `.log` konsep yang dihasilkan |
+| Tetapan | Lalai | Kesan |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | Aktifkan keluaran konsep setelah folder ditetapkan |
+| `conceptNoteFolder` | `''` | Tiada folder dipilih pada awal |
+| `extractConceptsMinimalTemplate` | `true` | Cipta nota konsep kendiri dengan tajuk sahaja |
+| `extractConceptsAddBacklink` | `false` | Aktifkan pautan balik bagi ekstraksi kendiri |
+| `extractConceptsProvider` | `DeepSeek` | Penyedia apabila penghalaan khusus tugas diaktifkan |
+| `extractConceptsModel` | `''` | Gunakan model penyedia pilihan jika kosong |
+| `extractConceptsLanguage` | `en` | Bahasa apabila bahasa keluaran khusus tugas diaktifkan |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Tambah arahan untuk mengurangkan sinonim |
+| `generateConceptLogFile` | `false` | Pilih untuk menjana log konsep |
 
-**Penting:** Tetapan `extractConceptsAddBacklink` dan `extractConceptsMinimalTemplate` hanya mempengaruhi **arahan pengekstrakan khusus**. Arahan "Add Links" sentiasa menghasilkan nota templat penuh dengan pautan balik.
+## Semakan pendua
 
-## Penghapusan duplikasi
+Semakan menggunakan heuristik nama fail seperti padanan tanpa beza huruf besar, bentuk jamak, penormalan simbol dan kandungan satu perkataan apabila skop membenarkannya. Ini tidak membuktikan kesetaraan makna; bentuk jamak tidak teratur dan makna teknikal berlainan memerlukan semakan manusia.
 
-Arahan dedup (`Notemd: Check & remove duplicate concept notes`) menjalankan analisis 5 langkah:
+Pilih **Check & remove duplicates**, semak calon dan sahkan hanya fail yang hendak dibuang. Item diluluskan melalui operasi tong sampah Obsidian. Folder konsep bukan cache sementara; sandarkan sebelum pembersihan pukal.
 
-### Langkah 1: Padanan nama fail yang tepat
+### Mod skop
 
-Perbandingan nama fail tanpa mengira huruf besar/kecil dalam skop yang ditetapkan.
-
-### Langkah 2: Pengesanan bentuk jamak
-
-Menghilangkan akhiran: `-ies` hingga `-y`, `-es` dihapuskan, `-s` dihapuskan. Membandingkan bentuk tunggal dengan fail skop. Tidak mengendalikan bentuk jamak yang tidak teratur (children/child).
-
-### Langkah 3: Normalisasi simbol
-
-Digunakan pada: `toLowerCase()`, gantikan tanda hubung/tanda bawah dengan ruang, padamkan aksara bukan alfanumerik, padatkan ruang kosong. Entri yang dinormalisasi secara serupa akan ditandakan.
-
-### Langkah 4: Pengasingan Perkataan Tunggal
-
-Nota konsep perkataan tunggal diperiksa berbanding nama fail skop berbilang perkataan. Tidak dijalankan apabila skopnya ialah `concept_folder_only`.
-
-### Langkah 5: Pengesahan dan Pemadaman
-
-Semua calon dipaparkan dalam modul pengesahan. Item yang diluluskan dipindahkan ke tong sampah sistem. Operasi boleh dibatalkan antara setiap pemadaman.
-
-### Mod Skop
-
-| Mod | Dibandingkan Dengan |
-|------|-------------------|
-| `vault` (lalai) | Semua fail vault `.md` kecuali folder konsep |
-| `concept_folder_only` | Nota konsep lain dalam folder tersebut |
-| `include` | Fail dalam folder yang disenaraikan secara khusus |
-| `exclude` | Semua fail vault kecuali folder konsep + folder yang disenaraikan |
+Bandingkan dengan seluruh Vault, folder konsep, folder yang disertakan atau skop yang mengecualikan folder tertentu. Semak skop sebelum meluluskan pemadaman. Skop menentukan calon, bukan makna pendua.
 
 ## Penggunaan
 
-### Ekstrak Konsep (Berdiri Sendiri)
+### Ekstraksi konsep kendiri
 
-1. Buka sebuah nota
-2. Jalankan **"Notemd: Ekstrak konsep"** daripada panel arahan
-3. Nota konsep diwujudkan dalam folder yang telah dikonfigurasikan
+Buka nota Markdown, sahkan folder konsep dan jalankan **Extract concepts (current file)**. Nota sumber tidak berubah. Semak nama fail, liputan konsep dan pautan balik pilihan.
 
-### Ekstrak + Jana Kandungan
+### Ekstrak kemudian jana kandungan
 
-**"Notemd: Ekstrak konsep dan jana tajuk"** — ekstrak konsep, kemudian jalankan "Jana daripada Tajuk" pada setiap nota dalam folder konsep. Ini menjana kandungan untuk **semua** nota konsep dalam folder, bukan hanya yang baru dibuat.
+Jalankan **Batch generate from titles** pada folder konsep untuk menambah huraian. Nota layak yang sudah ada juga boleh diproses, bukan hanya hasil ekstraksi terkini. Semak folder dahulu dan destinasi folder complete yang dilaporkan selepasnya.
 
-### Cipta Pautan Wiki daripada Pemilihan
+### Cipta pautan wiki daripada pilihan
 
-1. Sorot teks dalam editor
-2. Jalankan **"Notemd: Cipta pautan wiki daripada pemilihan"**
-3. Teks dibalut dengan `[[...]]` dan sebuah nota konsep akan dihasilkan
+Tindakan pilihan boleh membalut istilah terpilih sebagai pautan wiki dan mencipta nota konsep apabila destinasi ditetapkan. Gunakan apabila mahu memilih istilah sendiri, bukannya meminta model memilih daripada seluruh nota.
 
-## Tips
+## Petua
 
-- **Sediakan folder konsep terlebih dahulu** — tanpanya, tiada nota yang dihasilkan. Tetingkap amaran akan muncul jika ia tidak ditetapkan.
-- **Guna model mengikut tugas** — ekstrak konsep berfungsi dengan baik menggunakan model yang lebih murah (GPT-4o-mini, DeepSeek). Simpan model yang mahal untuk tujuan penyelidikan/terjemahan.
-- **Aktifkan penindasan sinonim** untuk domain teknikal di mana beberapa istilah merujuk kepada konsep yang sama.
-- **Padamkan duplikasi secara berkala** — jalankan arahan padam duplikasi selepas pemprosesan berkelompok untuk mengesan duplikasi hampir sama.
-- **Fail log akan ditulis semula** setiap kali dijalankan, bukan ditambah. Salininya jika anda memerlukan hasil sebelumnya.
+- Mulakan dengan sumber kecil dan folder konsep khusus.
+- Pilih bahasa sebelum membina koleksi besar.
+- Semak cadangan sinonim dan calon pendua secara berasingan.
+- Simpan log yang diperlukan sebelum pelaksanaan kemudian menulis gantinya.
 
----
+## Seterusnya
 
-## Langkah Seterusnya
-
-- [Wiki-Links](./wiki-links) — Cara konsep dipautkan secara dalam talian
-- [Diagrams](./diagrams) — Visualisasikan hubungan antara konsep
-- [Workflows](./workflows) — Gabungkan ekstrak dengan tugas lain
+- [Pautan wiki](./wiki-links): hasil nota diproses dan fail konsep.
+- [Aliran kerja](./workflows): urutan tepat One-Click Extract.
+- [Pemprosesan kelompok](../advanced/batch-processing): penjanaan folder dan hasil separa.

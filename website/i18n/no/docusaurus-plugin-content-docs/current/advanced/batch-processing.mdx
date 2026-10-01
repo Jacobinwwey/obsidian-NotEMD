@@ -1,121 +1,87 @@
 ---
 id: batch-processing
-title: "Batchbehandling"
-description: "Behandle flere filer effektivt"
+title: Batchbehandling
+description: >-
+  Velg en avgrenset mappe og kontroller resultater og delvis fullføring før ny
+  kjøring.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [batch processing, folders, concurrency, bulk operations]
-concepts: [Batch Processing, Concurrency, Folder Operations]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Node.js Worker Threads
-    url: https://nodejs.org/api/worker_threads.html
+keywords:
+  - Batchbehandling
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Batchbehandling
 
-<TLDR>
-**Notemd behandler hele mappeler i én handling med konfigurerbar samtidighet og kontroll over overskrivning.** Klikk høyre på en mappe for å batch-legge til wiki-linker, extrahere konsepter, gjennomføre forskning eller oversette alle notater inni. Samtidighetsbegrensninger forhindrer API-rate-limit-feil. Fortgangen rapporteres per fil. Overskrivingsverdien er konfigurerbar: skippe eksisterende, legge til eller ersatte. Fjellet filer registreres uten å avbryte batchen.
-
-Dette er en del av [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Mappehandlinger deler utvalg og framdriftsvisning, men ikke overskrivingsregler. Standard samtidighet er én. Begynn i en liten testmappe, kontroller omfang og mål, og utvid etterpå.</TLDR>
 
 ## Oversikt
 
-Batchbehandling omvandler en mappe med notater til en enkelt handling. Istedenfor å åpne hver notat og kjøre kommandoen individuelt, klikker du høyre på mappen og velger oppgaven. Notemd ganger gjennom alle `.md`-filer, aplicerer den valgte handlingen og rapporterer fortgang i realtid.
+Sidepanel/filutforsker har mappehandlinger for lenker, begreper, titler, oversettelse, originalpassasjer, Mermaid og formler. Ingen generell undersøkelseshandling for mapper finnes; tittelgenerering kan legge til undersøkelser. En batch er ingen mappetransaksjon: fullførte resultater beholdes ved feil/avbrudd.
 
-Dette funksjonen er essensiell for kunnskapsextraksjon i hele vaultet. Efter å importere desater av PDF-filer, for eksempel batch-legge til-linker etterpå batch-extrahere-konsepter, bygges din kunnskapsgraph på minutter fremfor timer.
+## Slik fungerer det
 
-## Hvordan det fungerer
+### Kjøremodell
 
-### Batchutviklingsmodellen
+1. Velg oppgave og mappe med ønskede filer.
+2. Filtyper, utvalg og oppgavespesifikke resultatfiltre bestemmer kandidatene.
+3. Oppgaven bruker sin modell/leverandør og viser status, feil og stier.
+4. Kontroller rapport og resultater etter fullføring eller avbrudd, før ny kjøring.
 
-```mermaid
-graph LR
-    A[Right-click Folder] --> B[Select Batch Task]
-    B --> C[Collect All .md Files]
-    C --> D[Partition by Concurrency]
-    D --> E[Execute Chunk in Parallel]
-    E --> F{All Files Done?}
-    F -->|No| G[Report Progress]
-    G --> E
-    F -->|Yes| H[Final Summary Toast]
-```
+Lenker, begreper, titler, originalpassasjer, Mermaid og formler tar vanligvis med undermapper. **Mappeoversettelse tar som standard bare direkte barn.** Utviklermodus og avanserte utvalgsprofiler kan endre omfang og filtre. Se faktiske treff.
 
-1. **Filsamling** -- Notemd skanner målmappen rekursivt (eller bare på toppnivå, avhengig av innstillingene) og samler inn alle `.md`-filer.
-2. **Samtidighetsindeling** -- Filene delges inn i chunker basert på `batchConcurrency`-innstillingen. Hver chunk kjøres parallelt; chunkene kjøres sekventielt.
-3. **Utvikling** -- Hver fil behandles med samme logikk som kommandoen for enkelt fil. Innstillinger for per-oppgave-provist og modell respekteres.
-4. **Fortgangsrapportering** -- En toast-notifikasjon oppdateres etter hver fil er ferdig, og viser `N / Total`-fortgangen.
-5. **Feilhantering** -- Dersom en fil feiler (API-feil, nettverkstidout osv.), registreres feilen og batchen fortssetter. Den endelige oppsummeringen listar alle fjellet filer.
-6. **Ferdigstilling** -- En oppsummeringstoast rapporterer totalt behandlet antall, suksesser og feil.
+### Overskriving
 
-### Overskriveverdien
+| Oppgave | Kontroll før ny kjøring |
+| ------ | ------------------------------------ |
+| Lenker | Separat standardresultat; se eget suffiks, mappe og kildeflytting |
+| Begreper | Aktive tilbakekoblinger kan supplere eksisterende notater; duplikater håndteres separat |
+| Tittelgenerering | Skriver egnede kilder og flytter hvis complete-målet er ledig |
+| Oversettelse | Eksisterende oversettelse kan erstattes; normalt `_<language>.md` |
+| Mermaid / formler | Endrer valgte notater; gjennomgå og ta backup |
 
-Når en fil som allerede har wiki-linker, konseptnotater eller oversettelser behandles, avhenger Notemd's verdi av overskrivingsinnstillingen:
+Ingen felles hopp over/legg til/erstatt-innstilling. Et opptatt complete-mål stopper flytting etter tittelgenerering, ikke genereringen selv. Generert og flyttet telles separat.
 
-| Modus | Verdien |
-|------|----------|
-| **Slett** | Den eksisterende innholdet blir ikke endret. Bare uendret filer behandles. |
-| **Legg til** (standard) | Nytt innhold legges til. De eksisterende wiki-linkene, konseptene eller oversettelserne behandles. |
-| **Endre** | Filen behandles fullstendig på nytt. Alle tidligere Notemd-endringer blir overskrive. |
+### Samtidighet
 
-Spesifikt for wiki-linking: Hvis en notat allerede inneholder `[[wiki-links]]`, lar **Slett**-modusen den være som den er, mens **Endre** sender hele notaten til LLM for ny link-innsatt. Bruk **Slett** for inkrementell behandling og **Endre** for å behandle på nytt etter en modelloppgradering.
+Behold `batchConcurrency: 1` til en prøve lykkes. Noen ruter krever også `enableBatchParallelism`; mappeoversettelse bruker samtidigheten direkte. Mer parallellitet belaster leverandør, minne og lokal server uten fartsgaranti. Mellomrom mellom forespørsler/grupper hindrer ikke alle kvoter eller annen kontobruk.
 
-### Konkurrenskontroll
+## Innstillinger
 
-`batchConcurrency`-innstillingen begrenser parallele API-kaller. Dette forhindrer rate-limit-feil (HTTP 429) når store mappeler behandles mot leverandører med strakte kvoter.
+| Innstilling | Startverdi | Virkning |
+| --------- | --------- | -------- |
+| `batchConcurrency` | `1` | Ønsket samtidighet på relevante ruter |
+| `enableBatchParallelism` | `false` | Aktiver støttet parallell planlegging |
+| `batchSize` | `50` | Gruppestørrelse i gruppevis planlegging |
+| `batchInterDelayMs` | `1000` | Pause mellom planlagte grupper |
+| `apiCallIntervalMs` | `500` | Intervall mellom samtidige API-forespørsler |
+| `folderTaskIncludeSubfoldersMode` | `legacy` | Behold hver oppgaves undermapperegler |
+| `enableStableApiCall` | `false` | Eksplisitt stabil forespørselsmodus |
 
-| Konkurrens | Anbefalt for | Typisk rate-limit-innflytelse |
-|-------------|----------------|---------------------------|
-| `1` | Kostnadsfrie planer, strikte leverandører | Ingen (seriell) |
-| `3` (standard) | De fleste molnekostnadsleverandører | Lav |
-| `5` | Ollama (lokalt), generøse planer | Ingen / Lav |
-| `10` | Lokale modeller med snabb inferens | Ingen |
+### Oppgavemodeller
 
-Hvis du møter 429-feil under batchbehandling, redusér samtidighet til 1 eller 2.
-
-## Konfigurasjon
-
-| Innstilling | Standard | Effekt |
-|---------|---------|--------|
-| `batchConcurrency` | `3` | Maksimal parallell API-kall under mappoperasjoner |
-| `batchOverwriteExisting` | `false` | Skriv over den eksisterende Notemd-innehållet. `false` = tilleggsmodus. |
-| `batchSkipProcessed` | `false` | Hoppa över filer som redan inneholder Notemd-markører (f.eks. wiki-linker) |
-| `batchRecursive` | `true` | Inkludere undermappar när man skanner mappen |
-| `enableStableApiCall` | `false` | Aktivera gjenprøvlogik (opptil 4 forsök) per fil under batch-prosessen |
-
-### Per-Task-modeller i batch
-
-Hver batch-operasjon bruker den tilsvarende per-task-modellen. Batch-add-links bruker `addLinksProvider`, batch-research bruker `researchProvider`, osv. Dette betyr at du kan bruke billige modeller for operasjoner med stor volum og reservere dyre modeller for oppgaver som kræver høy kvalitet.
+Mappehandlingene følger den tilsvarende filoppgavens modellvalg. Kontroller private dataruter. Lokal kontekst ved batchtitler bruker ett startsnapshot; redigering under kjøring blandes ikke inn i senere oppslag. Start en ny batch for å ta med endringene.
 
 ## Eksempel
 
-Du har en mapp `papers/` som inneholder 40 importerte forskningsnotater. Du vil legge til wiki-linker og extrahere konsepper fra dem alle:
+Opprett `trial-titles` med to tittelnotater. Kjør **Batch generate from titles** og se innhold, tilstøtende `trial-titles_complete` og antall generert/flyttet/feil. Undersøk den mislykkede filen først. Ny kjøring av kildemappen gjenopptar ikke automatisk bare gjenstående arbeid.
 
-1. Klikk høyre på mappen `papers/`
-2. Välj **"Notemd: Process mapp (legg til lenker)"**
-3. Notemd skanner mappen, finner 40 `.md`-filer og bearbeider 3 på gang (standardkonkurrens)
-4. En fremstegsnotis viser: `12/40 files processed...`
-5. Efter ca 3 minutter rapporterer en sammanfattingsnotis: `39 succeeded, 1 failed (API timeout on paper-37.md)`
-6. Gjentak med **"Notemd: Process mapp (utvinne konsep)"** for å skape konseptnotater for alle 40
+## Avbrudd og gjenoppretting
 
-Den ene feilfulle filen registreres. Du kan kjøre påkalt bare på den filen senere.
+Avbrudd stopper ny planlegging og støttede forespørsler. Eksterne systemer kan fullføre aksepterte kall/skrivninger; leverandøren styrer fakturering. Vent, sammenlign ferdige filer med gjenopprettings-/konfliktstier, og rydd etter gjennomgang.
 
 ## Tips
 
-- **Start med lav konkurrens** -- Hvis du er usikker på din leverandørs hastighetsbegrensninger, start med `1` og øk gradvis.
-- **Bruk skippmodus for inkrementelle oppdateringer** -- Efter den første fulla batchen, skift til `batchSkipProcessed: true` så bare nye notater bearbeides i fremtidige kjør.
-- **Aktiver stabile API-kaller** -- `enableStableApiCall: true` legger til gjenkørslogik som återhæmtes fra tidsvisse nettverksfeil under lange batcher.
-- **Kjør på nytt etter modelloppgraderinger** -- Hvis du skifter til en bedre modell, still på `batchOverwriteExisting: true` og kjør på nytt for å få bedre lenker og konsep.
-
----
+- Kontroller profilens faktiske utvalg.
+- Senk samtidighet og undersøk kvoter ved 429.
+- Skill avbrutt, mislykket og fullført.
+- Bevar uendret prøve og sikkerhetskopi.
 
 ## Neste trinn
 
-- [Workflows](/docs/features/workflows) -- Koble batchoppgaver til én-klikk-sidemenuknapper
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Anpass prompter for batchutvinning
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Fikse hastighetsbegrensingsfeil og koblingsfeil under batchkjøringer
-- [LLM Tjänsteleverantörer](/docs/providers/overview) -- Referens för modellkonfiguration per uppgift
+- [Arbeidsflyter](../features/workflows).
+- [Konfigurasjon](../getting-started/configuration).
+- [Feilsøking](./troubleshooting).

@@ -1,446 +1,103 @@
 ---
 id: configuration
-title: "Konfiguráció"
-description: "Beállítsa az Notemd beállításait és előnyölt értékeit"
+title: Beállítások
+description: >-
+  Szolgáltatók, kimeneti útvonalak, nyelvek és munkafolyamatok beállítása a
+  tényleges feladathatárok szerint.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Beállítások
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Konfiguráció
+# Beállítások
 
-<TLDR>
-**A Notemd konfiguráció 6 fő területet tartalmaz:** (1) LLM fornalmak és API kulcsok, (2) Munkavégzési alapú modellek választása, (3) Kielégítési útvonalok és szabványok, (4) UI nyelv és kielégítési nyelv, (5) Keresési szolgáltatások (Tavily/DuckDuckGo), (6) Szerkesztett munkafolyamatok. Minden beállítás található a Obsidian Beállítások → Notemd részben. A változások azonnal érvényesek.
-</TLDR>
+<TLDR>Nyissa meg a Settings → Notemd oldalt, és keresse meg a mezőt. A szolgáltatót és kimeneti helyet indítás előtt válassza ki. Egy jegyzeten teszteljen; a futó feladat megtarthatja induláskori beállításait.</TLDR>
 
-## Beállítások áttekintése
+## Áttekintés
 
-Hozzáférés: **Obsidian Beállítások (⚙️) → Notemd**
-
-### Fő részek
-
-1. **Fornalmak konfigurációja** — API kulcsok, alap URLs, modellek
-2. **Munkavégzési beállítások** — Munkavégzési alapú modellek választása
-3. **Kielégítési konfiguráció** — A készült fájlok mentése ahol
-4. **Nyelvi beállítások** — UI és kielégítési nyelvek
-5. **Keresés integrációja** — Tavily/DuckDuckGo beállítása
-6. **Munkafolyamatok** — Szerkesztett gombképzések
-7. **Fejlesztett beállítások** — Diagnozis, batch feldolgozás, blokkolás
+Az alapértelmezett szolgáltató DeepSeek, üres hitelesítő adatokkal. A profilválasztás nem hoz létre fiókot, nem telepít modellt és nem ad jogosultságot. Lásd [szolgáltatók](../providers/overview).
 
 <!-- notemd-settings-favorites-guide -->
-## Notemd beállítások megtalálása és előnépsorolása
+## Keresés és kedvencek
 
-A beállítások oldala olyan formájú, hogy többször használható legyen, nem csak egyetlen alkalomra szóló konfigurációkhoz:
+A **Search settings** névben, leírásban, aliasokban és látható kategóriákban keres, majd a mezőhöz vezet. A **★ Favorites** a mentett beállításokat leírással, kategóriával és célhellyel mutatja. Vaultonként, újraindítás után is megmaradnak; az elavult ID-k törlődnek. A keresőkifejezés a sáv összecsukásakor megmarad. A kedvenclista nem azonos a csak kedvencekben kereső szűrővel.
 
-- Használja a **Search settings** bevonót, amely az adatmezőket is figyelembe veszi, hogy egy beállítást nevével, leírásával, alias-ával vagy látható kategóriájával találja. A eredmények szintjei alapján sorrendeződnek, így közvetlenül az adott beállításra léphet össze.
-- Használja **★ Favorites**-t, hogy a gyakran módosított beállításokat a jelenlegi Vault-ben tárolja. Kattintva rá egy speciális lista nyílik meg, amelyben található a beállítás neve, leírása, kategória és közvetlen navigációs cél. A beállítások oldaláról nem kellett elhagynia a listát, hogy egy előnépsorolott elemet törölni.
-- A megtalálási eszközbar alapbán nyitva van. Ha több vertikális teret szereti, használja a chevron gombot, hogy azt egy emelkedő jobb felső részben lévő kontrollként összeösszenyomja; az aktuális keresés megmarad és visszaállításra kerül, amikor újra nyitják.
-- Az előnépsorolott elemek listája független a kizárólag előnépsorolt elemekre vonatkozó filtrektől. Az előnépsorolások stabil beállítás-identifikátorokat használják, azok érvényesek maradnak Obsidian újraindulások után, és ha egy beállítás már nem létezik, a megmaradt, elavult identifikátorok biztonságosan eltörölődnek.
+A **Diagram preview export PPI** alapértéke 300, tartománya 72–600, és csak PNG-re vonatkozik. Az SVG/PDF megőrzi a támogatott vektorgeometriát. Az **Also export complete Mermaid visuals** a kísérőfájlokat szabályozza, nem a Mermaid megjelenését a Drawnix-előnézetben.
 
-A **Diagram preview export PPI** beállítás alapértelmezettént **300 PPI**-t használ, de megengedi a **72-600** értékeket is. Ez csak a PNG rasterizálást kontrollálja; a SVG és PDF pedig a vektorgeometriát megőrizik. A **Also export complete Mermaid visuals** beállítás az opcionális, külön Mermaid elemek exportálását kezel, de nem határozza meg a Mermaid elemek láthatóságát a Drawnix előnézetekben.
----
+## 1. Szolgáltató
 
-## 1. Fornalmak konfigurációja
+Adja meg a megfelelő protokoll végpontját, a szükséges kulcsot és az elérhető modellt. A modelllistát és generálást külön ellenőrizze. A helyi szervernek/modellnek készen kell állnia; a felhő és átjáró megkapja a tartalmat. Magánadatok előtt a feladatonkénti útvonalakat is nézze át.
 
-### Fornalmak hozzáadása
+## 2. Feladatonkénti modellek
 
-1. **Válassza ki a fornalmat** a lefelépő listából (30+ elérhető)
-2. **Írja be az API kulcsot**
-3. **Választható**: Beállítsa a saját alapértelmezett URL-t (proxyek/hálózati átmenetekhez)
-4. **Kattintson a „Get Model List”-re**, hogy ellenőrizze a kapcsolatot
-5. **Válassza ki a alapértelmezett modellt**
+A `useMultiModelSettings` külön profilt/modellt enged hivatkozáshoz, címgeneráláshoz, kutatáshoz, fordításhoz, fogalmakhoz, eredeti részletekhez és Mermaidhez. Üres modellmező a szolgáltató modelljét használja; kikapcsolva az aktív profil érvényes. Azonos jegyzeten mérje a pontosságot, késleltetést és tényleges költséget.
 
-### Általános fornítók
+## 3. Kimenetek
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
+| Feladat | Alapértelmezett kimenet |
+| ------ | ------------------------- |
+| Hivatkozások hozzáadása | Külön `_processed.md` a forrás mellett; eredeti áthelyezése kikapcsolva |
+| Önálló fogalomkinyerés | Kiválasztott fogalommappa; csak cím, visszahivatkozás nélkül |
+| Fordítás | A forrás mellett `_<language>.md`; a létező cél felülírható |
+| Kutatás | Összefoglaló az aktív Markdown végére |
+| Kötegelt generálás címekből | Alkalmas források írása, majd áthelyezés a szomszédos `<folder>_complete` mappába, ha a cél engedi |
+| Diagramelőnézet/export | Támogatott forrás vagy vizuális export; ellenőrizze a jelentett útvonalat |
 
-#### Anthropic (Claude)
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
+A fogalommappa üresen indul; a `concepts` példa. Az önálló fogalomjegyzet minimális/teljes változata nem általános sablonmotor. [Fogalmak](../features/concept-notes). Feldolgozás és fordítás saját utótaggal/mappával dolgozik. Ellenőrizze a célokat; megszakítás nem vonja vissza a kész írásokat.
 
-#### Ollama (Local)
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
+## 4. Nyelvek
+
+A felület 21 nyelvet, a webhely 34 nyelvi útvonalat ad. A `uiLocale: auto` támogatott egyezést választ, egyébként angolt. A generált tartalom nyelve külön állítható, alapból angol. Támogatott feladatoknak saját nyelvük lehet; a fordítás a `language` mezőt használja. A darabszám nem bizonyítja a modell nyelvtudását.
+
+## 5. Keresés
+
+Válasszon Tavilyt kulccsal vagy DuckDuckGót kifejezetten. Üres kulcs nem vált szolgáltatást. Mindkettő hálózatos; a DuckDuckGo eredményoldalakat is letölthet. Címgenerálásban a kutatás kikapcsolt: `enableResearchInGenerateContent`. A helyi keresés is kikapcsolt, saját mappa- és feladathatárokkal. A hozzáadott helyi részleteket a kiválasztott LLM megkapja.
+
+## 6. Munkafolyamatok
+
+Használja a szerkesztőt vagy gombonként egy elnevezett DSL-sort:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
+A `::` a nevet és műveleteket, a `>` az ID-kat választja el. Alapból a jelentett hiba leállítja a sort. Lásd [munkafolyamatok](../features/workflows) a kontextusról és hibák utáni folytatásról.
 
-### Több fornító
+## 7. Haladó értékek
 
-Más fornítókat is beállíthatja és műveletek között őket váltathatja ki:
-- **Fő fornító**: Alapvető megoldásként használódik
-- **Műveletspecifikus fornítók**: Speciális műveletekhez változtatásokhoz
+| Beállítás | Alapérték | Hatás |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | Szolgáltató külön feladatútvonal nélkül |
+| `useMultiModelSettings` | `false` | Feladatonkénti szolgáltató/modell |
+| `useCustomConceptNoteFolder` | `true` | Fogalomkimenetek engedélyezése mappaválasztás után |
+| `conceptNoteFolder` | `''` | Nincs kiválasztott fogalommappa |
+| `extractConceptsMinimalTemplate` | `true` | Csak cím az önálló fogalmakban |
+| `extractConceptsAddBacklink` | `false` | Visszahivatkozások önálló kinyeréskor |
+| `moveOriginalFileOnProcess` | `false` | Forrás megőrzése hivatkozásfeldolgozásnál |
+| `chunkWordCount` | `3000` | Közelítő részméret, nem tokenkorlát |
+| `batchConcurrency` | `1` | Köteg alapértelmezett párhuzamossága |
+| `enableBatchParallelism` | `false` | Párhuzamos ütemezés az ezt használó útvonalakon |
+| `enableStableApiCall` | `false` | Kifejezetten bekapcsolható stabil kérésmód |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Munkafolyamat leállítása jelentett hibánál |
 
----
+A részméret nem a kimeneti tokenkeret. Kisebb részek nem oldanak meg minden kontextuskorlátot, és az alacsony párhuzamosság sem szüntet meg minden 429-et.
 
-## 2. Műveletspecifikus modellek
+## Beállításprofilok
 
-Különböző műveletekhez különböző modellt beállíthatja, hogy a költséget és a minőséget optimalizálja:
+A beállítás a vault bővítményadataiban található. Módosítás előtt mentse. A szolgáltatóexport saját érzékenymező-eltávolítási szerződéssel működik, nem teljes mentés. A tisztított profilokban is maradhatnak privát végpontok és metaadatok. Nyers beállítást és magánjegyzetet tartalmazó diagnosztikát ne publikáljon.
 
-### Művelet típusai
+## Beállítási hibák
 
-| Munka | Alapértelmezett modell | Cél |
-|------|--------------|---------|
-| **Összekötés** | Fő fornító | Wiki-hivatkozásokhoz szükséges konceptek azonosítása |
-| **Koncept kialakítása** | Fő nyújtó | Koncepciók kiolvasása és leírása |
-| **Tudományos kutatás** | Fő nyújtó | Web keresési eredmények összefoglalása |
-| **Übersetzung** | Fő nyújtó | Szöveg überszólítása |
-| **Diagram kialakítása** | Fő nyújtó | Mermaid/Canvas diagramok készítése |
+Kis jegyzeten ellenőrizze a pontos profilt/modellt. Hiányzó mezőnél nézze meg a keresést, kategóriát, fejlesztői láthatóságot és aktív vaultot. Adja meg a verziót és minimális beállítást titkok nélkül.
 
-### Példa: Költségoptimalizált beállítás
+## Tovább
 
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### Hogyan konfigurálni
-
-1. **Beállítások → Notemd → Feladatbeállítások**
-2. Mindentől egy feladatra a következőt válassza:
-   - ✅ **Fő nyújtót használjuk** (alapértelmezett)
-   - 🔄 **Személyre szabott nyújtót használjuk** → válassza a nyújtót és a modellt
-
----
-
-## 3. Kimeneti beállítások
-
-### Koncepciói figyelemek kimenete
-
-**Ahol tárolódnak a új konceptleírások:**
-
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Szabvány:**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### Mappastruktúra opciók
-
-**Opcion 1: Egyszerű (minden koncept egy mappában)**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**Opcion 2: Hierarchikus (forrásmappa alapján)**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-Konfigurálás: **Beállítások → Kielégítés → Használj hierarchikus mappákat**
-
-### Diagramkép kielégítése
-
-**Ahol tárolódnak a diagramok:**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**Formátum:**
-- `.mmd` (Mermaid forrás)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
-
-## 4. Nyelvi beállítások
-
-### UI Nyelv
-
-**Felület nyelve** (gombok, menük, ablakok):
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-Támogatott nyelvek: angol, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية és többek.
-
-### Kielégítés nyelve
-
-**Generált tartalom nyelve** (konceptleírások, kutatási összefoglalók):
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**Használati eset:** Kínai UI + angol kijelzés kétnyelvű kutatásokhoz.
-
-### Übersetzungsziel
-
-**Standardzielsprache** für Übersetzungsaufgaben:
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
-
-## 5. Suchintegrationsmöglichkeit
-
-### Tavily (Empfohlen)
-
-**Von KI optimierter Suchdienst:**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-Schlüssel hozzárendelés: [tavily.com](https://tavily.com/)
-
-**Funkciók:**
-- Hochwertige Ergebnisse
-- Von KI optimierte Zusammenfassungen
-- Quellenzitate
-
-### DuckDuckGo (Experimentell)
-
-**Kein API-Schlüssel erforderlich:**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**Hinweis:** Geringere Qualität, keine Anpassungsmöglichkeiten.
-
----
-
-## 6. Arbeitsablaufkonfiguration
-
-### Eigene Arbeitsabläufe erstellen
-
-**A munkafolyamok több feladatot egy gombba összeköti.**
-
-1. **Beállítások → Munkafolyamok → Munkafolyam hozzáadása**
-2. **Neve**: "Paper Analysis Flow"
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **Megőrzés**
-
-Új gomb jelentkezik a bal oldalsárban.
-
-### DSL szintaxisza
-
-**Formátum:** `action1>action2>action3`
-
-**Elérhető műveletek:**
-- `process-current-add-links` — Jelölt dokumentumba wiki-hivatkozások hozzáadása
-- `extract-concepts-current` — Konceptjelölt dokumentumok készítése
-- `research-and-summarize` — Web-recherche + összefoglalás
-- `translate-current` — Jelölt dokumentum übersetése
-- `summarize-as-mermaid` — Mermaid diagram készítése
-- `process-folder-add-links` — Mappának batch-kezelése
-
-** példámfolyamok:**
-
-**Szybki extrahálás konceptekből:**
-```
-process-current-add-links>extract-concepts-current
-```
-
-**Összetett kutatás:**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**Köznyelvi analízis:**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
-
-## 7. Fejlesztett beállítások
-
-### Hromados feldolgozás
-
-**Képes több fájlt egyaránt feldolgozni:**
-
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
-
-Magasabb érték = gyorsabb, de több API kérést jelent.
-
-### Intelligens rögzítés
-
-**Hosszú jegyzetek esetén rögzítsük a jegyzetet blokkokba:**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-Elkereli a token-környezeti hibákat.
-
-### Diagnostikai panel
-
-**Detalmas logok megtekintése:**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-Megjelenít:
-- API kérések/reakciók
-- Token-használata
-- Feldolgozás idősegek
-- Hibák
-
-### Duplikált konceptek azonosítása
-
-**Képzelj el közel egyenlő koncepteket:**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-Magasabb = agresszívabb összevonás.
-
----
-
-## Konfigurációs profillak
-
-### Be-/Kiszállítás beállításai
-
-**Oszd a konfigurációkat különböző eszközök között:**
-
-1. **Beállítások → Fejlesztett → Konfigurációt kiszállítás**
-2. Szárvál `notemd-config.json`
-3. Új eszközön: **Konfigurációt importálás**
-
-**Mit tartalmaz:**
-- Társító API kulcsok (vagyontatlan)
-- Modellek választása
-- Kielégítési útvonalak
-- Szerkeszthető munkafolyamok
-
----
-
-## Tanácsolt konfigurációk
-
-### Tanulók számára
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### Tudósok számára
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### Privátisításra gondos felhasználókhoz
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### Kétnyelvű munkához
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## Konfigurációs hibák eloldása
-
-### Beállítások nem mentésének megoldása
-- Ellenőrizze a fájl jogokat a `.obsidian/plugins/notemd/`-ban
-- Próbálja: Kikapcsolja a plugint → Újra engedélyezze
-
-### Névlenes API kulcs
-- Nincs extra tér
-- Ellenőrizze a megközelülés időtartamát
-- Ellenőrizze a krediteket a fornecedő táblalapján
-
-### Modellek nem töltődnek be
-- Kattintson a "Modelllistához lépés" gombra frissítéshez
-- Ellenőrizze a hálózati kapcsolatot
-- Próbálja más fornecedőt
-
----
-
-## További lépések
-
-- 📖 [Funkciók megjelenítése](../features/wiki-links)
-- 🔌 [Fornecedő beállítási útmutatók](../providers/overview)
-- ❓ [FAQ](../faq)
+- [Gyors kezdés](./quick-start).
+- [Kötegelt feldolgozás](../advanced/batch-processing).
+- [Egyéni promptok](../advanced/custom-prompts).
+- [Hibaelhárítás](../advanced/troubleshooting).

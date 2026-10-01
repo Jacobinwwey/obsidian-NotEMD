@@ -1,0 +1,107 @@
+---
+id: overview
+title: 開發者指南
+description: 沿用 provider、operation、渲染與文件契約，建置、測試並擴充 Notemd。
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - 開發者指南
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 開發者指南
+
+<TLDR>
+從功能分支開始，安裝鎖定依賴及兩個瀏覽器修訂版，建置並執行完整 Jest。修改契約的現有歸屬模組，使文件、provider 測試與原生消費端證據一起更新。
+</TLDR>
+
+## 準備工作副本
+
+複製[儲存庫](https://github.com/Jacobinwwey/obsidian-NotEMD)，閱讀 [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) 並建立功能分支。外掛 CI 在 Linux／Windows 用 Node 20，網站驗證用 Node 24。根目錄與 `website/` 分別安裝依賴。
+
+根目錄命令：
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+兩個 Playwright 套件可能鎖定不同 Chromium，乾淨環境只裝一個不足。`main.js` 是生成且被 Git 忽略的檔案，舊 bundle 不能證明新提交。
+
+## 修改前確認歸屬
+
+| 責任 | 主要原始碼 |
+| ---------------- | ---------------- |
+| 生命週期、命令與宿主路由 | `src/main.ts` |
+| Provider 預設、協定與校驗 | `src/llmProviders.ts` |
+| 請求、傳輸、重試與串流 | `src/llmUtils.ts` |
+| Operation 定義、schema、公開 CLI 選取 | `src/operations/`, `src/cliContracts.ts` |
+| 檔案任務、研究與翻譯 | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| 動作鏈與側欄組合 | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| 圖表規格與渲染 | `src/diagram/`, `src/rendering/` |
+| UI 字串及語言 | `src/i18n/` |
+| 公開指南與譯文 | `website/docs/`, `website/i18n/` |
+| 維護手冊和具日期證據 | `docs/maintainer/` |
+
+正式 bundle 自包含，也包含內嵌預覽宿主。候選獨立 render-host 不是已出貨資產契約，啟用前需同步包裝、資產、審計和文件。
+
+## 實作有邊界的變更
+
+1. 先重現行為，新增聚焦且失敗的測試。
+2. 修改不變量歸屬模組，在外部邊界驗證，不在呼叫者重複 provider／operation 知識。
+3. 執行聚焦與完整測試，寫入任務包含取消、錯誤及持久化。
+4. 更新英文與受影響語言；計畫、任務及 walkthrough 在 `docs/` 保留分離完整中英文版本。
+5. 視覺或原生匯出改動須檢查真實應用；XML、截圖、綠色建置都不能單獨證明可編輯性或連線附著。
+
+新增 provider 改 `llmProviders.ts`，相容時共用傳輸，更新 `llmProviders.test.ts`、`llmUtilsProviderSupport.test.ts`、README 和連線測試。保留串流及中斷回應處理。
+
+暴露 operation 前定義輸入／結果 schema、上下文、副作用與 handling tag。登錄不自動形成公開 Agent API，見 [Agent 指南](../agents/overview)。
+
+## 驗證變更
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint 門檻逐診斷比較；既有負債不允許新錯誤，總數降低也不能掩蓋回歸。檢索路徑變更按需執行 `npm run benchmark:local-kb`，報告語料與環境，不作通用速度宣稱。
+
+網站使用 Node 24：
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+1.9.8 譯文由 Codex 直接撰寫和審核。不執行舊翻譯寫入腳本，也不呼叫 LM Studio／翻譯端點，工具可排版、校驗及渲染已撰寫文字。
+
+## 在 Obsidian 與原生應用測試
+
+使用可捨棄 Vault。提交的宿主腳本要求 `.notemd-host-verification` 標記並核對複製 bundle；避免真實用戶 Vault。CLI 驗證同時嘗試 `obsidian help`、`obsidian-cli help`，工具缺失如實記錄，不把樁程式當真實宿主。
+
+PowerPoint、CircuitikZ 和投影片匯出有專用先決條件與產物。遵循[可靠性驗收](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md)和[發布手冊](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md)，明確保留行動端／最低版本未驗證。
+
+## 貢獻與發布
+
+PR 說明具體問題、最終行為、測試及限制。[Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) 接收可重現報告。不提交 API 憑證、私密 Vault 或無關產物。
+
+發布依儲存庫工具與手冊：同步版本、數字 tag、乾淨 tag 源碼、雙語說明、驗證草稿附件，再公開及明確部署 Pages。勿移動公開 tag 更換二進位檔。`.trellis/` 是本地流程狀態，不可成為 CI 依賴。
+
+## 延伸閱讀
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)：執行規範。
+- [專案狀態](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md)：計畫與證據。
+- [Agent 指南](../agents/overview)：能力及呼叫契約。
+- [1.9.8](../releases/1.9.8)：升級影響與邊界。

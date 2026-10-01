@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "ถัดไป",
-    "description": "The label for version current"
+    "message": "เอกสารปัจจุบัน",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "เริ่มต้นใช้งาน",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "คุณสมบัติหลัก",
+    "message": "ความสามารถหลัก",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {

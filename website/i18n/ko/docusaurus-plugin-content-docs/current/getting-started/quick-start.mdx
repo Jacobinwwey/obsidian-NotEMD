@@ -1,181 +1,80 @@
 ---
 id: quick-start
-title: 빠른 시작 가이드
-description: 5분 안에 Notemd로 시작해 보세요
+title: 빠른 시작
+description: provider를 설정하고 시험 노트의 실제 출력을 확인한 뒤 폴더 작업으로 확장합니다.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 빠른 시작
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 빠른 시작 가이드
+# 빠른 시작
 
-<TLDR>
-**5분 만에 Notemd를 사용해 보세요.** 단 3단계만 거치면 됩니다: (1) LLM API 키를 추가하거나 로컬 Ollama을 사용합니다, (2) 노트를 열고 “파일 처리(링크 추가)” 명령을 실행합니다, (3) 사이드바에서 원클릭 워크플로우를 살펴봅니다. 30개 이상의 제공업체를 지원하며, 코딩이 필요하지 않습니다. Ollama를 사용하면 오프라인에서도 작동합니다.
-</TLDR>
+<TLDR>이미 접근 가능한 provider와 시험용 Markdown 노트 하나로 시작하세요. 폴더를 처리하기 전에 생성 파일을 확인합니다. 클라우드 호출은 작업 내용을 전송하며 로컬 모델도 실행 중인 서버와 준비된 모델이 필요합니다.</TLDR>
 
-## 1단계: 첫 번째 LLM 제공업체를 설정합니다 (2분)
+## 1. 첫 LLM 설정
 
-### 옵션 A: 클라우드 제공업체 (OpenAI, Anthropic 등)
+1. [설치 및 활성화](./installation) 후 **Settings → Notemd**를 엽니다.
+2. provider, endpoint, 필요한 인증 정보와 접근 가능한 모델을 선택합니다. **Fetch models**가 지원되어도 생성 가능 여부는 별도 확인합니다.
+3. **연결 테스트**을 실행하고 인증·모델·주소 오류부터 해결합니다.
+4. **개념 노트 폴더 경로**를 검색해 필요한 경우 `concepts` 같은 전용 폴더를 선택합니다. 초기 값은 비어 있으며 `concepts/`가 자동 설정되는 것은 아닙니다.
 
-1. **설정** → **Notemd**를 엽니다.
-2. **LLM Provider Configuration** 아래에서 드롭다운 목록에서 제공업체를 선택하세요.
-3. **API 키**를 입력하세요.
-4. (선택 사항) 사용 가능한 모델을 보려면 **“Get Model List”**를 클릭하세요.
-5. 각 작업 유형에 맞는 모델을 선택하세요
+Ollama는 모델을 먼저 받고 정확한 이름을 입력합니다. 초기 주소는 `http://localhost:11434/api`입니다. LM Studio는 서버를 시작하고 `LMStudio` 프로필을 선택하세요. [로컬 모델](../providers/local)을 참고하세요. 요약 모델이 로컬이어도 웹 연구에는 네트워크가 필요합니다.
 
-**인기 있는 선택지:**
-- **OpenAI**: `gpt-4o-mini` (빠르고, 저렴함)
-- **Anthropic**: `claude-sonnet-4-6` (고품질)
-- **DeepSeek**: `deepseek-chat` (매우 저렴함)
+## 2. 첫 작업 실행
 
-### 옵션 B: 로컬 Ollama (API 키 필요 없음)
+선택한 provider로 보내도 되는 내용으로 `Notemd trial.md`를 만드세요:
 
-1. [Ollama](https://ollama.com/)를 설치하세요.
-2. 모델 다운로드: `ollama pull llama3.1`
-3. Notemd 설정에서 제공업체로 **"Ollama"**를 선택하세요
-4. 모델 이름: `llama3.1` (또는 사용자가 다운로드한 모든 모델)
-
-## 2단계: 첫 번째 작업 시도하기 (1분)
-
-### 노트에 위키 링크 추가하기
-
-1. 의미 있는 내용이 포함된 노트를 열어보세요.
-2. 편집기에서 마우스 오른쪽 버튼 클릭
-3. **"파일 처리(링크 추가)"**를 선택하세요.
-4. 몇 초 기다려 주세요.
-5. 주요 개념들은 이제 `[[wiki-linked]]`입니다!
-
-**예시:**
-
-**이전:**
-```
-Machine learning models use neural networks to process data.
+```text
+기계 학습 모델은 신경망을 이용해 예제에서 패턴을 학습합니다.
 ```
 
-**완료 후:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
+사이드바나 명령 팔레트에서 **파일 처리 (링크 추가)**를 실행합니다. 기본적으로 원본은 유지하고 같은 폴더에 `Notemd trial_processed.md`를 만듭니다. 실제 링크를 열어 확인하세요. 다음은 가능한 예시일 뿐입니다:
+
+```markdown
+[[기계 학습]] 모델은 [[신경망]]을 이용해 예제에서 패턴을 학습합니다.
 ```
 
-## 3단계: 기능 탐색 (2분)
+선택한 개념 폴더에도 노트가 생길 수 있습니다. 파일과 링크를 검토하세요. 모든 핵심 개념을 정확히 찾았다는 보장은 아닙니다.
+
+## 3. 다른 기능 살펴보기
 
 ### 개념 노트 추출
 
-1. 마우스 오른쪽 버튼 클릭 → **"현재 파일에서 개념 추출"**
-2. Notemd는 각 개념마다 별도의 파일을 생성합니다.
-3. 구성된 콘셉트 폴더(기본값: `concepts/`)를 확인해 주세요.
-4. 각 콘셉트 노트에는 원본 노트로 연결되는 백링크가 있습니다.
+**개념 추출 (현재 파일)**은 원문을 다시 쓰지 않습니다. 개념 폴더를 설정해야 하며 기본 결과는 제목만 있는 노트, 원문 역링크 없음입니다. 역링크는 명시적으로 켜세요. [개념 노트](../features/concept-notes).
 
-### 조사 및 요약
+### 연구와 요약
 
-1. 노트에서 주제를 강조 표시하세요
-2. 마우스 오른쪽 버튼 클릭 → **"조사 및 요약"**
-3. Notemd은 웹 검색을 수행합니다 (Tavily 또는 DuckDuckGo)
-4. 요약 내용이 출처와 함께 노트에 추가됩니다.
+Markdown 편집기에서 주제를 선택하거나 노트 제목을 사용해 **조사 및 요약**를 실행합니다. Tavily와 키 또는 DuckDuckGo를 명시적으로 선택하세요. 현재 노트에 요약을 추가합니다. 출처를 열어 주장과 대조하세요.
 
-### 원클릭 워크플로우
+### 원클릭 워크플로
 
-1. 워크플로우 버튼이 있는지 **왼쪽 사이드바**를 확인해 보세요.
-2. 어떤 노트에서든 **"One-Click Extract"**를 클릭하세요
-3. 실행 과정은 다음과 같습니다: 링크 추가 → 개념 추출 → 조사 → 다이어그램 생성
-4. 한 번의 클릭으로 모든 것이 해결됩니다!
+기본 **One-Click Extract** 정의는 다음과 같습니다:
 
-## 일반적인 초기 작업들
-
-### 과제 1: 논문/기사 처리
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### 과제 2: 노트 번역
+링크를 추가하고 개념 또는 선택 폴더의 적격 노트를 제목으로 생성한 다음 complete 폴더의 Mermaid를 복구합니다. 기존 개념 노트도 처리할 수 있습니다. 첫 실행은 전용 시험 폴더를 사용하세요. 웹 연구나 일반 도표 생성이 자동 추가되지는 않습니다.
 
-```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
+## 취소와 출력 확인
 
-### 과제 3: 지식 맵 생성
-
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
-
-## 맞춤 설정 팁
-
-### 작업별 모델 선택
-
-다양한 작업에 맞는 서로 다른 모델을 사용할 수 있습니다:
-
-| 작업 | 추천 모델 | 왜요? |
-|------|------------------|-----|
-| 링크 추가 | `gpt-4o-mini`, `deepseek-chat` | 빠르고, 많은 호출 |
-| 개념 추출 | `claude-sonnet-4-6`, `gpt-4o` | 품질 추출 |
-| 조사 | `perplexity`, `gpt-4o` | 웹 기반 |
-| 번역 | `gemini-flash`, `gpt-4o` | 다국어 |
-| 다이어그램 | `claude-opus`, 로컬 모델 | 복잡한 추론 |
-
-구성 위치: **Settings → Notemd → Task-Specific Models**
-
-### 커스텀 워크플로우
-
-자신만의 버튼 만들기:
-
-1. 설정 → Notemd → 워크플로우
-2. “워크플로우 추가”를 클릭하세요.
-3. DSL 입력: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. 이름 지정: "My Research Flow"
-5. 사이드바에 새로운 버튼이 나타납니다.
+진행 화면의 **취소**로 후속 작업을 중지합니다. 완료 출력은 남으며 취소는 실행 취소 트랜잭션이 아닙니다. 서버 생성이나 과금 중지를 보장하지 않습니다. 종료를 기다리고 출력 경로·복구 충돌을 확인한 뒤 다시 실행하세요.
 
 ## 문제 해결
 
-### "API 키가 유효하지 않습니다."
-- 키가 올바른지 확인하세요(여분의 공백 없음).
-- 계정에 크레딧이 있는지 확인하세요.
-- 설정의 "Connection Test" 버튼을 사용해 테스트하세요
-
-### "모델을 찾을 수 없습니다."
-- 사용 가능한 모델을 보려면 “Get Model List”를 클릭하세요.
-- 일부 제공업체는 특정 모델 이름을 요구합니다(예: `gpt-4o`이지 `gpt-4`은 아님).
-
-### 링크가 표시되지 않습니다.
-- 메모에 충분한 내용이 포함되도록 하세요(50단어 이상).
-- 더 강력한 모델을 사용해 보세요.
-- LLM 호출이 성공했는지 확인하십시오(진단 패널 참조).
-
-### 느린 성능
-- 더 빠른 모델을 사용하세요(`gpt-4o-mini` 대신 `gpt-4o` 사용).
-- 설정에서 청크 크기를 줄이기
-- 배치 작업에 대한 병렬 처리를 활성화합니다.
+- 인증/모델 오류: 정확한 프로필과 연결 시험을 확인합니다.
+- 개념 파일 없음: 폴더 설정과 활성화를 확인합니다.
+- 유용한 링크 없음: 응답과 사용자 prompt를 확인합니다. 추출을 보장하는 최소 단어 수는 없습니다.
+- 사용량 제한: 계정 한도를 확인하는 동안 배치 동시성은 기본 `1`로 유지합니다.
 
 ## 다음 단계
 
-- 📖 [모든 기능 살펴보기](../features/wiki-links)
-- ⚙️ [고급 설정](./configuration)
-- 🔧 [LLM 제공업체 설정](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## 비디오 튜토리얼
-
-3분짜리 빠른 시작 비디오(중국어)를 시청하세요:
-[【완전 오픈소스 무료! NotEMD 3분 속성 가이드】](https://b23.tv/lqR0RlA)
-
-## 도움 받기
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **문제점**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **문서**: [전체 문서](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [설정](./configuration).
+- [워크플로](../features/workflows).
+- [문제 해결](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)에 민감 정보를 제거한 증거를 첨부하세요.

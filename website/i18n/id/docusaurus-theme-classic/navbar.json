@@ -8,15 +8,35 @@
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "Dokumen",
+    "message": "Dokumentasi",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Pertanyaan umum",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Mulai di sini",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Pengguna baru",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Alur pengguna",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Pengembang",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

@@ -1,121 +1,91 @@
 ---
 id: batch-processing
-title: "Pemprosesan Secara Pukal"
-description: "Memproses berbilang fail dengan cekap"
+title: Pemprosesan kelompok
+description: >-
+  Pilih folder berskop jelas, fahami hasil khusus tugas dan periksa penyiapan
+  separa sebelum mengulang kelompok.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [batch processing, folders, concurrency, bulk operations]
-concepts: [Batch Processing, Concurrency, Folder Operations]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Node.js Worker Threads
-    url: https://nodejs.org/api/worker_threads.html
+keywords:
+  - Pemprosesan kelompok
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Pemprosesan Secara Pukal
+# Pemprosesan kelompok
 
-<TLDR>
-**Notemd memproses folder keseluruhan dalam satu tindakan dengan kekonduksian yang boleh dikonfigurasi dan kawalan penggantian.** Klik kanan pada folder untuk menambah pautan wiki secara pukal, mengekstrak konsep, menjalankan penyelidikan, atau menterjemahkan semua nota di dalamnya. Had kekonduksian mengelakkan ralat had kelajuan API. Kemajuan dilaporkan untuk setiap fail. Tingkah laku penggantian boleh dikonfigurasi: abaikan yang sedia ada, tambah, atau gantikan. Fail yang gagal akan direkodkan tanpa menghentikan pemprosesan pukal.
+<TLDR>Tindakan folder berkongsi kawalan pemilihan dan kemajuan, tetapi hasil serta penulisan gantinya berbeza. Keserentakan lalai ialah satu. Mulakan dengan folder ujian khusus, periksa skop dan destinasi, kemudian luaskan kelompok.</TLDR>
 
-Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Gambaran keseluruhan
 
-## Gambaran Keseluruhan
+Gunakan tindakan folder bar sisi atau menu penjelajah fail yang sepadan. Tugas meliputi tambah pautan, ekstraksi konsep, penjanaan tajuk, terjemahan, ekstraksi teks asal serta pembaikan Mermaid dan formula. Tiada tindakan penyelidikan folder umum; penjanaan tajuk boleh menyertakan penyelidikan pilihan.
 
-Pemprosesan secara pukal menukar folder nota menjadi satu operasi tunggal. Daripada membuka setiap nota dan menjalankan arahan secara berasingan, anda hanya perlu klik kanan pada folder dan pilih tugas yang diinginkan. Notemd akan melalui setiap fail `.md`, melaksanakan tindakan yang dipilih, dan melaporkan kemajuan dalam masa nyata.
+Kelompok bukan transaksi seluruh folder. Hasil yang berjaya ditulis kekal jika fail lain gagal atau operasi dibatalkan.
 
-Ciri ini sangat penting untuk pengekstrakan pengetahuan di seluruh vault. Selepas mengimport puluhan fail PDF, contohnya, dengan menambah pautan secara pukal diikuti oleh pengekstrakan konsep secara pukal, graf pengetahuan anda dapat dibina dalam masa beberapa minit sahaja, bukan jam.
+## Cara kerja
 
-## Cara Ia Berfungsi
+### Model pelaksanaan kelompok
 
-### Model Pelaksanaan Secara Pukal
+1. Pilih tugas dan folder yang hanya mengandungi fail yang dimaksudkan.
+2. Tugas mengumpulkan fail layak, menggunakan peraturan sambungan/pemilihan dan mengecualikan hasil khusus tugas.
+3. Penyedia/model tugas digunakan; kemajuan, kegagalan dan destinasi dilaporkan.
+4. Selepas selesai atau batal, semak laporan dan fail sebelum mengulang.
 
-```mermaid
-graph LR
-    A[Right-click Folder] --> B[Select Batch Task]
-    B --> C[Collect All .md Files]
-    C --> D[Partition by Concurrency]
-    D --> E[Execute Chunk in Parallel]
-    E --> F{All Files Done?}
-    F -->|No| G[Report Progress]
-    G --> E
-    F -->|Yes| H[Final Summary Toast]
-```
+Skop lalai menyertakan subfolder untuk tambah pautan, konsep, penjanaan tajuk, ekstraksi asal, pembaikan Mermaid dan formula. **Terjemahan folder lalai hanya fail anak langsung.** Profil pemilihan lanjutan boleh mengubah skop/penapis apabila mod pembangun dan pemilihan fail lanjutan kedua-duanya aktif. Semak profil sebenar; jangan anggap semua tugas menelusuri subfolder secara sama.
 
-1. **Pengumpulan fail** -- Notemd akan menyemak folder sasaran secara rekursif (atau hanya pada tahap atasan, bergantung pada tetapan) dan mengumpulkan semua fail `.md`.
-2. **Pembahagian kekonduksian** -- Fail-fail dibahagikan kepada kumpulan kecil berdasarkan tetapan `batchConcurrency`. Setiap kumpulan dijalankan secara selari; kumpulan lain pula dijalankan secara berurutan.
-3. **Pelaksanaan** -- Setiap fail diproses menggunakan logik yang sama seperti arahan untuk fail tunggal. Tetapan penyedia dan model untuk setiap tugas akan dihormati.
-4. **Laporan kemajuan** -- Pemberitahuan toast akan dikemaskini selepas setiap fail selesai, menunjukkan kadar kemajuan `N / Total`.
-5. **Pengendalian ralat** -- Jika sesuatu fail gagal (ralat API, masa tamat sambungan rangkaian, dan sebagainya), ralat tersebut akan direkodkan dan pemprosesan pukal akan diteruskan. Ringkasan akhir akan menyenaraikan semua fail yang gagal.
-6. **Penyelesaian** -- Pemberitahuan toast ringkasan akan melaporkan jumlah keseluruhan yang diproses, kejayaan, dan kegagalan.
+### Tingkah laku tulis ganti
 
-### Kelakuan Menulis Semula
+| Tugas | Perkara diperiksa sebelum mengulang |
+| ------ | ------------------------------------ |
+| Tambah pautan | Hasil berasingan secara lalai; semak akhiran, folder hasil dan pemindahan asal |
+| Ekstraksi konsep | Nota sedia ada boleh menerima pautan balik apabila aktif; semakan pendua berasingan |
+| Penjanaan tajuk | Kandungan ditulis ke nota sumber layak; hasil berjaya dipindah ke folder complete dilaporkan jika destinasi kosong |
+| Terjemahan | Hasil terjemahan sepadan boleh ditulis ganti; nama lalai menggunakan `_<language>.md` |
+| Pembaikan Mermaid / formula | Mengubah nota pilihan; semak sampel kecil dan simpan sandaran |
 
-Apabila memproses fail yang sudah mengandungi pautan wiki, nota konsep, atau terjemahan, kelakuan Notemd bergantung pada tetapan penulisan semula:
+Tiada tetapan langkau/tambah/ganti sejagat. Bagi penjanaan tajuk kelompok, destinasi folder complete sedia ada menghalang pemindahan; ini tidak bermakna penjanaan sebelumnya dilangkau. Hasil membezakan jumlah dijana dan dipindahkan.
 
-| Mod | Kelakuan |
-|------|----------|
-| **Lompat** | Kandungan sedia ada tidak diubah. Hanya fail yang belum diubah sahaja diproses. |
-| **Tambah** (lazim) | Kandungan baru ditambahkan. Pautan wiki, konsep, atau terjemahan sedia ada akan dipelihara. |
-| **Gantikan** | Fail diproses sepenuhnya semula. Semua pengubahsuaian Notemd sebelum ini akan ditulis semula. |
+### Kawalan keserentakan
 
-Untuk pautan wiki khususnya: jika sebuah nota sudah mengandungi `[[wiki-links]]`, mod **Lompat** akan membiarkannya begitu sahaja, manakala mod **Gantikan** akan menghantar semula keseluruhan nota ke LLM untuk penyisipan pautan yang baru. Gunakan **Lompat** untuk pemprosesan berperingkat dan **Gantikan** untuk pemprosesan semula selepas kemas kini model.
+Kekalkan `batchConcurrency` pada `1` sehingga sampel perwakilan berjaya. Sesetengah laluan juga memerlukan `enableBatchParallelism`; terjemahan folder menggunakan keserentakannya secara langsung. Nilai lebih tinggi menambah tekanan penyedia, memori dan pelayan setempat, bukan jaminan lebih pantas.
 
-### Kawalan Serentak
-
-Tetapan `batchConcurrency` mengehadkan panggilan API secara serentak. Ini mengelakkan ralat had kelajuan (HTTP 429) semasa memproses folder besar pada penyedia dengan kuota yang ketat.
-
-| Serentak | Disyorkan Untuk | Kesan Had Kelajuan Biasa |
-|-------------|----------------|---------------------------|
-| `1` | Tahap percuma, penyedia yang ketat | Tiada (siri) |
-| `3` (lalai) | Kebanyakan penyedia awan | Rendah |
-| `5` | Ollama (setempat), tahap yang murah hati | Tiada / Rendah |
-| `10` | Model setempat dengan inferensi yang cepat | Tiada |
-
-Jika anda menghadapi ralat 429 semasa pemprosesan berkumpulan, kurangkan kekonduksian kepada 1 atau 2.
+Sela API dan lengah antara kelompok mengurangkan lonjakan, tetapi tidak menjamin pematuhan kuota permintaan/token, had akaun atau penggunaan aplikasi lain pada titik akhir sama.
 
 ## Konfigurasi
 
-| Pengaturan | Lalai | Kesan |
-|---------|---------|--------|
-| `batchConcurrency` | `3` | Jumlah panggilan API selari maksimum semasa operasi folder |
-| `batchOverwriteExisting` | `false` | Gantikan kandungan Notemd yang sedia ada. `false` bermaksud mod tambahan. |
-| `batchSkipProcessed` | `false` | Langkau fail yang sudah mengandungi penanda Notemd (contohnya, pautan wiki) |
-| `batchRecursive` | `true` | Sertakan subdirektori semasa memindai folder |
-| `enableStableApiCall` | `false` | Aktifkan logik percubaan semula (sehingga 4 percubaan) untuk setiap fail dalam kumpulan |
+| Tetapan | Lalai | Kesan |
+| --------- | --------- | -------- |
+| `batchConcurrency` | `1` | Keserentakan diminta pada laluan kelompok berkenaan |
+| `enableBatchParallelism` | `false` | Aktifkan penjadualan selari apabila disokong |
+| `batchSize` | `50` | Saiz kumpulan pada laluan penjadualan kelompok |
+| `batchInterDelayMs` | `1000` | Lengah antara kumpulan apabila berkenaan |
+| `apiCallIntervalMs` | `500` | Sela penjadualan permintaan serentak |
+| `folderTaskIncludeSubfoldersMode` | `legacy` | Kekalkan skop subfolder lalai setiap tugas |
+| `enableStableApiCall` | `false` | Mod permintaan stabil yang dipilih jelas |
 
-### Model Mengikut Tugas dalam Kumpulan
+### Model khusus tugas dalam kelompok
 
-Setiap operasi kumpulan menggunakan model yang sesuai mengikut tugas. batch-add-links menggunakan `addLinksProvider`, batch-research menggunakan `researchProvider`, dan sebagainya. Ini bermakna anda boleh gunakan model murah untuk operasi berskala besar dan simpan model mahal untuk tugas yang memerlukan kualiti tinggi.
+Tindakan folder menggunakan pilihan penyedia/model yang sama seperti tugas satu fail berkaitan. Semak sebelum bahan peribadi. Dapatan pengetahuan setempat pilihan untuk penjanaan tajuk kelompok menggunakan satu petikan keadaan indeks pada permulaan; suntingan ketika berjalan tidak dicampur ke hasil dapatan kemudian. Mulakan kelompok baharu untuk memasukkannya.
 
 ## Contoh
 
-Anda mempunyai sebuah folder `papers/` yang mengandungi 40 nota penyelidikan yang diimport. Anda ingin menambah pautan wiki dan mengekstrak konsep daripada kesemuanya:
+Cipta `trial-titles` dengan dua nota tajuk tanpa fail lain. Jalankan **Batch generate from titles**, semak kandungan dan destinasi `trial-titles_complete`, kemudian jumlah dijana/dipindah/ralat. Diagnosis fail gagal sebelum mengulang; menjalankan folder asal semula bukan sambungan automatik tepat bagi kerja belum siap.
 
-1. Klik kanan pada folder `papers/`
-2. Pilih **"Notemd: Process folder (add links)"**
-3. Notemd akan menyemak folder tersebut, mencari 40 fail `.md`, dan memproses 3 fail setiap kali (konvergensi lalai)
-4. Tetingkap kemajuan akan menunjukkan: `12/40 files processed...`
-5. Selepas kira-kira 3 minit, tetingkap ringkasan akan melaporkan: `39 succeeded, 1 failed (API timeout on paper-37.md)`
-6. Ulangi dengan **"Notemd: Process folder (extract concepts)"** untuk membuat nota konsep bagi kesemua 40 fail tersebut
+## Pembatalan dan pemulihan
 
-Fail yang gagal akan direkodkan. Anda boleh menjalankannya semula hanya pada fail tersebut kemudian.
+Cancel menghentikan penjadualan baharu dan menghantar pembatalan kepada permintaan disokong. Panggilan atau penulisan yang sudah diterima sistem luaran mungkin selesai; bil jauh dikawal penyedia. Tunggu kelompok stabil, periksa fail selesai dan laluan pemulihan/konflik. Kekalkan hasil pemulihan sehingga dibandingkan dengan nota semasa.
 
-## Tips
+## Petua
 
-- **Mulakan dengan konvergensi yang rendah** -- Jika anda tidak pasti tentang had kelajuan penyedia perkhidmatan, mulakan dengan `1` dan tingkatkan secara beransur-ansur.
-- **Gunakan mod lompat untuk kemas kini berperingkat** -- Selepas kumpulan penuh pertama, tukar kepada `batchSkipProcessed: true` supaya hanya nota baru yang diproses pada jalan-jalan seterusnya.
-- **Aktifkan panggilan API yang stabil** -- `enableStableApiCall: true` menambah logik percubaan semula yang memulihkan diri daripada ralat rangkaian sementara semasa kumpulan yang panjang.
-- **Jalankan semula selepas kemas kini model** -- Jika anda beralih ke model yang lebih baik, tetapkan `batchOverwriteExisting: true` dan jalankan semula untuk mendapatkan pautan dan konsep yang lebih baik.
+- Sahkan fail padanan sebenar sebelum menggunakan profil pemilihan.
+- Kurangkan keserentakan dan semak kuota untuk ralat 429.
+- Bezakan batal, gagal dan selesai.
+- Simpan sampel asal serta sandaran sebelum operasi yang mengubah nota.
 
----
+## Seterusnya
 
-## Langkah Seterusnya
-
-- [Workflows](/docs/features/workflows) -- Susun tugas kumpulan menjadi butang sidebar satu klik
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Sesuaikan promp untuk pengekstrakan kumpulan
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Perbaiki ralat had kelajuan dan kegagalan sambungan semasa jalan-jalan kumpulan
-- [Pembekal LLM](/docs/providers/overview) -- Rujukan konfigurasi model mengikut tugas
+- [Aliran kerja](../features/workflows): pengendalian kegagalan rantaian.
+- [Konfigurasi](../getting-started/configuration): destinasi dan lalai.
+- [Penyelesaian masalah](./troubleshooting): diagnosis fail gagal.

@@ -1,18 +1,18 @@
 {
   "version.label": {
-    "message": "Neste",
-    "description": "The label for version current"
+    "message": "Gjeldende dokumentasjon",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Begynn med",
+    "message": "Kom i gang",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Kjernefunksjoner",
+    "message": "Hovedfunksjoner",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM-providere",
+    "message": "LLM-leverandører",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

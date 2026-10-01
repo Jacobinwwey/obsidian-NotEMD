@@ -1,16 +1,13 @@
 ---
 id: local
 title: ローカルモデル
-description: Ollamaを設定し、ローカルのLLMも設定します。
+description: 起動済みの Ollama、LM Studio、OVMS を接続し、通信する範囲を把握します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - ローカルモデル
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,46 +15,45 @@ import TLDR from '@site/src/components/TLDR';
 # ローカルモデル
 
 <TLDR>
-**ローカルプロバイダーは、ホストされているAPI上にノートの内容を保存しません。** 現在のローカルパスでは、ネイティブな`ollama`トランスポートを使用して Ollamaを、またOpenAI互換のトランスポートを使用して LMStudioを処理します。どちらのパスにもAPIキーは必要ありませんが、ローカルサーバーとモデルは事前に起動している必要があります。
-
-これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
+端末上で動くサーバーに内容を処理させる設定です。モデルを先に取得／読み込み、対応プロトコルを指定します。ローカル LLM の選択だけでは Web 検索、遠隔 URL、依存導入、クラウド指定タスクはオフラインになりません。
 </TLDR>
 
-## セットアップ
+## 導入
 
-Ollamaの場合は、Ollamaをインストールし、必要なモデルを取得してサーバーを起動した後、Notemdに`Ollama`プロバイダープロファイルを追加します。LMStudioの場合は、LM Studioのローカルサーバーでモデルを読み込み、`LMStudio`プロバイダープロファイルを追加します。
+[Ollama](https://ollama.com/) はサーバー導入とモデル pull、[LM Studio](https://lmstudio.ai/) はモデル読み込みと API サーバー起動、OVMS はモデル配備が必要です。
 
-ローカルモデルは単なる設定ではなく、動作に必要な依存要素です。Notemdはローカルプロセスが公開する機能のみを呼び出すことができるため、プラグインのデバッグを行う前にObsidianの外部でローカルモデルを確認してください。
+一致するプリセットで正確な公開モデル名を設定し、接続とノート処理を確認します。Notemd はモデル導入やサーバー起動を代行しません。
 
 ## エンドポイントと認証
 
-| プロバイダー | ベース URL | デフォルトモデル | APIキー | メモ |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | 必要ありません | NDJSON ストリーミング；`/api/tags`を介したモデル発見 |
-| LMStudio | `localhost:1234/v1` | `local-model` | 必要ありません | ベアラートークンとして`"EMPTY"`を送信します。OpenAI互換です。 |
+| プリセット | 既定 URL | モデルの開始値 | プロトコル／認証 |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | ネイティブ Ollama。キー不要 |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI-compatible。キー任意、既定 `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI-compatible。配備に合うモデルと認証を設定 |
 
-Ollamaは、Base URLの下にあるネイティブな`/chat`パスを使用します。LMStudioはOpenAI互換の`chat/completions`ルートに従い、ローカルサーバーで読み込まれたモデルを期待します。
+`localhost` は Obsidian を実行している端末です。スマートフォン自身のループバックから PC のモデルへは接続できません。LAN はネットワークサービスなので、実アドレスと適切な認証を使い、未認証サーバーを信頼できないネットワークへ公開しないでください。
 
-## モデル検出
+## モデルの発見
 
-Ollamaは`ollama-tags`のディスカバリーモードを使用し、ローカルで取得したタグを一覧表示します。LMStudioは、サーバーが`/v1/models`を公開している場合に、OpenAI互換のモデルディスカバリーを利用します。
-
-ディスカバリで何も返ってこない場合、それは通常ローカルサーバーの状態に問題があることを意味します。モデルが取得されていない、読み込まれていない、またはサーバーがプロファイルとは異なるホスト/ポートにバインドされているのです。
+Ollama は `/api/tags`、LM Studio は `/v1/models`、OVMS は配備に応じた一覧規則を使います。モデルが列挙されても、メモリーに収まることや構造化タスクへの対応を保証しません。実際に要求してください。
 
 ## トラブルシューティング
 
-- 接続が拒否されました：Ollama または LM Studio を起動し、設定されたポートを確認してください。
-- モデルが見つかりません：テストを行う前にOllamaタグを取得するか、LM Studioのモデルを読み込んでください。
-- 出力が遅い場合は、コンテキストサイズを小さくしたり、より小さいローカルモデルを使用したり、処理負荷の大きいタスクをホストされたプロバイダーに委託したりしてください。
-- 空の応答または形式が不正な応答：選択したプロバイダープロファイルがローカルサーバーのプロトコルと一致しているか確認してください。OllamaとLMStudioは互換性がありません。
+- 接続拒否：サーバー、待受アドレス、ポートを確認。
+- モデルなし：pull／読み込みと正確な名称・別名を確認。
+- 認証拒否：`EMPTY` を前提にせず必要 token を入力。
+- 遅い／不完全：メモリー、文脈、出力上限を調べ、一要求ずつ試す。
+- 不正形式：バッチ設定変更前にプロトコル、プロンプト、モデル能力を確認。
 
-## いつ使用するか
+## 選ぶ場面
 
-プライベートなヴォルトの利用、オフラインでの作業、または安価で反復的なタスクにはローカルプロバイダを使用してください。研究の統合や長時間にわたる推論においてローカルが自動的に優れているとは限らないため、モデルの品質とハードウェアの制約がトレードオフとなります。
+プライバシー範囲、可用性、実測結果が要件を満たす場合に使います。切断前にモデルと出力依存を導入し、タスク別 provider と検索設定を調べます。ローカル断片を渡す LLM がクラウドの可能性もあります。
 
----
+Tavily／DuckDuckGo 調査はオンラインです。ネイティブ出力には別ツールが必要な場合があります。ローカルモデルはオフライン構成の一要素です。
 
-## 次のステップ
+## 次に読む
 
-- [LLM プロバイダー](/docs/providers/overview) -- 完全な設定とタスクごとのモデル設定
-- [トラブルシューティング](/docs/advanced/troubleshooting) – ローカルサーバーが実行されていない場合に発生するconnection-refusedエラーの修正
+- [概要](./overview)：プリセットとルート。
+- [設定](../getting-started/configuration)：タスクと言語。
+- [トラブルシューティング](../advanced/troubleshooting)：サーバーとタスクの切り分け。

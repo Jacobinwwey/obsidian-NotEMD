@@ -1,38 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Plugin Notemd pour Obsidian
 
+> Notemd est un plugin Obsidian sous licence MIT qui transforme les notes en Markdown lié, notes de concepts, résumés, traductions et diagrammes. Les fichiers restent dans le coffre ; les tâches cloud envoient du contenu au fournisseur choisi et la recherche web utilise le réseau.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Commencer ici
+
+| Lecteur | Point de départ | Objectif |
+|---|---|---|
+| Débutant | [Démarrage rapide](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/getting-started/quick-start) | Configurer un fournisseur et vérifier une note |
+| Utilisateur | [Flux de travail](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/features/workflows) | Maîtriser les dossiers, les sorties et la récupération |
+| Développeur | [Guide de développement](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/developers/overview) | Compiler, tester et étendre les contrats existants |
+| Agent | [Guide des agents](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/agents/overview) | Découvrir les quatre commandes d’export prises en charge |
+
+**Version:** 1.9.8
+
+- **Annulation et récupération :** l’annulation reste active pendant la planification et les réessais, et bloque les écritures tardives de recherche et de traduction. Les résultats terminés sont conservés ; les conflits de récupération sont signalés.
+- **Historique et exports natifs :** la recherche conserve la saisie et le focus clavier. Les séparateurs de cellules fusionnées PowerPoint et les connexions/étiquettes CircuitikZ sont corrigés ; la recherche locale par lot utilise un instantané cohérent.
+- **Publication et documentation :** vérification de la provenance des sources propres et des fichiers téléchargés, parcours par public et traductions rédigées directement.
+
+Les 36 préréglages de fournisseurs et 33 types de diagrammes exécutables existaient déjà en 1.9.7. [Guide de mise à niveau](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/releases/1.9.8) · [Vérifier la publication publique](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Les flèches Drawnix entre branches restent statiques après réorganisation. Mermaid/SVG dans un PPTX peut être exporté sous forme d’image. Annuler ne revient pas à annuler les modifications déjà enregistrées et ne garantit pas l’arrêt de la génération ou de la facturation distante. Les appareils mobiles physiques et Obsidian 0.15.0 restent non vérifiés.
 
 Lire la documentation dans d'autres langues : [Centre de Langues](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
-  Amélioration des connaissances multilingues
-             propulsée par l'IA
-==================================================
-```
-
-Un moyen facile de créer votre propre base de connaissances !
-
-Notemd améliore votre flux de travail Obsidian en s'intégrant à divers modèles de langage de grande taille (LLM) pour traiter vos notes multilingues, générer automatiquement des wiki-links pour les concepts clés, créer les notes de concept correspondantes, effectuer des recherches sur le web, vous aidant à construire des graphes de connaissances puissants et plus encore.
-
 Si vous aimez utiliser Notemd, veuillez envisager de [⭐ donner une étoile sur GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) ou [☕️ m'offrir un café](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Table des Matières
 
@@ -51,13 +50,26 @@ Si vous aimez utiliser Notemd, veuillez envisager de [⭐ donner une étoile sur
 
 ## Démarrage Rapide
 
-1.  **Installer & Activer** : Obtenez le plugin via le magasin communautaire d'Obsidian.
-2.  **Configurer le LLM** : Allez dans `Réglages -> Notemd`, sélectionnez votre fournisseur LLM (comme OpenAI ou un local comme Ollama), et entrez votre clé API/URL.
-3.  **Ouvrir la barre latérale** : Cliquez sur l'icône de baguette magique Notemd dans le ruban de gauche pour ouvrir la barre latérale.
-4.  **Traiter une note** : Ouvrez n'importe quelle note et cliquez sur **"Traiter le fichier (Ajouter des liens)"** dans la barre latérale pour ajouter automatiquement des `[[wiki-links]]`.
-5.  **Lancer un workflow rapide** : Utilisez le bouton **"One-Click Extract"** par défaut pour enchaîner le traitement, la génération en masse et le nettoyage Mermaid en un seul clic.
+1. Installez et activez **Notemd** dans **Réglages → Plugins communautaires → Parcourir**.
+2. Dans les réglages Notemd, configurez le point de terminaison, les identifiants et le modèle exacts. Lancez le test de connexion puis vérifiez une génération réelle : une liste de modèles ne prouve pas l’accès au chat.
+3. Créez un dossier vide `trial-concepts` et sélectionnez-le comme dossier de notes de concepts ; le réglage initial est vide. Créez une note jetable `Notemd trial.md` contenant un court texte que vous pouvez envoyer au fournisseur.
+4. Exécutez **Traiter le fichier (Ajout de liens)**. Inspectez `Notemd trial_processed.md` à côté de la source conservée et vérifiez les liens ainsi que les notes de concepts.
+5. Rouvrez la note source de test, puis lancez **One-Click Extract** avec ce dossier : ajout de liens, génération depuis les titres des notes admissibles, puis correction Mermaid dans le dossier complete. Des notes admissibles déjà présentes peuvent être incluses.
 
-C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités comme la recherche web, la traduction et la génération de contenu.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+La recherche web et la génération de diagrammes sont des actions séparées. Après une annulation, attendez la fin des tâches actives et inspectez les sorties terminées ou de récupération avant de relancer.
+
+<details>
+<summary>Exemples de l’interface</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Support Linguistique
 
@@ -90,9 +102,9 @@ C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités com
 - **Renforcement de la Chaîne de Requêtes Longues Stables compatible OpenAI** : En mode stable, les appels compatibles OpenAI utilisent maintenant un ordre explicite en 3 étapes pour chaque tentative : transport direct en streaming primaire, puis transport direct hors streaming, puis repli `requestUrl` (qui peut toujours passer à l'analyse en streaming si nécessaire). Cela réduit les faux négatifs où les fournisseurs complètent des réponses en mémoire tampon mais où les flux de streaming sont instables.
 - **Repli de Streaming Sensible au Protocole sur toutes les API LLM** : Les tentatives de repli de longue durée passent maintenant à une analyse en streaming sensible au protocole sur chaque chemin LLM intégré, pas seulement sur les points de terminaison compatibles OpenAI. Notemd gère maintenant les réponses SSE de style OpenAI/Azure, le streaming de messages Anthropic, les réponses SSE de Google Gemini et les flux NDJSON d'Ollama sur le bureau `http/https` et le `fetch` hors bureau, et les points d'entrée directs restants de style OpenAI réutilisent ce même chemin de repli partagé.
 - **Préréglages de Fournisseurs pour la Chine** : Les préréglages intégrés couvrent maintenant `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` et `SiliconFlow` en plus des fournisseurs mondiaux et locaux existants.
-- **Traitement par Lot Fiable** : Logique de traitement concurrent améliorée avec des **appels API échelonnés** pour éviter les erreurs de limitation de débit et assurer des performances stables lors de gros travaux par lot. La nouvelle implémentation garantit que les tâches sont lancées à des intervalles différents plutôt que toutes en même temps.
-- **Rapports de Progression Précis** : Correction d'un bug où la barre de progression pouvait rester bloquée, assurant que l'interface utilisateur reflète toujours le statut réel de l'opération.
-- **Traitement par Lot Parallèle Robuste** : Résolution d'un problème où les opérations par lot parallèles s'arrêtaient prématurément, assurant que tous les fichiers sont traités de manière fiable et efficace.
+- **Traitement par Lot Fiable** : Les appels API décalés réduisent les pics de requêtes ; les quotas du fournisseur restent applicables.
+- **Rapports de Progression Précis** : Le suivi distingue les fichiers terminés, en échec et annulés ; une progression terminée ne signifie pas que tous ont réussi.
+- **Traitement par Lot Parallèle Robuste** : Les tâches actives atteignent leur état final avant le bilan. Une annulation arrête la suite du travail sans annuler les écritures déjà effectuées : le dossier ne forme pas une transaction unique.
 - **Précision de la Barre de Progression** : Correction d'un bug où la barre de progression pour la commande "Créer un wiki-link & Générer une note" restait bloquée à 95%, assurant qu'elle affiche maintenant correctement 100% à la fin.
 - **Débogage API Amélioré** : Le "Mode de débogage d'erreur API" capture maintenant les corps de réponse complets des fournisseurs LLM et des services de recherche (Tavily/DuckDuckGo), et enregistre également une chronologie de transport par tentative avec les URL de requête nettoyées, la durée écoulée, les en-têtes de réponse, les corps de réponse partiels, le contenu de flux partiel analysé et les traces de pile pour un meilleur dépannage sur les replis OpenAI, Anthropic, Google, Azure OpenAI et Ollama.
 - **Panneau du Mode Développeur** : Les réglages incluent maintenant un panneau de diagnostic dédié aux développeurs qui reste caché à moins que le "Mode développeur" ne soit activé. Il prend en charge la sélection de chemins d'appel de diagnostic et l'exécution de sondes de stabilité répétées pour le mode sélectionné.
@@ -107,7 +119,7 @@ C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités com
 - **Création de Notes de Concept (Optionnel & Personnalisable)** : Crée automatiquement de nouvelles notes pour les concepts découverts dans un dossier de coffre spécifié.
 - **Chemins de Sortie Personnalisables** : Configurez des chemins relatifs séparés dans votre coffre pour enregistrer les fichiers traités et les notes de concept nouvellement créées.
 - **Noms de Fichier de Sortie Personnalisables (Ajout de Liens)** : Écrasez éventuellement le **fichier d'origine** ou utilisez un suffixe/chaîne de remplacement personnalisé au lieu du `_processed.md` par défaut lors du traitement des fichiers pour les liens.
-- **Maintenance de l'Intégrité des Liens** : Gestion de base pour la mise à jour des liens lorsque les notes sont renommées ou supprimées dans le coffre.
+- **Maintenance de l'Intégrité des Liens** : La mise à jour des liens lors d’un renommage dépend d’Obsidian et de ses réglages. Une suppression peut laisser des liens non résolus ; vérifiez les notes portant le même nom.
 - **Extraction de Concept Pure** : Extrayez des concepts et créez les notes de concept correspondantes sans modifier le document original. C'est idéal pour remplir une base de connaissances à partir de documents existants sans les altérer. Cette fonctionnalité a des options configurables pour créer des notes de concept minimales et ajouter des backlinks.
 
 
@@ -118,10 +130,10 @@ C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités com
     - **Support des Fichiers Volumineux** : Divise automatiquement les gros fichiers en plus petits morceaux en fonction du réglage `Nombre de mots par morceau` avant de les envoyer au LLM. Les morceaux traduits sont ensuite combinés de manière transparente en un seul document.
     - Supporte la traduction entre plusieurs langues.
     - Langue cible personnalisable dans les réglages ou l'interface utilisateur.
-    - Ouvre automatiquement le texte traduit sur le côté droit du texte original pour une lecture facile.
+    - Ouvre le résultat enregistré dans l’espace de travail Obsidian, selon la disposition disponible.
 - **Traduction en Masse** :
-    - Traduisez tous les fichiers d'un dossier sélectionné.
-    - Supporte le traitement parallèle quand "Activer le parallélisme par lot" est activé.
+    - Par défaut, traduit les fichiers admissibles directement dans le dossier choisi, sans ses sous-dossiers. La sélection avancée peut modifier ce périmètre ; une destination existante peut être écrasée.
+    - La traduction utilise directement `batchConcurrency` (1 par défaut), indépendamment de `enableBatchParallelism`.
     - Utilise des prompts personnalisés pour la traduction si configuré.
 	- Ajoute une option "Traduire ce dossier en masse" au menu contextuel de l'explorateur de fichiers.
 - **Désactiver la traduction automatique** : Lorsque cette option est activée, les tâches non-traduction ne forceront plus les sorties dans une langue spécifique, préservant le contexte linguistique original. La tâche explicite "Traduire" effectuera toujours la traduction comme configuré.
@@ -138,7 +150,7 @@ C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités com
 - **Génération de Contenu depuis Titre** :
     - Utilisez le titre de la note pour générer un contenu initial via LLM, en remplaçant le contenu existant.
     - **Recherche Optionnelle** : Configurez si vous souhaitez effectuer une recherche web (en utilisant le fournisseur sélectionné) pour fournir du contexte à la génération.
-- **Génération de Contenu en Masse depuis Titres** : Génère du contenu pour toutes les notes d'un dossier sélectionné en fonction de leurs titres (respecte le réglage de recherche optionnel). Les fichiers traités avec succès sont déplacés vers un **sous-dossier "terminé" configurable** (ex: `[nomdudossier]_complete` ou un nom personnalisé) pour éviter de les retraiter.
+- **Génération de Contenu en Masse depuis Titres** : Génère et remplace le contenu des fichiers `.md` admissibles, hors fichiers `_processed.md` et arborescence de destination « complete », en respectant le réglage de recherche. Après la génération, le déplacement vers le dossier « complete » est tenté. Une destination occupée bloque le déplacement, pas la génération déjà enregistrée ; les nombres de fichiers générés et déplacés sont distincts.
 - **Couplage d'Auto-Correction Mermaid** : Lorsque l'auto-correction Mermaid est activée, les workflows liés à Mermaid réparent maintenant automatiquement les fichiers générés ou les dossiers de sortie après le traitement. Cela couvre les flux de Traitement, Génération depuis titre, Génération en masse depuis titres, Recherche & Résumé, Résumer comme Mermaid et Traduction.
 
 
@@ -295,8 +307,8 @@ Accédez aux réglages du plugin via :
 
 #### Sortie des Notes de Concept
 -   **Personnaliser le Chemin des Notes de Concept** :
-    *   **Désactivé (Par défaut)** : La création automatique de notes pour les `[[concepts liés]]` est désactivée.
-    *   **Activé** : Vous permet de spécifier un dossier où les nouvelles notes de concept seront créées.
+    *   **Désactivé** : ne crée pas automatiquement les notes des concepts liés.
+    *   **Activé par défaut** : le chemin est initialement vide. Renseignez un chemin valide relatif au coffre avant de créer les notes de concepts.
 -   **Chemin du Dossier des Notes de Concept** : (Visible uniquement si activé ci-dessus) Entrez un *chemin relatif* dans votre coffre (ex : `Concepts` ou `Generé/Sujets`) où les nouvelles notes de concept doivent être enregistrées. Les dossiers seront créés s'ils n'existent pas. **Doit être rempli si la personnalisation est activée.** **N'utilisez pas de chemins absolus ou de caractères invalides.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -343,8 +355,8 @@ Accédez aux réglages du plugin via :
 
 #### Correction Mermaid en Masse
 -   **Activer la Détection d'Erreurs Mermaid** :
-    *   **Désactivé (Par défaut)** : La détection d'erreurs est ignorée après le traitement.
-    *   **Activé** : Analyse les fichiers traités pour les erreurs de syntaxe Mermaid restantes et génère un rapport `mermaid_error_{foldername}.md`.
+    *   **Désactivé** : ignore la détection après traitement.
+    *   **Activé par défaut** : recherche les erreurs Mermaid restantes et produit le rapport `mermaid_error_{foldername}.md`.
 -   **Déplacer les fichiers avec erreurs Mermaid vers un dossier spécifié** :
     *   **Désactivé** : Les fichiers avec erreurs restent à leur place.
     *   **Activé** : Déplace tous les fichiers qui contiennent encore des erreurs de syntaxe Mermaid après la tentative de correction vers un dossier dédié pour une revue manuelle.
@@ -360,7 +372,7 @@ Accédez aux réglages du plugin via :
 -   **Intervalle d'Appel API (ms)** : Délai minimum en millisecondes *avant et après* chaque appel API LLM individuel. Crucial pour les API à faible débit ou pour prévenir les erreurs 429. Réglez sur 0 pour aucun délai artificiel. (Par défaut : 500ms)
 -   **Nombre de Mots par Morceau** : Nombre maximum de mots par morceau envoyé au LLM. Affecte le nombre d'appels API pour les gros fichiers. (Par défaut : 3000)
 -   **Activer la Détection de Doublons** : Active/désactive la vérification de base des mots en double dans le contenu traité (résultats dans la console). (Par défaut : Activé)
--   **Max Tokens** : Nombre maximum de jetons que le LLM doit générer par morceau de réponse. Affecte le coût et le niveau de détail. (Par défaut : 4096)
+-   **Max Tokens** : Nombre maximum de jetons que le LLM doit générer par morceau de réponse. Affecte le coût et le niveau de détail. (Par défaut : 8192) Une limite de sortie propre au fournisseur peut remplacer cette valeur ; des valeurs par défaut adaptées au modèle existent aussi.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Traduction
@@ -388,7 +400,7 @@ Accédez aux réglages du plugin via :
     *   **Changer le mot de prompt** : Vous permet de changer le mot de prompt pour une tâche spécifique.
     *   **Mot de prompt personnalisé** : Entrez votre mot de prompt personnalisé pour la tâche.
 -   **Utiliser un Dossier de Sortie Personnalisé pour 'Générer depuis Titre'** :
-    *   **Désactivé (Par défaut)** : Les fichiers générés avec succès sont déplacés vers un sous-dossier nommé `[NomDossierOriginal]_complete` par rapport au parent du dossier d'origine (ou `Vault_complete` si le dossier d'origine était la racine).
+    *   **Désactivé (Par défaut)** : Le déplacement vise le dossier voisin `[foldername]_complete`, ou `Vault_complete` à la racine du coffre. L’option activée permet un nom personnalisé.
     *   **Activé** : Vous permet de spécifier un nom personnalisé pour le sous-dossier où les fichiers terminés sont déplacés.
 -   **Nom du Dossier de Sortie Personnalisé** : (Visible uniquement si activé ci-dessus) Entrez le nom souhaité pour le sous-dossier (ex : `Contenu Généré`, `_complete`). Les caractères invalides ne sont pas autorisés. Par défaut sur `_complete` s'il est laissé vide. Ce dossier est créé par rapport au répertoire parent du dossier d'origine.
 
@@ -493,11 +505,11 @@ C'est la fonctionnalité de base centrée sur l'identification des concepts et l
     *   Lancez la commande `Notemd: Translate Note/Selection` (via la palette de commandes ou le bouton de la barre latérale).
     *   Une fenêtre apparaîtra vous permettant de confirmer ou de changer la **Langue Cible** (par défaut selon le réglage spécifié en Configuration).
     *   Le plugin utilise le **Fournisseur LLM** configuré (basé sur les réglages Multi-Modèle) pour effectuer la traduction.
-    *   Le contenu traduit est enregistré dans le **Chemin d'Enregistrement des Traductions** configuré avec le suffixe approprié, et ouvert dans un **nouveau volet à droite** du contenu original pour une comparaison facile.
+    *   Enregistre la traduction dans `Translation Save Path` avec le suffixe configuré, puis ouvre le fichier enregistré dans l’espace de travail Obsidian.
     *   Vous pouvez annuler cette tâche via le bouton de la barre latérale ou le bouton d'annulation de la fenêtre.
 3.  **Traduire en Masse** :
     *   Lancez la commande `Notemd: Batch Translate Folder` depuis la palette de commandes et sélectionnez un dossier, ou faites un clic droit sur un dossier dans l'explorateur de fichiers et choisissez "Traduire ce dossier en masse".
-    *   Le plugin traduira tous les fichiers Markdown du dossier sélectionné.
+    *   Par défaut, traduit les fichiers admissibles directement dans le dossier choisi, sans ses sous-dossiers. La sélection avancée peut modifier ce périmètre ; une destination existante peut être écrasée.
     *   Les fichiers traduits sont enregistrés dans le chemin de traduction configuré mais ne sont pas ouverts automatiquement.
     *   Ce processus peut être annulé via la fenêtre de progression.
 
@@ -524,7 +536,7 @@ C'est la fonctionnalité de base centrée sur l'identification des concepts et l
     *   Lancez la commande `Notemd: Batch Generate Content from Titles` (via la palette de commandes ou le bouton de la barre latérale).
     *   Sélectionnez le dossier contenant les notes que vous souhaitez traiter.
     *   Le plugin passera en revue chaque fichier `.md` du dossier (en excluant les fichiers `_processed.md` et les fichiers du dossier "terminé" désigné), générant du contenu basé sur le titre de la note et remplaçant le contenu existant. Les fichiers sont traités en arrière-plan sans être ouverts dans l'éditeur.
-    *   Les fichiers traités avec succès sont déplacés vers le dossier "terminé" configuré.
+    *   Après la génération, le déplacement vers le dossier « complete » est tenté. Une destination occupée bloque le déplacement, pas la génération déjà enregistrée ; les nombres de fichiers générés et déplacés sont distincts.
     *   Cette commande respecte le réglage **"Activer la recherche dans 'Générer depuis titre'"** pour chaque note traitée.
     *   Vous pouvez annuler cette tâche via le bouton de la barre latérale ou le bouton d'annulation de la fenêtre.
     *   La progression et les résultats (nombre de fichiers modifiés, erreurs) sont affichés dans le journal de la barre latérale/fenêtre.
@@ -576,6 +588,8 @@ C'est la fonctionnalité de base centrée sur l'identification des concepts et l
     *   Configurez optionnellement le plugin pour déplacer ces fichiers problématiques vers un dossier séparé pour revue.
 
 ## Fournisseurs LLM Supportés
+
+Le tableau présente une sélection d’exemples. Consultez le [guide des 36 fournisseurs](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/providers/overview) pour la liste des préréglages et leurs conditions.
 
 | Fournisseur        | Type    | Clé API Requise        | Notes                                                                 |
 |--------------------|---------|------------------------|-----------------------------------------------------------------------|
@@ -645,7 +659,7 @@ Notemd s'exécute localement à l'intérieur d'Obsidian, mais certaines fonction
 ### Problèmes Courants
 -   **Le plugin ne se charge pas** : Assurez-vous que `manifest.json`, `main.js`, `styles.css` sont dans le bon dossier (`<Coffre>/.obsidian/plugins/notemd/`) et redémarrez Obsidian. Vérifiez la Console Développeur (`Ctrl+Shift+I` ou `Cmd+Option+I`) pour les erreurs au démarrage.
 -   **Échecs de traitement / Erreurs API** :
-    1.  **Vérifier le format de fichier** : Assurez-vous que le fichier que vous tentez de traiter ou de vérifier a une extension `.md` ou `.txt`. Notemd ne supporte actuellement que ces formats textuels.
+    1.  **Vérifiez le format** : les formats par défaut dépendent de la tâche (`.md`, ou `.md`/`.txt`). Le mode développeur avec entrées élargies autorise d’autres textes et PDF pour certaines tâches préservant la source, dont traduction et extraction de concepts. L’ajout de liens reste limité à `.md`/`.txt`.
     2.  Utilisez la commande/bouton "Tester la connexion LLM" pour vérifier les réglages du fournisseur actif.
     3.  Vérifiez deux fois la clé API, l'URL de base, le nom du modèle et la version de l'API (pour Azure). Assurez-vous que la clé API est correcte et dispose de crédits/permissions suffisants.
     4.  Assurez-vous que votre serveur LLM local (LMStudio, Ollama) est lancé et que l'URL de base est correcte (ex : `http://localhost:1234/v1` pour LMStudio).
@@ -706,7 +720,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 ---
 
 
-*Notemd v1.9.7 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.9.8 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 

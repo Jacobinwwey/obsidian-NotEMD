@@ -1,0 +1,99 @@
+---
+id: overview
+title: Ghid pentru dezvoltatori
+description: >-
+  Construiți, testați și extindeți contractele existente ale furnizorilor,
+  operațiilor, randării și documentației.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Ghid pentru dezvoltatori
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Ghid pentru dezvoltatori
+
+<TLDR>Lucrați într-o ramură separată, instalați dependențele fixate și ambele revizii de browser, apoi rulați buildul și întregul Jest. Modificați proprietarul contractului și păstrați împreună documentația, testele furnizorilor și dovezile aplicațiilor țintă.</TLDR>
+
+## Copia de lucru
+
+Clonați [depozitul](https://github.com/Jacobinwwey/obsidian-NotEMD) și citiți [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md). CI pentru plugin folosește Linux/Windows Node 20; site-ul Node 24. Rădăcina și `website/` au instalări separate.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Cele două pachete Playwright pot cere revizii Chromium diferite; o singură instalare nu ajunge. `main.js` este generat și ignorat de Git. Un bundle local vechi nu validează un commit nou.
+
+## Responsabilități
+
+| Responsabilitate | Sursă principală |
+| ---------------- | ---------------- |
+| Ciclu de viață, comenzi și integrare cu gazda | `src/main.ts` |
+| Profiluri, metadate de protocol și validare | `src/llmProviders.ts` |
+| Cereri, transporturi, reîncercări și streamuri | `src/llmUtils.ts` |
+| Operații, scheme și subsetul public CLI | `src/operations/`, `src/cliContracts.ts` |
+| Sarcini de fișiere, cercetare și traducere | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Acțiuni de flux și panoul lateral | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Specificații de diagrame și randare | `src/diagram/`, `src/rendering/` |
+| Texte UI și limbi | `src/i18n/` |
+| Ghiduri publice și traduceri | `website/docs/`, `website/i18n/` |
+| Reguli de întreținere și dovezi datate | `docs/maintainer/` |
+
+Bundle-ul de producție este autonom, cu gazda previzualizării încorporată. O cale separată posibilă pentru gazdă nu este contractul pachetului livrat. Activarea ei cere alinierea împachetării, fișierelor, verificărilor și documentelor.
+
+## Schimbare delimitată
+
+1. Reproduceți și scrieți întâi testul țintit care eșuează.
+2. Modificați proprietarul invariantului și validați la limita externă.
+3. Rulați teste focalizate și complete; păstrați anularea, propagarea erorilor și scrierea durabilă.
+4. Actualizați sursa engleză și limbile afectate. Planurile, sarcinile și walkthrough-urile cer versiuni complete separate în engleză/chineză sub `docs/`.
+5. Verificați schimbările vizuale/nativ exportate în aplicația reală; XML, imaginea sau buildul nu dovedesc editabilitatea ori conectorii atașați.
+
+Adăugați furnizorul în `llmProviders.ts`, refolosiți transportul compatibil și acoperiți `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README și testarea conexiunii. Păstrați streamingul și răspunsurile întrerupte. Expunerea unei operații cere scheme de intrare/rezultat, context, efecte și etichete de manipulare. Înregistrarea nu înseamnă endpoint public Agent. [Agent](../agents/overview).
+
+## Verificare
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint compară diagnostice individuale; un total mai mic nu justifică o regresie nouă. Pentru schimbări de căutare locală, rulați `npm run benchmark:local-kb` și precizați corpusul/mediul. Pentru site folosiți Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+În programul 1.9.8, Codex scrie și verifică direct traducerile. Nu executați scripturi vechi de traducere, LM Studio sau servicii de traducere. Instrumentele pot formata, valida și randa textul deja scris.
+
+## Obsidian și aplicațiile țintă
+
+Folosiți un vault temporar marcat `.notemd-host-verification`; scripturile verifică bundle-ul copiat. Separați vault-urile utilizatorului. Încercați atât `obsidian help`, cât și `obsidian-cli help`; un instrument absent este indisponibil, nu test reușit al gazdei.
+
+PowerPoint, CircuitikZ și diapozitivele au condiții și artefacte separate. Urmați [acceptarea datată](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) și [procedura de publicare](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Menționați explicit dispozitivele mobile fizice și versiunea minimă neverificate.
+
+## Contribuții și publicare
+
+PR-ul descrie problema, comportamentul final, testele și limitele. Raportați reproducerea în [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). Nu comiteți chei, note private sau fișiere fără legătură. Un singur publisher gestionează versiunile coerente, tagul numeric, sursa curată la tag, notele bilingve, fișierele draft verificate, publicarea și deploy-ul Pages explicit. Nu modificați tagul public. `.trellis/` este stare locală de lucru, nu dependență CI.
+
+## În continuare
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Starea proiectului](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

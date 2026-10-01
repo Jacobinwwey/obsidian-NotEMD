@@ -1,125 +1,90 @@
 ---
 id: research
-title: 調査とウェブ検索
-description: ノートにウェブ検索機能を統合しましょう
+title: 調査と Web 検索
+description: 検索サービスを選択して要約をノートに追記し、Web 出典と任意のローカル文脈を区別します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - 調査と Web 検索
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 調査とウェブ検索
+# 調査と Web 検索
 
 <TLDR>
-**Notemdはウェブを検索し、LLMで要約された結果を直接メモに挿入します。** Tavily APIが主要な検索バックエンドであり、DuckDuckGoは設定不要の代替手段として機能します。結果は出典の引用と共に要約され、`## Research`という見出しの下に追加されます。単一メモでの調査、フォルダ全体での調査、および要約ステップでのタスク別モデル選択に対応しています。
-
-これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
+選択した主題または現在のタイトルを検索し、設定した LLM が利用可能な文脈を要約してアクティブ Markdown に追記します。Tavily または DuckDuckGo を明示的に選び、検索結果と生成引用を確認してください。
 </TLDR>
 
 ## 概要
 
-ResearchはNotemdが提供する最も強力な統合機能の一つで、読み取り、検索、書き込みのサイクルを完結させます。見慣れない用語を調べるためにブラウザに切り替える代わりに、その用語をハイライトし、Notemdに検索や要約、結果の追加を任せることができ、すべてはあなたのVault内で行われます。
+検索サービスと要約 LLM は別に設定します。Tavily はキー必須、DuckDuckGo は不要ですが通信と制限があります。ローカル要約モデルでも Web 調査はオフラインになりません。
 
-このプロセスは完全にカスタマイズ可能です。検索プロバイダや要約を記述するLLM、そして結果をアクティブなノートに追加するか別のファイルに保存するかを選択できます。バッチモードを使えば、ワンクリックでフォルダ内のすべてのノートを調査できます。
+## 仕組み
 
-## 動作の仕組み
+### 検索してから要約
 
-### 検索後要約パイプライン
+1. Markdown エディターで対象ノートを開き、短い主題を選択。未選択ならタイトルを使用。
+2. **調査して要約** を実行。
+3. 設定検索サービスを呼び出す。Tavily は返却断片、DuckDuckGo は結果ページの取得を含み得る。
+4. タスクのローカル検索が有効なら範囲内抜粋を追加。
+5. 研究用モデルが要約し、主題と文脈由来を示す `Research Summary` 見出しの下へ追記。
+6. 内容と URL を点検。取得成功は各記述・引用の裏付けを保証しない。
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+### Tavily と DuckDuckGo
 
-1. **クエリ抽出** – Notemdは、選択した内容やメモのタイトルから検索語を抽出します。
-2. **ウェブ検索** – まず Tavily が試行されます。API キーが設定されていない場合は、自動的に DuckDuckGo が使用されます（キーは不要）。
-3. **LLM 要約** -- 生の検索結果は設定されたLLMに送信され、そこでインラインの出典引用を含む簡潔な要約が生成されます。
-4. **Append** -- フォーマット済みの要約が、アクティブなノート内の`## Research`見出しの下に追加されます。
+| 選択 | 設定 | 運用上の境界 |
+|---|---|---|
+| Tavily | 選択して API key を入力 | アカウント割当量と返却断片を使用 |
+| DuckDuckGo | 明示的に選択 | キー不要。制限と結果ページの可用性に依存 |
 
-### Tavily と DuckDuckGo の比較
+Tavily キーの不備で自動的に切り替わることはありません。Web 文脈が不足したら報告を読みます。有効なローカル文脈だけで要約できる場合もあり、由来のラベルで区別されます。
 
-| アスペクト | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| APIキー | 必須（無料プランあり） | 必要ありません |
-| 結果の品質 | より高度なもの（AI向けに特別に設計されている） | 一般的なクエリには十分です |
-| レート制限 | 手厚い無料プラン | スロットリングの対象となります |
-| 設定 | 設定の中の`tavilyApiKey` | ゼロ設定 -- 自動フォールバック |
+### タイトル生成の中で調査
 
-### バッチフォルダーの調査
-
-フォルダを右クリックし、**「Notemd: Research folder」**を選択します。フォルダ内のすべての`.md`ファイルが順番に（または設定された並行度まで同時に）処理されます。各ノートには独自の研究要約が生成されます。
+**Enable research in "Generate from title"** を有効にすると単独／一括生成に調査を加えます。既定は無効。対応するフォルダー経路はこれで、汎用の Research Folder 操作はありません。
 
 ## 設定
 
-| 設定 | デフォルト | エフェクト |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Tavily APIキー。空の場合は、DuckDuckGoのみが使用されます。 |
-| `researchProvider` / `researchModel` | DeepSeek | 検索結果を要約するためのタスクごとのLLM |
-| `maxResearchContentTokens` | `4000` | LLMに送信されるコンテンツのトークン予算です。超過分は切り捨てられます。 |
-| `researchAppendToNote` | `true` | ソースノートに要約を追加します。falseの場合は、別のファイルを作成します。 |
-| `researchLanguage` | `'en'` | 要約された研究の出力言語 |
+| 設定 | 既定値 | 意味 |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | 検索バックエンド |
+| `tavilyApiKey` | `''` | Tavily 利用前にキーを入力 |
+| `tavilyMaxResults` | `5` | Tavily の要求結果数 |
+| `tavilySearchDepth` | `basic` | Tavily の検索深度 |
+| `ddgMaxResults` | `5` | DuckDuckGo の要求結果数 |
+| `ddgFetchTimeout` | `15` | 結果ページ取得の秒単位タイムアウト |
+| `maxResearchContentTokens` | `3000` | Web 文脈の概算予算 |
+| `researchProvider` | `DeepSeek` | 個別ルート時の要約プロバイダー |
+| `researchModel` | `''` | 空なら指定プロバイダーのモデル |
+| `researchSummarizeLanguage` | `en` | 個別言語指定時の出力言語 |
+| `enableResearchInGenerateContent` | `false` | タイトル生成に調査を追加 |
+| `enableLocalKnowledgeRetrieval` | `false` | 範囲付きローカル検索を別途有効化 |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | この調査タスクでローカル検索を使う |
 
-### タスク別モデル推薦
+### 文脈とモデル
 
-多言語コンテンツを扱い、構造の整った文章を生成するモデルは、研究に大きな恩恵をもたらします。以下を考慮してください：
-
-- **DeepSeek** – デフォルト、手頃な価格、高品質
-- **GPT-4o** – より高品質な要約機能、ただしコストも高い
-- **Gemini Flash** – 迅速で低コスト、シンプルなクエリに最適
+予算は近似であり、サービス固有の正確な token 分割ではありません。切り詰めで証拠が欠け得るため、資料に合うモデルと予算、焦点を絞った問いを選びます。語彙索引は embedding 意味検索や完全再現率を意味しません。
 
 ## 例
 
-*transformer attention mechanisms*に関する論文を読んでいると、*relative positional encoding*という見慣れない用語に出会います。Obsidianのままにしておく代わりに：
+`Relative positional encoding` というノートを作り、調査後に引用原論文や公式資料と照合します。問い、実際の URL、修正を残し、第三者が結論を検証できるようにします。ガイドの例文はあなたの Vault で取得した調査結果ではありません。
 
-1. **「relative positional encoding」**をハイライトしてください
-2. 右クリック --> **"Notemd: 研究して要約する"**
-3. Notemdはウェブを検索し、上位の結果を要約した上で、次の内容を追加します：
+## キャンセルとプライバシー
 
-```markdown
-## Research
-
-### Relative Positional Encoding
-
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
-
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
-
-その要約は現在、あなたのヴォルトに保存されており、検索可能で、リンクを貼れ、オフラインでもアクセスできます。
+対応箇所の後続は止まりますが、完了した追記や進行中のサービス呼び出しは残り得ます。検索側は問い、Web サイトは取得要求、LLM は収集文脈と有効にしたローカル抜粋を受け取ります。診断共有前に確認します。
 
 ## ヒント
 
-- **最良の結果を得るためにTavilyキーを設定してください** – 無料プランであっても、生のDuckDuckGoよりも高い関連性が得られます。
-- **高性能な要約モデルを使用してください** – 安価なモデルでは微妙な技術的な内容が単純化されてしまう可能性があります。
-- 最初に全体を通読した後に**Batch research**を行い、複数のノートに散在する情報のギャップを一度に埋めます。
-- **追加された要約の確認** – LLMsは出典の詳細を誤って生成する可能性があります。重要な主張を確認してください。
+- Web 出典、ローカルノート、モデルの推論を区別する。
+- 引用、日付、重要な主張は原文で確認。
+- 小さな問いで検索と LLM を別々に診断。
+- 再実行前に既存要約を読み、追記の重複を避ける。
 
----
+## 次に読む
 
-## 次のステップ
-
-- [概念ノート](./concept-notes) – 研究結果から重要な用語を抽出し、保存する
-- [Wiki-Links](./wiki-links) – あなたのバンク内で研究から得られた概念同士をリンクする
-- [翻訳](./translation) -- 研究の要約を別の言語に翻訳する
-- [LLM プロバイダー](/docs/providers/overview) -- 要約に使用するモデルを設定する
+- [設定](../getting-started/configuration)：検索とローカル文脈。
+- [カスタムプロンプト](../advanced/custom-prompts)：研究用変数。
+- [トラブルシューティング](../advanced/troubleshooting)：キー、割当量、文脈不足。

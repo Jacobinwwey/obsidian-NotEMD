@@ -1,319 +1,124 @@
 ---
 id: wiki-links
-title: ウィキリンク
-description: キーコンセプトの自動ウィキリンク生成
+title: Wiki リンク
+description: モデルが提案するリンクを処理後ノートへ追加し、指定フォルダーに概念ファイルを作成します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
-concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Auto Link Plugin
-    url: https://github.com/ov7a/obsidian-auto-link
+keywords:
+  - Wiki リンク
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# ウィキリンク
+# Wiki リンク
 
 <TLDR>
-**Notemd**は、ノート内のキーコンセプトに自動的に`[[wiki-links]]`を追加します。LLMはコンテンツを読み取り、文脈内の重要な用語を特定し、各出現箇所にObsidianスタイルのウィキリンクを挿入します。必要に応じて、バックリンク付きのコンセプトノートファイルも作成できます。同義語の抑制、名前変更や削除時のリンクの完全性維持、そしてファイルを修正しない純粋な抽出モードにも対応しています。既存のノートタイトルのみをマッチングするAuto Linkとは異なり、NotemdはAIを利用して新しいコンセプトを特定し、対応するノートを作成します。これは[Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge)の一部です。
+**ファイルを処理（リンク追加）** は LLM に概念と wiki リンクを提案させます。既定では原文を保持して別の `_processed.md` に出力します。概念ファイルには保存フォルダーの指定が必要です。バッチを広げる前に確認してください。
 </TLDR>
 
 ## 概要
 
-ウィキリンク機能はNotemdの核心的な特徴です。これにより、プレーンテキストを以下の方法で相互に接続された知識グラフに変換します：
+ノートの意味からリンク候補を探すタスクです。実行ごとに語が変わったり、まだファイルのない概念を指したりします。リンクは移動先であり、概念の同一性や説明の正しさの証明ではありません。
 
-1. LLMを使ってメモの分析を行います
-2. **重要な概念の特定**（用語、人物、手法、理論）
-3. 各出現箇所に `[[wiki-links]]` を挿入する
-4. **コンセプトノートの作成**（任意）とバックリンク
-
-## 動作の仕組み
+## 仕組み
 
 ### 処理
 
-```mermaid
-graph LR
-    A[Your Note] --> B[LLM Analysis]
-    B --> C{Concepts Found}
-    C --> D[Insert Wiki-Links]
-    C --> E[Create Concept Notes]
-    D --> F[Updated Note]
-    E --> F
-    F --> G[Connected Knowledge Graph]
-```
+ノートを分割して指定 provider/model に送り、応答を結合して処理結果を書き込みます。設定したフォルダーに概念ノートを作成／更新できます。進捗で部分失敗と実際の出力先を確認します。
 
 ### 例
 
-**以前:**
-```markdown
-Machine learning models use neural networks to learn patterns from data.
-The transformer architecture revolutionized natural language processing.
+原文：
+
+```text
+機械学習モデルはニューラルネットワークを使い、例からパターンを学習します。
 ```
 
-**後:**
+出力例：
+
 ```markdown
-[[Machine learning]] models use [[neural networks]] to learn patterns from data.
-The [[transformer architecture]] revolutionized [[natural language processing]].
+[[機械学習]]モデルは[[ニューラルネットワーク]]を使い、例からパターンを学習します。
 ```
 
-## 使用方法
+例示であり、実際の語は入力、モデル、プロンプトで変わります。
 
-### 基本：現在のノートにリンクを追加する
+## 使い方
 
-1. メモを開く
-2. エディタで右クリック → **「ファイルを処理する（リンクを追加）」**
-3. 数秒待ってください。
-4. コンセプトがリンクされました！
+### 基本：現在のノート
 
-### バッチ処理：複数のノートを処理する
+Markdown のコピーを開き、**ファイルを処理（リンク追加）** を実行します。既定の隣接 `_processed.md` を確認してください。カスタム接尾辞、出力フォルダー、原文移動によって動作は変わります。
 
-1. ファイルエクスプローラーでフォルダを右クリックします
-2. **「Notemd: フォルダを処理する（リンクを追加）」**を選択してください。
-3. 設定する：
-   - 並行処理数（同時に処理できるファイルの数）
-   - 既存のリンクを上書きする（はい/いいえ）
-4. **Process**をクリックしてください
+### バッチ：複数ノート
 
-### 選択的：特定のテキストをリンクする
+**フォルダーを処理（リンク追加）** でフォルダーと範囲を確認し、小さく試します。全フォルダータスク共通の上書き／スキップ設定はありません。[バッチ処理](../advanced/batch-processing)を読んでから再実行します。
 
-1. 処理対象のテキストをハイライトしてください
-2. 右クリック → **「プロセスの選択（リンクの追加）」**
-3. ハイライトされた部分のみが分析されます。
+### 選択：指定した語
 
-## Notemdとオートリンクの比較
+語を自分で選ぶ場合は **Create wiki link and generate note from selection** を使います。別アクションであり、ファイル全体のリンク追加を選択範囲だけにする指示ではありません。概念ファイルと本文を確認します。
 
-Obsidianには自動的なウィキリンクを行うための2つの方法があります：
+## リンク方法を選ぶ
 
-| | **自動リンク** | **Notemd** |
-|--|---------------|-------------|
-| リンク元 | Vault内の既存のノートタイトル | LLMで特定されたコンテンツ内の概念 |
-| 新しい概念をリンクできますか | いいえ——タイトルは既に存在していなければなりません。 | はい — AIが概念を認識し、メモを作成します |
-| 同義語の処理 | いいえ | はい — 同義語抑制 |
-| コンセプトノートの作成 | いいえ | はい — バックリンクと重複排除機能付きです |
-| バッチ処理 | いいえ（単一ファイル） | はい（フォルダレベル） |
-| タスクごとのモデルルーティング | いいえ | はい |
-
-**Auto Link**はタイトルマッチング機能を持っており、「Machine Learning」という名前のノートが存在する場合、該当部分を`[[Machine Learning]]`で囲みます。ノートが存在しない場合は何も起こりません。
-
-**Notemd**はAI駆動です。LLMがコンテンツを読み取り、文脈を理解し、まだメモが存在しなくてもリンクされるべき概念を特定し、リンクと概念メモの両方を作成します。
+内容から候補を発見するならモデル補助、既存タイトルへの再現可能な照合を優先するなら決定的なタイトル一致を使います。他プラグインは現行文書で評価し、日時付きベンチマークのない性能／機能順位は主張しません。
 
 ## 機能
 
-### 類義語抑制
+### 同義語の抑制
 
-**問題:** "transformer", "transformers", "Transformer architecture" → 3つの異なる概念
+`replaceSynonymsDuringConceptExtraction` は同義・重複概念を避ける指示を追加します。既定で無効の真偽値で、数値の類似度閾値ではありません。略語と近い語は自分で確認します。
 
-**解決策：** Notemdはほぼ同一のデータを検出し、標準形を使用します。
+### リンクの整合性
 
-**設定:**
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (0 = off, 1 = aggressive)
-```
+リネーム時の更新は Obsidian の設定と操作に依存します。対象削除後の未解決リンクは、リンクのない言及とは異なります。フォルダー間で同名ノートがあれば basename の曖昧さを確認します。
 
-### リンクの完全性
+### 単独抽出
 
-**コンセプトノートの名前を変更する際：**
-- すべてのウィキリンクは自動的に更新されます（Obsidian コア機能）
-- バックリンクはそのまま保持されます。
+原文を変更せず概念ファイルが欲しい場合は **概念を抽出（現在のファイル）**。最小テンプレートやバックリンク設定はリンク追加と異なります。[概念ノート](./concept-notes)を参照してください。
 
-**コンセプトノートを削除するとき：**
-- リンクは残っていますが、「未リンクの言及」として表示されます。
-- どの出現例からでも再作成できます
-
-### 純粋抽出モード
-
-**元の内容を変更せずに概念を抽出する：**
-
-1. 右クリック → **「コンセプトを抽出（リンクなし）」**
-2. コンセプトノートが作成されます。
-3. 元のファイルはそのままです
-
-使用例：読み取り専用のコンテンツや最終稿の処理。
-
-## コンセプトノート作成
+## 概念ノート生成
 
 ### 自動作成
 
-**有効になっている場合（デフォルト）、Notemdは次のものを作成します：**
-
-```markdown
----
-tags: [concept, auto-generated]
-created: 2026-06-13
-source: [[Original Note Name]]
----
-
-# Machine Learning
-
-A branch of artificial intelligence that enables computers
-to learn from data without explicit programming.
-
-## Occurrences in Your Vault
-
-- [[Original Note Name#Section]]
-- [[Another Note#Header]]
-
-## Related Concepts
-
-- [[Neural Networks]]
-- [[Deep Learning]]
-- [[Supervised Learning]]
-```
+概念出力を有効化しパスを指定すると、タイトルと `Linked From` リンクを持つファイルを作成できます。調査済み説明、関連概念節、任意 frontmatter テンプレートは自動生成しません。本文が必要ならタイトル生成を別途使います。
 
 ### 設定
 
-**出力フォルダ:**
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
+概念フォルダー、処理後フォルダー、接尾辞、原文移動を検索します。初期の概念パスは空。試行時は原文集合と出力先を区別します。
 
-**階層構造:**
-```
-Settings → Output → Use Hierarchical Folders
-If enabled:
-  papers/my-paper.md → papers/concepts/Concept.md
-If disabled:
-  → concepts/Concept.md
-```
+## 詳細設定
 
-**テンプレート:**
-```
-Settings → Output → Concept Template
-Customize with variables:
-  {{concept}} — Concept name
-  {{description}} — LLM-generated description
-  {{backlinks}} — List of source notes
-  {{date}} — Creation date
-```
+### 文脈とプロンプト
 
-## 高度なオプション
+`chunkWordCount` は概算分割サイズです。分野指定とカスタムプロンプトは候補を絞れますが、文／段落の文脈セレクター、最低出現回数、汎用概念テンプレート変数はありません。
 
-### コンテキストウィンドウ
+## 実務上の確認
 
-**送信する周辺テキストの量：**
+- 原文と出力の引用、式、コードを照合。
+- 新しい語に概念ノートが必要か判断。
+- 固定サンプルでプロンプトを評価してから拡大。
+- 原文移動や既存出力への再実行前にバックアップ。
 
-```
-Settings → Linking → Context Window
-Options: Sentence | Paragraph | Full Note
-Default: Paragraph
-```
+## 性能
 
-サイズが大きいほど精度は向上しますが、コストも高くなります。
-
-### 最小出現回数
-
-**複数回出現する概念のみリンクしてください：**
-
-```
-Settings → Linking → Min Occurrences
-Default: 1 (link all)
-```
-
-繰り返し出現するテーマに焦点を当てるには、2または3に設定してください。
-
-### 除外パターン
-
-**特定の単語をスキップする:**
-
-```
-Settings → Linking → Exclude List
-Example: note, idea, example, thing
-```
-
-一般的な用語による過度なリンクを防ぎます。
-
-### カスタムプロンプト
-
-**デフォルトのLLM指示を上書きする：**
-
-```
-Settings → Advanced → Custom Linking Prompt
-Default:
-  "Identify key concepts, theories, methods, and technical
-   terms in the following text. Return as a list..."
-```
-
-ドメイン固有のニーズに合わせて変更する（例：「医療用語に焦点を当てる」）。
-
-## ヒントとベストプラクティス
-
-### ✅ 完了
-
-- **100語以上のメモを処理する** — 短いメモでは概念が少なくなります
-- より優れた概念特定のために、強力なモデルを利用してください（GPT-4o、Claude）
-- **承認する前に確認してください** — 提示されたリンクが適切かどうかをチェックしてください
-- **反復的にビルドする** — 5〜10件のメモを処理し、グラフを確認して設定を調整する
-
-### ❌ やめてください
-
-- **Over-link** — すべての名詞にリンクは必要ない
-- **ドラフトを繰り返し処理する** — コンセプトは変わる可能性があるため、安定するまで待機する
-- **同義語を無視する** — 「ML」と「Machine Learning」の区別を避けるために抑制機能を有効にする
-
-## パフォーマンス
-
-### スピード
-
-| ノートサイズ | GPT-4o-mini | Claude Sonnet | Ollama (ローカル) |
-|-----------|-------------|---------------|----------------|
-| 500語 | 2～3秒 | 3～5秒 | 5～10秒 |
-| 2000語 | 5～8秒 | 10～15秒 | 20～40秒 |
-| 5000語以上 | 分割送信（複数回の呼び出し） | チャンク化された | チャンク化された |
-
-### コスト見積もり
-
-**例：GPT-4o-miniを使った1000語のメモ**
-- 入力：約1500トークン
-- 出力結果：約200トークン
-- コスト：約0.001ドル
-
-**100件のノートをバッチ処理する:** 約0.10ドル
+時間と費用はモデル、サービス、入力、出力、再試行で変わります。固定秒数や100ノートあたりの費用は約束しません。代表例と実使用量を測ってから範囲を増やします。
 
 ## トラブルシューティング
 
-### リンクは追加されていません。
+### リンクが増えない
 
-**チェック:**
-1. LLM の呼び出しが成功しました（設定 → 診断）
-2. このメモには十分な内容があります（50語以上）。
-3. コンセプトとは技術的で具体的なものです（単なる代名詞ではありません）。
+要求の結果、応答、対象ノート、実出力を確認します。有用なリンクを保証する最小語数はありません。
 
-**試してみて：**
-- より強力なモデルを使用してください
-- コンテキストウィンドウを拡大する
-- APIキーの有効性を確認します
+### リンクが多すぎる
 
-### リンクが多すぎます
+プロンプトや分野を絞って確認します。同義語抑制は語彙を強制する仕組みではありません。
 
-**ソリューション:**
-1. 最小出現回数を（2または3）に増やす
-2. 除外リストによく使われる単語を追加する
-3. より穏やかなモデルを使用してください
+### リネームでリンクが切れる
 
-### 誤った概念がリンクされています
+Obsidian の更新設定と元からの曖昧さを確認し、対象を意図的に復元／修正します。LLM 再実行は決定的なリンク修復ではありません。
 
-**修正内容:**
-1. ドメイン固有の詳細に合わせてカスタムプロンプトを使用してください
-2. 同義語抑制を有効にする
-3. 手動で確認し、リンクを解除してください
+## 次に読む
 
-### 名前を変更するとリンクが切れる
-
-**これは正常なObsidianの動作です。**
-
-すべてのリンクを更新するには：
-1. コンセプトノートの名前を変更する
-2. Obsidianは自動的に`[[old]]`を`[[new]]`に更新します
-
----
-
-## 次のステップ
-
-- 📖 [Concept Notes](./concept-notes) — コンセプトノート作成の詳細解説
-- 🔍 [Research Integration](./research) — リンク機能とウェブ検索を組み合わせる
-- 🎨 [Diagrams](./diagrams) — ナレッジグラフを可視化する
+- [概念ノート](./concept-notes)：テンプレートと重複。
+- [ワークフロー](./workflows)：アクションと文脈。
+- [カスタムプロンプト](../advanced/custom-prompts)：出力契約。

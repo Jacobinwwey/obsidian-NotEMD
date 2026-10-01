@@ -1,75 +1,63 @@
 ---
 id: china
-title: "Поставщики из Китая"
-description: "Настроить Qwen, DeepSeek, GLM и т.д."
+title: Китайские провайдеры
+description: >-
+  Сопоставляйте регион аккаунта, endpoint и модель или deployment ID с
+  правильным профилем.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - Китайские провайдеры
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Поставщики из Китая
+# Китайские провайдеры
 
-<TLDR>
-**Notemd поддерживает поставщиков из региона Китая и с происхождением из Китая через в основном OpenAI-совместимые конечные точки.** В текущий набор входят DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS и Z AI. Преимущества — региональный охват и контроль затрат; риски — уникальное название модели для каждого поставщика и ограничения на аккаунт.
+<TLDR>Выбирайте профиль своего аккаунта и deployment. Даже общий OpenAI-compatible протокол не делает регионы, пути, модели и права взаимозаменяемыми. Проверьте маленькую задачу.</TLDR>
 
-Это часть [Obsidian Руководства по управлению знаниями с ИИ](/docs/pillar-ai-knowledge).
-</TLDR>
+## Подготовка
 
-## Настройка
+Получите аккаунт и ключ, выберите профиль и подтвердите регион/права модели. Начальные параметры не гарантируют текущего доступа; после соединения проверьте заметку.
 
-Создайте аккаунт поставщика, сгенерируйте ключ API, затем выберите соответствующую предустановку поставщика Notemd вместо использования общего профиля OpenAI. Предустановка содержит стандартный Base URL, модель, режим тестирования API, поведение обнаружения моделей и любые уникальные поля UI для конкретного поставщика.
+## Адрес и авторизация
 
-Здесь следует активно использовать выбор модели в зависимости от задачи. Например, для задач с интенсивным использованием логики оставляйте DeepSeek или GLM, для широких задач на китайском языке используйте Qwen или Moonshot, а для задач по программированию направляйте их на Qwen Code, если этот аккаунт предоставляет модели для программистов.
+| Профиль | Начальная модель | Начальный URL |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-## Конец и аутентификация
+Замените пример Doubao на действительный endpoint ID Ark или поддерживаемую модель. GLM и Z AI — разные региональные профили. Ключ другого региона/тарифа может не работать. Следуйте условиям аккаунта, а не только географическому положению.
 
-| Поставщик | Стандартная модель | Base URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (требуется ID конечной точки) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+## Модели
 
-**Примечание:** Doubao требует ID конечной точки Ark (формат: `ep-xxxxxxxx-xxxx-xxxx`) вместо стандартного имени модели.
+Получайте список, когда разрешено. Huawei Cloud MaaS зависит от deployment, другие профили используют совместимое обнаружение по возможностям. Запрет списка не всегда запрещает генерацию по явному ID. DeepSeek может пройти проверку по списку, ряд региональных профилей генерирует короткий ответ. Реальная задача всё равно обязательна.
 
-Большинство этих поставщиков используют общую среду выполнения, совместимую с OpenAI, но их аккаунты и семантика моделей отличаются. Используйте стандартный Base URL для конкретной предустановки, если вы не проверили альтернативную конечную точку аккаунта.
+## Ошибки
 
-## Обнаружение моделей
+- Ключ принят, генерация запрещена: модель, deployment и регион.
+- Ark отвергает ID: требуется endpoint или имя модели?
+- Рассуждение обрезано: бюджет и правила thinking.
+- Сеть: проверяйте адрес с устройства Obsidian и транспортную ошибку.
 
-DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan и SiliconFlow используют обнаружение моделей, совместимое с OpenAI, когда поставщик поддерживает список. Huawei Cloud MaaS использует режим `huaweicloud-modelarts-models`, потому что метаданные развертывания ModelArts не идентичны обычному списку `/v1/models`.
+## Когда выбирать
 
-Не считайте неудачу обнаружения доказательством невозможности чата. Некоторые поставщики позволяют чат, ограничивая права на список моделей. В таком случае сохраняйте явный ID модели в профиле и проверяйте его с помощью теста подключения.
+При подходящих правах, доступности и требованиях к данным. Категория не задаёт языковое качество или стоимость. Сравнивайте образец с записанными параметрами.
 
-## Устранение неполадок
+## Далее
 
-- Аутентификация прошла, но чат не работает: имя модели может находиться за пределами разрешений или региона аккаунта.
-- Doubao выдает ошибку при использовании стандартного имени модели: используйте ID конечной точки Ark в поле модели, если ваше развертывание этого требует.
-- Ответы с логическими рассуждениями обрезаются: проверьте максимальное количество токенов вывода, установленное поставщиком, и настройки максимального количества токенов, основанные на модели, у Notemd.
-- Региональная сетевая инфраструктура различается: используйте конечную точку поставщика для региона Китая, когда машина хранилища находится в Китае; используйте международную конечную точку только тогда, когда аккаунт и сетевой путь оба действительны.
-
-## Когда использовать
-
-Используйте китайских поставщиков, когда основными ограничениями являются региональная задержка, доступ к платежам/аккаунтам, качество на китайском языке или стоимость. Предпочитайте прямые OpenAI, Anthropic, Google или местных поставщиков, если вам нужны более простые границы протокола или более надежная согласованность при отладке между поставщиками.
-
----
-
-## Следующие шаги
-
-- [LLM Providers](/docs/providers/overview) -- Полная конфигурация, модели для каждой задачи и логика повторных попыток
-- [Устранение неполадок](/docs/advanced/troubleshooting) -- Устранение ошибок региональной связности и аутентификации
+- [Провайдеры](./overview).
+- [Настройки](../getting-started/configuration).
+- [Ошибки](../advanced/troubleshooting).

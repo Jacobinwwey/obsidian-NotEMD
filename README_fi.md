@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Notemd-liitännäinen Obsidianille
 
+> Notemd on MIT-lisensoitu Obsidian-lisäosa linkitettyä Markdownia, käsitemuistiinpanoja, yhteenvetoja, käännöksiä ja kaavioita varten. Tiedostot jäävät holviin; pilvitehtävät lähettävät sisältöä valitulle tarjoajalle ja verkkotutkimus käyttää verkkoyhteyttä.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Aloita tästä
+
+| Lukija | Aloitus | Tavoite |
+|---|---|---|
+| Aloittelija | [Pika-aloitus](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/getting-started/quick-start) | Määritä tarjoaja ja tarkista yksi muistiinpano |
+| Käyttäjä | [Työnkulut](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/features/workflows) | Hallitse kansioita, tuloksia ja palautusta |
+| Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
+| Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
+
+**Versio:** 1.9.8
+
+- **Peruutus ja palautus:** peruutus pysyy voimassa ajoituksen ja uusintayritysten aikana ja estää tutkimuksen ja käännöksen myöhäiset kirjoitukset. Valmiit tulokset säilyvät ja palautusristiriidat ilmoitetaan.
+- **Historia ja vienti:** hakuteksti ja näppäimistökohdistus säilyvät. PowerPointin yhdistettyjen solujen erotinviivat sekä CircuitikZ-yhteydet ja selitteet on korjattu. Paikallinen erähaku käyttää yhtenäistä tilannekuvaa.
+- **Julkaisu ja dokumentaatio:** puhtaiden lähteiden alkuperä ja ladatut tiedostot tarkistetaan; eri lukijat saavat omat aloituspolut ja suoraan kirjoitetut käännökset.
+
+36 tarjoajaesiasetusta ja 33 suoritettavaa kaaviotyyppiä olivat mukana jo versiossa 1.9.7. [Päivitysopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/releases/1.9.8) · [Tarkista julkinen julkaisu](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Drawnixin haarojen väliset nuolet pysyvät staattisina uudelleenjärjestelyn jälkeen. PPTX:n Mermaid/SVG voi käyttää kuvavaraesitystä. Peruutus ei kumoa tallennettuja muutoksia eikä takaa etägeneroinnin tai laskutuksen loppumista. Fyysisiä mobiililaitteita ja Obsidian 0.15.0:aa ei ole varmennettu.
 
 Lue dokumentaatio muilla kielillä: [Kielikeskus](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- Tekoälypohjainen monikielinen tiedon rikastaminen
-==================================================
-```
-
-Helppo tapa rakentaa oma tietopohjasi.
-
-Notemd parantaa Obsidian-työnkulkuasi integroimalla erilaisia suuria kielimalleja (LLM) monikielisten muistiinpanojesi käsittelyyn, luomalla automaattisesti wiki-linkkejä keskeisille käsitteille, luomalla niitä vastaavia käsite-muistiinpanoja, tekemällä verkkotutkimusta ja auttamalla sinua rakentamaan tehokkaita tietograafeja ja paljon muuta.
-
 Jos rakastat Notemdin käyttöä, harkitse [⭐ tähden antamista GitHubissa](https://github.com/Jacobinwwey/obsidian-NotEMD) tai [☕️ osta minulle kahvi](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Sisällysluettelo
 
@@ -50,13 +50,26 @@ Jos rakastat Notemdin käyttöä, harkitse [⭐ tähden antamista GitHubissa](ht
 
 ## Pika-aloitus
 
-1. **Asenna ja ota käyttöön**: Hae liitännäinen Obsidian Marketplacesta.
-2. **Määritä LLM**: Siirry kohtaan `Settings -> Notemd`, valitse haluamasi LLM-tarjoaja, esimerkiksi OpenAI tai paikallinen tarjoaja kuten Ollama, ja syötä API-avain/URL.
-3. **Avaa sivupalkki**: Avaa sivupalkki napsauttamalla Notemdin taikasauvakuvaketta vasemmassa reunapalkissa.
-4. **Käsittele muistiinpano**: Avaa mikä tahansa muistiinpano ja napsauta sivupalkissa **"Process File (Add Links)"**, niin liitännäinen lisää automaattisesti `[[wiki-links]]`-linkit keskeisiin käsitteisiin.
-5. **Suorita nopea työnkulku**: Käytä oletuspainiketta **"One-Click Extract"** ketjuttamaan käsittely, erägenerointi ja Mermaid-siistiminen yhdestä sisäänkäynnistä.
+1. Asenna ja ota **Notemd** käyttöön kohdassa **Asetukset → Yhteisölisäosat → Selaa**.
+2. Määritä tarkka päätepiste, tunnistetiedot ja malli. Testaa yhteys ja sitten todellinen generointi; malliluettelon saaminen ei todista keskusteluoikeuksia.
+3. Luo tyhjä `trial-concepts`-kansio ja valitse se käsitemuistiinpanoille; alkuperäinen polku on tyhjä. Tee `Notemd trial.md` ja lisää lyhyt teksti, jonka saa lähettää tarjoajalle.
+4. Suorita **Process File (Add Links)**. Tarkista säilytetyn lähteen viereinen `Notemd trial_processed.md`, linkit ja käsitemuistiinpanot.
+5. Avaa testilähde uudelleen ja suorita **One-Click Extract** testikansiolla: linkkien lisäys, soveltuvien muistiinpanojen generointi otsikoista ja Mermaid-korjaus complete-kansiossa. Myös jo olemassa olevia soveltuvia muistiinpanoja voidaan käsitellä.
 
-Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotutkimuksen, kääntämisen ja sisällön luonnin.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Verkkotutkimus ja kaavioiden luonti ovat erillisiä toimintoja. Odota peruutuksen jälkeen aktiivisten tehtävien päättymistä ja tarkista valmiit tulokset sekä palautustiedostot ennen uutta yritystä.
+
+<details>
+<summary>Käyttöliittymän esimerkkejä</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Kielituki
 
@@ -89,9 +102,9 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
 - **OpenAI-compatible-pitkien pyyntöjen vakausketjun kovennus**: Vakaassa tilassa OpenAI-compatible-kutsut käyttävät nyt eksplisiittistä kolmivaiheista järjestystä jokaisessa yrityksessä: suora streaming-siirtotapa, sitten suora non-stream-siirtotapa, ja lopuksi `requestUrl`-fallback, joka voi silti tarvittaessa päivittää jäsennyksen streamaavaksi. Tämä vähentää vääriä negatiivisia tuloksia tilanteissa, joissa tarjoaja palauttaa puskuroidun vastauksen oikein mutta streaming-putki on epävakaa.
 - **Protokollatietoinen streaming-fallback eri LLM-API-polkujen välillä**: Pitkäkestoisten fallback-yritysten parsing päivittyy nyt protokollatietoisesti streamaavaksi kaikissa sisäänrakennetuissa LLM-poluissa, ei vain OpenAI-compatible-päätepisteissä. Notemd käsittelee nyt OpenAI/Azure-tyylisen SSE:n, Anthropic Messages -streamauksen, Google Gemini SSE -vastaukset ja Ollama NDJSON -streamit sekä työpöydän `http/https`- että ei-työpöytäympäristön `fetch`-poluissa, ja jäljellä olevat suorat OpenAI-tyyliset tarjoajapolut käyttävät samaa yhteistä fallback-polkua.
 - **Kiina-valmiit tarjoajaesiasetukset**: Sisäänrakennetut esiasetukset kattavat nyt `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` ja `SiliconFlow` nykyisten globaalien ja paikallisten tarjoajien lisäksi.
-- **Luotettava eräkäsittely**: Samanaikaisen käsittelyn logiikkaa on parannettu **staggered API calls** -mallilla, jotta rate limiting -virheitä vältetään ja suurten eräajojen suorituskyky pysyy vakaana. Tehtävät käynnistyvät nyt eri aikavälein eivätkä kaikki kerralla.
-- **Tarkka edistymisraportointi**: Virhe, joka saattoi jättää edistymispalkin jumiin, on korjattu, joten käyttöliittymä vastaa aina toiminnon todellista tilaa.
-- **Vankka rinnakkainen eräkäsittely**: Ongelma, jossa rinnakkaiset erätoiminnot pysähtyivät ennenaikaisesti, on ratkaistu, jotta kaikki tiedostot käsitellään luotettavasti ja tehokkaasti.
+- **Luotettava eräkäsittely**: Porrastetut API-kutsut vähentävät pyyntöpiikkejä. Palveluntarjoajan kiintiöt ja nopeusrajoitukset ovat silti voimassa.
+- **Tarkka edistymisraportointi**: Seuranta erottaa valmistuneet, epäonnistuneet ja peruutetut tiedostot. Ajon päättyminen ei tarkoita kaikkien tiedostojen onnistumista.
+- **Vankka rinnakkainen eräkäsittely**: Aktiiviset tehtävät päättyvät ennen yhteenvetoa. Peruutus pysäyttää jatkotyön, mutta ei palauta tallennettuja muutoksia; kansiota ei käsitellä yhtenä transaktiona.
 - **Edistymispalkin tarkkuus**: Virhe, jossa "Create Wiki-Link & Generate Note" -komennon edistymispalkki jäi 95 prosenttiin, on korjattu, joten se näyttää nyt oikein 100 % valmistuessa.
 - **Parannettu API-vianmääritys**: "API Error Debugging Mode" tallentaa nyt täydet vastausrungot LLM-tarjoajilta ja hakupalveluilta, kuten Tavilyltä ja DuckDuckGolta, sekä lokittaa yrityskohtaisen siirtotapa-aikajanan, jossa näkyvät anonymisoidut pyyntö-URL:t, kesto, vastausotsikot, osittaiset vastausrungot, jäsennetyt osittaiset stream-sisällöt ja stack tracit. Tämä helpottaa vianetsintää OpenAI-compatible-, Anthropic-, Google-, Azure OpenAI- ja Ollama-fallbackeissa.
 - **Kehittäjätilan paneeli**: Asetuksiin kuuluu nyt oma diagnostiikkapaneeli kehittäjille. Paneeli on piilotettu, ellei "Developer mode" ole käytössä. Se tukee diagnostiikkakutsupolkujen valintaa ja toistuvia vakaustestejä valitulle tilalle.
@@ -105,7 +118,7 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
 - **Käsite-muistiinpanojen luonti (valinnainen ja muokattava)**: Luo automaattisesti uusia muistiinpanoja löydetyille käsitteille vaultissasi määritettyyn kansioon.
 - **Muokattavat tulostepolut**: Määritä vaultiin erilliset suhteelliset polut käsitellyille tiedostoille ja uusille käsite-muistiinpanoille.
 - **Muokattavat tulostetiedoston nimet (Add Links)**: Voit halutessasi **ylikirjoittaa alkuperäisen tiedoston** tai käyttää mukautettua pääte- tai korvausmerkkijonoa oletuksen `_processed.md` sijaan, kun tiedostoihin lisätään linkkejä.
-- **Linkkien eheyden ylläpito**: Perustason käsittely linkkien päivittämiselle, kun muistiinpanoja nimetään uudelleen tai poistetaan vaultista.
+- **Linkkien eheyden ylläpito**: Linkkien päivitys uudelleennimeämisessä riippuu Obsidianista ja sen asetuksista. Poisto voi jättää ratkaisemattomia linkkejä; samannimiset muistiinpanot on tarkistettava.
 - **Puhdas käsitepoiminta**: Poimi käsitteitä ja luo niitä vastaavat käsite-muistiinpanot muuttamatta alkuperäistä dokumenttia. Tämä sopii hyvin tietopohjan rakentamiseen olemassa olevista dokumenteista ilman, että niitä muokataan. Ominaisuudessa on määritettävät vaihtoehdot minimaalisille käsite-muistiinpanoille ja takaisinviittauksille.
 
 ### Kääntäminen
@@ -115,10 +128,10 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
   - **Tuki suurille tiedostoille**: Suuret tiedostot jaetaan automaattisesti pienempiin osiin `Chunk word count` -asetuksen perusteella ennen kuin ne lähetetään LLM:lle. Käännetyt osat yhdistetään tämän jälkeen saumattomasti takaisin yhdeksi dokumentiksi.
   - Tukee kääntämistä useiden kielten välillä.
   - Kohdekieli on mukautettavissa asetuksissa tai käyttöliittymässä.
-  - Avaa käännetyn tekstin automaattisesti alkuperäisen tekstin oikealle puolelle helppoa vertailua varten.
+  - Avaa tallennetun käännöksen Obsidianin työtilaan käytettävissä olevan asettelun mukaan.
 - **Eräkäännös**:
-  - Käännä kaikki valitun kansion tiedostot.
-  - Tukee rinnakkaista käsittelyä, kun "Enable Batch Parallelism" on käytössä.
+  - Kääntää oletuksena kelvolliset tiedostot suoraan valitusta kansiosta ilman alikansioita. Edistynyt tiedostovalinta voi muuttaa laajuutta; olemassa olevat kohdetiedostot voidaan korvata.
+  - Käännös käyttää suoraan `batchConcurrency`-arvoa (oletus 1) riippumatta `enableBatchParallelism`-asetuksesta.
   - Käyttää kääntämiseen mukautettuja promptteja, jos ne on määritetty.
   - Lisää tiedostoselaimen kontekstivalikkoon vaihtoehdon "Batch translate this folder".
 - **Poista automaattinen käännös käytöstä**: Kun tämä vaihtoehto on käytössä, muut kuin Translate-tehtävät eivät enää pakota ulostuloa tietylle kielelle, vaan säilyttävät lähdekielen kontekstin. Nimenomainen "Translate"-tehtävä suorittaa silti käännöksen määritetyllä tavalla.
@@ -134,7 +147,7 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
 - **Sisällön luonti otsikosta**:
   - Käytä muistiinpanon otsikkoa lähtötietona alkuperäisen sisällön generoimiseen LLM:llä, jolloin mahdollinen olemassa oleva sisältö korvataan.
   - **Valinnainen tutkimus**: Määritä, tehdäänkö verkkotutkimus, käyttäen valittua palveluntarjoajaa, jotta generoinnille saadaan taustakontekstia.
-- **Eräluonti otsikoista**: Luo sisältö kaikille valitun kansion muistiinpanoille niiden otsikoiden perusteella. Toiminto noudattaa valinnaista tutkimusasetusta. Onnistuneesti käsitellyt tiedostot siirretään **määritettävään "complete"-alikansioon**, kuten `[foldername]_complete` tai muuhun nimeen, jotta niitä ei käsitellä uudelleen.
+- **Eräluonti otsikoista**: Luo ja korvaa kelvollisten `.md`-tiedostojen sisällön tutkimusasetuksen mukaisesti. `_processed.md` ja määritetyn complete-kansion koko hakemistopuu jätetään pois. Luonnin jälkeen tiedostoa yritetään siirtää complete-kansioon. Varattu kohde estää siirron, mutta ei jo tallennettua luontia; luodut ja siirretyt tiedostot lasketaan erikseen.
 - **Mermaid auto-fix -kytkentä**: Kun Mermaid auto-fix on käytössä, Mermaidiin liittyvät työnkulut korjaavat nyt automaattisesti generoidut tiedostot tai tulostekansiot käsittelyn jälkeen. Tämä kattaa Process-, Generate from Title-, Batch Generate from Titles-, Research & Summarize-, Summarise as Mermaid- ja Translate-virrat.
 
 ### Apuominaisuudet
@@ -289,8 +302,8 @@ Pääset liitännäisen asetuksiin näin:
 
 #### Käsite-muistiinpanojen tuloste
 - **Customize Concept Note Path**:
-  - **Pois käytöstä (oletus)**: `[[linked concepts]]`-linkeille ei luoda automaattisesti uusia muistiinpanoja.
-  - **Käytössä**: Mahdollistaa kansion määrittämisen uusille käsite-muistiinpanoille.
+  - **Pois käytöstä**: Ei luo automaattisesti muistiinpanoja linkitetyistä käsitteistä.
+  - **Oletuksena käytössä**: Polku on aluksi tyhjä. Määritä kelvollinen holvin sisäinen suhteellinen polku ennen käsitemuistiinpanojen luontia.
 - **Concept Note Folder Path**: Näkyy vain, kun yllä oleva asetus on käytössä. Anna *suhteellinen polku* vaultissasi, esimerkiksi `Concepts` tai `Generated/Topics`, johon uudet käsite-muistiinpanot tallennetaan. Kansio luodaan tarvittaessa. **Kenttä on pakollinen, jos mukautus on käytössä.** **Älä käytä absoluuttisia polkuja tai virheellisiä merkkejä.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -337,8 +350,8 @@ Pääset liitännäisen asetuksiin näin:
 
 #### Erä Mermaid -korjaus
 - **Enable Mermaid Error Detection**:
-  - **Pois päältä (oletus)**: Virheiden tunnistusta ei suoriteta käsittelyn jälkeen.
-  - **Päällä**: Skannaa käsitellyt tiedostot jäljellä olevien Mermaid-syntaksivirheiden varalta ja generoi `mermaid_error_{foldername}.md`-raportin.
+  - **Pois**: Ohittaa virheentunnistuksen käsittelyn jälkeen.
+  - **Oletuksena päällä**: Etsii jäljellä olevat Mermaid-virheet ja luo raportin `mermaid_error_{foldername}.md`.
 - **Move files with Mermaid errors to specified folder**:
   - **Pois päältä**: Virheelliset tiedostot jäävät paikoilleen.
   - **Päällä**: Siirtää kaikki tiedostot, joissa on korjausyrityksen jälkeen edelleen Mermaid-syntaksivirheitä, erilliseen kansioon manuaalista tarkastelua varten.
@@ -354,7 +367,7 @@ Pääset liitännäisen asetuksiin näin:
 - **API Call Interval (ms)**: Pienin viive millisekunteina *ennen jokaista yksittäistä LLM API -kutsua ja sen jälkeen*. Tärkeä hitaasti rajoitetuille API:ille tai 429-virheiden välttämiseksi. Aseta arvoon 0, jos et halua keinotekoista viivettä. Oletus: 500 ms.
 - **Chunk Word Count**: LLM:lle lähetettävän chunkin enimmäissanamäärä. Vaikuttaa suurten tiedostojen API-kutsujen määrään. Oletus: 3000.
 - **Enable Duplicate Detection**: Kytkee päälle tai pois käsitellyn sisällön duplikaattisanojen perustarkistuksen. Tulokset näkyvät konsolissa. Oletus: päällä.
-- **Max Tokens**: Enimmäismäärä tokeneita, jotka LLM saa tuottaa per vastauschunk. Vaikuttaa kustannukseen ja yksityiskohtaisuuteen. Oletus: 4096.
+- **Max Tokens**: Enimmäismäärä tokeneita, jotka LLM saa tuottaa per vastauschunk. Vaikuttaa kustannukseen ja yksityiskohtaisuuteen. Oletus: 8192. Palveluntarjoajakohtainen tulosteraja voi ohittaa arvon; myös mallikohtaisia oletusarvoja käytetään.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Kääntäminen
@@ -382,7 +395,7 @@ Pääset liitännäisen asetuksiin näin:
   - **Change Prompt Word**: Mahdollistaa prompt-sanan muuttamisen tietylle tehtävälle.
   - **Custom Prompt Word**: Syötä tehtävälle oma prompt-sanasi.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Pois käytöstä (oletus)**: Onnistuneesti generoitu sisältö siirretään alikansioon nimeltä `[OriginalFolderName]_complete`, joka sijaitsee alkuperäisen kansion ylätason kansiossa, tai `Vault_complete`, jos alkuperäinen kansio oli juuri.
+  - **Pois käytöstä (oletus)**: Kohde on rinnakkainen kansio `[foldername]_complete`, tai holvin juuressa `Vault_complete`. Käytössä oleva asetus sallii oman nimen.
   - **Käytössä**: Mahdollistaa alikansion nimen mukauttamisen, johon valmiit tiedostot siirretään.
 - **Custom Output Folder Name**: Näkyy vain, kun yllä oleva asetus on käytössä. Anna haluamasi alikansion nimi, esimerkiksi `Generated Content` tai `_complete`. Virheelliset merkit eivät ole sallittuja. Jos kenttä jätetään tyhjäksi, käytetään nimeä `_complete`. Kansio luodaan alkuperäisen kansion ylätason kansioon.
 
@@ -486,11 +499,11 @@ Tämä on ydinominaisuus, joka keskittyy käsitteiden tunnistamiseen ja `[[wiki-
    - Suorita komento `Notemd: Translate Note/Selection` komentopaletista tai sivupalkin painikkeesta.
    - Näkyviin tulee modaali, jossa voit vahvistaa tai muuttaa **Target Language** -asetusta; oletusarvo tulee määrityksissä määritetystä asetuksesta.
    - Liitännäinen käyttää määritettyä **LLM Provider** -asetusta Multi-Model-asetusten mukaisesti käännöksen suorittamiseen.
-   - Käännetty sisältö tallennetaan määritettyyn **Translation Save Path** -polkuun oikealla päätteellä ja avataan **uuteen paneeliin alkuperäisen sisällön oikealle puolelle** helppoa vertailua varten.
+   - Tallentaa käännöksen määritettyyn polkuun asetetulla loppuliitteellä ja avaa tallennetun tiedoston Obsidianin työtilaan.
    - Voit perua tämän tehtävän sivupalkin painikkeesta tai modaalin peruutuspainikkeesta.
 3. **Eräkäännös**:
    - Suorita komentopaletista `Notemd: Batch Translate Folder` ja valitse kansio, tai napsauta kansiota oikealla tiedostoselaimessa ja valitse "Batch translate this folder".
-   - Liitännäinen kääntää kaikki valitun kansion Markdown-tiedostot.
+   - Kääntää oletuksena kelvolliset tiedostot suoraan valitusta kansiosta ilman alikansioita. Edistynyt tiedostovalinta voi muuttaa laajuutta; olemassa olevat kohdetiedostot voidaan korvata.
    - Käännetyt tiedostot tallennetaan määritettyyn käännöspolkuun, mutta niitä ei avata automaattisesti.
    - Prosessi voidaan perua edistymismodaalista.
 
@@ -517,7 +530,7 @@ Tämä on ydinominaisuus, joka keskittyy käsitteiden tunnistamiseen ja `[[wiki-
    - Suorita komento `Notemd: Batch Generate Content from Titles` komentopaletista tai sivupalkin painikkeesta.
    - Valitse kansio, joka sisältää käsiteltävät muistiinpanot.
    - Liitännäinen käy läpi jokaisen kansion `.md`-tiedoston, pois lukien `_processed.md`-tiedostot ja tiedostot määritetystä "complete"-kansiosta, generoi sisältöä otsikon perusteella ja korvaa mahdollisen olemassa olevan sisällön. Tiedostot käsitellään taustalla ilman, että niitä avataan editoriin.
-   - Onnistuneesti käsitellyt tiedostot siirretään määritettyyn "complete"-kansioon.
+   - Luonnin jälkeen tiedostoa yritetään siirtää complete-kansioon. Varattu kohde estää siirron, mutta ei jo tallennettua luontia; luodut ja siirretyt tiedostot lasketaan erikseen.
    - Komento noudattaa kunkin käsitellyn muistiinpanon kohdalla asetusta **"Enable Research in 'Generate from Title'"**.
    - Voit perua tämän tehtävän sivupalkin painikkeesta tai modaalin peruutuspainikkeesta.
    - Edistyminen ja tulokset, kuten muokattujen tiedostojen määrä ja virheet, näkyvät sivupalkin tai modaalin lokissa.
@@ -569,6 +582,8 @@ Tämä on ydinominaisuus, joka keskittyy käsitteiden tunnistamiseen ja `[[wiki-
    - Voit halutessasi määrittää liitännäisen siirtämään nämä ongelmalliset tiedostot erilliseen tarkastuskansioon.
 
 ## Tuetut LLM-tarjoajat
+
+Taulukossa on valittuja esimerkkejä. Katso esiasetukset ja vaatimukset [36 palveluntarjoajan oppaasta](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/providers/overview).
 
 | Tarjoaja | Tyyppi | API-avain vaaditaan | Huomautukset |
 |--------------------|---------|------------------------|-----------------------------------------------------------------------|
@@ -638,7 +653,7 @@ Notemd toimii paikallisesti Obsidianin sisällä, mutta osa ominaisuuksista läh
 ### Yleiset ongelmat
 - **Liitännäinen ei lataudu**: Varmista, että `manifest.json`, `main.js` ja `styles.css` ovat oikeassa kansiossa, `<Vault>/.obsidian/plugins/notemd/`, ja käynnistä Obsidian uudelleen. Tarkista Developer Console (`Ctrl+Shift+I` tai `Cmd+Option+I`) mahdollisten käynnistysvirheiden varalta.
 - **Käsittelyvirheet / API-virheet**:
-  1. **Tarkista tiedostomuoto**: Varmista, että käsiteltävällä tai tarkistettavalla tiedostolla on `.md`- tai `.txt`-pääte. Notemd tukee tällä hetkellä vain näitä tekstipohjaisia formaatteja.
+  1. **Tarkista muoto**: Oletusmuodot riippuvat tehtävästä (`.md` tai `.md`/`.txt`). Kehittäjätila laajennetuilla syötemuodoilla sallii muita tekstejä ja PDF-tiedostoja tietyissä lähteen säilyttävissä tehtävissä, kuten käännöksessä ja käsitteiden poiminnassa. Linkkien lisääminen rajoittuu edelleen `.md`/`.txt`-tiedostoihin.
   2. Käytä "Test LLM Connection" -komentoa tai -painiketta aktiivisen tarjoajan asetusten tarkistamiseen.
   3. Tarkista vielä kerran API Key, Base URL, Model Name ja API Version (Azurelle). Varmista, että API-avain on oikea ja että siinä on riittävästi krediittejä tai käyttöoikeuksia.
   4. Varmista, että paikallinen LLM-palvelimesi (LMStudio tai Ollama) on käynnissä ja että Base URL on oikea, esimerkiksi `http://localhost:1234/v1` LM Studiolle.
@@ -699,7 +714,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.7 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.8 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->

@@ -20,6 +20,9 @@ export const publishedZhCnDocs = [
   {id: 'advanced/troubleshooting', path: '/docs/advanced/troubleshooting', sourcePath: 'advanced/troubleshooting.mdx'},
   {id: 'pillar-ai-knowledge', path: '/docs/pillar-ai-knowledge', sourcePath: 'pillar-ai-knowledge.mdx'},
   {id: 'faq', path: '/docs/faq', sourcePath: 'faq.mdx'},
+  {id: 'developers/overview', path: '/docs/developers/overview', sourcePath: 'developers/overview.mdx'},
+  {id: 'agents/overview', path: '/docs/agents/overview', sourcePath: 'agents/overview.mdx'},
+  {id: 'releases/1.9.8', path: '/docs/releases/1.9.8', sourcePath: 'releases/1.9.8.mdx'},
 ];
 
 export const zhCnCriticalDocPaths = publishedZhCnDocs.map((doc) => doc.path);
@@ -27,7 +30,10 @@ export const zhCnCriticalDocPaths = publishedZhCnDocs.map((doc) => doc.path);
 export const zhCnHomepageDocPaths = [
   '/docs/intro',
   '/docs/getting-started/quick-start',
+  '/docs/features/workflows',
+  '/docs/developers/overview',
+  '/docs/agents/overview',
   '/docs/providers/overview',
-  '/docs/pillar-ai-knowledge',
+  '/docs/advanced/troubleshooting',
   '/docs/faq',
 ];

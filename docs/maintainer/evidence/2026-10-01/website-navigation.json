@@ -1,0 +1,4938 @@
+{
+  "node": "v24.14.0",
+  "locales": [
+    "en",
+    "zh-CN",
+    "zh-Hant",
+    "zh-TW",
+    "ja",
+    "fr",
+    "de",
+    "es",
+    "ko",
+    "ru",
+    "pt",
+    "it",
+    "ar",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "bn",
+    "he",
+    "ms",
+    "tr",
+    "nl",
+    "pl",
+    "sv",
+    "uk",
+    "fi",
+    "da",
+    "no",
+    "cs",
+    "el",
+    "hu",
+    "ro",
+    "fa",
+    "pt-BR"
+  ],
+  "pages": [
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "en",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-CN",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-Hant",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "zh-TW",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ja",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fr",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "de",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "es",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ko",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ru",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "it",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ar",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hi",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "id",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "vi",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "th",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "bn",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "he",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ms",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "tr",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "nl",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pl",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "sv",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "uk",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fi",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "da",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "no",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "cs",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "el",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "hu",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "ro",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "fa",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/docs/faq",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 390,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 390
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/docs/faq",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 768,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 768
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/docs/getting-started/quick-start",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/docs/features/workflows",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/docs/developers/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/docs/agents/overview",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/docs/releases/1.9.8",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/docs/faq",
+      "scrollWidth": 1440
+    },
+    {
+      "locale": "pt-BR",
+      "width": 1440,
+      "route": "/docs/providers/overview (dark)",
+      "scrollWidth": 1440
+    }
+  ],
+  "failures": []
+}

@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const {pathToFileURL} = require('url');
 const yaml = require('js-yaml');
+const {createHash} = require('node:crypto');
 
 const websiteRoot = path.resolve(__dirname, '..');
 const buildRoot = path.join(websiteRoot, 'build');
@@ -12,12 +13,11 @@ const siteRoot = 'https://jacobinwwey.github.io/obsidian-NotEMD/';
 const basePath = '/obsidian-NotEMD/';
 const zhRoot = `${siteRoot}zh-CN/`;
 const zhBasePath = `${basePath}zh-CN/`;
-const expectedSoftwareVersion = '1.9.7';
+const expectedSoftwareVersion = require('../src/lib/releaseFacts.cjs').version;
 const providerSourceRoot = path.join(websiteRoot, 'docs', 'providers');
 let supportedLocalizedLocales = [];
 let publishedLanguageScopeText = '';
 let localePublicationByCode = new Map();
-const criticalLocalizedSourceDocs = new Set(['features/diagrams.mdx', 'faq.mdx']);
 const localizedFillerMarkers = [
   '这一部分解释产品行为',
   '這一部分說明產品行為',
@@ -208,12 +208,16 @@ const localeScriptRequirements = {
 
 function auditLocalizedLanguageSignal(locale, sourceContent, localizedContent, context) {
   if (locale === 'en') return;
-  const sourceH1 = markdownHeadings(sourceContent).find((heading) => heading.level === 1)?.text;
   const localizedH1 = markdownHeadings(localizedContent).find((heading) => heading.level === 1)?.text;
   if (!localizedH1) fail(`${context} has no level-one heading`);
-  if (sourceH1 && localizedH1 === sourceH1) fail(`${context} retained the English H1 "${sourceH1}"`);
+  const sourceSummary = sourceContent.match(/<TLDR>([\s\S]*?)<\/TLDR>/)?.[1].trim();
+  const localizedSummary = localizedContent.match(/<TLDR>([\s\S]*?)<\/TLDR>/)?.[1].trim();
+  if (!localizedSummary) fail(`${context} has no localized summary`);
+  if (sourceSummary === localizedSummary) fail(`${context} retained the English summary as fallback`);
   const requiredScript = localeScriptRequirements[locale];
-  if (requiredScript && !requiredScript.test(localizedH1)) fail(`${context} H1 does not contain the expected ${locale} script`);
+  // Cognates and technical titles (for example German "Installation") can be
+  // identical. The instructional summary must carry the locale's own prose.
+  if (requiredScript && !requiredScript.test(localizedSummary)) fail(`${context} summary does not contain the expected ${locale} script`);
   if (locale !== 'ko' && locale !== 'ja' && !/^zh/.test(locale) && /[\uac00-\ud7af]/.test(localizedH1)) {
     fail(`${context} H1 contains Hangul from another locale`);
   }
@@ -250,10 +254,28 @@ function auditLocalizedFaqMetadata() {
     if (locale !== 'en' && localizedFaq.some((item, index) => item.question === englishFaq[index].question || item.answer === englishFaq[index].answer)) {
       fail(`${locale} FAQ frontmatter still contains English question/answer text`);
     }
+    const body = content.replace(/^---\r?\n[\s\S]*?\r?\n---/, '');
+    for (const item of localizedFaq) {
+      assertContains(body, `### ${item.question}`, `${locale} visible FAQ`);
+      assertContains(body, item.answer, `${locale} visible FAQ`);
+    }
+  }
+}
+
+function assertReviewedDocument(source, authored, receipt, context) {
+  if (!receipt) fail(`${context} has no source-review receipt`);
+  for (const [label, content, expected] of [
+    ['source', source, receipt.sourceSha256],
+    ['authored translation', authored, receipt.authoredSha256],
+  ]) {
+    const actual = createHash('sha256').update(content.replace(/\r\n/g, '\n')).digest('hex');
+    if (actual !== expected) fail(`${context} ${label} changed after its recorded review`);
   }
 }
 
 function auditLocalizedSourceTextIntegrity() {
+  const review = JSON.parse(readSourceFile(path.join(websiteRoot, 'i18n', 'source-review.json')));
+  if (review.schema !== 1 || review.method !== 'direct-codex') fail('Unsupported locale source-review record');
   for (const {locale} of supportedLocalizedLocales) {
     const localeRoot = localizedDocsSourceRoot(locale);
     for (const sourceDoc of englishSourceDocs()) {
@@ -261,6 +283,7 @@ function auditLocalizedSourceTextIntegrity() {
       const localizedContent = readSourceFile(filePath);
       const englishContent = readSourceFile(path.join(websiteRoot, 'docs', sourceDoc));
       const context = `${locale} source doc ${sourceDoc}`;
+      assertReviewedDocument(englishContent, localizedContent, review.locales?.[locale]?.[sourceDoc], context);
 
       for (const marker of localizedFillerMarkers) {
         assertNotContains(localizedContent, marker, context);
@@ -277,9 +300,7 @@ function auditLocalizedSourceTextIntegrity() {
       if (JSON.stringify(localizedHeadings) !== JSON.stringify(englishHeadings)) {
         fail(`${context} heading structure does not mirror the English source`);
       }
-      if (criticalLocalizedSourceDocs.has(sourceDoc)) {
-        auditLocalizedLanguageSignal(locale, englishContent, localizedContent, context);
-      }
+      auditLocalizedLanguageSignal(locale, englishContent, localizedContent, context);
     }
   }
 }
@@ -352,6 +373,13 @@ function auditPublishedScopeSourceFiles(languageScope) {
   }
 }
 
+function auditHomepageAudienceLinks(html, localeBasePath, context) {
+  const visibleHtml = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+  for (const route of ['getting-started/quick-start', 'features/workflows', 'developers/overview', 'agents/overview', `releases/${expectedSoftwareVersion}`]) {
+    assertContains(visibleHtml, `href="${localeBasePath}docs/${route}"`, context);
+  }
+}
+
 function auditHomepageRoutes(languageScope) {
   const englishHome = readBuildFile('index.html');
   const zhHome = readBuildFile('zh-CN/index.html');
@@ -360,24 +388,15 @@ function auditHomepageRoutes(languageScope) {
   assertContains(englishHome, `rel="canonical" href="${siteRoot}"`, 'English homepage');
   assertContains(englishHome, `"url":"${siteRoot}"`, 'English homepage JSON-LD');
   assertContains(englishHome, `"softwareVersion":"${expectedSoftwareVersion}"`, 'English homepage SoftwareApplication JSON-LD');
-  assertContains(englishHome, 'Source-backed product facts', 'English homepage GEO surface');
-  assertContains(englishHome, 'Answer-engine source map', 'English homepage GEO surface');
+  auditHomepageAudienceLinks(englishHome, basePath, 'English homepage');
   assertContains(englishHome, `${basePath}llms.txt`, 'English homepage GEO source map link');
-  assertContains(
-    englishHome,
-    'English and Simplified Chinese are verified indexable docs surfaces; all other locale routes remain available for review and are marked machine-translated.',
-    'English homepage language boundary',
-  );
 
   assertContains(zhHome, '<html lang="zh-CN"', 'zh-CN homepage');
   assertContains(zhHome, `rel="canonical" href="${zhRoot}"`, 'zh-CN homepage');
   assertContains(zhHome, `"url":"${zhRoot}"`, 'zh-CN homepage JSON-LD');
   assertContains(zhHome, `"softwareVersion":"${expectedSoftwareVersion}"`, 'zh-CN homepage SoftwareApplication JSON-LD');
-  assertContains(zhHome, '可索引的产品事实', 'zh-CN homepage GEO surface');
-  assertContains(zhHome, 'Answer engine 来源地图', 'zh-CN homepage GEO surface');
+  auditHomepageAudienceLinks(zhHome, zhBasePath, 'zh-CN homepage');
   assertContains(zhHome, `${basePath}llms.txt`, 'zh-CN homepage GEO source map link');
-  assertContains(zhHome, '语言边界：英文与简体中文是已验证、可索引的文档表面；', 'zh-CN homepage language boundary');
-  assertContains(zhHome, '明确标记为机器翻译。', 'zh-CN homepage language boundary');
   assertContains(zhHome, `href="${zhBasePath}docs/faq"`, 'zh-CN homepage');
 
   for (const docPath of languageScope.zhCnHomepageDocPaths) {
@@ -391,6 +410,7 @@ function auditHomepageRoutes(languageScope) {
     const localizedHome = readBuildFile(path.join(locale, 'index.html'));
     assertContains(localizedHome, `<html lang="${htmlLang}"`, `${locale} homepage`);
     assertContains(localizedHome, `rel="canonical" href="${siteRoot}${locale}/"`, `${locale} homepage`);
+    auditHomepageAudienceLinks(localizedHome, `${basePath}${locale}/`, `${locale} homepage`);
     if (localePublicationByCode.get(locale)?.indexable) {
       assertNotContains(localizedHome, 'content="noindex,follow"', `${locale} homepage`);
     } else {
@@ -804,7 +824,11 @@ async function main() {
   console.log('website build audit passed');
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = {assertReviewedDocument, auditLocalizedLanguageSignal, auditHomepageAudienceLinks};

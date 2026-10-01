@@ -1,359 +1,202 @@
 ---
 id: faq
-title: "Často kladené otázky"
-description: "Běžné otázky týkající se instalace, funkcí a použití Notemd"
-keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+title: Časté otázky
+description: >-
+  Ověřitelné odpovědi o instalaci, poskytovatelích, výstupech, soukromí, zrušení
+  a Agent rozhraní.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Ollama
-    url: https://ollama.com
+keywords:
+  - Časté otázky
+  - Notemd
+  - Obsidian
 faqItems:
-  - question: "Jak nainstalovat Notemd do Obsidianu?"
-    answer: "Otevřete Nastavení v Obsidianu, přejděte na sekci Komunitní pluginy, vyberte možnost Procházet, vyhledejte Notemd, klikněte na Instalovat a Poté Povolit. Vyžaduje se Obsidian 0.15.0 nebo novější verze. Manuální instalace je také dostupná prostřednictvím vydání na GitHubu."
-  - question: "Které poskytovatele LLM podporuje Notemd?"
-    answer: "Notemd podporuje více než 30 poskytovatelů, včetně OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter a mnoha čínských poskytovatelů jako Qwen, Doubao, Moonshot a GLM."
-  - question: "Funguje Notemd s lokálními LLM?"
-    answer: "Ano. Notemd funguje s Ollama, LM Studio, vLLM, LocalAI a jakýmkoli koncem kompatibilním s OpenAI. Všechny úlohy fungují i s lokálními modely, včetně vytváření odkazů, generování konceptů, překladu, vyhledávání informací a tvorby diagramů."
-  - question: "V čem se Notemd liší od ChatGPT?"
-    answer: "ChatGPT vytváří dočasné odpovědi na konverzace. Notemd zapisuje trvalé, strukturované výsledky přímo do vašeho úložiště v Obsidianu ve formě souborů propojených prostřednictvím wiki, poznámek o konceptech, diagramů a překladů, které se postupně hromadí do znalostní báze."
-  - question: "Jak se Notemd porovnává s Copilotem nebo Smart Connections?"
-    answer: "Copilot je zaměřen především na konverzace o poznámkách. Smart Connections se zaměřuje na hledání podobných poznámek. Notemd je zaměřen především na psaní – zpracovává poznámky pomocí AI a vytváří do vašeho úložiště strukturované výsledky. Všechny tři nástroje se navzájem doplňují."
-  - question: "Které vyhledávací služby fungují s funkcí vyhledávání informací v Notemd?"
-    answer: "Tavily (doporučeno, vyhledávání optimalizované pro AI, vyžaduje se klíč API) a DuckDuckGo (experimentální, není potřeba klíč API). Výsledky vyhledávání jsou shrnuty pomocí LLM a přidány k vaší poznámce spolu s odkazy na zdroje."
-  - question: "Podporuje Notemd čínštinu nebo jiné jazyky?"
-    answer: "Uživatelské rozhraní podporuje více než 21 jazyků. Jazyk výstupu úloh lze nastavit samostatně, co umožňuje kombinované nastavení, např. čínské rozhraní s anglickým výstupem nebo naopak."
-  - question: "Mohu použít Notemd k čtení článků nebo PDF souborů?"
-    answer: "Ano. Převeďte PDF do formátu Markdown pomocí MinerU, otevřete ho v Obsidianu a poté spusťte úlohy Notemd pro přidání wiki-odkazů, generování poznámek o konceptech, extrakci textu, vyhledávání informací k pozadí, překlad částí a vytvoření diagramů typu Mermaid."
-  - question: "Které typy diagramů může Notemd generovat?"
-    answer: "Mermaid (diagramy toků, sekvencí, tříd, stavů, ER, Gantt s automatickou opravou syntaxe), JSON Canvas (nativní formát Obsidianu), Vega-Lite (grafy dat), záložní formát HTML a explicitně upravitelné artefakty ve formátu HTML/SVG. Jsou také k dispozici možnosti exportu do formátů XML od Draw.io a JSON od Drawnix pro testování artefaktů s jistotou."
-  - question: "Je Notemd zdarma a open source?"
-    answer: "Ano. Je licencován pod MIT, neexistují žádné placené verze, není zde cloud lock-in a nejsou shromažďovány žádné telemetrické údaje. Zdrojový kód je dostupný na GitHubu a má více než 234 hvězdiček. Jsou vítány pull requests."
-  - question: "Funguje Notemd zcela offline?"
-    answer: "Ano, s Ollamou. Není potřeba žádný klíč API ani internet. Všechny funkce fungují offline, včetně wiki-odkazů, poznámek o konceptech, překladu a diagramů. Vyhledávání pomocí DuckDuckGo také funguje bez potřeby klíče API."
-  - question: "Jsou moje data odesílána do cloudu?"
-    answer: "Při použití Ollamy nebo LM Studio žádná data neopouštějí váš počítač. Při použití cloudových poskytovatelů jako OpenAI nebo Anthropic je obsah vaší poznámky odesílán jako vstup pro API. Samotný Notemd neshromažďuje žádné telemetrické údaje ani údaje uživatelů."
+  - question: Jak nainstaluji Notemd do Obsidianu?
+    answer: >-
+      Otevřete Settings → Community plugins → Browse, vyhledejte Notemd,
+      nainstalujte jej a zapněte. Ruční instalace používá main.js, manifest.json
+      a styles.css ze stejného GitHub Release. Manifest uvádí minimum Obsidian
+      0.15.0; tuto starou verzi ani fyzická mobilní zařízení současné doklady
+      vydání neověřují.
+  - question: Které poskytovatele LLM podporuje?
+    answer: >-
+      Registr obsahuje 36 profilů pěti rodin protokolů: OpenAI-compatible,
+      Anthropic, Google, Azure OpenAI a Ollama. Hostovaná API, brány a lokální
+      servery potřebují vlastní endpoint, přihlašovací údaje a model. Profil ani
+      uvedený model nezaručují současnou dostupnost nebo oprávnění generovat u
+      poskytovatele.
+  - question: Lze používat lokální LLM?
+    answer: >-
+      Ano. Nastavte běžící Ollama, LM Studio, OVMS nebo kompatibilní vlastní
+      endpoint. Nejprve stáhněte či načtěte model a otestujte zamýšlenou úlohu.
+      Lokální inference nedělá webovou rešerši, instalaci závislostí ani
+      samostatně směrované cloudové úlohy offline.
+  - question: Čím se Notemd liší od ChatGPT?
+    answer: >-
+      Notemd se soustředí na konkrétní souborové úlohy Obsidianu: odkazy, pojmy,
+      připojování rešerší, překlad a vytváření artefaktů. Zvolte jej, pokud
+      odpovídají vašim úlohám v trezoru. Ostatní nástroje hodnoťte podle jejich
+      současného ukládání, exportu a integrací; i chatové nástroje mohou
+      uchovávat historii a vytvářet soubory.
+  - question: Jak se srovnává s Copilot nebo Smart Connections?
+    answer: >-
+      Porovnejte přesné úlohy s aktuální verzí, nastavením a dokumentací každého
+      projektu. Notemd transformuje poznámky a nabízí omezenou lexikální
+      retrieval cestu. Neposkytuje obecné chat-with-vault ani sémantické hledání
+      pomocí embeddings. Tento web netvrdí aktuální pořadí funkcí jiných
+      projektů.
+  - question: Které vyhledávací služby používá rešerše?
+    answer: >-
+      Výslovně zvolte Tavily s API klíčem nebo DuckDuckGo. Prázdný klíč Tavily
+      nepřepíná službu automaticky. Obě potřebují síť. Vybraný LLM shrne
+      dostupný webový a volitelný lokální kontext a připojí shrnutí k aktivní
+      poznámce Markdown. Ověřte URL zdrojů a důležitá tvrzení.
+  - question: Podporuje čínštinu a další jazyky?
+    answer: >-
+      UI pluginu má 21 lokalizací a web 34 jazykových cest. Jazyk generovaného
+      obsahu se nastavuje zvlášť, s výjimkami podle úloh tam, kde jsou
+      podporovány. Překladová schopnost a kvalita závisejí na modelu, nikoli na
+      počtu jazyků UI či webu.
+  - question: Lze Notemd použít při čtení článků a PDF?
+    answer: >-
+      Převeďte dokument do čitelného Markdownu vhodným externím nástrojem a
+      ověřte chyby rovnic, tabulek a obrázků. Pak propojujte pojmy, extrahujte
+      původní pasáže, zkoumejte otázky, překládejte či vytvářejte diagramy.
+      Standardní práce s poznámkami neslibuje nativní PDF OCR ani věrnou
+      extrakci libovolných binárních dokumentů.
+  - question: Jaké diagramy může generovat?
+    answer: >-
+      Spustitelný katalog obsahuje 33 položek s kompatibilními zdroji a náhledy.
+      Mermaid, JSON Canvas, Vega-Lite, editovatelný HTML/SVG, Draw.io, Drawnix a
+      omezený CircuitikZ slouží různým účelům. Používejte podporované volby a
+      ověřte výstup v cílovém nástroji; náhled neprokazuje věrnost nativní
+      editace ani kompilace.
+  - question: Je Notemd zdarma a open source?
+    answer: >-
+      Notemd je dostupný pod licencí MIT. Účty poskytovatelů, inference, hledání
+      a volitelné externí nástroje mají vlastní ceny a podmínky. Repozitář je
+      veřejný a příspěvky vítány. Svobodná licence neznamená bezplatnost všech
+      nastavených služeb.
+  - question: Funguje zcela offline?
+    answer: >-
+      Některé poznámkové úlohy mohou použít lokální model po instalaci serveru,
+      modelových souborů a potřebných závislostí. Webová rešerše včetně
+      DuckDuckGo vyžaduje síť. Před odpojením ověřte profily jednotlivých úloh a
+      volitelné závislosti exportu. Pro všechny funkce neplatí jednotná offline
+      záruka.
+  - question: Odcházejí má data do cloudu?
+    answer: >-
+      Prompty a obsah jdou nastavenému endpointu LLM. Vyhledávače dostávají
+      dotazy a načítání výsledků kontaktuje weby. Lokální retrieval může přidat
+      úryvky trezoru do cloudového promptu. I místní profil lze nastavit na
+      vzdálenou adresu. Před sdílením prověřte směrování a očistěte záznamy;
+      místní ukládání samo nezaručuje data výhradně na zařízení.
+  - question: Co skutečně spouští One-Click Extract?
+    answer: >-
+      Výchozí sekvence přidá odkazy k aktivní poznámce, generuje obsah
+      způsobilých poznámek ve složce pojmů nebo zvolené složce a opraví Mermaid
+      ve složce complete. Může zpracovat existující pojmy. Automaticky nepřidává
+      webovou rešerši ani generování diagramu. Přesnou syntaxi
+      name::action>action uvádí průvodce postupy.
+  - question: Vrátí zrušení úlohy její změny?
+    answer: >-
+      Ne. Zrušení zastavuje podporovanou další práci a zachovává dokončené
+      výstupy. Přijatý požadavek či zápis může doběhnout a účtování řídí
+      vzdálený poskytovatel. Vyčkejte na ustálení úlohy, prověřte hlášené cesty
+      a konflikty obnovy a opakujte jen zamýšlenou práci.
+  - question: Může Agent automatizovat Notemd?
+    answer: >-
+      Čtyři omezené exportní příkazy vystavují profily s odstraněnými citlivými
+      poli, schopnosti, kontrakty volání a veřejné CLI přes dostupný Obsidian a
+      trezor. Mohou zapisovat exportní soubory. Operace správců repozitáře tvoří
+      samostatný kontrakt; počet interních operací není veřejné automatizační
+      API. Začněte průvodcem pro Agent.
+  - question: Kde mají začít vývojáři a přispěvatelé?
+    answer: >-
+      Vývojářský průvodce popisuje nastavení repozitáře, build, úplné testy,
+      odpovědnost modulů a pravidla rozšiřování. AGENTS.md je verzovanou
+      autoritou pro provádění práce. Hlášení mají být reprodukovatelná, s
+      přesnými verzemi a očištěnými doklady. Změny ověřte před návrhem
+      integrace.
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Často kladené otázky
+# Časté otázky
 
-<TLDR>
-**Rychlé odpovědi na nejčastější otázky ohledně Notemd.** Zahrnuje instalaci (nastavení za 5 minut), podporu více než 30 poskytovatelů LLM, možnosti lokálního/cloudového modelu, jednoklikové pracovní postupy, vícejazyčný UI (21 jazyků), automatizaci odkazování na wiki, integraci s výzkumem, pracovní postupy pro čtení PDF, generování diagramů a licencování podle open source. Všechny funkce fungují offline s Ollama.
-</TLDR>
+<TLDR>Začněte zkušební poznámkou, dostupným poskytovatelem a jasnými výstupními cestami. Odpovědi popisují implementované hranice; úplné nastavení a ověření najdete v odkazovaných návodech.</TLDR>
 
----
+## Otázky
 
-## Instalace a nastavení
+### Jak nainstaluji Notemd do Obsidianu?
 
-### Jak nainstalovat Notemd do Obsidian?
+Otevřete Settings → Community plugins → Browse, vyhledejte Notemd, nainstalujte jej a zapněte. Ruční instalace používá main.js, manifest.json a styles.css ze stejného GitHub Release. Manifest uvádí minimum Obsidian 0.15.0; tuto starou verzi ani fyzická mobilní zařízení současné doklady vydání neověřují.
 
-Otevřete Obsidian **Nastavení → Komunitní pluginy → Procházet** → vyhledejte **"Notemd"** → **Nainstalovat** → **Povolit**.
+### Které poskytovatele LLM podporuje?
 
-**Požadavky:**
-- Obsidian 0.15.0+
-- Podporováno na desktopu (Windows, macOS, Linux) a mobilních zařízeních (iOS, Android)
+Registr obsahuje 36 profilů pěti rodin protokolů: OpenAI-compatible, Anthropic, Google, Azure OpenAI a Ollama. Hostovaná API, brány a lokální servery potřebují vlastní endpoint, přihlašovací údaje a model. Profil ani uvedený model nezaručují současnou dostupnost nebo oprávnění generovat u poskytovatele.
 
-**Ruční instalace:**
-1. Stáhněte `main.js`, `styles.css`, `manifest.json` z [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)
-2. Umístěte je do `<your-vault>/.obsidian/plugins/notemd/`
-3. Přezačtěte Obsidian a povolte plugin
+### Lze používat lokální LLM?
 
-**Statistiky:** více než 4 tisíce stažení, 44 vydání, licencováno podle MIT.
+Ano. Nastavte běžící Ollama, LM Studio, OVMS nebo kompatibilní vlastní endpoint. Nejprve stáhněte či načtěte model a otestujte zamýšlenou úlohu. Lokální inference nedělá webovou rešerši, instalaci závislostí ani samostatně směrované cloudové úlohy offline.
 
----
+### Čím se Notemd liší od ChatGPT?
 
-## Konfigurace LLM
+Notemd se soustředí na konkrétní souborové úlohy Obsidianu: odkazy, pojmy, připojování rešerší, překlad a vytváření artefaktů. Zvolte jej, pokud odpovídají vašim úlohám v trezoru. Ostatní nástroje hodnoťte podle jejich současného ukládání, exportu a integrací; i chatové nástroje mohou uchovávat historii a vytvářet soubory.
 
-### Jaké LLM poskytovatele Notemd podporuje?
+### Jak se srovnává s Copilot nebo Smart Connections?
 
-Notemd podporuje **30+ poskytovatelů**:
+Porovnejte přesné úlohy s aktuální verzí, nastavením a dokumentací každého projektu. Notemd transformuje poznámky a nabízí omezenou lexikální retrieval cestu. Neposkytuje obecné chat-with-vault ani sémantické hledání pomocí embeddings. Tento web netvrdí aktuální pořadí funkcí jiných projektů.
 
-**Poskytovatelé cloudových služeb:**
-- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
-- Anthropic (Claude Opus, Sonnet, Haiku)
-- Google (Gemini Pro, Flash, Ultra)
-- xAI (Grok)
-- Mistral, DeepSeek, Qwen, Moonshot, GLM
+### Které vyhledávací služby používá rešerše?
 
-**Poskytovatelé zaměřené na Čínu:**
-- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
-- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+Výslovně zvolte Tavily s API klíčem nebo DuckDuckGo. Prázdný klíč Tavily nepřepíná službu automaticky. Obě potřebují síť. Vybraný LLM shrne dostupný webový a volitelný lokální kontext a připojí shrnutí k aktivní poznámce Markdown. Ověřte URL zdrojů a důležitá tvrzení.
 
-**Lokální/vlastní hostované:**
-- Ollama
-- LM Studio
-- Jakýkoli koncový bod kompatibilní s OpenAI
+### Podporuje čínštinu a další jazyky?
 
-**Brány:**
-- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
-- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
-- Hugging Face, Vercel AI Gateway, Requesty
+UI pluginu má 21 lokalizací a web 34 jazykových cest. Jazyk generovaného obsahu se nastavuje zvlášť, s výjimkami podle úloh tam, kde jsou podporovány. Překladová schopnost a kvalita závisejí na modelu, nikoli na počtu jazyků UI či webu.
 
-### Může Notemd fungovat s lokálními LLMs?
+### Lze Notemd použít při čtení článků a PDF?
 
-**Ano, plně podporováno.** Notemd funguje s:
-- **Ollama** (nativní integrace)
-- **LM Studio** (prostřednictvím OpenAI-kompatibilního koncového bodu)
-- **vLLM, LocalAI, text-generation-webui** (v OpenAI-kompatibilním režimu)
+Převeďte dokument do čitelného Markdownu vhodným externím nástrojem a ověřte chyby rovnic, tabulek a obrázků. Pak propojujte pojmy, extrahujte původní pasáže, zkoumejte otázky, překládejte či vytvářejte diagramy. Standardní práce s poznámkami neslibuje nativní PDF OCR ani věrnou extrakci libovolných binárních dokumentů.
 
-Všechny úlohy fungují s lokálními modely: propojování, generování konceptů, překlad, výzkum a generování diagramů.
+### Jaké diagramy může generovat?
 
-**Příklad kombinace:**
-- Ollama (lokální) pro propojování → rychlé, soukromé, bez nákladů
-- OpenAI pro výzkum → vysoká kvalita, integrace s webovým vyhledáváním
-- Gemini pro překlad → multimodální podpora
-
-### Jak nakonfigurovat různé modely pro různé úlohy?
-
-V **Nastaveních Notemd** má každá úloha samostatné vybírače poskytovatelů/modelů:
-
-| Úloha | Příklad konfigurace |
-|------|----------------------|
-| **Propojování** | DeepSeek (rychlé, levné) |
-| **Generování konceptů** | Claude Opus (vysoká kvalita) |
-| **Výzkum** | Perplexity nebo GPT-4o (web-grounded) |
-| **Překlad** | Gemini Flash (multimodální) |
-| **Generování diagramů** | Ollama (lokalní, soukromé) |
-
-Tato optimalizace pro jednotlivé úkoly vyvažuje rychlost, náklady a kvalitu.
-
----
-
-## Hlavní vlastnosti
-
-### Jak se Notemd liší od ChatGPT při čtení papírových materiálů?
-
-| Rozměr | ChatGPT | Notemd |
-|-----------|---------|--------|
-| **Umístění výstupu** | Historie chatu (dočasná) | Obsidian trezor (trvalé soubory) |
-| **Formát výsledku** | Textová odpověď | Wiki-odkazy, poznámky k konceptům, diagramy, překlady |
-| **Dlouhodobá hodnota** | Zmizí po skončení relace | Skládá se do znalostní báze |
-| **Opětovné využití** | Je nutné provést nový dotaz | Soubory zůstávají, odkazy se vyvíjejí |
-
-**Použijte ChatGPT pro:** Rychlé otázky a odpovědi, jednorázové vysvětlení
-**Použijte Notemd pro:** Vytvoření trvalé, strukturované znalostní báze během týdnů/měsíců
-
-### Jak Notemd přidává wiki-odkazy do poznámek?
-
-**Proces:**
-1. Spustíte „Zpracovat soubor (přidat odkazy)“ u poznámky
-2. Notemd odešle text na vámi nakonfigurovaný LLM
-3. LLM identifikuje klíčové koncepty v kontextu
-4. Notemd vkládá `[[wiki-links]]` při každém výskytu konceptu
-5. Volitelně automaticky vytváří poznámky ke konceptům ve složce, kterou určíte
-
-**Vlastnosti:**
-- Potlačení synonym (vyhýbá se duplicitám „transformer“ a „transformers“)
-- Zpětné odkazy z konceptuálních poznámek na zdroj
-- Integrita odkazu při přejmenování/smazání
-- Režim čisté extrakce (extrahovat koncepty bez úprav původního textu)
-
-### Co je to jednoklikový pracovní postup Notemd?
-
-**Pracovní postupy na jedno kliknutí** spojují více akcí do **jediného tlačítka v postranním panelu**.
-
-**Výchozí pracovní postup:** `One-Click Extract`
-```
-process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
-```
-
-**Výsledek:** Jeden kliknutí spustí:
-1. Přidejte wiki odkazy do aktuální poznámky
-2. Vytvořte konceptuální poznámky k novým termínům
-3. Výzkum a doplnění kontextu
-4. Stažit do diagramu Mermaid
-
-**Vlastní pracovní postupy:** Definujte si vlastní v Nastaveních pomocí formátu DSL. Každý pracovní postup se stane znovupoužitelným tlačítkem v bočním panelu.
-
-### Jak se Notemd porovnává s Copilot nebo Smart Connections?
-
-Tyto doplňky řeší různé problémy:
-
-- **Copilot** — Zaměřeno na konverzaci. Mluvíte s AI o svých poznámkách. Odpovědi AI zůstávají v panelu konverzace; nemění vaše úložiště.
-- **Smart Connections** — Zaměřeno na vyhledávání. Najde sémanticky podobné poznámky pomocí embeddingů. Nevytváří ani neupravuje obsah.
-- **Notemd** — Zaměřeno na psaní. AI zpracuje vaše poznámky a vytvoří strukturované výsledky (odkazy na wiki, konceptové poznámky, výzkum, diagramy, překlady) přímo do vašeho úložiště jako trvalé soubory.
-
-| Co potřebujete | Doporučený doplněk |
-|----------------|-------------------|
-| Konverzace s AI o poznámkách | Copilot |
-| Nalezení podobných/nebo souvisejících poznámek | Smart Connections |
-| Automatické vložení odkazů na wiki a vytvoření znalostní sítě | **Notemd** |
-| Vytvoření konceptových poznámek s zpětnými odkazy | **Notemd** |
-| Vytvoření diagramů z obsahu poznámek | **Notemd** |
-| Prozkoumat téma a přidat shrnutí | **Notemd** |
-
-Všechny tři možnosti lze použít společně – doplňují se navzájem místo toho, aby konkurovaly.
-
----
-
-## Výzkum a překlad
-
-### Které vyhledávací služby fungují s výzkumem Notemd?
-
-| Služba | Vyžaduje se klíč API | Kvalita | Poznámky |
-|---------|-----------------|---------|-------|
-| **Tavily** | Ano | Vysoká | Doporučené vyhledávání optimalizované pro AI |
-| **DuckDuckGo** | Ne | Experimentální | Žádné nastavení, nižší kvalita |
-
-**Jak funguje „Výzkum a shrnutí“:**
-1. Vyberete si téma nebo jej spustíte v aktuální poznámce
-2. Notemd pošle dotaz do vyhledávací služby
-3. Výsledky → LLM shrnutí
-4. Shrnutí je přidáno k vaší poznámce s odkazy na zdroje
-
-**Výsledek:** Trvalá stopa výzkumu ve vašem úložišti, nikoli v kartách prohlížeče.
-
-### Podporuje Notemd čínštinu nebo jiné jazyky?
-
-**Jazyky UI:** Podporováno více než 21 jazyků
-- Angličtina, 中文 (简体), 中文 (繁體), 日本語, 한국어
-- Arabská, němčina, francouzština, španělština, ruština, portugalština, italština
-- Hindština, bengálština, thajština, vietnamština, turečtina, polština, čeština a další
-
-**Jazyk výstupu úlohy:** Nezávislé nastavení
-- UI v čínštině + výstup v angličtině: ✅
-- UI v angličtině + výstup v čínštině: ✅
-
-**Použití:** Dvojjazyční výzkumníci mohou ponechat UI v rodném jazyce a zároveň vytvářet poznámky v angličtině pro publikaci.
-
----
-
-## PDF a akademické pracovní postupy
-
-### Mohu použít Notemd pro čtení článků/PDF?
-
-**Ano.** Postup:
-1. **Převést PDF na Markdown** pomocí [MinerU](https://github.com/opendatalab/MinerU) (doporučeno pro akademické články)
-2. Otevřít soubor v formátu Markdown v Obsidian
-3. Spustit úkoly v Notemd:
-   - **Přidat wiki-odkazy** k klíčovým termínům
-   - **Vytvořit poznámky k konceptům** pro neznámou terminologii
-   - **Vyextrahovat původní text** pomocí vlastních otázek (např. "Jaké jsou omezení?")
-   - **Prozkoumat kontext** citovaných metod/datových sad
-   - **Přeložit** obtížné části
-   - **Stažit do diagramu Mermaid** pro lepší pochopení struktury
-
-**Verze 1.9.1+:** Extrakce struktury kapitol s podporou obsahu
-
-**Výsledek:** Čtení vašeho článku se stane strukturovaným, odkazovatelným znalostním artefaktem ve vašem úložišti.
-
----
-
-## Diagramy a vizualizace
-
-### Jaké typy grafů/diagramů může Notemd vytvořit?
-
-| Typ | Podpora | Funkce |
-|------|---------|----------|
-| **Mermaid** | Plná | Schéma toků, sekvence, třídy, stavy, ER, Gantt, automatická oprava syntaxe, hromadná validace |
-| **JSON Canvas** | Plná | Nativní rozložení obrazovky Obsidian |
-| **Vega-Lite** | Plná | Grafy dat, časové řady, sloupcové, bodové, přizpůsobitelné |
-| **HTML** | Náhradní řešení | Pro nepodporované typy diagramů |
-| **Editovatelný HTML/SVG** | Výslovný cíl | Samostatný inline SVG s semantickými poznámkami ve stylu Draw.io |
-| **Draw.io / Drawnix artefakty** | Hranice exportu | Deterministický XML/JSON z `SemanticFigureModel`; bez závislosti na běhovém prostředí editoru |
-
-**Mermaid automatická oprava:** Režim hlubokého ladění opravuje:
-- Zlomené šipky (`-->`, `-.->`, `==>`)
-- Neplatné značky, komentáře
-- Chyby v syntaxi podgrafů
-- Notace tvarů (`[`, `(`, `{`, `((`)
-- Znak trubice v značkách
-- Přílohy poznámek
-
-**Pracovní postup:**
-1. Spusťte „Shrňte do diagramu Mermaid“ u poznámky
-2. Náhled v modálním okně
-3. Exportujte jako SVG nebo PNG
-4. Nebo uložte jako soubor `.mmd` do trezoru
-
----
-
-## Open Source & Community
+Spustitelný katalog obsahuje 33 položek s kompatibilními zdroji a náhledy. Mermaid, JSON Canvas, Vega-Lite, editovatelný HTML/SVG, Draw.io, Drawnix a omezený CircuitikZ slouží různým účelům. Používejte podporované volby a ověřte výstup v cílovém nástroji; náhled neprokazuje věrnost nativní editace ani kompilace.
 
 ### Je Notemd zdarma a open source?
 
-**Ano.**
-- **Licence:** MIT (volná, komerční využití povoleno)
-- **Zdrojový kód:** https://github.com/Jacobinwwey/obsidian-NotEMD
-- **Žádné placené úrovně, žádné uzamčení na cloudu, žádná telemetrie**
-- **Komunita:** 234+ hvězdiček na GitHubu, aktivní Discord
+Notemd je dostupný pod licencí MIT. Účty poskytovatelů, inference, hledání a volitelné externí nástroje mají vlastní ceny a podmínky. Repozitář je veřejný a příspěvky vítány. Svobodná licence neznamená bezplatnost všech nastavených služeb.
 
-**Vlastníte:**
-- Vaše data (zůstávají ve vašem trezoru)
-- Vaše pracovní postupy (upravte pokyny, modely, řetězce)
-- Vaše soukromí (lokální podpora LLM)
+### Funguje zcela offline?
 
-**Přispějte:** Vítány pull requests. Podívejte se na [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+Některé poznámkové úlohy mohou použít lokální model po instalaci serveru, modelových souborů a potřebných závislostí. Webová rešerše včetně DuckDuckGo vyžaduje síť. Před odpojením ověřte profily jednotlivých úloh a volitelné závislosti exportu. Pro všechny funkce neplatí jednotná offline záruka.
 
----
+### Odcházejí má data do cloudu?
 
-## Řešení problémů
+Prompty a obsah jdou nastavenému endpointu LLM. Vyhledávače dostávají dotazy a načítání výsledků kontaktuje weby. Lokální retrieval může přidat úryvky trezoru do cloudového promptu. I místní profil lze nastavit na vzdálenou adresu. Před sdílením prověřte směrování a očistěte záznamy; místní ukládání samo nezaručuje data výhradně na zařízení.
 
-### Moje volání LLM selhávají. Co bych měl zkontrolovat?
+### Co skutečně spouští One-Click Extract?
 
-1. **Je klíč API platný?** Zkontrolujte Nastavení → Konfigurace poskytovatele
-2. **Je název modelu správný?** Použijte tlačítko "Získat seznam modelů" (Get Model List) v nastaveních
-3. **Je síť přístupná?** Někteří poskytovatelé vyžadují VPN
-4. **Omezení rychlosti?** Zkontrolujte panel poskytovatele
-5. **Diagnostika:** Spusťte v nastaveních „Test spojení“ pro podrobné protokoly chyb
+Výchozí sekvence přidá odkazy k aktivní poznámce, generuje obsah způsobilých poznámek ve složce pojmů nebo zvolené složce a opraví Mermaid ve složce complete. Může zpracovat existující pojmy. Automaticky nepřidává webovou rešerši ani generování diagramu. Přesnou syntaxi name::action>action uvádí průvodce postupy.
 
-### Notemd je pomalý. Jak ho mohu urychlit?
+### Vrátí zrušení úlohy její změny?
 
-1. **Použijte rychlejší modely:** DeepSeek, Gemini Flash, GPT-4o-mini
-2. **Zmenšete velikost částí:** Nastavení → Chytré dělení na části → snižte počet slov
-3. **Paralelní zpracování:** Nastavení → Hromadné zpracování → zvyšte souběžnost
-4. **Lokální modely:** Ollama pro úkoly, které nepotřebují vyhledávání na webu
+Ne. Zrušení zastavuje podporovanou další práci a zachovává dokončené výstupy. Přijatý požadavek či zápis může doběhnout a účtování řídí vzdálený poskytovatel. Vyčkejte na ustálení úlohy, prověřte hlášené cesty a konflikty obnovy a opakujte jen zamýšlenou práci.
 
-### Může Notemd fungovat 100% offline?
+### Může Agent automatizovat Notemd?
 
-**Ano, s Ollama.** Bez klíče API, bez internetu, žádná data neopouštějí váš počítač:
+Čtyři omezené exportní příkazy vystavují profily s odstraněnými citlivými poli, schopnosti, kontrakty volání a veřejné CLI přes dostupný Obsidian a trezor. Mohou zapisovat exportní soubory. Operace správců repozitáře tvoří samostatný kontrakt; počet interních operací není veřejné automatizační API. Začněte průvodcem pro Agent.
 
-1. Nainstalujte [Ollama](https://ollama.com) a spusťte `ollama serve`
-2. V nastaveních Notemd vyberte jako poskytovatele **Ollama**
-3. Stáhněte model: `ollama pull llama3` (nebo qwen2.5, gemma2 atd.)
-4. Všechny funkce fungují: odkazy na wiki, poznámky k konceptům, překlad, diagramy
+### Kde mají začít vývojáři a přispěvatelé?
 
-**Výzkum DuckDuckGo** také funguje bez klíče API (experimentální kvalita).
+Vývojářský průvodce popisuje nastavení repozitáře, build, úplné testy, odpovědnost modulů a pravidla rozšiřování. AGENTS.md je verzovanou autoritou pro provádění práce. Hlášení mají být reprodukovatelná, s přesnými verzemi a očištěnými doklady. Změny ověřte před návrhem integrace.
 
-U cloudových poskytovatelů (OpenAI, Anthropic, Google, DeepSeek atd.) je obsah vašich poznámek odesílán jako vstup API. Zkontrolujte zásady ochrany osobních údajů každého poskytovatele ohledně zpracování dat.
+## Dále
 
-### Jsou moje data odesílána do cloudu?
-
-**Záleží to na vašem poskytovateli:**
-
-| Typ poskytovatele | Jsou data odesílána do cloudu? | Poznámky |
-|--------------|---------------------|-------|
-| **Ollama (lokalní)** | Ne | Vše zůstává na vašem počítači |
-| **LMStudio (lokalní)** | Ne | Stejné jako Ollama |
-| **DeepSeek, OpenAI, atd.** | Ano | Obsah poznámky je odesílán jako vstup API pro zpracování |
-| **OpenRouter, AIHubMix** | Ano | Brána, která směruje provoz k cloudovým poskytovatelům |
-
-Notemd sama neshromažďuje **žádné telemetrické údaje, žádnou analýzu, žádná uživatelská data**. Tento plugin je zcela open source (MIT). Jediné údaje, které opouštějí váš počítač, jsou ty, které výslovně odešlete vašemu nakonfigurovanému LLM poskytovateli.
-
-### Který Obsidian AI plugin je nejlepší pro výzkum?
-
-Záleží na vašem výzkumném pracovním postupu:
-
-| Potřeba | Plugin | Důvod |
-|------|--------|-----|
-| Najít související články/poznámky | Smart Connections | Objevování sémantické podobnosti |
-| Konverzace o vašich zdrojích | Copilot | Konverzace s kontextem trezoru |
-| Automatické propojování konceptů + generování poznámek | **Notemd** | AI identifikuje koncepty, vkládá odkazy a vytváří poznámky |
-| Webový výzkum + shrnutí do poznámek | **Notemd** | Tavily/DuckDuckGo vyhledávání → LLM shrnutí → přidáno do poznámky |
-| Vytvořit diagramy z výzkumu | **Notemd** | Mermaid/Canvas/Vega-Lite z obsahu poznámky |
-
-**Doporučená kombinace:** Smart Connections (objevování) + Notemd (strukturování) + Copilot (diskuse).
-
----
-
-## Získat pomoc
-
-- **Dokumentace:** https://jacobinwwey.github.io/obsidian-NotEMD/
-- **GitHub Issues:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
-- **Discord:** https://discord.gg/qnGgsQ9W
-- **Sponzor:** https://github.com/sponsors/Jacobinwwey
+- [Rychlý start](./getting-started/quick-start): instalace a první výstup.
+- [Postupy](./features/workflows): skutečné akce a politika chyb.
+- [Diagramy](./features/diagrams): hranice zdroje a exportu.
+- [Vývojáři](./developers/overview): build a rozšíření.
+- [Agent](./agents/overview): veřejný kontrakt.
+- [Řešení potíží](./advanced/troubleshooting): reprodukovatelná hlášení.

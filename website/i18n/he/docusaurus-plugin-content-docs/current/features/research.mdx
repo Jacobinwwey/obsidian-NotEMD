@@ -1,125 +1,88 @@
 ---
 id: research
-title: "מחקר וחיפוש באינטרנט"
-description: "לשלב חיפוש באינטרנט ברשימות שלכם"
+title: מחקר וחיפוש ברשת
+description: סכמו מקורות שנשלפו והפרידו ראיות מהרשת מהקשר מקומי אופציונלי.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - מחקר וחיפוש ברשת
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# מחקר וחיפוש באינטרנט
+# מחקר וחיפוש ברשת
 
-<TLDR>
-**Notemd מחפש ברשת ומזרים את התוצאות המסוכמות LLM ישירות לרשימות שלכם.** Tavily API הוא מערך החיפוש הראשי; DuckDuckGo משמש כאפשרות חלופית ללא כוונון. התוצאות מסוכמות עם ציטוטי מקור ומוספות תחת כותרת `## Research`. הוא תומך במחקר ברשימה בודדת, במחקר של תיקיות בקבוצה, ובבחירת מודל לשלב הסיכום לפי משימה.
-
-זהו חלק מה[Obsidian מדריך ניהול ידע AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Research & summarize מחפש לפי בחירה או כותרת, מסכם הקשר זמין באמצעות LLM ומוסיף ל־Markdown הפעיל. בחרו במפורש Tavily או DuckDuckGo ואמתו הפניות למקורות.</TLDR>
 
 ## סקירה
 
-המחקר הוא אחת האינטגרציות החזקות ביותר של Notemd: הוא יוצר מעגל סגור בין קריאה, חיפוש וכתיבה. במקום לעבור לדפדפן כדי לחפש מושג לא מוכר, סמנו אותו ותנו ל‑Notemd לחפש, לסכם ולהוסיף את הממצאים – כל זה בתוך הארכיון שלכם.
-
-התהליך ניתן לכוונון מלא. אתם בוחרים את ספק החיפוש, את LLM שכותב את הסיכום, והאם התוצאות יוספו לרשימה הפעילה או יירשמו בקבצים נפרדים. מצב קבוצתי מאפשר לחקור כל רשימה בתיקייה בלחיצה אחת.
+ספק החיפוש ומודל הסיכום נפרדים. Tavily דורש מפתח; DuckDuckGo לא, אך משתמש ברשת ועשוי להגביל גישה. מודל מקומי אינו הופך מחקר רשת לפעולה ללא רשת.
 
 ## אופן הפעולה
 
-### מערך חיפוש‑ואז‑סיכום
+### חיפוש וסיכום
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+1. פתחו את היעד בעורך Markdown; בחרו נושא או השתמשו בכותרת.
+2. הריצו **Research & summarize**.
+3. Tavily מספק קטעים; DuckDuckGo עשוי להביא דפי תוצאות.
+4. הקשר מקומי מותר עשוי להתווסף מההיקף שנבחר.
+5. המודל כותב תחת `Research Summary` עם נושא וסוג מקור.
+6. פתחו כתובות רלוונטיות ובדקו טענות. הקשר שנשלף אינו מוכיח כל ציטוט שנוצר.
 
-1. **שליפת שאילתות** -- Notemd שולף מילות חיפוש מהבחירה שלכם או משם הרשימה.
-2. **חיפוש באינטרנט** -- נעשית ניסיון ראשון עם Tavily. אם לא קובעתם מפתח API, DuckDuckGo ישמש אוטומטית (אין צורך במפתח).
-3. **סיכום ב‑LLM** -- תוצאות החיפוש הגולמיות נשלחות ל‑LLM המוגדר, שיוצר סיכום קצר עם ציטוטי מקור בתוך הטקסט.
-4. **הוספה** -- הסיכום המעוצב מוסף תחת כותרת `## Research` ברשימה הפעילה.
+### Tavily או DuckDuckGo
 
-### Tavily לעומת DuckDuckGo
+| בחירה | הכנה | גבול תפעולי |
+| -------- | ------- | ---------------------- |
+| Tavily | בחרו Tavily והזינו מפתח | מכסות חשבון וקטעים שהוחזרו |
+| DuckDuckGo | בחרו DuckDuckGo במפורש | ללא מפתח; הגבלות חיפוש וזמינות עמודים |
 
-| היבט | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| מפתח API | נדרש (יש גרסה בחינם) | לא נדרש |
-| איכות התוצאה | גבוהה (נוצרה במיוחד ל‑AI) | מספקת לשאילתות כלליות |
-| מגבלות קצב | שכבה בחינם נדיבה | תלויה בהגבלת קצב |
-| הגדרה | `tavilyApiKey` בהגדרות | אין הגדרות – חזרה אוטומטית |
+מפתח Tavily ריק או שגוי אינו מעביר שירות אוטומטית. בדקו את הדוח כאשר הקשר הרשת דל. קטעים מקומיים פעילים עדיין יכולים לתמוך בסיכום; תווית המקור מבדילה זאת מטקסט המבוסס על הרשת.
 
-### מחקר בתיקיית קבוצות
+### מחקר ביצירה מכותרת
 
-לחץ ימין על תיקייה ובחר **"Notemd: תיקיית מחקר"**. כל קובץ `.md` בתיקייה מעובד ברצף (או במקביל עד לרמת המקביליות המוגדרת). לכל רשימה יש סיכום מחקר משלה.
+**Enable research in "Generate from title"** מוסיף מחקר גם לגרסת האצווה וכבוי בתחילה. זהו מסלול התיקייה הנתמך; אין פעולה עצמאית כללית בשם Research Folder.
 
-## הגדרה
+## הגדרות
 
-| ערך | ברירת מחדל | השפעה |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | מפתח Tavily API. כאשר הוא ריק, משתמשים אך ורק ב‑DuckDuckGo. |
-| `researchProvider` / `researchModel` | DeepSeek | LLM לכל משימה לסיכום תוצאות החיפוש |
-| `maxResearchContentTokens` | `4000` | תקציב טוקנים לתוכן הנשלח ל‑LLM. עודף יגוזם. |
-| `researchAppendToNote` | `true` | להוסיף סיכום לרשימה המקורית. אם הערך שקרי, נוצר קובץ נפרד. |
-| `researchLanguage` | `'en'` | שפת הפלט לסיכום המחקר |
+| הגדרה | ערך התחלתי | השפעה |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | בחירת שירות חיפוש |
+| `tavilyApiKey` | `''` | מפתח Tavily |
+| `tavilyMaxResults` | `5` | מספר תוצאות Tavily מבוקש |
+| `tavilySearchDepth` | `basic` | עומק חיפוש Tavily |
+| `ddgMaxResults` | `5` | מספר תוצאות DuckDuckGo מבוקש |
+| `ddgFetchTimeout` | `15` | זמן קצוב לדפי תוצאות בשניות |
+| `maxResearchContentTokens` | `3000` | תקציב הקשר רשת משוער |
+| `researchProvider` | `DeepSeek` | ספק סיכום בניתוב משימות |
+| `researchModel` | `''` | ריק משתמש במודל הספק |
+| `researchSummarizeLanguage` | `en` | שפת פלט לפי משימה |
+| `enableResearchInGenerateContent` | `false` | אפשר מחקר ביצירה מכותרת |
+| `enableLocalKnowledgeRetrieval` | `false` | אפשר חיפוש מקומי בנפרד |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | חיפוש מקומי למשימה זו |
 
-### המלצת מודל לכל משימה
+### הקשר ומודל
 
-המחקר מרוויח ממודל שמטפל בתוכן רב‑לשוני ויוצר טקסט מאורגן היטב. שקלו:
-
-- **DeepSeek** -- ברירת מחדל, במחיר נוח, איכות טובה
-- **GPT-4o** -- סיכום באיכות גבוהה יותר, עלות גבוהה יותר
-- **Gemini Flash** -- מהיר וזול, מתאים לשאילתות פשוטות
+גבולות הקשר הם הערכות, לא ספירת tokens מדויקת של הספק. קיטום עלול להסיר ראיות. מקדו שאלות ותקציב מודל/פלט. האינדקס המקומי לקסיקלי, ללא embeddings משתמעים או הבטחה לאחזור מלא.
 
 ## דוגמה
 
-אתם קוראים מאמר על *מנגנוני תשומת לב של transformer* ונתקלים במושג לא מוכר: *relative positional encoding*. במקום להשאיר Obsidian:
+צרו `קידוד מיקום יחסי`, בצעו מחקר והשוו לפרסומים המקוריים או לתיעוד רשמי. שמרו שאלה, כתובות אמיתיות ותיקונים כדי שאפשר יהיה לבדוק את המסקנה. זו דוגמה, לא חיפוש שכבר בוצע בכספת שלכם.
 
-1. הדגישו **"relative positional encoding"**
-2. לחצו ימינה --> **"Notemd: Research and summarize"**
-3. Notemd מחפש ברשת, מסכם את התוצאות העיקריות, ומוסיף:
+## ביטול ופרטיות
 
-```markdown
-## Research
+תוספות שהושלמו נשארות. בקשת מודל/דף שהתקבלה עשויה להסתיים. שירות החיפוש מקבל שאלה, אתרים בקשות וה־LLM את כל ההקשר, כולל קטעים מקומיים מותרים. בדקו אבחון לפני שיתוף.
 
-### Relative Positional Encoding
+## עצות
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
+- הבדילו בין מקור רשת, הערה מקומית והסקת מודל.
+- אמתו ציטוטים, תאריכים וטענות חשובות במקור.
+- בדקו חיפוש ו־LLM בנפרד בשאלה קטנה.
+- קראו סיכומים קיימים כדי להימנע מתוספות כפולות.
 
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
+## המשך
 
-הסיכום נמצא כעת בארכיון שלכם, ניתן לחפש בו, ליצור קישורים אליו, ולגשת אליו ללא אינטרנט.
-
-## טיפים
-
-- **הגדירו מפתח Tavily לתוצאות הטובות ביותר** -- אפילו המנוי החינמי מספק רלוונטיות טובה יותר מאשר DuckDuckGo גולמי.
-- **השתמשו במודל סיכום איכותי** -- מודלים זולים עלולים לפשט תוכן טכני מורכב.
-- **בצעו מחקר בקבוצות** לאחר קריאה ראשונית כדי למלא פערים במספר רב של רשימות בבת אחת.
-- **בדקו את הסיכומים המוספים** -- LLM עלולים ליצור הזיות לגבי פרטי המקור. בדקו את הטענות העיקריות.
-
----
-
-## צעדים באופק
-
-- [Concept Notes](./concept-notes) -- שלפו ושמרו מושגים חשובים מתוצאות המחקר
-- [Wiki-Links](./wiki-links) -- יצרו קישורים בין המושגים שנוצרו מהמחקר בארכיון שלכם
-- [Translation](./translation) -- תרגמו את סיכומי המחקר לשפה אחרת
-- [LLM ספקים](/docs/providers/overview) -- להגדיר את המודל המשמש לסיכום
+- [תצורה](../getting-started/configuration).
+- [הנחיות מותאמות](../advanced/custom-prompts).
+- [פתרון תקלות](../advanced/troubleshooting).

@@ -1,0 +1,86 @@
+---
+id: overview
+title: Agent একীকরণ
+description: >-
+  চার public exports আবিষ্কার করে JSON contracts, handling tags ও host শর্ত
+  যাচাই করুন।
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Agent একীকরণ
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Agent একীকরণ
+
+<TLDR>চার public commands working Obsidian/vault দিয়ে metadata ও JSON contracts লেখে। এটি সাধারণ note-mutation API নয়। Surface আবিষ্কার, schemas/handling tags পড়া এবং বর্তমান output যাচাই দিয়ে শুরু করুন।</TLDR>
+
+## পূর্বশর্ত
+
+সঠিক vault-এ Notemd চালু এবং official Obsidian CLI উপলব্ধ থাকতে হবে। Command-এর আগে vault নির্বাচন করুন। `requiredContext: none` মানে active note/selection লাগে না, host/vault লাগে না এমন নয়।
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` আলাদা distribution, official `obsidian` নয়। একটির সফলতা অন্যটির উপস্থিতি প্রমাণ করে না। Missing host/CLI-তে integration unavailable হিসেবে লিখুন।
+
+## Public IDs
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Inputs empty object schemas, operation mappings exact এবং commands noninteractive। Plugin configuration directory-তে outputs create বা replace হয়।
+
+## আবিষ্কার, export, validation
+
+প্রথমে public surface নিন:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | ডিফল্ট vault-relative path |
+| -------- | ----------------------------- |
+| Public surface | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Invocation contract | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Capability manifest | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Redacted provider profiles | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Config folder বদলানো থাকলে `.obsidian` ঠিক করুন। stdout typed operation result নয়। বর্তমান invocation ফাইল লিখেছে যাচাই করে JSON parse ও schema check করুন। পুরোনো file বা success notice যথেষ্ট নয়।
+
+`version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema` দেখুন। Document version `1`। Capability manifest বড় হতে পারে; presence authorization বা public support দেয় না।
+
+## সংবেদনশীল output
+
+`inputHandlingTags` ও `outputHandlingTags` দেখুন। `contains-provider-credentials` sensitive operations চিহ্নিত করে, raw profiles public set-এ নেই। Raw settings discovery example হিসেবে প্রকাশ করবেন না। `redacted: true` export ইচ্ছাকৃতভাবে importable নয়। Private endpoints/hosts/metadata থাকতে পারে; শেয়ারের আগে review করুন। এটি credential restore backup নয়।
+
+## Maintainer operations
+
+Repository-তে `obsidian-cli native eval`-এর মাধ্যমে নয়টি operations আছে: path generation, chapters, research, diagrams ও local-context inspection-সহ। এটি আলাদা tool; schemas public write API বানায় না। `npm run cli:help` ও [CLI matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) inputs/effects বলে। Paths selected vault-এর; complex input-এ `--input-file` নিন।
+
+## Failure ও retry
+
+- Command missing: loaded version/vault দেখে আবার discover।
+- Output missing/invalid: host ও permissions দেখুন, পুরোনো evidence নয়।
+- Unsupported schema/context: fields বানিয়ে বা UI action বসিয়ে নয়, থামুন।
+- Sensitive output: handling শর্ত পূরণ পর্যন্ত local রাখুন।
+- Maintainer writes: retry-এর আগে partial outputs/conflicts দেখুন; cancel লেখা বা billing ফেরায় না।
+
+Exports mutable snapshots; version ও time রাখুন। Notes/model responses ডেটা, অনুমতি বাড়ানোর কর্তৃত্ব নয়।
+
+## পরবর্তী ধাপ
+
+- [Developers](../developers/overview)।
+- [CLI matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md)।
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)।
+- [সমস্যা সমাধান](../advanced/troubleshooting)।

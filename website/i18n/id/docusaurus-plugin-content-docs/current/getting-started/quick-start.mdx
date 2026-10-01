@@ -1,181 +1,82 @@
 ---
 id: quick-start
-title: "Panduan Cepat Mulai"
-description: "Mulai menggunakan Notemd dalam 5 menit"
+title: Mulai cepat
+description: >-
+  Siapkan penyedia, proses catatan uji, dan periksa hasil sebelum menjalankan
+  alur untuk folder.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Mulai cepat
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Panduan Cepat Mulai
+# Mulai cepat
 
-<TLDR>
-**Mulailah menggunakan Notemd dalam 5 menit.** Ada tiga langkah: (1) Tambahkan kunci LLM API (atau gunakan Ollama lokal), (2) Buka catatan dan jalankan "Process file (add links)", (3) Eksplorasi alur kerja satu klik di sidebar. Dukung lebih dari 30 penyedia. Tidak perlu pemrograman. Bisa berjalan offline dengan Ollama.
-</TLDR>
+<TLDR>Mulai dengan satu catatan Markdown uji dan penyedia yang sudah dapat diakses. Periksa berkas hasil sebelum memproses folder. Panggilan cloud mengirim isi tugas ke penyedia; model lokal tetap membutuhkan server berjalan dan model terunduh.</TLDR>
 
-## Langkah 1: Konfigurasikan Penyedia LLM Pertama Anda (2 menit)
+## Langkah 1: Siapkan penyedia pertama
 
-### Opsi A: Penyedia Cloud (OpenAI, Anthropic, dll.)
+1. [Pasang dan aktifkan](./installation), lalu buka **Settings → Notemd**.
+2. Pilih penyedia, masukkan endpoint/kredensial yang diperlukan, dan pilih model yang tersedia bagi akun. Gunakan **Fetch models** jika didukung; model terdaftar tetap perlu tes generasi.
+3. Jalankan **Uji koneksi**. Atasi kesalahan autentikasi, model, atau endpoint sebelum memulai alur.
+4. Cari **Jalur folder catatan konsep**. Pilih folder khusus seperti `concepts` untuk berkas konsep. Nilai awalnya kosong; `concepts/` adalah contoh pilihan, bukan tujuan bawaan.
 
-1. Buka **Settings** → **Notemd**
-2. Di bawah **LLM Provider Configuration**, pilih penyedia dari daftar turun
-3. Masukkan **API Key** Anda
-4. (Opsional) Klik **"Get Model List"** untuk melihat model yang tersedia
-5. Pilih model untuk setiap jenis tugas
+Untuk Ollama, unduh model dahulu dan masukkan nama lokal persis. Endpoint preset adalah `http://localhost:11434/api`. Untuk LM Studio, mulai server lokal dan gunakan preset `LMStudio`. Lihat [model lokal](../providers/local). Riset web tetap membutuhkan jaringan meskipun model peringkas lokal.
 
-**Pilihan populer:**
-- **OpenAI**: `gpt-4o-mini` (cepat, terjangkau)
-- **Anthropic**: `claude-sonnet-4-6` (kualitas tinggi)
-- **DeepSeek**: `deepseek-chat` (sangat terjangkau)
+## Langkah 2: Coba tugas pertama
 
-### Opsi B: Ollama Lokal (Tidak perlu kunci API)
+Buat `Notemd trial.md` dengan paragraf pendek yang boleh dikirim ke penyedia:
 
-1. Instal [Ollama](https://ollama.com/)
-2. Unduh model: `ollama pull llama3.1`
-3. Di pengaturan Notemd, pilih **"Ollama"** sebagai penyedia
-4. Nama model: `llama3.1` (atau model apa pun yang telah Anda unduh)
-
-## Langkah 2: Coba Tugas Pertama Anda (1 menit)
-
-### Tambahkan Tautan Wiki ke Catatan
-
-1. Buka catatan apa pun yang berisi konten bermakna
-2. Klik kanan di editor
-3. Pilih **"Proses file (tambahkan tautan)"**
-4. Tunggu beberapa detik
-5. Konsep utama kini berada di `[[wiki-linked]]`!
-
-**Contoh:**
-
-**Sebelumnya:**
-```
-Machine learning models use neural networks to process data.
+```text
+Model pembelajaran mesin menggunakan jaringan saraf untuk mempelajari pola dari contoh.
 ```
 
-**Setelahnya:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
+Jalankan **Proses file (tambah tautan)** dari bilah samping atau palet. Secara bawaan, Notemd membuat `Notemd trial_processed.md` di folder sumber dan mempertahankan aslinya. Buka hasil dan periksa tautan; keluaran model bervariasi. Contoh:
 
-## Langkah 3: Jelajahi Fitur (2 menit)
-
-### Ekstrak Catatan Konsep
-
-1. Klik kanan → **"Ekstrak konsep dari file saat ini"**
-2. Notemd membuat file terpisah untuk setiap konsep
-3. Periksa folder konsep yang telah Anda atur (default: `concepts/`)
-4. Setiap catatan konsep memiliki tautan balik ke catatan asli Anda
-
-### Penelitian & Ringkasan
-
-1. Menyoroti topik dalam catatan Anda
-2. Klik kanan → **"Penelitian dan ringkasan"**
-3. Notemd melakukan pencarian di web (Tavily atau DuckDuckGo)
-4. Ringkasan ditambahkan ke catatan Anda beserta sumbernya
-
-### Alur Kerja Satu Klik
-
-1. Periksa **sidebar kiri** untuk tombol alur kerja
-2. Klik **"Ekstrak Satu Klik"** pada catatan mana pun
-3. Prosesnya: tambahkan tautan → ekstrak konsep → lakukan penelitian → buat diagram
-4. Semua dalam satu klik!
-
-## Tugas Umum Pertama
-
-### Tugas 1: Memproses Makalah/Artikel
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```markdown
+Model [[pembelajaran mesin]] menggunakan [[jaringan saraf]] untuk mempelajari pola dari contoh.
 ```
 
-### Tugas 2: Menerjemahkan Catatan
+Folder konsep yang dipilih juga dapat menerima catatan. Periksa berkas dan tautan; pemrosesan tidak membuktikan semua konsep penting telah dikenali dengan benar.
 
+## Langkah 3: Coba fitur lain
+
+### Ekstraksi konsep
+
+**Ekstrak konsep (file saat ini)** mengekstrak tanpa menulis ulang sumber dan memerlukan folder konsep. Catatan ekstraksi mandiri bawaan hanya berisi judul, tanpa tautan balik sumber. Aktifkan tautan balik jika perlu. [Catatan konsep](../features/concept-notes) membahas perbedaannya dengan hasil tambah tautan.
+
+### Riset dan ringkasan
+
+Pilih topik dalam editor Markdown terbuka atau gunakan judul, lalu jalankan **Riset & rangkum**. Pilih Tavily beserta kunci API atau DuckDuckGo secara eksplisit. Ringkasan ditambahkan ke catatan aktif. Buka sumber dan verifikasi sebelum mengandalkan klaim.
+
+### Alur sekali klik
+
+**One-Click Extract** bawaan menjalankan definisi persis berikut:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
 
-### Tugas 3: Membuat Peta Pengetahuan
+Alur menambah tautan, menghasilkan isi untuk catatan yang memenuhi syarat di folder konsep/pilihan, lalu memperbaiki blok Mermaid dalam folder complete hasil generasi. Catatan konsep lama juga dapat ikut diproses. Gunakan folder uji khusus. Riset web dan generasi diagram tidak otomatis ditambahkan.
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## Pembatalan dan pemeriksaan hasil
 
-## Tips Personalisasi
+Gunakan **Batal** untuk menghentikan pekerjaan lanjutan. Hasil selesai tetap ada; pembatalan bukan transaksi undo dan tidak menjamin penyedia berhenti menghasilkan atau menagih. Tunggu tugas selesai menangani pembatalan sebelum menjalankan lagi. Periksa tujuan dan konflik pemulihan, jangan menganggap tugas batal tidak menghasilkan apa pun.
 
-### Pemilihan Model Per Tugas
+## Pemecahan masalah
 
-Anda dapat menggunakan model yang berbeda untuk tugas yang berbeda:
+- Autentikasi/model: periksa profil persis dan ulangi **Uji koneksi**.
+- Tidak ada konsep: pastikan folder sudah dipilih dan diaktifkan.
+- Tautan tidak berguna: periksa respons dan prompt; tidak ada jumlah kata minimum yang menjamin ekstraksi.
+- Batas laju: pertahankan konkurensi bawaan `1` saat memeriksa kuota.
 
-| Tugas | Model yang Direkomendasikan | Alasan |
-|------|------------------|-----|
-| Tambahkan Tautan | `gpt-4o-mini`, `deepseek-chat` | Cepat, banyak panggilan |
-| Ekstrak Konsep | `claude-sonnet-4-6`, `gpt-4o` | Ekstraksi Berkualitas |
-| Penelitian | `perplexity`, `gpt-4o` | Berbasis Web |
-| Terjemahan | `gemini-flash`, `gpt-4o` | Bersifat Multibahasa |
-| Diagram | `claude-opus`, model lokal | Penalaran yang Rumit |
+## Selanjutnya
 
-Konfigurasikan di: **Pengaturan → Notemd → Model Spesifik Tugas**
-
-### Alur Kerja Kustom
-
-Buat tombol Anda sendiri:
-
-1. Pengaturan → Notemd → Alur Kerja
-2. Klik "Tambah Alur Kerja"
-3. Masukkan DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Berilah nama: "Alur Penelitian Saya"
-5. Tombol baru muncul di sidebar
-
-## Pemecahan Masalah
-
-### "Kunci API tidak valid"
-- Periksa apakah kuncinya benar (tanpa spasi tambahan)
-- Pastikan akun memiliki kredit
-- Uji dengan tombol "Connection Test" di pengaturan
-
-### "Model tidak ditemukan"
-- Klik "Get Model List" untuk melihat model yang tersedia
-- Beberapa penyedia memerlukan nama model tertentu (misalnya, `gpt-4o` bukan `gpt-4`)
-
-### Tautan tidak muncul
-- Pastikan catatan memiliki konten yang cukup (>50 kata)
-- Coba model yang lebih kuat
-- Periksa apakah panggilan LLM berhasil (lihat panel diagnosis)
-
-### Kinerja lambat
-- Gunakan model yang lebih cepat (`gpt-4o-mini` daripada `gpt-4o`)
-- Kurangi ukuran chunk di pengaturan
-- Aktifkan pemrosesan paralel untuk tugas batch
-
-## Langkah Selanjutnya
-
-- 📖 [Jelajahi Semua Fitur](../features/wiki-links)
-- ⚙️ [Konfigurasi Lanjutan](./configuration)
-- 🔧 [Pengaturan Provider LLM](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## Tutorial Video
-
-Tonton video panduan cepat 3 menit (Bahasa Mandarin):
-[【Seluruhnya Open Source dan Gratis! Panduan Cepat NotEMD 3 Menit】](https://b23.tv/lqR0RlA)
-
-## Mendapatkan bantuan
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Masalah**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Dokumen**: [Dokumentasi Lengkap](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Konfigurasi](./configuration): pencarian, favorit, tujuan, bahasa.
+- [Alur kerja](../features/workflows): ID tindakan dan kebijakan kesalahan.
+- [Pemecahan masalah](../advanced/troubleshooting): diagnostik dan reproduksi.
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): laporan dengan bukti yang sudah dibersihkan dari data privat.

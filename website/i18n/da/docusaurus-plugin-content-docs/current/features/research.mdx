@@ -1,125 +1,88 @@
 ---
 id: research
-title: "Forskning og websearch"
-description: "Integre websearch i dine notater"
+title: Research og websøgning
+description: 'Opsummér hentede kilder, og skeln webgrundlag fra valgfri lokal kontekst.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - Research og websøgning
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Forskning og websearch
+# Research og websøgning
 
-<TLDR>
-**Notemd undersøger webben og injicerer LLM-sammanfattede resultater direkte i dine notater.** Tavily API er den primære søgebakendem; DuckDuckGo fungerer som en zero-config fallback. Resultaterne sammanfattas med kilder og tilføjes under en `## Research` overskrift. Støder forskning i enkelt noter, batch-forskning i mapper og valg af modell for sammanfattningsstegen per opgave.
+<TLDR>Research & summarize søger ud fra markering eller notetitel, lader LLM opsummere tilgængelig kontekst og føjer resultatet til aktiv Markdown. Vælg Tavily eller DuckDuckGo eksplicit, og verificér kildereferencer.</TLDR>
 
-Dette er en del af [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+## Overblik
 
-## Översikt
+Søgeudbyder og opsummeringsmodel er separate. Tavily kræver nøgle; DuckDuckGo er uden nøglekrav, men bruger netværk og kan begrænses. Lokal model gør ikke webresearch offline.
 
-Forskning er en af Notemd's mest kraftfulde integreringer: den lukker sikken mellem læsning, søgning og skrivning. I stedet for at skifte til en browser for at finde en ukendt term, markerer du den og lader Notemd søge, sammanfattige og tilføje resultaterne -- alt indenfor din vault.
+## Sådan virker det
 
-Processen er fuldstændig konfigurerbar. Du velger søgeudbyderen, den LLM som skriver sammanfattelsen, og hvilket resultat der tilføjes til den aktive note eller skrivs i separate filer. Batch-modus muliggør at forske i alle noter i en mappe med én klik.
+### Søg og opsummér
 
-## Hvordan det virker
+1. Åbn målet i Markdown-editor, og vælg emne eller brug titel.
+2. Kør **Research & summarize**.
+3. Tavily leverer uddrag; DuckDuckGo kan hente resultatsider.
+4. Tilladt lokal kontekst kan tilføjes fra valgt omfang.
+5. Modellen skriver under `Research Summary` med emne og kildetype.
+6. Åbn relevante URL’er, og kontrollér påstande. Hentet kontekst beviser ikke ethvert genereret citat.
 
-### Søg-og-sammanfattingspipeline
+### Tavily eller DuckDuckGo
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+| Valg | Forberedelse | Driftsgrænse |
+| -------- | ------- | ---------------------- |
+| Tavily | Vælg Tavily, og angiv nøgle | Kontokvoter og returnerede uddrag |
+| DuckDuckGo | Vælg DuckDuckGo udtrykkeligt | Ingen nøgle; søgebegrænsning og sidetilgængelighed |
 
-1. **Utdrag af spørgsmål** -- Notemd udtrækker søgeord fra din valg eller notetitlen.
-2. **Websearch** -- Tavily forsøges først. Hvis ingen API-klæde er konfigureret, bruges DuckDuckGo automatisk (ingen klæde nødvendig).
-3. **LLM-sammanfattning** -- Rå søgeresultater sendes til den konfigurerede LLM, som genererer en kort sammanfattelse med inline-kilder.
-4. **Tilføj** -- Den formaterede sammanfattelse tilføjes under en `## Research` overskrift i den aktive note.
+En tom eller forkert Tavily-nøgle skifter ikke automatisk. Kontrollér rapporten ved svagt webgrundlag. Aktive lokale uddrag kan stadig understøtte en opsummering; kildemærkningen skelner den fra webunderbygget tekst.
 
-### Tavily vs. DuckDuckGo
+### Research ved titelgenerering
 
-| Aspekt | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| API-klæde | Nødigt (fri plan tilgængelig) | Ikke nødvendigt |
-| Resultkvalitet | Højere (specielt designet for AI) | Dygtig til almindelige spørgsmål |
-| Rate limits | Rigelig gratis plan | Underlagt throttling |
-| Konfiguration | `tavilyApiKey` i indstillinger | Nul konfiguration -- automatisk fallback |
+**Enable research in "Generate from title"** tilføjer research, også i batchvarianten, og er fra som standard. Dette er mapperuten; der findes ingen selvstændig generel Research Folder-handling.
 
-### Batch Folder Research
+## Indstillinger
 
-Klik højre på en mapp og vælg **"Notemd: Research folder"**. Hver `.md`-fil i mappen behandles sekventielt (eller parallelt op til den konfigurerede konkurrenci). Hver note modtager sin egen forskningsopsummering.
+| Indstilling | Startværdi | Virkning |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Søgebackend |
+| `tavilyApiKey` | `''` | Tavily-nøgle |
+| `tavilyMaxResults` | `5` | Ønsket antal Tavily-resultater |
+| `tavilySearchDepth` | `basic` | Tavily-søgedybde |
+| `ddgMaxResults` | `5` | Ønsket antal DuckDuckGo-resultater |
+| `ddgFetchTimeout` | `15` | Timeout for resultatsider i sekunder |
+| `maxResearchContentTokens` | `3000` | Omtrentligt webkontekstbudget |
+| `researchProvider` | `DeepSeek` | Opsummeringsudbyder med opgaverouting |
+| `researchModel` | `''` | Tomt bruger udbyderens model |
+| `researchSummarizeLanguage` | `en` | Output med opgavespecifikke sprog |
+| `enableResearchInGenerateContent` | `false` | Tillad research ved titelgenerering |
+| `enableLocalKnowledgeRetrieval` | `false` | Aktivér lokal søgning særskilt |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Lokal søgning for denne opgave |
 
-## Konfiguration
+### Kontekst og model
 
-| Indstilling | Standard | Effekt |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Tavily API-klæde. Hvis den er tom, bruges kun DuckDuckGo. |
-| `researchProvider` / `researchModel` | DeepSeek | Per-opgave LLM til at opsummere søgeresultater |
-| `maxResearchContentTokens` | `4000` | Tokenbudget for indhold sendt til LLM. Overflødigt materiale tronkes af. |
-| `researchAppendToNote` | `true` | Føj opsummering til den kilde-note. Hvis det er falskt, skapas en separat fil. |
-| `researchLanguage` | `'en'` | Utdragsspråk for den opsummerte forskning |
-
-### Modellanbefaling per opgave
-
-Forskning gør bedre brug af en modell, der kan hantere multilingvalt indhold og generere godt struktureret prosa. Overvej følgende:
-
-- **DeepSeek** -- standard, billig, god kvalitet
-- **GPT-4o** -- højere kvalitet på sammanfattelser, højere kost
-- **Gemini Flash** -- snabb og billig, godt til enkle spørgsmål
+Kontekstgrænser er skøn, ikke præcise udbydertokens. Afkortning kan fjerne evidens. Afgræns spørgsmål og model-/outputbudget. Det lokale indeks er leksikalt uden implicitte embeddings eller fuldstændighedsgaranti.
 
 ## Eksempel
 
-Du læser en artikel om *transformer attention mechanisms* og støder på en ukendt term: *relative positional encoding*. I stedet for at lade Obsidian:
+Opret `Relativ positionskodning`, kør research, og sammenlign med originale publikationer eller officiel dokumentation. Gem spørgsmål, faktiske URL’er og rettelser for efterprøvning. Eksempelteksten er ikke en allerede udført søgning i din vault.
 
-1. Highlight **"relative positional encoding"**
-2. Højreklik --> **"Notemd: Forskning og sammanfattelse"**
-3. Notemd søger på webben, sammanfatter de bedste resultaterne og tilføjer:
+## Annullering og privatliv
 
-```markdown
-## Research
-
-### Relative Positional Encoding
-
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
-
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
-
-Sammenfattelsen er nu en del af din vault, søgbar, linkbar og tilgængelig uden internet.
+Færdige tilføjelser bevares. Accepterede model-/sideanmodninger kan afsluttes. Søgningen får forespørgslen, websteder får anmodninger og LLM får samlet kontekst inklusive tilladte lokale uddrag. Kontrollér diagnostik før deling.
 
 ## Tips
 
-- **Stil en Tavily-klæde for bedste resultater** -- selv den kostenlose version gir bedre relevans end ren DuckDuckGo.
-- **Brug en effektiv sammanfattelsesmodell** -- billige modeller kan forsvække nuancer i teknisk indhold.
-- **Gennemgå forskningen i batch** efter en første gennemgang for at fylde tommer i mange notater på en gang.
-- **Gennemse de tilføjte sammenfattelser** -- LLM kan lave falske oplysninger om kilder. Kontroller vigtige påståelser.
-
----
+- Skeln webkilde, lokal note og modelslutning.
+- Kontrollér citater, datoer og vigtige påstande i originalmaterialet.
+- Test søgning og LLM separat med et lille spørgsmål.
+- Læs eksisterende opsummeringer for at undgå dobbelte tilføjelser.
 
 ## Næste trin
 
-- [Concept Notes](./concept-notes) -- Extraher og gem vigtige termer fra forskningsresultater
-- [Wiki-Links](./wiki-links) -- Link koncepter fra forskningen i din vault
-- [Translation](./translation) -- Oversæt forskningssammenfattelser til et andet sprog
-- [LLM Tjänsteleverantörer](/docs/providers/overview) -- Konfigurera modellen som används för sammanfattning
+- [Konfiguration](../getting-started/configuration).
+- [Egne prompts](../advanced/custom-prompts).
+- [Fejlfinding](../advanced/troubleshooting).

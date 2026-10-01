@@ -1,0 +1,79 @@
+---
+id: 1.9.8
+title: Aktualisierung auf Notemd 1.9.8
+description: >-
+  Prüfe Zuverlässigkeit, native Exporte, Historie und Dokumentationsänderungen
+  seit 1.9.7 vor einem kontrollierten Update.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Aktualisierung auf Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Aktualisierung auf Notemd 1.9.8
+
+<TLDR>
+1.9.8 verbessert Abbruch, Ausgabeeigentum, konsistente Stapelsuche, native Exporte und Dokumentation. Verfügbarkeit im öffentlichen GitHub Release prüfen; alle Laufzeitdateien aus derselben Version beziehen. Anbieter- und Diagrammanzahlen sind bestehende Fähigkeiten.
+</TLDR>
+
+## Änderungen seit 1.9.7
+
+| Bereich | Auswirkung |
+| ------ | ------------- |
+| Abbruch | Gemeinsamer Zustand für Planung, Transporte und Wiederholungen; späte Antworten setzen geschützte Schreibpfade nicht fort |
+| Artefaktspeicherung | Eigentum bei überlappenden Speicherungen und Wiederherstellungen samt gleichen Namen und geteilten Anhängen |
+| Lokale Suche | Konsistenter Snapshot für Titelstapel; Speicher- und Korpusmessungen |
+| Native Ausgabe | Korrigierte PowerPoint-Trenner unter verbundenen Zellen und CircuitikZ-Leitungen/Beschriftungen |
+| Prüfung | Linux/Windows-CI, einzelne Lintdiagnosen, Prozess- und native Nachweise |
+| Dokumentation | Tatsächliche Standards, vier Zielgruppenwege, direkt verfasste Übersetzungen und kontrollierte Veröffentlichung |
+
+Historiensuche behält aufeinanderfolgende Eingaben und Cursor bei asynchronen Aktualisierungen. Die Vorschau-Schublade hält Tab-Fokus innen, fokussiert beim Laden und stoppt Escape vor der übergeordneten Vorschau. Wiederholungen und verspätete Antworten sind im echten Browser getestet.
+
+Recherche und Übersetzung prüfen Abbruch nach letzter Quelllesung bzw. Ordnererstellung erneut, bevor sie anhängen, erstellen oder überschreiben. Von Vault bereits akzeptierte Schreibvorgänge bleiben als abgeschlossen erfasst.
+
+36 Anbieterprofile und 33 ausführbare Diagrammeinträge gab es bereits in 1.9.7. Hinweise trennen Laufzeitänderungen, Dokumentation und Mergeeinträge ohne Doppelzählung.
+
+Legt eine andere Aufgabe den Übersetzungsordner während des Wartens an, wird dieser wiederverwendet, ohne seine Erstellung der aktuellen Aufgabe zuzuschreiben. Bei einer kollidierenden Datei oder weiterhin fehlendem Ordner bleiben Fehlermeldung und Rückfall auf den Quellordner erhalten.
+
+## Sicher aktualisieren
+
+1. Aufgaben beenden und Vault/Einstellungen sichern.
+2. Community-Update oder `main.js`, `manifest.json`, `styles.css` aus demselben öffentlichen [Release 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Manuell nur Laufzeitdateien ersetzen, Einstellungen und Ausgaben behalten.
+4. Obsidian neu laden und Version prüfen.
+5. Testnotiz, dann kleinen Ordner prüfen, erst danach größere Abläufe fortsetzen.
+
+Befehls-IDs und Einstellungen bleiben erhalten. One-Click Extract bleibt Links, Titelstapel und Mermaid-Reparatur. Dokumentkorrektur fügt der Standardkette keine Recherche hinzu.
+
+## Abbruch und Wiederherstellung
+
+Abbruch ist keine Rückabwicklung. Fertige Dateien bleiben, akzeptierte Anfragen oder Schreibvorgänge können enden; entfernte Generierung und Kosten kontrolliert der Anbieter. Auf Abschluss warten und Ausgaben vor Wiederholung prüfen.
+
+Konflikte werden sichtbar, nicht still als Ersetzungserfolg gewertet. Aktuelle Notiz und Wiederherstellung vergleichen. Begleitordner behalten, solange alte Artefakte darauf verweisen, auch wenn neue Exporte eigenständig sind.
+
+## Export- und Kompatibilitätsgrenzen
+
+- PowerPoint-Tabellen haben gezielte native Assertions; ein Gesamtbildscore übersah den Randfehler.
+- Mermaid/SVG in PPTX können Bilder statt editierbarer Formen sein.
+- Statische Drawnix-Astbeziehungen beweisen keine Anheftung nach Umordnung.
+- CircuitikZ-Vorschau und TeX-Kompilierung sind getrennte Prüfungen.
+- Physische Mobilgeräte und Obsidian 0.15.0 bleiben ungetestet; Manifest ist kein neuer Test.
+- Lexikalische Korpusnachweise belegen weder semantische Suche noch Leistung beliebiger Vaults.
+
+## Release-Integrität
+
+Der Publisher prüft Version und lokale/entfernte Tagidentität, baut aus sauberem Quellstand, lädt einen Entwurf hoch und verifiziert heruntergeladene Hashes vor Veröffentlichung. Vier Assets: `main.js`, `manifest.json`, `styles.css`, `README.md`. Wiederholungen ersetzen öffentliche Bytes nicht still durch fremde.
+
+Pages folgt erst nach Verfügbarkeit des öffentlichen Release. Codex verfasst und prüft Übersetzungen direkt, ohne LM Studio oder Übersetzungsengine. Das ist kein Anspruch auf unabhängige muttersprachliche Prüfung.
+
+## Weitere Schritte
+
+- [Release und zweisprachige Hinweise](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Schnellstart](../getting-started/quick-start).
+- [Stapelverarbeitung](../advanced/batch-processing).
+- [Entwickler](../developers/overview) und [Agents](../agents/overview).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) mit Versionen und bereinigten Nachweisen.

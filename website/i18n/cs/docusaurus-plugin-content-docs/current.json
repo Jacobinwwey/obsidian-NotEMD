@@ -1,7 +1,7 @@
 {
   "version.label": {
-    "message": "Následující",
-    "description": "The label for version current"
+    "message": "Aktuální dokumentace",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "Začínáme",

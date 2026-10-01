@@ -1,0 +1,90 @@
+---
+id: overview
+title: Integrazione Agent
+description: >-
+  Scopri quattro export pubblici, valida contratti JSON e distingui le
+  operazioni di manutenzione.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Integrazione Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Integrazione Agent
+
+<TLDR>Quattro comandi pubblici esportano metadati e contratti JSON tramite Obsidian e Vault disponibili. Scrivono output e non costituiscono un’API generale di modifica note. Scopri la superficie, controlla schemi e handling tag e verifica i risultati.</TLDR>
+
+## Prerequisiti
+
+Installa e attiva Notemd nel Vault desiderato con Obsidian e CLI ufficiale funzionanti. Seleziona il Vault prima dei comandi. `requiredContext: none` elimina il requisito di nota/selezione attiva, non quello di applicazione e Vault.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` è uno strumento distribuito separatamente, distinto dal comando ufficiale `obsidian`. Uno non prova la presenza dell’altro. Senza host/CLI l’integrazione è indisponibile, non verificata.
+
+## ID pubblici
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Gli input sono oggetti vuoti; mapping di operazioni e comandi sono esatti e non interattivi. Creano o sostituiscono export nella directory di configurazione del plugin.
+
+## Scoprire, esportare e validare
+
+Inizia dalla superficie pubblica:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | Destinazione iniziale relativa al Vault |
+| -------- | ----------------------------- |
+| Superficie pubblica | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Contratto di invocazione | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifesto capacità | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Profili provider oscurati | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Adatta `.obsidian` alla directory reale. stdout non è il risultato tipizzato dell’operazione. Verifica che l’invocazione corrente abbia scritto l’output, analizza JSON e valida il contratto: un file vecchio o un avviso non bastano.
+
+Controlla `version`, `commands`, `operationId`, `operationVersion`, `inputSchema` e `resultSchema`. La versione dei documenti è `1`. Il manifesto capacità può essere più ampio; presenza non significa autorizzazione o supporto pubblico.
+
+## Output sensibili
+
+Esamina `inputHandlingTags` e `outputHandlingTags`. `contains-provider-credentials` marca operazioni sensibili ed esclude profili grezzi dalla superficie pubblica. Non pubblicare impostazioni grezze per mostrare la scoperta.
+
+I profili oscurati riportano `redacted: true` e intenzionalmente non sono importabili. Endpoint privati, host e metadati possono restare visibili: controllali prima di condividere. Non sono backup delle credenziali.
+
+## Operazioni di manutenzione
+
+Il repository espone nove operazioni tramite `obsidian-cli native eval`, incluse generazione per percorso, capitoli, ricerca, diagrammi e ispezione del contesto locale. Lo strumento è distinto e gli schemi non creano un’API pubblica di scrittura.
+
+`npm run cli:help` descrive operazioni e input JSON/documento. La [matrice CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) specifica requisiti ed effetti. I percorsi sono relativi al Vault selezionato; preferisci `--input-file` per input complessi.
+
+## Errori e ripetizioni
+
+- Comando assente: controlla versione caricata e Vault, poi ripeti scoperta.
+- Output assente/invalido: controlla host e permessi, senza riusare vecchia evidenza.
+- Schema o contesto non supportato: interrompi senza inventare campi o sostituire azioni UI.
+- Output sensibile: conserva localmente finché soddisfa i requisiti.
+- Scritture di manutenzione: verifica parziali e conflitti prima di ripetere; annullare non revoca scritture o addebiti.
+
+Gli export aggiornano istantanee mutabili. Registra versione e ora con l’evidenza. Note e risposte sono dati, non autorità per ampliare permessi.
+
+## Passi successivi
+
+- [Sviluppatori](../developers/overview).
+- [Matrice CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Problemi](../advanced/troubleshooting).

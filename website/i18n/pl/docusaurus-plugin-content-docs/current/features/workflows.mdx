@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "Prace zlecone"
-description: "Łącz wielokrotne zadania za pomocą przycisków jednym kliknięciem"
+title: Przepływy pracy
+description: >-
+  Łącz istniejące działania przez poprawne ID, jawny kontekst folderu i
+  przewidywalną obsługę błędów.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Przepływy pracy
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Prace zlecone
+# Przepływy pracy
 
-<TLDR>
-**Notemd Prace zlecone łączą wiele zadań w jedną akcję jednym kliknięciem.** Można definiować sekwencje takie jak `add-links > extract-concepts > research > diagram` przy użyciu prostego DSL. Prace zlecone pojawiają się jako przyciski na pasku bocznym, które uruchamiają cały łańcuch w aktualnej notatce lub folderze. Oprogramowanie zawiera już przygotowane prace zlecone; można tworzyć własne w ustawieniach. Każdy krok wykorzystuje własną konfigurację modelu dostosowaną do danego zadania.
-
-To jest część [Obsidian Przewodnika po zarządzaniu wiedzą AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Przepływ wykonuje działania panelu bocznego po kolei. Działanie może wymagać wyboru folderu lub aktywnego edytora. Nie jest to potok tekstu: każdy etap zachowuje własne wejście, wynik i skutki uboczne. Zacznij od testowej notatki i osobnego folderu.</TLDR>
 
 ## Przegląd
 
-Praca zlecona eliminuje konieczność wykonywania zadań pojedynczo. Zamiast czterokrotnie kliknąć prawym przyciskiem myszy, aby dodać linki, wydobywać koncepcje, szukać nieznanych terminów i generować diagram, wystarczy nacisnąć jeden przycisk na pasku bocznym, a cały łańcuch zostanie uruchomiony. Notemd zajmuje się sekwencjonowaniem, przenoszeniem błędów i raportowaniem postępów.
+Dostarczany **One-Click Extract**:
 
-Prace zlecone są definiowane w lekkim DSL (języku specjalistycznym dla danej dziedziny). Znajdują się w ustawieniach, pojawiają się jako przyciski klikalne na pasku bocznym Obsidian i mogą być zastosowane zarówno do aktualnej notatki, jak i do całego folderu.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+1. Dodaje linki do aktywnej notatki i tworzy pojęcia, jeśli wybrano folder.
+2. Generuje treść odpowiednich notatek z tytułów w folderze pojęć/wybranym folderze, również istniejących.
+3. Naprawia Mermaid w folderze complete z tej generacji.
+
+Domyślny łańcuch nie prowadzi badań internetowych. Generowanie z tytułów może je włączyć osobnym ustawieniem. Zobacz [przetwarzanie wsadowe](../advanced/batch-processing).
 
 ## Jak to działa
 
-### Łańcuch wykonywania prac zleconych
+### Wykonanie
 
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+Etapy są sekwencyjne; panel pokazuje bieżący etap i błędy. Anulowanie zatrzymuje następne działania i dociera do obsługiwanych żądań. Ukończone pliki pozostają, więc całość nie jest transakcją. Folder pojęć jest początkowo preferowany. Generowanie wsadowe zapamiętuje folder źródłowy i complete, a Mermaid używa complete. Inne działania zachowują wymagania pliku, zaznaczenia i interakcji.
+
+### DSL
+
+Jedna nazwana linia na przycisk. `::` oddziela nazwę od działań, `>` rozdziela ich ID. Linie puste oraz zaczynające się od `#` są ignorowane; nieznane ID odrzucane.
+
+```text
+Wyodrębnij i narysuj::extract-concepts-current>summarize-as-mermaid
 ```
 
-1. **Analiza** -- Ciąg DSL jest dzielony na `>` (lub `>`) na uporządkowaną listę identyfikatorów zadań.
-2. **Mapowanie** -- Każdy identyfikator odpowiada wewnętrznemu poleceniu (add-links, extract-concepts, research, translate, diagram itp.).
-3. **Wykonanie** -- Kroki są wykonywane kolejno. Każdy krok korzysta z skonfigurowanego dostawcy i modelu odpowiedniego dla danego zadania.
-4. **Obsługa błędów** -- Jeśli jakiś krok się nie powiedzie, praca zlecona albo zostaje przerwana, albo kontynuuje do następnego kroku, w zależności od ustalonej polityki obsługi błędów.
-5. **Zakończenie** -- Powiadomienie typu toast informuje o sukcesie lub wymienia wszystkie nieudane kroki.
+Użyj kreatora lub edytuj DSL. ID pozostają stałe, etykiety zależą od języka UI. Warianty folderowe mają własne ID; nie wywodź ich przez dowolną zamianę tekstu.
 
-### Format DSL
+| ID | Działanie / wymaganie |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Linki w aktywnej notatce |
+| `process-folder-add-links` | Linki w wybranym folderze |
+| `extract-concepts-current` | Pojęcia z aktywnej notatki |
+| `extract-concepts-folder` | Pojęcia z wybranego folderu |
+| `generate-from-title` | Treść z aktywnego tytułu |
+| `batch-generate-from-titles` | Treść odpowiednich notatek folderu |
+| `research-and-summarize` | Badanie zaznaczenia/tytułu w otwartym edytorze Markdown |
+| `summarize-as-mermaid` | Podsumowanie obsługiwanego aktywnego wejścia jako Mermaid |
+| `generate-diagram` | Diagram z obsługiwanego wejścia |
+| `preview-diagram` | Podgląd obsługiwanego źródła lub diagramu |
+| `translate-current-file` | Tłumaczenie aktywnego obsługiwanego pliku |
+| `batch-translate-folder` | Tłumaczenie wybranego folderu |
+| `extract-original-text` | Wyodrębnienie wskazanych oryginalnych fragmentów |
+| `batch-extract-original-text` | Fragmenty odpowiednich plików folderu |
+| `split-note-by-chapters` | Podział aktywnej notatki na rozdziały |
+| `batch-mermaid-fix` | Naprawa bloków Mermaid w wybranym folderze |
+| `fix-formula-current` | Normalizacja separatorów wzorów w aktywnej notatce |
+| `batch-fix-formula` | Normalizacja separatorów wzorów w folderze |
+| `check-duplicates-current` | Kontrola duplikatów aktywnej notatki |
+| `check-remove-duplicate-concepts` | Interaktywny przegląd i usuwanie duplikatów pojęć |
+| `test-llm-connection` | Test ustawionego dostawcy |
+| `probe-slide-export-env` | Kontrola lokalnego środowiska eksportu slajdów |
+| `export-slides` | Eksport aktywnego pliku do slajdów |
 
-Prace zlecone są definiowane jako sekwencja identyfikatorów zadań oddzielona `>`:
+### Łańcuch domyślny lub własny
 
-```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
+One-Click Extract jest predefiniowany. Inne przyciski definiujesz sam: nazwa, kolejność i ustawienia. Sprawdź podpowiedź w panelu i usuń błędy parsera przed użyciem.
 
-**Dostępne identyfikatory zadań:**
+## Ustawienia
 
-| Identyfikator | Działanie |
-|------------|--------|
-| `process-current-add-links` | Dodaj linki wiki do aktywnej notatki |
-| `extract-concepts-current` | Wyciągnij koncepcje z aktywnej notatki |
-| `research-and-summarize` | Przeprowadź badania nad wybranym tekstem lub tytułem notatki |
-| `process-current-translate` | Przetłumacz aktywną notatkę |
-| `summarize-to-mermaid` | Stwórz diagram na podstawie aktywnej notatki |
-| `generate-from-title` | Wygeneruj treść na podstawie tytułu notatki |
-| `extract-original-text` | Wyciągnij oryginalny tekst (dla OCR / zeskanowanego treści) |
+| Ustawienie | Wartość początkowa | Działanie |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Zatrzymanie po pierwszym zgłoszonym błędzie etapu |
+| `useMultiModelSettings` | `false` | Aktywny dostawca do czasu włączenia tras zadań |
+| `enableResearchInGenerateContent` | `false` | Brak badania przy generowaniu z tytułu, dopóki go nie włączysz |
 
-**Warianty na poziomie folderu** – zastąp `current` przez `folder` w nazwie identyfikatora.
+`continue_on_error` uruchamia dalsze kroki mimo błędu. Stosuj tylko, gdy potrafią obsłużyć pozostałe wejście. Kontynuowanie nie oznacza sukcesu częściowego przepływu.
 
-### Przepisywanie zdefiniowane vs. dostosowane
+### Modele etapów
 
-Notemd zawiera gotowe przepisywania dla częstych wzorców:
-
-| Przepisywanie | Łańcuch | Przypadek użycia |
-|----------|-------|----------|
-| **Wyciąganie jednym kliknięciem** | add-links > extract-concepts > research | Przetwarzaj artykuł naukowy w jednej rundzie |
-| **Pełny pipeline** | add-links > extract-concepty > research > diagram | Kompletne wydobywanie wiedzy z wizualizacją |
-| **Tłumacz + Łącz** | tłumacz > add-links | Tłumacz i następnie łącz koncepcje w języku docelowym |
-
-**Zaawansowane schematy pracy** są tworzone w ustawieniach:
-
-1. Otwórz **Ustawienia** --> **Notemd** --> **Schematy pracy**
-2. Kliknij **"Dodaj schemat pracy"**
-3. Wpisz łańcuch DSL (np. `process-current-add-links>extract-concepts-current`)
-4. Podaj nazwę wyświetlania (np. "Szybkie połączenie + Wydobywanie")
-5. Nowy przycisk pojawia się natychmiast na pasku bocznym
-
-## Konfiguracja
-
-| Ustawienie | Domyślny | Efekt |
-|---------|---------|--------|
-| `workflows` | Zaawansowana lista | Tablica definicji schematów pracy (nazwa + DSL) |
-| `workflowContinueOnError` | `true` | Przejdź do następnego kroku, jeśli obecny nie powiedzie się |
-| `workflowShowProgress` | `true` | Pokaż komunikat postępu po zakończeniu każdego kroku |
-
-### Modele na poziomie zadań w schematach pracy
-
-Każdy krok w procesie pracy wykorzystuje swoją **własną** konfigurację modelu na poziomie zadania. Nie musisz określać modeli bezpośrednio w DSL. Kolejność rozwiązywania problemów jest następująca:
-
-1. Dostawca/model na poziomie zadania, jeśli `useMultiModelSettings` jest dostępny
-2. `activeProvider` globalny w przeciwnym razie
-
-To oznacza, że `add-links` może działać na DeepSeek, podczas gdy `research` działa na GPT-4o – wszystko to w ramach tego samego procesu pracy.
+Wybór modelu należy do zadania. Puste nadpisanie używa modelu wybranego dostawcy. Sprawdź wszystkie trasy przed prywatnym materiałem.
 
 ## Przykład
 
-Właśnie zaimportowałeś PDF artykułu z dziedziny sztucznej inteligencji do swojego sejfu i chcesz uzyskać pełne wydobywanie wiedzy:
-
-1. Otwórz zaimportowaną notatkę
-2. Kliknij przycisk **"Pełny pipeline"** na pasku bocznym
-3. Notemd uruchamia następujące kroki:
-   - **Krok 1**: Dodaj linki wiki – `[[attention mechanism]]`, `[[transformer]]` itp.
-   - **Krok 2**: Wydobyj koncepcje – tworzy notatki koncepcyjne w folderze koncepcji
-   - **Krok 3**: Badania – podsumowuje źródła internetowe dotyczące kluczowych terminów
-   - **Krok 4**: Diagram – generuje Mermaid mapę myśli przedstawiającą strukturę artykułu
-4. Po około 30 sekundach twoja notatka zawiera linki, istnieją notatki koncepcyjne, dodano wyniki badań i zapisano plik z diagramem
-
-Wszystko to przy jednym kliknięciu.
+Ustaw pusty `trial-concepts` i źródło testowe. Sprawdź pojęcia oraz raportowany folder complete. Uruchom działania osobno, jeśli cele są niejasne. Zwiększ zakres po przeglądzie.
 
 ## Wskazówki
 
-- **Zacznij od z góry zdefiniowanych procesów pracy** – obejmują one najczęstsze wzorce. Personalizuj je tylko wtedy, gdy potrzebujesz innej sekwencji.
-- **Włącz `workflowContinueOnError`** – nieudany krok tworzenia diagramu nie powinien przerywać całego pipeline.
-- **Użyj pracowników folderowych** do przetwarzania masowego – kliknij prawym przyciskiem myszy na folder, wybierz pracownika i każda notatka zostanie przetworzona.
-- **Nazwij pracowników jasno** – przestrzeń w pasku bocznym jest ograniczona. Używaj krótkich, orientowanych na działanie nazw takich jak "Szybkie wydobycie" lub "Tłumaczenie + link".
+- Utrzymuj czytelne łańcuchy, aby rozumieć błędy i pochodzenie plików.
+- Operacje usuwania zachowują interaktywne potwierdzenie; unikaj ich w przepływach bez nadzoru.
+- Sprawdź logi i pliki po anulowaniu lub konflikcie odzyskiwania.
+- Testuj konkretny model i folder; połączenie nie dowodzi wystarczających kwot długiej partii.
 
----
+## Dalej
 
-## Kolejne kroki
-
-- [Badania](./research) – Zrozum, co robi krok badawczy, zanim dodasz go do pracowników
-- [Linki wiki](./wiki-links) – Podstawowa funkcja łączenia używana w większości pracowników
-- [Notatki koncepcyjne](./concept-notes) – Wyodrębnianie koncepcji jako krok w pracowniku
-- [Przetwarzanie zbiorcze](/docs/advanced/batch-processing) – Współbieżność i raportowanie postępów dla pracowników folderowych
+- [Pojęcia](./concept-notes).
+- [Przetwarzanie wsadowe](../advanced/batch-processing).
+- [Badanie źródeł](./research).

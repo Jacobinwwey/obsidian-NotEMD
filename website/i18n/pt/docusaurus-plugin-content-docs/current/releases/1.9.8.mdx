@@ -1,0 +1,79 @@
+---
+id: 1.9.8
+title: Atualizar para Notemd 1.9.8
+description: >-
+  Rever fiabilidade, exportação nativa, histórico e documentação desde 1.9.7
+  antes de atualizar.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Atualizar para Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Atualizar para Notemd 1.9.8
+
+<TLDR>
+1.9.8 melhora cancelamento, propriedade das saídas, consistência de pesquisa em lote, exportação nativa e documentação. Confirmar disponibilidade no GitHub e usar componentes da mesma versão. Quantidades de fornecedores e diagramas são capacidades anteriores.
+</TLDR>
+
+## Alterações desde 1.9.7
+
+| Área | Impacto |
+| ------ | ------------- |
+| Cancelamento | Estado partilhado na agenda, transportes e tentativas; respostas tardias não continuam escritas protegidas |
+| Persistência de artefactos | Propriedade em gravações sobrepostas e recuperação, incluindo nomes iguais e anexos comuns |
+| Pesquisa local | Instantâneo consistente nos títulos em lote; medição de memória e corpus fixo |
+| Saída nativa | Separadores PowerPoint sob células unidas e ligações/rótulos CircuitikZ corrigidos |
+| Verificação | CI Linux/Windows, lint por diagnóstico, testes de processo e prova nativa |
+| Documentação | Padrões corrigidos, quatro percursos, traduções diretas e publicação controlada |
+
+A pesquisa do histórico preserva entradas consecutivas e cursor durante atualização assíncrona. O painel mantém Tab dentro, recebe foco ao carregar e impede Escape de fechar a vista principal. Repetições e respostas antigas têm regressões de navegador real.
+
+Pesquisa e tradução voltam a verificar cancelamento após leitura final ou preparação da pasta, antes de acrescentar, criar ou substituir documentos. Escritas já aceites pelo Vault conservam resultados concluídos.
+
+Os 36 perfis e 33 entradas executáveis já existiam em 1.9.7. As notas separam execução, documentação e merges sem contagem duplicada.
+
+Se outra tarefa criar a pasta de tradução durante a espera, a tradução reutiliza-a sem atribuir a criação à tarefa atual. Um ficheiro em conflito ou uma pasta ainda ausente mantêm o erro comunicado e a alternativa na pasta de origem.
+
+## Atualizar com segurança
+
+1. Parar tarefas e fazer backup do cofre/ajustes.
+2. Atualizar pelos plugins ou obter `main.js`, `manifest.json`, `styles.css` da mesma [versão pública 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Manualmente substituir apenas componentes de execução; conservar ajustes e resultados.
+4. Recarregar Obsidian e confirmar versão.
+5. Testar nota descartável e pasta pequena antes de retomar o lote.
+
+IDs e ajustes mantêm-se. One-Click Extract continua com links, títulos em lote e Mermaid. Corrigir documentação não adiciona pesquisa à sequência padrão.
+
+## Cancelamento e recuperação
+
+Cancelar não é transação inversa. Resultados concluídos ficam e pedidos/escritas aceites podem terminar. Geração e cobrança remotas pertencem ao fornecedor. Esperar e rever saídas antes de repetir.
+
+Conflitos são apresentados. Comparar nota atual e cópias antes de apagar. Conservar acompanhantes referenciados por resultados antigos mesmo se os novos forem autónomos.
+
+## Limites de exportação e compatibilidade
+
+- Tabelas PowerPoint têm verificações nativas dirigidas; uma pontuação global de imagem tinha omitido o defeito.
+- Mermaid/SVG em PPTX podem ser imagens, não formas editáveis.
+- Relações estáticas Drawnix não garantem ligação após reorganização.
+- Vista CircuitikZ e compilação TeX têm testes separados.
+- Mobile físico e Obsidian 0.15.0 continuam sem validação; manifesto não é novo teste.
+- Evidência lexical num corpus fixo não comprova pesquisa semântica ou desempenho universal.
+
+## Integridade da publicação
+
+O publisher verifica versão e tags locais/remotas, recompila fonte limpa, envia para rascunho e compara hashes obtidos por download antes de publicar. Componentes obrigatórios: `main.js`, `manifest.json`, `styles.css`, `README.md`. Repetir não substitui bytes públicos por outros sem relação.
+
+Pages é publicado após verificar o Release público. Codex redige e revê diretamente, sem LM Studio ou motor de tradução. Isso não equivale a revisão independente de falante nativo.
+
+## Próximos passos
+
+- [Release e notas bilingues](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Início rápido](../getting-started/quick-start).
+- [Lotes](../advanced/batch-processing).
+- [Desenvolvimento](../developers/overview) e [agentes](../agents/overview).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) com versões e evidência sem dados privados.

@@ -1,0 +1,3241 @@
+{
+  "schema": 1,
+  "method": "direct-codex",
+  "independentNativeReview": false,
+  "locales": {
+    "ar": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "9817afb839814ce4d490989316d86d02d97ad42dad7fb28202f365e46d9f60f3"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "38e125c39e8ffab92811ffd1f64b1c7143f84e28909fbae0d9a70236d071f5ff"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "02c9e35e2f943ce6bee116cffa9c0093124496d251617cc85f464b3dd5d1085a"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "bff23d6549c85bc6cb8baf98a926001555d2f0025284575ed804d8dc77661006"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "870771c639426331316224ff9230bffbfcee0aadbb24b1fb91041363e2be4bf2"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "5ff2827aa7a4d16b0e35d7780a3ec43d68adca29f69ac133cefa7c65260d7205"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "d0602e4914fde80d82ed4d0b5f0db70143faf206a6e3ab527af98645a3cb97ea"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "b6ebc7dab3fd2e3e52e80f169a09d3fde8002fce18cbb205ab44c5f072ba6804"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "696cfa11e9dd0151f73d3f004e6ff971e65282c693819dfbb67ea68005404e47"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "e03b65bb71ab0e3204abc8cebb32d95bbfe0c2e983f4f930a3a4fd1969debdcd"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "2cc0888dc3e4b425a3c07ed18fa65181021edfe1b32631d80b23edda8cb88d3c"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "5acb595024570b06ed7d7e9f41bfc99a8d7079951468606aa2acb4fe32e772ee"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "d37d26a6a7ed914d575c725ee45af2a2aea25b92e7628c7354526e638c0900b5"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "3be1d421ae75e13577b205cbae429f4f320fa64bf1545094501d6074ab7c7cb9"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "ca20917789a32d0d513ad0f6e0b25e4911d849548df928b1e751f1b00ef53206"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "771a035fa700507434e630b4adb62c7d150e2390e85dc9bcc3ad8622a5b90ec3"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "e799666e6590c2acb65fa9ed426ffaf1522b06276fb03737cddcbfabd006d446"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "754a1ebed08e14a218e09e7141105ec680398e68f56f61622280e596fc207422"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "32e199d8dc74e8dea65af0211a2bab555d73c9a42a7cfcd74c463c383251096e"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "92dcfb80d3107128d7db602b1d536c67f30e6794e6e10f11d5ad55202c01319b"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "f67ebef8789ec5f834dbbf1032e813f1b7a2e77d721b4aebb2b50397506498b1"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "d153782e6da578dde5ac259e7533a1612a70955b5266e833af6da565d7a7cd34"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "d9ecd7ad7539d599dd5c380c245163a4bbe3ffcf13ce4abe9d6bab1c658f856b"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "7217b63681830ad22efa7f05e6e678d3a71eb10e291cd658661fce84b3a682b5"
+      }
+    },
+    "bn": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "eb2f61cf2c94f16dcdf921b72cc45e2ad2537446abbe3382eb8a984059a2f2ef"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "f000aed59e66efd38d6cb6210a770149d986388e86be37d6df277cb407b2c6ec"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "57108e548df4c75d978105398c6e56711ddafd9e1686a9f3893eaef217459e4d"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "0cedceeeb7f48a2ed676e52bb5eff2f217697ee3ed410d38d2ee0f6f94388678"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "7d7ee114e488a5f166a197f04983342ac72d73e8a7c1437ec733fe5116f2c6d6"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "a3319d40de1bc290c19d35823f3ac07478c27ab1fae5949bb386a110349165ae"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "027924cb582844292aee1d9d3ea03060733574c09a9c87aea8f9c7178b3fba7c"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "9064be16f8247a465fa240366876d67a327c1fea56022b065daf6b71e7024bd4"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "800ef1835c5654074bb299bbadbb1b4973780de61e82e730f811a5d667be3a44"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "81fc3ef83784ff7c22fe60387ecb299f53e61745a26eb11b3ee1410e15fa0754"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "05a94c58c8160ae9e3d5e1a661ee3350f4cb15f7f30734e4e776e2b9260422e2"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "a20c0fa19b0ff0687dd84d2e0e73876b56fe1dd57a94248e42790a5a1e118adf"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "07fbaf8903e2832d5e838ebe8a34c10c68a63c1604f798dfdface9505fd0b32d"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "42915f92fe58aeafb75538df9de884dffaf02bc23af189d8c9a1061a747bcd6b"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "35f019b84d89d75ca3cafd924c0a5d93584e18718e74253751cc95ff6a13fcd7"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "b62187ad0d003a14bcece112fa5745780af580103424dac70409f2b69cbec201"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "eafb88352592d596c0026954f5b7d52218cdc12be003a00542906e41914a4732"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "51400b30ce9f5b30a8fc9488b90a6f89b32ad05858aa38db84c949d1208eab2a"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "39a48f3ee5f0a5670eabafa3f7f56ffd0c4cd921ece2111e940897a502d70f23"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "fcac480cadced1ab7181278e9a3522bd114d7ac7ce2f8d299a33a830132a798d"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "7213dc27142537a743c6d92e59ff366b3bd9f1541b05d908174cfae6c29f2443"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "6a3a5824f7533c35a3a74e454f0986f4874605a90b2434e76280e1471954d867"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "9f393e234edb6175936d5bd0a2c0218eb91a575555637d2e0b222e35f16422f7"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "67cd5602a9b7dd0987bb22bf6d8c568e96e4fc991f89d4a5aede31dbfea35760"
+      }
+    },
+    "cs": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "da365a27722de7b34c3c1a035376e5bc0519895f0a9cde0e324f8b9014e5f0cf"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "fae737222b830401c8a5eb95cbbc6892121e7cd77228a91df61bde8dd6b778f3"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "2b93c5d11af328734163dc66aeb39b422d5839a50b4d8ac18a82893611217028"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "bf37681ee4b93b0bb666790ba60f6a65f47f25b8b78d8a4ab310fdeb5d702d42"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "4f853e1dfecd68edb994fc859150050a018a8058b3018955204868f950befb4a"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "7a5888c395fefcd46dead8983462e5e2c8f5ea8df084db71215fd76fd558355c"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "0b3c5c97e336c5c50f88cfb431dada0cd0adddc74dc338d497f4fa5a63320df6"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "b87b1e23c208855e8476ce56c173043a170df532beb9c92cbe78fdd12a4a2011"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "5f0bee51d894457dc50399faf4a4faa62a86d9296d7b701d32a5abc573d9d0cf"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "576d785e48303efe8dec1ce09a9dc95968c09db2035618c61f49f11ae27ed2ec"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "34ffc1783931da1025a19695570bbc30cb3e02b60716447d26c3d61fa08afbde"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "29b6179e6d4dfaf0a42c8002267d3d36424faeb6fc502a7d23240116b75dda29"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "8817c37d28b9d3c365c936594a226b51071964ad148f31b12bd373434aa738c8"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "7a94ee74e6b1f8952ba330078f5e8190123a0627fbac9923dcad6ccb1c4e1937"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "2ab379d1d96469b44c901ca742395680d41311d106f71134315a278dc99eda14"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "e5cfcd7cfb6ed5a8a12a19a4acaf36f74d3065ac34f79faa62a9a05b23dfff10"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "c441e6b1f15fc5beb7f53095b8cb14668ef77c0ed4af137b53a50ddd3f2465e6"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "a57fae9d60e86edf0ee7939e13adaa8022f95a9ee935dc1e813fe03a01f4ddcb"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "bab29facab2e45f9f2c1d1067a719789101d4163567ac34cf69b974f2abdd2cf"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "a114b26ce27cedde42c290d16f294ed24572ca9c8ab0941909ec7a833d85e6b3"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "a4ab3c89680089d1133bcd13dc320caf43a7d0faf73ebbbc10480f8db0ddec5b"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "3e51792ac8e728cc9d89f32a844004e025fffac41b1bc3769a2ff2f33c8211b4"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "9551349cb25d7e5043e0c4af4124ceb3e93befe67365b9e898a490a70d9d7cc6"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "c0474d0fcae82abb0d5db0889a4c4e6bed89a344024b37f70cdf11e3ca83add9"
+      }
+    },
+    "da": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "c3a08d7bc134029e29d8dd1fcf2ab83aff727a462f9d0c5e7012a5345acdd349"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "b29c8bcb8cde8a0566330b93347194c90ecfeec89b1c2d09d6c3a9a274a547f3"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "764467708686d71e0632fdfbd1fac999f05e1a8679698114d2e6a7a41f289ca9"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "148f8fe0dfcb27c2e567249cf23e52c29f9f7f78d61ea4e899b8ed794c3d2c91"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "8e8d143b547d4da923f55a972ea1840832ef8252e458b8d5f9e1899d57535e2f"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "bba0ccff7ef8e3286236f8652f90a8e9b58da8e435ece2e481d5f2c067499a4d"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "90faf4d589fa04afddc3aa81084639b7e479a4273968a0a9a4aa3adf26bc9ab8"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "9cdb03ce2435e3724cca5866068875d039277714f001e0ba54e2d8aba39708b4"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "ee6ef38c5e065f69d37be8497b28e5158c64a757270151a9cac52194d73339c5"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "3b0cf804bcae4aeae6987abe06596ac4f7ea300405807a0a8bd2d2fc52b8aa81"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "499e292cfa21ff3f55bc223146b5f53033ba2a26e87dd8c85a311a3bb0e30523"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "ae09feaad293f53ad2da297afd31740c87c21485e84ed549c4b31769dd1c4884"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "b74655cf2d97a3ded856cf5f5aa96ee9f546cb9571398b209b7e60b0f40baa97"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "08da1ec624aea7c7462fcb3483d2d0e31905d5dc9b7abbe177268f9dd828a276"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "14597288553533f5602bd94eaeaa583bc648ee8efb39fbd2a433d0805df4cf7f"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "00f16b7c0b7018d8efb2d8c7a3a395c3ca27cd0b3f8ae63f3e75ef3c82f7a1c5"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "be30a12cf018a82534d4e03d420b60e212722631e5e5bfd2900c3ae64d8b90df"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "0b75389c41d9eb35326fea5fe98925416764df382b49a01f80680bf50dadb43a"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "7232b54a955695ba27274f1fb344ecc03dce554471c78d0e303eb4dea4072c55"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "0303eb98846243bb628f6549d0e7824d6400bdb48628e48b8d0d39fc26f13d41"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "6b5b470415c11d65b3eb691a0a01473beec09310192922a351f95ca3f6cab6f3"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "91f43242b8c3f7ab7c8e2c59e601d537e1474dca5691aff10e981b7c278f8073"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "ac6e37bd3390e0b3b3d37a35ebc2680563b88fa1d6de62561547558f1e333e3e"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "2bb3576ff8f500d7974ca91858e76d94750b5b039f020d7ba78aaa0bee9a4c5b"
+      }
+    },
+    "de": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "a5a3c9e2d69f21c81f15b2922ced758561587411050e46e439750cc85b02c255"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "b17387044e23c25bd5d32ef1e87000ba4016189ea967998cdf3ee6f527818e49"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "6a680e79a06f4644949df39268bca1376504d076f871d5910b7a6d95814637d6"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "6b5df9f8a6d538539a053b1d826663a82975dfb1c4ce1a6105a391e03905b0f2"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "a8df533cb3a2d0d02ac094d42e81af8ac2be97a445563645e8bb0560f7ca411c"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "04e8adc475bb0a8e595607a8c049a74705d792133f1f1b9a4ffe8db62da3b8a2"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "af3b2aef603929d7eeaa29f57bd5d99445fee8cb60e4e746ce1a2831769d8ca3"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "a48b4b52df3187cef50cbe455ec2bc1c8fd9e0df24b11d935785984618576fc9"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "4d0292d8fc7adef1296b164ffd61ea4a1cd02e4e20933b9df6afc646ec2efb73"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "710dc3a7221b9b8ede6c11ea83bc34f46a314bc6c7454c63dd1e20a12465aa31"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "56b24e96c91edde0c96e4de85a83323443034cdb0d6ac36a5d3be1443f28f71d"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "cc2442fde75b42212b81790dd3cf27e8e04131ad178d26371a5e6afe138f9f3e"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "0d471574386f16fba3eaf287112ac1955bb2db7ff3798b99b91855c1cf92c92f"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "c224c15ddd6db25c4f6ef8104dcd0a05d55970b63155de3b1f26cb6d1929ff92"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "9e37a88132298263ddadd25f5d355b0a71489e85821086d1e29fe78e2ffd3d60"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "1c01e340c349bb8de6469b8b0e64477cf3968c0911f315eb02d9e9a54aff20f0"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "f7bab4801ad68366276af384ca13e119eafb881f65c16702e9b047d9e4380c0e"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "b1950ab6cbc4a3d3672b10e2489b664d3b0a00e4d7f5047519abf4ff0eba0e4a"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "f0f89a9c89f63528e1755f0c0a02361476f2addaeb0f7cd6bf4f4e600ff79979"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "01abad3d56ebbf048a91e8e39cc700b723edfd3c3977e29a362fd855e0f92bd1"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "d9e58421c904b55f5d8dcbf20163cbc9a4d9773cb5731fdb3a1c0f8ee7b1003e"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "4b095f6f69de508295dd450e213f70f89c121b0b88fc7c5da7590de35fef3b96"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "3c391e076c8d0b0eac91cd0b7eabde9ce14307817b6bbd0529dc94d7bed4ace0"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "dc296c47e0a93506aa28f7e7f92f2964950949ee489b0ea347abb5a49244e15e"
+      }
+    },
+    "el": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "e552733a8a2111eaef960989931c9b8893e9d18bc63f6565ac1228af418e9a38"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "96f6e9d364c57533da1348ec10f844239ef28e41bc9c0ec979078e49192538d9"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "12443dcaf44393f953cff8bbfcc789fddc6ecd06baf5819fa3e7159062a2b189"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "7485c40293f33d5b8475d12350e351970a79d887d981b4d4478cd3e032e5ece2"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "26f4a0fb1ec23ce5c51e8b9e795e0f9e7da72bfa2e85e48645322df6e31003e8"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "651a448582ef81045c22207d390206e8f6881687705a644628846e8c08410d03"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "e5f50a49fd9df8191061c7a17861d0fab159fd4376d68596655f6324b71a5354"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "5be11f65bce59e6f0dc6af797052862df80be0ef8a9acb057a2acdd4187f3eef"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "a3302fbf0f7ec6c151035a42f53c38ef9df99f8cef76533e8f5c619b2db8a571"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "6d34154959115574f9c583a40d4bf9394540332ccf4a6d53ed8e45d6d723cce3"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "c18931bf382fdd418e100dac20a333d086fad43297ef103f4a106b24d217bb1d"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "074534df3f4754ede3c1fb4ba32217a1d4764f98815e1ee6e2bf5430a0b6f94d"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "8241e2bb4375b1c6eecf32c96c2833cb6ac946bb567ecbd0f7b674dae64cb4ef"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "adef028713a0b70cf66187e1f7c50828bfc13f3a8f7df5d9c3d849de68d9f5f5"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "3718139aa5b8ce5163a101dca260bcf6291d772f613f2671d339a2e1be71fa28"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "9e172da74f953e82c7d25b1c295d71990943e91f37c875611c6554b316920343"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "97c751f0bf6c8e2c0669d399cabe70ec98629b185a3543d2be7c9f55848ef615"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "7f50094f561ff6159a3549ab927c598c09fda02baa84c101f190b241f0648254"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "a1024429aa71ef7d17d8103a1f18179c113feaa50405aecf4e9ceb393716b2df"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "bc5a683f3db9b171b6cb1063cbb32b1d218a94bff98c4f22c806d3884611498d"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "4801d4d0d319dc7aacd7c9fa9b03c3d93d8fd6d1f67226d922bc6ee4b64e7d3e"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "c5a53e1e62c8f960dcfbef2470c334287f812f8df757243639e518b5ef38b7b7"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "c81ff79475b06330b54f00c6053cf851c73f71c450bc31d43d82740fad65b6c9"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "6b47c3a59171bb537dd9ab6a86243cca64129f9f22d95c89f9153586a24ec3ad"
+      }
+    },
+    "es": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "8dbc3c3c9e1efd693dea24ea8535c86feda10f66a1ea7344863d8aea8a8fd82b"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "1540a6d890e148f752b70f264e3b93ccae776e9e9864de7c77df6fcfd43bab52"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "1d2bb32bae53c9e466c201a42b07648bdeead493c4dd0283f914108b069f0bb4"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "0f58d2874622577fbf644d396ecaeb1c1238b226d9ee0b8375efe007e5899ed3"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "4ced24d7e1805bec9e9e15fc21e36fb7b2ea3775f541ed3470f1cec3feca32c2"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "103ce4680c16dab78c90861cf1a4201c0fb9df3527cc7c216b98460ac781362e"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "8e86c4b1d73d47669a83c6de21f33c2f9af101fcec2a0c01a7508502eaa6299b"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "dc8d9edcd81f89a34b515e4c9d03c66b11efb7f200b5f18a7daa36392ddf39ef"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "7459ac727be158b2e02935d81d5a47735da3d83db4baa1b07993056c366b338f"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "97be81b13488b94ffbdf5fdcfdce2f2e7360e9e7ffaa1bbdfa042ba661bd0a4d"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "4de0acd79c5e831f8fb7f05178d3b60eeb7f85b73ad79b09e482e489d5e2f202"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "19b6dd97eabbbe38246c492b08123a433a61ef33c3e429e77426dfab23521496"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "43fc7940623a9082456a6671ec6d917531ef6f5717f6963179b710b5cec9bdcf"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "f66a9fb828247d3720d85c7ccf30a5b4dc84ed3c005fd660fb9d5421815b216b"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "ec0b80bec7dbd98661cc950e940641f6ce683078876fe418a55335c387f3a780"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "4b8e8996113d64df0acdd9b2c3b658720cbb4ad8adc6a3a5d1e28cf4a735d8d1"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "58d82b09c20dc6065ea155a3db1ac814d72b1277c595c5f98e3db87655918f98"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "1ae3a942dbbe687395f6d14db6d8e7e78b7ce50d45a5b67a45bafc1559246d32"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "defd3ad06ab163a7f82a6ee70461e1dc0e8c04ba4edb5e80e51343baca7e8e76"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "04e91fdece74255a0f56536c6d6163d379ff6f7019966b7e9590a34d7786fc42"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "e05ebe8fa56a9356fa90cfc805e1cde8f26554e8d9b272c780542d2b95d811fe"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "d97afe37ac35bd712cc9c956c43c61457cfe0c05495c7360e4405090cc4880c5"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "cd86d1476fb518400b8c4daf99c3700c39f2a0238de3dc2e3ee972b8bbe2c266"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "0baae5a9253e3fba7e4e98b59ebb2570e9d563a45b23046ab65792e99c47b4ab"
+      }
+    },
+    "fa": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "89f66f118c46dc94c2108c924e08ae327420ad10442e8c968ebf3d4941326a49"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "0b391d6ab022861af3e8bd2790fa5c2382f82a6b27caea5fc14289dd1efbf516"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "5a7f21032350b4dd1d75dd75eabe798e37f7586347028c62e63ebb4ef7d2843d"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "f48a7b04bd726b8c19426ce1ab48c2b22af57fe69a7e6dcb09948345492c7ce9"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "7db9548c82cf4ecd70823a0899136c13309109e76b22bf1eb3c83a5b1ef3813d"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "d9f5f8ceb5a6685af1a95e634cee5ab43936c0c7b1c2764e4d7a5d185df08d09"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "ce57d9eb6741fd17beac8d65095c944dd85655656c4af173aa7ffa7f3b9bbe2d"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "7210ecb270509842c0436a5dca54fc0e7d81dbdbdaf10e8f9c7b89868b7bd18a"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "1d9e40086ec1d3f3afd20c5200d3d4a5d316db48924958eb655d38b185d3ae54"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "1d9cf3c84a69cfabd5eac006b79ee56fe1a0fc9cbab77d7c88d686a78f8c7ea4"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "c066a8364e0264b3d5f548ed976fb001dc5eda7d7964812221d9580d1c401a41"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "377ef9472d4696c5059793c67248e0993177747565dfb3ea8de0f002a0e0ee7a"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "dc08af50eb1135d7cc71b1a784769e7f4e30b561cc1e04dab1d1867a1948ed4d"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "80b3f0cdb9b7d3b0d0a7d2446169df60bebe09e8eab27a008e0f9ee4fd728105"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "934ee2db0b767a585a63831e33c5f91f9d5d532008f234768a56dc78c654650a"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "cbed12744bd1d0894b8756a967ad9a4df0ea3d871eb9c0b3ac7a37de3bd5b753"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "dba2a1a0f093892127953f64a747a0e03e7ef794895db187feda3d56d867d38d"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "dc6898bf383cdd09349547a134e80ad8ddd651c8ee580f60886f30d2e9bf44b5"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "3de6000ce07cf268500e67e157fbb3c5cb94d00fe074844402135857e4d5de2c"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "40bfe106576f139e8e578f9c88581b9d52a134abcd4c49c46a682e4e64ceb579"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "66f4f6eb3b6db5e6255046ac7f8e2fc859df1999c52d178e7eccc909ca2cfd15"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "c12020dfdff46d0676d5d18c7117d9ec6dbe21eaad86ef7ad916cd0548e405df"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "3f74b2c09ab4f9b01182d3017de76da22f610866a794de0b61cb3f0b85c522af"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "9eb63f700dd2f74eaf1df530659c3f1a47a7dea6c64012b5c2438bb1fc691dfe"
+      }
+    },
+    "fi": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "68f6a66d162716aec80091cc790ed42b3bb1a082b27cf1ab9d3ebf9411594bd0"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "a3fb1235028a8fbe1bb8e1fb5e69b1c85e5861bafa9cd9fb46c67c9d79e79092"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "5205bfea81e989938f707327e9553ac5d50d011a8b71e9d5f971d73b660c5932"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "2ce600eea227aa629a104ebf485912441108673c8a9a0aaa2178b170737408a3"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "ada59131314247e4fd1e431e747b4bc2715a5e6e9636608bdf703c0811428085"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "a011741c7048cafd84ebe75066c096987eca8c559058fb9db044f02f9982f102"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "7e0a24af02028a816e4672aad27df3bc32871ef831f4fd99d70f8e126e909bae"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "cee99f37b96aae967f7e68c9c61cb4cea4ad369f3c9fcf634928b00efee5d3d7"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "7bff60aa3c024a4fe33b2c140663c55c8701b537d9201b20503718526e0be39c"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "2a17c42b22760dd49319bea8e69a09dd0154abb1becca1f9611dd7e1257252b5"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "060959fabf8f7a20f9bf6d006ede70c177a45df71d3b77446b86353f1e854484"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "722952d7993f743c1857343e4e60b763acee02e42e08e234ecd936d7747501a3"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "0345efebf68301976a25e3a67f53463f5651bc0aa5895606c5d77df3667fb099"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "81fe44459bbfe957e71c4929da7467006976623e406d58a7400973e4b7bf6451"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "8150a1d6d4d6e8b3ddd446cd1732a4674fd90e37ab833d1551742563d4dae65c"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "67d631dd46d49ae08e26dcf82fd5e94f948137f0658305f0d3d63a5a1b31c168"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "f38c6ef2067ac6275db62b1f43cc095cb862f3f5b4fb37b2bea9ddfd3ebff1ee"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "6b09d48e4997b86c13190a9ab97e6f18f9494a3bb611cec46f87b5aebab333b3"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "e585c25868b536c61b8a4cc4e4565c3cb3e3743b1ec43158d84b2cb0c34b820a"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "909d1a1e534a2b6f8c6c91a8459db87403948959ea9f402ffa684fb55f9ae589"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "42c2059df9bb29aa08844286b933182d0ff582863659a3f8d9217c35ae85b74a"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "0d467073369e59477ec726a35f144f23988ac011801c5670c0c3adb4eec72d0c"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "8d6e98dfbc495c0a61d0c52a1efebbfd57e57ab7e3be1349ba6ef347261580cf"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "7651b1fb09f0f252827cda004a86ecc730c941998bcb2fdcfe9a9e3945858a65"
+      }
+    },
+    "fr": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "29dde554563f199196d06bbc450ef678e9db667126849c193a804b713c1a3046"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "eccf41cd1028129f75fe1ba8e8671a59108c58a5a83ddb3c3bf560e58cbde4af"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "9655994471aa4f223097e35ffd9cfe9de24b0805e1bbf51f7443f1b524502a2e"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "87c4f6fc6db5bd9e6973c4d418dd7e55a832bad16db1934d32ac8da8cedc06ab"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "f2649d4dfaba9d0a60792a3bc9e9125383824586ced7b983efe08a5e3f23b8a6"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "8040873f203f15a77738d32a84e56819a54c3864ce2b25f839a98755035ae618"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "ff8f6ac36c23611de15538a8b86f4cd5496334e56760821072127d96de33eadf"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "bca870d3e5aa59a357baadc76ea75a9c393bbf25f7d0097966dea4f8e2264e03"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "f61b9c57ceaf51c874692501ec752c5fd8f56decb6da3fbf5be8e691bb1d7367"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "8b3982b8e9da8deeec43ac237229b09960f744c234d2125aa913c8b7da693ef1"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "28548e13a4dc47aab4c1f62d9d387c20d300f3c142329818392eba73469c8f7f"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "d5b5b74866ba163ec52403aeab67dd9616749218522187e89d000b010ebfa155"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "409dee4b8cc5626daa95028da9bd7fe97f7d2cce7a1ba903d18dda0a3149acc0"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "b697415a1c3de3d95d573dc47b1d3c41517646538668d8f32d2f23e4a3984acb"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "c6df0ed633a2fa65184a88ae0ec078b9217fd961acead75dfac6707c24826aa9"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "6223a057e37dc4395b6caa6ef2e0f5189869785428e3f13487adb9aa7e96bca1"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "ca9ce8eb55dd6f8616cb25327496d1b0830c3ffc821ef62ca495ce093ee65936"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "bbd11c124e63403b87148ebc3f450158184c070cd0e3e855bb6be6342ab11765"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "26c7095c253463f80ee68f93a3ac7d56472f80fcbe5dfea0f1428acf26d2f33b"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "5c7c4b67991c1c0b077903afff86303fbbdf89b95355dec20af2a4a3ed0234b0"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "2a7f6a1026be1b29f2f7c1e442cc8dd16d3dd8f7763987f14475efba8feeb5bc"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "3e14a3e25cd44583cb097bd5fd384d671e96c8f9bb6e85b0daeabb64aa6c9771"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "bfde43a736ea12eb8f2a377f7a7c739ae15fb69d5a1938501b1506764a110186"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "1e0d79ac7a53cf4c40e2610fa0820c1cf7e40f8fbb0ca7df1c7100376ff62c91"
+      }
+    },
+    "he": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "63808d59864ad1bdc430e2015628fb9312665e6c8f5c3ed55e864dc664949e23"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "3f0fc64d23a3a8645fa90ca34a48147f36074dc0a952a728271c43b8eff060c6"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "9a9b2b2f09fb773576633563cb57506c71518ce3a107ea0b6a1782fc3fd70612"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "f0ec3409359502f29164a06cfbe69c971d8e0b60c9ae459cb5d626dfd602a65d"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "053c04438d97ea5fbc1b8159d27172dc5d7edd883d5de389ab7d2b130f3e4b19"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "3386ad8787c492958aacac641903216707e06116ff6107adadd0ce1454d395f9"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "a91694c7f7cc080a6d871bdc1bfe143ec379dca4b3f2901c969de15f98d5dcc9"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "fe6af39448a031b853c85d95c909b41dc952eac89452f7766f5f5a3b6a9133b6"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "a9e4fbc3a3b2bbb7b6ad7e6c272b27b668535c499d7b388ce00b07fb1e1d670d"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "7e8b06da06622bbdae70c5117db7872abaa847a0215f47855a00b46d49361ff6"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "dba38344dcab9647321ca9fa0a0c1627563a30e26050d870a0629201ea100ff6"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "156f471a17e73e70b6d6373ea858d700773f13c8e908e473a4c664083597fc0d"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "d0e5f81710316537418926ec7ca1cae93bea94e3011cd29d42a91c95ef18f9f7"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "06487899601751f1be5e53fa092c7e7bac1092961d8a32373e07ab2cee093607"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "913e8894d5627c04319ec85fcd306832c80bcf79ab55ceee3ff617590cdb8376"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "f6b02c3cb83d7b8f89b9ee061b6415555688c6bf5dd5f1b51059ab9b84c96fa1"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "b393e621a9be595fc0946cf2e09b452f9ec20f922e56672f1ce1f00e0b3aa9c6"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "5d95eebe4169ea441e1277f191d937301a6fb29e0203bd284acaacf7f3a548fc"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "d7f7ae34440689c9aa2fec5f79eaa876d955c4c584795d8ee7adc283292c41e2"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "ae5e2749d7c4f9e55c0f9cf72e6913342b5cd0084d1b34b20c9fb0f591058947"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "cb3bceac5b86130a74563c8949e99744d4c29e03ba20ee1726d134bb03023caa"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "0705f032a4e487338f2e26130acf763a318eeb90920e2664f05764a7b498ebe8"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "6e6de41a3d059b98503ecbe26b0eaafaa14e921656b84bdb062528378d6fcc9a"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "782c7d2b2c2dd7f82bc511290cbc37a9046e481a313122c601666c85165e02fb"
+      }
+    },
+    "hi": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "d78c2e5599681094b2c3eaf9ca0a6d037c535e9cd591d054ebcfbdc32d349739"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "3750f1c709c917e319d99283715dec51f51a9d65d059728a47f179cfc1bbc5c3"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "8c681d4c0aa67d14df5e87c7a74a7d419b56e298ba948dd565192052a43d3d79"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "4291a6d64bd01aed972369c496c49c2667714cd0eecfd79913f73a6752b582a1"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "0b7812d889a4b5efacfb622fe19388066a68c5d6f7510991e4d277c4e6a5efcd"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "e4a8841537059e2b61ccf695d0b1a7fdbc6fd9c3110e25e0ff252e6e418991be"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "d4aa6f35a734188da0255c26ff4116e2f5a00543312961fcee8134cde7a06db0"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "2c7edbf050fc9e9fb8f2d1d1073132b126f69331e70efda98337c548090ce7cf"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "26f6e2143129119676cc4683ac7690c8a2d7018ef46c1f01250d2ea7a29e1dd7"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "d77650f5e86f2eacbc911631d7f068168d37ca25721e13cc2aeb3d5aa09d46e1"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "d3b80e1e321fc2373cc46579f2d6ce500d4e28aef9b2dd47f73f104f43a41d10"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "ec228389c4f4c9b148c96687c8ae7b07f989a6694571db3099228e98af7d3605"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "7f4ebbc9e583762ea6ed76a6a1af25790c22f2eab8d7b20a26f501bf930fc2e4"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "bf7ecbef66e4fdd76ffcfe2ccb939c6532ee866a5d20d520ec5bd52a442939bb"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "291dcb5e3cd1731d1b75f165de2e7aff9f07100bc4729e5dc841d795bcf2adb8"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "1cb51f83a49b5b746185894be32e17c4475c5bf52b85067f55a55b96ab1b4854"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "9898aa95ae91c05fec42d57c55af6829e194b9417f1c689235313db8b3751ee0"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "68c39feda6d3322107631ad0d13a1d13f4e802034a573c07d4629ed5bd47b02a"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "a06de434e63403b3cb0a85e5de000aef2efb3cebc7af3a11fa7b54cdc3608ad4"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "e29aa5112deae03f752d360ae31f835cbbe682bfacaad9999a8d77e2cf366fb2"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "5766cd5110ca96b6067ac6888122df441d8adae3f4459b4e2b4c9ba954dd71f9"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "be25cf4055f8495747f603b3c4388ee1f754aa56bba231f1bc0b2749d814c507"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "fffa63dce90c585dba3d70a420fcf113f8a988359cf8c9e036cf5ee9ae84cef0"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "db7bb0a3dcc17a0361d05798d2eb0b757370e1cb33fd74aa182f85e5cfbd391e"
+      }
+    },
+    "hu": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "16f0a54b6908997391860223f482094351a3fdfe41a1581ca1422cb0189564a5"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "5ec4ea63ce0cecb3f260c0014fbfe7fca9d95e5b9f07ba54e51635e0d38896ee"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "4a2a7174f6784d5e83aff006aabf1cba4626d3f49dbf90835506c826f17c20c3"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "9ad35cf4f5abbbc0d7a84c03b64cab12ace93773f520b519314ba0e63cf51a5a"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "920cdc810d6d350e1c616d03df00374e9112db9dc06813dd1b8a7bba031e1183"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "5df2f5d29c4ebf84a2ce36941c2570e7f72360c9d37825e14987e24a2f170fc3"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "7395983dbec8ba722bf2bb2b8ba891a6937b4b1383addb54ba82cda17473c570"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "02be807abb2d5f9f4c2f7f4406952dd5c921868d41565569e9c556d621a39fb4"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "187161fb7e8717bb3426aba02832e0113673135526d96a6d6189bd1cac0a57c1"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "9216d5f6b8120eeba26a00cdefc5d3ec9c1eaf5dbf41718d5dc5c683754970f5"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "f664d1deea4b94df6a0f74e25d05b6661f6f30136622c2e7a37ab5e0974ed1e0"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "176751e13382dc3b02d450b80119c29d83b03b81dcfd6f500eb11d0b81df0fe7"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "8d5bde07a7e7b7b074c860a1ae482290d95c391aa9392ffaf79c2775d217a6ca"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "ba20392b8587951e2786d82f62282b1aeb872dc460619c78f254b33b5370cc2f"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "b791308bf3531c95c7bc060afaaaa38d52ee586440cbb41411b6ba7c1ba6c8d2"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "ba08315b4c5650b845030423e9ee50d597dbdbd5af842986fbe058959f53c144"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "22449bc4f99eb3336eeca82f431eec9118622fbb81b1e180363ae83a4127dc22"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "dab39a0dc164e199d8fc6c5e94354645967ed361412c3f4e99c6df964cab3f6e"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "277cffb0c130b3a70b477e7f1dcd8d4b2b22f449735aade4fbe5dee2987d38d8"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "1b32c03c8de7a2f1f9f1fe2a82a8f388ac362e75593457c93564a8c56dfdcd9c"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "049835eaaa51cf108d28d230bc1f2c04813062e78d1ce858ec04a7d5fa744197"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "d9ddaa6969b25e9e686073f8086c62ccf39f54eff08b692a707e1c8f200c8c67"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "c28ae40e4c78ade27a35db619203c91b015fed1f2d3bb852c3890541131421e6"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "a646ef56df2170afd7263f6092d75953a7b10b353a1e6416f01d88dc8e0374c6"
+      }
+    },
+    "it": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "9a2982b79b148441ec4718c00b0fcae685d5af3bd110be93197551f5eaa3f11a"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "94a870050519f8b3dcac3caee1ba8175b30512c52885a42e831075f0c7eb8224"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "dd01c3ea3548faada9b3401f2734a331fb87fcdd160e0a88a39c4368b6ac75d7"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "53d26e320c692fcdebd6dcccadda25e06da3b66c419bdc172d4893ad3f05a4e8"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "5d92145fbc2ec829c925be507c4b6ece085c119c8743c1cae5abdc3658bacd42"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "c01de9f341cfd25cd4ed969a12649f7b9d9f9c169465355c5f2952bc0744ea06"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "9dd0de07373b64a3e0ff59b4d1d314811f6b28845df227224bc66d8e70f73a00"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "3a7d0bec7b7979a6916136d9214a6a0560f901a7d2892fb3a720dcd7569d54ff"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "97fcabcd29942544c91d26a2f0ee5b75aba46f4a49a22c29f93e31b63bfaa2f4"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "b471bc8f9ec914d3829c6ee36bdb0b51c7c6809c8067c035bb13b5818f9273fe"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "5e862a435755c5f4e61edddd19b371fec728e415cc6e958e2c6384eb1b908e9d"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "701604beec804e16c82755e8ce4a1709f1f1613ad3d0113fdb88ea3540ca20fa"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "9b4637055080398bb7e5256d2b4a49f810f727b8a737652356d8a53369b97c47"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "e79e3f9603b4f1543e54454f212feefe2e37366b61d67a858ed488cae3a8a665"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "4ef0bb83823918a6fbc1b5afadc8eac36c4800ea1ff4f9cae5ee5105444281ca"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "cf7e8a033f99d9908932192d546dfb60d688a0401a746031c5f66f46ce32d717"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "6c1d3003ade28b3aca80f7ebd5b7ed54bf08eb66e275751b23d35723dc6ad5ec"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "0f16e2fe0be98fc35fac9ed933fb85b6a818a5fe8ac02cecd487e26bc8ce4d05"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "8c731fc9cbb74d24e7b91252b6bc028dfef362953033013e5861b624ba4e8fcc"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "d3160d4b7c8e7086ebda1707f18427ec9848fa4836cf994077c7f00829b707a4"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "9deaf3a9f2d0e773d14f4c631d87ac117e1042f1e4ced7871752698c11aa2265"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "c7f0d6a651519095f877d842c68061b2370472bffdadf67c1bbb1d71201c4d4b"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "d24ddbddaadd3cc6347dd9a5a135058a958853d985b221a1811b340cf2fffeb5"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "5c5713390adbb49b23eeb5c0dcb02251f32c37d0cf7cb44dfb67eb3d5372bd22"
+      }
+    },
+    "ja": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "872d7aa4506201c71a41c08e3317b9c657937653eb35e692f199e0777eb0c719"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "7558ee5d737c75974b140c11ad1fa6cd9bba84d73b3e99d04159f3610d1a95f3"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "abde19cebff1c52408dea270527c7220827f74772559b96e729190ab88a47b1c"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "43c1f49ac80d8d6f24e701aa7940ced2d091a7ef4340c693583391ffe66008e6"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "44e8d341a83caec59712b5f90a8fb43df76bdfdb9a221b8f6e4a764baa174f26"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "31894dfce573ddfb90e189dc3cff3c95faeaf9e217d470c5f88f09351af2628c"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "e52da4c922288624c4eba2745b876c97e354ef6a0e8f92519f1433f922a2eeb3"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "2fec2eb39b74773cf1a24e7f93e9d1840b866fce2c7ddabb5060b74ebe6cce65"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "e8c78c55b19de1dbbd1ce8816bab2b2c75254368b7cf675798aec4068be881b4"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "67acd087df3096353ebc76d6fc2babbe42b0e0920c6bd8d1f0f858f307910a78"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "293805c2142ba23fc3e611ca3c4c2093e70638d82c5d3de0f42d08186249dacf"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "6604acbcaff050e6abf725f53cb084e88d23bdd85f704aca2fbb3a729a841bb7"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "286cde5f19effa4e716ddccd6450395833be66897dba0cb049a0cc03f64c93fa"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "5d1430c2c8efe471008b1b953497d07c6ccfba02243ed4024bf51de8c25d9d6a"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "8ce5606515a362ede240b63f165dd1681c0e129a493df68d644db6452ce67a4b"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "82156e249a003e478aef35d2c8edfa94226696b6d7217eadd1f25d0e363bb96d"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "4ca7708b8b221496c08c983532cb705dc8211e9fc931d78a2adbed035853cb4d"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "8bc3ecd2a3acf0e81068d5c87cfe008d0d7740e9cc94b41448fa24af74fb13d4"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "71fbd5d3712355fbfd3e584a1542006a9fbbac0c822480b736ba6802cfd7e34c"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "92bc4196dfaa5ce4409740ed97991b06fac91f3358e7804f0617246266cf51e8"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "cf6634b9b251b4829a9510803b661ebdfbd2838951cdc8dab3ea62a5492c20e9"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "0fc46344daeb60554271871fc355e4b8d261ed15b5e82e82234e99b30eb94b48"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "de9f28c4b3b79150cd04b660c896b42caa814270b3f124b70abdb1c24a93fe62"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "f1e66906f1abb1043b0c17999ce6b001368e295c40ca2baa956ae59825bb63ac"
+      }
+    },
+    "ko": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "fcfa1dc2f18b9cca02381a8790e963b147bc94c6636dfc7ca81273d097a350d3"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "3f518d75a4a50a5f3b4fe0d71ae9c2ed6cd043a8ba0b7328974a8cffd07b5efc"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "37c05144da616fb9931e017f02fd2b15ae3bea0b42a95bbf2112633bff73d6ca"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "2b445f8f7ad901c3d693a66c3dfebde9436b5ccf2712157a2074ad7482d0f2b1"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "06d4fe60c57ddea35df9bfaf8792854f9eb13b698ac81f26382177ee2ed73109"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "caa194f0b455fd513319fc899553a154e951634d292280c85038177b40340e59"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "c357881d4788de807015d05315a513dba9de5602590c5082b866c3e899be3b9c"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "29053418b6abd8ff9159501e5f815a7e34bf4094cab75df5abd532be9831b648"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "8bced112754875048f48d287cdf01609ceea9bbf74590e0b72365a3768b4bd57"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "1670cf1687b5f6bb7f80a6f7559ad004e3a62fe3c848cd283011a781957bb52c"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "26e1d5c61685c423e8a584a244a1472bd1667d88a52aee96c826bf03f4fc8d38"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "e37cc7241693463fd2ae2b29ad64254eb5d9310ba33d220852e8985accd0da55"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "17e7b06b9c3b6b7744086b7ee41d6833affb22e739a3a94a2cf72be264c7aaff"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "16827675ef7842e0b977a0e005b95c1967af41161668c9bf19f72692d5f8006d"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "1f9982f1e9f51484a4e4fe68fe64a74bd73beee280ff6f1fd0225d4cf11ecb5a"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "89db49a2a034f75d49fd93bf8cb7e923fd01c64eed36efd6731bca1e6600fc3b"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "ebdda036e6fe92b2f5378ceeada1f8505f971727763fbef4b12ebbffe523532d"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "ed016a79d6ae78cea1708475d63b26b4083df53927045a5a42ba90455a223500"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "e7cb8e5da274bf6a3490c5aaa705e92c3a1642af79a69b608ebd2a42da5b8a2e"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "2be91c518db33da4cf420683aa896529e8e4e8503990e1e95929a83f2606ec74"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "308f848bc42405a9768de7d0a8dc31bf0dbe8764ecea2fcde6766558d5462646"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "292b6d83c51f9a1e27e6435746308ab1fe03c96f858db8f87661f3f05f94e15b"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "90b21d3d46f0975cd08a0c0f75831ff3c4bf76d5ddbbcb9d166633bfe48f415e"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "bc2ab4fe57f2745e1654fd322cc3df48d7569309e7e830bac9796d5f6dc7a033"
+      }
+    },
+    "nl": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "19fa33d7e3a4f226864e4179671c1d52f36927670d1e0337d306759d3cc95b3e"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "a70e2698314003016f03f9292c2a1c4bba58069ff48a3d14342f9ae72eb1b101"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "b7e23ec1ab6e3c02e260ba3175ced9221df8488b5a2197f1010b717e86106fd7"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "7474e26d55c58166e95b78b774638ab422f6df4e351cf7f330c7c82e7f53f228"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "1b68d492bf87a22761f20544bc641b339b50a00b95211f23423354f1e6df9916"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "d2521928dd0db8f6d029ded55b6d906f39f58bd78bd0ad8177c16a2c526f0c66"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "a599f52ffec2ea53d08ed18bf232b29158ccb88467016db4e6b3fca66bbad434"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "4147163bf4772d8775e6a780d50c6d6ddd85968273f16d7331a7c20dac600533"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "10f35055c8f228adc4ca86d91caafe8b84a641647832bdd7d5ce55868b838efc"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "b9eeb295439e0b9b8edc76d4d3d5b56085b0e79d01dc60c748830174843263a3"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "20ac9d62d0d956bdb64a95770c9ca0ba048cf414a7b4ff8f77bb6c65babc403f"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "b7e6f5a4c8734c06633f0924bf84683fca51d2aafd7790a7de0e0acd504b9448"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "01733d9282b3705047e0d56ddba698ea5c09aecd119aae7bbed4932b21f70300"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "5ad59be4694908cc29b6340355db54f5cc50b218537e6dd0c3684cc9248e1ef0"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "7a3c4b7da9ef237c56b9fc30ed94ee1ce14452cb64900de938b162e53c7cc816"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "4d8671877c301a8049388d7391f7f9f7c9e840abb7b1874f9a09a59dec2d1548"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "d55bbdd476e919d404d561c1eb4cf57ae041e5b456b2bc02c0cc0c32f2a998c6"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "43571024217e55e55493c6a6fdbc1319bd48bfacd9a5b258024ee6c7a2f633d0"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "a97af96b36a46c7a22fd4b58796b2b224f029e542532ae1d94fdd5207af207d5"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "f978ed1dc9320eae7c89e8d9c74e205ff44be7da1c57ce60da76270211f12806"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "fed431bee2db7c6dd55ee28a2941bcc3b1dd40562d4088a96ca16e1a9bf5363b"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "194859570fcdfef1145eb987acca8d8f09b762c9be953646322eceacf2f95a97"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "3cb5c8f15459e2be2922eae4d921954d19f9e248f43326f466d9e29d39a8b835"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "49c11f132095d145edd7535bf28a935784f75ac2284e5b8deb813703b434b64b"
+      }
+    },
+    "no": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "46af904e8a8482bd35e49677ffe8f62e50416439c61162d2b4570051bc338f7d"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "71b33c9443ebb38578b7a6fb02d913086681b792ae53e12b16d64136022b4b7c"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "ffe91bc3ef5281db2aefb6eaee45610a2edd3198241783755a60e8d45f97ff8d"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "41f98bcdb31af688080bb87febb894fb995581e9d287166b4944591f94e31e90"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "a55e2e1b399e2013d6bad5d0a7d831658dfc0f391d0311b187b749a277db397c"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "2e95c44e37c2d501237a63c0e1863367d60023a43bb3cae5ed35b7afed7022c5"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "3ca3cf0bc28f07362ae692b01c860aceb7b2e63205d52535732e2966857989c9"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "e08758b96627510f42a6ae1f0290d538e779cc4fbff7013546505783ac44fe18"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "6c715840f11a9ce25cb4774b86509800950a72c187e37a9603bc35a1f657d56d"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "574c8449e5d77a0407da17646615524b5cf4a71ae96b9edc0632e03709f65a22"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "7baa6f6d313e8baf3ed4890dab908610dda42984136e37db9b8952032bfce68f"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "06f9d37794780e2338a126eec978509e9374bb7cc54837eeaaa4f4c65b9ee362"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "77f811778c10560590cf5da945996a82e96a79a3012a428442336dcdbe437b61"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "6dc8728de892b971758c70dd30aa0f423cdf16708f679dbb18867853a2241555"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "2ab3b24b4c160299979e6e4ef0eee008f3bfad8e2533ecc7918f841f8c0dce71"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "ddd35763c3b523f332349de350d879fa59e5a3a8b16caedcee9d4a2c2ab3372f"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "530f4df978deb376f58c782e1366f79a166929422a889ed4ee51304bb33974a1"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "61cc87e46112721c89a00c190bf9a1545dab92d5fe0c75f4bcaf68a936d013ad"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "f1ee9819a2f0d919ea392f0aa51bf0003fe70ca2106b0f5aff6136ebf8f862b7"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "894306a91f9405c2286c1f0c318933b569527de48724c432ec2e996d0d211056"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "00e49a70e40f1c4811e6c3ae66cdc0dea6dd9a5d9809eae42221d913c39032ba"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "57375e83152300527bc637a7ce01517d4482e6fff92146fb1d5641b5214163c3"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "dc3679d0b5fb55f25ec2a6fbdd9afb7cc5da60a87f51eb9d71997cd66d270df6"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "dbc6d7db692d6e99d296b15ee6c81ee2f79a72076f9d59a4aff0041fac249063"
+      }
+    },
+    "pl": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "e63077cc1f37a5ea9c14f7d65b385968076a761816f8db90bb742717aaddfbb6"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "7c78881968e1e62177b6eacbf7c05d91fe9adecbd672ca5798a03dc85442e300"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "c6b02086566514ae2997905ca17f8e38f95097b05f1b6a2ddf1f761df8b8f355"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "bd9ceb13adf29b030ca32bbac9f7596baedcdee61dbdf2401c2d0a58fde39127"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "ef4d84c61f30b905623d0d9c4230c8117694a5ab2af0298078bc6b03473206dd"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "35d826b5af8e8cd3bafb4109d307a56f70b36a8d6d058b613bbffd5ccf11bbc8"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "e170d9307aba7487a523e120242fd68347e9eb51e388c58e1be24f9dc68f50f2"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "5282f583f47ac30392e7ce49492d224dba1312623655d7aae70eb5604cde968d"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "c8a632c23d4bfd9e0044ae3b0e2593138f2e83ef36e1cb6a7726bc2fec2e0458"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "6fe6ea7547364b2e94ed8a76b4be23c49ed6b4e2c028f672604f6b1b9b3b7619"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "e59d44d04d13bdcfa5d7d7ef48188ec2349f7605664282449d887958980ec119"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "cc79a945e152f3e2ce0aa801dc9973bddf7815f8f3b14e3505e376ef719e9eea"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "e04612590e91e44f5fa280d7ced10bd20949510989f02bb01f3b8c448652bd5a"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "20a10b582a94cd905b64417c57a7e28eb5af80ab67a5ce97a3e6678cf45635d6"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "845fe2e839e9a57cb99de878ca30ad0594c230da019e6d0a0613e5ddfeea54c4"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "17bdad685d3d9bf26b85afeb4a6b6c260f15dbd0cdd5c5b378b7d24626c0eb99"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "deeab1d038ed4fbdda309186c3dd8e759208652c22569debb3dbdb9d304bb609"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "df832576337575279b98e57afbbd75a9b3c3e239023c3ee2e979fec536377a36"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "055d5c441205cf9e53b999e4aab88b8fd41b5315918d7106d20b3c0bafb386be"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "bd16b93a22e6d8150f755fe729c4c0ef71143e187f8b59a500a43eed49d59c46"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "7149817a1c37d1cee71e1060103186eaa7aba328ba606d3a4c00d817d235784a"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "6cff47aa824416192b04fa1faddd3fb9c173732995c65f168d802b34cdf7cb38"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "39a3c41b76177e562563f41196ce08e283b5f1fa155c6c0026c983766d7f9106"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "377043fa1354daeb4c44c3761fb65a48354cf376caf089ddbb1eb8a53000e506"
+      }
+    },
+    "pt-BR": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "ee71441e4f15bd298d4d520937483e6953cc6021040a6aebad7c98d182238229"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "f1dbb4ce53fddc3bac5719cb1ea6d3baaa3377854ee0f8bdd7f801b02082c812"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "822f86601a8edb5d069d3d6fb88a18fd45fdfa198f4dcb45b50aff83a80f4514"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "eaf388a788fabfd287a383a55dd6279b05a81840bc94c322baf3041654593c02"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "8f04d9f0ddc85d40c70eb1cd23c29547ea883a45abb4610118c8a95c80187f21"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "b21cb659feb3fbdf014bb4537cc304a8e9c887dbf3a6ab6dd93c63a577389a7f"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "689f5923482add9a9d629c807a438bd59749ff2c1f73aa18b5d261acfea05b06"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "58c27e04ed1c3ec3da5e63e88c92dc8d3b453cdff61d1c39b3724e9db428420d"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "cff93607bafa3651959dac61a923082fb2316a898b54d6176ee817ee16a92428"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "c155483d89512638cc369433cd6943572e45887bb0120f41a97238f1802c64c9"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "9ebc0756b342bf75a207c2c2d671bd6b7ebece45ec0a3140491a90196d998748"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "140fad96cd6ea884cfe71b06f38acc200f51d2f0ffec8dad6767fad68666f8c1"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "3941d0dfa91fb470cef1924b1c071ae481fca166013410665c4341870833ed6a"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "2d96508907d8b81854c814a72e7b34b119586dcb740e9e67747cbe085f77d195"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "c85da63deaaf58874a9d92c43dfdc90fb815f862476f40dba174dd465a350f5a"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "79b619a29892e67bb6fe9f23e44c29a29c1eed27c7adab0158ab7f7405244541"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "808a6d8d7e7e185c4ccf1baa5851eb94c6efab87890218bdafd11a939c2301f7"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "6dca96523dbfcebc8e0a86dc7d43e8570be419f178907e446002789888d0a220"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "184c63298e205985fda644e5234f4fab3f61429cacd445da4db8556ea8f135d8"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "92c9a9c6e24f69b0e7dce6d9b5e819261eeb338724e4ba8c1197fd4906af5c71"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "7e2a907cf5b1caf9d70ba561e4b4247d64fd5c522774c0aa6cb3f678ef5b5741"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "e8d1ce37a426094bc4f3c9acb255cb2ba1eb4a67ca44e0a4b55087afc2a8622a"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "a38704191d242532c2577415a9907e5320469678adb26e2dcdc38d682ea6421b"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "7ef694748783ffde1a2fa477ab6c782562c330d6a1930b396f8ff4462fdc97d9"
+      }
+    },
+    "pt": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "ee71441e4f15bd298d4d520937483e6953cc6021040a6aebad7c98d182238229"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "f1dbb4ce53fddc3bac5719cb1ea6d3baaa3377854ee0f8bdd7f801b02082c812"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "773d722d0ded9ab547f50be20710a5f51434fe8bf28d94b2f21ffb7137a4a0e2"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "eaf388a788fabfd287a383a55dd6279b05a81840bc94c322baf3041654593c02"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "8f04d9f0ddc85d40c70eb1cd23c29547ea883a45abb4610118c8a95c80187f21"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "b21cb659feb3fbdf014bb4537cc304a8e9c887dbf3a6ab6dd93c63a577389a7f"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "689f5923482add9a9d629c807a438bd59749ff2c1f73aa18b5d261acfea05b06"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "1b13e29c9262b36a2cea4a799ba06ed5b8040a7add7ca8d1dfcef206dda1c743"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "cff93607bafa3651959dac61a923082fb2316a898b54d6176ee817ee16a92428"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "c155483d89512638cc369433cd6943572e45887bb0120f41a97238f1802c64c9"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "9ebc0756b342bf75a207c2c2d671bd6b7ebece45ec0a3140491a90196d998748"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "140fad96cd6ea884cfe71b06f38acc200f51d2f0ffec8dad6767fad68666f8c1"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "43f4768615a1c424d34f6b6b1c33354157e92e33f6efb15b764dba95403228be"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "9eb37818146d3de48b9633a50a4499bbdfb7995bc8e02e0db62b9033f81a77aa"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "183a6358da46601fe9b361c20a2e51be30003d1179b4e73e971471aea47c369f"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "79b619a29892e67bb6fe9f23e44c29a29c1eed27c7adab0158ab7f7405244541"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "808a6d8d7e7e185c4ccf1baa5851eb94c6efab87890218bdafd11a939c2301f7"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "6dca96523dbfcebc8e0a86dc7d43e8570be419f178907e446002789888d0a220"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "184c63298e205985fda644e5234f4fab3f61429cacd445da4db8556ea8f135d8"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "92c9a9c6e24f69b0e7dce6d9b5e819261eeb338724e4ba8c1197fd4906af5c71"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "7e2a907cf5b1caf9d70ba561e4b4247d64fd5c522774c0aa6cb3f678ef5b5741"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "d3fdc0b0f882aafa965c885aa5e0d3e1a73d3ed1f72986ce69af76e27f15c155"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "7a5bd783e4705be0516dd89781bf564663a1a89685391e945dab9c08e827dfb3"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "66e843ab6cc8a9c2763d0dbfd9dd009ea995ddf3cda8645d2feb5d385a7335c7"
+      }
+    },
+    "ro": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "41014083ef5f8b5f3082691146cdf462c262e333b6c5b640a8b19958be5cba0b"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "cea6ed1541450f6690a8b10e5922325a6ed79922c1f181fd48a85521f8bd4c73"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "20084789ae9954706a4d04970ef487496c8c806b5e07aee84f989cf20c7842c1"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "9d7d05192552893dae3b3cab118646380044a32bbd75388a5ab4ed06d4e1079c"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "638695f22fddb3c0b47dfbdaf36512963ac807acd44b604f0aac0fd8abeade08"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "f488135d4d343e2e14c91c24628f6947007d2f4c5696b5e64abe514bda3e62b2"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "d757460e200ae8eaf7b42f478a950ff73e5f7e24d03da5154643c2650d9187b3"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "e972730b1b5705905af53674a654af8ccba05be1fa62729787056b64360a6d91"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "8b794b62756e3e9b274551260e4601a25e9bf834b611d6ee71f6b70c5beb6072"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "e6ba1efd089193b90fe74f9901ada5da259c890a25c6bd1dd1b3499a54912cb2"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "34f6e63fdc87aae14ace4a9f68318611938dc68ad466c8392129e4a23876d468"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "43e20df61bb9f7280cdd7dcf768ae4215ba23ec1bd0f6b6057a5a58addfea3c3"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "5844c453417e6d0ea39e088939c713e9f459f78671727efb5d74261f72a27bec"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "6e9e62609804f7eeea6d900096601daee2a449b16e35bbdf92170af2b4538c89"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "e964297715221af7b1c76dd0352924b4547631912748c800c95ba458413ae11d"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "e399a704886f39812f89a696ca9c664c4736c205792790d4853f088d34b73b1b"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "2b6ae92f7e9d8cea883220c7d35248a9ff114ded57502a4543971a9e8317971e"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "b7b718f0811e3e963836f8674798c7c55433675a9f442d79b9e6b8a8c0634140"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "104da5f766eb5b145f53006727b9a52cdc57f5ad7371f54950c6e2e0a0a219c7"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "c37c839e04978d3e9967cd1daa7513b8e838acaa72db0f75672c745a3473516f"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "f52b2de7edaef71a3cee154e85fc987b3d921016ef0d6bc16c0c28fc1f955ef7"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "9d5896c4523d5db4aff26a26d5f4527c681cb867f9f802f8836f2eccdf97e4f1"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "1716fee2fe8dd4d9c1f256d637e72770bcbd409acbb03034bdd5ae03658f02f9"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "8f89e8ad0ec09c7c836c49d94af6003862e85b87ce27ba3bebfc9d7bd33ee83f"
+      }
+    },
+    "ru": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "57fb11adafb71b9c6956d3ca07ee4984a3c9c7ca1bf7f0788e90954a134a3264"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "dd7f977b291a9c196dd4ad17c0832741bcfa3736907f03ff1d8ea0425b27190c"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "509c066c62d622730d12e23be7fdccf1c68cf552915edb1b4f27a1d453dfcbca"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "4dc542fed689952b7b962e8babc2141bb21f2533f89571bef4ed78c4f1b4f04a"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "84a92ab0c9bfa4f1a44cd2a7888c12ca9856cb86076d421aca84801a52be770f"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "7a883b4f8d5bc372b88b8dc9bc72120d255de53e5a95f62232ef7925208a2d8a"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "32723a11ae1082af752120298b8606fca4cb602d0e158a994fa7462ee76610cc"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "e6f42b317c05e25f20e7a9eb054460540dfac34b9f6f06de95b63dc2fc314d55"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "1f0f2204290eb3586887cbcf2d248fbbb3f46bd9d8929cee91942a847156f909"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "d10d15e5ddca2e5cfb60aebd97c2c75a095fc3fe463baaa4c8241c1acaf8c120"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "9b1c610b481bd6d15c5d21aae1727e732735e3e0a9bfdb73861503826caead21"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "eb41cdf00d6d0894d6d569e1471241d5ccc18782c6eb8b88f8e5c4c6f09c2077"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "1c02b9b91823baaa5ec071b8aaec9b7ef8f6c7ae7ae9b2e6924aa83f205e948e"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "4372c06322550852b554d14486c195ef2e98dda34c96702a6109aebbe4d1935b"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "e1a3db84cd737516ca9bc82e43e56cf7647610bdf4d8b9b029da6d0dbabcc6e1"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "183e239781f8c43538ff02f9b12ef3dad6dc0181c1d03214057c2661df05e8ab"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "b3431f88a95dd600bc3a0b58e61e2eec9ad2734aaeb9802b6a9b9f9d20ad55a6"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "65fdf64b376c63c0b300c3d2407fea5c64e8da516b160a80d7a2372d761a73e1"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "a6e85e80f75f62c9b636513e6d7c9577c399e02d6e248589c08222fea0c594c0"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "a6a6fdd3a581ddd9162ef98691ec1d449a0125ff79609bf1aa8ba1d8d58bbca5"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "96a942fe0e0707e8001860da1cb6f560609c8fef2adbe214dc5a3f7b49b36c2e"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "644b6ddfcbf7f249d4c12dda61ba689dbacac803095f42c1ca435ded5f795191"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "d88c79ef79cf4441e5873038ef1503126d535839a3f8062d03d877c99e63a8e8"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "5ff2e67d90b218dbfb2131395380531bf1e3a31c7dcc64f139f1b3f5cdf0b1ad"
+      }
+    },
+    "sv": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "9d66520a955f90a00aef9f4c7caf98718d0c8e2d07c67b85b2e6d051f420af02"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "7c96e55b18c46526c53e9bd51e855866a08c84cdeda3f662c255c331621af7f3"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "0526aecb60fb4f56be1b32fa5a87a3301e484737ffe3f1dc7e1b8fdc75337173"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "2affacf8171a9bff0dc88777b495ded42bf39124cc9702adf40c71b40863f20c"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "a91f09ef57b1faac8bfae1cd00c71791e6c9674697da700792b8dc92de7cd94e"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "be4d9e62c5aa4b0558e50f2c070334d730203287b4e9f8b891fca9d24f733516"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "736891625f9ed7cdf8645a322ad1fb2f47c7169def250fd663c10d87e2e58667"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "21c0ba537527a1af47df27edc790306a4b0645387f871bf7475f20765af42c9a"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "7b40a6b599fe4ba751d5b3946ba62e309b08d77a2bba073ec036f0e89a1bfe44"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "d3f8fe1b1e40be210449cf6fe114bc210b1d7abf643f9df175cff9a4151fda54"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "b108c1b276985e84f5a3f0d53878289af0aa4b46c4128a70cec1abb8eb73af3a"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "85447bc6d7f844f619408067dcf0b11ea19364fd912ab049352cd5b6fdee884a"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "8506dee369092574ed47bb752cdfcc0192c0b29b8fdc2a05c2c4fd792414c903"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "94341404d6a547931a19fe3b13652d2f82042c6c122b64d1957379b3f1bd9a02"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "ecff2aa9917dccea9f489281c1420e0d1b0b7494cd4a57207d63a8993e504485"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "3371071b0a86f2cbba1f4ac110dfc8b9054bbc3e5d3d47fc3304967fc7b3a042"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "c83eaf3686492f6207bf4bf065f564845174c06c05b982cfe9799286cc7b60b5"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "c594799ac388ef80962c6748e4cf8a471a6937fd0664034842a6ff336c56f37a"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "442d7690cb099dad3b4cf10054f7fcf8cf5141355fb93fa25aa03618b77d9bee"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "fb240a7ab66dfbb04e265fa49ac1557c50cff77007e0e63156b1ebe0f343de87"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "d4fcf941440cded26abc0c6ee56e951754d31cd255710fc2ba82daa2e7faf96c"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "a1f9d4c9b76807ac74b2fc5631720d23512f38c04cee1b28f1cf0774804412a6"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "bff08814f64f5a9da53e6c6dc7b4006ffb985dd6fde849e5ec59129e17dac4d3"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "e3d51ce4d044d88f72d9a694bcd8971d3d0f7573d365f9c58838635767983af8"
+      }
+    },
+    "th": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "cde6ef4f17f5458d4f3469f4224ce366da8cd6ede0341216fd0605afb1ffe57a"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "dc8261d66d34b897fec45a0afd6b1c61c012177cf4fee600d38b71ad0116ed64"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "5e4704b0561f6f11e0ab972578561e194fa2245761cbe968ebb488187948aa67"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "80b8e3723257016eef22bdbb7643df6c00378d5953503e93779308c32797bebc"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "9234c9fef0b9f838f69a69b37c425117d3f014d31da3c12f90da864b7fce935f"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "074ffa328ecdb39041460dd661587a42d2f42760efc39c23ea6487b45c7059a7"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "188ba3ddf251168f7dd268fdaf9c0bcb3227865de72dc9928d5b05d17dd8afcb"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "4d6efd17c9a88af84b281caeb4a94c25e32c1b60b61bf172e382a1c4e40df34f"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "bd7bdd5bc21d4688ed0d23697588b3761dc01cda62972967360af1a90cc66604"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "14198127b711098a008adff32d15302475324c6bc58de0d49c9070ac4ce938bc"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "16627a86c182ebfa2c13709589c35cd7da248ca399806806a3d0119223b3ddf6"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "fdf3dd3cee811bba1825849c6646bc3763c32a47a1b9a970083097e9966a0057"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "766716073b240cde80a4cc1bb0df83eb4cc9d2a4029d70fc001e00032b2e4f75"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "44fdf13319efc244fce155836082b90d6927dc1188a90c658327d964edde3475"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "8e521346821d3da135096ace0319aa66c5fd440929743cb9530acb050336a4e9"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "e97a6bfc9234f941132f22f2ee6a5c2741d70d7eff3724611df34ddfe84792c8"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "b3e1900a58d2907bea7de102af2173d3ad23497916885953f53a9969dc942e8a"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "1a128dccbf3a92eca3e42dc2d827858f95e49f2b4d235c47ff3f77c9955a0a95"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "99493137699a3f507a67f577826d13be8b6f49cdb137d99ccbf641affb7f8cc3"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "d1c4c783c4b567371f1ac687a1f4ff3ef2f76e956aeae658605da7dcfb1bb8e1"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "e47122f453f74bfd8900aacc9f3f9ff467cb03bb23ef8223cb6ed69e2a4ae3c2"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "2328eb29e1012bf633a4a40e028c1ea139fa548c6fbebdafc3e6a835d1591760"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "a832470376d34da59d75f42c4762b57c42c42d36b11a06163722b0f2a6879d15"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "52f45d1c4ce3532b8465be3b5430cf1c8be1c492ff1a620cff21def1e71e5cb2"
+      }
+    },
+    "tr": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "217b83e51c369c336320f0c9f4d6410b8fd1f9691f307bf3e349669506c55d7f"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "68bdb3ba054379c33851c1956cac3515c5e67e6201c7e658c4f70a20a26f3c6c"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "3033a8f1dfb174498742a40ac175068396ba4c428d92cbfda6da48ac2eed9a96"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "faaa9a9df7ad4fe056696bd70a55e49a48fcfcb3f8cfcb03c982d37bab8ff050"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "98648c06e52f9083db4382c0d1a5ce8dccc480c7e0a7f35ad73ba1e2c247e612"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "c22f8ddc29dddb52138c574fbb0dc2f0b477733bd71fe8c2c29d69092547644d"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "44c3aa445bebdad2b2d8ee97ddfcb6e09f61b451893e3a17208cc03d8585f865"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "d5be84756ef7197f0f551baf80ceec7c47b00c9b29cda7318ab4e7df12cd8885"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "ec041e54d93a7d6130b45a6f1722bcbc1cc0407b63f1842c56fd8453cb7d8b58"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "0ed3480b8dc6d5dd86a6eccb2b2ba751df24658611ec876f718f1a0d4872b153"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "49b6832ea94b469cbf5818e8198cd2579912881a9617a27d1ca75e41ba2bdac2"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "46b9186970a684ff65b0b47837d04980b2e745da5659bfe6faa96f6726ca5a98"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "a296e2205bda65b6eec30ccac2c7f8f180cf6357e37645acef27c705dcd3b2bc"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "78c5586c32369ebb70d6a94a75d68e278546c0fb21c04e49ec0eb31071fda5e2"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "f5a8bf0d4ba79ffbd105ffc4924615850bd12409feb1a3db395236f9799bdc3f"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "31c18bb634359d1c962df2960732b25319e652ded5600c59300dcf40ced53aa3"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "4be0deae5dd8181abcebf086172ac4987442ec06ecaaa4334c8decba48c4e727"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "280adbc22ff3e3d71f2d9e28a74465f2cfb40054d28b2323ef5bdf4168a9f10d"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "2f1067e9ecdc4a678af5f1b2256f8e74915162d89ef7d1c26b2033701e04ea3b"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "b156a0b5ae82aa5cea1d5d5f999846c0ffddd73eebd939e6c7e4f900f111f518"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "2cd08f805a8fe013c8ba0872b3ba919061378ac3c6d709cd8f10648d58040509"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "c50635196dbffefa2e20f8003c0ee2e2acaf325366009b06df57d334b75328a1"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "951bafff97d5b099f61c2e6b8ca981f2ab67d944cba304e2e8df6176a33448e1"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "c7197f701ffcc0eac346bec6c2b9a3e27e9c54948ea40da5aaedd185b8164751"
+      }
+    },
+    "zh-CN": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "a33f8d0aaef632bfdd47ca2c5526b2b50fdedac2c9ff37a2d318a4c79637af04"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "28d69cb556a7f0167030ce3f8462c1db6b80d5d126fb35ce6ac32fbbd61d76dc"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "9d911d8df8236727e3db4b307f36206bd208d706d82a10256b1a493801ac8748"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "a6b67f2fc226bcff4a6a88c8d3b35138e39c3f6c02697ab40c8385c272c9caff"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "fa8133fef8b3af103a52db296fc16bf9b3857bf3e0056368a4f02fde6a804c72"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "8d88c814c517fe5a63cc52f096cecb8d47c8eb1bbfec99a017057aa03ab04afe"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "d3c2d54551d252663455c51043d02890d265059debe51fd0d843daf89c3c67a0"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "3a70d88cb56425727f066f67628a14da9002d2320399e1e446b95043bbb12dca"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "8c80a54825e3724719e849d47b8965afc3d757aa6062d8f7df8fcbe0ebc6e6fe"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "ac2ca4f0c837a4a888c143af01895bc8ddb0b4c069a0326942d14b111c5114c3"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "ab8ef7a52ba8c95cdbc43aebda6cda7630fdec450592b76ada6df55450362f88"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "294993c9750affc399e676ea4aa826ceba84a06828b2f3b41adc5f6707355b8a"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "63cffc1eb86b30b671a98e388f57b76fc7bd27fe09cf6bc08d8747e5fa2ff0e4"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "6aa5765a5f726dde56cba22e57f19ccb6abe32b970c24d702dc6c20f8b37ebbc"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "9b3c1732eaab1915144d7d09abdb28ca855c8a533f44accffcb230b45f2462ec"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "79f52557b96fa033eff7540e17eeb826674173fdab88b5c0e7a5fceb1457924f"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "02c0e4c88598655c99559144f78f7d573b5d832ca4dc6bace6d312221b02f48d"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "31703d3ac224850617c7cc86ebe6784a7fca06f46cab6e53dbc48281aba84e4e"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "6f3d6e241d86c2abe3c17780106188381b630f31a2b90e4200f5f009a190ef1b"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "073436bec527eb970cc0c5c037feefeb6ef012e6c0e99beadd30a14defa2c4cb"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "a23deef49d5e52ef7a19a303dc75b6153370227d6829bd15e0d288e167f50acc"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "64c2fe098e30b4c0e250ad7e1fde9768431a37d1307a97868ee952a236f902e8"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "8c927b3df2fd95f5fc011555b976773527b29d299c8d64c02d493c98f6d087ea"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "29a19d970140e7dfcb0e612e8fe0f016aa355b1f4034f7d8877dae29d1e1c40f"
+      }
+    },
+    "zh-Hant": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "5418132a749bb62d26abaf5c4e125e732da11fa6868e81de6df2b87a3148a5af"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "a15b5251452befdbbd2620c4230d60e4931f8a112bac18b1f2d79e0912cfeedc"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "a5a1c361ae64899d33b0adf00ea0a8d8e940f5ba84724f6673161885e531a541"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "548f18995d184b137126436c04b55080772bbdfc47f01a29643f79d4904e7600"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "41e4e21df53e981f62973055f94647f94ded5055401af17f534caaea530a52e0"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "277e16d79ad520948f810a6dc4459cc7231bbc685ef6e78e9796ed19297091c8"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "a880250f15636d0bd596145b87b0fe304a6717fd4278bef02c87cffa48b7ea62"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "bb9f459b5c51ba17b8e91222560d8dfd8bcb8c991f6c362a2d3de38dcc0348a1"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "97094944699d48152580d82d4a5500cdf2538d8840cf3abab7ca1c3a44005aa5"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "73d51ea89f739adaaf74cd986060bab4a4a6898cda713fca241538526d834acd"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "34d509ddb40941c8aedc2bb25db2582432d2cf0d75433413dd13b65b7171a1d0"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "15c28ed5f96705161063f31697b66e86d1d115ca396ed200c2b543279a36c217"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "9bbc15f489755df3b0326c3e020e62186c0545cf22f8ace8b8d8dd8428e38a71"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "b13eca8908535707a3b2623c4b36a0794a3d55f51238fa012299e798ad47e821"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "76ed2bf81cd7eafb35e477492b54eaf47637b88f3632211876c4a84ee70bc910"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "67ed81847b169065b0909cf48d4cc02917c1d299d9cd2cf44a46670c92dcaf4e"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "faec8fcd792f342dae1f4f7245eee8162b7cf914b9d65a75242d6040224a10d7"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "ba494466ae9d1e15e138e3081ae1efdaac28635a532889f920676e81525f6b33"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "f927aaee58de7cfd9b37f1ace1dee8675d1af72bfc133ada83d0388384af75f3"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "ec812c373505e19f7777df17ca7f4944453c90b99e58b70f10bf17ab00f10fe0"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "4f6475315de6ebbf656877e228dc449005b9d565c37b47d04404221298a27b88"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "75422fc7ce8f3a29de9943fc83f1c3125e04f5e83d1ae8a8cedcdd6ab6ddd769"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "5e4c3f55d54108cf4fae5b5ad3965e26add7c602ca2546e7f1f1906193495b17"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "af1e2ddff38db32bb92608383d512b77b50ad13f676186de300fc5fd491f74f9"
+      }
+    },
+    "zh-TW": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "5418132a749bb62d26abaf5c4e125e732da11fa6868e81de6df2b87a3148a5af"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "a15b5251452befdbbd2620c4230d60e4931f8a112bac18b1f2d79e0912cfeedc"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "a5a1c361ae64899d33b0adf00ea0a8d8e940f5ba84724f6673161885e531a541"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "548f18995d184b137126436c04b55080772bbdfc47f01a29643f79d4904e7600"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "41e4e21df53e981f62973055f94647f94ded5055401af17f534caaea530a52e0"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "277e16d79ad520948f810a6dc4459cc7231bbc685ef6e78e9796ed19297091c8"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "a880250f15636d0bd596145b87b0fe304a6717fd4278bef02c87cffa48b7ea62"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "bb9f459b5c51ba17b8e91222560d8dfd8bcb8c991f6c362a2d3de38dcc0348a1"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "97094944699d48152580d82d4a5500cdf2538d8840cf3abab7ca1c3a44005aa5"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "73d51ea89f739adaaf74cd986060bab4a4a6898cda713fca241538526d834acd"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "34d509ddb40941c8aedc2bb25db2582432d2cf0d75433413dd13b65b7171a1d0"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "15c28ed5f96705161063f31697b66e86d1d115ca396ed200c2b543279a36c217"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "9bbc15f489755df3b0326c3e020e62186c0545cf22f8ace8b8d8dd8428e38a71"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "b13eca8908535707a3b2623c4b36a0794a3d55f51238fa012299e798ad47e821"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "76ed2bf81cd7eafb35e477492b54eaf47637b88f3632211876c4a84ee70bc910"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "67ed81847b169065b0909cf48d4cc02917c1d299d9cd2cf44a46670c92dcaf4e"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "faec8fcd792f342dae1f4f7245eee8162b7cf914b9d65a75242d6040224a10d7"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "ba494466ae9d1e15e138e3081ae1efdaac28635a532889f920676e81525f6b33"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "f927aaee58de7cfd9b37f1ace1dee8675d1af72bfc133ada83d0388384af75f3"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "ec812c373505e19f7777df17ca7f4944453c90b99e58b70f10bf17ab00f10fe0"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "4f6475315de6ebbf656877e228dc449005b9d565c37b47d04404221298a27b88"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "75422fc7ce8f3a29de9943fc83f1c3125e04f5e83d1ae8a8cedcdd6ab6ddd769"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "5e4c3f55d54108cf4fae5b5ad3965e26add7c602ca2546e7f1f1906193495b17"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "af1e2ddff38db32bb92608383d512b77b50ad13f676186de300fc5fd491f74f9"
+      }
+    },
+    "uk": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "2eedcead41235defe29d182be047bcebc3852183df3402c8361548aff22afb96"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "bb105a69cc4f91f1b340f5e2e1de8045b90bb58e100227f875f6551e87ea62d8"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "df3e1cff8b09f5199b37a6b0018d7a67ff4ab60fcd9bce85162a6a6a328fec85"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "e2b84f32f405b9937d19bc9e84e7a4759064d24cd3e42e35fc15f18eac14e0f0"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "f01d9b394e905b238fc1796232c7f93386710bfc842ee567d12c5497d24a07b6"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "e9eed3e0ffa463577567340a5055eeeca45924b9acf29a7692a8c5904e8c53c9"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "9688f280309d83e853b255c9e3bcfedcb72c6d8ec429c25c3a6345ddf33f0493"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "d9c33031b5528da48e83deb459fa179edb4f6ffd7f93f45c844cae6ab7e69376"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "036515f37661a5a6dd87153c92870bd62fc7cfed680f0595c8b1206298a73fa9"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "348b98ec20b88c9cb93efa1ccc15b67bf433072dfdca5e6f3789181a7e794c34"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "9c7fa15e0055a588924150d5aa25721adf4f7945ae4addd22836c259a91e37e0"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "0affa0e6ffc205379dfc944c5c5cb14ab82adb340457d8fe3983fd86d1a04ad5"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "0fb41fec9eca87a49249e984b1a380f4af3b116c2caaf2868ec2d322e1e3f18e"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "ccd9341c46c6edde8437bb512fe6b4c4bfff23feb0670869763170aa79acd4da"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "94d9ea8c6fb646d4ec28f9b300d223330632413fdae3992c66db6e2e0ab39d52"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "1780170fdb974ec9471ec5d6335e67c3954f403dfc8a246ee20030b6202e83bd"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "1d83b49b370b1513ceaaf29e4070227effdaadf0defee3bc8afea5d6ff804ddf"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "aee74ec6f5238fc210620c419de7525ef1899fac1d6ea1b7d20f63e780c89413"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "4727377a4a0c08f02e5113813e2b5244120183929cc74cdc6b47753861fc0c4d"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "1cc9e788675d83d56aa48ece2538ca897424e500027a5510b08f5a8303318ac5"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "164bf67f4529caaa7616b7f4eb50a88bbbb9f0dbd3a3082611e9c0f548009ac0"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "2d413b080c9b6fa9d52aed94b7f8595cc432c355883af63d14b3015433162290"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "322ef5e7b8590a2df1f12c36aac932fde0d0ba61595db7302407f34045159818"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "e8d058f2411c43171f619a7a232ff211a6ba3a96acd729e416623681884f2701"
+      }
+    },
+    "vi": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "bb9a3507d664b047f8b19b7f93612a78c77d78fae02517555077cf5585deb59d"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "0155551558d8bb24c8e3835fcc1155778324d9ea8ea2efb530720e8bfd0cb310"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "84ec337c7e91ff2c0edd67bda79535ab3836f38275220b111a38961da8f3eca2"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "43daa6662799ee2ad1fb75fbac51c1408653fde299ecc038c27ef3a12ec96b1e"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "d1054e417270306c3031ef3f947198820ea151afdb170eca8754872508ff9f15"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "e672e4e9fba0b43d2070607546703a58f795e1d7bc35c70c6b6622f13fe1d34d"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "a28663bad6f9c6d9424528346eca79db525d1486578c3cc415f9a5b5feaf1502"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "5d6a24d0b7f3fe49b75109deb14d14497663d0eb5bb3d304a697a5a50bbaa0ef"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "6c138f143a1ffebf4c5f542721b455ba53c024245f2e5ff666b9faa31f6eaa01"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "608783568b90adacdc02e84636b82613f948dda530c291626894b6f41de68c84"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "1e0be0db152e7b99179cd4fd49bf28483cf9711a31f9a67999000c107407d4af"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "5be388e75fe8ec51dcc45eee6e7493d27471df13526ee1dd349284bba7fbdd76"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "512588986d7950c241ba0524cbe2bd0527d24f41ac4ca1b95e27aa9597be9327"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "033cb7158822a2c7c82180cf8d6b2e041d1e5b91ea892502f1672157fa51e93a"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "3057a16caffae8d6955bb0f45b6ce28ed744890c856d67b99166aaaacf9071d4"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "6f9f4d100cdfa3886da65cc2ad3a3d08c476ee615be9aad83e6e5a36dc4b5156"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "740bffe4bacdb7c6902f5d9e7a609d8b79798babfb81c3ae91c3de8b5f75a4ba"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "4e1e8d86387fe598d6517bf29b176f4ca446ddb1e9c3001d598b2c3cc828bc1b"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "a83014bb20c48cc237fc9d24921364d463f496fa8fd191206fd1deb77ff00503"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "0e886f8a813995d3cf97f3b22bba74b823653c2ec995b3a6d640afaf80232b43"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "b9637271d3ced760f98b3f804a3592bd5ee7d2085a97f93d86331d3182b5ebbf"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "858c8139a0408033647d7e41edaa3894336d36bc53d30e4caf9dbac8cec25a8b"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "6138423b4d2ab987390023eaa3f6272386f0ba4d525f3f4e492569bdfc60cd9d"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "d9778654be8466b9243f0a61b25936350e54d08f82f7464432d167a174a07430"
+      }
+    },
+    "id": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "af1959a61f92d9434d530a8eb4c1e8a8804a68ffe1fadaf924d2aa926928f9fb"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "7ec791359a5de6d822e9003824e95feb60a93597280f3e11c6f4c2b34d479cbc"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "808e74da62d6f15581a4092b73cfc24ee1709bf44e932c904cd1e183631b9d33"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "115c90ece74b3b07f5227b5edc7dd5d4889a62c108944847a31718d42ae17660"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "5b0f0c8f58fdfb472eb555db80bf16c53f8a5d230ae56783de9b7bea33ffe29d"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "bb58fbcf3bc95e6aafdf9985150e115e49119ac2e12b14d63efa851cf60ef1b5"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "92a9382d1217f59ec50ccbb390dc129360cf4272ecdf100c4462a8c991239f32"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "58472019b8e8429de5f4e4b7e832e401b04f090af5c27a4d180e9cd04941d68b"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "0fd0239b0f59491dc7f8fa854ce17acea3af96ceaf2089ca5b977379ff0bfdf4"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "dd9bd165e9edfc06bda0671b9a59c40f0343ec499dfb83075efc3bd202975890"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "515508b5972616bb31357ee82a7cc1b262a5eb7fcd12b9da7d989cfb64e02d6d"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "7121fc8d08b9f72e08b7883da3dfa87b5df3227b0706b10a8dea28cb149c56a9"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "2dd7f26494728b032b3a0877eaae7a2974930d8b32ec7c582ea52817615711e2"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "d8ad25e3b5a2be816be2344e1121364e09a2677cfc2a25a1e704519685199852"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "2ca0b1a178e610f59c2c03f63862c190129b0e0dd26538f87bb8bc6269b10a4b"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "f78aed85fa8cf4b5f257b719bf16fa168bddec127c1647d1843dfa8cb2cc26de"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "cbe93ce77a86e418304c671e2fa4529337525d8e1fe3a3e52ab56ea7ceafd071"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "c0730fc8a10a5d19e005a8733570bd472fea5d8702d1c7c234a48f0350e34180"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "62d94c0a45a3d95eeb5d8fd116aa99438c73335af82603e44434ed20df84227a"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "e6920c6f344612a27fe3896057f7857b02fea718853f937bfe6d2894f01d75e3"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "9f362c1210faebe53d0d34ac039f02ccf9e6f91d3190cdd17f2fd725c7458775"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "93b453648933cc999955acd6f1e40df1dabffe73ac07c1d07054cc0f9069794a"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "06c54f4eab6496ca46596f982bda5b3a084e3b70c88a934e6e746ce39b7e60fc"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "987604eef8cc99469ea1a5221ebe5708364d3073681d1c1230c0b80ddf47895b"
+      }
+    },
+    "ms": {
+      "advanced/batch-processing.mdx": {
+        "sourceSha256": "32d79c99874ac768576777414478ac0fe86f75da1163d5ca54699817bc60dd24",
+        "authoredSha256": "042af80d19dcd5bb85488f57046448537126c975fc13cd8baedaaec322542f24"
+      },
+      "advanced/custom-prompts.mdx": {
+        "sourceSha256": "d3089af7c386ce8cb6af4d896d91f0cd663a743a3448fd03b0e7c99e53e0a20e",
+        "authoredSha256": "5a6a6261b2d07429000038224689c506b94cc92a23dfa3fece7ab9b968c3b9cd"
+      },
+      "advanced/troubleshooting.mdx": {
+        "sourceSha256": "b7db9addad4af3628119ade8c513f6a28fb9cb937d4d0e08d661c64955c771d6",
+        "authoredSha256": "6c5e7b05265b304a6c8ed5930e3e603a735c1d34d592d907e66da36bed2bb2b4"
+      },
+      "agents/overview.mdx": {
+        "sourceSha256": "3efcb2ddee512283345fc09d83e540c7e1845ae8c6c1a20225b06da9186a2a7c",
+        "authoredSha256": "9d6bb3de46c42ddc64df8d9e538d67521168d0cee33f082c1f1595af2b6db77c"
+      },
+      "developers/overview.mdx": {
+        "sourceSha256": "98945b999665833d29256ee63b92d3a73cac9a9649324b302e03168ef6513dce",
+        "authoredSha256": "ec996ab052f45bd05c7921c50bcafb823559d42e0c90df3b29440ca1c5071e72"
+      },
+      "faq.mdx": {
+        "sourceSha256": "2230ae3fba13f70ac75cc42a5ae5031d2deb93988a2b3fcd8f07505a446a2201",
+        "authoredSha256": "d6b03ac5d2c3397d8493d24ddd064112b0bf600d3d36f9678069ce5dcd0c6e0c"
+      },
+      "features/concept-notes.mdx": {
+        "sourceSha256": "4e2f67d231a2c06044243b96ffdbdd4b9354e270edba6eb14eeca0dbe166e060",
+        "authoredSha256": "cc96e752c72b6ea0869c54acec027dda2cdb03f7d244ce6e727e7ac242fe20aa"
+      },
+      "features/diagrams.mdx": {
+        "sourceSha256": "0eb509a816a80bde9c1f06f6d17100c5e9694f969b6ca9a4afa44a24c164fab5",
+        "authoredSha256": "62f9dfd936ea9eb99c5bd6d19627a2bdfb8f231cf1db7c827e88f1b524f8970f"
+      },
+      "features/research.mdx": {
+        "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
+        "authoredSha256": "5937912f4e9c23abbbddcdc1c70e34305f7618e00c7f8736d4d0662d878f0807"
+      },
+      "features/translation.mdx": {
+        "sourceSha256": "0ae55ec606586d5080074a74109fc2afb125c157c1480627b1fabc4bd3588461",
+        "authoredSha256": "409fc4dc786e6f35ac8a91380cc63938a2088c460c6606ff856419eb70ae0ddb"
+      },
+      "features/wiki-links.mdx": {
+        "sourceSha256": "c8d8d20e5e8f1b35a223edfc8e0225f8a2fcbedd200da88d118d51a311c8ff22",
+        "authoredSha256": "bc8210d7cbf7e02efbce391cb816f521e43ca0889980652b6fc3030f598ae29c"
+      },
+      "features/workflows.mdx": {
+        "sourceSha256": "e142f02bb9c6d85a2485436e0cdcf95e4b540674708f7a424061cd169f55f71b",
+        "authoredSha256": "972a4a94435ef09e4c2b97c34e2f07b4ef8597a0683201e29d9c1cb61eb41919"
+      },
+      "getting-started/configuration.mdx": {
+        "sourceSha256": "b5dfd5054851fae472d2837ead1a07fc1c3e31c7c944570b2f109ec6e132bb69",
+        "authoredSha256": "d17abff5e799e4f656b9426a94d229248e60da80270ec03d796153e47d0f69a7"
+      },
+      "getting-started/installation.mdx": {
+        "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
+        "authoredSha256": "650f84ce5de80fcdcc8995d0e52b9312846d43bea92153757ef79368e7c2524d"
+      },
+      "getting-started/quick-start.mdx": {
+        "sourceSha256": "8d1f905f49c6f8c8d6c1a208c6ca82fe0e043a383b48ade17ccffffb94553e88",
+        "authoredSha256": "1e642a1b5e2515a753e7b3c86019038d3a71acb0c0df451567ad2b7ea5b561b3"
+      },
+      "intro.mdx": {
+        "sourceSha256": "7fe3676b2b3614e228f4d56b92b94e1856b4f4d4aaa4ce242edf28a22d353539",
+        "authoredSha256": "98df93bd69b2c323a6c7f8dbd8a6e486d3a14e2ddf808d341b789a4fbcadc634"
+      },
+      "pillar-ai-knowledge.mdx": {
+        "sourceSha256": "d56bf6749f7ba63ef029196b132b79a27fecc6883d5b26452d6442b3f547d200",
+        "authoredSha256": "90a750a7c13f41df66da0e8e49eaaa73967579d88b1fecb4b3efbc2639fd9360"
+      },
+      "providers/anthropic.mdx": {
+        "sourceSha256": "8a1b1111c430e6798face881374cfe7969aa01f5b1f85a9ccad9783cdb77689d",
+        "authoredSha256": "5750c3043efb9c18b11231d2636e844a847c7ede934800829a9a17dc6528d336"
+      },
+      "providers/china.mdx": {
+        "sourceSha256": "74ea451f52b1aa598ce5bab41d4e6f4dc60b6c38b3bd2a0a720e50d087fa9810",
+        "authoredSha256": "5f522f6de2818cea50bcafc9fa3501a88cb78183f21b19140e3415e679ec6cd6"
+      },
+      "providers/google.mdx": {
+        "sourceSha256": "eb1ecb64e8d5371061e3c25820b5f6c85ebc3f302dfb0bd0627edbc7a07a4d88",
+        "authoredSha256": "6dd18fd57973e1b566efa7183d6a3c4ae1067aae5d5b467ba841d8071d51b9ea"
+      },
+      "providers/local.mdx": {
+        "sourceSha256": "9c55c259574a5428d4dfc888dd12cfb250a0eb25e784053903cc61b48d39650d",
+        "authoredSha256": "59ff52b88dd9f3a73dbdf634c9d324591efea011858c0ca26811782705f1a096"
+      },
+      "providers/openai.mdx": {
+        "sourceSha256": "287a0114339ee89d402c768922ef9f2e8d08de1609de35477fcbafb370bde9f0",
+        "authoredSha256": "9332adb7363e8d15b2cb1a7561ed5a2840b43f2f7b3b1e2e65f09169a6a78add"
+      },
+      "providers/overview.mdx": {
+        "sourceSha256": "3578c57dc073e36185f812ec3a431ce4f1d5fabcb1b5a2ec5e4a269f5632163b",
+        "authoredSha256": "a38f7d45f8d5d4dbe9654c9f288f04e90bb8fecb11b1f60dc7a30d688cd08b0b"
+      },
+      "releases/1.9.8.mdx": {
+        "sourceSha256": "b2b9c2dabcea510ba6dc1c0d120651471c2e157bd2c1bae3b799357e1b704187",
+        "authoredSha256": "dfd59bd6ee1471ea6a6efb8a378d27adcffc8f4307462b5091deff76547089b2"
+      }
+    }
+  }
+}

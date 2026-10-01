@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "Järgующen",
-    "description": "The label for version current"
+    "message": "Nykyiset ohjeet",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Alkuperäinen käyttö",
+    "message": "Aloitus",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Päätoimintat ovat",
+    "message": "Keskeiset toiminnot",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
@@ -16,7 +16,7 @@
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Edistynyt",
+    "message": "Lisäasetukset",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

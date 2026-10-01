@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Notemd 1.9.8 में अपग्रेड
+description: >-
+  1.9.7 से reliability, native output और documentation बदलाव समझकर नियंत्रित
+  upgrade जाँचें।
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Notemd 1.9.8 में अपग्रेड
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.8 में अपग्रेड
+
+<TLDR>1.9.8 cancellation, output ownership, consistent batch retrieval, native export और सही docs पर केंद्रित है। Public GitHub Release में उपलब्धता देखें और एक ही release की runtime files लें। Providers तथा diagrams की संख्या पहले से मौजूद क्षमता है।</TLDR>
+
+## 1.9.7 के बाद
+
+| क्षेत्र | उपयोगकर्ता प्रभाव |
+| ------ | ------------- |
+| Cancellation | Scheduling, transport और retries में साझा status; late response सुरक्षित writes जारी नहीं रखती |
+| Artifact persistence | Overlapping saves/recovery में same-name sources और shared attachments का ownership |
+| Local retrieval | Batch titles का consistent snapshot; fixed corpus और memory measurement |
+| Native output | Merged cells के नीचे PowerPoint separator तथा CircuitikZ wires/labels सुधरे |
+| Verification | Linux/Windows CI, प्रति-diagnostic lint, process tests और native evidence |
+| Documentation | असल defaults, चार audience paths, direct translations और controlled publication |
+
+History search asynchronous refresh में लगातार typing और caret बचाता है। Drawer Tab अंदर रखता, loading में focus लेता और Escape से parent preview नहीं बंद होने देता। Retry तथा stale responses पर browser regressions हैं।
+
+Research/translation अंतिम read या folder preparation के बाद append/create/overwrite से पहले cancellation दोबारा जाँचते हैं। Vault के accepted writes completed result रहते हैं। दूसरी task ने इंतज़ार में translation folder बना दिया हो तो reuse होता है, creation अपने नाम नहीं गिनी जाती। Conflicting file या अब भी गायब directory पर error और source-folder fallback कायम है।
+
+36 provider presets और 33 executable diagram entries 1.9.7 में थे। Runtime, docs और merge records अलग गिने जाते हैं।
+
+## सुरक्षित अपग्रेड
+
+1. काम रोककर vault/settings का backup लें।
+2. Community plugins से अपडेट या एक ही [public 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) के `main.js`, `manifest.json`, `styles.css` लें।
+3. Manual तरीके में केवल runtime files बदलें, settings/results बचाएँ।
+4. Reload करके version देखें।
+5. बड़े batches से पहले disposable note और छोटी folder जाँचें।
+
+Command IDs और settings कायम हैं। One-Click Extract अभी भी links, batch title generation और Mermaid repair है। Docs correction default chain में research नहीं जोड़ता।
+
+## Cancellation और recovery
+
+Cancel reverse transaction नहीं। Completed files रहते और accepted requests/writes पूरी हो सकती हैं; remote billing provider संभालता है। समाप्ति के बाद output देखें। Conflicts दिखाई देते हैं: current note और recovery की तुलना करके हटाएँ। पुराने artifacts द्वारा उपयोग companion folders बचाएँ।
+
+## Export और compatibility सीमाएँ
+
+- PowerPoint tables के targeted native assertions हैं; whole-slide score ने पहले defect छोड़ा था।
+- PPTX में Mermaid/SVG image fallback हो सकते हैं।
+- Static Drawnix cross-branch relations rearrangement के बाद attachment नहीं सिद्ध करतीं।
+- CircuitikZ preview तथा TeX compile अलग जाँच हैं।
+- वास्तविक mobile और Obsidian 0.15.0 अभी unverified हैं।
+- Frozen lexical evidence semantic search quality या किसी भी vault की performance नहीं सिद्ध करता।
+
+## Release integrity
+
+Publisher version और local/remote tag identity देखता, clean tagged source बनाता, draft upload करता और downloaded hashes जाँचकर public करता है। `main.js`, `manifest.json`, `styles.css`, `README.md` आवश्यक हैं। Retry public bytes को unrelated output से नहीं बदल सकता।
+
+Public Release सत्यापन के बाद Pages deploy होता है। Codex बिना LM Studio या translation engine सीधे अनुवाद लिखकर जाँचता है। यह स्वतंत्र native-speaker review का दावा नहीं है।
+
+## आगे
+
+- [Release और English/Chinese notes](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8)।
+- [त्वरित शुरुआत](../getting-started/quick-start)।
+- [बैच](../advanced/batch-processing)।
+- [डेवलपर](../developers/overview), [Agent](../agents/overview)।
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) में versions और sanitized evidence दें।

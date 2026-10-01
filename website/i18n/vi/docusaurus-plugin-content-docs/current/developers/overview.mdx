@@ -1,0 +1,107 @@
+---
+id: overview
+title: Hướng dẫn nhà phát triển
+description: >-
+  Biên dịch, kiểm thử và mở rộng Notemd theo hợp đồng nhà cung cấp, thao tác,
+  dựng hình và tài liệu hiện có.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Hướng dẫn nhà phát triển
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Hướng dẫn nhà phát triển
+
+<TLDR>Bắt đầu trên nhánh tính năng, cài phụ thuộc đã khóa và cả hai phiên bản trình duyệt, rồi biên dịch và chạy toàn bộ Jest. Mở rộng tại mô-đun sở hữu hợp đồng. Giữ tài liệu, kiểm thử nhà cung cấp và bằng chứng ứng dụng đích khớp hành vi sửa đổi.</TLDR>
+
+## Chuẩn bị bản làm việc
+
+Sao chép [kho mã](https://github.com/Jacobinwwey/obsidian-NotEMD), đọc [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) và tạo nhánh tính năng. CI tiện ích dùng Node 20 trên Linux/Windows; website xác minh bằng Node 24. Cài phụ thuộc riêng ở gốc và `website/`.
+
+Từ gốc kho mã:
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Hai gói Playwright có thể dùng Chromium khác phiên bản. Chỉ cài một là chưa đủ cho môi trường sạch. `main.js` là sản phẩm được sinh và bị Git bỏ qua; mã chạy cũ không chứng minh commit mới hoạt động.
+
+## Xác định nơi sở hữu trước khi sửa
+
+| Trách nhiệm | Nguồn chính |
+| ---------------- | ---------------- |
+| Vòng đời tiện ích, lệnh và định tuyến host | `src/main.ts` |
+| Hồ sơ nhà cung cấp, siêu dữ liệu giao thức và kiểm tra | `src/llmProviders.ts` |
+| Yêu cầu, giao vận, thử lại và luồng | `src/llmUtils.ts` |
+| Định nghĩa thao tác, schema và lựa chọn CLI công khai | `src/operations/`, `src/cliContracts.ts` |
+| Tác vụ tệp, nghiên cứu và dịch | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Hành động quy trình và thanh bên | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Đặc tả và dựng sơ đồ | `src/diagram/`, `src/rendering/` |
+| Chuỗi giao diện và ngôn ngữ hỗ trợ | `src/i18n/` |
+| Hướng dẫn công khai và bản dịch | `website/docs/`, `website/i18n/` |
+| Quy trình bảo trì và bằng chứng có ngày | `docs/maintainer/` |
+
+Bundle sản xuất hiện tại tự chứa, gồm host xem trước nội tuyến. Đường render-host độc lập thử nghiệm không phải hợp đồng tài sản đã phát hành. Không bật nếu chưa đồng bộ đóng gói, tài sản, audit và tài liệu.
+
+## Triển khai thay đổi có phạm vi
+
+1. Tái hiện hành vi và thêm kiểm thử tập trung thất bại trước khi đổi hành vi.
+2. Sửa mô-đun sở hữu bất biến. Kiểm tra đầu vào ngoài tại ranh giới, tránh nhân bản kiến thức nhà cung cấp/thao tác ở bên gọi.
+3. Chạy kiểm thử tập trung rồi toàn bộ. Thêm hủy, lỗi và lưu trữ khi thao tác ghi tệp.
+4. Cập nhật nguồn tiếng Anh và ngôn ngữ bị ảnh hưởng. Kế hoạch, tác vụ và hướng dẫn thực hiện cần bản Anh/Trung đầy đủ riêng dưới `docs/`.
+5. Kiểm tra ứng dụng đích khi sửa hình hoặc xuất gốc. XML, ảnh chụp hay build xanh không đủ chứng minh khả năng sửa gốc hoặc liên kết đầu nối.
+
+Nhà cung cấp mới cần hồ sơ trong `llmProviders.ts`, tái dùng giao vận tương thích, cập nhật `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README và kiểm thử kết nối. Giữ luồng cùng xử lý phản hồi bị ngắt.
+
+Với thao tác, định nghĩa schema đầu vào/kết quả, ngữ cảnh, tác động và nhãn xử lý trước khi công khai. Mục trong registry không tự thành endpoint Agent công khai. Xem [Agent](../agents/overview).
+
+## Xác minh thay đổi
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Cổng lint so từng chẩn đoán với nền. Nợ lint cũ không cho phép lỗi mới; tổng lỗi giảm không biện minh hồi quy mới. Dùng `npm run benchmark:local-kb` khi đổi truy xuất, báo tập dữ liệu và môi trường thay vì hứa tốc độ chung.
+
+Với website, dùng Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Trong chương trình tài liệu 1.9.8, Codex trực tiếp viết và kiểm tra bản dịch. Không chạy script dịch cũ hoặc gọi LM Studio/điểm cuối dịch để tạo chúng. Công cụ có thể định dạng, xác thực và dựng văn bản đã viết.
+
+## Thử trong Obsidian và ứng dụng đích
+
+Dùng kho thử có thể bỏ. Script host yêu cầu marker `.notemd-host-verification` và kiểm tra bundle đã chép. Tách khỏi kho thật. Thử cả `obsidian help` và `obsidian-cli help` khi xác minh CLI; ghi rõ công cụ thiếu, không coi lệnh giả là kiểm thử host thành công.
+
+PowerPoint, CircuitikZ và xuất slide có điều kiện và sản phẩm riêng. Theo [biên bản độ tin cậy](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) và [quy trình phát hành](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Giữ rõ giới hạn di động/phiên bản tối thiểu chưa xác minh.
+
+## Đóng góp và phát hành
+
+PR cần vấn đề cụ thể, hành vi sau sửa, kiểm thử và giới hạn. Dùng [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) cho lỗi tái hiện được. Không commit khóa, nội dung kho riêng hoặc sản phẩm không liên quan.
+
+Publisher và runbook sở hữu phát hành: siêu dữ liệu đồng bộ, tag số, nguồn tag sạch, ghi chú song ngữ, tài sản draft đã xác minh, rồi công khai và chủ động triển khai Pages. Không dời tag đã công khai để thay nhị phân. `.trellis/` là trạng thái cục bộ, không được thành phụ thuộc CI.
+
+## Tiếp theo
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): thực thi và review.
+- [Trạng thái dự án](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md): tiến độ và bằng chứng.
+- [Agent](../agents/overview): khả năng và hợp đồng gọi.
+- [1.9.8](../releases/1.9.8): tác động và giới hạn nâng cấp.

@@ -1,16 +1,10 @@
 ---
 id: openai
 title: OpenAI
-description: Configure OpenAI (GPT-4, GPT-4o)
+description: Configure the native OpenAI endpoint for Notemd's shared Chat Completions transport and verify model access.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords: [Notemd OpenAI, Chat Completions, provider configuration]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,50 +12,46 @@ import TLDR from '@site/src/components/TLDR';
 # OpenAI Provider
 
 <TLDR>
-**OpenAI uses the shared OpenAI-compatible transport.** The current preset defaults to `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5`, and the `models-then-chat` connection test. Use this page when you need exact field semantics; use the [LLM Providers](/docs/providers/overview) overview for category-level selection.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+The OpenAI preset uses Notemd's shared OpenAI-compatible Chat Completions runtime. Configure an API key and a model accepting that protocol. The preset model is a starting value, not a guarantee of current account access or a recommendation for every task.
 </TLDR>
 
 ## Setup
 
-Create an OpenAI API key, add an `OpenAI` provider profile in Notemd settings, and keep the default Base URL unless you are intentionally pointing at an OpenAI-compatible gateway. The model field can stay on `gpt-4o` for general work or be replaced by another OpenAI model ID that your account can call.
+Select **OpenAI** in Notemd settings, enter the API key, and keep `https://api.openai.com/v1` for the official endpoint. Choose a model available to the account and compatible with chat completions. Models exposed only through another API are not made compatible by appearing in a model list.
 
-Use task-specific models for cost control: keep stronger models for research, concept extraction, and long-form restructuring; use cheaper or faster models for translation, link suggestions, and short summaries.
+For a gateway, prefer its matching preset so its endpoint and request headers are used. For Azure deployments, use **Azure OpenAI** and configure the deployment and API version separately.
 
 ## Endpoint And Authentication
 
-| Field | Current preset |
-|-------|----------------|
+| Field | Preset value |
+|-------|--------------|
 | Transport | `openai-compatible` |
 | API key | Required |
 | Base URL | `https://api.openai.com/v1` |
 | Default model | `gpt-4o` |
 | Temperature | `0.5` |
-| Connection test | `/models`, then `/chat/completions` |
+| Connection test | `models-then-chat` |
 
-Notemd normalizes OpenAI-compatible base URLs before appending `chat/completions` or `models`. Do not include a trailing `/chat/completions` in the Base URL; that creates a duplicated path.
+The runtime normalizes known base-URL forms before constructing the model-list or chat route. Start with the preset base URL and inspect the resolved route when debugging, rather than appending extra endpoint segments by guesswork.
 
 ## Model Discovery
 
-OpenAI uses the generic OpenAI-compatible model discovery path. The settings UI first asks `/v1/models`, then validates the selected model with a lightweight chat request. If discovery fails but chat still works, check whether your key has model-list permission or whether a gateway blocks model listing.
+**Fetch models** queries the configured endpoint. **Test connection** can succeed on the model-list request without validating chat generation. Run a disposable note through the exact provider/model after testing connectivity.
 
-Reasoning models are treated as a protocol edge case: Notemd merges system and user prompt content for OpenAI reasoning IDs that reject a separate `system` role, and it exposes `reasoningEffort` only where the provider definition supports it.
+Reasoning, thinking, sampling and output-token controls depend on the preset and model-specific runtime rules. Validate the combination used by your task; listing a model does not guarantee acceptance of every parameter.
 
 ## Troubleshooting
 
-- `401` or `403`: verify the key, project access, billing state, and whether the selected model is enabled for the key.
-- `404` on chat: the Base URL is usually wrong or already includes `/chat/completions`.
-- Model appears in docs but not in the selector: model-list access and chat access are separate failure points; test the exact model ID manually in the provider profile.
-- Reasoning model rejects messages: use a model ID covered by the OpenAI reasoning handling path or switch to a non-reasoning chat model.
+- `401` or `403`: check API credentials, project permissions, model entitlement and account status.
+- `404`: check endpoint, model ID and whether the selected API supports that model.
+- Model listing works but the task fails: inspect the actual chat error and requested model/settings.
+- Long output fails or truncates: review the requested output limit, source size and provider response; a short connection test cannot reproduce every long-request failure.
 
 ## When To Use
 
-Use OpenAI when you want the most predictable default hosted path, when `/v1/models` discovery is important, or when a workflow depends on OpenAI reasoning model semantics. Prefer a gateway or local provider when routing, privacy, or cost controls matter more than direct OpenAI API behavior.
-
----
+Use this preset for direct OpenAI models accepting the implemented Chat Completions protocol. Evaluate a representative note before choosing it for a workload. Provider pricing and model availability can change independently of a Notemd release.
 
 ## Next Steps
 
-- [LLM Providers](/docs/providers/overview) -- Full configuration, per-task models, and retry logic
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix 401/403 and rate-limit errors
+- [Provider overview](./overview): task routing and protocol families.
+- [Troubleshooting](../advanced/troubleshooting): sanitized evidence and output failures.

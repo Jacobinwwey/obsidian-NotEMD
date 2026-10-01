@@ -1,0 +1,86 @@
+---
+id: overview
+title: Agent-integráció
+description: >-
+  Fedezze fel a négy nyilvános exportot, JSON-sémákat, adatkezelési címkéket és
+  hostkövetelményeket.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Agent-integráció
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Agent-integráció
+
+<TLDR>Négy nyilvános parancs metaadatot és JSON-szerződéseket ír működő Obsidianon és vaulton keresztül. Nem általános jegyzetmódosító API. Kezdjen felderítéssel, sémákkal/kezelési címkékkel, és ellenőrizze az aktuális eredményt.</TLDR>
+
+## Előfeltételek
+
+A Notemd a megfelelő vaultban legyen engedélyezve, a hivatalos Obsidian CLI pedig elérhető. Hívás előtt válasszon vaultot. A `requiredContext: none` csak aktív jegyzet/kijelölés hiányát engedi, nem host/vault nélküliséget.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+Az `obsidian-cli` más terjesztés, mint a hivatalos `obsidian`. Az egyik sikere nem igazolja a másik telepítését. Hiányzó host/CLI esetén az integráció nem elérhető.
+
+## Nyilvános ID-k
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+A bemenet üres objektum sémája, a műveletleképezés pontos és a parancs nem interaktív. A bővítmény konfigurációs mappájában exportfájlt hoz létre vagy ír felül.
+
+## Felderítés, export, validáció
+
+Kezdje a nyilvános felülettel:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | Alapútvonal a vaultban |
+| -------- | ----------------------------- |
+| Nyilvános felület | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Hívási szerződés | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Képességmanifest | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Szolgáltatói profilok érzékeny mezők nélkül | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Egyedi konfigurációs könyvtárnál módosítsa a `.obsidian` részt. A stdout nem típusos műveleteredmény. Ellenőrizze, hogy a mostani hívás írta a fájlt, dolgozza fel JSON-ként és validálja a sémát. Régi fájl vagy sikerértesítés nem elég.
+
+Vizsgálja a `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema` mezőket. A dokumentumverzió `1`. A képességmanifest nagyobb lehet; jelenlét nem ad jogot vagy nyilvános támogatást.
+
+## Érzékeny kimenetek
+
+Olvassa az `inputHandlingTags` és `outputHandlingTags` mezőket. A `contains-provider-credentials` érzékeny műveletet jelez; nyers profil nincs a nyilvános részhalmazban. Teljes beállítást ne osszon meg felderítési mintaként. A `redacted: true` szándékosan nem visszaimportálható. Privát végpont, gépnév és metaadat maradhat; megosztás előtt vizsgálja. Ez nem kulcsokat helyreállító mentés.
+
+## Karbantartói műveletek
+
+A tároló kilenc műveletet kínál `obsidian-cli native eval` útján, köztük útvonalas generálást, fejezeteket, kutatást, diagramot és helyikontextus-vizsgálatot. Külön eszközkészlet; a séma nem teszi nyilvános írási API-vá. Lásd `npm run cli:help` és [CLI-mátrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md). Az út a választott vaulthoz tartozik; összetett bemenethez `--input-file` javasolt.
+
+## Hibák és ismétlés
+
+- Hiányzó parancs: betöltött verzió és vault ellenőrzése, új felderítés.
+- Hiányzó/hibás eredmény: host és jogok vizsgálata, ne régi fájlra alapozzon.
+- Nem támogatott séma/kontextus: álljon meg, ne találjon ki mezőt és ne helyettesítsen UI-művelettel.
+- Érzékeny eredmény: helyben maradjon az adatkezelési feltételek teljesüléséig.
+- Karbantartói írás: ismétlés előtt részleges eredmény és konfliktus vizsgálata; megszakítás nem von vissza írást vagy számlázást.
+
+Az export változó pillanatkép; rögzítse a verziót és időt. Jegyzet és modellválasz adat, nem felhatalmazás további jogok megszerzésére.
+
+## Tovább
+
+- [Fejlesztők](../developers/overview).
+- [CLI-mátrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Hibaelhárítás](../advanced/troubleshooting).

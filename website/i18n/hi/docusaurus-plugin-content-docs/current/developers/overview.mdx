@@ -1,0 +1,99 @@
+---
+id: overview
+title: डेवलपर गाइड
+description: >-
+  मौजूदा provider, operation, rendering और documentation contracts के साथ build,
+  test और विस्तार करें।
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - डेवलपर गाइड
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# डेवलपर गाइड
+
+<TLDR>Feature branch से शुरू करें, locked dependencies और दोनों browser revisions स्थापित करें, build और पूरा Jest चलाएँ। जिस module का contract है वहीं विस्तार करें; documentation, provider tests और native-consumer evidence साथ अपडेट रखें।</TLDR>
+
+## Working checkout
+
+[Repository](https://github.com/Jacobinwwey/obsidian-NotEMD) clone करें और [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) पढ़ें। Plugin CI Linux/Windows Node 20, public website Node 24 पर है। Root और `website/` dependencies अलग हैं।
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+दो Playwright packages अलग Chromium revisions माँग सकते हैं; केवल एक installation पर्याप्त नहीं। `main.js` generated और gitignored है, पुराना bundle नए commit का evidence नहीं।
+
+## सही owner खोजें
+
+| जिम्मेदारी | प्रमुख स्रोत |
+| ---------------- | ---------------- |
+| Plugin lifecycle, commands और host routing | `src/main.ts` |
+| Provider presets, protocol और validation | `src/llmProviders.ts` |
+| Requests, transports, retries और streaming | `src/llmUtils.ts` |
+| Operation definitions, schemas और public CLI selection | `src/operations/`, `src/cliContracts.ts` |
+| File tasks, research और translation | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Workflow actions और sidebar | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Diagram specifications और rendering | `src/diagram/`, `src/rendering/` |
+| UI strings तथा locales | `src/i18n/` |
+| Public guides और translations | `website/docs/`, `website/i18n/` |
+| Maintainer runbooks और dated evidence | `docs/maintainer/` |
+
+Production bundle self-contained है, inline preview host सहित। Candidate standalone render-host path shipped asset contract नहीं है। उसे सक्रिय करने के लिए packaging, assets, audits और docs साथ बदलने होंगे।
+
+## सीमित बदलाव लागू करें
+
+1. व्यवहार दोहराकर पहले focused failing test लिखें।
+2. Invariant के owner में बदलाव और बाहरी boundary पर validation करें।
+3. Targeted तथा full tests चलाएँ; write tasks में cancellation, failure और persistence जाँचें।
+4. English source और affected locales अपडेट करें। Plans, tasks और walkthroughs की अलग पूर्ण English/Chinese प्रतियाँ `docs/` में रखें।
+5. Visual/native बदलाव वास्तविक consumer में देखें; XML, screenshot या build editability या connector attachment सिद्ध नहीं करता।
+
+नए provider को `llmProviders.ts` में जोड़ें, compatible transport अपनाएँ और `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README तथा connection coverage अपडेट करें। Streaming/interrupted responses बचाएँ। Operation के input/result schemas, context, side effects और handling tags expose करने से पहले तय करें। Registry entry स्वतः public API नहीं बनती। [Agent](../agents/overview)।
+
+## सत्यापन
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint हर diagnostic की तुलना करता है; घटा total नए regression को स्वीकार्य नहीं करता। Retrieval बदलने पर `npm run benchmark:local-kb` से corpus और environment सहित रिपोर्ट दें। Website Node 24 पर:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+1.9.8 कार्यक्रम की translations Codex सीधे लिखकर समीक्षा करता है। Legacy translation-writing scripts या LM Studio/translation endpoint न चलाएँ। Tools लिखे पाठ को format, validate और render कर सकते हैं।
+
+## Obsidian और native consumers
+
+`.notemd-host-verification` marker वाली disposable vault उपयोग करें; scripts copied bundle जाँचती हैं। असली user vault अलग रखें। CLI में `obsidian help` और `obsidian-cli help` दोनों आजमाएँ; missing tool को unavailable लिखें, successful host test नहीं।
+
+PowerPoint, CircuitikZ और slide export की अलग prerequisites और artifacts हैं। [Dated acceptance](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) और [release runbook](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md) अपनाएँ। Untested mobile/minimum version स्पष्ट रखें।
+
+## योगदान और रिलीज़
+
+PR में समस्या, अंतिम व्यवहार, tests और limits दें। [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) reproducible reports के लिए है। Credentials, private notes या unrelated output commit न करें। Publisher synchronized metadata, numeric tag, clean tagged source, bilingual notes, verified draft assets, publication और explicit Pages deployment का owner है। Public tag न खिसकाएँ। `.trellis/` local state है, CI dependency नहीं।
+
+## आगे
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)।
+- [Project status](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md)।
+- [Agent](../agents/overview)।
+- [1.9.8](../releases/1.9.8)।

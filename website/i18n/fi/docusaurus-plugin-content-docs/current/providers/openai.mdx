@@ -1,67 +1,54 @@
 ---
 id: openai
-title: "OpenAI"
-description: "Konfigoi OpenAI (GPT-4, GPT-4o)"
+title: OpenAI
+description: Määritä Chat Completions ja varmista generointi valitulla OpenAI-mallilla.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI Provider
+# OpenAI
 
-<TLDR>
-**OpenAI käyttää yhdistyvää OpenAI-sovelluksellista liikenteä.** Nykyinen asetus vaihtuu automaattisesti `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` sekä `models-then-chat`-yhteystestin suuntaan. Käytä tätä sivua, kun tarvitset täsmällisiä vältyvyysmerkityksiä; käytä [LLM Tuoja](/docs/providers/overview)-yhteenvietoa kategorianvalinnan vuoksi.
+<TLDR>Profiili käyttää yhteistä OpenAI Chat Completions -ajopolkua. Valitse protokollan avain ja malli. Alkuarvo ei takaa nykyistä pääsyä tai yleistä laatua.</TLDR>
 
-Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
-</TLDR>
+## Valmistelu
 
-## Asetukset
+Käytä viralliselle palvelulle **OpenAI**-profiilia, avainta ja osoitetta `https://api.openai.com/v1`. Listattu malli voi tarvita eri API:n. Yhdyskäytävillä on omat profiilit/otsakkeet; Azure käyttää **Azure OpenAI** -profiilia, deploymentia ja API-versiota.
 
-Luo OpenAI API-avain, lisää `OpenAI`-tuojen profiili Notemd-asetuksissa ja säilytä vaihtoehtoisesti perus URL, ilman että tarkoitat suositeltavasti OpenAI-sovelluksellista käytäntöpintaa. Malleiväli voi jää `gpt-4o` yleiseen käyttöön tai se voidaan asettaa toiseen OpenAI-mallin tunnukseksi, jonka sinun tilisi voi käyttää.
+## Osoite ja tunnistautuminen
 
-Käytä tehtäökohdallisia mallia kulutusten hallintaan: säilytä vahvempia mallia tutkimuksissa, aineiden erottamisessa ja pitkien tekstien uudellejärjestelmällässä; käytä halvempia tai nopeampia mallia kääntöjen, linkkiä suosittelemisen ja lyhyiden yhteenvetojen vuoksi.
+| Kenttä | Alkuarvo |
+| ------- | -------------- |
+| Siirtoprotokolla | `openai-compatible` |
+| API-avain | Pakollinen |
+| Perusosoite | `https://api.openai.com/v1` |
+| Malli | `gpt-4o` |
+| Lämpötila | `0.5` |
+| Yhteystesti | `models-then-chat` |
 
-## Päätöspiste ja tunnistus
+Tunnetut URL-muodot normalisoidaan ennen reittien koostamista. Aloita profiilista ja tarkista lopullinen osoite sen sijaan, että lisäät polkuosia arvaamalla.
 
-| Poliivi | Nykyinen asetus |
-|-------|----------------|
-| Transporto | `openai-compatible` |
-| API-avain | Tarvittava |
-| Base URL | `https://api.openai.com/v1` |
-| Vaikuttava malli | `gpt-4o` |
-| Tempertatuuri | `0.5` |
-| Yhteystesti | `/models`, sitten `/chat/completions` |
+## Mallit
 
-Notemd normaloi OpenAI-sovelluksellisia perus URL-mallia ennen kuin se lisää `chat/completions` tai `models`. Älä lisa perus URL:hin lopullista `/chat/completions`; se luodaan duplikaattisen pathin.
+**Fetch models** pyytää saatavilla olevat mallit. **Test connection** voi onnistua pelkällä listalla. Tarkista täsmällinen malli muistiinpanolla. Reasoning, thinking, otanta ja budjetit on sovitettava profiiliin/malliin.
 
-## Mallien löytö
+## Ongelmat
 
-OpenAI käyttää yleistä OpenAI-sovelluksellista mallien löytöpathia. Asetukset UI kysyvät ensin `/v1/models`, sitten vahvistavat valittun mallin helpokkaan chat-pyyntöllä. Jos löytö ehtoissa epäonnestuu mutta chat toimii edelleen, tarkista, onko sinun avainsellesi mallilistan käyttöoikeus tai onko käytäntöpinta estänyt mallien listaus.
+- 401/403: avain, projekti, oikeudet ja tili.
+- 404: osoite, mallitunniste ja API-tuki.
+- Lista toimii, generointi ei: chat-virhe ja parametrit.
+- Pitkä vastaus katkeaa: syöte, budjetti ja vastaus; lyhyt testi ei kata tätä.
 
-Päätöksentekijämallit kohdellutkaan protokollin erityisjuhtomuodina: Notemd yhdistää sistemän ja käyttäjän pyyntösisältöä OpenAI-päätöksentekijäidentyksiksi, jotka hylkäävät erillisen `system`-roolin, ja se paljastaa `reasoningEffort` vain siellä, kun tuojen määrittely tukee sitä.
+## Milloin käyttää
 
-## Virheiden ratkaiseminen
+Suorille OpenAI-osoitteille, jotka tukevat Chat Completionsia. Arvioi oma aineisto; hinnat ja saatavuus muuttuvat Notemdistä riippumatta.
 
-- `401` tai `403`: todista avain, projektin pääsyoikeudet, tilastointitilanne sekä tämä, onko valittu malli avainselle aktivoitu.
-- `404` chatissa: perus URL on usein väärä tai sisältää juba `/chat/completions`.
-- Malli näkyy dokumenteissa mutta ei valintalista: mallilistan pääsy ja chat-pääsy ovat erilliset virhekohtat; testaa täsmällistä mallintunnusta käsikäyttöisesti tuojen profiilissa.
-- Päätöksentekijämalli hylkää viestit: käytä OpenAI-päätöksentekijähallinnan pathia koskevat mallintunnukset tai vaihtaa muihin, jotka eivät ole päätöksentekijämallit.
+## Seuraavaksi
 
-## Kun käyttää
-
-Käytä OpenAI, kun haluat ennustettavaimman perushostituksen pathin, kun `/v1/models`-löytö on tärkeää tai kun työprosessi riippuu OpenAI-päätöksentekijämallien käyttöominaisuuksista. Ehdotetaan käyttää käytäntöpintaa tai lokalaista tuojaa, kun reittitys, yksityisyys tai kulutusten hallinta ovat tärkeämpää kuin suora OpenAI API-toiminta.
-
----
-
-## Järguvät toimet
-
-- [LLM Tukijat](/docs/providers/overview) -- Täysin konfigurointi, tehtävänkohdalliset mallit ja uudellepyyntologiikka
-- [Virheiden ratkaiseminen](/docs/advanced/troubleshooting) -- Korjaa 401/403- ja rate-limit-virheet
+- [Tarjoajat](./overview).
+- [Vianmääritys](../advanced/troubleshooting).

@@ -1,0 +1,77 @@
+---
+id: 1.9.8
+title: Notemd 1.9.8 升级指南
+description: 了解 1.9.7 之后的可靠性、原生导出与文档改进，并验证受控升级。
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Notemd 1.9.8 升级指南
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.8 升级指南
+
+<TLDR>
+1.9.8 聚焦取消与输出归属、批量检索一致性、原生导出正确性和文档准确性。以公开 GitHub Release 确认可用性，运行文件须来自同一版本。Provider 和图表目录数量是既有能力，不是本次新增。
+</TLDR>
+
+## 自 1.9.7 起的变化
+
+| 领域 | 用户影响 |
+| ------ | ------------- |
+| 取消 | 共享取消状态传播到调度、provider 传输与重试；晚到响应不能继续受保护写入 |
+| 产物持久化 | 重叠保存与恢复跟踪输出归属，涵盖同名源文件和共享附件 |
+| 本地检索 | 批量标题生成使用一致检索快照；记录保留内存与冻结语料测量 |
+| 原生输出 | 针对 PowerPoint 合并单元格下方分隔线和 CircuitikZ 导线／标签修复 |
+| 验证 | Linux／Windows CI、逐诊断 lint 回归、进程测试与原生应用证据 |
+| 文档 | 校正默认值，为新人／用户／开发者／Agent 提供入口，直接撰写译文并控制发布 |
+
+历史搜索在异步刷新期间保留连续输入和光标。预览历史抽屉将 Tab 导航限定在内部，加载时正确进入焦点，Escape 不再关闭父级预览；重试与过期响应已有浏览器回归。
+
+36 个 provider 预设和 33 项可执行图表目录在 1.9.7 已存在。发布说明区分运行时、文档和合并记录，避免重复计算。
+
+研究与翻译在最后一次源文件读取或输出目录准备后、追加／创建／覆盖文件之前再次检查取消状态。Vault 已接受的写入仍保留完成结果。
+
+若另一任务在创建译文目录的等待期间先建好目标目录，翻译会复用它，不将其计为本任务创建。目标是冲突文件或目录仍不存在时，继续报告错误并回退到源文件夹。
+
+## 安全升级
+
+1. 停止活动任务，备份 Vault 与插件设置。
+2. 从社区插件更新，或从同一公开 [1.9.8 Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) 下载 `main.js`、`manifest.json`、`styles.css`。
+3. 手动安装只替换运行文件，保留设置和生成文件。
+4. 重载 Obsidian，核对加载版本。
+5. 先运行可丢弃笔记并检查路径，再试小目录，最后恢复大工作流。
+
+保留已有命令 ID 和设置契约。默认 One-Click Extract 仍为添加链接、批量标题生成、批量 Mermaid 修复。校正文档不代表为默认流程新增研究。
+
+## 取消与恢复
+
+取消不是撤销事务。完成文件保留，已接受的外部请求或写入可能继续完成，远端生成与计费由 provider 控制。等待任务收敛并检查输出后再重试。
+
+恢复冲突会显式报告，不会静默当作替换成功。比较当前笔记与恢复文件后再删除。即使新产物可内嵌视觉内容，仍要保留已有产物引用的配套目录。
+
+## 导出与兼容性限制
+
+- PowerPoint 表格修复有针对性原生断言；全页图像评分曾漏掉合并边框缺陷。
+- PPTX 中 Mermaid／SVG 可采用图像回退，不保证都是可编辑原生形状。
+- Drawnix 静态跨分支关系不保证重排后箭头仍附着。
+- CircuitikZ 预览与原生 TeX 编译有独立检查和依赖。
+- 实体移动设备和 Obsidian 0.15.0 尚未验证，manifest 最低值不是新兼容性测试。
+- 冻结词法检索证据不证明语义搜索质量或任意 Vault 性能。
+
+## 发布完整性
+
+发布流程校验版本和本地／远端 tag 身份，从干净 tag 源码重建 bundle，上传草稿并验证下载资产哈希后公开。四个附件为 `main.js`、`manifest.json`、`styles.css`、`README.md`；重试不能静默用无关字节替换公开附件。
+
+网站部署前确认 Release 可用。本轮译文由 Codex 直接撰写并审核，不调用 LM Studio 或翻译引擎；AI 撰写不等于独立母语者审核。
+
+## 后续阅读
+
+- [公开版本与双语说明](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8)。
+- [快速开始](../getting-started/quick-start)：升级后验证首个任务。
+- [批量处理](../advanced/batch-processing)：范围、输出与部分完成。
+- [开发者](../developers/overview)和 [Agent 指南](../agents/overview)：实现与集成边界。
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)：附准确版本和脱敏证据报告回归。

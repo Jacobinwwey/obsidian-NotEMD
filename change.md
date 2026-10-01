@@ -4,10 +4,17 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
-## Unreleased - 2026-09-13
+## 1.9.8
 
 ### English
 
+- Preserve inline path and identifier punctuation in right-to-left guides, with a rendered-glyph check for the leading dot in `.obsidian`. Browser coverage includes keyboard journeys to the current upgrade guide and FAQ.
+- Reuse a translation directory created by a peer during preparation without claiming its creation; retain source-folder fallback for a conflicting file or a still-missing directory.
+- Align instructional control names with the actual UI and keep table headers visible in both documentation themes. The browser gate now detects fully transparent header text that contrast-only checks skipped.
+- Prevent research append and translation creation/overwrite after cancellation during the final source read or output-folder preparation; retain completed results for already accepted writes.
+- Fixed history-drawer loading/Tab focus and Escape propagation. Preserved consecutive search input, caret and filter focus across asynchronous refreshes, with retry and stale-response browser regressions.
+- Hardened release publication with offline previews, strict input/version/tag validation, clean-source rebuilding, candidate provenance, draft-first uploads, downloaded SHA-256 checks and immutable public assets.
+- Corrected the public guides against actual defaults and commands, added developer/Agent/upgrade entry points, and made direct Codex authoring the active translation policy. Separated current software version from historical chronicle refresh metadata.
 - Fixed cancellation before concurrent scheduling, shared signal ownership across all provider transports and retries, and late title-generation writes/moves. Completed writes remain counted when a later move is cancelled.
 - Serialized overlapping diagram outputs per Vault. Atomic text compensation preserves conflicting edits; recovery copies and failures are explicit. Partial creations, binary outputs and old Drawnix companions are retained when safe deletion/restoration cannot be established.
 - Added Linux/Windows PR verification with Node 20, both locked Chromium revisions and a diagnostic-level lint ratchet. Added PNG archive hashes and Windows-safe SVG text comparisons; removed tests that pinned audit opinions.
@@ -20,6 +27,13 @@ This document summarizes the major functional and architectural changes implemen
 
 ### 中文
 
+- 在从右向左的指南中保持行内路径与标识符的标点顺序，以实际字形位置检查 `.obsidian` 的前导点；浏览器覆盖补齐当前升级指南和 FAQ 的键盘访问。
+- 对齐教程控件名称与实际 UI，恢复文档浅色／深色主题中的可见表头；浏览器门禁新增纯透明文字检测，覆盖对比度检查此前跳过的情况。
+- 复用其他任务在准备期间先建好的译文目录；同路径是文件或目录仍不存在时保留源目录回退，不将他者创建的目录计为本任务产物。
+- 最后一次源文件读取或输出目录准备期间取消时，阻止研究追加及译文创建／覆盖；已接受的写入仍保留完成结果。
+- 修复历史抽屉加载／Tab 焦点和 Escape 冒泡，异步刷新保留连续搜索输入、光标与筛选焦点，补充重试和过期响应的浏览器回归。
+- 强化发布流程：离线预览、严格参数／版本／tag 校验、干净源码重建、候选版本归属、先上传草稿、下载 SHA-256 验证，以及公开资产不可变。
+- 按实际默认值和命令校正公开指南，新增开发者／Agent／升级入口，并将 Codex 直接撰写设为当前翻译政策。当前软件版本与历史编年史刷新元数据分开维护。
 - 修复并发调度前取消、所有 provider 传输与重试期间的共享信号生命周期，以及标题生成晚到结果继续写入/移动的问题。后续移动被取消时，已成功写入的数量仍准确保留。
 - 在每个 Vault 内串行化相互重叠的图表输出。原子文本补偿保留冲突编辑，恢复副本及恢复失败显式报告；无法确认安全删除/恢复时，保留部分新建文件、二进制输出及旧 Drawnix 附件。
 - 新增 Node 20 下的 Linux/Windows PR 验证、两个锁定 Chromium 版本及逐条诊断的 lint 门禁。新增 PNG 归档哈希、兼容 Windows 换行的 SVG 比对，并移除锁定审计观点的测试。

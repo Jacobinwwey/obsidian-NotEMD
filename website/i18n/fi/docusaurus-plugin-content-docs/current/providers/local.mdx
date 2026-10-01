@@ -1,63 +1,55 @@
 ---
 id: local
-title: "Sisäiset mallit"
-description: "Konfiguroi Ollama ja sisäiset LLM-t"
+title: Paikalliset mallit
+description: >-
+  Valmistele Ollama, LM Studio tai OVMS ja tarkista protokolla, tunnistautuminen
+  ja verkkorajat.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Paikalliset mallit
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Sisäiset mallit
+# Paikalliset mallit
 
-<TLDR>
-**Sisäiset tarjoajat säilyttävät sisältöä ulkopuolisen API-sta.** Nykyinen sisäinen path kattaa Ollama kanssa perus `ollama`-transportin ja LMStudio OpenAI-sovelluksen transportin kautta. Ei ole tarpeen API-avaintia mukaisessa pathissa, mutta sisäinen serveri ja malli trebuie deja käynnissä.
+<TLDR>Käynnissä oleva palvelin voi suorittaa tehtävät laitteellasi. Valmistele malli ja protokolla ensin. Verkkotutkimus, ulkoiset osoitteet, riippuvuusasennukset ja pilveen reititetyt tehtävät eivät muutu offline-toiminnoiksi.</TLDR>
 
-Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
-</TLDR>
+## Valmistelu
 
-## Asetukset
+Asenna [Ollaman](https://ollama.com/) palvelin/malli tai lataa malli ja käynnistä API [LM Studiossa](https://lmstudio.ai/). Valmistele OVMS-käyttöönotto erikseen. Notemd ei asenna malleja eikä käynnistä palvelimia. Valitse tarkka nimi/profiili ja testaa yhteys sekä tehtävä.
 
-Ollama-ksi asetaa Ollama, taaan halutun mallin, käynnistää serverin ja lisää `Ollama`-tarjoajan profiili Notemd-ssä. LMStudio-ksi laaditaan malli LM Studio:n sisäisessä serverissä ja lisätään `LMStudio`-tarjoajan profiili.
+## Osoite ja tunnistautuminen
 
-Sisäiset mallit ovat toimintakriteerit, ei vain asetukset. Notemd voi kutsua vain sitä, mitä sisäinen prosessi paljostaa, siksi tarkista sisäinen malli ulkopuolella Obsidian ennen sovelluksen vianottamista.
+| Profiili | Perusosoite | Esimerkkimalli | Protokolla / pääsy |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Natiivi Ollama; ei pakollista avainta |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI-yhteensopiva; valinnainen avain, alkuarvo `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI-yhteensopiva; malli ja oikeudet käyttöönoton mukaan |
 
-## Päätöspiste ja tunnistus
+`localhost` viittaa Obsidian-laitteeseen. Puhelin ei tavoita sillä tietokonetta. Lähiverkkopalvelin tarvitsee oikean osoitteen ja asianmukaisen suojauksen. Älä avaa suojaamatonta palvelinta epäluotettaviin verkkoihin.
 
-| Tarjoaja | Base URL | Vaihtoehtoinen malli | API-avain | Huomiot |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Ei tarvita | NDJSON-strimointi; mallien löytö `/api/tags`-kautta |
-| LMStudio | `localhost:1234/v1` | `local-model` | Ei tarvita | Lähetää `"EMPTY"`-t kantajatokena; OpenAI-sovelluksellinen |
+## Mallit
 
-Ollama käyttää perus `/chat`-pathia alaisessa Base URL-ssaan. LMStudio seuraa OpenAI-sovelluksellista `chat/completions`-maria ja ootaa mallia, joka on laadittu sisäisessä serverissä.
+Ollama näyttää tagit `/api/tags`-reitillä, LM Studio voi tarjota `/v1/models`; OVMS seuraa käyttöönottoa. Lista ei todista muistin riittävyyttä tai sopivaa vastausmuotoa. Testaa oikea pyyntö.
 
-## Mallien löytö
+## Ongelmat
 
-Ollama käyttää `ollama-tags`-löytömodiia ja listoi sisäisesti taittuja siltiä. LMStudio käyttää OpenAI-sovelluksellista mallien löytöä, kun sen serveri paljostaa `/v1/models`.
+- Yhteys torjutaan: palvelin, kuunteluosoite ja portti.
+- Malli puuttuu: nouda/lataa ja tarkista alias.
+- Tunnistautuminen: oikea token vaadittaessa, ei sokkona `EMPTY`.
+- Hidas/vajaa: muisti, konteksti ja budjetti; aloita yhdestä pyynnöstä.
+- Väärä muoto: tarkista protokolla, kehote ja malli ennen eräsäätöjä.
 
-Jos löytö ei anna tulevia tulevia, se on yleensä sisäisen serverin tilan ongelma: malli ei ole taittu, laadittu tai serveri on yhdistetty toiseen hostiin/porttiin kuin profiilissa.
+## Milloin käyttää
 
-## Virheiden ratkaiseminen
+Kun tietoraja, saatavuus ja mitattu tulos sopivat. Valmistele riippuvuudet ennen verkon irrottamista. Tarkista kaikki tehtäväreitit: paikalliset katkelmat voidaan lähettää pilvi-LLM:lle. Tavily/DuckDuckGo tarvitsevat verkon; natiivivienti voi tarvita erillisiä työkaluja.
 
-- Yhteyden estää: käynnistä Ollama tai LM Studio ja vahvista konfiguroitu portti.
-- Mallia ei löydy: taaan Ollama-silti tai laadita LM Studio-malli ennen testausa.
-- Hyvin hyvä välitys: vähentä kontekstin suurusta, käytä pienempää sisäistä mallia tai suunnittele raskaita tehtävät ulkopuoliseen tarjoajaan.
-- Tyhjät tai väärinkonstruoituja vastauksia: vahvista, että valittu tarjoajan profiili sopii sisäisen serverin protokollille; Ollama ja LMStudio eivät ole vaihtoehtoisia.
+## Seuraavaksi
 
-## Kun käyttää
-
-Käytä paikallisia tarjoajia yksityisiin avaroihin, offline-toimintaan tai halville, kertoisille tehtäville. Älä olettaa, että paikallinen ratkaisu on automaattisesti parempi tutkimus-synthetiseen tai pitkeään pohjendeluaan; mallin laatu ja laitteiden rajoitteet ovat tasapainotus.
-
----
-
-## Järguvät toimet
-
-- [LLM Tarjoajat](/docs/providers/overview) -- Täysin konfigurointi ja mallin asettelu tehtävälle
-- [Virheentekijä](/docs/advanced/troubleshooting) -- Korjaa connection-refused-virheet, kun paikallinen serveri ei käy
+- [Tarjoajat](./overview).
+- [Asetukset](../getting-started/configuration).
+- [Vianmääritys](../advanced/troubleshooting).

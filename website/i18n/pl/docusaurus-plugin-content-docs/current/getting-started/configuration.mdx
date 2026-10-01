@@ -1,446 +1,101 @@
 ---
 id: configuration
-title: "Konfiguracja"
-description: "Konfiguruj ustawienia i preferencje Notemd"
+title: Konfiguracja
+description: 'Znajdź ustawienia dostawców, ścieżek wyników, języków i przepływów pracy.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Konfiguracja
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Konfiguracja
 
-<TLDR>
-**Konfiguracja Notemd obejmuje 6 głównych obszarów:** (1) dostawcy LLM i klucze API, (2) wybór modelu dla zadań, (3) ścieżki wyjściowe i szablony, (4) język UI i język wyjściowy, (5) usługi wyszukiwania (Tavily/DuckDuckGo), (6) niestandardowe procesy. Wszystkie ustawienia znajdują się w Obsidian Ustawienia → Notemd. Zmiany wchodzą w życie natychmiast.
-</TLDR>
+<TLDR>Otwórz Settings → Notemd i wyszukaj pole. Wybierz dostawcę i miejsce wyników przed uruchomieniem zadania. Sprawdź zmianę na jednej notatce; trwające zadanie może zachować ustawienia z chwili startu.</TLDR>
 
-## Przegląd ustawień
+## Przegląd
 
-Dostęp: **Obsidian Ustawienia (⚙️) → Notemd**
-
-### Główne sekcje
-
-1. **Konfiguracja dostawcy** — klucze API, podstawowe URLs, modele
-2. **Ustawienia zadań** — wybór modelu dla zadań
-3. **Konfiguracja wyjścia** — miejsce zapisu plików generowanych
-4. **Ustawienia językowe** — UI i języki wyjściowe
-5. **Integracja wyszukiwania** — konfiguracja Tavily/DuckDuckGo
-6. **Procesy** — niestandardowe łańcuchy przycisków
-7. **Zaawansowane** — diagnostyka, przetwarzanie zbiorcze, dzielenie na fragmenty
+Początkowym dostawcą jest DeepSeek bez danych uwierzytelniających. Wybranie profilu nie tworzy konta, nie instaluje modelu ani nie daje uprawnień. Zobacz [dostawców](../providers/overview).
 
 <!-- notemd-settings-favorites-guide -->
-## Odkrywanie ustawień i tworzenie ulubionych elementów Notemd
+## Wyszukiwanie i ulubione
 
-Strona z ustawieniami została zaprojektowana do wielokrotrego używania, a nie tylko do jednorazowej konfiguracji:
+**Search settings** przeszukuje nazwy, opisy, aliasy i widoczne kategorie, a następnie prowadzi do pola. **★ Favorites** pokazuje zapisane ustawienia z opisem, kategorią i miejscem docelowym. Są przechowywane dla skarbca, przetrwają restart i usuwają stare ID. Zapytanie pozostaje po zwinięciu paska. Lista ulubionych i filtr wyszukiwania tylko w ulubionych to osobne funkcje.
 
-- Wykorzystaj pole **Search settings** dostępne w funkcji wyszukiwania, aby znaleźć określoną ustawienie podając jej nazwę, opis, alias lub widoczną kategorię. Wyniki są sortowane według ważności i umożliwiają bezpośrednie przejście do konkretnej ustawienia.
-- Użyj **★ Favorites**, aby przechowywać często zmieniane ustawienia w bieżącym Vault. Kliknięcie w niego otwiera dedykowaną listę zawierającą nazwę ustawienia, opis, kategorię oraz bezpośredni adres do przejścia. Można usunąć ulubione elementy z tej listy bez opuszczania strony z ustawieniami.
-- Pasek narzędzi do odkrywania jest domyślnie rozwinięty. Gdy potrzebujesz więcej miejsca pionowego, użyj przycisku w kształcie strzałki, aby zamknąć go i przenieść na prawy górny róg jako element sterujący; aktualne zapytanie zostaje zachowane i przywrócone po ponownym rozwinięciu paska.
-- Lista ulubionych elementów jest niezależna od filtru obejmującego wyłącznie ulubione pozycje. Ustawienia ulubione korzystają ze stabilnych identyfikatorów, przetrwają restarty Obsidian, a nieskuteczne identyfikatory są bezpiecznie usuwane, gdy dane ustawienie już nie istnieje.
+**Diagram preview export PPI** zaczyna od 300, zakres 72–600, i wpływa wyłącznie na PNG. SVG/PDF zachowują obsługiwaną geometrię wektorową. **Also export complete Mermaid visuals** steruje plikami towarzyszącymi, nie widocznością Mermaid w podglądzie Drawnix.
 
-Ustawienie **Diagram preview export PPI** ma domyślną wartość **300 PPI** i przyjmuje wartości od **72 do 600**. Kontroluje ono wyłącznie proces rastrowania PNG; SVG oraz PDF zachowują geometrię wektorową. Ustawienie **Also export complete Mermaid visuals** umożliwia eksport dodatkowych plików Mermaid według potrzeb i nie wpływa na widoczność tych plików w przeglądach Drawnix.
----
+## 1. Dostawca
 
-## 1. Konfiguracja dostawcy
+Podaj endpoint właściwego protokołu, potrzebny klucz i dostępny model. Lista modeli i udane generowanie są odrębnymi testami. Przygotuj lokalny serwer/model; chmura i gateway otrzymują treść. Sprawdź też trasy poszczególnych zadań przed użyciem prywatnych danych.
 
-### Dodawanie dostawcy
+## 2. Modele dla zadań
 
-1. **Wybierz dostawcę** z listy rozwijanej (ponad 30 dostępnych)
-2. **Wpisz klucz API**
-3. **Opcjonalnie**: Ustaw własną bazę URL (dla proxyów/bram)
-4. **Kliknij "Pobierz listę modeli"**, aby sprawdzić połączenie
-5. **Wybierz domyślny model**
+`useMultiModelSettings` pozwala ustawić osobnych dostawców/modele dla linków, tytułów, badania, tłumaczenia, pojęć, oryginalnego tekstu i Mermaid. Puste nadpisanie używa modelu dostawcy; wyłączenie używa aktywnego dostawcy. Porównuj dokładność, opóźnienie i realny koszt na tym samym materiale.
 
-### Popularni dostawcy
+## 3. Wyniki
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
+| Zadanie | Wynik domyślny |
+| ------ | ------------------------- |
+| Dodawanie linków | Osobny `_processed.md` obok źródła; przenoszenie oryginału wyłączone |
+| Samodzielne wyodrębnianie pojęć | Wybrany folder pojęć; tylko tytuł, linki zwrotne wyłączone |
+| Tłumaczenie | Obok jako `_<language>.md`; istniejący cel może zostać zastąpiony |
+| Badanie | Podsumowanie dopisywane do aktywnego Markdown |
+| Generowanie wsadowe z tytułów | Zapis odpowiednich źródeł, potem przeniesienie do sąsiedniego `<folder>_complete`, jeśli cel pozwala |
+| Podgląd/eksport diagramów | Wybór obsługiwanego źródła lub eksportu wizualnego; kontrola raportowanej ścieżki |
 
-#### Anthropic (Claude)
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
+Folder pojęć jest początkowo pusty; `concepts` to przykład. Samodzielne notatki mają formę minimalną/pełną, bez ogólnego silnika szablonów. [Pojęcia](../features/concept-notes). Przetwarzanie i tłumaczenie mają oddzielne sufiksy oraz foldery. Sprawdź cele i konflikty odzyskiwania; anulowanie nie cofa ukończonych zapisów.
 
-#### Ollama (Lokalny)
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
+## 4. Języki
+
+UI ma 21 wersji językowych, witryna 34 trasy językowe. `uiLocale: auto` wybiera obsługiwane mapowanie, w przeciwnym razie angielski. Język generowania jest osobny, początkowo angielski. Obsługiwane zadania mogą mieć własny język; tłumaczenie używa `language`. Liczby nie dowodzą umiejętności językowych modelu.
+
+## 5. Wyszukiwanie
+
+Wybierz jawnie Tavily z kluczem lub DuckDuckGo. Pusty klucz Tavily nie przełącza usługi. Obie używają sieci; DuckDuckGo może pobierać strony wynikowe. Badanie w generowaniu z tytułu jest wyłączone: `enableResearchInGenerateContent`. Pobieranie lokalne również jest wyłączone, z osobnymi zakresami folderów/zadań. Lokalne fragmenty kontekstu trafiają do wybranego LLM.
+
+## 6. Przepływy pracy
+
+Użyj kreatora albo jednej nazwanej linii DSL na przycisk:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
+`::` oddziela nazwę od działań, `>` oddziela ID działań. Domyślna polityka zatrzymuje się przy zgłoszonym błędzie. Zobacz [przepływy](../features/workflows): zakres i konsekwencje kontynuowania mimo błędu.
 
-### Wielu dostawców
+## 7. Ustawienia zaawansowane
 
-Możesz skonfigurować kilku dostawców i przełączać się między nimi w zależności od zadania:
-- **Główny dostawca**: Wykorzystywany jako alternatywa
-- **Dostawcy specyficzne dla zadania**: Nadpisują te ustawienia dla konkretnych zadań
+| Ustawienie | Wartość początkowa | Działanie |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | Dostawca bez osobnej trasy zadania |
+| `useMultiModelSettings` | `false` | Dostawca/model dla zadania |
+| `useCustomConceptNoteFolder` | `true` | Zezwolenie na wyniki pojęciowe po wybraniu folderu |
+| `conceptNoteFolder` | `''` | Początkowo brak folderu pojęć |
+| `extractConceptsMinimalTemplate` | `true` | Tylko tytuł w samodzielnych pojęciach |
+| `extractConceptsAddBacklink` | `false` | Linki zwrotne w samodzielnej ekstrakcji |
+| `moveOriginalFileOnProcess` | `false` | Zachowanie oryginału przy linkowaniu |
+| `chunkWordCount` | `3000` | Przybliżone części tekstu, nie limit tokenów |
+| `batchConcurrency` | `1` | Domyślna współbieżność partii |
+| `enableBatchParallelism` | `false` | Równoległe planowanie na trasach używających przełącznika |
+| `enableStableApiCall` | `false` | Jawnie wybierany stabilny tryb żądań |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Zatrzymanie przepływu przy zgłoszonym błędzie |
 
----
+Rozmiar części tekstu i budżet tokenów odpowiedzi są różne. Mniejsze części nie rozwiązują wszystkich limitów kontekstu, a niska współbieżność nie zapobiega każdemu 429.
 
-## 2. Modele specyficzne dla zadania
+## Profile ustawień
 
-Konfiguruj różne modele dla różnych zadań, aby optymalizować koszt/jakość:
+Ustawienia są danymi wtyczki w skarbcu. Wykonaj kopię przed zmianą. Eksport dostawców ma własny kontrakt maskowania danych, nie stanowi pełnego backupu skarbca. Sprawdź adresy i metadane także w zamaskowanym wyniku. Nie publikuj surowych ustawień ani diagnostyki z prywatnymi notatkami.
 
-### Typy zadań
+## Problemy z konfiguracją
 
-| Zadanie | Domyślny model | Cel |
-|------|--------------|---------|
-| **Łączenie** | Główny dostawca | Identyfikacja pojęć dla linków wiki |
-| **Generowanie koncepcji** | Główny dostawca | Wyciągnij i opisz koncepcje |
-| **Badania** | Główny dostawca | Streszcz wyniki wyszukiwania w sieci |
-| **Tłumaczenie** | Główny dostawca | Tłumacz tekst |
-| **Generowanie diagramów** | Główny dostawca | Generuj diagramy Mermaid/Canvas |
+Przetestuj dokładnego dostawcę/model na krótkiej notatce. Gdy pola brak, sprawdź wyszukiwanie, kategorię, widoczność w trybie deweloperskim i skarbiec. Zgłoś wersję oraz minimalne ustawienia bez sekretów.
 
-### Przykład: Optymalna konfiguracja pod kątem kosztów
+## Dalej
 
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### Jak skonfigurować
-
-1. **Ustawienia → Notemd → Ustawienia zadania**
-2. Dla każdego zadania wybierz:
-   - ✅ **Użyj głównego dostawcy** (domyślnie)
-   - 🔄 **Użyj dostawcy niestandardowego** → wybierz dostawcę + model
-
----
-
-## 3. Konfiguracja wyjściowa
-
-### Wyjście notatek o koncepcjach
-
-**Gdzie zapisywane są nowe notatki koncepcyjne:**
-
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Szablon:**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### Opcje struktury folderów
-
-**Opcja 1: Płaska (wszystkie koncepcje w jednym folderze)**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**Opcja 2: Hierarchiczna (według folderu źródłowego)**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-Konfiguracja: **Ustawienia → Wyjście → Użyj folderów hierarchicznych**
-
-### Wyjście w postaci diagramu
-
-**Gdzie zapisywane są diagramy:**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**Format:**
-- `.mmd` (Mermaid źródło)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
-
-## 4. Ustawienia językowe
-
-### UI Język
-
-**Język interfejsu** (przyciski, menu, okna dialogowe):
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-Obsługiwane języki: angielski, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية i inne.
-
-### Język wyjścia
-
-**Język generowanego treści** (notatki koncepcyjne, streszczenia badań):
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**Przypadek użycia:** chiński UI + wyjście w języku angielskim dla bilingwalnych badań.
-
-### Cel tłumaczenia
-
-**Domyślny język docelowy** do zadań tłumaczeniowych:
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
-
-## 5. Integracja z wyszukiwarką
-
-### Tavily (Zalecane)
-
-**Usługa wyszukiwania optymalizowana pod AI:**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-Otrzymaj klucz: [tavily.com](https://tavily.com/)
-
-**Cechy:**
-- Wysokiej jakości wyniki
-- Streszczenia optymalizowane pod AI
-- Cytaty źródłowe
-
-### DuckDuckGo (Eksperymentalne)
-
-**Nie jest potrzebny klucz API:**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**Uwaga:** Gorsza jakość, brak możliwości personalizacji.
-
----
-
-## 6. Konfiguracja procesu pracy
-
-### Tworzenie niestandardowych procesów pracy
-
-**Przepływy pracy łączą wiele zadań w jeden przycisk.**
-
-1. **Ustawienia → Przepływy pracy → Dodaj przepływ pracy**
-2. **Nazwa**: "Przepływ analizy papierów"
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **Zapisz**
-
-Nowy przycisk pojawia się w lewej kolumnie bocznej.
-
-### Składnia DSL
-
-**Format:** `action1>action2>action3`
-
-**Dostępne działania:**
-- `process-current-add-links` — Dodaj linki wiki do obecnej notatki
-- `extract-concepts-current` — Stwórz notatki konceptualne
-- `research-and-summarize` — Badania internetowe + streszczenie
-- `translate-current` — Przetłumacz obecną notatkę
-- `summarize-as-mermaid` — Stwórz diagram Mermaid
-- `process-folder-add-links` — Przetwarzanie folderów pakietowo
-
-**Przykłady przepływów pracy:**
-
-**Szybkie wydobywanie koncepcji:**
-```
-process-current-add-links>extract-concepts-current
-```
-
-**Głębokie badania:**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**Analiza wielojęzyczna:**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
-
-## 7. Zaawansowane ustawienia
-
-### Przetwarzanie partiami
-
-**Przetwarzanie wielu plików równolegle:**
-
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
-
-Większa wartość = szybsze działanie, ale więcej wywołań API.
-
-### Inteligentne dzielenie na fragmenty
-
-**W przypadku długich notatek – dzielenie na fragmenty:**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-Unika błędów związanych z limitem tokenów.
-
-### Panel diagnostyczny
-
-**Przeglądanie szczegółowych logów:**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-Pokazuje:
-- API żądań/odpowiedzi
-- Użycie tokenów
-- Czasy przetwarzania
-- Błędy
-
-### Wykrywanie duplikatów koncepcji
-
-**Unikaj niemal identycznych koncepcji:**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-Wyższa wartość = bardziej agresywne łączenie.
-
----
-
-## Profilowanie konfiguracji
-
-### Eksport/W Import ustawień
-
-**Dzielenie się konfiguracjami między urządzeniami:**
-
-1. **Ustawienia → Zaawansowane → Eksport konfiguracji**
-2. Zapisuje `notemd-config.json`
-3. Na nowym urządzeniu: **Import konfiguracji**
-
-**Co jest zawarte:**
-- Klucze dostawcy API (opcjonalne)
-- Wybory modeli
-- Ścieżki wyjściowe
-- Dostosowane procesy pracy
-
----
-
-## Zalecane konfiguracje
-
-### Dla studentów
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### Dla badaczy
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### Dla użytkowników dbających o prywatność
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### Dla pracy dwujęzycznej
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## Rozwiązywanie problemów z konfiguracją
-
-### Ustawienia nie zostały zapisane
-- Sprawdź uprawnienia do pliku w `.obsidian/plugins/notemd/`
-- Spróbuj: Wyłącz wtyczkę → Ponownie włącz
-
-### Klucz API jest nieważny
-- Brak dodatkowych spacji
-- Sprawdź termin ważności
-- Sprawdź kredyty na panelu dostawcy
-
-### Modele nie ładują się
-- Kliknij "Pobierz listę modeli", aby odświeżyć
-- Sprawdź połączenie sieciowe
-- Spróbuj innego dostawcy
-
----
-
-## Kolejne kroki
-
-- 📖 [Odkryj funkcje](../features/wiki-links)
-- 🔌 [Przewodniki konfiguracji dostawcy](../providers/overview)
-- ❓ [FAQ](../faq)
+- [Szybki start](./quick-start).
+- [Przetwarzanie wsadowe](../advanced/batch-processing).
+- [Własne prompty](../advanced/custom-prompts).
+- [Rozwiązywanie problemów](../advanced/troubleshooting).

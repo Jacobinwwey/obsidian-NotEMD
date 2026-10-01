@@ -1,0 +1,278 @@
+{
+  "ok": true,
+  "fixtureDirectory": "<repo>\\docs\\maintainer\\fixtures\\circuitikz",
+  "outputDirectory": "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+  "rendererAvailability": {
+    "ok": true,
+    "status": "configured",
+    "diagnostics": []
+  },
+  "fixtureCount": 6,
+  "fixtures": [
+    {
+      "name": "cmos-buffer-v1",
+      "inputPath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-buffer-v1.json",
+      "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-buffer-v1.tex",
+      "circuitKind": "cmos-buffer",
+      "goldenReferenceId": "cmos-buffer-v1",
+      "compileExecution": {
+        "executable": "<repo>/.cache/plan-audit-2026-09-12/tectonic.exe",
+        "args": [
+          "--outdir",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-buffer-v1.tex"
+        ],
+        "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+        "exitCode": 0,
+        "signal": null,
+        "timedOut": false,
+        "stdout": "note: Running TeX ...\nnote: Rerunning TeX because \"cmos-buffer-v1.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-buffer-v1.pdf` (7.1103515625 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+        "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+        "renderSmoke": {
+          "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-buffer-v1.pdf",
+          "artifactExists": true,
+          "artifactSizeBytes": 7281,
+          "nonEmptyArtifact": true,
+          "artifactKind": "opaque",
+          "diagnostics": []
+        },
+        "diagnostics": {
+          "ok": true,
+          "summary": "0 error(s), 0 warning(s)",
+          "diagnostics": []
+        }
+      },
+      "compileDiagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      },
+      "rendererAvailability": {
+        "ok": true,
+        "status": "configured",
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "cmos-inverter-v1",
+      "inputPath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-inverter-v1.json",
+      "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-inverter-v1.tex",
+      "circuitKind": "cmos-inverter",
+      "goldenReferenceId": "cmos-inverter-v1",
+      "compileExecution": {
+        "executable": "<repo>/.cache/plan-audit-2026-09-12/tectonic.exe",
+        "args": [
+          "--outdir",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-inverter-v1.tex"
+        ],
+        "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+        "exitCode": 0,
+        "signal": null,
+        "timedOut": false,
+        "stdout": "note: Running TeX ...\nnote: Rerunning TeX because \"cmos-inverter-v1.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-inverter-v1.pdf` (5.25390625 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+        "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+        "renderSmoke": {
+          "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-inverter-v1.pdf",
+          "artifactExists": true,
+          "artifactSizeBytes": 5380,
+          "nonEmptyArtifact": true,
+          "artifactKind": "opaque",
+          "diagnostics": []
+        },
+        "diagnostics": {
+          "ok": true,
+          "summary": "0 error(s), 0 warning(s)",
+          "diagnostics": []
+        }
+      },
+      "compileDiagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      },
+      "rendererAvailability": {
+        "ok": true,
+        "status": "configured",
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "cmos-nand2-v1",
+      "inputPath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-nand2-v1.json",
+      "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nand2-v1.tex",
+      "circuitKind": "cmos-nand2",
+      "goldenReferenceId": "cmos-nand2-v1",
+      "compileExecution": {
+        "executable": "<repo>/.cache/plan-audit-2026-09-12/tectonic.exe",
+        "args": [
+          "--outdir",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nand2-v1.tex"
+        ],
+        "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+        "exitCode": 0,
+        "signal": null,
+        "timedOut": false,
+        "stdout": "note: Running TeX ...\nnote: Rerunning TeX because \"cmos-nand2-v1.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nand2-v1.pdf` (5.9423828125 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+        "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+        "renderSmoke": {
+          "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nand2-v1.pdf",
+          "artifactExists": true,
+          "artifactSizeBytes": 6085,
+          "nonEmptyArtifact": true,
+          "artifactKind": "opaque",
+          "diagnostics": []
+        },
+        "diagnostics": {
+          "ok": true,
+          "summary": "0 error(s), 0 warning(s)",
+          "diagnostics": []
+        }
+      },
+      "compileDiagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      },
+      "rendererAvailability": {
+        "ok": true,
+        "status": "configured",
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "cmos-nor2-v1",
+      "inputPath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-nor2-v1.json",
+      "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nor2-v1.tex",
+      "circuitKind": "cmos-nor2",
+      "goldenReferenceId": "cmos-nor2-v1",
+      "compileExecution": {
+        "executable": "<repo>/.cache/plan-audit-2026-09-12/tectonic.exe",
+        "args": [
+          "--outdir",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nor2-v1.tex"
+        ],
+        "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+        "exitCode": 0,
+        "signal": null,
+        "timedOut": false,
+        "stdout": "note: Running TeX ...\nnote: Rerunning TeX because \"cmos-nor2-v1.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nor2-v1.pdf` (5.876953125 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+        "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+        "renderSmoke": {
+          "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-nor2-v1.pdf",
+          "artifactExists": true,
+          "artifactSizeBytes": 6018,
+          "nonEmptyArtifact": true,
+          "artifactKind": "opaque",
+          "diagnostics": []
+        },
+        "diagnostics": {
+          "ok": true,
+          "summary": "0 error(s), 0 warning(s)",
+          "diagnostics": []
+        }
+      },
+      "compileDiagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      },
+      "rendererAvailability": {
+        "ok": true,
+        "status": "configured",
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "cmos-transmission-gate-v1",
+      "inputPath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\cmos-transmission-gate-v1.json",
+      "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-transmission-gate-v1.tex",
+      "circuitKind": "cmos-transmission-gate",
+      "goldenReferenceId": "cmos-transmission-gate-v1",
+      "compileExecution": {
+        "executable": "<repo>/.cache/plan-audit-2026-09-12/tectonic.exe",
+        "args": [
+          "--outdir",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-transmission-gate-v1.tex"
+        ],
+        "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+        "exitCode": 0,
+        "signal": null,
+        "timedOut": false,
+        "stdout": "note: Running TeX ...\nnote: Rerunning TeX because \"cmos-transmission-gate-v1.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-transmission-gate-v1.pdf` (5.9951171875 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+        "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+        "renderSmoke": {
+          "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\cmos-transmission-gate-v1.pdf",
+          "artifactExists": true,
+          "artifactSizeBytes": 6139,
+          "nonEmptyArtifact": true,
+          "artifactKind": "opaque",
+          "diagnostics": []
+        },
+        "diagnostics": {
+          "ok": true,
+          "summary": "0 error(s), 0 warning(s)",
+          "diagnostics": []
+        }
+      },
+      "compileDiagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      },
+      "rendererAvailability": {
+        "ok": true,
+        "status": "configured",
+        "diagnostics": []
+      }
+    },
+    {
+      "name": "common-source-nmos-v1",
+      "inputPath": "<repo>\\docs\\maintainer\\fixtures\\circuitikz\\common-source-nmos-v1.json",
+      "outputPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\common-source-nmos-v1.tex",
+      "circuitKind": "common-source-amplifier",
+      "goldenReferenceId": "common-source-nmos-v1",
+      "compileExecution": {
+        "executable": "<repo>/.cache/plan-audit-2026-09-12/tectonic.exe",
+        "args": [
+          "--outdir",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+          "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\common-source-nmos-v1.tex"
+        ],
+        "cwd": "<repo>\\.cache\\release-1.9.8-research\\circuitikz",
+        "exitCode": 0,
+        "signal": null,
+        "timedOut": false,
+        "stdout": "note: Running TeX ...\nnote: Rerunning TeX because \"common-source-nmos-v1.aux\" changed ...\nnote: Running xdvipdfmx ...\nnote: Writing `<repo>\\.cache\\release-1.9.8-research\\circuitikz\\common-source-nmos-v1.pdf` (5.833984375 KiB)\nnote: Skipped writing 1 intermediate files (use --keep-intermediates to keep them)\n",
+        "stderr": "Fontconfig error: Cannot load default config file: No such file: (null)\r\n",
+        "renderSmoke": {
+          "expectedArtifactPath": "<repo>\\.cache\\release-1.9.8-research\\circuitikz\\common-source-nmos-v1.pdf",
+          "artifactExists": true,
+          "artifactSizeBytes": 5974,
+          "nonEmptyArtifact": true,
+          "artifactKind": "opaque",
+          "diagnostics": []
+        },
+        "diagnostics": {
+          "ok": true,
+          "summary": "0 error(s), 0 warning(s)",
+          "diagnostics": []
+        }
+      },
+      "compileDiagnostics": {
+        "ok": true,
+        "summary": "0 error(s), 0 warning(s)",
+        "diagnostics": []
+      },
+      "rendererAvailability": {
+        "ok": true,
+        "status": "configured",
+        "diagnostics": []
+      }
+    }
+  ],
+  "reportOutputPath": "<repo>\\report.json"
+}

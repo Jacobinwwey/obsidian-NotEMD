@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # إضافة Notemd لـ Obsidian
 
+> Notemd إضافة لـ Obsidian بترخيص MIT لإنشاء Markdown مترابط وملاحظات مفاهيم وملخصات وترجمات ومخططات. تبقى الملفات في الخزنة، لكن المهام السحابية ترسل المحتوى إلى المزود المحدد، ويستخدم البحث على الويب الشبكة.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## ابدأ من هنا
+
+| القارئ | المدخل | الهدف |
+|---|---|---|
+| مبتدئ | [البدء السريع](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/getting-started/quick-start) | إعداد مزود والتحقق من ملاحظة واحدة |
+| مستخدم | [سير العمل](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/features/workflows) | ضبط المجلدات والمخرجات والاستعادة |
+| مطور | [دليل المطور](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/developers/overview) | بناء العقود الحالية واختبارها وتوسيعها |
+| وكيل | [دليل الوكلاء](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/agents/overview) | اكتشاف أوامر التصدير الأربعة المدعومة |
+
+**الإصدار:** 1.9.8
+
+- **الإلغاء والاستعادة:** يظل الإلغاء فعالاً خلال الجدولة وإعادة المحاولة، ويمنع الكتابة المتأخرة للبحث والترجمة. تُحفظ المخرجات المكتملة وتُبلّغ تعارضات الاستعادة.
+- **السجل والتصدير الأصلي:** يحتفظ البحث بالنص المدخل وتركيز لوحة المفاتيح. أُصلحت فواصل خلايا PowerPoint المدمجة وتوصيلات وتسميات CircuitikZ. يستخدم البحث المحلي الدفعي لقطة متسقة.
+- **الإصدار والوثائق:** التحقق من أصل المصادر النظيفة والملفات المنزلة، مع مداخل حسب الجمهور وترجمات مكتوبة مباشرة.
+
+كانت إعدادات المزودين الـ 36 وأنواع المخططات القابلة للتنفيذ الـ 33 موجودة بالفعل في 1.9.7. [دليل الترقية](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/releases/1.9.8) · [التحقق من الإصدار العام](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+تظل أسهم Drawnix بين الفروع ثابتة بعد إعادة الترتيب. قد يُستعاض عن Mermaid/SVG بصور في PPTX. الإلغاء لا يتراجع عن التغييرات المحفوظة ولا يضمن توقف التوليد أو الفوترة عن بُعد. لم تُختبر الأجهزة المحمولة الفعلية ولا Obsidian 0.15.0.
 
 اقرأ الوثائق بلغات إضافية من: [مركز اللغات](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
-  تعزيز قاعدة المعرفة متعددة اللغات بالذكاء الاصطناعي
-==================================================
-```
-
-طريقة سهلة لبناء قاعدة المعرفة الخاصة بك.
-
-يقوم Notemd بتوسيع سير العمل داخل Obsidian من خلال التكامل مع نماذج لغوية كبيرة متعددة (LLMs) لمعالجة ملاحظاتك متعددة اللغات، وإنشاء wiki-links تلقائيا للمفاهيم الأساسية، وإنشاء concept notes مقابلة، وإجراء بحث ويب وغير ذلك، بما يساعدك على بناء رسوم معرفية قوية.
-
 إذا كنت تحب استخدام Notemd، يرجى النظر في [⭐ إعطاء نجمة على GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) أو [☕️ شراء قهوة لي](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## جدول المحتويات
 
@@ -50,13 +50,26 @@
 
 ## البدء السريع
 
-1. **ثبّت وقم بالتفعيل**: احصل على الإضافة من Obsidian Marketplace.
-2. **اضبط LLM**: انتقل إلى `Settings -> Notemd`، واختر مزود LLM الخاص بك، مثل OpenAI أو مزود محلي مثل Ollama، ثم أدخل API key أو URL.
-3. **افتح الشريط الجانبي**: انقر على أيقونة العصا السحرية الخاصة بـ Notemd في الشريط الأيسر لفتح sidebar.
-4. **عالج ملاحظة**: افتح أي ملاحظة واضغط **"Process File (Add Links)"** في الشريط الجانبي لإضافة `[[wiki-links]]` تلقائيا إلى المفاهيم الأساسية.
-5. **شغّل Quick Workflow**: استخدم الزر الافتراضي **"One-Click Extract"** لربط المعالجة والتوليد والتنظيف الخاص بـ Mermaid من نقطة دخول واحدة.
+1. ثبّت **Notemd** وفعّله من **الإعدادات ← إضافات المجتمع ← استعراض**.
+2. حدّد نقطة النهاية وبيانات الاعتماد والنموذج بدقة. اختبر الاتصال ثم اختبر توليداً فعلياً؛ إتاحة قائمة النماذج لا تثبت صلاحية المحادثة.
+3. أنشئ مجلداً فارغاً باسم `trial-concepts` وحدده لملاحظات المفاهيم؛ المسار الأولي فارغ. جهّز `Notemd trial.md` بفقرة اختبار يجوز إرسالها إلى المزود.
+4. شغّل **Process File (Add Links)**. افحص `Notemd trial_processed.md` بجوار المصدر المحفوظ، وتحقق من الروابط وملاحظات المفاهيم.
+5. أعد فتح ملاحظة المصدر التجريبية ثم شغّل **One-Click Extract** مع مجلد الاختبار: إضافة الروابط، ثم توليد محتوى الملاحظات المؤهلة من عناوينها، ثم إصلاح Mermaid في مجلد complete. قد يشمل ذلك ملاحظات مؤهلة موجودة مسبقاً.
 
-هذا كل شيء. استكشف الإعدادات لفتح مزيد من الإمكانات مثل البحث على الويب والترجمة وتوليد المحتوى.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+البحث على الويب وتوليد المخططات عمليتان منفصلتان. بعد الإلغاء انتظر انتهاء المهام النشطة، وافحص المخرجات المكتملة وملفات الاستعادة قبل إعادة التشغيل.
+
+<details>
+<summary>أمثلة الواجهة</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## دعم اللغات
 
@@ -89,9 +102,9 @@
 - **تقوية سلسلة الطلبات الطويلة المستقرة لمزودي OpenAI-compatible**: في الوضع المستقر، تستخدم طلبات OpenAI-compatible ترتيبا صريحا من ثلاث مراحل لكل محاولة: direct streaming transport ثم direct non-stream transport ثم `requestUrl` fallback، والذي يستطيع الترقية إلى parsing متدفق عند الحاجة. هذا يخفض الإخفاقات الكاذبة عندما تكون استجابة المزود bufferized لكن أنابيب streaming غير مستقرة.
 - **Fallback متدفق واعٍ بالبروتوكول عبر واجهات LLM المختلفة**: محاولات fallback الطويلة أصبحت تستخدم parsing متدفقا واعيا بالبروتوكول عبر جميع المسارات المدمجة، وليس فقط مع OpenAI-compatible. بات Notemd يتعامل مع OpenAI/Azure SSE، وAnthropic Messages streaming، وGoogle Gemini SSE، وOllama NDJSON على `http/https` المكتبي وكذلك `fetch` في البيئات غير المكتبية، كما تستفيد entrypoints الأخرى ذات النمط OpenAI من هذا المسار المشترك.
 - **Presets مناسبة للبيئة الصينية**: تتضمن الإعدادات المسبقة الآن `Qwen` و `Qwen Code` و `Doubao` و `Moonshot` و `GLM` و `Z AI` و `MiniMax` و `Huawei Cloud MaaS` و `Baidu Qianfan` و `SiliconFlow`، إضافة إلى المزودين المحليين والعالميين الموجودين مسبقا.
-- **معالجة دفعية موثوقة**: تم تحسين منطق المعالجة المتوازية مع **استدعاءات API متدرجة زمنيا** لتجنب rate limiting وضمان أداء ثابت أثناء الأعمال الدفعية الكبيرة. التنفيذ الجديد يجعل المهام تبدأ على فترات بدلا من الانطلاق دفعة واحدة.
-- **عرض تقدم دقيق**: تم إصلاح مشكلة كانت تؤدي إلى تجمد شريط التقدم، بحيث يعكس الـ UI الآن الحالة الحقيقية للعملية.
-- **معالجة دفعية متوازية أكثر متانة**: تم حل مشكلة كانت تؤدي إلى توقف العمليات الدفعية المتوازية مبكرا، مما يضمن معالجة جميع الملفات بشكل موثوق وفعّال.
+- **معالجة دفعية موثوقة**: تقلل استدعاءات API المتباعدة زمنياً ذروة الطلبات. تبقى حصص المزوّد وحدود معدل الطلبات سارية.
+- **عرض تقدم دقيق**: يميّز التقدم بين الملفات المكتملة والفاشلة والملغاة. انتهاء التشغيل لا يعني نجاح كل ملف.
+- **معالجة دفعية متوازية أكثر متانة**: تنتهي المهام النشطة قبل عرض الملخص. يوقف الإلغاء العمل اللاحق ولا يتراجع عن التغييرات المحفوظة؛ المجلد ليس معاملة واحدة قابلة للتراجع الكامل.
 - **دقة Progress Bar**: تم إصلاح خطأ كان يجعل شريط التقدم في أمر "Create Wiki-Link & Generate Note" يتوقف عند 95%، وهو الآن يعرض 100% بشكل صحيح عند الاكتمال.
 - **تصحيح API محسّن**: أصبح "API Error Debugging Mode" يلتقط full response bodies من مزودي LLM وخدمات البحث (Tavily/DuckDuckGo)، ويسجل timeline للنقل لكل محاولة مع sanitized request URLs، والمدة المنقضية، وresponse headers، وpartial response bodies، وparsed partial stream content، وstack traces لتسهيل الاستكشاف عبر OpenAI-compatible وAnthropic وGoogle وAzure OpenAI وOllama fallbacks.
 - **لوحة Developer Mode**: تتضمن الإعدادات الآن لوحة تشخيصية خاصة بالمطورين تبقى مخفية ما لم يتم تفعيل "Developer mode". وتدعم اختيار مسارات التشخيص وإجراء repeated stability probes للمسار المحدد.
@@ -105,7 +118,7 @@
 - **إنشاء concept notes اختياريا وقابلا للتخصيص**: إنشاء ملاحظات جديدة تلقائيا للمفاهيم المكتشفة داخل مجلد محدد في الـ vault.
 - **مسارات output قابلة للتخصيص**: يمكنك ضبط مسارات نسبية منفصلة داخل vault لحفظ الملفات المعالجة والملاحظات المفاهيمية المنشأة.
 - **أسماء ملفات output قابلة للتخصيص (Add Links)**: يمكنك اختيار **الكتابة فوق الملف الأصلي** أو استخدام suffix أو replacement string مخصص بدلا من `_processed.md` الافتراضي عند معالجة الملفات لإضافة الروابط.
-- **المحافظة على سلامة الروابط**: هناك معالجة أساسية لتحديث الروابط عندما يعاد تسمية الملاحظات أو حذفها داخل الـ vault.
+- **المحافظة على سلامة الروابط**: يعتمد تحديث الروابط عند إعادة التسمية على Obsidian وإعداداته. قد يترك الحذف روابط غير محلولة؛ افحص الملاحظات المتطابقة في الاسم.
 - **استخراج مفاهيم خالص**: يمكنك استخراج المفاهيم وإنشاء concept notes مقابلة دون تعديل المستند الأصلي. هذا مناسب لتعبئة قاعدة معرفية من مستندات موجودة دون تغييرها. تتوفر إعدادات لإنشاء ملاحظات مفاهيمية minimal وإضافة backlinks.
 
 ### الترجمة
@@ -115,10 +128,10 @@
   - **دعم الملفات الكبيرة**: يقسم الملفات الكبيرة تلقائيا إلى chunks أصغر حسب إعداد `Chunk word count` قبل إرسالها إلى LLM، ثم يعيد دمج الأجزاء المترجمة بسلاسة في مستند واحد.
   - يدعم الترجمة بين لغات متعددة.
   - اللغة الهدف قابلة للتخصيص في الإعدادات أو من الـ UI.
-  - يمكن فتح النص المترجم تلقائيا في pane على يمين النص الأصلي لسهولة القراءة.
+  - يفتح الترجمة المحفوظة في مساحة عمل Obsidian بحسب التخطيط المتاح.
 - **الترجمة المجمعة**:
-  - ترجمة جميع الملفات داخل مجلد محدد.
-  - يدعم المعالجة المتوازية عند تفعيل "Enable Batch Parallelism".
+  - يترجم افتراضياً الملفات المؤهلة الموجودة مباشرة في المجلد المختار دون المجلدات الفرعية. يمكن لاختيار الملفات المتقدم تغيير النطاق؛ وقد تُستبدل ملفات الوجهة الموجودة.
+  - تستخدم الترجمة `batchConcurrency` مباشرة (القيمة الافتراضية 1)، بشكل مستقل عن `enableBatchParallelism`.
   - يستخدم custom prompts للترجمة إذا تم إعدادها.
   - يضيف خيار "Batch translate this folder" إلى قائمة السياق في file explorer.
 - **تعطيل الترجمة التلقائية**: عندما يتم تفعيل هذا الخيار، فإن المهام غير الخاصة بالترجمة لن تفرض لغة خرج محددة، وبذلك تحافظ على سياق اللغة الأصلية. أما مهمة `Translate` الصريحة فستستمر في تنفيذ الترجمة كما هو مضبوط.
@@ -134,7 +147,7 @@
 - **توليد المحتوى من العنوان**:
   - استخدام عنوان الملاحظة لتوليد محتوى أولي عبر LLM مع استبدال المحتوى الحالي.
   - **بحث اختياري**: يمكن إعداد تنفيذ web research عبر المزود المختار لتوفير context إضافي عند التوليد.
-- **Batch Content Generation from Titles**: توليد المحتوى لجميع الملاحظات في مجلد محدد بناء على عناوينها، مع احترام إعداد البحث الاختياري. يتم نقل الملفات المعالجة بنجاح إلى **مجلد فرعي "complete" قابل للتخصيص** مثل `[foldername]_complete` أو اسم مخصص لتجنب إعادة المعالجة.
+- **Batch Content Generation from Titles**: يولّد محتوى ملفات `.md` المؤهلة ويستبدله وفق إعداد البحث، مع استبعاد `_processed.md` وشجرة مجلد complete المحدد بالكامل. تُجرّب عملية النقل إلى مجلد complete بعد التوليد. الوجهة المشغولة تمنع النقل، لكنها لا تمنع التوليد الذي حُفظ بالفعل؛ يُحسب عدد الملفات المولّدة والمنقولة بشكل منفصل.
 - **ربط Mermaid Auto-Fix**: عندما يكون Mermaid auto-fix مفعلا، تقوم المسارات المتعلقة بتوليد Mermaid بإصلاح الملفات أو مجلدات الإخراج الناتجة تلقائيا بعد المعالجة. ويشمل ذلك Process وGenerate from Title وBatch Generate from Titles وResearch & Summarize وSummarise as Mermaid وTranslate.
 
 ### الميزات المساعدة
@@ -291,8 +304,8 @@
 
 #### إخراج الملاحظات المفاهيمية
 - **Customize Concept Note Path**:
-  - **Disabled (الافتراضي)**: يكون الإنشاء التلقائي لملاحظات `[[linked concepts]]` معطلا.
-  - **مفعّل**: يسمح لك بتحديد المجلد الذي تنشأ فيه concept notes الجديدة.
+  - **معطّل**: لا ينشئ ملاحظات للمفاهيم المرتبطة تلقائياً.
+  - **مفعّل افتراضياً**: المسار فارغ في البداية. أدخل مساراً نسبياً صالحاً داخل الخزنة قبل إنشاء ملاحظات المفاهيم.
 - **Concept Note Folder Path**: يظهر فقط عند التفعيل. أدخل **مسارا نسبيا** داخل الـ vault، مثل `Concepts` أو `Generated/Topics`. سيتم إنشاء المجلدات تلقائيا إذا لم تكن موجودة. **يجب تعبئة الحقل عند تفعيل الميزة.** **لا تستخدم المسارات المطلقة أو الرموز غير الصالحة.**
 
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
@@ -341,8 +354,8 @@
 
 #### إصلاح Mermaid دفعة واحدة
 - **Enable Mermaid Error Detection**:
-  - **Off (الافتراضي)**: يتم تجاوز فحص الأخطاء بعد المعالجة.
-  - **On**: يفحص الملفات المعالجة بحثا عن أخطاء Mermaid syntax متبقية وينشئ تقريرا باسم `mermaid_error_{foldername}.md`.
+  - **معطّل**: يتجاوز اكتشاف الأخطاء بعد المعالجة.
+  - **مفعّل افتراضياً**: يبحث عن أخطاء Mermaid المتبقية وينشئ `mermaid_error_{foldername}.md`.
 - **Move files with Mermaid errors to specified folder**:
   - **Off**: تبقى الملفات ذات الأخطاء في أماكنها.
   - **On**: ينقل أي ملف ما زال يحتوي على أخطاء Mermaid syntax بعد محاولة الإصلاح إلى مجلد مخصص للمراجعة اليدوية.
@@ -358,7 +371,7 @@
 - **API Call Interval (ms)**: الحد الأدنى للتأخير قبل وبعد كل استدعاء فردي لـ LLM API. وهو مهم مع APIs ذات المعدل المنخفض أو لتقليل أخطاء 429. ضبطه على `0` يعني عدم وجود تأخير اصطناعي. الافتراضي: `500ms`.
 - **Chunk Word Count**: الحد الأقصى لعدد الكلمات في كل chunk ترسل إلى LLM. يؤثر في عدد استدعاءات API للملفات الكبيرة. الافتراضي: `3000`.
 - **Enable Duplicate Detection**: يبدّل التحقق الأساسي من الكلمات المكررة داخل المحتوى المعالج، وتظهر النتائج في console. الافتراضي: مفعّل.
-- **Max Tokens**: أقصى عدد من tokens يجب أن تولدها LLM لكل response chunk. يؤثر في الكلفة ومستوى التفصيل. الافتراضي: `4096`.
+- **Max Tokens**: أقصى عدد من tokens يجب أن تولدها LLM لكل response chunk. يؤثر في الكلفة ومستوى التفصيل. الافتراضي: `8192`. قد يتجاوز حد إخراج خاص بالمزوّد هذه القيمة؛ توجد أيضاً قيم افتراضية تراعي النموذج.
 
 <img width="795" height="274" alt="معلمات المعالجة   إعدادات اللغة" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
@@ -389,7 +402,7 @@
   - تسمح بتغيير prompt word الخاصة بمهمة محددة.
   - في **Custom Prompt Word** يمكنك إدخال الصياغة الخاصة بك.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Disabled (الافتراضي)**: تنقل الملفات التي تم توليدها بنجاح إلى مجلد فرعي باسم `[OriginalFolderName]_complete` نسبة إلى والد المجلد الأصلي، أو `Vault_complete` إذا كان المجلد الأصلي هو جذر الـ vault.
+  - **Disabled (الافتراضي)**: الوجهة هي المجلد المجاور `[foldername]_complete`، أو `Vault_complete` لجذر الخزنة. يتيح تفعيل الخيار تحديد اسم مخصص.
   - **مفعّل**: يسمح لك بتحديد اسم مخصص للمجلد الفرعي الذي تنقل إليه الملفات المكتملة.
 - **Custom Output Folder Name**: يظهر فقط عند تفعيل الخيار السابق. أدخل اسم المجلد الفرعي المطلوب، مثل `Generated Content` أو `_complete`. لا يسمح بالرموز غير الصالحة. وإذا تُرك فارغا، يستخدم `_complete`.
 
@@ -493,12 +506,12 @@
    - شغّل `Notemd: Translate Note/Selection` من Command Palette أو من زر sidebar.
    - ستظهر modal تسمح لك بتأكيد أو تغيير **Target Language**، مع استخدام القيمة الافتراضية المحددة في Configuration.
    - تستخدم الإضافة **LLM Provider** المهيأ، تبعا لإعدادات Multi-Model، لتنفيذ الترجمة.
-   - يحفظ المحتوى المترجم في **Translation Save Path** المهيأة مع suffix المناسبة، ويفتح في **pane جديدة إلى يمين** المحتوى الأصلي لتسهيل المقارنة.
+   - يحفظ الترجمة باستخدام المسار واللاحقة المضبوطين، ثم يفتح الملف المحفوظ في مساحة عمل Obsidian.
    - يمكنك إلغاء هذه المهمة عبر زر sidebar أو زر الإلغاء في modal.
 
 3. **الترجمة المجمعة**:
    - شغّل `Notemd: Batch Translate Folder` من Command Palette واختر مجلدا، أو انقر بزر الفأرة الأيمن على مجلد داخل file explorer واختر "Batch translate this folder".
-   - تقوم الإضافة بترجمة جميع ملفات Markdown داخل المجلد المحدد.
+   - يترجم افتراضياً الملفات المؤهلة الموجودة مباشرة في المجلد المختار دون المجلدات الفرعية. يمكن لاختيار الملفات المتقدم تغيير النطاق؛ وقد تُستبدل ملفات الوجهة الموجودة.
    - تحفظ الملفات المترجمة في المسار المضبوط للترجمة، لكنها لا تفتح تلقائيا.
    - يمكن إلغاء العملية من progress modal.
 
@@ -525,7 +538,7 @@
    - شغّل الأمر `Notemd: Batch Generate Content from Titles` من Command Palette أو من زر sidebar.
    - اختر المجلد الذي يحتوي على الملاحظات التي تريد معالجتها.
    - ستقوم الإضافة بالمرور على كل ملف `.md` داخل المجلد، باستثناء ملفات `_processed.md` والملفات الموجودة داخل designated "complete" folder، ثم تولد محتوى بناء على عنوان الملاحظة مع استبدال المحتوى الحالي. تتم المعالجة في الخلفية دون فتح الملفات في المحرر.
-   - تنقل الملفات المعالجة بنجاح إلى "complete" folder المهيأة.
+   - تُجرّب عملية النقل إلى مجلد complete بعد التوليد. الوجهة المشغولة تمنع النقل، لكنها لا تمنع التوليد الذي حُفظ بالفعل؛ يُحسب عدد الملفات المولّدة والمنقولة بشكل منفصل.
    - يحترم هذا الأمر إعداد **"Enable Research in 'Generate from Title'"** لكل ملاحظة.
    - يمكنك إلغاء هذه المهمة من sidebar أو modal.
    - تظهر progress والنتائج، مثل عدد الملفات المعدلة وعدد الأخطاء، داخل سجل sidebar أو modal.
@@ -578,6 +591,8 @@
     - ويمكن أيضا ضبط الإضافة لنقل هذه الملفات إلى مجلد منفصل لمراجعتها.
 
 ## موفرو LLM المدعومون
+
+يعرض الجدول أمثلة مختارة. راجع [دليل المزوّدين الـ 36](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/providers/overview) للاطلاع على الإعدادات المسبقة ومتطلباتها.
 
 | المزود | النوع | هل يتطلب API Key | ملاحظات |
 |---|---|---|---|
@@ -647,7 +662,7 @@
 ### المشاكل الشائعة
 - **الإضافة لا يتم تحميلها**: تأكد من وجود `manifest.json` و `main.js` و `styles.css` داخل المجلد الصحيح: `<Vault>/.obsidian/plugins/notemd/` ثم أعد تشغيل Obsidian. كما يجدر فحص Developer Console عبر (`Ctrl+Shift+I` أو `Cmd+Option+I`) لرؤية أخطاء الإقلاع.
 - **فشل المعالجة أو أخطاء API**:
-  1. **تحقق من نوع الملف**: تأكد من أن الملف الذي تحاول معالجته أو التحقق منه يحمل الامتداد `.md` أو `.txt`. يدعم Notemd حاليا هذه الصيغ النصية فقط.
+  1. **تحقق من الصيغة**: تختلف الصيغ الافتراضية حسب المهمة (`.md` أو `.md`/`.txt`). يتيح وضع المطوّر مع صيغ الإدخال الموسعة نصوصاً أخرى وPDF لبعض المهام التي تحافظ على المصدر، مثل الترجمة واستخراج المفاهيم. تظل إضافة الروابط مقتصرة على `.md`/`.txt`.
   2. استخدم الأمر أو الزر "Test LLM Connection" للتحقق من إعدادات المزود النشط.
   3. راجع API Key وBase URL وModel Name وAPI Version، بالنسبة لـ Azure، وتأكد من صحة API key ووجود رصيد وصلاحيات كافية.
   4. تأكد من أن خادم LLM المحلي، مثل LMStudio أو Ollama، يعمل وأن Base URL صحيحة، مثل `http://localhost:1234/v1` بالنسبة لـ LMStudio.
@@ -708,7 +723,7 @@
 ---
 
 
-*Notemd v1.9.7 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
+*Notemd v1.9.8 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
 
 
 <!-- repo-chronicle:start -->

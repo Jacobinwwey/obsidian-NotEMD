@@ -1,67 +1,56 @@
 ---
 id: anthropic
-title: "Anthropic"
-description: "Konfigurasikan Anthropic Claude"
+title: Anthropic
+description: >-
+  Sediakan Claude melalui protokol Messages natif Anthropic yang digunakan
+  Notemd.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [anthropic, claude, provider, configuration]
-concepts: [Anthropic, Claude, API Configuration]
-citations:
-  - title: Anthropic API
-    url: https://docs.anthropic.com
-  - title: Claude
-    url: https://www.anthropic.com/claude
+keywords:
+  - Anthropic
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Pembekal Anthropic
+# Penyedia Anthropic
 
-<TLDR>
-**Anthropic menggunakan pengangkutan Messages API asli, bukan pengangkutan yang serasi dengan OpenAI.** Tetapan pra‑tetap semasa menggunakan `claude-3-5-sonnet-20240620`, `https://api.anthropic.com`, dan `temperature: 0.5`. Anggap ia sebagai antaramuka protokol berasingan semasa menyahpepijat.
+<TLDR>Gunakan pratetap Anthropic untuk API Messages natif. Claude yang dilayan gerbang serasi OpenAI menggunakan pratetap gerbang itu. Sahkan akses model semasa sebelum tugas; model lalai lama mungkin perlu diganti.</TLDR>
 
-Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Persediaan
 
-## Pengaturan
+Pilih **Anthropic**, masukkan kunci Anthropic dan kekalkan titik akhir natif kecuali deployment jelas menyediakan protokol sama. Masukkan ID Claude yang tersedia kini, jalankan **Test connection** dan cuba tugas pada nota ujian.
 
-Buat kunci Anthropic API, tambah profil pembekal `Anthropic`, dan biarkan Base URL pada titik hujung asli kecuali anda menghala melalui profil gateway khusus. Pilih ID model Claude yang ingin digunakan dalam medan model; tetapan lalai mengekalkan asas produk sedia ada stabil.
+## Titik akhir dan pengesahan
 
-Anthropic merupakan pilihan yang baik untuk ringkasan berkualiti tinggi, sintesis penyelidikan, dan pengekstrakan konsep. Jika anda menggabungkannya dengan pembekal yang lebih murah, gunakannya hanya pada tugas yang mendapat manfaat daripada kualiti outputnya.
-
-## Titik Hujung Dan Pengesahan
-
-| Medan | Tetapan pra‑tetap semasa |
-|-------|----------------|
-| Pengangkutan | `anthropic` |
+| Medan | Nilai pratetap |
+| ------- | -------------- |
+| Penghantaran | `anthropic` |
 | Kunci API | Diperlukan |
-| Base URL | `https://api.anthropic.com` |
+| URL asas | `https://api.anthropic.com` |
 | Model lalai | `claude-3-5-sonnet-20240620` |
 | Suhu | `0.5` |
-| Ujian sambungan | Hanya sembang |
+| Ujian sambungan | `chat-only` |
 
-Runtimes menghantar permintaan ke `/v1/messages` dengan `x-api-key` dan `anthropic-version: 2023-06-01`. Jangan konfigurasikan titik hujung `/v1/chat/completions` gaya OpenAI di bawah tetapan pra‑tetap ini; gunakan tetapan gateway yang serasi dengan OpenAI sebaliknya.
+Masa jalan menggunakan `/v1/messages` dengan pengepala kunci API dan versi API natif. Jangan letakkan laluan sembang OpenAI dalam pratetap ini. Model lalai merekodkan tetapan repositori, bukan dakwaan penyedia masih melayannya.
 
-## Penemuan Model
+## Penemuan model
 
-Anthropic menggunakan mod penemuan `anthropic-models` dalam daftar penyedia. Jika kunci atau akaun anda tidak dapat senaraikan model, simpan ID model yang diketahui dalam profil dan sahkan melalui ujian sambungan.
+Penemuan menggunakan laluan senarai natif Anthropic apabila tersedia. Jika senarai disekat, masukkan ID boleh akses dan gunakan ujian sambungan berasaskan sembang. Uji tugas panjang atau berstruktur secara berasingan daripada ujian pendek.
 
-Pengangkutan ini tidak boleh digantikan dengan penyedia yang serasi dengan OpenAI. Model Claude yang diarahkan melalui OpenRouter, LiteLLM, atau pintu gerbang lain harus berada dalam profil pintu gerbang tersebut, bukan dalam profil Anthropic asli.
+## Penyelesaian masalah
 
-## Pemecahan masalah
+- `401` / `403`: semak kunci, akses ruang kerja/projek, bil dan izin model.
+- `404`: sahkan titik akhir serta ketersediaan model.
+- ID model gerbang gagal: gunakan pratetap gerbang dan pengecam yang dijangkakan.
+- Respons panjang gagal: periksa had keluaran dan ralat penyedia sebelum menambah ulangan.
 
-- `401` atau `403`: periksa skop kunci, akses ruang kerja, bilangan, dan sama ada kunci itu milik ruang kerja Anthropic yang dijangkakan.
-- `404`: Base URL adalah salah atau ID model yang dipilih tidak tersedia untuk akaun tersebut.
-- ID model Claude gaya pintu gerbang gagal: pindahkan profil ke penyedia pintu gerbang yang sesuai kerana Anthropic asli mengharapkan nama model asli.
-- Permintaan yang panjang gagal pada akhir: kurangkan saiz output model setiap tugas atau gunakan model dengan had token output yang lebih tinggi.
+## Bila digunakan
 
-## Bila Perlu Digunakan
+Pilih apabila titik akhir menggunakan Anthropic Messages. Bandingkan hasil pada sumber sendiri, bukan kedudukan mutu sejagat penyedia. Penghalaan khusus tugas membolehkan penyedia digunakan hanya pada tugas yang memenuhi keperluan.
 
-Guna Anthropic apabila kualiti sintesis, nota penyelidikan, atau penulisan berstruktur lebih penting daripada kos asas. Jangan gunakannya sebagai alternatif umum yang serasi dengan OpenAI; pengangkutan yang berasingan itulah tujuannya, dan mencampurkan protokol menjadikan diagnosis lebih sukar.
+## Seterusnya
 
----
-
-## Langkah Seterusnya
-
-- [LLM Providers](/docs/providers/overview) -- Konfigurasi penuh, model setiap tugas, dan logik percubaan semula
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Perbaiki ralat 401/403 dan masalah sambungan
+- [Gambaran penyedia](./overview): penghalaan, ulangan dan protokol lain.
+- [Penyelesaian masalah](../advanced/troubleshooting): asingkan kegagalan sambungan dan tugas.

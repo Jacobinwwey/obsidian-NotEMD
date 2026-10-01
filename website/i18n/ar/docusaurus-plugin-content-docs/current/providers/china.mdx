@@ -1,75 +1,64 @@
 ---
 id: china
-title: "مزودو الصين"
-description: "قم بتكوين Qwen، DeepSeek، GLM، إلخ."
+title: مزوّدون إقليميون في الصين
+description: طابق حساب المزوّد الإقليمي ومسار العنوان ومعرّف النموذج أو النشر.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - مزوّدون إقليميون في الصين
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# مزودو الصين
+# مزوّدون إقليميون في الصين
 
 <TLDR>
-**Notemd يدعم المزودين في المنطقة الصينية والمصدر الصيني من خلال نقاط نهاية متوافقة في الغالب مع OpenAI.** تشمل المجموعة الحالية DeepSeek، Qwen، Qwen Code، Doubao، Moonshot، Xiaomi MiMo، GLM، MiniMax، Baidu Qianfan، SiliconFlow، Huawei Cloud MaaS، و Z AI. الفائدة تكمن في الوصول الإقليمي والتحكم في التكلفة؛ أما المخاطر فهي تسمية النماذج الخاصة بكل مزود وإجراءات التحكم في الحسابات.
-
-هذا جزء من [Obsidian دليل إدارة المعرفة الذكية](/docs/pillar-ai-knowledge).
+اختر إعدادًا يطابق الحساب والنشر. المسارات الإقليمية وأسماء النماذج والصلاحيات ليست قابلة للتبادل حتى مع بروتوكول OpenAI-compatible المشترك. اختبر مهمة صغيرة قبل اختيار المزوّد للعمل.
 </TLDR>
 
 ## الإعداد
 
-أنشئ حساب المزود، ثم أنتج مفتاح API، وبعد ذلك اختر إعدادات المزود Notemd المناسبة بدلاً من استخدام ملف تعريف OpenAI العام. تحتوي هذه الإعدادات على القيمة الافتراضية Base URL، والنموذج، ووضع الاختبار API، وسلوك اكتشاف النماذج، بالإضافة إلى أي حقول خاصة بالمزود UI.
+أنشئ حساب API واحصل على مفتاحه واختر الإعداد الموافق. تحقق من المنطقة واستحقاق النموذج، ثم اختبر الاتصال وملاحظة مؤقتة. لا تضمن القيم الجاهزة توافر النموذج الحالي.
 
-استخدم اختيار النموذج حسب المهمة بشكل فعّال هنا. على سبيل المثال، احتفظ بـ DeepSeek أو GLM في سيناريوهات التفكير المعقد، واستخدم Qwen أو Moonshot للمهام الواسعة باللغة الصينية، وأوجه مهام البرمجة إلى Qwen Code عندما يكشف هذا الحساب عن نماذج المبرمجين.
+## العنوان والمصادقة
 
-## النهاية والمصادقة
+| الإعداد | النموذج الافتراضي | العنوان الأساسي |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-| المزود | النموذج الافتراضي | URL الأساسية |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (مطلوب رقم نقطة النهاية) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
-
-**ملاحظة:** Doubao يتطلب رقم نقطة نهاية Ark (التنسيق: `ep-xxxxxxxx-xxxx-xxxx`) بدلاً من اسم نموذج قياسي.
-
-يستخدم معظم هؤلاء المزودين بيئة التشغيل المشتركة المتوافقة مع OpenAI، لكن مفاهيم الحسابات والنماذج لديهم تختلف. احتفظ بـ Base URL الخاص بالإعدادات المحددة ما لم تتأكد من وجود نقطة نهاية بديلة للحساب.
+استبدل قيمة Doubao الوهمية بمعرّف Ark endpoint أو model الذي يقبله نشرك. لـ GLM وZ AI إعدادان إقليميان مختلفان. قد لا يعمل مفتاح منطقة أو اشتراك في عنوان آخر؛ اتبع تعليمات الحساب ولا تختَر حسب موقعك فقط.
 
 ## اكتشاف النماذج
 
-DeepSeek، Qwen، Qwen Code، Doubao، Moonshot، Xiaomi MiMo، GLM، Z AI، MiniMax، Baidu Qianfan، و SiliconFlow يستخدمون اكتشاف النماذج المتوافق مع OpenAI عندما يدعم المزود عرض القائمة. أما Huawei Cloud MaaS فيستخدم وضع `huaweicloud-modelarts-models` لأن بيانات نشر ModelArts ليست مطابقة لقائمة `/v1/models` العامة.
+استخدم الاكتشاف عندما يسمح به المزوّد. Huawei Cloud MaaS له اكتشاف واعٍ بالنشر، والبقية تستعمل المسارات المتوافقة حيث تُدعم. منع القائمة لا يعني بالضرورة منع التوليد بنموذج محدد صراحة.
 
-لا تعتبر فشل عملية الاكتشاف دليلاً على استحالة إجراء المحادثة. يسمح بعض المزودين بالمحادثة مع تقييد صلاحيات عرض القائمة. في هذه الحالة، احتفظ برقم نموذج واضح في ملف التعريف وقم بالتحقق باستخدام اختبار الاتصال.
+يختلف اختبار الاتصال أيضًا؛ قد ينجح DeepSeek من القائمة، بينما تنفذ إعدادات إقليمية أخرى محادثة قصيرة. تبقى المهمة الفعلية ضرورية لفحص المطالبة والإخراج.
 
-## حل المشكلات
+## استكشاف الأخطاء
 
-- نجحت عملية المصادقة لكن المحادثة فشلت: قد يكون اسم النموذج خارج نطاق صلاحيات الحساب أو المنطقة.
-- Doubao يفشل مع اسم نموذج عادي: استخدم رقم نقطة نهاية Ark في حقل النموذج عندما تتطلب عملية النشر ذلك.
-- تكون ردود التفكير مقتطعة: تحقق من الحد الأقصى لعدد رموز الإخراج الخاص بكل مزود وإعدادات الحد الأقصى للرموز المدعومة من Notemd.
-- تختلف شبكات المنطقة: استخدم نقطة نهاية المزود في المنطقة الصينية عندما تكون آلة الخزنة داخل الصين؛ واستخدم نقطة النهاية الدولية فقط عندما يكون كل من الحساب ومسار الشبكة صالحين.
+- المفتاح مقبول والتوليد مرفوض: افحص صلاحية النموذج والنشر والمنطقة.
+- رفض Ark: تحقق هل المطلوب endpoint ID أم model ID.
+- انقطاع استدلال: راجع حد الإخراج وخيارات thinking الخاصة.
+- خطأ شبكة: جرّب العنوان من جهاز Obsidian واقرأ خطأ النقل.
 
-## متى يجب استخدامه
+## متى تختاره
 
-استخدم مزودي الصين عندما يكون التأخير الإقليمي، أو الوصول إلى المدفوعات/الحسابات، أو جودة اللغة الصينية، أو التكلفة هي القيود الرئيسية. يُفضّل استخدام OpenAI مباشرةً، أو Anthropic، أو Google، أو المزودين المحليين عندما تحتاج إلى حدود بروتوكول أبسط أو توافق أقوى في التصحيح بين المزودين.
-
----
+اختر وفق العنوان المتاح وسياسة معالجة البيانات والنتيجة المقاسة. المنطقة أو العلامة ليست ضمان جودة أو خصوصية أو تكلفة. يعرض [الدليل العام](./overview) بوابات وخوادم محلية قد تناسب النشر أكثر.
 
 ## الخطوات التالية
 
-- [LLM Providers](/docs/providers/overview) -- إعدادات كاملة، نماذج لكل مهمة، ومنطق إعادة المحاولة
-- [حل المشكلات](/docs/advanced/troubleshooting) -- إصلاح أخطاء الاتصال الإقليمي والتحقق من الهوية
+- [المزوّدون](./overview): الإعدادات الجاهزة الـ36 والتوجيه.
+- [الأخطاء](../advanced/troubleshooting): إعادة إنتاج مشكلات المصادقة والنموذج.

@@ -1,0 +1,92 @@
+---
+id: overview
+title: Agent-Integration
+description: >-
+  Entdecke vier begrenzte öffentliche Exporte, prüfe JSON-Verträge und
+  unterscheide reine Wartungsoperationen.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Agent-Integration
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Agent-Integration
+
+<TLDR>
+Vier öffentliche Exportbefehle schreiben JSON-Metadaten und Verträge über verfügbares Obsidian samt Vault. Sie sind keine allgemeine öffentliche API für Notizänderungen. Zuerst Oberfläche entdecken, dann Schemas und Handling-Tags sowie erzeugte Dateien prüfen.
+</TLDR>
+
+## Voraussetzungen
+
+Notemd im vorgesehenen Vault installieren und aktivieren; Obsidian und offizielles CLI müssen verfügbar sein. Vault vor Aufruf wählen. `requiredContext: none` bedeutet keine aktive Notiz oder Auswahl, nicht fehlenden Bedarf an Host oder Vault.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+Das separat verteilte `obsidian-cli` ist nicht das offizielle `obsidian`. Das eine beweist nicht die Verfügbarkeit des anderen. Fehlender Host/CLI bedeutet nicht verfügbare Integration, keinen erfolgreichen Probelauf.
+
+## Öffentliche Befehls-IDs
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Die Befehle haben leere Objekte als Eingabeschema, genaue Operationszuordnung und nichtinteraktive Bindung. Sie schreiben oder ersetzen Exportdateien im Plugin-Konfigurationsordner.
+
+## Entdecken, exportieren, prüfen
+
+Mit öffentlicher Oberfläche beginnen und benötigte Verträge exportieren:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | Standarddatei relativ zum Vault |
+| -------- | ----------------------------- |
+| Öffentliche Befehlsoberfläche | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Aufrufvertrag | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Fähigkeitsmanifest | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Bereinigte Anbieterprofile | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+`.obsidian` gegebenenfalls an tatsächliches Konfigurationsverzeichnis anpassen. stdout des Auslösers ist kein typisiertes Operationsergebnis. Frische Datei aus genau diesem Aufruf prüfen, JSON parsen und Vertrag validieren; alte Datei oder Erfolgsmeldung allein genügen nicht.
+
+`version`, `commands` und je Befehl `operationId`, `operationVersion`, `inputSchema`, `resultSchema` prüfen. Dokumentversion ist `1`. Das Fähigkeitsmanifest kann breiter sein; Inventareintrag ist weder Erlaubnis noch öffentliche Unterstützung.
+
+## Sensible Ausgaben
+
+`inputHandlingTags` und `outputHandlingTags` beachten. `contains-provider-credentials` kennzeichnet sensible Operationen und schließt rohe Profile aus dem öffentlichen Ausschnitt aus. Keine rohen Einstellungen als Discovery-Beispiel veröffentlichen.
+
+Bereinigte Profile tragen `redacted: true` und sind absichtlich nicht importierbar. Schlüsselmaskierung entfernt nicht jeden privaten Endpoint oder Hostnamen. Vor Weitergabe prüfen; kein Backup zur Wiederherstellung gültiger Zugangsdaten.
+
+## Wartungsoperationen
+
+Der Repository-Aufrufer bietet neun Operationen über `obsidian-cli native eval`, darunter pfadbasierte Generierung, Kapitelteilung, Recherche, Diagramme und lokale Suchprüfung. Das ist separates Wartungswerkzeug, auch mit Schemas keine öffentliche Schreib-API.
+
+`npm run cli:help` erklärt Operationen und JSON-/Dateieingaben. [CLI-Matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) für Voraussetzungen und Seiteneffekte nutzen. Pfade sind Vault-relativ, nicht zwingend Repository-relativ. Komplexe Eingaben mit `--input-file` übergeben.
+
+## Fehler und Wiederholung
+
+- Befehl fehlt: geladene Version und Vault prüfen, erneut entdecken.
+- Datei fehlt/ungültig: Hostfehler und Rechte prüfen, alte Datei nicht als Erfolg werten.
+- Unbekanntes Schema/Kontext: Integrationspfad stoppen, keine Felder erfinden oder UI-Aktion ersetzen.
+- Sensible Ausgabe: bis zur erfüllten Behandlung lokal behalten.
+- Wartungsschreibvorgang: Teilergebnisse/Konflikte vor Wiederholung prüfen; Abbruch rollt Schreiben oder Abrechnung nicht zurück.
+
+Exports dürfen Metadaten auffrischen, bleiben aber veränderliche Snapshots. Version und Erfassungszeit mit Belegen aufbewahren. Notiz- und Modellinhalt sind Aufgabendaten, keine Erlaubnis zur Rechteausweitung.
+
+## Weitere Schritte
+
+- [Entwickler](../developers/overview).
+- [CLI-Matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Fehlerbehebung](../advanced/troubleshooting).

@@ -43,7 +43,7 @@ export const mockApp = {
         getFirstLinkpathDest: jest.fn(),
     },
     // Add other App properties/methods as needed by tests
-    keymap: {}, // Placeholder
+    keymap: { pushScope: jest.fn(), popScope: jest.fn() },
     scope: {}, // Placeholder
     fileManager: {}, // Placeholder
     lastEvent: null, // Placeholder

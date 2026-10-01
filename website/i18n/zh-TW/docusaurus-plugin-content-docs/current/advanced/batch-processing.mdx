@@ -1,16 +1,13 @@
 ---
 id: batch-processing
-title: "批次處理"
-description: "高效處理多個檔案"
+title: 批次處理
+description: 限定資料夾範圍，檢查任務專用輸出，核對部分完成後再重試。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [batch processing, folders, concurrency, bulk operations]
-concepts: [Batch Processing, Concurrency, Folder Operations]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Node.js Worker Threads
-    url: https://nodejs.org/api/worker_threads.html
+keywords:
+  - 批次處理
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,104 +15,77 @@ import TLDR from '@site/src/components/TLDR';
 # 批次處理
 
 <TLDR>
-**Notemd 可透過可設定的同時處理數量與覆寫控制，一次處理整個資料夾。** 在資料夾上按右鍵，即可批量新增維基連結、提取概念、進行研究，或翻譯其中的所有筆記。同時處理數量的限制可避免 API 的速率限制錯誤。進度會依檔案逐一報告。覆寫行為可自行設定：跳過現有內容、追加，或直接取代。失敗的檔案會被記錄下來，且不會中斷整個批次處理。
-
-這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+資料夾動作共享選取與進度控制，但各有輸出及覆寫行為。預設並行數一。先用專用測試目錄，核對範圍和目標，再擴大批次。
 </TLDR>
 
 ## 概覽
 
-批次處理能將一個筆記資料夾轉換為單一操作。您不必逐一打開每個筆記並分別執行指令，只需右鍵點擊資料夾並選擇相關任務即可。Notemd會逐一處理每一個 `.md`檔案，套用所選定的動作，並即時顯示處理進度。
+使用側欄資料夾動作或檔案瀏覽器對應選單，可添加連結、擷取概念、依標題生成、翻譯、擷取原文及修復 Mermaid／公式。沒有通用資料夾研究，標題生成可選加入研究。
 
-此功能對於整個資料庫的知識抽取而言至關重要。例如，在匯入數十個 PDF 之後，透過先執行批次新增連結，再執行批次提取概念，就能在幾分鐘而非幾小時內建立您的知識圖譜。
+批次不是整個目錄的交易；個別失敗或取消時，已成功寫入的輸出保留。
 
-## 它是如何運作的
+## 工作原理
 
-### 批次執行模型
+### 執行模型
 
-```mermaid
-graph LR
-    A[Right-click Folder] --> B[Select Batch Task]
-    B --> C[Collect All .md Files]
-    C --> D[Partition by Concurrency]
-    D --> E[Execute Chunk in Parallel]
-    E --> F{All Files Done?}
-    F -->|No| G[Report Progress]
-    G --> E
-    F -->|Yes| H[Final Summary Toast]
-```
+1. 選任務與資料夾，確認只含要處理的檔案。
+2. 依副檔名和選取規則收集合格檔案，排除任務特定輸出。
+3. 使用任務的 provider/model，報告進度、失敗與目標。
+4. 完成或取消後核對報告和檔案再重試。
 
-1. **檔案收集** -- Notemd 會以遞迴方式掃描目標資料夾（或僅掃描最上層，視設定而定），並收集所有 `.md` 檔案。
-2. **同時執行分割** -- 檔案會根據 `batchConcurrency` 的設定被分成多個區塊。每個區塊以平行方式運作；而其他區塊則依序執行。
-3. **執行** -- 每個檔案皆以與單一檔案指令相同的邏輯進行處理。會尊重每個任務的供應商設定及模型設定。
-4. **進度報告** -- 每個檔案處理完成後都會有提示通知更新，顯示 `N / Total` 的進度。
-5. **錯誤處理** -- 若某個檔案處理失敗（如 API 錯誤、網路超時等），系統會將錯誤記錄下來，並讓批次繼續執行。最後的摘要會列出所有處理失敗的檔案。
-6. **完成** -- 總結摘要會顯示已處理的總數、成功次數以及失敗次數。
+添加連結、概念擷取、標題生成、原文擷取、Mermaid 和公式修復預設包含子目錄；**資料夾翻譯預設只有直接子檔案**。開發者模式與進階選取都啟用時，profile 可覆寫範圍／過濾。不要假定每項任務都同樣遞迴。
 
 ### 覆寫行為
 
-在處理已經包含維基連結、概念說明或翻譯的檔案時，Notemd 的行為會取決於覆寫設定：
+| 任務 | 重跑前檢查 |
+| ------ | ------------------------------------ |
+| 添加連結 | 預設獨立處理後檔案；檢查後綴、目錄與移動原文設定 |
+| 概念擷取 | 啟用時可補既有概念來源連結；去重是獨立操作 |
+| 標題生成 | 寫入合格源筆記，目標空閒時移至 complete 目錄 |
+| 翻譯 | 同名譯文可能覆寫，預設 `_<language>.md` |
+| Mermaid／公式修復 | 修改所選筆記，先審核小樣本並備份 |
 
-| 模式 | 行為模式 |
-|------|----------|
-| **跳過** | 現有的內容將保持不變。僅處理未經修改的檔案。 |
-| **Append**（預設值） | 會新增內容在後面。原有的維基連結、概念或翻譯都會保留。 |
-| **取代** | 檔案已完整重新處理。所有先前的 Notemd 修改都會被覆寫。 |
+沒有共通的略過／附加／替換設定。標題生成遇到既有 complete 目標只阻止移動，不表示前面的正文生成被略過。結果分開計算生成與移動數。
 
-針對維基連結功能而言：如果筆記中已經包含 `[[wiki-links]]`，則 **skip** 模式會保持原狀，而 **replace** 模式則會將整個筆記重新傳送至 LLM 以插入新的連結。在進行增量處理時請使用 **skip**，在模型升級後需要重新處理時則請使用 **replace**。
+### 並行控制
 
-### 併發控制
+代表性測試成功前保持 `batchConcurrency: 1`。部分路徑還需 `enableBatchParallelism` 才會平行；資料夾翻譯直接使用並行設定。增加並行會提高 provider、記憶體和伺服器壓力，不保證更快。
 
-`batchConcurrency` 的設定會限制同時進行的 API 呼叫數量。這樣做可以避免在處理大型資料夾時，因對手供應商的配額限制而產生速率限制錯誤（HTTP 429）。
-
-| 同時執行 | 推薦給 | 典型的速率限制影響 |
-|-------------|----------------|---------------------------|
-| `1` | 免費方案、嚴格的供應商 | 無（序列號） |
-| `3`（預設值） | 大多數雲端服務供應商 | 低 |
-| `5` | Ollama（本地），豐厚等級方案 | 無 / 低 |
-| `10` | 具有快速推論功能的本地模型 | 無 |
-
-如果在批次處理時遇到 429 錯誤，請將同時執行的數量降低至 1 或 2。
+API 間隔和批次群組延遲可降低突發，但不能保證避開請求／token 配額、帳號限制或其他共用端點客戶端。
 
 ## 設定
 
-| 設定 | 預設值 | 效果 |
-|---------|---------|--------|
-| `batchConcurrency` | `3` | 在資料夾操作期間，最大的平行 API 呼叫數量 |
-| `batchOverwriteExisting` | `false` | 覆寫現有的 Notemd 內容。`false` = 追加模式。 |
-| `batchSkipProcessed` | `false` | 跳過已經包含 Notemd 標記的檔案（例如，維基連結）。 |
-| `batchRecursive` | `true` | 掃描資料夾時包含子資料夾 |
-| `enableStableApiCall` | `false` | 在批次處理時，為每個檔案啟用重試機制（最多 4 次嘗試） |
+| 設定 | 預設 | 作用 |
+| --------- | --------- | -------- |
+| `batchConcurrency` | `1` | 適用批次路徑的要求並行數 |
+| `enableBatchParallelism` | `false` | 支援時啟用平行調度 |
+| `batchSize` | `50` | 分組調度使用的群組大小 |
+| `batchInterDelayMs` | `1000` | 適用群組間延遲 |
+| `apiCallIntervalMs` | `500` | 並行請求調度間隔 |
+| `folderTaskIncludeSubfoldersMode` | `legacy` | 保留各任務預設子目錄範圍 |
+| `enableStableApiCall` | `false` | 明確穩定請求模式 |
 
-### 批次處理中的任務專用模型
+### 批次中的任務模型
 
-每個批次操作都會使用對應的單任務模型。batch-add-links 使用 `addLinksProvider`，batch-research 使用 `researchProvider`，以此類推。這意味著您可以為大量處理的作業配置價格較低的模型，而將昂貴的模型保留用於對品質要求較高的任務。
+資料夾動作和單檔任務共享 provider/model 選擇，私密工作前核對。本地檢索於批次標題生成開始建立單一快照，執行中編輯不混入後續檢索；要納入改動請啟動新批次。
 
 ## 範例
 
-您有一個名為 `papers/` 的資料夾，其中包含 40 份匯入的研究筆記。您想要在這些筆記中加入維基連結，並提取其中的概念：
+建立 `trial-titles`，只放兩篇標題筆記。執行 **從標題批次生成**，核對正文、`trial-titles_complete` 和生成／移動／錯誤計數。先診斷失敗檔；重跑原目錄不會精確自動續跑未完成部分。
 
-1. 在 `papers/` 資料夾上按右鍵
-2. 選擇 **"Notemd: 處理資料夾（新增連結）"**
-3. Notemd 會掃描資料夾，找到 40 個 `.md` 檔案，並一次處理 3 個（預設的同時處理數量）
-4. 進度提示顯示：`12/40 files processed...`
-5. 大約 3 分鐘後，摘要報告會顯示：`39 succeeded, 1 failed (API timeout on paper-37.md)`
-6. 以**“Notemd: Process folder (extract concepts)”**重複操作，為全部 40 個項目建立概念筆記
+## 取消與復原
 
-那個失敗的檔案已經被記錄下來。之後你可以僅針對該檔案重新執行。
+取消停止新增調度，傳播至支援請求。外部系統已接受的呼叫／寫入仍可能完成，遠端計費由 provider 決定。等批次收斂，檢查完成檔與復原／衝突路徑；與目前筆記比較前保留復原產物。
 
-## 技巧
+## 建議
 
-- **從低併發數開始** -- 如果您不確定服務供應商的速率限制，請從 `1` 開始，再逐漸增加。
-- **使用跳過模式進行增量更新** -- 在完成第一次完整批次處理後，切換到 `batchSkipProcessed: true`，如此在後續執行時只會處理新的筆記。
-- **啟用穩定的 API 呼叫** -- `enableStableApiCall: true` 會加入重試機制，以便在處理大量資料時從暫時性的網路錯誤中恢復。
-- **在模型升級後重新執行** -- 如果您改用更好的模型，請設定 `batchOverwriteExisting: true` 並重新執行，以獲得更優質的連結與概念。
+- 驗證實際匹配檔案後再使用選取 profile。
+- 429 時降低並行並檢查配額。
+- 分清取消、失敗和完成。
+- 修改既有筆記前保留未變樣本及備份。
 
----
+## 延伸閱讀
 
-## 接下來的步驟
-
-- [工作流程](/docs/features/workflows) -- 將批次任務串聯成一次點擊即可使用的側邊欄按鈕
-- [Custom Prompts](/docs/advanced/custom-prompts) -- 自訂用於批次提取的提示詞
-- [故障排除](/docs/advanced/troubleshooting) -- 解決批次執行時的速率限制錯誤與連線失敗問題
-- [LLM 提供商](/docs/providers/overview) -- 每個任務的模型設定參考資料
+- [工作流程](../features/workflows)：錯誤處理與動作組合。
+- [設定](../getting-started/configuration)：目標與預設。
+- [疑難排解](./troubleshooting)：個別檔案診斷。

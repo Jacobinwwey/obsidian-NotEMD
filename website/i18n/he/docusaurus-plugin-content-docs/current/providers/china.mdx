@@ -1,75 +1,61 @@
 ---
 id: china
-title: "ספקים בסין"
-description: "להגדיר Qwen, DeepSeek, GLM וכו'"
+title: ספקים סיניים
+description: 'התאימו אזור חשבון, כתובת ומזהה מודל או פריסה לפרופיל הנכון.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - ספקים סיניים
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# ספקים בסין
+# ספקים סיניים
 
-<TLDR>
-**Notemd תומך בספקים מהאזור של סין וממקור של סין דרך קצוות תואמים בעיקר ל-OpenAI.** הקבוצה הנוכחית כוללת את DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS ו-Z AI. היתרון הוא הגישה האזורית ושליטה בעלויות; הסיכון הוא שמות מודלים ספציפיים לספק ובקרת חשבונות.
+<TLDR>בחרו פרופיל לפי החשבון והפריסה. גם עם OpenAI-compatible משותף, אזורים, נתיבים, מודלים והרשאות אינם ניתנים להחלפה חופשית. בדקו משימה קטנה.</TLDR>
 
-זהו חלק מה[Obsidian מדריך ניהול ידע AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## הכנה
 
-## הגדרה
+הכינו חשבון ומפתח, בחרו פרופיל ואמתו אזור וגישה למודל. ערכי ברירת מחדל אינם מבטיחים זמינות עדכנית. בדקו חיבור והערה.
 
-יש ליצור חשבון ספק, לייצר מפתח API, ולאחר מכן לבחור את ההגדרה המותאמת של הספק Notemd במקום להשתמש בפרופיל כללי OpenAI. ההגדרה הזו כוללת את Base URL הבסיסי, מודל, מצב בדיקה API, התנהגות גילוי מודלים, וכל שדות UI ספציפיים לספק.
+## נקודת קצה ואימות
 
-יש להשתמש בבחירת מודל לפי משימה באופן אגרסיבי כאן. לדוגמה, לשמור על DeepSeek או GLM בעבודות הדורשות חשיבה מורכבת, להשתמש ב-Qwen או Moonshot לעבודות רחבות בשפה הסינית, ולהפנות משימות קידוד ל-Qwen Code כאשר החשבון הזה מציג מודלי מתכנתים.
+| פרופיל | מודל התחלתי | כתובת בסיס |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-## קצה ואימות
+החליפו את דוגמת Doubao במזהה נקודת Ark אמיתי או מודל נתמך. GLM ו־Z AI הם פרופילים אזוריים שונים. מפתח מאזור או מסוג מנוי אחר עלול לא לעבוד. פעלו לפי הוראות החשבון, לא רק לפי מיקומכם.
 
-| ספק | מודל ברירת המחדל | Base URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (נדרש מזהה קצה) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+## מודלים
 
-**הערה:** Doubao דורש מזהה קצה של Ark (פורמט: `ep-xxxxxxxx-xxxx-xxxx`) במקום שם מודל סטנדרטי.
+השתמשו ברשימות אם מותר. Huawei Cloud MaaS דורש ידע על הפריסה; אחרים משתמשים בגילוי OpenAI-compatible הנתמך. היעדר הרשאת רשימה אינו תמיד חוסם יצירה עם מזהה מפורש. DeepSeek יכול לעבור בדיקת חיבור ברשימה; כמה פרופילים אזוריים מייצרים תשובה קצרה. עדיין צריך לבדוק משימה אמיתית.
 
-רוב הספקים האלה משתמשים בסביבת ביצועים משותפת תואמת ל-OpenAI, אך הסמנטיקה של החשבונות והמודלים שלהם שונה. יש לשמור על Base URL הספציפי להגדרה אלא אם כן בדקתם את קצה החלופי של החשבון.
+## תקלות
 
-## גילוי מודלים
+- מפתח מתקבל אך יצירה נדחית: הרשאת מודל, פריסה ואזור.
+- מזהה Ark נדחה: נדרש מזהה נקודת קצה או מודל?
+- חשיבה נקטעת: תקציב ו־thinking ייעודי למודל.
+- רשת: בדקו כתובת מתוך Obsidian וקראו את שגיאת התעבורה.
 
-DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan ו-SiliconFlow משתמשים בגילוי מודלים תואם ל-OpenAI כאשר הספק תומך ברשימה. Huawei Cloud MaaS משתמש במודל `huaweicloud-modelarts-models` מכיוון שמטא-נתוני ההפעלה של ModelArts אינם זהים לרשימה כללית של `/v1/models`.
+## מתי לבחור
 
-אל תטילו את כישלון הגילוי כהוכחה ששיחה בלתי אפשרית. מספר ספקים מאפשרים שיחה תוך הגבלת זכויות רשימת המודלים. במקרה כזה, יש לשמור על מזהה מודל מפורש בפרופיל ולבדוק זאת עם מבחן החיבור.
+כשהחשבון, הזמינות ותנאי המידע מתאימים. גאוגרפיה אינה מוכיחה איכות שפה או מחיר נמוך. השוו אותה דוגמה ושמרו הגדרות.
 
-## פתרון בעיות
+## המשך
 
-- האימות מצליח אך השיחה נכשלת: שם המודל עשוי להיות מחוץ להרשאות או לאזור של החשבון.
-- Doubao נכשל עם שם מודל רגיל: יש להשתמש במזהי קצה של Ark בשדה המודל כאשר ההפעלה שלכם דורשת זאת.
-- תגובות החשיבה מקוצרות: בדקו את מספר הטוקנים המרבי הספציפי לספק ואת הגדרות הטוקן המרבי המבוססות מודל של Notemd.
-- הרשתות האזוריות שונות: השתמשו בקצה של הספק באזור סין כאשר מחשב האוצר נמצא בסין; השתמשו רק בקצה הבינלאומי כאשר החשבון ונתיב הרשת שניהם תקינים.
-
-## מתי להשתמש
-
-השתמשו בספקים מסין כאשר עיכובים אזוריים, גישה לתשלומים/חשבונות, איכות בשפה הסינית או העלות הם המגבלה העיקרית. העדיפו OpenAI ישיר, Anthropic, Google או ספקים מקומיים כאשר אתם זקוקים לגבולות פרוטוקול פשוטים יותר או לעקביות חזקה יותר בניפוי שגיאות בין ספקים.
-
----
-
-## צעדים באופק
-
-- [LLM Providers](/docs/providers/overview) -- תצורה מלאה, מודלים לכל משימה, ולוגיקת ניסיונות חוזרים
-- [פתרון בעיות](/docs/advanced/troubleshooting) -- תקן בעיות של חיבור אזורי ושגיאות אימות
+- [ספקים](./overview).
+- [תצורה](../getting-started/configuration).
+- [פתרון תקלות](../advanced/troubleshooting).

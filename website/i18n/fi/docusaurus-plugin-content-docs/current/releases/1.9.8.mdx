@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: 'Päivitys Notemd 1.9.8:aan'
+description: >-
+  Tarkista 1.9.7:n jälkeiset luotettavuus-, natiivivienti- ja ohjeparannukset
+  ennen päivitystä.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - 'Päivitys Notemd 1.9.8:aan'
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Päivitys Notemd 1.9.8:aan
+
+<TLDR>1.9.8 keskittyy peruutukseen, tuotosten omistajuuteen, yhtenäiseen erähakuun, natiivivientiin ja oikeisiin ohjeisiin. Tarkista saatavuus julkisesta GitHub-julkaisusta ja käytä saman julkaisun tiedostoja. Tarjoaja- ja kaaviomäärät ovat aiempaa kapasiteettia.</TLDR>
+
+## Muutokset 1.9.7:n jälkeen
+
+| Alue | Vaikutus |
+| ------ | ------------- |
+| Peruutus | Yhteinen tila ajastuksessa, siirroissa ja uusinnassa; myöhäisvastaus ei käynnistä suojattua kirjoitusta |
+| Tuotosten pysyvyys | Samannimisten lähteiden ja jaettujen liitteiden omistajuus päällekkäisissä tallennuksissa/palautuksissa |
+| Paikallinen haku | Yksi tilannekuva otsikkoerään; kiinteä korpus ja muistimittaukset |
+| Natiivituotokset | PowerPoint-erottimet yhdistettyjen solujen alla sekä CircuitikZ-johdot/tekstit korjattu |
+| Varmennus | Linux/Windows CI, havaintokohtainen lint, prosessitestit ja natiivinäyttö |
+| Ohjeet | Todelliset oletukset, neljä yleisöreittiä, suoraan kirjoitetut käännökset ja hallittu julkaisu |
+
+Historian haku säilyttää peräkkäisen kirjoituksen ja kohdistimen asynkronisessa päivityksessä. Laatikko pitää Tabin sisällään, ottaa kohdistuksen latauksessa eikä Escapella sulje taustalla olevaa esikatselua. Uusinta ja vanhentuneet vastaukset ovat selainregressioissa.
+
+Tutkimus/käännös tarkistaa peruutuksen viimeisen luvun tai kansiovalmistelun jälkeen ennen lisäystä/luontia/ylikirjoitusta. Holvin hyväksymä kirjoitus pysyy valmistuneena tuloksena. Toisen tehtävän odotusaikana luoma käännöskansio käytetään uudelleen väittämättä sitä itse luoduksi. Ristiriitatiedosto tai edelleen puuttuva hakemisto säilyttää raportoidun virheen ja lähdekansiovarareitin.
+
+36 profiilia ja 33 suoritettavaa kaaviokohtaa olivat jo 1.9.7:ssä. Ajonaikaiset muutokset, ohjeet ja yhdistämiscommitit lasketaan erikseen.
+
+## Hallittu päivitys
+
+1. Pysäytä tehtävät ja varmuuskopioi holvi/asetukset.
+2. Päivitä Community plugins -valikossa tai ota `main.js`, `manifest.json`, `styles.css` samasta [julkisesta 1.9.8:sta](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Käsin korvaa vain ajonaikaiset tiedostot, säilytä asetukset/tulokset.
+4. Lataa uudelleen ja varmista versio.
+5. Testaa kertakäyttömuistiinpano ja pieni kansio ennen laajaa ajoa.
+
+Komentotunnisteet ja asetukset säilyvät. One-Click Extract sisältää edelleen linkityksen, otsikkoerän ja Mermaid-korjauksen. Ohjeiden korjaaminen ei lisää tutkimusta oletusketjuun.
+
+## Peruutus ja palautuminen
+
+Peruutus ei ole käänteistransaktio. Valmiit tiedostot säilyvät, hyväksytyt pyynnöt/kirjoitukset voivat valmistua ja tarjoaja hallitsee laskutusta. Odota ja tarkista tulokset. Vertaa näkyvät ristiriidat ja palautustiedostot ennen siivousta. Säilytä oheiskansiot, joita vanhat tuotokset tarvitsevat.
+
+## Viennin ja yhteensopivuuden rajat
+
+- PowerPointissa on kohdistettuja natiivitarkistuksia; aiempi koko dian pistemäärä ei löytänyt virhettä.
+- Mermaid/SVG voi päätyä PPTX:ään kuvana.
+- Drawnixin staattisten haaranuolten kiinnittymistä uudelleenasettelun jälkeen ei ole todistettu.
+- CircuitikZ-esikatselu ja TeX-käännös testataan erikseen.
+- Fyysiset mobiilit ja Obsidian 0.15.0 ovat edelleen varmentamatta.
+- Kiinteä leksikaalinen näyttö ei todista semanttista hakua tai kaikkien holvien suorituskykyä.
+
+## Julkaisun eheys
+
+Julkaisija tarkistaa version ja paikallisen/etätagin identiteetin, rakentaa puhtaan tagatun lähteen, lataa luonnostiedostot ja vertaa ladattujen tiedostojen hasheja ennen julkistusta. Vaaditaan `main.js`, `manifest.json`, `styles.css`, `README.md`. Uusinta ei saa korvata julkisia tavuja asiaankuulumattomilla tuotoksilla.
+
+Pages jaellaan varmennetun julkisen julkaisun jälkeen. Codex kirjoittaa ja tarkistaa suoraan ilman LM Studiota tai käännösmoottoria. Tämä ei tarkoita riippumatonta äidinkielistä tarkistusta.
+
+## Seuraavaksi
+
+- [Julkaisu ja englanti-/kiinatiedot](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Pika-aloitus](../getting-started/quick-start).
+- [Eräajo](../advanced/batch-processing).
+- [Kehittäjät](../developers/overview), [Agentit](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): versiot ja puhdistettu näyttö.

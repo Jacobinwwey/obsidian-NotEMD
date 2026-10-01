@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Uppgradera till Notemd 1.9.8
+description: >-
+  Granska förbättringarna efter 1.9.7 inom tillförlitlighet, native export och
+  dokumentation.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Uppgradera till Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Uppgradera till Notemd 1.9.8
+
+<TLDR>1.9.8 fokuserar på avbrott, utdataägarskap, konsekvent batchhämtning, native export och korrekta guider. Kontrollera den publika GitHub-releasen och hämta filer från samma release. Leverantörs- och diagramantal är befintlig kapacitet.</TLDR>
+
+## Efter 1.9.7
+
+| Område | Förändring |
+| ------ | ------------- |
+| Avbrott | Delat tillstånd genom schemaläggning, transporter och omförsök; sena svar utlöser inte skyddade skrivningar |
+| Artefaktlagring | Ägarskap för lika källnamn och delade bilagor vid överlappande sparande/återställning |
+| Lokal hämtning | En ögonblicksbild för batchtitlar; fast korpus och minnesmätning |
+| Native utdata | PowerPoint-separatorer under sammanslagna celler samt CircuitikZ-ledningar/etiketter rättade |
+| Verifiering | Linux/Windows CI, diagnostikbaserad lint, processtester och native bevis |
+| Dokumentation | Verkliga standardvärden, fyra ingångar, direktförfattade översättningar och kontrollerad publicering |
+
+Historiksökning behåller löpande inmatning och markör vid asynkron uppdatering. Lådan fångar Tab, tar fokus under laddning och låter Escape stänga den utan att stänga moderförhandsvisningen. Omförsök och gamla svar täcks av webbläsarregressioner.
+
+Forskning/översättning kontrollerar avbrott efter sista läsning eller mappförberedelse och före tillägg/skapa/överskrivning. Accepterade valvskrivningar räknas fortfarande som klara. Om annan uppgift skapar översättningsmappen under väntan återanvänds den utan påstått skapandeägarskap. Konfliktfil eller fortsatt saknad mapp ger rapporterat fel och fallback till källmappen.
+
+De 36 profilerna och 33 körbara diagramposterna fanns i 1.9.7. Runtime, dokumentation och merge-commits räknas separat.
+
+## Kontrollerad uppgradering
+
+1. Stoppa uppgifter och säkerhetskopiera valv/inställningar.
+2. Uppdatera via Community plugins eller hämta `main.js`, `manifest.json`, `styles.css` från samma [publika 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Ersätt bara körningsfiler manuellt; behåll inställningar och resultat.
+4. Ladda om och kontrollera version.
+5. Testa anteckning och liten mapp före större körning.
+
+Kommando-ID:n och inställningar bevaras. One-Click Extract är fortfarande länkar, batchtitlar och Mermaid-reparation. Korrigerade guider lägger inte till forskning i standardkedjan.
+
+## Avbrott och återställning
+
+Avbrott är ingen omvänd transaktion. Klara filer finns kvar, accepterade anrop/skrivningar kan avslutas och fjärrdebitering styrs av leverantören. Vänta och granska. Jämför synliga konflikter och återställningsfiler före städning. Behåll följeslagarmappar som äldre artefakter refererar till.
+
+## Export- och kompatibilitetsgränser
+
+- PowerPoint har riktade native assertioner; tidigare helbildspoäng missade felet.
+- Mermaid/SVG i PPTX kan bli bilder.
+- Statiska Drawnix-pilar mellan grenar är inte verifierade som fästa efter omflöde.
+- CircuitikZ-förhandsvisning och TeX-kompilering är separata tester.
+- Fysiska mobiler och Obsidian 0.15.0 är fortsatt overifierade.
+- Fast lexikal evidens bevisar inte semantisk sökning eller prestanda i valfritt valv.
+
+## Releasens integritet
+
+Publiceraren verifierar version och lokal/fjärrtagg, bygger om ren taggad källa, laddar upp utkast och kontrollerar nedladdade hashar före publicering. `main.js`, `manifest.json`, `styles.css`, `README.md` krävs. Omförsök får inte ersätta publika byte med orelaterad utdata.
+
+Pages driftsätts efter verifierad publik release. Codex författar och granskar direkt utan LM Studio eller översättningsmotor. Detta är inget påstående om oberoende modersmålsgranskning.
+
+## Nästa steg
+
+- [Release med engelska/kinesiska texter](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Snabbstart](../getting-started/quick-start).
+- [Batcher](../advanced/batch-processing).
+- [Utvecklare](../developers/overview), [agenter](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) med versioner och avidentifierat underlag.

@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "بعدی",
-    "description": "The label for version current"
+    "message": "مستندات جاری",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "شروع کار",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "ویژگی‌های اصلی",
+    "message": "قابلیت‌های اصلی",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {

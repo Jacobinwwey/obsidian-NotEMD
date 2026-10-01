@@ -1,67 +1,62 @@
 ---
 id: openai
 title: OpenAI
-description: Konfigurieren Sie OpenAI (GPT-4, GPT-4o)
+description: >-
+  Konfiguriere OpenAI über Notemds gemeinsame Chat-Completions-Laufzeit und
+  prüfe den Modellzugriff.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI Anbieter
+# OpenAI-Anbieter
 
 <TLDR>
-**OpenAI verwendet den gemeinsam genutzten, OpenAI-kompatiblen Transport.** Die aktuelle Voreinstellung verwendet standardmäßig `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` sowie den `models-then-chat`-Verbindungscheck. Verwenden Sie diese Seite, wenn Sie genaue Feldsemantiken benötigen; nutzen Sie die Übersicht der [LLM Anbieter](/docs/providers/overview) für eine Auswahl auf Kategorienebene.
-
-Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
+Das OpenAI-Profil nutzt die gemeinsame OpenAI-kompatible Chat-Completions-Laufzeit. Setze Schlüssel und ein Modell für dieses Protokoll. Der voreingestellte Modellname ist kein aktuelles Zugriffsversprechen oder allgemeiner Qualitätsrat.
 </TLDR>
 
 ## Einrichtung
 
-Erstellen Sie einen OpenAI API-Schlüssel, fügen Sie ein `OpenAI`-Anbieterprofil in den Notemd-Einstellungen hinzu und behalten Sie den Standard-Base URL bei, es sei denn, Sie verweisen absichtlich auf eine OpenAI-kompatible Gateway. Das Modellfeld kann für allgemeine Arbeiten bei `gpt-4o` bleiben oder durch eine andere OpenAI-Modell-ID ersetzt werden, die Ihr Konto aufrufen kann.
+Wähle **OpenAI**, trage den Schlüssel ein und verwende offiziell `https://api.openai.com/v1`. Das Modell muss Chat Completions unterstützen; die Modellliste macht ausschließlich über andere APIs verfügbare Modelle nicht kompatibel.
 
-Verwenden Sie modellbezogene Modelle zur Kostenkontrolle: Behalten Sie leistungsstärkere Modelle für Forschung, Konzeptextraktion und umfassende Umstrukturierung bei; verwenden Sie günstigere oder schnellere Modelle für Übersetzungen, Linkvorschläge und kurze Zusammenfassungen.
+Für Gateways deren Profil mit korrekten Headern nutzen. Azure über **Azure OpenAI** mit Deployment und API-Version konfigurieren.
 
-## Endpunkt und Authentifizierung
+## Adresse und Authentifizierung
 
-| Feld | Aktuelle Voreinstellung |
-|-------|----------------|
+| Feld | Voreinstellung |
+| ------- | -------------- |
 | Transport | `openai-compatible` |
-| API Schlüssel | Erforderlich |
-| Base URL | `https://api.openai.com/v1` |
-| Standardmodell | `gpt-4o` |
+| API-Schlüssel | Erforderlich |
+| Basis-URL | `https://api.openai.com/v1` |
+| Modell | `gpt-4o` |
 | Temperatur | `0.5` |
-| Verbindungsprüfung | `/models`, dann `/chat/completions` |
+| Verbindungstest | `models-then-chat` |
 
-Notemd normalisiert die OpenAI-kompatible Basis URLs, bevor `chat/completions` oder `models` hinzugefügt werden. Fügen Sie kein nachstehendes `/chat/completions` zur Basis URL hinzu; das erzeugt einen doppelten Pfad.
+Die Laufzeit normalisiert bekannte Basis-URL-Formen und bildet Modell-/Chatrouten. Beginne mit der Voreinstellung und prüfe den aufgelösten Pfad, statt Segmente zu erraten.
 
-## Modellentdeckung
+## Modelle finden
 
-OpenAI verwendet den generischen, OpenAI-kompatiblen Modell-Auffindungspfad. Die Einstellungen UI fragen zunächst `/v1/models` ab und überprüfen anschließend das ausgewählte Modell mit einer einfachen Chatanfrage. Falls die Auffindung fehlschlägt, aber der Chat weiterhin funktioniert, prüfen Sie, ob Ihre Zugangsdaten die Berechtigung „Model-Liste“ haben oder ob ein Gateway die Anzeige von Modellen blockiert.
+**Fetch models** fragt den konfigurierten Endpunkt ab. **Verbindung testen** kann nur durch die Liste erfolgreich sein. Prüfe danach den exakten Anbieter/Modellweg mit einer Testnotiz.
 
-Reasoning-Modelle werden als Sonderfall des Protokolls betrachtet: Notemd fügt den Inhalt von System- und Benutzereingaben zusammen, um OpenAI Reasoning-IDen zu erzeugen, die eine separate `system` Rolle ablehnen, und es stellt `reasoningEffort` nur dann zur Verfügung, wenn die Anbieterdefinition dies unterstützt.
+Reasoning, Thinking, Sampling und Ausgabelimits hängen von Profil- und Modellregeln ab. Ein gelistetes Modell akzeptiert nicht automatisch alle Parameter.
 
 ## Fehlerbehebung
 
-- `401` oder `403`: Überprüfen Sie den Schlüssel, den Projektzugriff, den Abrechnungszustand sowie ob das ausgewählte Modell für den Schlüssel aktiviert ist.
-- `404` im Chat: Die Basis URL ist in der Regel falsch oder enthält bereits `/chat/completions`.
-- Das Modell erscheint in den Dokumenten, aber nicht im Selektor: Der Zugriff auf model-list und der Zugriff auf Chat sind getrennte Fehlerquellen; prüfen Sie die genaue Modell-ID manuell im Provider-Profil.
-- Das Reasoning-Modell lehnt Nachrichten ab: Verwenden Sie eine Modell-ID, die vom OpenAI Reasoning-Handling-Pfad abgedeckt wird, oder wechseln Sie zu einem nicht-Reasoning-Chat-Modell.
+- `401`/`403`: Schlüssel, Projekt, Modellrechte, Kontostatus.
+- `404`: Endpoint, Modell-ID und passende API.
+- Liste erfolgreich, Aufgabe nicht: tatsächlichen Chatfehler und Parameter prüfen.
+- Lange Antwort scheitert: Ausgabelimit, Quellgröße und Antwort prüfen; Kurztests decken nicht alle Langläufer ab.
 
-## Wann verwenden
+## Geeigneter Einsatz
 
-Verwenden Sie OpenAI, wenn Sie den vorhersehbarsten Standard-Hosted-Pfad wünschen, wenn die Entdeckung von `/v1/models` wichtig ist oder wenn ein Workflow von den Semantiken des OpenAI-Reasoning-Modells abhängt. Wählen Sie einen Gateway oder einen lokalen Anbieter, wenn Routing, Datenschutz oder Kosteneinschränkungen wichtiger sind als das direkte OpenAI API-Verhalten.
+Für direkte OpenAI-Modelle mit implementiertem Chat-Completions-Protokoll. Repräsentative Aufgabe prüfen; Preise und Verfügbarkeit ändern sich unabhängig von Notemd.
 
----
+## Weitere Schritte
 
-## Nächste Schritte
-
-- [LLM Anbieter](/docs/providers/overview) -- Vollständige Konfiguration, modellbasierte Verarbeitung pro Aufgabe und Wiederholungslogik
-- [Fehlerbehebung](/docs/advanced/troubleshooting) -- Behebung von Fehlern 401/403 sowie Rate-Limit-Fehlern
+- [Anbieterübersicht](./overview).
+- [Fehlerbehebung](../advanced/troubleshooting).

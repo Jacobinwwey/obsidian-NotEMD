@@ -1,0 +1,3841 @@
+{
+  "ok": true,
+  "source": {
+    "vaultRoot": "<repo>\\.cache\\release-1.9.8-research\\native-exports",
+    "sourcePath": "pptx-office-fidelity.md"
+  },
+  "environment": {
+    "node": {
+      "tool": "node",
+      "installed": true,
+      "version": "22.19.0"
+    },
+    "slidev": {
+      "tool": "slidev",
+      "installed": true,
+      "version": "52.16.0 (<repo>\\node_modules\\.bin\\slidev.cmd)"
+    },
+    "playwright": {
+      "tool": "playwright",
+      "installed": true,
+      "version": "playwright-chromium 1.61.1 (E:\\DevCache\\ms-playwright\\chromium-1228\\chrome-win64\\chrome.exe)"
+    },
+    "ffmpeg": {
+      "tool": "ffmpeg",
+      "installed": true,
+      "version": "8.1.2-full_build-www.gyan.dev"
+    },
+    "capabilities": {
+      "html": true,
+      "pdf": true,
+      "png": true,
+      "pptx": true,
+      "mp4": true
+    }
+  },
+  "slideSource": {
+    "inputFilePath": "export-recheck/_slidev-sources/pptx-office-fidelity.slidev.md",
+    "outputBasename": "pptx-office-fidelity",
+    "preparedDeckPath": "export-recheck/_slidev-sources/pptx-office-fidelity.slidev.md",
+    "skillRootPath": "<user>\\.agents\\skills\\slidev",
+    "skillReferenceCount": 52
+  },
+  "output": {
+    "format": "pptx",
+    "path": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity.pptx",
+    "bytes": 64846,
+    "pptxReportPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity.pptx.report.json",
+    "pptxReport": {
+      "formatVersion": 1,
+      "source": {
+        "htmlPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\index-standalone.html",
+        "deckPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\_slidev-sources\\pptx-office-fidelity.slidev.md"
+      },
+      "output": {
+        "pptxPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity.pptx",
+        "reportPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity.pptx.report.json"
+      },
+      "slideCount": 10,
+      "textBoxCount": 18,
+      "tableCount": 2,
+      "consumedTableCount": 2,
+      "consumedTableTextCandidateCount": 15,
+      "richTextBoxCount": 1,
+      "richTextRunCount": 36,
+      "hyperlinkRunCount": 0,
+      "hyperlinkTargetCount": 0,
+      "lineSpacingTextBoxCount": 15,
+      "paragraphSpacingTextBoxCount": 9,
+      "bodyInsetTextBoxCount": 2,
+      "lineSpacingTableCellCount": 15,
+      "bodyInsetTableCellCount": 15,
+      "collapsedTableBorderModelCount": 2,
+      "separateTableBorderModelCount": 0,
+      "tableCellTextInsetCount": 15,
+      "tableCellTextInsetDeltaCount": 0,
+      "maxTableCellTextInsetDeltaIn": 0,
+      "editableSolidRectangleCount": 4,
+      "editableCodeBackgroundRectangleCount": 1,
+      "editableDecorativeRectangleCount": 3,
+      "editableDecorativeLineCount": 0,
+      "decorativePrimitiveCandidateCount": 13,
+      "decorativePrimitiveAcceptedCount": 3,
+      "decorativePrimitiveSkippedCount": 10,
+      "decorativePrimitiveSkipReasonCounts": [
+        {
+          "reason": "not-visible",
+          "count": 4
+        },
+        {
+          "reason": "table-owned-decoration",
+          "count": 6
+        }
+      ],
+      "bulletedTextBoxCount": 0,
+      "editableTableCellCount": 15,
+      "editableBodyTextBoxCount": 18,
+      "editableCodeTextBoxCount": 0,
+      "editableMermaidTextBoxCount": 0,
+      "editableSvgTextBoxCount": 0,
+      "editableTableCellOverlayTextBoxCount": 0,
+      "editableTextSlideCount": 10,
+      "pagesWithoutEditableText": [],
+      "backgroundImageSlideCount": 10,
+      "imageFallbackCount": 10,
+      "editablePrimitiveCoverage": {
+        "editableTextBoxCount": 18,
+        "editableBodyTextBoxCount": 18,
+        "editableCodeTextBoxCount": 0,
+        "editableMermaidTextBoxCount": 0,
+        "editableSvgTextBoxCount": 0,
+        "editableTableCellOverlayTextBoxCount": 0,
+        "editableTextSlideCount": 10,
+        "editableTextSlideRatio": 1,
+        "editableTextCharacterCount": 501,
+        "editableTableCount": 2,
+        "editableTableSlideCount": 1,
+        "editableTableSlideRatio": 0.1,
+        "editableTableCellCount": 15,
+        "editableTableCellCharacterCount": 272,
+        "richTextBoxCount": 1,
+        "richTextBoxRatio": 0.055556,
+        "richTextRunCount": 36,
+        "richTextRunCharacterCount": 773,
+        "hyperlinkRunCount": 0,
+        "hyperlinkTargetCount": 0,
+        "lineSpacingTextBoxCount": 15,
+        "paragraphSpacingTextBoxCount": 9,
+        "bodyInsetTextBoxCount": 2,
+        "lineSpacingTableCellCount": 15,
+        "bodyInsetTableCellCount": 15,
+        "collapsedTableBorderModelCount": 2,
+        "separateTableBorderModelCount": 0,
+        "tableCellTextInsetCount": 15,
+        "tableCellTextInsetDeltaCount": 0,
+        "maxTableCellTextInsetDeltaIn": 0,
+        "editableSolidRectangleCount": 4,
+        "editableCodeBackgroundRectangleCount": 1,
+        "editableDecorativeRectangleCount": 3,
+        "editableDecorativeLineCount": 0,
+        "decorativePrimitiveCandidateCount": 13,
+        "decorativePrimitiveAcceptedCount": 3,
+        "decorativePrimitiveSkippedCount": 10,
+        "decorativePrimitiveSkipReasonCounts": [
+          {
+            "reason": "not-visible",
+            "count": 4
+          },
+          {
+            "reason": "table-owned-decoration",
+            "count": 6
+          }
+        ],
+        "bulletedTextBoxCount": 0,
+        "backgroundFallbackSlideCount": 10,
+        "backgroundFallbackSlideRatio": 1,
+        "textSourceCoverage": [
+          {
+            "sourceKind": "body",
+            "slideCount": 10,
+            "textBoxCount": 18,
+            "textLineCount": 18,
+            "characterCount": 501,
+            "richTextParagraphCount": 18,
+            "richTextRunCount": 21
+          }
+        ],
+        "tableCellRichTextCoverage": {
+          "tableSlideCount": 1,
+          "richTextTableSlideCount": 1,
+          "tableCount": 2,
+          "tableCellCount": 15,
+          "richTextTableCellCount": 15,
+          "richTextParagraphCount": 15,
+          "richTextRunCount": 15,
+          "richTextRunCharacterCount": 272,
+          "styledRunCount": 0,
+          "codeRunCount": 0,
+          "highlightedRunCount": 0,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0
+        },
+        "fallbackOnlyElementKinds": [
+          "mermaid"
+        ],
+        "unmodeledTextRunReasons": [
+          "inline-code",
+          "inline-formatting"
+        ]
+      },
+      "textSourceCoverage": [
+        {
+          "sourceKind": "body",
+          "slideCount": 10,
+          "textBoxCount": 18,
+          "textLineCount": 18,
+          "characterCount": 501,
+          "richTextParagraphCount": 18,
+          "richTextRunCount": 21
+        }
+      ],
+      "tableCellRichTextCoverage": {
+        "tableSlideCount": 1,
+        "richTextTableSlideCount": 1,
+        "tableCount": 2,
+        "tableCellCount": 15,
+        "richTextTableCellCount": 15,
+        "richTextParagraphCount": 15,
+        "richTextRunCount": 15,
+        "richTextRunCharacterCount": 272,
+        "styledRunCount": 0,
+        "codeRunCount": 0,
+        "highlightedRunCount": 0,
+        "hyperlinkRunCount": 0,
+        "hyperlinkTargetCount": 0
+      },
+      "fontContract": {
+        "fontFamilyCount": 3,
+        "fontFamilies": [
+          "Avenir Next",
+          "Fira Code",
+          "Notemd Deliberately Missing Font"
+        ],
+        "cjkFontFamilies": [
+          "Avenir Next",
+          "Notemd Deliberately Missing Font"
+        ],
+        "latinFontFamilies": [
+          "Avenir Next",
+          "Fira Code",
+          "Notemd Deliberately Missing Font"
+        ],
+        "writerEastAsiaFontFace": "Microsoft YaHei",
+        "writerEastAsiaFallbackFontFamilies": [
+          "Avenir Next",
+          "Notemd Deliberately Missing Font"
+        ],
+        "fontSelectionPolicy": {
+          "latinFontFace": "Noto Sans",
+          "eastAsiaFontFace": "Microsoft YaHei",
+          "monospaceFontFace": "DejaVu Sans Mono",
+          "sourceFontFaceOverrides": {
+            "Avenir Next": "Noto Sans",
+            "Fira Code": "DejaVu Sans Mono"
+          },
+          "userSystemFontFaces": [],
+          "embeddingPolicy": "not-embedded"
+        },
+        "selectedLatinFontFace": "Noto Sans",
+        "selectedEastAsiaFontFace": "Microsoft YaHei",
+        "selectedMonospaceFontFace": "DejaVu Sans Mono",
+        "userSystemFontFamilies": [],
+        "officeFontFamilyCount": 4,
+        "officeFontFamilies": [
+          "DejaVu Sans Mono",
+          "Microsoft YaHei",
+          "Notemd Deliberately Missing Font",
+          "Noto Sans"
+        ],
+        "officeCjkFontFamilies": [
+          "Microsoft YaHei"
+        ],
+        "officeLatinFontFamilies": [
+          "DejaVu Sans Mono",
+          "Notemd Deliberately Missing Font",
+          "Noto Sans"
+        ],
+        "officeTextRunCount": 46,
+        "officeEastAsiaFallbackRunCount": 11,
+        "officeEastAsiaFallbackCharacterCount": 53,
+        "officeMissingFontRiskCount": 3,
+        "officeMissingFontRiskFamilies": [
+          "Avenir Next",
+          "Fira Code",
+          "Notemd Deliberately Missing Font"
+        ],
+        "officeOutputMissingFontRiskFamilies": [
+          "DejaVu Sans Mono",
+          "Notemd Deliberately Missing Font",
+          "Noto Sans"
+        ],
+        "fontUsages": [
+          {
+            "fontFace": "Avenir Next",
+            "textBoxCount": 17,
+            "richTextRunCount": 34,
+            "tableCellCount": 15,
+            "characterCount": 725,
+            "cjkCharacterCount": 44,
+            "latinCharacterCount": 583,
+            "writerEastAsiaFallbackRunCount": 10,
+            "writerEastAsiaFallbackCharacterCount": 44,
+            "officeMissingFontRisk": true,
+            "officeMissingFontRiskReasons": [
+              "non-office-family"
+            ]
+          },
+          {
+            "fontFace": "Fira Code",
+            "textBoxCount": 1,
+            "richTextRunCount": 1,
+            "tableCellCount": 0,
+            "characterCount": 15,
+            "cjkCharacterCount": 0,
+            "latinCharacterCount": 10,
+            "writerEastAsiaFallbackRunCount": 0,
+            "writerEastAsiaFallbackCharacterCount": 0,
+            "officeMissingFontRisk": true,
+            "officeMissingFontRiskReasons": [
+              "non-office-family"
+            ]
+          },
+          {
+            "fontFace": "Notemd Deliberately Missing Font",
+            "textBoxCount": 1,
+            "richTextRunCount": 1,
+            "tableCellCount": 0,
+            "characterCount": 33,
+            "cjkCharacterCount": 9,
+            "latinCharacterCount": 19,
+            "writerEastAsiaFallbackRunCount": 1,
+            "writerEastAsiaFallbackCharacterCount": 9,
+            "officeMissingFontRisk": true,
+            "officeMissingFontRiskReasons": [
+              "non-office-family"
+            ]
+          }
+        ],
+        "fontEmbeddingPolicy": "not-embedded",
+        "embeddedFontCount": 0,
+        "embeddedFontFamilies": []
+      },
+      "editableLayerContract": {
+        "visualFidelityStrategy": "frozen-background-first",
+        "visibleTextSource": "native-text-and-background-image",
+        "editableTextShapeFill": "visible",
+        "editableTableTextFill": "visible",
+        "editableTableCellOverlayTextFill": "visible",
+        "backgroundTextPolicy": "hide-modeled-text-before-capture",
+        "textSelectionSurface": "visible-native-text",
+        "selectableNativeTextSources": [
+          "body",
+          "code",
+          "svg-text",
+          "table-cell-overlay"
+        ],
+        "visibleNativeTextSources": [
+          "body",
+          "code",
+          "svg-text",
+          "table-cell-overlay"
+        ],
+        "transparentOverlayTextSources": [],
+        "backgroundHiddenTextSources": [
+          "body",
+          "code",
+          "svg-text",
+          "table-cell-overlay"
+        ],
+        "backgroundPreservedTextSources": [
+          "mermaid-text"
+        ],
+        "mermaidSvgVisualPolicy": "background-image",
+        "mermaidSvgTextPolicy": "background-image-only",
+        "officeNativeMermaidSvgElementEditability": "not-claimed",
+        "fontPortabilityPolicy": "report-only-no-default-font-embedding"
+      },
+      "fallbackOnlyElementKinds": [
+        "mermaid"
+      ],
+      "unmodeledTextRunReasons": [
+        "inline-code",
+        "inline-formatting"
+      ],
+      "slides": [
+        {
+          "slideNumber": 1,
+          "editableTextBoxCount": 1,
+          "editableBodyTextBoxCount": 1,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 22,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 1,
+          "richTextRunCharacterCount": 22,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 1,
+          "paragraphSpacingTextBoxCount": 1,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 0,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [
+            "Avenir Next"
+          ],
+          "writerEastAsiaFallbackFontFamilies": [
+            "Avenir Next"
+          ],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 1,
+              "textLineCount": 1,
+              "characterCount": 22,
+              "richTextParagraphCount": 1,
+              "richTextRunCount": 1
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        },
+        {
+          "slideNumber": 2,
+          "editableTextBoxCount": 1,
+          "editableBodyTextBoxCount": 1,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 13,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 1,
+          "richTextRunCharacterCount": 13,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 1,
+          "paragraphSpacingTextBoxCount": 1,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 0,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [],
+          "writerEastAsiaFallbackFontFamilies": [],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 1,
+              "textLineCount": 1,
+              "characterCount": 13,
+              "richTextParagraphCount": 1,
+              "richTextRunCount": 1
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        },
+        {
+          "slideNumber": 3,
+          "editableTextBoxCount": 6,
+          "editableBodyTextBoxCount": 6,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 256,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 1,
+          "richTextRunCount": 9,
+          "richTextRunCharacterCount": 256,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 3,
+          "paragraphSpacingTextBoxCount": 2,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 1,
+          "editableCodeBackgroundRectangleCount": 1,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 0,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [
+            "inline-code",
+            "inline-formatting"
+          ],
+          "fontFamilies": [
+            "Avenir Next",
+            "Fira Code",
+            "Notemd Deliberately Missing Font"
+          ],
+          "cjkFontFamilies": [
+            "Avenir Next",
+            "Notemd Deliberately Missing Font"
+          ],
+          "writerEastAsiaFallbackFontFamilies": [
+            "Avenir Next",
+            "Notemd Deliberately Missing Font"
+          ],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next",
+            "Fira Code",
+            "Notemd Deliberately Missing Font"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 6,
+              "textLineCount": 6,
+              "characterCount": 256,
+              "richTextParagraphCount": 6,
+              "richTextRunCount": 9
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        },
+        {
+          "slideNumber": 4,
+          "editableTextBoxCount": 1,
+          "editableBodyTextBoxCount": 1,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 13,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 1,
+          "richTextRunCharacterCount": 13,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 1,
+          "paragraphSpacingTextBoxCount": 1,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 0,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [],
+          "writerEastAsiaFallbackFontFamilies": [],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 1,
+              "textLineCount": 1,
+              "characterCount": 13,
+              "richTextParagraphCount": 1,
+              "richTextRunCount": 1
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        },
+        {
+          "slideNumber": 5,
+          "editableTextBoxCount": 1,
+          "editableBodyTextBoxCount": 1,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 2,
+          "editableTableCellCount": 15,
+          "editableTextCharacterCount": 13,
+          "editableTableCellCharacterCount": 272,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 16,
+          "richTextRunCharacterCount": 285,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 1,
+          "paragraphSpacingTextBoxCount": 0,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 15,
+          "bodyInsetTableCellCount": 15,
+          "collapsedTableBorderModelCount": 2,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 15,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 6,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 6,
+          "decorativePrimitiveSkipReasonCounts": [
+            {
+              "reason": "table-owned-decoration",
+              "count": 6
+            }
+          ],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [
+            "Avenir Next"
+          ],
+          "writerEastAsiaFallbackFontFamilies": [
+            "Avenir Next"
+          ],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 1,
+              "textLineCount": 1,
+              "characterCount": 13,
+              "richTextParagraphCount": 1,
+              "richTextRunCount": 1
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 1,
+            "richTextTableSlideCount": 1,
+            "tableCount": 2,
+            "tableCellCount": 15,
+            "richTextTableCellCount": 15,
+            "richTextParagraphCount": 15,
+            "richTextRunCount": 15,
+            "richTextRunCharacterCount": 272,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 15,
+          "warnings": []
+        },
+        {
+          "slideNumber": 6,
+          "editableTextBoxCount": 1,
+          "editableBodyTextBoxCount": 1,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 11,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 1,
+          "richTextRunCharacterCount": 11,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 1,
+          "paragraphSpacingTextBoxCount": 1,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 0,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [],
+          "writerEastAsiaFallbackFontFamilies": [],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 1,
+              "textLineCount": 1,
+              "characterCount": 11,
+              "richTextParagraphCount": 1,
+              "richTextRunCount": 1
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        },
+        {
+          "slideNumber": 7,
+          "editableTextBoxCount": 3,
+          "editableBodyTextBoxCount": 3,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 53,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 3,
+          "richTextRunCharacterCount": 53,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 3,
+          "paragraphSpacingTextBoxCount": 0,
+          "bodyInsetTextBoxCount": 2,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 3,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 3,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 3,
+          "decorativePrimitiveAcceptedCount": 3,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [
+            "Avenir Next"
+          ],
+          "writerEastAsiaFallbackFontFamilies": [
+            "Avenir Next"
+          ],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 3,
+              "textLineCount": 3,
+              "characterCount": 53,
+              "richTextParagraphCount": 3,
+              "richTextRunCount": 3
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": [
+            "Slide 7 default visible-native background residue sampling is suspicious after 3 attempts (1 region(s), max ratio 1)."
+          ]
+        },
+        {
+          "slideNumber": 8,
+          "editableTextBoxCount": 1,
+          "editableBodyTextBoxCount": 1,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 16,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 1,
+          "richTextRunCharacterCount": 16,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 1,
+          "paragraphSpacingTextBoxCount": 1,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 0,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [],
+          "writerEastAsiaFallbackFontFamilies": [],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 1,
+              "textLineCount": 1,
+              "characterCount": 16,
+              "richTextParagraphCount": 1,
+              "richTextRunCount": 1
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        },
+        {
+          "slideNumber": 9,
+          "editableTextBoxCount": 2,
+          "editableBodyTextBoxCount": 2,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 101,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 2,
+          "richTextRunCharacterCount": 101,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 2,
+          "paragraphSpacingTextBoxCount": 1,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 4,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 4,
+          "decorativePrimitiveSkipReasonCounts": [
+            {
+              "reason": "not-visible",
+              "count": 4
+            }
+          ],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [
+            "mermaid"
+          ],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [],
+          "writerEastAsiaFallbackFontFamilies": [],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 2,
+              "textLineCount": 2,
+              "characterCount": 101,
+              "richTextParagraphCount": 2,
+              "richTextRunCount": 2
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        },
+        {
+          "slideNumber": 10,
+          "editableTextBoxCount": 1,
+          "editableBodyTextBoxCount": 1,
+          "editableCodeTextBoxCount": 0,
+          "editableMermaidTextBoxCount": 0,
+          "editableSvgTextBoxCount": 0,
+          "editableTableCellOverlayTextBoxCount": 0,
+          "editableTableCount": 0,
+          "editableTableCellCount": 0,
+          "editableTextCharacterCount": 3,
+          "editableTableCellCharacterCount": 0,
+          "richTextBoxCount": 0,
+          "richTextRunCount": 1,
+          "richTextRunCharacterCount": 3,
+          "hyperlinkRunCount": 0,
+          "hyperlinkTargetCount": 0,
+          "lineSpacingTextBoxCount": 1,
+          "paragraphSpacingTextBoxCount": 1,
+          "bodyInsetTextBoxCount": 0,
+          "lineSpacingTableCellCount": 0,
+          "bodyInsetTableCellCount": 0,
+          "collapsedTableBorderModelCount": 0,
+          "separateTableBorderModelCount": 0,
+          "tableCellTextInsetCount": 0,
+          "tableCellTextInsetDeltaCount": 0,
+          "maxTableCellTextInsetDeltaIn": 0,
+          "editableSolidRectangleCount": 0,
+          "editableCodeBackgroundRectangleCount": 0,
+          "editableDecorativeRectangleCount": 0,
+          "editableDecorativeLineCount": 0,
+          "decorativePrimitiveCandidateCount": 0,
+          "decorativePrimitiveAcceptedCount": 0,
+          "decorativePrimitiveSkippedCount": 0,
+          "decorativePrimitiveSkipReasonCounts": [],
+          "bulletedTextBoxCount": 0,
+          "backgroundFallbackPresent": true,
+          "fallbackOnlyElementKinds": [],
+          "unmodeledTextRunReasons": [],
+          "fontFamilies": [
+            "Avenir Next"
+          ],
+          "cjkFontFamilies": [],
+          "writerEastAsiaFallbackFontFamilies": [],
+          "officeMissingFontRiskFamilies": [
+            "Avenir Next"
+          ],
+          "textSourceCoverage": [
+            {
+              "sourceKind": "body",
+              "slideCount": 1,
+              "textBoxCount": 1,
+              "textLineCount": 1,
+              "characterCount": 3,
+              "richTextParagraphCount": 1,
+              "richTextRunCount": 1
+            }
+          ],
+          "tableCellRichTextCoverage": {
+            "tableSlideCount": 0,
+            "richTextTableSlideCount": 0,
+            "tableCount": 0,
+            "tableCellCount": 0,
+            "richTextTableCellCount": 0,
+            "richTextParagraphCount": 0,
+            "richTextRunCount": 0,
+            "richTextRunCharacterCount": 0,
+            "styledRunCount": 0,
+            "codeRunCount": 0,
+            "highlightedRunCount": 0,
+            "hyperlinkRunCount": 0,
+            "hyperlinkTargetCount": 0
+          },
+          "consumedTableTextCandidateCount": 0,
+          "warnings": []
+        }
+      ],
+      "visibleTextLayer": "native-text-and-background-image",
+      "editableLayerRenderMode": "visible-native-text",
+      "visibleNativeBackgroundCapture": {
+        "status": "verified",
+        "nativeLayer": "visible-text-and-table",
+        "backgroundCapture": "after-modeled-dom-hidden",
+        "residueSampling": {
+          "slideCount": 10,
+          "sampledSlideCount": 10,
+          "suspiciousSlideCount": 1,
+          "checkedRegionCount": 48,
+          "suspiciousRegionCount": 1,
+          "maxTextLikePixelRatio": 1,
+          "threshold": {
+            "colorDistance": 62,
+            "textLikePixelRatio": 0.075,
+            "minTextLikePixels": 8
+          },
+          "slides": [
+            {
+              "slideNumber": 1,
+              "sampledTextBoxCount": 1,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 1,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 2,
+              "sampledTextBoxCount": 1,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 1,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 3,
+              "sampledTextBoxCount": 6,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 6,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 4,
+              "sampledTextBoxCount": 1,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 1,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 5,
+              "sampledTextBoxCount": 16,
+              "sampledTableCellCount": 15,
+              "checkedRegionCount": 31,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 6,
+              "sampledTextBoxCount": 1,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 1,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 7,
+              "sampledTextBoxCount": 3,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 3,
+              "suspiciousRegionCount": 1,
+              "maxTextLikePixelRatio": 1,
+              "suspicious": true
+            },
+            {
+              "slideNumber": 8,
+              "sampledTextBoxCount": 1,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 1,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 9,
+              "sampledTextBoxCount": 2,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 2,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            },
+            {
+              "slideNumber": 10,
+              "sampledTextBoxCount": 1,
+              "sampledTableCellCount": 0,
+              "checkedRegionCount": 1,
+              "suspiciousRegionCount": 0,
+              "maxTextLikePixelRatio": 0,
+              "suspicious": false
+            }
+          ]
+        },
+        "warnings": [
+          "Slide 7 default visible-native background residue sampling is suspicious after 3 attempts (1 region(s), max ratio 1)."
+        ]
+      },
+      "warnings": [
+        "Slide 7 default visible-native background residue sampling is suspicious after 3 attempts (1 region(s), max ratio 1)."
+      ]
+    }
+  },
+  "pptxInspection": {
+    "isZip": true,
+    "entryCount": 44,
+    "slideCount": 10,
+    "mediaCount": 10,
+    "textRunCount": 46,
+    "pictureCount": 10,
+    "tableCount": 2,
+    "visibleNativeTextShapeCount": 18,
+    "visibleNativeTableShapeCount": 2,
+    "tableCellOverlayTextShapeCount": 0,
+    "nonOpaqueTextRunCount": 0,
+    "transparentTextRunCount": 0,
+    "lowOpacityTextRunCount": 0,
+    "nativeTableOverlayLeakCount": 0,
+    "minimumTextRunAlpha": 100000,
+    "slidesWithoutEditableText": [],
+    "slidesWithNonOpaqueText": [],
+    "slidesWithNativeTableOverlayLeak": [],
+    "editableTextAudit": {
+      "passed": true,
+      "failures": []
+    },
+    "slideTextRuns": [
+      {
+        "path": "ppt/slides/slide1.xml",
+        "textRunCount": 2,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 1,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 1,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide2.xml",
+        "textRunCount": 1,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 1,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 1,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide3.xml",
+        "textRunCount": 12,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 6,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 6,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide4.xml",
+        "textRunCount": 1,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 1,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 1,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide5.xml",
+        "textRunCount": 20,
+        "pictureCount": 1,
+        "tableCount": 2,
+        "visibleNativeTextShapeCounts": {
+          "body": 1,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 2
+        },
+        "visibleNativeTextShapeCount": 1,
+        "visibleNativeTableShapeCount": 2,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide6.xml",
+        "textRunCount": 1,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 1,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 1,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide7.xml",
+        "textRunCount": 5,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 3,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 3,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide8.xml",
+        "textRunCount": 1,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 1,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 1,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide9.xml",
+        "textRunCount": 2,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 2,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 2,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      },
+      {
+        "path": "ppt/slides/slide10.xml",
+        "textRunCount": 1,
+        "pictureCount": 1,
+        "tableCount": 0,
+        "visibleNativeTextShapeCounts": {
+          "body": 1,
+          "code": 0,
+          "svg": 0,
+          "mermaid": 0,
+          "tableCellOverlay": 0,
+          "table": 0
+        },
+        "visibleNativeTextShapeCount": 1,
+        "visibleNativeTableShapeCount": 0,
+        "tableCellOverlayTextShapeCount": 0,
+        "nativeTableOverlayLeakCount": 0,
+        "nonOpaqueTextRunCount": 0,
+        "transparentTextRunCount": 0,
+        "lowOpacityTextRunCount": 0,
+        "minimumTextRunAlpha": 100000,
+        "hasEditableText": true
+      }
+    ]
+  },
+  "pptxVisualDiff": null,
+  "pptxVisualGate": {
+    "required": true,
+    "referenceSource": "pptx-rendered-html-reference",
+    "observedPassed": true,
+    "passed": true,
+    "failures": [],
+    "thresholds": {
+      "maxRmse": 0.25,
+      "meanRmse": 0.145
+    },
+    "thresholdProfile": "visible-native-rendered-html",
+    "thresholdOverrides": {
+      "maxRmse": false,
+      "meanRmse": false
+    }
+  },
+  "pptxRenderedHtmlReference": {
+    "path": "export-recheck/pptx-office-fidelity-pptx-rendered-html-reference",
+    "absolutePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference",
+    "slideCount": 10,
+    "viewport": {
+      "width": 1960,
+      "height": 1104,
+      "deviceScaleFactor": 2
+    }
+  },
+  "pptxRenderedHtmlReferenceVisualDiff": {
+    "available": true,
+    "outputDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff",
+    "tools": {
+      "checked": [
+        {
+          "command": "identify",
+          "available": true,
+          "status": 0,
+          "version": "Version: ImageMagick 7.1.1-38 Q16-HDRI x64 b0ab922:20240901 https://imagemagick.org",
+          "error": null
+        },
+        {
+          "command": "compare",
+          "available": true,
+          "status": 0,
+          "version": "Version: ImageMagick 7.1.1-38 Q16-HDRI x64 b0ab922:20240901 https://imagemagick.org",
+          "error": null
+        },
+        {
+          "command": "montage",
+          "available": true,
+          "status": 0,
+          "version": "Version: ImageMagick 7.1.1-38 Q16-HDRI x64 b0ab922:20240901 https://imagemagick.org",
+          "error": null
+        },
+        {
+          "command": "magick",
+          "available": true,
+          "status": 0,
+          "version": "Version: ImageMagick 7.1.1-38 Q16-HDRI x64 b0ab922:20240901 https://imagemagick.org",
+          "error": null
+        }
+      ],
+      "missing": []
+    },
+    "rendererSelection": {
+      "renderer": "powerpoint",
+      "reason": "requested-powerpoint"
+    },
+    "reference": {
+      "source": "pptx-rendered-html-reference",
+      "referenceDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference",
+      "referenceImages": [
+        {
+          "slide": 1,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-01.png"
+        },
+        {
+          "slide": 2,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-02.png"
+        },
+        {
+          "slide": 3,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-03.png"
+        },
+        {
+          "slide": 4,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-04.png"
+        },
+        {
+          "slide": 5,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-05.png"
+        },
+        {
+          "slide": 6,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-06.png"
+        },
+        {
+          "slide": 7,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-07.png"
+        },
+        {
+          "slide": 8,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-08.png"
+        },
+        {
+          "slide": 9,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-09.png"
+        },
+        {
+          "slide": 10,
+          "imagePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-10.png"
+        }
+      ]
+    },
+    "render": {
+      "pptxPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity.pptx",
+      "renderer": "powerpoint",
+      "renderedDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered",
+      "renderedImages": [
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-01.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-02.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-03.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-04.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-05.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-06.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-07.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-08.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-09.png",
+        "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-10.png"
+      ],
+      "width": 3920,
+      "height": 2208,
+      "metadata": {
+        "slideCount": 10,
+        "outputDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\work\\powerpoint-raw"
+      },
+      "commands": {
+        "powerpoint": {
+          "status": 0,
+          "stdout": "{\"slideCount\":10,\"outputDirectory\":\"E:\\\\convert\\\\undo\\\\obsidian-NoteMD_new\\\\.cache\\\\release-1.9.8-research\\\\native-exports\\\\export-recheck\\\\pptx-office-fidelity-rendered-html-reference-diff\\\\work\\\\powerpoint-raw\"}",
+          "stderr": ""
+        }
+      }
+    },
+    "comparison": {
+      "referenceDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference",
+      "renderedDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered",
+      "outputDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff",
+      "resizedDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized",
+      "diffDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff",
+      "sideBySideDirectory": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side",
+      "sideBySideSheetPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\all-side-by-side-sheet.png",
+      "diffSheetPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\all-diff-sheet.png",
+      "contactSheetWarnings": [],
+      "metricsCsvPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\comparison-metrics.csv",
+      "optionalMetricSupport": {
+        "available": true,
+        "metrics": [
+          "AE",
+          "DSSIM",
+          "FUZZ",
+          "MAE",
+          "MEPP",
+          "MSE",
+          "NCC",
+          "PAE",
+          "PHASH",
+          "PSNR",
+          "RMSE",
+          "SSIM"
+        ],
+        "error": null
+      },
+      "optionalMetricPolicy": {
+        "metrics": [
+          "PHASH",
+          "NCC",
+          "SSIM"
+        ],
+        "timeoutMs": 60000,
+        "hardGate": false
+      },
+      "pages": [
+        {
+          "slide": 1,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-01.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-01.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-01.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-01.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-01.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 2725,
+            "height": 287,
+            "x": 223,
+            "y": 938,
+            "areaRatio": 0.09035730460662526
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.09553571428571428,
+            "centerOffsetYRatio": 0.010190217391304348,
+            "maxCenterOffsetRatio": 0.09553571428571428
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "3776.36",
+              "value": 3776.36,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.201263",
+              "value": 0.201263,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.957172",
+              "value": 0.957172,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "10852.3 (0.165596)",
+          "rmseNormalized": 0.165596,
+          "absoluteErrorPixels": 265130,
+          "absoluteErrorRatio": 0.030631885906536527,
+          "diagnostics": {
+            "status": "within-advisory-range",
+            "rmseLevel": "high",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "medium",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": false,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "medium",
+            "rationale": [
+              "no dominant visual drift signal"
+            ]
+          }
+        },
+        {
+          "slide": 2,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-02.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-02.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-02.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-02.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-02.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 1401,
+            "height": 212,
+            "x": 1262,
+            "y": 955,
+            "areaRatio": 0.03431538376220053
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.0006377551020408163,
+            "centerOffsetYRatio": 0.01947463768115942,
+            "maxCenterOffsetRatio": 0.01947463768115942
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "2992.85",
+              "value": 2992.85,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.401338",
+              "value": 0.401338,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.982435",
+              "value": 0.982435,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "6647.11 (0.101428)",
+          "rmseNormalized": 0.101428,
+          "absoluteErrorPixels": 102212,
+          "absoluteErrorRatio": 0.011809098639455782,
+          "diagnostics": {
+            "status": "renderer-noise-review",
+            "rmseLevel": "medium",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "low",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": true,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "low",
+            "rationale": [
+              "metrics fit renderer/subpixel noise profile"
+            ]
+          }
+        },
+        {
+          "slide": 3,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-03.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-03.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-03.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-03.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-03.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 3375,
+            "height": 890,
+            "x": 224,
+            "y": 180,
+            "areaRatio": 0.34703929125998223
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.012372448979591836,
+            "centerOffsetYRatio": 0.21693840579710144,
+            "maxCenterOffsetRatio": 0.21693840579710144
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "4735.95",
+              "value": 4735.95,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.322616",
+              "value": 0.322616,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.943491",
+              "value": 0.943491,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "9505.55 (0.145045)",
+          "rmseNormalized": 0.145045,
+          "absoluteErrorPixels": 307310,
+          "absoluteErrorRatio": 0.03550516674060929,
+          "diagnostics": {
+            "status": "within-advisory-range",
+            "rmseLevel": "high",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "high",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": false,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "medium",
+            "rationale": [
+              "no dominant visual drift signal"
+            ]
+          }
+        },
+        {
+          "slide": 4,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-04.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-04.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-04.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-04.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-04.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 1499,
+            "height": 212,
+            "x": 1200,
+            "y": 955,
+            "areaRatio": 0.03671574608104111
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.0026785714285714286,
+            "centerOffsetYRatio": 0.01947463768115942,
+            "maxCenterOffsetRatio": 0.01947463768115942
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "3083.77",
+              "value": 3083.77,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.346118",
+              "value": 0.346118,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.981989",
+              "value": 0.981989,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "6847.74 (0.10449)",
+          "rmseNormalized": 0.10449,
+          "absoluteErrorPixels": 107485,
+          "absoluteErrorRatio": 0.012418316511387164,
+          "diagnostics": {
+            "status": "renderer-noise-review",
+            "rmseLevel": "medium",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "low",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": true,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "low",
+            "rationale": [
+              "metrics fit renderer/subpixel noise profile"
+            ]
+          }
+        },
+        {
+          "slide": 5,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-05.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-05.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-05.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-05.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-05.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 3433,
+            "height": 1408,
+            "x": 225,
+            "y": 180,
+            "areaRatio": 0.5584590357882283
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.004719387755102041,
+            "centerOffsetYRatio": 0.09963768115942029,
+            "maxCenterOffsetRatio": 0.09963768115942029
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "922.337",
+              "value": 922.337,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.33995",
+              "value": 0.33995,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.924241",
+              "value": 0.924241,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "10450.4 (0.159463)",
+          "rmseNormalized": 0.159463,
+          "absoluteErrorPixels": 439089,
+          "absoluteErrorRatio": 0.05073029891304348,
+          "diagnostics": {
+            "status": "within-advisory-range",
+            "rmseLevel": "high",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "critical",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": false,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "medium",
+            "rationale": [
+              "no dominant visual drift signal"
+            ]
+          }
+        },
+        {
+          "slide": 6,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-06.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-06.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-06.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-06.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-06.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 1279,
+            "height": 270,
+            "x": 1325,
+            "y": 955,
+            "areaRatio": 0.03989782054125998
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.0011479591836734695,
+            "centerOffsetYRatio": 0.006340579710144928,
+            "maxCenterOffsetRatio": 0.006340579710144928
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "3079.96",
+              "value": 3079.96,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.411997",
+              "value": 0.411997,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.985895",
+              "value": 0.985895,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "5942.68 (0.0906794)",
+          "rmseNormalized": 0.0906794,
+          "absoluteErrorPixels": 81908,
+          "absoluteErrorRatio": 0.009463269003253475,
+          "diagnostics": {
+            "status": "renderer-noise-review",
+            "rmseLevel": "medium",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "low",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": true,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "low",
+            "rationale": [
+              "metrics fit renderer/subpixel noise profile"
+            ]
+          }
+        },
+        {
+          "slide": 7,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-07.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-07.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-07.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-07.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-07.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 2042,
+            "height": 646,
+            "x": 235,
+            "y": 180,
+            "areaRatio": 0.15240637015675834
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.17959183673469387,
+            "centerOffsetYRatio": 0.27219202898550726,
+            "maxCenterOffsetRatio": 0.27219202898550726
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "3.72197",
+              "value": 3.72197,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.963855",
+              "value": 0.963855,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.986912",
+              "value": 0.986912,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "3389.32 (0.0517177)",
+          "rmseNormalized": 0.0517177,
+          "absoluteErrorPixels": 77129,
+          "absoluteErrorRatio": 0.008911125591540964,
+          "diagnostics": {
+            "status": "renderer-noise-review",
+            "rmseLevel": "low",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "medium",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": true,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "low",
+            "rationale": [
+              "metrics fit renderer/subpixel noise profile"
+            ]
+          }
+        },
+        {
+          "slide": 8,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-08.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-08.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-08.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-08.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-08.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 1907,
+            "height": 271,
+            "x": 1012,
+            "y": 954,
+            "areaRatio": 0.05970831946909198
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.0014030612244897958,
+            "centerOffsetYRatio": 0.006567028985507246,
+            "maxCenterOffsetRatio": 0.006567028985507246
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "2875.61",
+              "value": 2875.61,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.436817",
+              "value": 0.436817,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.97722",
+              "value": 0.97722,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "7468.21 (0.113958)",
+          "rmseNormalized": 0.113958,
+          "absoluteErrorPixels": 130427,
+          "absoluteErrorRatio": 0.01506892838657202,
+          "diagnostics": {
+            "status": "renderer-noise-review",
+            "rmseLevel": "medium",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "low",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": true,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "low",
+            "rationale": [
+              "metrics fit renderer/subpixel noise profile"
+            ]
+          }
+        },
+        {
+          "slide": 9,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-09.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-09.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-09.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-09.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-09.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 3417,
+            "height": 760,
+            "x": 230,
+            "y": 178,
+            "areaRatio": 0.30003604702750664
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.00548469387755102,
+            "centerOffsetYRatio": 0.24728260869565216,
+            "maxCenterOffsetRatio": 0.24728260869565216
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "3.21238",
+              "value": 3.21238,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.588233",
+              "value": 0.588233,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.975564",
+              "value": 0.975564,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "6365.64 (0.0971335)",
+          "rmseNormalized": 0.0971335,
+          "absoluteErrorPixels": 223382,
+          "absoluteErrorRatio": 0.025808516341319136,
+          "diagnostics": {
+            "status": "renderer-noise-review",
+            "rmseLevel": "medium",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "high",
+            "textAntialiasDriftLikely": true,
+            "rendererNoiseLikely": true,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "low",
+            "rationale": [
+              "wide diff region with low RMSE and low scale drift",
+              "metrics fit renderer/subpixel noise profile"
+            ]
+          }
+        },
+        {
+          "slide": 10,
+          "referencePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference\\slide-10.png",
+          "renderedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-rendered\\slide-10.png",
+          "resizedPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\pptx-resized\\slide-10.png",
+          "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-10.png",
+          "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-10.png",
+          "referenceDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "renderedOriginalDimensions": {
+            "width": 3920,
+            "height": 2208
+          },
+          "widthScaleRatio": 1,
+          "heightScaleRatio": 1,
+          "maxScaleRatioDelta": 0,
+          "differenceBoundingBox": {
+            "available": true,
+            "thresholdPercent": 8,
+            "referenceWidth": 3920,
+            "referenceHeight": 2208,
+            "width": 235,
+            "height": 118,
+            "x": 1840,
+            "y": 1012,
+            "areaRatio": 0.0032037951049985213
+          },
+          "differenceGeometry": {
+            "available": true,
+            "centerOffsetXRatio": 0.0006377551020408163,
+            "centerOffsetYRatio": 0.014945652173913044,
+            "maxCenterOffsetRatio": 0.014945652173913044
+          },
+          "optionalCompareMetrics": {
+            "PHASH": {
+              "metric": "PHASH",
+              "available": true,
+              "raw": "2.4033",
+              "value": 2.4033,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "NCC": {
+              "metric": "NCC",
+              "available": true,
+              "raw": "0.326153",
+              "value": 0.326153,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            },
+            "SSIM": {
+              "metric": "SSIM",
+              "available": true,
+              "raw": "0.999113",
+              "value": 0.999113,
+              "normalized": false,
+              "reason": null,
+              "error": null,
+              "timeoutMs": 60000
+            }
+          },
+          "rmseRaw": "808.163 (0.0123318)",
+          "rmseNormalized": 0.0123318,
+          "absoluteErrorPixels": 3564,
+          "absoluteErrorRatio": 0.00041176796805678795,
+          "diagnostics": {
+            "status": "renderer-noise-review",
+            "rmseLevel": "low",
+            "scaleDriftLevel": "low",
+            "diffAreaLevel": "low",
+            "textAntialiasDriftLikely": false,
+            "rendererNoiseLikely": true,
+            "referenceContractDriftLikely": false,
+            "layoutDriftLikely": false,
+            "reviewPriority": "low",
+            "rationale": [
+              "metrics fit renderer/subpixel noise profile"
+            ]
+          }
+        }
+      ],
+      "summary": {
+        "pageCount": 10,
+        "comparablePageCount": 10,
+        "missingReferenceSlides": [],
+        "missingRenderedSlides": [],
+        "meanRmse": 0.10418424,
+        "maxRmse": 0.165596,
+        "maxScaleRatioDelta": 0,
+        "maxDifferenceBoundingBoxAreaRatio": 0.5584590357882283,
+        "worstSlides": [
+          {
+            "slide": 1,
+            "rmseNormalized": 0.165596,
+            "absoluteErrorRatio": 0.030631885906536527,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 2725,
+              "height": 287,
+              "x": 223,
+              "y": 938,
+              "areaRatio": 0.09035730460662526
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-01.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-01.png"
+          },
+          {
+            "slide": 5,
+            "rmseNormalized": 0.159463,
+            "absoluteErrorRatio": 0.05073029891304348,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 3433,
+              "height": 1408,
+              "x": 225,
+              "y": 180,
+              "areaRatio": 0.5584590357882283
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-05.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-05.png"
+          },
+          {
+            "slide": 3,
+            "rmseNormalized": 0.145045,
+            "absoluteErrorRatio": 0.03550516674060929,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 3375,
+              "height": 890,
+              "x": 224,
+              "y": 180,
+              "areaRatio": 0.34703929125998223
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-03.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-03.png"
+          },
+          {
+            "slide": 8,
+            "rmseNormalized": 0.113958,
+            "absoluteErrorRatio": 0.01506892838657202,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1907,
+              "height": 271,
+              "x": 1012,
+              "y": 954,
+              "areaRatio": 0.05970831946909198
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-08.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-08.png"
+          },
+          {
+            "slide": 4,
+            "rmseNormalized": 0.10449,
+            "absoluteErrorRatio": 0.012418316511387164,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1499,
+              "height": 212,
+              "x": 1200,
+              "y": 955,
+              "areaRatio": 0.03671574608104111
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-04.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-04.png"
+          },
+          {
+            "slide": 2,
+            "rmseNormalized": 0.101428,
+            "absoluteErrorRatio": 0.011809098639455782,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1401,
+              "height": 212,
+              "x": 1262,
+              "y": 955,
+              "areaRatio": 0.03431538376220053
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-02.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-02.png"
+          },
+          {
+            "slide": 9,
+            "rmseNormalized": 0.0971335,
+            "absoluteErrorRatio": 0.025808516341319136,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 3417,
+              "height": 760,
+              "x": 230,
+              "y": 178,
+              "areaRatio": 0.30003604702750664
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-09.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-09.png"
+          },
+          {
+            "slide": 6,
+            "rmseNormalized": 0.0906794,
+            "absoluteErrorRatio": 0.009463269003253475,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1279,
+              "height": 270,
+              "x": 1325,
+              "y": 955,
+              "areaRatio": 0.03989782054125998
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-06.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-06.png"
+          },
+          {
+            "slide": 7,
+            "rmseNormalized": 0.0517177,
+            "absoluteErrorRatio": 0.008911125591540964,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 2042,
+              "height": 646,
+              "x": 235,
+              "y": 180,
+              "areaRatio": 0.15240637015675834
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-07.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-07.png"
+          },
+          {
+            "slide": 10,
+            "rmseNormalized": 0.0123318,
+            "absoluteErrorRatio": 0.00041176796805678795,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 235,
+              "height": 118,
+              "x": 1840,
+              "y": 1012,
+              "areaRatio": 0.0032037951049985213
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-10.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-10.png"
+          }
+        ],
+        "worstDifferenceBoundingBoxSlides": [
+          {
+            "slide": 5,
+            "rmseNormalized": 0.159463,
+            "absoluteErrorRatio": 0.05073029891304348,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 3433,
+              "height": 1408,
+              "x": 225,
+              "y": 180,
+              "areaRatio": 0.5584590357882283
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-05.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-05.png"
+          },
+          {
+            "slide": 3,
+            "rmseNormalized": 0.145045,
+            "absoluteErrorRatio": 0.03550516674060929,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 3375,
+              "height": 890,
+              "x": 224,
+              "y": 180,
+              "areaRatio": 0.34703929125998223
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-03.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-03.png"
+          },
+          {
+            "slide": 9,
+            "rmseNormalized": 0.0971335,
+            "absoluteErrorRatio": 0.025808516341319136,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 3417,
+              "height": 760,
+              "x": 230,
+              "y": 178,
+              "areaRatio": 0.30003604702750664
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-09.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-09.png"
+          },
+          {
+            "slide": 7,
+            "rmseNormalized": 0.0517177,
+            "absoluteErrorRatio": 0.008911125591540964,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 2042,
+              "height": 646,
+              "x": 235,
+              "y": 180,
+              "areaRatio": 0.15240637015675834
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-07.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-07.png"
+          },
+          {
+            "slide": 1,
+            "rmseNormalized": 0.165596,
+            "absoluteErrorRatio": 0.030631885906536527,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 2725,
+              "height": 287,
+              "x": 223,
+              "y": 938,
+              "areaRatio": 0.09035730460662526
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-01.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-01.png"
+          },
+          {
+            "slide": 8,
+            "rmseNormalized": 0.113958,
+            "absoluteErrorRatio": 0.01506892838657202,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1907,
+              "height": 271,
+              "x": 1012,
+              "y": 954,
+              "areaRatio": 0.05970831946909198
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-08.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-08.png"
+          },
+          {
+            "slide": 6,
+            "rmseNormalized": 0.0906794,
+            "absoluteErrorRatio": 0.009463269003253475,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1279,
+              "height": 270,
+              "x": 1325,
+              "y": 955,
+              "areaRatio": 0.03989782054125998
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-06.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-06.png"
+          },
+          {
+            "slide": 4,
+            "rmseNormalized": 0.10449,
+            "absoluteErrorRatio": 0.012418316511387164,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1499,
+              "height": 212,
+              "x": 1200,
+              "y": 955,
+              "areaRatio": 0.03671574608104111
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-04.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-04.png"
+          },
+          {
+            "slide": 2,
+            "rmseNormalized": 0.101428,
+            "absoluteErrorRatio": 0.011809098639455782,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 1401,
+              "height": 212,
+              "x": 1262,
+              "y": 955,
+              "areaRatio": 0.03431538376220053
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-02.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-02.png"
+          },
+          {
+            "slide": 10,
+            "rmseNormalized": 0.0123318,
+            "absoluteErrorRatio": 0.00041176796805678795,
+            "maxScaleRatioDelta": 0,
+            "differenceBoundingBox": {
+              "available": true,
+              "thresholdPercent": 8,
+              "referenceWidth": 3920,
+              "referenceHeight": 2208,
+              "width": 235,
+              "height": 118,
+              "x": 1840,
+              "y": 1012,
+              "areaRatio": 0.0032037951049985213
+            },
+            "sideBySidePath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\side-by-side\\slide-10.png",
+            "diffPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-rendered-html-reference-diff\\diff\\slide-10.png"
+          }
+        ],
+        "advisoryMetrics": {
+          "limits": {
+            "rmse": {
+              "low": 0.08,
+              "medium": 0.12,
+              "high": 0.2
+            },
+            "scaleDrift": {
+              "low": 0.015,
+              "medium": 0.035,
+              "high": 0.06
+            },
+            "diffArea": {
+              "low": 0.08,
+              "medium": 0.28,
+              "high": 0.55
+            }
+          },
+          "optionalCompareMetrics": {
+            "requestedMetricCount": 30,
+            "availableMetricCount": 30,
+            "unavailableMetricCount": 0,
+            "timedOutMetricCount": 0,
+            "unsupportedMetricCount": 0,
+            "unparsedMetricCount": 0,
+            "commandFailedMetricCount": 0,
+            "unavailableReasons": {}
+          },
+          "diagnosticCounts": {
+            "textAntialiasDriftLikely": 1,
+            "rendererNoiseLikely": 7,
+            "referenceContractDriftLikely": 0,
+            "layoutDriftLikely": 0
+          },
+          "likelyRendererNoiseSlides": [
+            2,
+            4,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "textAntialiasDriftSlides": [
+            9
+          ],
+          "referenceContractDriftSlides": [],
+          "worstLikelyLayoutDriftSlides": []
+        }
+      },
+      "gate": {
+        "passed": true,
+        "failures": [],
+        "thresholds": {
+          "maxRmse": 0.25,
+          "meanRmse": 0.145,
+          "maxScaleRatioDelta": null,
+          "maxDifferenceBoundingBoxAreaRatio": null
+        }
+      }
+    },
+    "gate": {
+      "passed": true,
+      "failures": [],
+      "thresholds": {
+        "maxRmse": 0.25,
+        "meanRmse": 0.145,
+        "maxScaleRatioDelta": null,
+        "maxDifferenceBoundingBoxAreaRatio": null
+      }
+    }
+  },
+  "pptxRenderedHtmlReferenceGate": {
+    "required": false,
+    "observedPassed": true,
+    "passed": true,
+    "failures": [],
+    "thresholds": {
+      "maxRmse": 0.25,
+      "meanRmse": 0.145
+    },
+    "thresholdProfile": "visible-native-rendered-html",
+    "thresholdOverrides": {
+      "maxRmse": false,
+      "meanRmse": false
+    }
+  },
+  "pptxVisibleNativeExperiment": null,
+  "htmlExport": {
+    "path": "export-recheck/pptx-office-fidelity-slides/index-standalone.html",
+    "requestedMode": "standalone",
+    "actualMode": "standalone",
+    "requiresLocalServer": false,
+    "fallbackPath": null,
+    "standaloneAttempt": {
+      "attempted": true,
+      "accepted": true,
+      "outputPath": "export-recheck/pptx-office-fidelity-slides/index-standalone.html",
+      "preservedFailurePath": null,
+      "loaderGaps": [],
+      "failureReason": null
+    }
+  },
+  "htmlExportHistory": [
+    {
+      "path": "export-recheck/pptx-office-fidelity-slides/index-standalone.html",
+      "requestedMode": "standalone",
+      "actualMode": "standalone",
+      "requiresLocalServer": false,
+      "fallbackPath": null,
+      "standaloneAttempt": {
+        "attempted": true,
+        "accepted": true,
+        "outputPath": "export-recheck/pptx-office-fidelity-slides/index-standalone.html",
+        "preservedFailurePath": null,
+        "loaderGaps": [],
+        "failureReason": null
+      }
+    }
+  ],
+  "standaloneGate": {
+    "required": false,
+    "passed": true,
+    "reason": null
+  },
+  "renderedLayoutGate": {
+    "required": false,
+    "passed": true,
+    "auditedSlideCount": 10,
+    "failureCount": 0,
+    "failures": []
+  },
+  "deck": {
+    "path": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\_slidev-sources\\pptx-office-fidelity.slidev.md",
+    "bytes": 1911,
+    "theme": "default",
+    "mermaidBlocks": 1,
+    "zoomLines": [],
+    "containsKnownStaleText": false,
+    "containsMissingTheme": false
+  },
+  "mermaidSourcePreservation": {
+    "required": true,
+    "passed": true,
+    "sourceFenceCount": 1,
+    "deckFenceCount": 1,
+    "changedFenceIndexes": []
+  },
+  "tableBodyLayoutGate": {
+    "passed": true,
+    "auditedSlideCount": 10,
+    "tableSlideCount": 1,
+    "bodyTextSlideCount": 10,
+    "failureCount": 0,
+    "failureSlides": [],
+    "failures": []
+  },
+  "playwright": [
+    {
+      "slide": 1,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-01-workflow.png",
+      "preview": "Office fidelity / 中文排版 | Enter fullscreen | Go to previous slide | Go to next slide",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 2,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-02-workflow.png",
+      "preview": "Editable text | Enter fullscreen | Go to previous slide | Go to next slide",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 3,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-03-workflow.png",
+      "preview": "Editable text | Bold 中文 and regular Latin share a baseline. Inline const retry = 3 must remain readable. | First item / 第一项 | A second item with enough text to wrap onto another line without a second bullet or overlapping paragraphs.",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 4,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-04-workflow.png",
+      "preview": "Table metrics | Enter fullscreen | Go to previous slide | Go to next slide",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 5,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-05-workflow.png",
+      "preview": "Table metrics | Contract\tEnglish and Chinese\tStatus | Cancellation\t晚到响应不能重新写入文件\tVerified | Recovery\tKeep externally edited content and retain the recoverable preimage.\tVerified",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 6,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-06-workflow.png",
+      "preview": "Layer order | Enter fullscreen | Go to previous slide | Go to next slide",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 7,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-07-workflow.png",
+      "preview": "Layer order | Background layer / 背层 | Foreground layer / 前层 | Enter fullscreen",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 8,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-08-workflow.png",
+      "preview": "Diagram fallback | Enter fullscreen | Go to previous slide | Go to next slide",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 9,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-09-workflow.png",
+      "preview": "Diagram fallback | Mermaid geometry remains an explicit image fallback. Surrounding text stays editable. | Enter fullscreen | Go to previous slide",
+      "layoutFindingCount": 0
+    },
+    {
+      "slide": 10,
+      "failed": false,
+      "errors": [],
+      "screenshotPath": "<repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-slides\\slide-10-workflow.png",
+      "preview": "End | Enter fullscreen | Go to previous slide | Go to next slide",
+      "layoutFindingCount": 0
+    }
+  ],
+  "playwrightSlides": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "layoutAudit": [
+    {
+      "slide": 1,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 70.00000762939453,
+        "top": 300,
+        "right": 963.1318435668945,
+        "bottom": 399.1304626464844,
+        "width": 893.1318359375,
+        "height": 99.13046264648438
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 60,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 18.000010070800784,
+        "top": 256.8,
+        "right": 264.86803680419916,
+        "bottom": 277.6695373535156,
+        "min": 18.000010070800784
+      },
+      "contentAreaRatio": 0.11882292971620824,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 2,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 404.809814453125,
+        "top": 300,
+        "right": 871.2568359375,
+        "bottom": 399.1304626464844,
+        "width": 466.447021484375,
+        "height": 99.13046264648438
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 60,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 352.80981689453125,
+        "top": 256.8,
+        "right": 356.7430444335937,
+        "bottom": 277.6695373535156,
+        "min": 256.8
+      },
+      "contentAreaRatio": 0.06205646178987073,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 3,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 73.91304779052734,
+        "top": 50.86956787109375,
+        "right": 1176.4130935668945,
+        "bottom": 349.6467590332031,
+        "width": 1102.5000457763672,
+        "height": 298.7771911621094
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 17.6,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 21.913050231933596,
+        "top": 7.669567871093754,
+        "right": 51.586786804199164,
+        "bottom": 327.15324096679683,
+        "min": 7.669567871093754
+      },
+      "contentAreaRatio": 0.442082790809089,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 4,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 392.7242126464844,
+        "top": 300,
+        "right": 883.36279296875,
+        "bottom": 399.1304626464844,
+        "width": 490.6385803222656,
+        "height": 99.13046264648438
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 60,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 340.7242150878906,
+        "top": 256.8,
+        "right": 344.6370874023437,
+        "bottom": 277.6695373535156,
+        "min": 256.8
+      },
+      "contentAreaRatio": 0.0652749249325521,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 5,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 73.91304779052734,
+        "top": 50.86956787109375,
+        "right": 1206.0868759155273,
+        "bottom": 535.740478515625,
+        "width": 1132.173828125,
+        "height": 484.87091064453125
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 17.6,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": 17.6,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 21.913050231933596,
+        "top": 7.669567871093754,
+        "right": 21.91300445556635,
+        "bottom": 141.05952148437495,
+        "min": 7.669567871093754
+      },
+      "contentAreaRatio": 0.7367443162413615,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "table",
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 6,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 425.65899658203125,
+        "top": 300,
+        "right": 850.4076538085938,
+        "bottom": 399.1304626464844,
+        "width": 424.7486572265625,
+        "height": 99.13046264648438
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 60,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 373.6589990234375,
+        "top": 256.8,
+        "right": 377.59222656249995,
+        "bottom": 277.6695373535156,
+        "min": 256.8
+      },
+      "contentAreaRatio": 0.05650888011589978,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 7,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 73.91304779052734,
+        "top": 50.86956787109375,
+        "right": 856.5217895507812,
+        "bottom": 333.9130554199219,
+        "width": 782.6087417602539,
+        "height": 283.0434875488281
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 17.6,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 21.913050231933596,
+        "top": 7.669567871093754,
+        "right": 371.47809082031245,
+        "bottom": 342.8869445800781,
+        "min": 7.669567871093754
+      },
+      "contentAreaRatio": 0.29728665498463136,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text",
+        "other"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 8,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 323.3288269042969,
+        "top": 300,
+        "right": 952.7581481933594,
+        "bottom": 399.1304626464844,
+        "width": 629.4293212890625,
+        "height": 99.13046264648438
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 60,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 271.3288293457031,
+        "top": 256.8,
+        "right": 275.2417321777343,
+        "bottom": 277.6695373535156,
+        "min": 256.8
+      },
+      "contentAreaRatio": 0.08373974926819724,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 9,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 73.91304779052734,
+        "top": 50.86956787109375,
+        "right": 1206.0868759155273,
+        "bottom": 305.5231018066406,
+        "width": 1132.173828125,
+        "height": 254.65353393554688
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 17.6,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 21.913050231933596,
+        "top": 7.669567871093754,
+        "right": 21.91300445556635,
+        "bottom": 371.27689819335933,
+        "min": 7.669567871093754
+      },
+      "contentAreaRatio": 0.3869370993784671,
+      "lowContentUtilization": false,
+      "mermaidFit": {
+        "status": "source-preserved-fit-review",
+        "reason": "preserved Mermaid margin 7.7px is below 18px",
+        "pageScale": 1,
+        "fitScale": 1,
+        "nextZoom": 1,
+        "diagramBounds": {
+          "left": 73.91304779052734,
+          "top": 99.13043975830078,
+          "right": 1206.0868759155273,
+          "bottom": 254.6535415649414,
+          "width": 1132.173828125,
+          "height": 155.52310180664062
+        },
+        "effectiveMinFontPx": null,
+        "svgTextMinFontPx": null,
+        "qualityMargins": {
+          "left": 21.913050231933596,
+          "top": 7.669567871093754,
+          "right": 21.91300445556635,
+          "bottom": 371.27689819335933,
+          "min": 7.669567871093754
+        },
+        "contentAreaRatio": 0.3869370993784671,
+        "lowZoom": false,
+        "lowFont": false,
+        "tightMargin": true
+      },
+      "findings": [],
+      "elementKinds": [
+        "mermaid",
+        "text"
+      ],
+      "slotZones": []
+    },
+    {
+      "slide": 10,
+      "safeRect": {
+        "left": 51.99999755859375,
+        "top": 43.199999999999996,
+        "right": 1227.9998803710937,
+        "bottom": 676.8,
+        "width": 1175.9998828125,
+        "height": 633.6
+      },
+      "contentBounds": {
+        "left": 596.4266357421875,
+        "top": 319.5652160644531,
+        "right": 681.2296752929688,
+        "bottom": 379.5652160644531,
+        "width": 84.80303955078125,
+        "height": 60
+      },
+      "pageScale": 1,
+      "effectiveMinFontPx": 36,
+      "svgTextMinFontPx": null,
+      "tableBodyMinFontPx": null,
+      "codeMinFontPx": null,
+      "qualityMargins": {
+        "left": 544.4266381835937,
+        "top": 276.36521606445314,
+        "right": 546.770205078125,
+        "bottom": 297.23478393554683,
+        "min": 276.36521606445314
+      },
+      "contentAreaRatio": 0.006828734410538749,
+      "lowContentUtilization": false,
+      "mermaidFit": null,
+      "findings": [],
+      "elementKinds": [
+        "text"
+      ],
+      "slotZones": []
+    }
+  ],
+  "layoutAuditSummary": {
+    "slideCount": 10,
+    "overflowCount": 0,
+    "unreadableCount": 0,
+    "renderErrorCount": 0,
+    "hardOverflowCount": 0,
+    "unreadableScaleCount": 0,
+    "lowEffectiveFontCount": 0,
+    "qualityMarginWarningCount": 0,
+    "lowContentUtilizationCount": 0,
+    "preSplitCount": 0,
+    "postPatchCount": 0,
+    "mermaidSlideCount": 1,
+    "mermaidFitReviewCount": 1,
+    "mermaidLowZoomCount": 0,
+    "mermaidManualReviewCount": 0,
+    "retryCount": 0
+  },
+  "layoutPatchAttempts": [
+    {
+      "pass": 1,
+      "changed": false,
+      "changedSlides": [],
+      "blockedSlides": []
+    }
+  ],
+  "ignoredOutputs": [
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/_slidev-sources/pptx-office-fidelity.slidev.md",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity.pptx",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity.pptx.report.json",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-pptx-rendered-html-reference",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-rendered-html-reference-diff",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/index-standalone.html",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-01-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-02-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-03-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-04-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-05-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-06-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-07-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-08-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-09-workflow.png",
+    ".gitignore:35:.cache\t.cache/release-1.9.8-research/native-exports/export-recheck/pptx-office-fidelity-slides/slide-10-workflow.png"
+  ],
+  "unignoredOutputs": [],
+  "gitIgnoreCheckError": null,
+  "progress": [
+    {
+      "phase": "slidev-source",
+      "detail": "Preparing Slidev deck from Markdown..."
+    },
+    {
+      "phase": "slidev-source",
+      "detail": "Loaded Slidev skill from <user>\\.agents\\skills\\slidev (52 references)."
+    },
+    {
+      "phase": "slidev-source",
+      "detail": "Prepared Slidev deck: export-recheck/_slidev-sources/pptx-office-fidelity.slidev.md"
+    },
+    {
+      "phase": "slidev-build",
+      "detail": "Building standalone Slidev HTML..."
+    },
+    {
+      "phase": "mermaid-fit",
+      "detail": "Injected post-fit script into export-recheck/pptx-office-fidelity-slides/index-standalone.html"
+    },
+    {
+      "phase": "slidev-build",
+      "detail": "Standalone HTML created via <repo>\\node_modules\\.bin\\slidev.cmd"
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Creating editable PPTX from rendered Slidev HTML..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 1/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 2/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 3/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 4/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 5/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 6/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 7/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 8/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 9/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "Extracting editable slide 10/10..."
+    },
+    {
+      "phase": "pptx-export",
+      "detail": "PPTX export complete with 18 editable text boxes and 2 native tables."
+    },
+    {
+      "phase": "pptx-visual-diff",
+      "detail": "Visible-native PPTX default detected; using same rendered HTML as the hard visual-match reference."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing PNG reference from the same rendered HTML used by PPTX export..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 1/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 2/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 3/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 4/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 5/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 6/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 7/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 8/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 9/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Capturing rendered-HTML PNG reference slide 10/10..."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Rendered-HTML PNG reference complete with 10 slide image(s)."
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Rendering PPTX back to PNG and comparing against same rendered HTML reference: <repo>\\.cache\\release-1.9.8-research\\native-exports\\export-recheck\\pptx-office-fidelity-pptx-rendered-html-reference"
+    },
+    {
+      "phase": "pptx-rendered-html-reference",
+      "detail": "Rendered-HTML reference diff is within thresholds."
+    }
+  ]
+}

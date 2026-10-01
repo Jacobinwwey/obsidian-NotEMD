@@ -1,0 +1,109 @@
+---
+id: overview
+title: Entwicklerleitfaden
+description: >-
+  Baue, teste und erweitere Notemd anhand bestehender Anbieter-, Operations-,
+  Rendering- und Dokumentationsverträge.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Entwicklerleitfaden
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Entwicklerleitfaden
+
+<TLDR>
+Beginne auf einem Feature-Branch mit festgeschriebenen Abhängigkeiten und beiden Browserversionen. Baue und führe alle Jest-Tests aus. Erweitere den bestehenden Vertragsinhaber und halte Dokumentation sowie native Nachweise aktuell.
+</TLDR>
+
+## Checkout vorbereiten
+
+[Repository](https://github.com/Jacobinwwey/obsidian-NotEMD) klonen, [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) lesen und Branch erstellen. Plugin-CI läuft unter Node 20 auf Linux/Windows; Website unter Node 24. Abhängigkeiten an der Wurzel und in `website/` getrennt installieren.
+
+An der Repository-Wurzel:
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Die beiden Playwright-Pakete können unterschiedliche Chromium-Versionen benötigen. Nur eine reicht für saubere Tests nicht. `main.js` wird erzeugt und ist gitignored; ein altes Bundle belegt keinen neuen Commit.
+
+## Zuständigkeit finden
+
+| Verantwortung | Primärquelle |
+| ---------------- | ---------------- |
+| Plugin-Lebenszyklus, Befehle, Host-Routing | `src/main.ts` |
+| Anbieterprofile, Protokolle, Validierung | `src/llmProviders.ts` |
+| Anfragen, Transporte, Wiederholungen, Streams | `src/llmUtils.ts` |
+| Operationen, Schemas, öffentliche CLI-Auswahl | `src/operations/`, `src/cliContracts.ts` |
+| Dateiaufgaben, Recherche, Übersetzung | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Workflows und Seitenleiste | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Diagrammspezifikation und Rendering | `src/diagram/`, `src/rendering/` |
+| UI-Texte und Sprachen | `src/i18n/` |
+| Öffentliche Leitfäden und Übersetzungen | `website/docs/`, `website/i18n/` |
+| Wartungsverfahren und datierte Nachweise | `docs/maintainer/` |
+
+Das Produktionsbundle ist eigenständig einschließlich Inline-Vorschauhost. Ein separater Render-Host-Kandidat ist kein ausgelieferter Assetvertrag. Aktivierung erfordert gemeinsame Änderungen an Packaging, Assets, Audits und Dokumentation.
+
+## Begrenzte Änderung umsetzen
+
+1. Verhalten reproduzieren und gezielten fehlschlagenden Test schreiben.
+2. Modul mit dem Invarianten ändern; externe Eingaben am Rand prüfen und keine Anbieter-/Operationskenntnis bei Aufrufern duplizieren.
+3. Gezielte, dann vollständige Tests ausführen; bei Dateimutationen Abbruch, Fehler und Persistenz abdecken.
+4. Englischen Quellleitfaden und betroffene Sprachen aktualisieren. Pläne, Aufgaben und Walkthroughs brauchen getrennte vollständige englische/chinesische Fassungen unter `docs/`.
+5. Bei visuellen/nativen Exporten echte Zielanwendung prüfen; XML, Screenshot oder Build allein beweisen keine Bearbeitbarkeit oder angehefteten Verbinder.
+
+Neue Anbieter in `llmProviders.ts` eintragen und kompatiblen Transport wiederverwenden. `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README und Verbindungstests aktualisieren; Streaming und Abbruchdiagnosen erhalten.
+
+Vor Öffnung einer Operation Eingabe-/Ergebnisschemas, Kontext, Nebenwirkungen und Handling-Tags definieren. Registrierung macht keine öffentliche Agent-API. Siehe [Agents](../agents/overview).
+
+## Änderung prüfen
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint vergleicht Einzeldiagnosen mit der Basis. Alte Schulden oder sinkende Gesamtzahlen erlauben keine neue Regression. Bei Suchänderungen `npm run benchmark:local-kb` mit festem Korpus nutzen und Umgebung dokumentieren.
+
+Website unter Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Übersetzungen für 1.9.8 werden direkt von Codex verfasst und geprüft. Keine alten Übersetzungsschreiber oder LM-Studio-/Übersetzungs-API aufrufen. Werkzeuge dürfen verfassten Text formatieren, prüfen und rendern.
+
+## Obsidian und native Verbraucher
+
+Entbehrlichen Vault mit `.notemd-host-verification` verwenden. Hostskripte prüfen Marker und kopiertes Bundle. Echte Nutzervaults trennen. Bei CLI-Prüfung `obsidian help` und `obsidian-cli help` versuchen; fehlende Werkzeuge protokollieren, keine Stubs als Hostnachweis.
+
+PowerPoint, CircuitikZ und Folienprüfungen haben eigene Voraussetzungen und Artefakte. [Datierte Abnahme](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) und [Release-Ablauf](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md) beachten. Mobile/Mindestversion bleiben unverifiziert.
+
+## Beiträge und Veröffentlichung
+
+PRs nennen konkretes Problem, neues Verhalten, Tests und Grenzen. [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) dienen reproduzierbaren Meldungen. Keine Schlüssel, privaten Vault-Inhalte oder fremden generierten Dateien committen.
+
+Publisher und Runbook besitzen den Release: abgestimmte Metadaten, numerischer Tag, sauberer Quellstand, zweisprachige Hinweise, geprüfte Draft-Assets, dann Veröffentlichung und explizites Pages-Deployment. Öffentliche Tags nicht bewegen. `.trellis/` bleibt lokaler Zustand und keine CI-Abhängigkeit.
+
+## Weitere Schritte
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Planstatus](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agents](../agents/overview).
+- [Version 1.9.8](../releases/1.9.8).

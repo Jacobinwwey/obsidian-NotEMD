@@ -1,16 +1,10 @@
 ---
 id: concept-notes
 title: Concept Notes
-description: Generate and manage concept notes — standalone notes for key concepts extracted from your vault
+description: Extract concepts into a configured folder, choose supported note templates, and review duplicates before deletion.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords: [Notemd concept notes, extraction, backlinks, duplicate review]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,167 +12,103 @@ import TLDR from '@site/src/components/TLDR';
 # Concept Notes
 
 <TLDR>
-**Notemd extracts key concepts from your notes and creates standalone concept note files.** The LLM identifies core terms, generates one `.md` file per concept in a configurable folder, and optionally adds backlinks to the source note. Supports synonym suppression, per-task model selection, filename sanitization, and a 4-step deduplication engine. This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+Standalone concept extraction reads a source note and creates concept Markdown files in a folder you choose. The folder starts empty in settings. New standalone notes are title-only by default, and source backlinks are disabled. Add-links processing uses a different concept-note template.
 </TLDR>
 
 ## Overview
 
-Concept notes are the building blocks of a connected knowledge base. When you process a note, Notemd:
-
-1. **Sends your text to an LLM** with a structured extraction prompt
-2. **Parses `CONCEPT:` lines** from the LLM response
-3. **Creates one `.md` file per concept** in a designated folder
-4. **Adds backlinks** to the source note (when enabled)
+Configure **Concept note folder path** before running extraction. A dedicated folder makes the resulting notes, duplicate review and later title-generation scope easier to inspect. Extraction creates concept files; it does not automatically fill each one with a researched explanation.
 
 ## How It Works
 
 ### Extraction Pipeline
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+The task sends note content to the chosen LLM, parses `CONCEPT:` entries, deduplicates names within the operation, and creates or updates concept files. Long notes are chunked. Inspect the progress report for failed chunks or incomplete output; a model response is not an exhaustive inventory of concepts.
 
 ### The Extraction Prompt
 
-The LLM receives a prompt that instructs it to:
-
-- Extract **nouns or noun phrases** central to the document's topic
-- **Prioritize specificity** — "Dielectric Relaxation" over "Relaxation"
-- **Normalize to singular** — "models" becomes "model"
-- **Suppress sub-concepts** — if "dielectric relaxation" appears, don't also extract "relaxation"
-- **Skip** references/bibliography sections, common nouns, company/product names
-- Output one concept per line as `CONCEPT: Term Name`
-
-**Synonym suppression** (optional): prepends "Avoid extracting synonyms, semantically similar core concepts, or keywords whenever possible" to the prompt.
-
-**Focused learning domain** (optional): prepends `Relevant Fields: [domain]` to constrain extraction to a discipline.
-
-**Language override** (optional): appends "The output concepts MUST be in [language]."
+The built-in prompt asks for specific topic-relevant concepts. Optional focused-learning and synonym-suppression instructions influence the model, but do not guarantee a canonical vocabulary. A custom extraction prompt must retain the `CONCEPT: Term` output contract. See [custom prompts](../advanced/custom-prompts).
 
 ### Chunking
 
-Long notes are split by `settings.chunkWordCount`. Each chunk is sent independently. Concepts from all chunks are accumulated in a `Set` — duplicates across chunks are silently removed. LLM errors on individual chunks do not abort the operation.
+`chunkWordCount` defaults to 3000. This is an approximate word-based division, not the provider's token budget. Cross-chunk context is limited; review related concepts and ambiguous names after processing.
 
 ## Concept Note Creation
 
 ### Filename Rules
 
-| Rule | Behavior |
-|------|----------|
-| Hyphens/underscores | Replaced with spaces |
-| Special characters | Stripped: backslash, forward slash, colon, asterisk, question mark, quotes, angle brackets, pipe, hash, caret, brackets |
-| Whitespace | Collapsed and trimmed |
-| Max length | 100 characters (truncated + re-trimmed) |
-| Empty/all-dots result | Silently skipped |
-
-Example: `A-B: Key*Term` becomes `A B KeyTerm.md`
+Names are sanitized for Vault filenames: unsupported path characters are removed, whitespace is normalized, and long names are truncated. Empty results are skipped. Different extracted phrases can therefore map to the same filename; inspect names before generating large collections.
 
 ### Templates
 
-**Full template** (backlinks enabled, minimal template off):
+A new standalone note uses the minimal template by default:
+
+```markdown
+# Concept Name
+```
+
+To include a backlink in a newly created standalone note, enable **Add "Linked From" backlink** and disable **Create minimal concept notes**. The supported full form is:
 
 ```markdown
 # Concept Name
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Source Note]]
 ```
 
-**Minimal template** (when `extractConceptsMinimalTemplate: true`):
-
-```markdown
-# Concept Name
-```
+Add-links processing creates full-form concept notes with backlinks when its concept-folder output is enabled. The standalone extraction switches do not change that add-links behavior.
 
 ### Updating Existing Notes
 
-When a concept file already exists:
-
-1. If backlinks are enabled and the source note isn't already listed, append a backlink
-2. If a `## Linked From` section exists, insert before the next `##` header
-3. If no `## Linked From` exists, append section at end
-4. Duplicate backlinks are checked and skipped
+When backlinks are enabled, an existing concept note can receive a missing source link in `## Linked From`. Existing body content is retained, and a repeated backlink is not appended again. The source link uses the source note's basename; inspect ambiguous names in Vaults containing same-named source notes.
 
 ### Configuration
 
 | Setting | Default | Effect |
 |---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | Master toggle. Off = no notes created |
-| `conceptNoteFolder` | `''` (disabled) | Folder path for concept notes |
-| `extractConceptsMinimalTemplate` | `true` | Title-only notes (no Linked From) |
-| `extractConceptsAddBacklink` | `false` | Add backlinks during standalone extraction |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Per-task LLM for concept extraction |
-| `extractConceptsLanguage` | `'en'` | Output language for concept names |
-| `replaceSynonymsDuringConceptExtraction` | `false` | Enable synonym suppression in prompt |
-| `generateConceptLogFile` | `false` | Write a `.log` listing created concepts |
-
-**Important:** The `extractConceptsAddBacklink` and `extractConceptsMinimalTemplate` settings only affect the **dedicated extraction command**. The "Add Links" command always creates full-template notes with backlinks.
+| `useCustomConceptNoteFolder` | `true` | Enable concept-folder output once a folder is configured |
+| `conceptNoteFolder` | `''` | No folder selected initially |
+| `extractConceptsMinimalTemplate` | `true` | Create title-only standalone concept notes |
+| `extractConceptsAddBacklink` | `false` | Enable backlinks during standalone extraction |
+| `extractConceptsProvider` | `DeepSeek` | Provider choice when task-specific routing is enabled |
+| `extractConceptsModel` | `''` | Use the selected provider's model when empty |
+| `extractConceptsLanguage` | `en` | Language choice when task-specific output languages are enabled |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Add a synonym-suppression instruction |
+| `generateConceptLogFile` | `false` | Opt in to a generated concept log |
 
 ## Deduplication
 
-The dedup command (`Notemd: Check & remove duplicate concept notes`) runs a 5-step analysis:
+Duplicate review uses filename heuristics, including case-insensitive names, plural forms, symbol normalization and single-word containment where the selected scope allows it. These are not semantic equivalence proofs: irregular plurals and distinct technical meanings need manual review.
 
-### Step 1: Exact Filename Match
-
-Case-insensitive basename comparison across the configured scope.
-
-### Step 2: Plural Form Detection
-
-Strips suffixes: `-ies` to `-y`, `-es` stripped, `-s` stripped. Compares singular form against scope files. Does not handle irregular plurals (children/child).
-
-### Step 3: Symbol Normalization
-
-Applies: `toLowerCase()`, replace hyphens/underscores with space, strip non-alphanumeric, collapse whitespace. Matches that normalize identically are flagged.
-
-### Step 4: Single-Word Containment
-
-Single-word concept notes are checked against multi-word scope file basenames. Not run when scope is `concept_folder_only`.
-
-### Step 5: Confirmation and Deletion
-
-All candidates are presented in a confirmation modal. Approved items are moved to system trash. Operation is cancellable between each deletion.
+Choose **Check & remove duplicates**, inspect the candidate list, and confirm only the files you intend to remove. Approved items go through Obsidian's trash operation. A concept folder is not a disposable cache; back it up before bulk cleanup.
 
 ### Scope Modes
 
-| Mode | Compared Against |
-|------|-------------------|
-| `vault` (default) | All vault `.md` files excluding concept folder |
-| `concept_folder_only` | Other concept notes within the folder |
-| `include` | Files in specific listed folders |
-| `exclude` | All vault files excluding concept folder + listed folders |
+The duplicate-check scope can compare with the Vault, the concept folder itself, included folders or a scope excluding specified folders. Verify the selected scope before approving removals. Scope changes affect candidates, not the meaning of a duplicate.
 
 ## Usage
 
 ### Extract Concepts (Standalone)
 
-1. Open a note
-2. Run **"Notemd: Extract concepts"** from command palette
-3. Concept notes are created in the configured folder
+Open a Markdown note, confirm the concept folder, and run **Extract concepts (current file)**. The source note remains unchanged. Inspect created filenames, concept coverage and optional backlinks.
 
 ### Extract + Generate Content
 
-**"Notemd: Extract concepts and generate titles"** — extracts concepts, then runs "Generate from Title" on every note in the concept folder. This generates content for **all** concept notes in the folder, not just the newly created ones.
+Run **Batch generate from titles** on the concept folder to add explanations. This can process eligible pre-existing notes in that folder, not just the newest extraction. Review the folder first and inspect the reported complete-folder destination afterward.
 
 ### Create Wiki Link from Selection
 
-1. Highlight text in editor
-2. Run **"Notemd: Create wiki link from selection"**
-3. Text is wrapped in `[[...]]` and a concept note is created
+The selection action can wrap a chosen term as a wiki-link and create its concept note when the destination is configured. Use it when you want to choose the term yourself instead of asking the model to select concepts from the whole note.
 
 ## Tips
 
-- **Set the concept folder first** — without it, no notes are created. A warning modal appears if unset.
-- **Use per-task models** — concept extraction is well-served by cheaper models (GPT-4o-mini, DeepSeek). Save expensive models for research/translation.
-- **Enable synonym suppression** for technical domains where multiple terms refer to the same concept.
-- **Dedup regularly** — run the dedup command after batch processing to catch near-duplicates.
-- **The log file is overwritten** on each run, not appended. Copy it if you need prior results.
-
----
+- Start with a small source and a dedicated concept folder.
+- Choose output language before creating a large concept collection.
+- Review synonym suggestions and duplicate candidates separately.
+- Keep generated logs you need before a later run overwrites them.
 
 ## Next Steps
 
-- [Wiki-Links](./wiki-links) — How concepts get linked inline
-- [Diagrams](./diagrams) — Visualize concept relationships
-- [Workflows](./workflows) — Chain extraction with other tasks
+- [Wiki-links](./wiki-links): processed-note output and related concept files.
+- [Workflows](./workflows): the exact One-Click Extract sequence.
+- [Batch processing](../advanced/batch-processing): folder-wide generation and partial completion.

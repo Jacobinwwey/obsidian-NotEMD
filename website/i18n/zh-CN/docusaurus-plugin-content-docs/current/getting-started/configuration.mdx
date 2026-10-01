@@ -1,14 +1,13 @@
 ---
 id: configuration
 title: 配置
-description: 配置 Notemd 的设置和偏好选项
+description: 查找 Notemd 设置，选择 provider，控制输出位置，并配置语言、任务模型和工作流。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 配置
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,431 +15,102 @@ import TLDR from '@site/src/components/TLDR';
 # 配置
 
 <TLDR>
-**Notemd**配置涵盖了6个主要方面：(1) LLM提供方和API密钥，(2) 每个任务的模型选择，(3) 输出路径与模板，(4) UI语言及输出语言，(5) 搜索服务(Tavily/DuckDuckGo)，(6) 自定义工作流。所有设置均在Obsidian的“设置”→“Notemd”中。更改会立即生效。
+打开**设置 → Notemd**，通过设置搜索定位字段。处理笔记前，配置 provider 与输出位置。先用一篇笔记验证设置变更，再应用于文件夹；已运行的任务可能继续使用启动时捕获的配置。
 </TLDR>
 
 ## 设置概览
 
-访问路径：**Obsidian 设置（⚙️）→ Notemd**
-
-### 主要章节
-
-1. **提供程序配置** — API 密钥、基础 URLs、模型
-2. **任务设置** — 每个任务的模型选择
-3. **输出配置** — 生成文件的保存位置
-4. **语言设置** — UI 与输出语言
-5. **搜索集成** — Tavily/DuckDuckGo 设置
-6. **工作流** — 自定义按钮链
-7. **高级** — 诊断、批量处理、分块处理
+默认活动 provider 是 DeepSeek，账户凭据初始为空。选择预设不会创建账户、安装模型或授予托管模型访问权限。[Provider 设置](../providers/overview)解释协议与模型发现。
 
 <!-- notemd-settings-favorites-guide -->
-## Notemd 设置查找与收藏功能
+## 设置发现与收藏
 
-设置页面旨在供重复使用，而非仅进行一次性配置：
+- **搜索设置**匹配名称、说明、别名和可见分类，并跳转到相应字段。
+- **★ 收藏**展示已收藏设置的说明、分类和跳转入口；收藏保存在当前 Vault，重启后保留，失效 ID 会被清理。
+- 使用箭头折叠发现工具栏可节省垂直空间；重新打开会恢复当前查询。
+- 收藏列表与“仅搜索收藏”是两个独立控件。
 
-- 使用具备字段识别功能的**搜索设置**输入框，可通过设置名称、描述、别名或可见类别来查找对应设置。搜索结果会按相关性排序，并直接跳转至目标设置。
-- 使用**★ Favorites**功能可将经常调整的设置保留在当前的Vault中。点击该按钮即可打开一个专用列表，其中显示设置名称、描述、所属类别以及可直接跳转的目标地址。无需离开设置页面即可从列表中移除收藏项。
-- 查找工具栏默认处于展开状态。当需要更多垂直空间时，可使用箭头按钮将其折叠为右上角的浮动控件；展开后当前的搜索条件会被保留，并在再次展开时自动恢复。
-- 收藏列表与仅显示收藏项的筛选功能是相互独立的。收藏项基于稳定的设置ID生成，即便Obsidian重启也不会丢失；当某设置不再存在时，过期的ID也会被安全地移除。
+**图表预览导出 PPI** 默认为 **300 PPI**，范围 **72–600**，仅影响 PNG 光栅化；所选格式支持时，SVG/PDF 保留矢量几何。**同时导出完整 Mermaid 可视化**控制配套文件，不决定 Drawnix 预览是否显示 Mermaid。
 
-**Diagram preview export PPI**设置的默认值为**300 PPI**，允许的数值范围为**72-600**。该设置仅控制PNG的栅格化处理，而SVG和PDF则会保留矢量几何结构。**Also export complete Mermaid visuals**设置用于控制是否导出额外的Mermaid相关文件，但不影响Drawnix预览中这些文件的显示状态。
----
+## 1. Provider 配置
 
-## 1. 提供商配置
+选择 provider，按需填写凭据，保留符合协议的预设端点，选择可用模型。支持时先获取模型列表，再测试连接；列出模型与成功生成响应是两项不同检查。
 
-### 添加提供程序
-
-1. 从下拉列表中选择提供商（当前有 36 个 provider 定义）。
-2. **输入 API 键**
-3. **可选**：设置自定义基础地址 URL（用于代理/网关）
-4. **点击“获取模型列表”**以验证连接状态
-5. **选择默认模型**
-
-### 常用提供商
-
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
-
-#### Anthropic（Claude）
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
-
-#### Ollama（本地）
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
-```
-
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
-
-### 多个提供商
-
-您可以配置多个提供者，并根据任务在它们之间切换：
-- **主要提供商**：用作备用选项
-- **特定任务提供程序**：为特定任务进行覆盖设置
-
----
+本地 provider 需要运行中的服务和已经下载或加载的模型。云端 provider 或网关会收到发送给它的任务内容。处理私密材料时，除活动 provider 外，还要检查各任务的独立 provider。
 
 ## 2. 任务专用模型
 
-为不同的任务配置不同的模型，以优化成本与质量：
+开启 `useMultiModelSettings` 后，可为链接、标题生成、研究、翻译、概念提取、原文提取和 Mermaid 摘要选择独立的 provider/model。任务模型覆盖值为空时，使用所选 provider 配置的模型；未启用时使用活动 provider。
 
-### 任务类型
-
-| 任务 | 默认模型 | 用途 |
-|------|--------------|---------|
-| **链接** | 主要提供商 | 确定维基链接的相关概念 |
-| **概念生成** | 主要提供商 | 提取并描述相关概念 |
-| **研究** | 主要提供商 | 总结网页搜索结果 |
-| **翻译** | 主要提供商 | 翻译文本 |
-| **图表生成** | 主要提供商 | 生成 Mermaid/Canvas 图表 |
-
-### 示例：成本优化配置
-
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### 如何进行配置
-
-1. **设置 → Notemd → 任务设置**
-2. 对于每个任务，请选择：
-   - ✅ **使用主提供商**（默认）
-   - 🔄 **使用自定义提供程序** → 选择提供程序和模型
-
----
+比较模型时使用代表性笔记，记录输出准确性、延迟与实际账户价格。本指南不提供模型排名，也不保证模型持续可用。
 
 ## 3. 输出配置
 
-### 概念说明输出
+| 任务 | 默认输出行为 |
+|---|---|
+| 添加链接 | 源目录中的独立 `_processed.md` 文件；默认不移动原文件 |
+| 独立概念提取 | 需选择概念文件夹；默认仅标题，无反向链接 |
+| 翻译 | 源目录中的独立 `_<language>.md` 文件；已有目标可能被覆盖 |
+| 研究 | 将研究摘要追加到活动 Markdown 笔记 |
+| 批量标题生成 | 写入正文，在目标允许时把符合条件的笔记移至报告中的同级 `<folder>_complete` 文件夹 |
+| 图表预览／导出 | 选择支持的源格式或视觉格式，并检查操作报告的路径 |
 
-**新概念文档的保存位置：**
+概念文件夹初始为空。`concepts` 是可自行选择的名称，不是默认路径。独立概念笔记只支持最小／完整模板，不存在通用笔记模板变量引擎，详见[概念笔记](../features/concept-notes)。
 
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**模板：**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### 文件夹结构选项
-
-**选项1：扁平式（所有概念放在一个文件夹中）**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**选项 2：分层结构（按源文件夹）**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-配置：**设置 → 输出 → 使用分层文件夹**
-
-### 图表输出
-
-**图表保存位置：**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**格式：**
-- `.mmd` (Mermaid 源码)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
+链接处理后缀、处理后文件夹、翻译后缀和翻译保存路径是不同设置。重跑写入操作前检查目标是否已存在。恢复和冲突提示会指出需关注的输出；取消不会回滚已完成写入。
 
 ## 4. 语言设置
 
-### UI 语言
+插件有 **21 个 UI locale**，网站有 **34 个语言路由**。`uiLocale: auto` 遵循可用 UI 语言映射，不支持的 UI 语言回退到英文。
 
-**界面语言**（按钮、菜单、对话框）：
-
-```
-Settings → Language → UI Language
-Options: 21 plugin UI languages
-Default: System language
-```
-
-支持的语言包括：英语、简体中文、繁体中文、日语、韩语、西班牙语、法语、德语、俄语、阿拉伯语等。
-
-### 输出语言
-
-**生成内容语言**（概念说明、研究总结）：
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**使用场景：** 中文 UI + 英文输出，用于双语研究。
-
-### 翻译目标
-
-翻译任务的**默认目标语言**：
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
+生成内容语言独立于界面，默认是英文。可为链接、标题生成、研究、概念提取或 Mermaid 摘要启用任务专用输出语言。翻译使用所选输出语言 `language`，同样独立于 UI。模型语言能力与 UI／网站语言数量不是同一指标。
 
 ## 5. 搜索集成
 
-### Tavily（推荐）
+选择 **Tavily** 并提供 API key，或明确选择 **DuckDuckGo**。Tavily 密钥为空不会自动切换到 DuckDuckGo。两者都联网，DuckDuckGo 还可能抓取结果页面。
 
-**AI优化搜索服务：**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-获取密钥：[tavily.com](https://tavily.com/)
-
-**功能特性：**
-- 高质量的结果
-- 经过 AI 优化的摘要
-- 来源引用
-
-### DuckDuckGo（实验性功能）
-
-**无需 API 键：**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**注意：** 图像质量较低，且不支持自定义。
-
----
+标题生成默认不研究；需要额外研究步骤时才开启 `enableResearchInGenerateContent`。可选本地知识检索默认也关闭，具有独立文件夹和任务范围。索引虽在本地，作为上下文使用的笔记片段仍会发送给任务 LLM。
 
 ## 6. 工作流配置
 
-### 创建自定义工作流
+使用构建器，或每行填写一个有名称的 DSL 定义。默认值为：
 
-**工作流可将多个任务串联到一个按钮中。**
-
-1. **设置 → 工作流 → 添加工作流**
-2. **名称**：“纸张分析流程”
-3. **DSL**：`process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **保存**
-
-左侧侧边栏中出现了一个新按钮。
-
-### DSL 语法
-
-**格式：** `action1>action2>action3`
-
-**可用操作：**
-- `process-current-add-links` — 为当前笔记添加维基链接
-- `extract-concepts-current` — 生成概念说明
-- `research-and-summarize` — 网络调研 + 摘要
-- `translate-current` — 翻译当前笔记
-- `summarize-as-mermaid` — 生成 Mermaid 图表
-- `process-folder-add-links` — 批量处理文件夹
-
-**示例工作流程：**
-
-**快速概念提取：**
-```
-process-current-add-links>extract-concepts-current
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-**深入研究：**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**多语言分析：**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
+`::` 分隔按钮名称和动作列表，`>` 分隔动作 ID。默认错误策略是在步骤报告失败后停止。[工作流](../features/workflows)列出有效 ID、文件夹上下文和忽略错误继续执行的后果。
 
 ## 7. 高级设置
 
-### 批量处理
+| 设置 | 默认值 | 作用 |
+|---|---|---|
+| `activeProvider` | `DeepSeek` | 无任务专用路由时使用的 provider |
+| `useMultiModelSettings` | `false` | 启用任务独立 provider/model |
+| `useCustomConceptNoteFolder` | `true` | 选择文件夹后允许生成概念文件 |
+| `conceptNoteFolder` | `''` | 初始未选择概念文件夹 |
+| `extractConceptsMinimalTemplate` | `true` | 独立提取生成仅标题笔记 |
+| `extractConceptsAddBacklink` | `false` | 显式开启后添加独立提取反向链接 |
+| `moveOriginalFileOnProcess` | `false` | 添加链接时保留源文件 |
+| `chunkWordCount` | `3000` | 近似文本块大小，不是 provider token 上限 |
+| `batchConcurrency` | `1` | 默认批量并发数 |
+| `enableBatchParallelism` | `false` | 对使用此开关的批量流程启用并行 |
+| `enableStableApiCall` | `false` | 显式稳定请求模式 |
+| `customWorkflowErrorStrategy` | `stop_on_error` | 报告错误后停止工作流 |
 
-**并行处理多个文件：**
+分块与输出 token 预算是不同控制项。较小的块不保证满足 provider 上下文限制；降低并发可减轻配额压力，但不能消除所有 429。
 
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
+## 配置备份与 Profile
 
-数值越高 = 速度越快，但 API 调用次数越多。
+设置属于 Vault 插件数据，变更可用配置前先备份。Provider profile 导出有独立脱敏契约，不是完整 Vault 备份。即使已脱敏，分享前也要核对端点 URL 与其他元数据。不要公开原始插件设置或含私密笔记的诊断响应。
 
-### 智能分块
+## 配置故障排查
 
-**对于较长的笔记，请将其拆分成多个部分：**
+针对实际 provider/model 运行连接测试，再重试一篇短笔记。设置似乎缺失时，按名称搜索，检查当前分类、开发者模式可见性，并确认打开了正确 Vault。报告问题时附插件版本和脱敏配置。
 
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
+## 后续阅读
 
-防止令牌数量限制错误。
-
-### 诊断面板
-
-**查看详细日志：**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-显示：
-- API 请求/响应
-- 令牌使用情况
-- 处理时间
-- 错误
-
-### 重复概念检测
-
-**避免近乎重复的概念：**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-数值越高，合并的激进程度就越大。
-
----
-
-## 配置文件
-
-### 导出/导入设置
-
-**在设备间共享配置：**
-
-1. **设置 → 高级选项 → 导出配置**
-2. 保存 `notemd-config.json`
-3. 在新设备上：**导入配置**
-
-**包含内容：**
-- 提供方 API 密钥（可选）
-- 模型选择
-- 输出路径
-- 自定义工作流
-
----
-
-## 推荐配置
-
-### 面向学生
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### 面向研究人员
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### 专为注重隐私的用户设计
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### 用于双语工作
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## 配置故障排除
-
-### 设置未保存
-- 检查 `.obsidian/plugins/notemd/` 中的文件权限
-- 尝试：禁用插件 → 重新启用
-
-### API 密钥无效
-- 不要多余的空白
-- 检查有效期
-- 在提供商控制面板中验证积分。
-
-### 模型无法加载
-- 点击“获取模型列表”以刷新。
-- 检查网络连接状态
-- 尝试不同的提供商
-
----
-
-## 后续步骤
-
-- 📖 [探索功能](../features/wiki-links)
-- 🔌 [提供商设置指南](../providers/overview)
-- ❓ [常见问题](../faq)
+- [快速开始](./quick-start)：检查首个输出。
+- [批量处理](../advanced/batch-processing)：范围与并发。
+- [自定义提示词](../advanced/custom-prompts)：替换变量与输出契约。
+- [故障排查](../advanced/troubleshooting)：诊断与报告。

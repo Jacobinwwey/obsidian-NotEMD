@@ -1,75 +1,64 @@
 ---
 id: china
-title: "Penyedia di China"
-description: "Sila konfigurasi Qwen, DeepSeek, GLM, dan sebagainya."
+title: Penyedia China
+description: >-
+  Padankan akaun penyedia serantau, laluan titik akhir dan ID model atau
+  deployment dalam Notemd.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - Penyedia China
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Penyedia di China
+# Penyedia China
 
-<TLDR>
-**Notemd menyokong penyedia dari kawasan China serta yang berasal dari China melalui titik hujung yang kebanyakannya serasi dengan OpenAI.** Senarai semasa termasuk DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS, dan Z AI. Kelebihannya ialah jangkauan serantau serta kawalan kos; risikonya pula ialah penamaan model yang berbeza mengikut penyedia serta sekatan akaun.
+<TLDR>Gunakan pratetap yang sepadan dengan akaun dan deployment. Laluan serantau, nama model serta izin tidak boleh ditukar ganti walaupun protokol serasi OpenAI sama. Uji tugas kecil sebelum memilih penyedia untuk beban kerja.</TLDR>
 
-Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Persediaan
 
-## Pengaturan
+Cipta akaun API penyedia, dapatkan kunci dan pilih pratetap Notemd sepadan. Sahkan rantau titik akhir akaun serta hak akses model. Jalankan **Test connection** dan tugas nota ujian; lalai tidak menjamin model tersedia kini.
 
-Buat akaun penyedia, hasilkan kunci API, kemudian pilih tetapan awal Notemd yang sesuai daripada menggunakan profil OpenAI umum. Tetapan awal tersebut mempunyai Base URL lalai, model, mod ujian API, tingkah laku penemuan model, serta sebarang medan UI khusus penyedia.
+## Titik akhir dan pengesahan
 
-Gunakan pemilihan model mengikut tugas dengan agresif di sini. Sebagai contoh, gunakan DeepSeek atau GLM untuk kerja yang memerlukan penaakulan yang banyak, gunakan Qwen atau Moonshot untuk kerja bahasa Cina yang meluas, dan hantar tugas pengaturcaraan ke Qwen Code apabila akaun tersebut menyokong model pengaturcaraan.
+| Pratetap | Model lalai | URL asas lalai |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-## Titik Hujung Dan Pengesahan
+Gantikan pemegang tempat Doubao dengan ID titik akhir Ark atau ID model yang disokong deployment. GLM dan Z AI mempunyai pratetap serantau berbeza. Kunci satu rantau/langganan mungkin tidak berfungsi pada titik akhir lain; ikut arahan akaun penyedia, bukan lokasi fizikal semata-mata.
 
-| Penyedia | Model Lalai | Base URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (ID titik hujung diperlukan) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+## Penemuan model
 
-**Nota:** Doubao memerlukan ID titik hujung Ark (format: `ep-xxxxxxxx-xxxx-xxxx`) dan bukannya nama model standard.
+Gunakan penemuan apabila dibenarkan. Huawei Cloud MaaS menggunakan penemuan berasaskan deployment; pratetap lain menggunakan laluan serasi OpenAI apabila disokong. Tiada izin senarai tidak semestinya bermakna model yang ditetapkan jelas tidak boleh menjana.
 
-Kebanyakan penyedia ini menggunakan runtime yang serasi dengan OpenAI, tetapi semantik akaun serta model mereka berbeza. Gunakan Base URL khusus untuk setiap tetapan awal kecuali jika anda telah sahkan titik hujung alternatif akaun tersebut.
+Ujian sambungan berbeza mengikut pratetap. DeepSeek boleh lulus daripada senarai sahaja, sementara beberapa pratetap serantau menjalankan sembang pendek. Tugas sebenar tetap perlu untuk mengesahkan prompt dan hasil.
 
-## Penemuan Model
+## Penyelesaian masalah
 
-DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan, dan SiliconFlow menggunakan penemuan model yang serasi dengan OpenAI apabila penyedia menyokong senarai. Huawei Cloud MaaS menggunakan mod `huaweicloud-modelarts-models` kerana metadata pelaksanaan ModelArts tidak sama dengan senarai `/v1/models` umum.
+- Kunci diterima tetapi penjanaan ditolak: semak hak model, deployment dan rantau akaun.
+- Model Ark ditolak: sahkan titik akhir menjangkakan ID deployment atau model.
+- Respons penaakulan terpotong: semak had keluaran dan tetapan pemikiran khusus penyedia.
+- Ralat rangkaian: uji titik akhir daripada peranti Obsidian dan baca ralat penghantaran.
 
-Jangan anggap kegagalan penemuan sebagai bukti bahawa perbualan tidak boleh dilakukan. Beberapa penyedia membenarkan perbualan sambil membataskan kebenaran senarai model. Dalam kes itu, simpan ID model yang jelas dalam profil dan sahkan dengan ujian sambungan.
+## Bila digunakan
 
-## Pemecahan masalah
+Pilih berdasarkan titik akhir akaun boleh dicapai, keperluan pengendalian data dan hasil tugas terukur. Rantau atau jenama model bukan jaminan mutu, privasi atau kos. [Gambaran penyedia](./overview) juga menyenaraikan gerbang dan pelayan setempat.
 
-- Autentikasi berjaya tetapi perbualan gagal: nama model mungkin berada di luar hak atau kawasan akaun.
-- Doubao gagal dengan nama model biasa: gunakan ID titik hujung Ark dalam medan model apabila pelaksanaan anda memerlukannya.
-- Jawapan penaakulan dipotong: periksa had token keluaran khusus penyedia serta tetapan had token berdasarkan model milik Notemd.
-- Rangkaian serantau berbeza: gunakan titik hujung kawasan China penyedia apabila mesin vault berada di dalam China; gunakan titik hujung antarabangsa hanya apabila akaun serta laluan rangkaian kedua-duanya sah.
+## Seterusnya
 
-## Bila Perlu Digunakan
-
-Gunakan penyedia di China apabila kelewatan serantau, akses pembayaran/akaun, kualiti bahasa Cina, atau kos merupakan kekangan utama. Pilih OpenAI, Anthropic, Google, atau penyedia tempatan secara langsung apabila anda memerlukan sempadan protokol yang lebih mudah atau konsistensi penyelidikan ralat antara penyedia yang lebih baik.
-
----
-
-## Langkah Seterusnya
-
-- [LLM Providers](/docs/providers/overview) -- Konfigurasi penuh, model setiap tugas, dan logik percubaan semula
-- [Penyelesaian Masalah](/docs/advanced/troubleshooting) -- Perbaiki masalah sambungan serantau dan ralat pengesahan
+- [Gambaran penyedia](./overview): 36 pratetap dan penghalaan tugas.
+- [Penyelesaian masalah](../advanced/troubleshooting): reproduksi ralat pengesahan dan model.

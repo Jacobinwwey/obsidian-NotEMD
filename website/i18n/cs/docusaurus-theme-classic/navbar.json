@@ -12,11 +12,31 @@
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Časté dotazy",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Začněte zde",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Noví uživatelé",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Pracovní postupy",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Vývojáři",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

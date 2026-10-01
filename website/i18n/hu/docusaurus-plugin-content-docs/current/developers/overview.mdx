@@ -1,0 +1,99 @@
+---
+id: overview
+title: Fejlesztői útmutató
+description: >-
+  Build, tesztelés és a meglévő szolgáltatói, műveleti, renderelési és
+  dokumentációs szerződések bővítése.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Fejlesztői útmutató
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Fejlesztői útmutató
+
+<TLDR>Külön ágon dolgozzon, telepítse a rögzített függőségeket és mindkét böngészőrevíziót, majd futtasson buildet és teljes Jestet. A szerződés gazdájánál módosítson; a dokumentáció, szolgáltatói tesztek és célalkalmazás-bizonyíték együtt változzon.</TLDR>
+
+## Munkapéldány
+
+Klónozza a [tárolót](https://github.com/Jacobinwwey/obsidian-NotEMD), olvassa az [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) fájlt. Plugin CI: Linux/Windows Node 20; webhely: Node 24. Gyökér és `website/` külön függőségtelepítést használ.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+A két Playwright-csomag eltérő Chromium-revíziót kérhet; egy telepítés nem elég. A `main.js` generált és Git által figyelmen kívül hagyott fájl. Régi helyi bundle nem igazolja az új commitot.
+
+## Felelősségi határok
+
+| Felelősség | Elsődleges forrás |
+| ---------------- | ---------------- |
+| Életciklus, parancsok és hostkapcsolat | `src/main.ts` |
+| Szolgáltatói profilok, protokollmetaadat és validáció | `src/llmProviders.ts` |
+| Kérések, transportok, ismétlések és streamek | `src/llmUtils.ts` |
+| Műveletek, sémák és nyilvános CLI-részhalmaz | `src/operations/`, `src/cliContracts.ts` |
+| Fájlműveletek, kutatás és fordítás | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Folyamatműveletek és oldalsáv | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Diagramspecifikációk és renderelés | `src/diagram/`, `src/rendering/` |
+| UI-szövegek és nyelvek | `src/i18n/` |
+| Nyilvános útmutatók és fordítások | `website/docs/`, `website/i18n/` |
+| Karbantartási szabályok és dátumozott bizonyíték | `docs/maintainer/` |
+
+A produkciós bundle önálló, beágyazott előnézeti hosttal. Lehetséges külön hostútvonal nem a szállított csomag szerződése. Aktiválásához csomagolás, assets, ellenőrzések és dokumentumok összehangolása kell.
+
+## Körülhatárolt változtatás
+
+1. Reprodukáljon, és előbb írjon célzott, hibára futó tesztet.
+2. Az invariáns gazdájánál módosítson; a külső határon validáljon.
+3. Futtasson célzott és teljes teszteket, megőrizve megszakítást, hibaterjedést és tartós írást.
+4. Frissítse az angol forrást és érintett nyelveket. Terv, feladat és walkthrough teljes, külön angol/kínai párt igényel a `docs/` alatt.
+5. Vizuális/natív változást a valódi alkalmazásban teszteljen; XML, kép vagy build nem bizonyít szerkeszthetőséget és csatlakozó kötéseket.
+
+Szolgáltatót a `llmProviders.ts` fájlban adjon hozzá, kompatibilis transportot használjon, fedje le a `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README és kapcsolatteszteket. Tartsa meg a streaminget és megszakadt válaszokat. Művelet kitételéhez bemeneti/eredményséma, kontextus, mellékhatás és kezelési címke kell. Regisztráció nem nyilvános Agent-végpont. [Agent](../agents/overview).
+
+## Ellenőrzés
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+A lint egyedi diagnózisokat hasonlít; kisebb összlétszám nem igazol új regressziót. Visszakeresési változásnál futtassa az `npm run benchmark:local-kb` parancsot, és rögzítse a korpuszt/környezetet. Webhelyhez Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Az 1.9.8 programban a fordításokat közvetlenül a Codex írja és ellenőrzi. Ne futtasson régi fordítószkriptet, LM Studiót vagy fordítási szolgáltatást. Formázás, validáció és a kész szöveg renderelése megengedett.
+
+## Obsidian és célalkalmazások
+
+Használjon `.notemd-host-verification` jelölésű ideiglenes vaultot; a szkriptek a bemásolt bundle azonosságát vizsgálják. A felhasználói vault maradjon külön. Próbálja az `obsidian help` és `obsidian-cli help` parancsot is; hiányzó eszköz nem sikeres hostteszt.
+
+PowerPoint, CircuitikZ és diaexport saját előfeltételekkel/artefaktumokkal rendelkezik. Kövesse a [dátumozott elfogadási jegyzőkönyvet](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) és [kiadási folyamatot](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Jelezze a fizikai mobilok és minimumverzió igazolatlan állapotát.
+
+## Közreműködés és kiadás
+
+A PR írja le a problémát, végső viselkedést, teszteket és határokat. Reprodukció: [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). Kulcsot, magánjegyzetet és idegen fájlt ne commitoljon. Egy publisher kezeli a verziókat, numerikus taget, tiszta tagforrást, kétnyelvű jegyzeteket, ellenőrzött draft fájlokat, publikálást és explicit Pages deployt. Nyilvános taget ne módosítson. A `.trellis/` helyi munkafolyamat-állapot, nem CI-függőség.
+
+## Tovább
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Projektállapot](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

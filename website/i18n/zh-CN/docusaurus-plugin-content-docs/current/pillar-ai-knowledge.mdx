@@ -1,341 +1,135 @@
 ---
 id: pillar-ai-knowledge
-title: Obsidian AI知识管理指南
-description: 利用人工智能构建互联知识库的完整指南——从维基链接与概念提取，到研究、翻译及图表生成
+title: Obsidian AI 知识管理指南
+description: 保留源文、选择任务范围、审核输出，再逐步扩大 Notemd 自动化。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [obsidian, AI, knowledge management, wiki-links, concept notes, LLM, diagrams, research, translation, workflows, Copilot alternative, Smart Connections alternative, obsidian AI plugin]
-concepts: [Notemd, Obsidian, AI Knowledge Management, Wiki-Links, Concept Notes, LLM Integration, Diagrams, Research, Translation, Workflows, Copilot Alternative]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Tavily
-    url: https://tavily.com
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Obsidian AI 知识管理指南
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Obsidian AI知识管理指南
+# Obsidian AI 知识管理指南
 
 <TLDR>
-**Notemd** 能将基于 LLM 的阅读内容转化为持久的知识体系：wiki 链接可串联各种概念，概念笔记能构建可检索的知识图谱，研究功能可将网络资源导入您的知识库，翻译功能可打破语言障碍，图表功能能让结构一目了然，而工作流则只需点击一下即可将所有元素整合在一起。本指南涵盖了从原始笔记到结构化、可视化且支持多语言的知识库的完整流程。
+有用的知识工作流应区分源材料、模型输出和你的更正。Notemd 的链接、提取、研究、翻译与图表任务会写入可检查文件。先验证单个来源，再自动化有边界的文件夹。
 </TLDR>
 
-## 为何选择人工智能知识管理？
+## 明确目标
 
-传统的笔记方式会生成扁平文件。即便使用了手动创建的维基链接，大多数笔记依然彼此孤立。Notemd 利用 LLMs 自动处理这些连接关系。
+选择真正需要的产物：带链接阅读笔记、概念集、有来源摘要、译文或图表。文件和链接越多不代表理解或检索越好。先决定如何核对正确性，以及以后如何找到材料。
 
-- **LLMs 会读取您的内容**，并识别出关键信息——术语、方法、人物、理论
-- 在每个概念出现的地方都会**自动插入链接**，而不会被放在“另请参阅”中。
-- **概念说明**会作为独立的可检索文件生成。
-- **研究功能**通过网页来源的上下文来丰富笔记内容
-- **图表能让结构一目了然**——基于相同内容的思维导图、流程图和数据图表
-
-最终结果是一个知识图谱，它会随着你处理的每条笔记而不断扩展，而不仅仅在你记得添加链接时才会变化。
-
-## 完整的处理流程
+## 完整流程
 
 ```mermaid
-graph TD
-    A[Raw Note] --> B[Add Links]
-    B --> C[Wiki-Linked Note]
-    B --> D[Concept Notes]
-    C --> E[Connected Knowledge Graph]
+flowchart TD
+    A[源笔记副本] --> B[选择任务与输出范围]
+    B --> C[带链接笔记或概念笔记]
+    B --> D[研究、翻译或图表]
+    C --> E[对照源文与证据]
     D --> E
-    F[Web Research] --> E
-    G[Translation] --> E
-    H[Diagram Generation] --> I[Visual Structure]
-    E --> H
-    I --> E
-    J[One-Click Workflow] --> B
-    J --> F
-    J --> G
-    J --> H
+    E --> F[在 Vault 保留修正后的结果]
 ```
 
-每个步骤都是独立的。可以使用其中一个或全部。最具影响力的顺序为：**添加链接 → 概念说明 → 图表**。
+这些是可选择的任务，不表示默认按钮会执行全部步骤。保留源文，组合流程前检查每个任务的输出位置。
 
----
+## 1. Wiki 链接：显式建立关系
 
-## 1. 维基链接：明确建立关联
+对测试笔记运行 **处理文件（添加链接）**，默认核对同级 `_processed.md`。检查候选术语是否有导航价值，引文、代码和公式是否忠实。
 
-维基链接是知识图谱的支柱。Notemd 使用 LLM 来：
+聚焦学习与同义词抑制可引导模型，不强制概念等价或数值相似度阈值。优先要求与现有文件名确定性匹配时，应使用确定性标题匹配。
 
-1. 读取您的笔记内容（长文档会拆分成多个部分）
-2. 识别核心概念——优先考虑具体的技术术语，而非通用名词
-3. 在每个出现的位置插入 `[[wiki-links]]`
-4. 抑制同义词，避免“ML”和“机器学习”生成独立的节点
+[Wiki 链接指南](./features/wiki-links)
 
-### 何时使用
+## 2. 概念笔记：区分术语与解释
 
-- **每条笔记字数需大于100字**——较短的笔记难以涵盖完整概念
-- **研究论文、技术文档、会议记录**——充满了领域特定的术语
-- **在内容稳定后** —— 请勿重复处理草稿
+提取前选择概念目录。独立提取默认创建仅标题笔记，不修改源文。新笔记需要 `Linked From` 时，开启反向链接并关闭最小模板。
 
-### 关键设置
+提取与正文生成是不同操作。**从标题批量生成** 可处理所选目录内已有和新增的符合条件笔记。测试用专用目录，并检查 complete 目录移动行为。
 
-| 设置 | 推荐 | 为什么 |
-|---------|-----------|-----|
-| `addLinksProvider` | DeepSeek 或 GPT-4o-mini | 低成本却具备出色的准确度 |
-| 同义词抑制 | 开启 | 防止节点重复 |
-| 上下文窗口 | 段落 | 在精度与成本之间取得平衡 |
+重复审核基于文件名启发式，删除前确认候选；相近名称可能有不同技术含义。
 
-→ [Wiki-Links 深入解析](/docs/features/wiki-links)
+[概念笔记指南](./features/concept-notes)
 
----
+## 3. 研究：保留证据链
 
-## 2. 概念说明：可检索的知识节点
+选择主题或使用活动标题，设置 Tavily 或 DuckDuckGo 后运行 **研究并总结**。缺少 Tavily key 不自动回退 DuckDuckGo。打开来源 URL，核对追加摘要的重要结论。
 
-维基链接可将各种概念在文本中相互关联，而概念笔记则能让每个概念独立被检索到。每个概念都有其专属的 `.md` 文件：
+可选本地检索提供限定范围片段。当前索引为词法，片段发送给任务所选 LLM，因此本地索引不等于整个研究流程离线或仅在设备内处理。
 
-```markdown
-# Machine Learning
+[研究指南](./features/research)
 
-## Linked From
-- [[My Research Notes]]
-- [[Neural Networks Explained]]
+## 4. 翻译：核对含义与结构
+
+选择输出语言并运行文件翻译，默认使用 `_<language>.md`，已有目标可能覆盖。仅需段落时先复制到临时笔记。
+
+对照原文检查术语、数字、代码、链接和数学符号。长文分块可能丢失跨块上下文。21 个 UI locale 和 34 个网站路由不证明任何语言对的翻译质量。
+
+[翻译指南](./features/translation)
+
+## 5. 图表：选择可编辑产物
+
+选择图表类型与兼容源格式，核对预览，再保存源文件及需要的 SVG、PNG 或 PDF。渲染图片不证明其他编辑器保留所有语义关系。
+
+采用选择器支持的目录项。CircuitikZ 有受限输出和独立原生编译环境检查；Drawnix 静态跨分支箭头不保证重排附着。PowerPoint 表格修复改善原生输出，Mermaid／SVG 仍可能图像回退。
+
+[图表指南](./features/diagrams)
+
+## 6. 工作流：自动化已验证步骤
+
+工作流由名称、`::` 与 `>` 分隔的动作 ID 组成，默认如下：
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### 提取过程
+它执行链接、文件夹标题生成和 Mermaid 修复，不附加通用研究或图表生成。动作保留各自前置条件与输出行为，不是任意文本管道。
 
-LLM 提示语的结构非常严谨：
-- 转换为单数形式
-- 优先使用多词概念而非单字（如“介电松弛”而非“松弛”）
-- 跳过参考文献/参考页部分
-- 以 `CONCEPT:` 行的形式输出，以便进行确定性解析
+默认在步骤报告失败时停止。只有后续动作可使用剩余输入时才适合继续；取消保留已完成输出，不回滚。
 
-各个数据块中的概念会通过 `Set<string>` 进行去重处理。单个数据块出现的 LLM 错误不会导致整个操作中止。
+[工作流指南](./features/workflows)
 
-### 反向链接
+## 7. Provider：匹配协议与任务
 
-启用后，每条概念笔记都会记录有哪些来源笔记提到了它。Obsidian 的内置反向链接面板也会显示这些反向连接。
+36 个预设覆盖五类协议。根据端点、模型权限、数据政策和实测输出选择 provider。比较速度或费用时使用相同源文和提示词。
 
-### 去重
+任务专用路由默认关闭，确需不同任务使用不同 profile 时再开启。判断本地化前逐项检查。
 
-Notemd的4步去重引擎能够检测到：
-1. **完全匹配** — 不区分大小写的文件名比较
-2. **复数形式** — “Models.md”与“Model.md”的区别
-3. **符号规范化** — “A-B.md”与“A B.md”的区别
-4. **单词包含检测**——当存在“Machine Learning.md”时，会标记“ML.md”
+[Provider 概览](./providers/overview)
 
-### 关键设置
+## 开始使用清单
 
-| 设置 | 推荐 | 为什么 |
-|---------|-----------|-----|
-| `conceptNoteFolder` | `concepts/` 或 `🧠 concepts/` | 保持保险库井然有序 |
-| `extractConceptsAddBacklink` | 开启 | 启用反向查找 |
-| `extractConceptsMinimalTemplate` | 关闭 | 包含“链接自”字段的完整模板 |
-| 任务级模型 | DeepSeek | 概念提取不需要昂贵的模型。 |
-| 同义词抑制 | 开启 | 相同的设置同时影响链接和提取功能。 |
-
-→ [概念说明深入解析](/docs/features/concept-notes)
-
----
-
-## 3. 研究：将网络引入其中
-
-Notemd 将网络搜索功能整合到您的笔记工作中：
-
-1. **查询构建** — 您的笔记标题或选择内容将作为搜索查询
-2. **网络搜索** — Tavily（推荐，需要 API 密钥）或 DuckDuckGo（免费，无需密钥）
-3. **LLM 摘要功能** — 将搜索结果浓缩为相关的摘要
-4. **追加到笔记**——在光标位置或作为新章节添加摘要
-
-### 何时使用
-
-- 在处理新主题之前——先获取网页上下文
-- 当概念说明需要补充内容时——先进行研究，然后再添加链接
-- 用于文献综述——批量处理一个笔记文件夹
-
-### 关键设置
-
-| 设置 | 推荐 | 为什么 |
-|---------|-----------|-----|
-| `researchProvider` | GPT-4o还是Claude | 研究需要更高质量的摘要生成。 |
-| 搜索服务 | Tavily | 更高的相关性，可配置的深度 |
-| `maxResearchContentTokens` | 4000 | 深度与成本之间的平衡 |
-
-→ [深入研究](/docs/features/research)
-
----
-
-## 4. 翻译：打破语言障碍
-
-Notemd 会使用您配置的 LLM 来翻译笔记——而非专门的翻译 API。这意味着：
-
-- **上下文感知翻译**——LLM能够理解整份文档，而不仅仅是逐句翻译
-- **技术术语处理** — “梯度下降”应保持为“梯度下降”，而非“坡度向下”
-- **批量支持**——可一次性翻译整个笔记文件夹中的所有内容
-- **按任务模型**——使用 Gemini Flash 进行翻译（快速、廉价且支持多语言）
-
-### 语言支持
-
-Notemd 本身支持 21 种 UI 语言。翻译目标语言可针对每个任务进行配置。常见的语言对包括：EN↔ZH、EN↔JA、EN↔KO、EN↔DE、EN↔FR、EN↔ES。
-
-→ [翻译详解](/docs/features/translation)
-
----
-
-## 5. 图表：让结构可视化
-
-Notemd的图表处理流程以规范优先：首先由LLM生成结构化的`DiagramSpec` JSON，随后通过适配器将其转换为目标格式。这种方式比让LLM直接处理原始的Mermaid语法能产生更可靠的输出。
-
-### 意图检测
-
-Notemd 会根据内容推断出最佳的图表类型：
-
-- **带数字的表格** → 数据图表 (Vega-Lite)
-- **客户端/服务器术语** → 序列图 (Mermaid)
-- **实体/主键** → ER图 (Mermaid)
-- **步骤/流程图** → 流程图 (Mermaid)
-- **概念图关键词** → JSON Canvas (Obsidian 原生)
-- **默认** → 思维导图 (Mermaid)
-
-### 渲染链
-
-主要目标 → 备用方案 → 备用方案 → HTML。如果 Mermaid 语法出错，它会向 LLM 发送错误信息后重试一次，否则就会退而使用最简的图表。
-
-### 关键设置
-
-| 设置 | 推荐 | 为什么 |
-|---------|-----------|-----|
-| `enableExperimentalDiagramPipeline` | 开启 | 以规格优先，提升质量 |
-| `experimentalDiagramCompatibilityMode` | `best-fit` | 每个意图的默认目标 |
-| `summarizeToMermaidProvider` | GPT-4o还是Claude | 图表规范需要空间推理能力。 |
-| `autoMermaidFixAfterGenerate` | 开启 | 自动捕获 LLM 语法错误 |
-| 本地知识增强 | 针对特定域启用 | 通过保险库上下文提升准确性 |
-
-→ [图表深度解析](/docs/features/diagrams)
-
----
-
-## 6. 工作流：一键自动化
-
-工作流可将多个任务串联为一个侧边栏按钮。其 DSL 格式为：
-
-```
-task1 | task2 | task3
-```
-
-示例：`addLinks` | 提取概念 | generateDiagram` — 一键将笔记从原始文本转换为完全连接的可视化知识节点。
-
-### 推荐的工作流程
-
-| 工作流 | 链条 | 用例 |
-|----------|-------|----------|
-| 完整流程 | `addLinks \| extractConcepts \| generateDiagram` | 新笔记 |
-| 先进行研究 | `research \| addLinks` | 不熟悉的主题 |
-| 多语言支持 | `translate \| addLinks` | 多语言笔记 |
-| 仅显示图表 | `generateDiagram` | 快速可视化 |
-
-→ [工作流深度解析](/docs/features/workflows)
-
----
-
-## 7. LLM 提供商：从云端到本地的36种选择
-
-Notemd 支持 4 种传输类型下的 36 家提供商。关键组：
-
-- **国际云服务**：OpenAI、Anthropic、Google、Mistral、xAI
-- **中国云**：DeepSeek、Qwen、Doubao、Moonshot、GLM、百度、SiliconFlow
-- **网关**：OpenRouter、GitHub Models、Hugging Face、Vercel
-- **本地**：Ollama、LMStudio、OVMS — 无 API 键，数据不会离开您的机器
-
-### 按任务模型策略
-
-最经济高效的配置方式是：用低成本模型处理简单任务，用高性能模型处理复杂任务。
-
-```
-extractConcepts  → DeepSeek (fast, cheap, accurate enough)
-addLinks          → DeepSeek or GPT-4o-mini
-research          → GPT-4o or Claude (needs quality)
-generateDiagram   → GPT-4o or Claude (needs spatial reasoning)
-translate         → Gemini Flash (fast, multilingual)
-```
-
-→ [LLM 提供商概览](/docs/providers/overview)
-
----
-
-## 入门检查清单
-
-1. **安装 Notemd** — [社区插件](/docs/getting-started/installation)（推荐）或手动安装
-2. **配置提供商** — DeepSeek（最简单），OpenAI，或 Ollama（免费）
-3. **处理您的第一条笔记** — 右键点击 → “处理文件（添加链接）”
-4. **设置概念文件夹** — 设置 → Notemd → 输出 → 概念文件夹
-5. **提取概念** — 对同一张便签运行“提取概念”操作
-6. **生成图表** — 运行“Generate diagram”以可视化这些连接关系
-7. **创建工作流**——将上述步骤串联成一个一键按钮
-
-## 推荐配置
-
-### 学生（预算）
-
-```
-Provider: DeepSeek (free tier available)
-Concept extraction: DeepSeek
-Research: DuckDuckGo (free) + DeepSeek
-Diagrams: Off (or legacy Mermaid)
-Workflows: addLinks | extractConcepts
-```
-
-### 研究员（质量）
-
-```
-Provider: GPT-4o (primary)
-Concept extraction: DeepSeek (cost savings)
-Research: GPT-4o + Tavily
-Diagrams: best-fit mode, GPT-4o
-Workflows: research | addLinks | extractConcepts | generateDiagram
-```
-
-### 隐私优先（仅本地）
-
-```
-Provider: Ollama (llama3 or qwen2.5:7b)
-All tasks: Ollama
-Research: DuckDuckGo (free, no API key)
-Diagrams: legacy Mermaid mode
-```
-
-### 双语（中文 + 英文）
-
-```
-Primary: DeepSeek (Chinese queries)
-Translation: Google Gemini Flash
-Research: Tavily + DeepSeek (Chinese search context)
-Language output: per-task (extractConceptsLanguage: zh-CN)
-```
-
----
+1. 安装 Notemd，备份源文。
+2. 配置并测试准确 provider/model。
+3. 选择概念目录和独立输出位置。
+4. 对笔记副本运行一个任务。
+5. 对照原文并保留更正。
+6. 扩大到小目录，检查部分完成后再构建较长工作流。
 
 ## 常见模式
 
-### 模式：处理一篇研究论文
+### 处理研究论文
 
-1. 导入 PDF 内容（或直接粘贴）
-2. **研究** — 获取该主题的网页相关内容
-3. **添加链接** — 识别并关联关键概念
-4. **提取概念** — 创建独立笔记
-5. **生成图表** — 可视化论文的结构
+先用合适外部工具转为可读 Markdown，检查公式、图片和表格转换错误。提取概念或原文，研究选定问题；只有图表能说明可核验关系时才生成。保留原论文链接和更正。
 
-### 模式：每日笔记丰富功能
+### 维护概念集合
 
-1. 撰写每日笔记
-2. **添加链接** — 将今日的想法与现有概念关联起来
-3. 概念说明会通过反向链接自动更新
+使用专用目录，提取后审核术语，只为明确选定子集生成解释。去重前备份；概念数量不能替代准确定义与有用导航。
 
-### 模式：文献综述
+### 处理私密材料
 
-1. 创建一个名为 papers/notes 的文件夹
-2. **批量添加链接** — 处理整个文件夹
-3. **去重概念** —— 清理近似重复的笔记
-4. **生成图表** — 整个文献的思维导图
+提前安装模型、服务与依赖，检查任务路由；要求离线时避免网络研究。分享前审核诊断。本地回环默认值不能阻止 profile 被配置为远端服务。
 
----
+### 从中断批次恢复
 
-*Notemd 是开源项目（采用 MIT 许可证），可在所有平台上与 Obsidian 0.15.0+ 版本配合使用。[立即安装](/docs/getting-started/installation) 或 [在 GitHub 上查看](https://github.com/Jacobinwwey/obsidian-NotEMD)。*
+等待取消或失败收敛，阅读报告，核对完成与恢复输出，比较冲突，仅重跑计划工作。不要由取消状态推断没有产物，也不要未经引用检查就删除配套文件。
+
+## 后续阅读
+
+- [快速开始](./getting-started/quick-start)：完成首个任务。
+- [批量处理](./advanced/batch-processing)：选取与输出归属。
+- [开发者指南](./developers/overview)：扩展与验证。
+- [Agent 指南](./agents/overview)：发现实际公开契约。

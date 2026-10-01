@@ -4,19 +4,39 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Notemd-logotyypi",
+    "message": "Notemd-logo",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "Dokumentit",
+    "message": "Dokumentaatio",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Usein kysyttyä",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Aloita tästä",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Uudet käyttäjät",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Päivittäinen työ",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Kehittäjät",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agentit",
+    "description": "Navbar label: Agents"
   }
 }

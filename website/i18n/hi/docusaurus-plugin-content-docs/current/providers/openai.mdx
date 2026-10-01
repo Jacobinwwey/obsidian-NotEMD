@@ -1,67 +1,54 @@
 ---
 id: openai
-title: "OpenAI"
-description: "OpenAI को कॉन्फ़िगर करें (GPT-4, GPT-4o)"
+title: OpenAI
+description: Chat Completions-संगत OpenAI मॉडल सेट करके generation अधिकार जाँचें।
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # OpenAI प्रदाता
 
-<TLDR>
-**OpenAI, साझा OpenAI-संगत ट्रांसपोर्ट का उपयोग करता है.** वर्तमान प्रीसेट `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` और `models-then-chat` कनेक्शन परीक्षण के लिए डिफ़ॉल्ट है. जब आपको सटीक फ़ील्ड सेमैंटिक्स की आवश्यकता हो तो इस पृष्ठ का उपयोग करें; श्रेणी-स्तरीय चयन के लिए [LLM Providers](/docs/providers/overview) का अवलोकन देखें.
+<TLDR>यह profile साझा OpenAI Chat Completions runtime उपयोग करता है। उसी protocol को स्वीकारने वाला model और key चुनें। प्रारंभिक model वर्तमान पहुँच या सामान्य गुणवत्ता की गारंटी नहीं है।</TLDR>
 
-यह [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge) का हिस्सा है.
-</TLDR>
+## तैयारी
 
-## सेटअप
+आधिकारिक सेवा में **OpenAI**, key और `https://api.openai.com/v1` चुनें। सूची का model किसी दूसरी API के लिए हो सकता है। Gateway का अपना profile/header लें; Azure हेतु **Azure OpenAI**, deployment और API version दें।
 
-एक OpenAI API कुंजी बनाएँ, Notemd सेटिंग्स में एक `OpenAI` प्रदाता प्रोफ़ाइल जोड़ें, और जब तक आप जानबूझकर OpenAI-संगत गेटवे की ओर इशारा न कर रहे हों, डिफ़ॉल्ट Base URL को ही रखें. मॉडल फ़ील्ड सामान्य कार्य के लिए `gpt-4o` पर ही रह सकता है या आपके खाते द्वारा कॉल किए जा सकने वाले किसी अन्य OpenAI मॉडल ID से बदला जा सकता है.
+## Endpoint और authentication
 
-लागत नियंत्रण के लिए कार्य-विशिष्ट मॉडलों का उपयोग करें: अनुसंधान, अवधारणा निष्कर्षण और लंबे रूप के पुनर्गठन के लिए मजबूत मॉडलों को रखें; अनुवाद, लिंक सुझाव और संक्षिप्त सारांशों के लिए सस्ते या तेज़ मॉडलों का उपयोग करें.
-
-## एंडपॉइंट एवं प्रमाणीकरण
-
-| फ़ील्ड | वर्तमान प्रीसेट |
-|-------|----------------|
-| ट्रांसपोर्ट | `openai-compatible` |
+| फ़ील्ड | प्रारंभिक मान |
+| ------- | -------------- |
+| Transport | `openai-compatible` |
 | API कुंजी | आवश्यक |
 | Base URL | `https://api.openai.com/v1` |
-| डिफ़ॉल्ट मॉडल | `gpt-4o` |
-| टेम्परेचर | `0.5` |
-| कनेक्शन परीक्षण | `/models`, फिर `/chat/completions` |
+| मॉडल | `gpt-4o` |
+| Temperature | `0.5` |
+| कनेक्शन टेस्ट | `models-then-chat` |
 
-Notemd, `chat/completions` या `models` जोड़ने से पहले OpenAI-संगत बेस URLs को सामान्यीकृत करता है. Base URL में कोई अंतिम `/chat/completions` शामिल न करें; ऐसा करने से दोहरा पथ बन जाता है.
+Runtime ज्ञात URL रूप normalise करके route बनाता है। Profile से शुरू करें और resolved URL देखें; मनमाने path segments न जोड़ें।
 
-## मॉडल खोज
+## मॉडल
 
-OpenAI, सामान्य OpenAI-संगत मॉडल खोज पथ का उपयोग करता है. सेटिंग्स UI पहले `/v1/models` से पूछती है, फिर हल्के चैट अनुरोध के माध्यम से चयनित मॉडल की पुष्टि करती है. यदि खोज विफल हो जाती है लेकिन चैट अभी भी काम कर रहा है, तो जाँचें कि क्या आपकी कुंजी में मॉडल-सूची अनुमति है या कोई गेटवे मॉडल सूचीबद्ध करने में बाधा डाल रहा है.
+**Fetch models** सूची माँगता है। **Test connection** सिर्फ सूची से सफल हो सकता है; सही model पर नोट चलाएँ। Reasoning, thinking, sampling और budgets profile/model नियमों से मिलें।
 
-तर्कनिष्ठा मॉडलों को एक प्रोटोकॉल एज केस के रूप में माना जाता है: Notemd, सिस्टम और उपयोगकर्ता प्रॉम्प्ट सामग्री को मिलाकर OpenAI तर्कनिष्ठा ID बनाता है जो अलग `system` भूमिका को अस्वीकार करते हैं, और यह केवल तभी `reasoningEffort` प्रदर्शित करता है जब प्रदाता परिभाषा इसे समर्थन देती है.
+## समस्याएँ
 
-## समस्या निवारण
-
-- `401` या `403`: कुंजी, प्रोजेक्ट पहुँच, बिलिंग स्थिति और चयनित मॉडल के कुंजी के लिए सक्षम होने की जाँच करें.
-- चैट पर `404`: आमतौर पर Base URL गलत होता है या पहले से ही `/chat/completions` शामिल होता है.
-- मॉडल दस्तावेज़ों में दिखता है लेकिन चयनकर्ता में नहीं: मॉडल-सूची पहुँच और चैट पहुँच अलग-अलग विफलता बिंदु हैं; प्रदाता प्रोफ़ाइल में सीधे मॉडल ID का मैन्युअल रूप से परीक्षण करें.
-- तर्कनिष्ठा मॉडल संदेशों को अस्वीकार करता है: OpenAI तर्कनिष्ठा हैंडलिंग पथ द्वारा कवर किए गए मॉडल ID का उपयोग करें या गैर-तर्कनिष्ठा चैट मॉडल पर स्विच करें.
+- 401/403: key, project, rights और account।
+- 404: endpoint, ID और API support।
+- List सफल, generation असफल: chat error और parameters।
+- लंबा उत्तर टूटा: input, budget और वास्तविक response देखें; छोटा test पर्याप्त नहीं।
 
 ## कब उपयोग करें
 
-जब आप सबसे पूर्वानुमेय डिफ़ॉल्ट होस्टेड पथ चाहते हैं, जब `/v1/models` खोज महत्वपूर्ण होती है, या जब कोई वर्कफ़्लो OpenAI तर्कनिष्ठा मॉडल सेमैंटिक्स पर निर्भर होता है, तो OpenAI का उपयोग करें. राउटिंग, गोपनीयता या लागत नियंत्रण के मामले में गेटवे या स्थानीय प्रदाता को प्राथमिकता दें, जब सीधा OpenAI API व्यवहार कम महत्वपूर्ण हो.
+Direct OpenAI Chat Completions endpoints के लिए। अपने नोटों पर जाँचें; कीमत और उपलब्धता Notemd से अलग बदलती हैं।
 
----
+## आगे
 
-## अगले चरण
-
-- [LLM Providers](/docs/providers/overview) -- पूर्ण कॉन्फ़िगरेशन, प्रति‑टास्क मॉडल और रिट्राय लॉजिक
-- [Troubleshooting](/docs/advanced/troubleshooting) -- 401/403 और रेट-लिमिट त्रुटियों को ठीक करें
+- [प्रदाता](./overview)।
+- [समस्या निवारण](../advanced/troubleshooting)।

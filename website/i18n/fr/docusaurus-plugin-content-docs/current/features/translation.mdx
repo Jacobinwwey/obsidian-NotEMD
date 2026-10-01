@@ -1,16 +1,15 @@
 ---
 id: translation
 title: Traduction
-description: Traduire les notes et les sélections
+description: >-
+  Traduisez fichiers et dossiers avec le LLM choisi en contrôlant langue, noms
+  de sortie et écrasements.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [translation, languages, i18n, batch translation]
-concepts: [Translation, Multi-Language, Batch Processing]
-citations:
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
-  - title: Google Translate API
-    url: https://cloud.google.com/translate
+keywords:
+  - Traduction
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,106 +17,70 @@ import TLDR from '@site/src/components/TLDR';
 # Traduction
 
 <TLDR>
-**Notemd permet de traduire du texte entre 21 langues ou plus grâce à une technologie de traduction développée par LLM.** Il prend en charge la traduction sélective d’un seul élément, la traduction complète d’une note, ainsi que la traduction batch d’un dossier entier. Chaque tâche de traduction peut utiliser un fournisseur et un modèle spécifiques via des paramètres dédiés à chaque tâche. La langue de sortie peut être configurée indépendamment de la langue UI. Les résultats sont ajoutés au fichier existant ou enregistrés dans un nouveau fichier selon vos préférences.
-
-Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
+Notemd traduit le fichier actif ou les fichiers admissibles d’un dossier avec votre LLM. Il crée par défaut un fichier séparé à suffixe linguistique. Qualité et langues dépendent du modèle ; les 21 langues d’interface et 34 langues du site ne sont ni limites ni garanties de traduction.
 </TLDR>
 
-## Aperçu général
+## Vue d’ensemble
 
-La traduction dans Notemd n’est pas une recherche dans un dictionnaire – c’est une traduction consciente du contexte, assurée par LLM. Le modèle prend en compte tout le paragraphe ou la note, préservant le ton, la terminologie sectorielle et la structure des phrases. Cela permet d’obtenir des résultats de meilleure qualité que les services de traduction phrase par phrase, en particulier pour l’écriture technique, académique et créative.
+Choisissez langue et fournisseur, puis testez une copie contenant terminologie, liens et code représentatifs. Cette fonction utilise votre LLM, pas une intégration dédiée Google Translate.
 
-Cette fonctionnalité prend en charge trois plages d’application : la sélection, la note active et le dossier entier. En combinant cela avec une sélection de modèle par tâche, vous pouvez utiliser un modèle rapide (Gemini Flash) pour des traductions occasionnelles et un modèle puissant (Claude Sonnet) pour du contenu sensible aux nuances – sans changer votre fournisseur global.
+Les actions portent sur fichiers et dossiers. Pour un passage seul, copiez-le dans une note temporaire. Une sélection dans l’éditeur ne limite pas **Traduire le fichier actuel** à ce texte.
 
-## Comment ça marche
+## Fonctionnement
 
-### Le commandement Traduire
+### Commande de traduction
 
-```mermaid
-graph LR
-    A[User selects text or note] --> B[Determine source language]
-    B --> C[Build translation prompt]
-    C --> D[LLM translates with context]
-    D --> E[Parse translated text]
-    E --> F{Append or new file?}
-    F -->|Append| G[Insert after selection]
-    F -->|New file| H[Write translated .md]
-```
+1. Choisissez la langue de sortie ; anglais par défaut, indépendamment de l’interface.
+2. Ouvrez la source et lancez **Traduire le fichier actuel**.
+3. Les longues entrées sont découpées, envoyées au modèle de traduction puis réunies.
+4. Ouvrez le chemin annoncé et vérifiez sens, termes, citations, liens Markdown et code.
 
-1. **Détection de la source** -- Le LLM déduit la langue de source à partir du contenu. Vous n’avez pas besoin de la spécifier manuellement.
-2. **Construction du prompt** -- Notemd crée un prompt qui inclut la langue cible, une indication de domaine optionnelle, ainsi que le contenu à traduire.
-3. **Traduction LLM** -- Les processus `translateProvider` / `translateModel` configurés traitent la demande. Le modèle conserve le formatage Markdown, les liens wiki et les blocs de code.
-4. **Sortie** -- Le texte traduit est soit ajouté en dessous du texte original, soit écrit dans un nouveau fichier dans le coffre-fort.
+`Example.md` traduit en français devient par défaut `Example_fr.md`, à côté de la source conservée. Une destination identique est écrasée. Aucun ajout automatique à la source ni titre `Translation` n’est garanti.
 
-### Paires de langues
+### Couples de langues
 
-Notemd prend en charge tout couple de langues que le LLM sous-jacent prend en charge. Les couples les plus courants incluent :
+Le modèle déduit la langue source. Une langue présente dans le menu ne prouve pas l’exactitude de ce couple. Testez les textes mixtes et les termes spécialisés ; le découpage limite le contexte entre fragments.
 
-| Source | Cible | Qualité typique |
-|--------|--------|----------------|
-| Anglais | Chinois simplifié | Excellente |
-| Chinois | Anglais | Excellente |
-| Anglais | Japonais | Très bien |
-| Anglais | Allemand / Français / Espagnol | Très bien |
-| Tout est pris en charge | Tout est pris en charge | Dépendant du modèle |
+### Modèle par tâche
 
-La configuration `translateLanguage` contrôle la **langue de sortie**. La langue source est détectée automatiquement.
+Activez les réglages par tâche pour `translateProvider` et `translateModel` ; sinon, le fournisseur actif s’applique. Un modèle local nécessite serveur et modèle prêts. Le cloud reçoit prompt et contenu. Comparez les sorties à une source métier, pas à un classement générique.
 
-### Sélection du modèle par tâche
+### Traduction de dossier
 
-La qualité de la traduction varie considérablement d’un modèle à l’autre. Notemd vous permet d’affecter un modèle dédié uniquement à la traduction :
-
-| Modèle | Vitesse | Qualité | Coût | Idéal pour |
-|-------|-------|--------|------|----------|
-| `gemini-2.0-flash-exp` | Vite | Bien | Bas | Décontracté, grand volume |
-| `gpt-4o-mini` | Vite | Bien | Bas | Recherches rapides |
-| `deepseek-chat` | Moyen | Bien | Très bas | Budget multilingue |
-| `claude-3-5-sonnet` | Moyen | Excellente | Moyen | Technique / académique |
-| `gpt-4o` | Moyen | Excellente | Moyen | Prose sensible aux nuances |
-
-### Traduction de dossier par lots
-
-Cliquez avec le bouton droit sur un dossier et sélectionnez **"Notemd: Traduire le dossier"** pour traduire toutes les notes contenus dans ce dossier. Chaque fichier est traité de manière indépendante. La valeur de la configuration de parallélisme détermine le nombre de fichiers qui sont traduits en même temps.
+**Traduire le dossier par lot** sélectionne par défaut les fichiers directement enfants ; les profils avancés peuvent modifier le périmètre. Deux sources de même basename réunies dans un dossier de sortie peuvent se heurter. Vérifiez destinations et traductions existantes avant relance.
 
 ## Configuration
 
-| Configuration | Par défaut | Appliquer |
-|---------|---------|--------|
-| `translateProvider` / `translateModel` | DeepSeek | Fournisseur dédié aux tâches de traduction |
-| `translateLanguage` | `'en'` | Langue de sortie cible |
-| `translationAppendToNote` | `true` | Ajoutez le texte traduit en dessous du texte original. Si c’est faux, créez un nouveau fichier. |
-| `batchConcurrency` | `3` | Nombre de fichiers traités en parallèle lors de la traduction par lots |
+| Paramètre | Défaut | Effet |
+| --------- | --------- | -------- |
+| `language` | `en` | Langue cible sélectionnée |
+| `translateProvider` | `DeepSeek` | Fournisseur avec routage par tâche |
+| `translateModel` | `''` | Reprendre le modèle du fournisseur si vide |
+| `useCustomTranslationSuffix` | `false` | Utiliser le suffixe de langue par défaut |
+| `translationCustomSuffix` | `_translated` | Suffixe lorsque l’option personnalisée est active |
+| `useCustomTranslationSavePath` | `false` | Enregistrer près de la source par défaut |
+| `translationSavePath` | `''` | Dossier de sortie relatif au coffre |
+| `batchConcurrency` | `1` | Concurrence demandée pour le dossier |
+
+Si le dossier personnalisé ne peut être créé, l’exécution peut revenir au dossier source : contrôlez le chemin réellement annoncé. Un suffixe personnalisé vide peut viser le fichier source ; choisissez un suffixe distinct pour conserver une traduction séparée.
 
 ## Exemple
 
-Vous lisez une note de recherche en chinois et souhaitez en obtenir une version en anglais :
+Choisissez l’anglais, copiez une courte note chinoise dans un dossier d’essai, puis traduisez le fichier. Comparez `_en.md` à la source : termes, nombres, équations et liens doivent être contrôlés avant le dossier entier.
 
-1. Ouvrez la note
-2. Clic droit --> **"Notemd : Traduire le fichier actuel"**
-3. Notemd détecte le chinois, le traduit dans la langue cible que vous avez configurée (anglais), et ajoute :
+## Annulation et relecture
 
-```markdown
-## Translation (English)
-
-The experimental results show that the proposed method achieves
-a 12% improvement in F1 score compared to the baseline, primarily
-due to the enhanced feature extraction module described in Section 3.
-```
-
-Le texte chinois original reste inchangé au-dessus de la traduction. Le titre `## Translation` permet de conserver les deux versions dans le même fichier pour une référence facile.
+L’annulation arrête la suite du travail là où elle est prise en charge. Elle n’annule ni les traductions déjà écrites ni la facturation distante. Examinez rapport et fichiers. Demander de préserver Markdown n’est pas une garantie syntaxique ou sémantique.
 
 ## Conseils
 
-- **Utilisez Gemini Flash pour les volumes importants** – c’est l’option la plus rapide et la moins chère pour la traduction en lot de grands dossiers.
-- **Conserver les liens wiki** – L’instruction de Notemd demande à LLM de laisser `[[wiki-links]]` intact dans la traduction. Vérifiez après traduction, car certains modèles les déballent parfois.
-- **Définir explicitement la langue de sortie** – la détection automatique fonctionne pour le texte source, mais configurez toujours `translateLanguage` afin d’éviter toute ambiguïté concernant la langue cible.
-- **Traduire en lot les notes de concept** -- si votre dossier de concepts est dans une langue et que vous avez besoin qu’il soit dans une autre, la traduction au niveau du dossier s’en charge en une seule étape.
+- Sauvegardez la source et vérifiez les collisions de noms.
+- Utilisez suffixe et dossier distincts pendant les essais.
+- Relisez identifiants, mathématiques, URL et noms propres.
+- Retirez les informations privées des diagnostics partagés.
 
----
+## Pour continuer
 
-## Prochaines étapes
-
-- [Recherche](./research) -- Rechercher et résumer dans n'importe quelle langue, puis traduire les résultats
-- [Workflows](./workflows) -- Traduction en chaîne avec liens wiki ou extraction de concepts
-- [Traitement par lots](/docs/advanced/batch-processing) -- Concurrence et comportement d’écrasement pour les opérations sur des dossiers
-- [LLM Fournisseurs](/docs/providers/overview) -- Choisissez le meilleur modèle pour votre paire de langues
+- [Lots](../advanced/batch-processing).
+- [Prompts](../advanced/custom-prompts).
+- [Fournisseurs](../providers/overview).

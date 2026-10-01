@@ -1,0 +1,29 @@
+{
+  "observedAt": "2026-10-01T05:43:48.175Z",
+  "vault": "1Knowledge",
+  "loaded": {
+    "version": "1.9.8",
+    "busy": false
+  },
+  "settingsUnchanged": true,
+  "assets": [
+    {
+      "name": "main.js",
+      "previousSha256": "dbccc6d309eae23475a7c0954eda41d15cf207a3500a736b41cc9249db06992f",
+      "sourceSha256": "3cb3b066c33e3a41f223efd7e949b224d72150ff318b1131590cd1cc9139b2da",
+      "installedSha256": "3cb3b066c33e3a41f223efd7e949b224d72150ff318b1131590cd1cc9139b2da"
+    },
+    {
+      "name": "manifest.json",
+      "previousSha256": "1852490833b18b225471096b633067ba7d73d6274e57ce1d11e3b1654dfe3677",
+      "sourceSha256": "1852490833b18b225471096b633067ba7d73d6274e57ce1d11e3b1654dfe3677",
+      "installedSha256": "1852490833b18b225471096b633067ba7d73d6274e57ce1d11e3b1654dfe3677"
+    },
+    {
+      "name": "styles.css",
+      "previousSha256": "d56c6c70ecaed75dbe9f64b4dd3d394a74a68422da3dfad55f97d8e7e7ee4bec",
+      "sourceSha256": "d56c6c70ecaed75dbe9f64b4dd3d394a74a68422da3dfad55f97d8e7e7ee4bec",
+      "installedSha256": "d56c6c70ecaed75dbe9f64b4dd3d394a74a68422da3dfad55f97d8e7e7ee4bec"
+    }
+  ]
+}

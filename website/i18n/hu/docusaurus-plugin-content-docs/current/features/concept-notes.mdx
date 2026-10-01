@@ -1,184 +1,115 @@
 ---
 id: concept-notes
-title: "Konceptleírások"
-description: "Készítse és kezelje a konceptleírásokat – külön leírások a fő koncepteknek, amelyek a tárgyáraiból származnak"
+title: Fogalomjegyzetek
+description: >-
+  Nyerjen ki fogalmakat egy kijelölt mappába, és ellenőrizze a sablonokat,
+  visszahivatkozásokat és duplikátumokat.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - Fogalomjegyzetek
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Konceptleírások
+# Fogalomjegyzetek
 
-<TLDR>
-**Notemd kiválaszol a leíráskokból a fő koncepteket és készít egy külön konceptleírás fájlt őknek.** A LLM az alapvető kifejezéseket azonosítja, egy `.md` fájlt hoz létre minden koncept számára egy beállítható mappában, és lehetőség esetén hozzáad egy visszahívót a forrásleíráshoz. Támogatja a szinonimák elrejtését, a munka alapján való modell választását, a fájlnevek titkosítását és egy 4 lépéses duplikácsok elszűrési motorát. Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Az önálló kinyerés a forrás olvasásával Markdown-fogalomjegyzeteket hoz létre a kiválasztott mappában. Alapból nincs mappa beállítva. Az új jegyzet csak címet tartalmaz, visszahivatkozás nélkül. A hivatkozásfeldolgozás más kimeneti formát használ.</TLDR>
 
 ## Áttekintés
 
-A konceptleírások egy összekapcsolódó tudományos bázis alapkövei. Amikor feldolgozza egy leírást, Notemd:
+Előbb válasszon **Concept note folder path** célmappát. Külön mappában könnyebb vizsgálni az eredményt, duplikátumokat és címgenerálást. A kinyerés nem tölti fel automatikusan a jegyzeteket kutatott magyarázatokkal.
 
-1. **Írja be a szöveget egy LLM-ba** egy struktúrizált kivonási kérelemmel
-2. **Áttekinti a `CONCEPT:` sorokat** a LLM válaszából
-3. **Hoz létre egy `.md` fájlt minden koncept számára** egy megadott mappában
-4. **Hozzáad visszahívót** a forrásleíráshoz (ha engedélyezve)
+## Működés
 
-## Hogyan működik
+### Kinyerés
 
-### Kivonási folyamat
+A kiválasztott LLM megkapja a szöveget. A feladat `CONCEPT:` sorokat olvas, műveleten belül kiszűri az ismételt neveket, és fájlokat hoz létre/frissít. Hosszú jegyzeteket részekre bont. Vizsgálja meg a sikertelen részeket; a válasz nem teljes fogalomleltár.
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### Kinyerési prompt
 
-### A kivonási kérelem
+Az alaputasítás konkrét, releváns fogalmakat kér. Témakör és szinonimaszabály nem garantál kanonikus szókincset. Saját promptban tartsa meg a `CONCEPT: Term` formát. [Promptok](../advanced/custom-prompts).
 
-A LLM kap egy kérelemet, amely megrendeli tőle, hogy:
+### Részek
 
-- Kivonja a **neveket vagy névmásokat**, amelyek a dokumentum témájának központi részei
-- **Prioritásba helyezze a specifikitást** – „Dielectric Relaxation” helyett „Relaxation”
-- **Normalizálja a szöveget egyedüli formába** – „models” legyen „model”
-- **Elrejtse a mellékkoncepteket** – ha „dielectric relaxation” jelenik meg, ne kivonja azonnal is a „relaxation”-ot
-- **Elhagyja** a referenciák/íráslisták részeit, a közös névmutatókat, a cégek/további termékek neveit
-- Egy konceptet egy sorban készítse ki az alakulattal `CONCEPT: Term Name`
+A `chunkWordCount` alapja körülbelül 3000 szó, nem szolgáltatói token. A részek közti kontextus korlátozott; ellenőrizze a kapcsolatokat és kétértelmű neveket.
 
-**Szóhasonlók elrejtése** (opcionális): a kérelem előtt írja be "Elkerülje a szóhasonlók, semantikailag hasonló alapkonceptek vagy kulcszavak kiválasztását, ha lehet".
+## Fájlok létrehozása
 
-**Fokozott tanulási terület** (opcionális): az előtt írja be `Relevant Fields: [domain]`, hogy a kiválasztás egy konkret tudományterületről legyen.
+### Elnevezés
 
-**Nyelvi átirányítás** (opcionális): hozzáírja "A kivált konceptek ELTEVENEKENNE [nyelv]ben lenniük."
+Az érvénytelen útvonaljelek eltűnnek, a szóközök normalizálódnak, a hosszú nevek rövidülnek; az üres eredmény kimarad. Különböző kifejezések ugyanarra az útvonalra képeződhetnek. Nagy gyűjtemény előtt vizsgálja meg a neveket.
 
-### Részekbe osztás
+### Sablonok
 
-Hosszú jegyzetek `settings.chunkWordCount`-vel oszlik le. Minden rész külön küldődik. Minden részből származó konceptek egy `Set`-ba gyűjthetők össze – a részek közötti duplikátkok csendesen eltávolítódnak. A egyes részeken lévő LLM hibák nem leállítják a folyamatot.
-
-## Konceptjelző készítése
-
-### Fájlnevek szabályai
-
-| Szabály | Elvényszerűlet |
-|------|----------|
-| Hátrajzok/alacsonybetűk | Cseréltük ki az üres helyekkel |
-| Különleges karakterek | Törölték: hátrajz, alacsonyrajz, kolon, csillag, kérészjelet, szavazatok, szögbetűk, őrnyelv, hash, caret, betűköri zárók |
-| Üres helyek | Összevonva és törlve |
-| Máximális hosszúság | 100 karakter (korlátozott + újra kiszorítva) |
-| Tüzel/összes ponttal teli eredmény | Csendesen elhagyva |
-
-Példa: `A-B: Key*Term` változik `A B KeyTerm.md`-ra
-
-### Szablontok
-
-**Teljes szablon** (visszahivatások engedélyezve, minimális szablon kikapcsolva):
+Minimális új jegyzet:
 
 ```markdown
-# Concept Name
+# Fogalom neve
+```
+
+Új önálló jegyzet visszahivatkozásához engedélyezze az **Add "Linked From" backlink** kapcsolót, és tiltsa le a **Create minimal concept notes** beállítást:
+
+```markdown
+# Fogalom neve
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Forrásjegyzet]]
 ```
 
-**Minimalis szablon** (amikor `extractConceptsMinimalTemplate: true` van):
+A hivatkozásfeldolgozás engedélyezett fogalomkimenetekkel teljesebb, forráshivatkozást tartalmazó formát hoz létre. Az önálló kinyerés kapcsolói nem módosítják ezt az útvonalat.
 
-```markdown
-# Concept Name
-```
+### Létező jegyzetek
 
-### Megújítás a már létező figyelemeket
+Engedélyezett visszahivatkozással a hiányzó forrás bekerülhet a `## Linked From` alá. A tartalom megmarad, az azonos hivatkozás nem ismétlődik. A forrás alapfájlneve több mappában kétértelmű lehet.
 
-Ha egy koncept fájl már létezik:
+### Beállítások
 
-1. Ha a visszahivatások engedélyezve vannak és a forrás figyelem még nem listázott, hozzáadjuk egy visszahivatást
-2. Ha egy `## Linked From` rész létezik, beillesztem azt a következő `##` felső rész előtt
-3. Ha nincs `## Linked From`, hozzáadjuk a részt a végére
-4. Duplikált visszahivatások ellen ellenőrzés történik és elhagyva vannak
+| Beállítás | Alapérték | Hatás |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | Fogalomkimenetek mappaválasztás után |
+| `conceptNoteFolder` | `''` | Nincs kiválasztott mappa |
+| `extractConceptsMinimalTemplate` | `true` | Csak cím az önálló fogalmakban |
+| `extractConceptsAddBacklink` | `false` | Visszahivatkozások önálló kinyeréskor |
+| `extractConceptsProvider` | `DeepSeek` | Szolgáltató feladatonkénti útválasztásnál |
+| `extractConceptsModel` | `''` | Üres mező a szolgáltató modelljét veszi át |
+| `extractConceptsLanguage` | `en` | Nyelv feladatonkénti felülbírálattal |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Szinonimacsökkentési utasítás |
+| `generateConceptLogFile` | `false` | Opcionális fogalomnapló |
 
-### Konfiguráció
+## Duplikátumok
 
-| Beállítás | Alapértelmezett | Hatás |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | Fő bekapcsoló. Kikapcsolva = nincs új figyelemek létrehozva |
-| `conceptNoteFolder` | `''` (kikapcsolva) | Konceptleírásokhoz szóló mappateja |
-| `extractConceptsMinimalTemplate` | `true` | Csak című leírások (nem van „Linked From”-ot) |
-| `extractConceptsAddBacklink` | `false` | Stándart kivonási folyamat során visszaadja a hivatkozásokat |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Konceptkivonáshoz szóló munkavégzési LLM |
-| `extractConceptsLanguage` | `'en'` | Konceptneveknek az átmeneti nyelv |
-| `replaceSynonymsDuringConceptExtraction` | `false` | A kérésben a szinonimák leírásának engedélyezése |
-| `generateConceptLogFile` | `false` | Írja le egy `.log` listát a kialakított konceptekről |
+A vizsgálat fájlnévheurisztikákra épül: kis/nagybetű, többes szám, szimbólumok és ahol engedett, szóelőfordulás más névben. Ez nem bizonyít azonos jelentést. A **Check & remove duplicates** felületén nézze át a rendhagyó alakokat és műszaki eltéréseket; csak szándékos törlést hagyjon jóvá. A lomtárat az Obsidian kezeli. A fogalommappa nem ideiglenes cache; mentse.
 
-**Fontos:** A `extractConceptsAddBacklink` és `extractConceptsMinimalTemplate` beállítások csak a **speciális kivonási parancsot** befolyásolják. A „Add Links” parancs mindig hivatkozásokkal rendelkező, teljes szabványú leírásokat készít ki.
+### Összehasonlítási kör
 
-## Duplikátok eltávolítása
-
-A duplikátok eltávolító parancs (`Notemd: Check & remove duplicate concept notes`) 5 lépéses analízist végez:
-
-### Lépés 1: Egyszerű fájlnev összevetése
-
-Konfigurált környezetben betűtípusnemkülönbségtelenségű fájlnevkövetkeztetés.
-
-### Lépés 2: Nömegformázat megtalálása
-
-Sorozatok eltávolítása: `-ies`-től `-y`-ig, `-es` eltávolítás, `-s` eltávolítás. A egyenszerű formát a környezeti fájlokval összeveti. Irreguláris nömegeket (children/child) nem kezel.
-
-### Lépés 3: Symbol normalizálása
-
-Érvényes: `toLowerCase()`, cserélje el az hátrajzokat/alsóköveket szöveges térként, töröljön a nem alfanumerikus karaktereket, összevonja a tömött szöveget. Azonosan normalizálódó elemek jelöltnek kerülnek.
-
-### 4. lépés: Egy szóból álló tartalmak ellenőrzése
-
-Az egy szóból álló konceptjellegű feljegyzések összevetésére használják a több szóból álló környezeti fájlok nevét. Ha a környezet `concept_folder_only`, ezt a lépést nem futtatják.
-
-### 5. lépés: Bizonyítás és törölés
-
-Az összes kandidátum megjelenik egy bizonyítási ablakban. Engedélyezett elemek kerülnek a rendszeri tömöbbé. A műveletet bármikor, azonos törölés között, törölhető ki.
-
-### Környezeti módkok
-
-| Módszer | Összevetésére használt elemek |
-|------|-------------------|
-| `vault` (alapértelmezett) | Minden `.md` fájl a tárolóban, kivéve a konceptmappát |
-| `concept_folder_only` | A mappában lévő más konceptjellegű feljegyzések |
-| `include` | Specifikusan listázott mappákban lévő fájlok |
-| `exclude` | Minden `.md` fájl a tárolóban, kivéve a konceptmappát és a listázott mappákat |
+Összevethet a vaulttal, a fogalommappával, bevont mappákkal vagy kizárásokat tartalmazó körrel. A hatókör a jelölteket módosítja, nem a duplikátum jelentését.
 
 ## Használat
 
-### Konceptek kivonása (képzetlen formában)
+### Önálló kinyerés
 
-1. Nyitja meg egy feljegyzést
-2. Futtassa el **"Notemd: Konceptek kivonása"** parancssorpaletából
-3. A konceptjellegű feljegyzések létrejönnek a beállított mappában
+Nyissa meg a Markdown-jegyzetet, ellenőrizze a mappát, és indítsa az **Extract concepts (current file)** műveletet. A forrás változatlan. Vizsgálja meg a neveket, lefedettséget és visszahivatkozásokat.
 
-### Tartalmak kiválasztása és készítése
+### Kinyerés és tartalom
 
-**"Notemd: Konceptek kiválasztása és címek készítése"** — kiválaszolja a koncepteket, majd futtatja a "Cím alapján készítés" parancsot az összes feljegyzésre a koncept mappában. Ez készíti tartalmat **minden** konceptfeljegyzéshez a mappában, nem csak az újra készülteknek.
+A **Batch generate from titles** kitölti a fogalmakat, de meglévő alkalmas jegyzeteket is bevonhat. Előtte ellenőrizze a mappát, utána a jelentett complete célhelyet.
 
-### Választott elemekből wiki hivatkozás készítése
+### Hivatkozás kijelölésből
 
-1. Szöveget az editorben felhajtóként jelölés
-2. Futtatja **"Notemd: Választott elemekből wiki hivatkozás készítése"** parancsot
-3. A szöveg `[[...]]`-ba kerül és egy konceptfeljegyzés készül
+A kijelölési művelet a saját kifejezést wiki-hivatkozássá alakítja, és beállított célnál fogalomfájlt is létrehozhat.
 
-## Tippek
+## Javaslatok
 
-- **Először beállítsa a koncept mappát** — без nьjük nincsenek feljegyzések. Ha nem beállított, jelenik meg egy figyelmeztetési ablak.
-- **Használjon parancsmentes modellket** — a konceptkiválasztásra jók a olcsóbb modellek (GPT-4o-mini, DeepSeek). A drágább modellket tárgyalásokhoz/übersetésekhez tartson meg.
-- **Hajtson végre a szinonimus leírása** a technikai területekben, ahol több kifejezés ugyanazt a konceptet jelzi.
-- **Reggeljön ki a duplikátkokat** — futtasson a duplikátok elszűrési parancsot a batch feldolgozás után, hogy az összetett duplikátkokat kiszűrje.
-- **A log fájl minden futtatásnál átírásra kerül**, nem hozzáadódik. Ha előző eredményeket szereti, kopícolja azt.
+- Kis forrás, külön mappa.
+- Tömeges létrehozás előtt válasszon nyelvet.
+- Szinonimákat és duplikátumokat külön értékeljen.
+- Szükséges naplót őrizzen meg a következő felülírás előtt.
 
----
+## Tovább
 
-## További lépések
-
-- [Wiki-hivatkozások](./wiki-links) — Hogyan kapcsolódnak a konceptek az inline szöveghez
-- [Diagramák](./diagrams) — Konceptek közötti kapcsolatok vizualizálása
-- [Munkafolyamok](./workflows) — Kiválasztást más parancsokkal összekötés
+- [Wiki-hivatkozások](./wiki-links).
+- [Munkafolyamatok](./workflows).
+- [Kötegelt feldolgozás](../advanced/batch-processing).

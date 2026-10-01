@@ -1,0 +1,99 @@
+---
+id: overview
+title: Kehittäjäopas
+description: >-
+  Käännä, testaa ja laajenna nykyisiä tarjoaja-, operaatio-, renderöinti- ja
+  dokumentaatiosopimuksia.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Kehittäjäopas
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Kehittäjäopas
+
+<TLDR>Käytä kehityshaaraa, asenna lukitut riippuvuudet ja molemmat selainversiot, käännä lisäosa ja suorita koko Jest-kokonaisuus. Muuta sopimuksen nykyistä omistajaa ja pidä ohjeet, tarjoajatestit sekä natiivikuluttajien näyttö yhdessä.</TLDR>
+
+## Työkopio
+
+Kloonaa [repositorio](https://github.com/Jacobinwwey/obsidian-NotEMD) ja lue [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md). Lisäosan CI käyttää Linux/Windows Node 20:tä, sivusto Node 24:ää. Juuri ja `website/` asentavat riippuvuudet erikseen.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Playwright-paketit voivat vaatia eri Chromium-versiot; yksi asennus ei riitä. `main.js` generoidaan ja ohitetaan Gitissä. Vanha paikallinen paketti ei validoi uutta committia.
+
+## Löydä vastuualue
+
+| Vastuu | Ensisijainen lähde |
+| ---------------- | ---------------- |
+| Lisäosan elinkaari, komennot ja isäntäohjaus | `src/main.ts` |
+| Tarjoajaprofiilit, protokollametadata ja validointi | `src/llmProviders.ts` |
+| Pyynnöt, siirrot, uusinnat ja virtaus | `src/llmUtils.ts` |
+| Operaatiot, skeemat ja julkinen CLI-valinta | `src/operations/`, `src/cliContracts.ts` |
+| Tiedostotehtävät, tutkimus ja käännös | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Työnkulkutoiminnot ja sivupaneeli | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Kaaviomääritykset ja renderöinti | `src/diagram/`, `src/rendering/` |
+| UI-merkkijonot ja kieliversiot | `src/i18n/` |
+| Julkiset oppaat ja käännökset | `website/docs/`, `website/i18n/` |
+| Ylläpito-ohjeet ja päivätty näyttö | `docs/maintainer/` |
+
+Tuotantopaketti sisältää esikatseluisännän ja toimii itsenäisesti. Ehdotettu erillinen isäntäpolku ei ole julkaistu tiedostosopimus. Sen käyttöönotto edellyttää pakkaamisen, tiedostojen, auditointien ja ohjeiden yhteistä muutosta.
+
+## Rajattu muutos
+
+1. Toista virhe ja kirjoita ensin kohdistettu epäonnistuva testi.
+2. Muuta invariantin omistajaa ja validoi ulkoisella rajalla.
+3. Aja kohdistetut/täydet testit; säilytä kirjoituksen peruutus-, virhe- ja pysyvyyskäytännöt.
+4. Päivitä englanninkielinen lähde ja kielet, joita muutos koskee. Suunnitelmien, tehtävien ja läpikäyntien täydet englanti-/kiinaversiot kuuluvat erikseen `docs/`-hakemistoon.
+5. Varmista visuaaliset/natiivit muutokset oikeassa kuluttajassa; XML, kuva tai käännös ei todista muokattavuutta tai liittimien kiinnitystä.
+
+Lisää tarjoaja `llmProviders.ts`:ään, käytä yhteensopivaa siirtopolkua ja täydennä `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README sekä yhteystestit. Säilytä virtaavat ja keskeytetyt vastaukset. Julkistettava operaatio tarvitsee syöte-/tulosskeemat, kontekstin, sivuvaikutukset ja käsittelytagit. Rekisterimerkintä ei tee julkista Agent-rajapintaa. [Agentit](../agents/overview).
+
+## Varmennus
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint vertaa yksittäisiä havaintoja; pienempi kokonaismäärä ei oikeuta uutta regressiota. Hakumuutoksissa suorita `npm run benchmark:local-kb` ja ilmoita korpus/ympäristö. Sivustolle Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Codex kirjoittaa ja tarkistaa 1.9.8-ohjelman käännökset suoraan. Älä aja vanhoja käännöskirjoitusskriptejä, LM Studiota tai käännösrajapintoja. Työkalut voivat muotoilla, validoida ja renderöidä kirjoitettua tekstiä.
+
+## Obsidian ja natiivikuluttajat
+
+Käytä kertakäyttöholvia, jossa on `.notemd-host-verification`-merkki; skriptit tarkistavat kopioidun paketin. Pidä käyttäjän holvit erillään. Kokeile sekä `obsidian help` että `obsidian-cli help`; puuttuva työkalu on poissa käytöstä, ei hyväksytty isäntätesti.
+
+PowerPointilla, CircuitikZ:llä ja dioilla on omat edellytykset/tuotokset. Seuraa [päivättyä hyväksyntää](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) ja [julkaisuohjetta](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Kerro testaamattomista mobiileista ja vähimmäisversiosta.
+
+## Osallistuminen ja julkaisu
+
+Kuvaa PR:ssä ongelma, lopullinen käytös, testit ja rajat. Anna toisto [Issuesissa](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). Älä commitoi avaimia, yksityisiä muistiinpanoja tai asiaankuulumattomia tuotoksia. Yksi julkaisija vastaa yhtenäisestä versiosta, numerotagista, puhtaasta tagatusta lähteestä, kaksikielisistä tiedoista, tarkistetuista luonnostiedostoista, julkaisusta ja erillisestä Pages-jakelusta. Älä siirrä julkaistua tagia. `.trellis/` on paikallinen työnkulun tila, ei CI-riippuvuus.
+
+## Seuraavaksi
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Projektitilanne](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agentit](../agents/overview).
+- [1.9.8](../releases/1.9.8).

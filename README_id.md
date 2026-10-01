@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Plugin Notemd untuk Obsidian
 
+> Notemd adalah plugin Obsidian berlisensi MIT untuk Markdown bertaut, catatan konsep, ringkasan, terjemahan, dan diagram. Berkas tetap di vault; tugas awan mengirim konten ke penyedia pilihan, sedangkan riset web menggunakan jaringan.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Mulai di sini
+
+| Pembaca | Pintu masuk | Tujuan |
+|---|---|---|
+| Pemula | [Mulai cepat](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/getting-started/quick-start) | Atur penyedia dan periksa satu catatan |
+| Pengguna | [Alur kerja](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/features/workflows) | Kendalikan folder, keluaran, dan pemulihan |
+| Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
+| Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
+
+**Versi:** 1.9.8
+
+- **Pembatalan dan pemulihan:** pembatalan tetap aktif selama penjadwalan dan percobaan ulang, serta menghalangi penulisan terlambat pada riset dan terjemahan. Keluaran yang selesai dipertahankan dan konflik pemulihan dilaporkan.
+- **Riwayat dan ekspor asli:** teks pencarian dan fokus papan ketik tetap terjaga. Pemisah sel gabungan PowerPoint serta sambungan/label CircuitikZ diperbaiki. Pencarian lokal berkelompok memakai cuplikan yang konsisten.
+- **Rilis dan dokumentasi:** asal sumber bersih dan berkas unduhan diverifikasi, dengan jalur tiap pembaca serta terjemahan yang ditulis langsung.
+
+36 preset penyedia dan 33 jenis diagram yang dapat dijalankan sudah ada pada 1.9.7. [Panduan peningkatan](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/releases/1.9.8) · [Periksa rilis publik](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Panah Drawnix antarcabang tetap statis setelah penataan ulang. Mermaid/SVG dalam PPTX dapat memakai gambar pengganti. Pembatalan tidak membatalkan perubahan tersimpan maupun menjamin penghentian generasi atau tagihan jarak jauh. Perangkat seluler fisik dan Obsidian 0.15.0 belum diverifikasi.
 
 Baca dokumentasi dalam lebih banyak bahasa di: [Pusat Bahasa](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- Peningkatan Basis Pengetahuan Multi-Bahasa dengan AI
-==================================================
-```
-
-Cara mudah untuk membangun knowledge base Anda sendiri.
-
-Notemd meningkatkan alur kerja Obsidian Anda dengan mengintegrasikan berbagai Large Language Model (LLM) untuk memproses catatan multi-bahasa, membuat wiki-link otomatis untuk konsep penting, membuat concept note yang sesuai, melakukan riset web, dan membantu Anda membangun knowledge graph yang kuat.
-
 Jika Anda suka menggunakan Notemd, mohon pertimbangkan untuk [⭐ memberi Bintang di GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) atau [☕️ membelikan saya kopi](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Daftar Isi
 
@@ -50,13 +50,26 @@ Jika Anda suka menggunakan Notemd, mohon pertimbangkan untuk [⭐ memberi Bintan
 
 ## Mulai Cepat
 
-1. **Instal & Aktifkan**: dapatkan plugin dari Obsidian Marketplace.
-2. **Konfigurasi LLM**: buka `Settings -> Notemd`, pilih penyedia LLM Anda, misalnya OpenAI atau penyedia lokal seperti Ollama, lalu masukkan API key atau URL.
-3. **Buka Sidebar**: klik ikon tongkat sihir Notemd di ribbon kiri untuk membuka sidebar.
-4. **Proses Catatan**: buka catatan apa pun dan klik **"Process File (Add Links)"** di sidebar untuk menambahkan `[[wiki-links]]` secara otomatis ke konsep penting.
-5. **Jalankan Quick Workflow**: gunakan tombol default **"One-Click Extract"** untuk merangkai pemrosesan, generasi batch, dan pembersihan Mermaid dari satu titik masuk.
+1. Pasang dan aktifkan **Notemd** melalui **Settings → Community plugins → Browse**.
+2. Atur endpoint, kredensial, dan model yang tepat. Uji koneksi, kemudian generasi nyata; daftar model saja tidak membuktikan akses percakapan.
+3. Buat folder kosong `trial-concepts` dan pilih sebagai folder catatan konsep; jalur awal kosong. Isi `Notemd trial.md` dengan paragraf uji yang boleh dikirim ke penyedia.
+4. Jalankan **Process File (Add Links)**. Periksa `Notemd trial_processed.md` di samping sumber yang dipertahankan, tautan, dan catatan konsep.
+5. Buka kembali catatan sumber uji lalu jalankan **One-Click Extract** dengan folder itu: menambah tautan, menghasilkan isi dari judul catatan yang memenuhi syarat, dan memperbaiki Mermaid di folder complete. Catatan lama yang memenuhi syarat juga dapat diproses.
 
-Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, terjemahan, dan generasi konten.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Riset web dan pembuatan diagram adalah tindakan terpisah. Setelah membatalkan, tunggu tugas aktif selesai dan periksa keluaran lengkap serta berkas pemulihan sebelum mengulang.
+
+<details>
+<summary>Contoh antarmuka</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Dukungan Bahasa
 
@@ -89,9 +102,9 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
 - **Penguatan Rantai Permintaan Panjang untuk OpenAI-Compatible**: dalam stable mode, panggilan OpenAI-compatible kini memakai urutan eksplisit tiga tahap per attempt: direct streaming transport, direct non-stream transport, lalu `requestUrl` fallback, yang masih dapat naik ke streamed parsing jika dibutuhkan. Ini mengurangi false negative ketika penyedia menyelesaikan respons buffered tetapi pipa streaming tidak stabil.
 - **Protocol-Aware Streaming Fallback di Seluruh API LLM**: fallback attempt untuk permintaan panjang kini menggunakan streamed parsing yang paham protokol di seluruh jalur LLM bawaan, bukan hanya endpoint OpenAI-compatible. Notemd sekarang menangani OpenAI/Azure SSE, Anthropic Messages streaming, Google Gemini SSE, dan Ollama NDJSON, baik di `http/https` desktop maupun `fetch` non-desktop, dan entrypoint lain bergaya OpenAI memakai fallback path yang sama.
 - **Preset Siap Pakai untuk Penyedia Tiongkok**: preset bawaan kini mencakup `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, dan `SiliconFlow`, di samping penyedia global dan lokal yang sudah ada.
-- **Pemrosesan Batch Andal**: logika concurrent processing ditingkatkan dengan **staggered API calls** untuk mencegah rate limiting dan menjaga performa stabil pada batch job besar. Tugas kini dimulai pada interval yang berbeda, bukan semuanya sekaligus.
-- **Pelaporan Progress Akurat**: bug yang membuat progress bar bisa macet telah diperbaiki, sehingga UI kini selalu mencerminkan status operasi yang sebenarnya.
-- **Parallel Batch Processing yang Lebih Kuat**: masalah yang membuat operasi batch paralel berhenti terlalu cepat telah diselesaikan, sehingga semua file diproses secara andal dan efisien.
+- **Pemrosesan Batch Andal**: Panggilan API yang dijadwalkan berselang mengurangi lonjakan permintaan. Kuota dan batas laju penyedia tetap berlaku.
+- **Pelaporan Progress Akurat**: Kemajuan membedakan berkas selesai, gagal, dan dibatalkan. Berakhirnya proses tidak berarti semua berkas berhasil.
+- **Parallel Batch Processing yang Lebih Kuat**: Tugas aktif selesai sebelum ringkasan dibuat. Pembatalan menghentikan pekerjaan berikutnya tanpa membatalkan perubahan yang tersimpan; folder bukan satu transaksi bersama.
 - **Akurasi Progress Bar**: bug yang membuat progress bar untuk perintah "Create Wiki-Link & Generate Note" macet di 95% telah diperbaiki, dan sekarang menampilkan 100% saat selesai.
 - **API Debugging yang Ditingkatkan**: "API Error Debugging Mode" kini menangkap full response body dari penyedia LLM dan layanan pencarian, seperti Tavily dan DuckDuckGo, serta mencatat timeline transport per attempt dengan request URL yang sudah disanitasi, durasi, response headers, partial response body, parsed partial stream output, dan stack traces untuk mempermudah troubleshooting di jalur OpenAI-compatible, Anthropic, Google, Azure OpenAI, dan Ollama fallback.
 - **Panel Developer Mode**: settings kini memiliki panel diagnostik khusus developer yang tetap tersembunyi sampai "Developer mode" diaktifkan. Panel ini mendukung pemilihan diagnostic call path dan menjalankan repeated stability probe untuk mode yang dipilih.
@@ -105,7 +118,7 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
 - **Pembuatan Concept Note yang Opsional & Dapat Dikustomisasi**: otomatis membuat catatan baru untuk konsep yang ditemukan di folder vault yang Anda tentukan.
 - **Customizable Output Paths**: atur path relatif terpisah di dalam vault untuk menyimpan processed files dan concept note yang baru dibuat.
 - **Customizable Output Filenames (Add Links)**: Anda dapat memilih untuk **menimpa file asli** atau memakai suffix atau replacement string kustom sebagai pengganti `_processed.md` saat memproses file untuk menambah link.
-- **Link Integrity Maintenance**: ada penanganan dasar untuk memperbarui link ketika catatan diubah nama atau dihapus di dalam vault.
+- **Link Integrity Maintenance**: Pembaruan tautan saat penggantian nama bergantung pada Obsidian dan pengaturannya. Penghapusan dapat meninggalkan tautan tidak terselesaikan; periksa catatan dengan nama yang sama.
 - **Pure Concept Extraction**: ekstrak konsep dan buat concept note terkait tanpa mengubah dokumen asli. Ini ideal untuk mengisi knowledge base dari dokumen yang sudah ada tanpa menyentuh file sumber. Fitur ini memiliki opsi untuk membuat concept note minimal dan menambahkan backlink.
 
 ### Terjemahan
@@ -115,10 +128,10 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
   - **Dukungan File Besar**: file besar otomatis dibagi menjadi chunk yang lebih kecil berdasarkan `Chunk word count` sebelum dikirim ke LLM, lalu hasil terjemahannya digabung kembali dengan mulus menjadi satu dokumen.
   - Mendukung terjemahan antarbanyak bahasa.
   - Bahasa target dapat dikustomisasi dari settings atau UI.
-  - Teks hasil terjemahan bisa dibuka otomatis di pane sebelah kanan dari teks asli agar mudah dibandingkan.
+  - Membuka terjemahan tersimpan di ruang kerja Obsidian sesuai tata letak yang tersedia.
 - **Terjemahan batch**:
-  - Menerjemahkan semua file dalam folder yang dipilih.
-  - Mendukung pemrosesan paralel jika "Enable Batch Parallelism" aktif.
+  - Secara bawaan menerjemahkan berkas yang memenuhi syarat langsung di folder pilihan, tanpa subfolder. Pemilihan berkas lanjutan dapat mengubah cakupan; berkas tujuan yang sudah ada dapat ditimpa.
+  - Terjemahan memakai `batchConcurrency` secara langsung (bawaan 1), terlepas dari `enableBatchParallelism`.
   - Menggunakan custom prompts untuk terjemahan jika sudah dikonfigurasi.
   - Menambahkan opsi "Batch translate this folder" ke menu konteks file explorer.
 - **Matikan terjemahan otomatis**: jika diaktifkan, tugas non-Translate tidak lagi memaksa output ke bahasa tertentu, sehingga konteks bahasa asli tetap terjaga. Tugas `Translate` eksplisit tetap menerjemahkan sesuai konfigurasi.
@@ -134,7 +147,7 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
 - **Pembuatan konten dari judul**:
   - Menggunakan judul catatan untuk menghasilkan konten awal lewat LLM, menggantikan konten yang sudah ada.
   - **Optional Research**: Anda dapat mengatur agar web research dilakukan terlebih dahulu menggunakan search provider yang dipilih lalu memasukkan hasilnya sebagai context ke prompt.
-- **Batch Content Generation from Titles**: menghasilkan konten untuk semua catatan di folder yang dipilih berdasarkan judul masing-masing, sambil tetap menghormati pengaturan riset opsional. File yang berhasil diproses dipindahkan ke **subfolder "complete" yang dapat dikonfigurasi**, seperti `[foldername]_complete` atau nama custom, untuk menghindari pemrosesan ulang.
+- **Batch Content Generation from Titles**: Membuat dan mengganti isi berkas `.md` yang memenuhi syarat sesuai pengaturan riset. Berkas `_processed.md` dan seluruh pohon folder complete yang ditetapkan dikecualikan. Setelah pembuatan, pemindahan ke folder complete dicoba. Tujuan yang sudah terisi menghalangi pemindahan, bukan pembuatan yang telah tersimpan; jumlah berkas yang dibuat dan dipindahkan dihitung terpisah.
 - **Mermaid Auto-Fix Coupling**: ketika Mermaid auto-fix diaktifkan, alur kerja terkait Mermaid secara otomatis memperbaiki generated files atau output folder setelah pemrosesan. Ini mencakup Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, dan Translate.
 
 ### Fitur Utilitas
@@ -291,8 +304,8 @@ Akses settings plugin melalui:
 
 #### Output Catatan Konsep
 - **Customize Concept Note Path**:
-  - **Dinonaktifkan (bawaan)**: pembuatan otomatis note untuk `[[linked concepts]]` dimatikan.
-  - **Diaktifkan**: memungkinkan Anda memilih folder tempat concept notes baru akan dibuat.
+  - **Dinonaktifkan**: Tidak membuat catatan konsep tertaut secara otomatis.
+  - **Aktif secara bawaan**: Jalur awal kosong. Tetapkan jalur relatif yang valid di dalam vault sebelum membuat catatan konsep.
 - **Concept Note Folder Path**: hanya terlihat ketika opsi di atas diaktifkan. Masukkan **path relatif** di dalam vault, misalnya `Concepts` atau `Generated/Topics`. Folder akan dibuat otomatis bila belum ada. **Harus diisi jika fitur kustomisasi diaktifkan.** **Jangan gunakan path absolut atau karakter yang tidak valid.**
 
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
@@ -341,8 +354,8 @@ Akses settings plugin melalui:
 
 #### Perbaikan Mermaid Batch
 - **Enable Mermaid Error Detection**:
-  - **Off (Default)**: error detection dilewati setelah pemrosesan.
-  - **On**: memindai file hasil proses untuk menemukan Mermaid syntax error yang tersisa dan menghasilkan report `mermaid_error_{foldername}.md`.
+  - **Nonaktif**: Melewati pemeriksaan kesalahan setelah pemrosesan.
+  - **Aktif secara bawaan**: Mencari kesalahan Mermaid yang tersisa dan membuat `mermaid_error_{foldername}.md`.
 - **Move files with Mermaid errors to specified folder**:
   - **Off**: file yang masih memiliki error tetap berada di tempatnya.
   - **On**: memindahkan file yang masih mengandung Mermaid syntax error setelah proses fix ke folder khusus untuk review manual.
@@ -358,7 +371,7 @@ Akses settings plugin melalui:
 - **API Call Interval (ms)**: delay minimum sebelum dan sesudah tiap panggilan LLM API. Penting untuk API dengan rate rendah atau untuk menghindari error 429. Atur ke `0` untuk menonaktifkan artificial delay. Default: `500ms`.
 - **Chunk Word Count**: jumlah kata maksimum per chunk yang dikirim ke LLM. Ini mempengaruhi jumlah API calls untuk file besar. Default: `3000`.
 - **Enable Duplicate Detection**: mengaktifkan pemeriksaan dasar untuk kata duplikat di dalam processed content. Hasilnya muncul di console. Default: aktif.
-- **Max Tokens**: jumlah token maksimum yang diizinkan untuk dihasilkan LLM per response chunk. Mempengaruhi biaya dan detail output. Default: `4096`.
+- **Max Tokens**: jumlah token maksimum yang diizinkan untuk dihasilkan LLM per response chunk. Mempengaruhi biaya dan detail output. Default: `8192`. Batas keluaran khusus penyedia dapat menggantikan nilai ini; tersedia pula nilai bawaan yang disesuaikan dengan model.
 
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
@@ -389,7 +402,7 @@ Akses settings plugin melalui:
   - Memungkinkan Anda mengubah kata atau frasa prompt untuk tugas tertentu.
   - Di **Custom Prompt Word**, Anda dapat memasukkan kata atau frasa prompt versi Anda sendiri.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Dinonaktifkan (bawaan)**: file yang berhasil dihasilkan dipindahkan ke subfolder bernama `[OriginalFolderName]_complete` relatif terhadap parent folder asli, atau `Vault_complete` bila folder aslinya adalah root vault.
+  - **Dinonaktifkan (bawaan)**: Tujuannya adalah folder sejajar `[foldername]_complete`, atau `Vault_complete` untuk akar vault. Opsi aktif memungkinkan nama khusus.
   - **Diaktifkan**: memungkinkan Anda menentukan nama custom untuk subfolder tempat file yang selesai dipindahkan.
 - **Custom Output Folder Name**: hanya terlihat bila opsi di atas aktif. Masukkan nama subfolder yang diinginkan, seperti `Generated Content` atau `_complete`. Karakter yang tidak valid tidak diperbolehkan. Bila dibiarkan kosong, `_complete` yang dipakai.
 
@@ -493,12 +506,12 @@ Ini adalah fungsi inti yang berfokus pada identifikasi konsep dan penambahan `[[
    - Jalankan `Notemd: Translate Note/Selection` melalui command palette atau tombol bilah samping.
    - Akan muncul modal yang memungkinkan Anda mengonfirmasi atau mengubah **Target Language**, dengan default mengikuti pengaturan di Configuration.
    - Plugin menggunakan **LLM Provider** yang telah dikonfigurasi berdasarkan pengaturan multi-model untuk menerjemahkan.
-   - Konten hasil terjemahan disimpan ke **Translation Save Path** yang sudah ditentukan dengan suffix yang sesuai dan dibuka di **pane baru di sisi kanan** konten asli agar mudah dibandingkan.
+   - Menyimpan terjemahan memakai jalur dan akhiran yang ditetapkan lalu membuka berkas tersimpan di ruang kerja Obsidian.
    - Anda dapat membatalkan tugas ini lewat tombol bilah samping atau tombol batal pada modal.
 
 3. **Terjemahan batch**:
    - Jalankan `Notemd: Batch Translate Folder` dari command palette lalu pilih folder, atau klik kanan folder di file explorer dan pilih "Batch translate this folder".
-   - Plugin akan menerjemahkan semua file Markdown di folder tersebut.
+   - Secara bawaan menerjemahkan berkas yang memenuhi syarat langsung di folder pilihan, tanpa subfolder. Pemilihan berkas lanjutan dapat mengubah cakupan; berkas tujuan yang sudah ada dapat ditimpa.
    - File hasil terjemahan disimpan ke path terjemahan yang sudah dikonfigurasi tetapi tidak dibuka otomatis.
    - Proses dapat dibatalkan melalui progress modal.
 
@@ -525,7 +538,7 @@ Ini adalah fungsi inti yang berfokus pada identifikasi konsep dan penambahan `[[
    - Jalankan `Notemd: Batch Generate Content from Titles` melalui command palette atau tombol bilah samping.
    - Pilih folder yang berisi catatan-catatan yang ingin Anda proses.
    - Plugin akan memproses tiap file `.md` dalam folder, kecuali file `_processed.md` dan file yang berada di "complete" folder, menghasilkan konten berdasarkan judul dan menggantikan konten yang ada. File diproses di background tanpa dibuka di editor.
-   - File yang berhasil diproses dipindahkan ke "complete" folder yang dikonfigurasi.
+   - Setelah pembuatan, pemindahan ke folder complete dicoba. Tujuan yang sudah terisi menghalangi pemindahan, bukan pembuatan yang telah tersimpan; jumlah berkas yang dibuat dan dipindahkan dihitung terpisah.
    - Perintah ini menghormati pengaturan **"Enable Research in 'Generate from Title'"** untuk setiap catatan.
    - Anda dapat membatalkan tugas ini melalui bilah samping atau modal.
    - Progres dan hasil, termasuk jumlah file yang dimodifikasi serta error, ditampilkan dalam log bilah samping atau modal.
@@ -578,6 +591,8 @@ Ini adalah fungsi inti yang berfokus pada identifikasi konsep dan penambahan `[[
     - Anda juga dapat mengatur plugin untuk memindahkan file-file tersebut ke folder terpisah untuk ditinjau.
 
 ## Penyedia LLM yang Didukung
+
+Tabel menampilkan contoh pilihan. Lihat [panduan 36 penyedia](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/providers/overview) untuk seluruh preset dan persyaratannya.
 
 | Penyedia | Tipe | API Key Diperlukan | Catatan |
 |---|---|---|---|
@@ -647,7 +662,7 @@ Notemd berjalan secara lokal di dalam Obsidian, tetapi beberapa fitur mengirimka
 ### Masalah Umum
 - **Plugin Tidak Termuat**: pastikan `manifest.json`, `main.js`, dan `styles.css` berada di folder yang benar, yaitu `<Vault>/.obsidian/plugins/notemd/`, lalu restart Obsidian. Periksa Developer Console melalui `Ctrl+Shift+I` atau `Cmd+Option+I` untuk melihat error saat startup.
 - **Kegagalan Pemrosesan / API Errors**:
-  1. **Periksa Format File**: pastikan file yang ingin diproses atau dicek memiliki ekstensi `.md` atau `.txt`. Saat ini Notemd hanya mendukung format teks tersebut.
+  1. **Periksa format**: Format bawaan bergantung pada tugas (`.md` atau `.md`/`.txt`). Mode pengembang dengan masukan diperluas mengizinkan teks lain dan PDF untuk beberapa tugas yang mempertahankan sumber, seperti terjemahan dan ekstraksi konsep. Penambahan tautan tetap terbatas pada `.md`/`.txt`.
   2. Gunakan perintah atau tombol "Test LLM Connection" untuk memverifikasi settings penyedia aktif.
   3. Periksa kembali API Key, Base URL, Model Name, dan API Version, untuk Azure, dan pastikan API key benar serta memiliki kredit dan izin yang cukup.
   4. Pastikan local LLM server, seperti LMStudio atau Ollama, sedang berjalan dan Base URL benar, misalnya `http://localhost:1234/v1` untuk LMStudio.
@@ -708,7 +723,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.7 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.8 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->

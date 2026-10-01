@@ -1,67 +1,54 @@
 ---
 id: openai
-title: "OpenAI"
-description: "Konfigurer OpenAI (GPT-4, GPT-4o)"
+title: OpenAI
+description: Konfigurer Chat Completions og test generering med valgt OpenAI-modell.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# OpenAI Provider
+# OpenAI
 
-<TLDR>
-**OpenAI bruker den delte OpenAI-kompatible transporten.** Den aktuelle forsinkelsen standardiseres til `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` og `models-then-chat`-kontakttesten. Bruk denne siden når du trenger nøyaktige feltsemantikker; bruk oversikten [LLM Providers](/docs/providers/overview) for valg på kategorienivå.
+<TLDR>Profilen bruker den delte OpenAI Chat Completions-kjørebanen. Velg nøkkel og modell for protokollen. Startmodellen garanterer ikke aktuell tilgang eller generell kvalitet.</TLDR>
 
-Dette er en del av [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+## Forberedelse
 
-## Oppsett
+Bruk **OpenAI**, nøkkel og `https://api.openai.com/v1` for offisiell tjeneste. En modell i listen kan kreve en annen API. Gatewayer har egne profiler/headere; Azure bruker **Azure OpenAI**, deployment og API-versjon.
 
-Skap en OpenAI API-klucz, legg til en `OpenAI`-leverandørprofil i Notemd-innstillingene, og behold den standardmessige Base URL medmindre du avsiktlig peker mot en OpenAI-kompatibel gateway. Modellfeltet kan forblive på `gpt-4o` for generelt bruk eller bli erstattet med en annen OpenAI-modell-ID som kontoen din kan kalle.
+## Endepunkt og autentisering
 
-Bruk modeller spesifikt for oppgaver for kostkontroll: behold sterkere modeller for forskning, konseptutvinning og langformig omstrukturering; bruk billigere eller hastigere modeller for oversettelse, lenkeforslag og korte sammanfattinger.
-
-## Endpoint og autentisering
-
-| Felt | Nåværende forsinking |
-|-------|----------------|
+| Felt | Startverdi |
+| ------- | -------------- |
 | Transport | `openai-compatible` |
-| API-klave | Krav |
-| Base URL | `https://api.openai.com/v1` |
-| Standardmodell | `gpt-4o` |
-| Temperature | `0.5` |
-| Kontakstest | `/models`, deretter `/chat/completions` |
+| API-nøkkel | Påkrevd |
+| Basis-URL | `https://api.openai.com/v1` |
+| Modell | `gpt-4o` |
+| Temperatur | `0.5` |
+| Forbindelsestest | `models-then-chat` |
 
-Notemd normaliserer OpenAI-kompatible base URL-er før det tillegges `chat/completions` eller `models`. Inkludere ikke en etterliggende `/chat/completions` i Base URL; dette skaper en duplisert path.
+Kjente URL-former normaliseres før ruter bygges. Start fra profilen og kontroller den endelige adressen fremfor å legge til tilfeldige stisegmenter.
 
-## Modelloppdagelse
+## Modeller
 
-OpenAI bruker den generelle OpenAI-kompatible modelloppdagelsesveien. Innstillingene UI spør først `/v1/models`, og validerer deretter den valgte modellen med en lettviktig chat-behov. Hvis oppdagelsen feiler men chaten fortsatt fungerer, kontroller om din klucz har tillatelse for model-liste eller om en gateway blokkerer modelllistet.
+**Fetch models** henter tilgjengelige modeller. **Test connection** kan lykkes med bare listen. Kontroller nøyaktig modell med et notat. Reasoning, thinking, sampling og budsjetter må passe profil/modell.
 
-Reasoning-modeller behandles som en protokoll-eksempel: Notemd samler system- og brukerinnhold for OpenAI-reasoning-ID:er som avviser en separat `system`-rolle, og det viser kun `reasoningEffort` der leverandørdefinisjonen støtter det.
+## Problemer
 
-## Feilforskning
+- 401/403: nøkkel, prosjekt, rettigheter og konto.
+- 404: endepunkt, modell-ID og API-støtte.
+- Liste fungerer, generering ikke: se chatfeil og parametere.
+- Langt svar avbrytes: inndata, budsjett og svar; kort test dekker ikke dette.
 
-- `401` eller `403`: kontroller klucz, projekttilgang, faktureringssituasjon og om den valgte modellen er aktiveret for klucz.
-- `404` i chat: Base URL er vanligvis feil eller inneholder allerede `/chat/completions`.
-- Modellen vises i dokumentene men ikke i selektoren: modell-liste-tilgang og chat-tilgang er separate feilmomenter; test nøyaktig modell-ID manuelt i leverandørprofilen.
-- Reasoning-modellen avviser meldinger: bruk en modell-ID som er dekket av OpenAI-reasoning-behandlingsveien eller skift til en ikke-reasoning chat-modell.
+## Når passer profilen?
 
-## Når å bruke
-
-Bruk OpenAI når du ønsker den mest forutsigbare standard-hostede veien, når `/v1/models`-oppdagelse er viktig, eller når en arbeidsflow avhenger av OpenAI-reasoning-modellsemantikker. Velg en gateway eller lokal leverandør når routering, privatliv eller kostkontroll er viktigere enn direkte OpenAI API-beteende.
-
----
+For direkte OpenAI-endepunkter med Chat Completions. Vurder egne notater; priser og tilgang endres uavhengig av Notemd.
 
 ## Neste trinn
 
-- [LLM Leverandører](/docs/providers/overview) -- Full konfigurasjon, modeller per oppgave og gjenprøvelogikk
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix 401/403 og rate-limit errors
+- [Leverandører](./overview).
+- [Feilsøking](../advanced/troubleshooting).

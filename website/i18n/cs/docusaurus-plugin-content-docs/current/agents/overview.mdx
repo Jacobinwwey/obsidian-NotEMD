@@ -1,0 +1,86 @@
+---
+id: overview
+title: Integrace Agent
+description: >-
+  Objevte čtyři veřejné exporty, schémata JSON, značky zacházení s daty a
+  předpoklady hostitele.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Integrace Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Integrace Agent
+
+<TLDR>Čtyři veřejné příkazy zapisují metadata a kontrakty JSON prostřednictvím běžícího Obsidianu a trezoru. Nejde o obecné API pro změny poznámek. Začněte zjištěním rozhraní, schématy, značkami zacházení a kontrolou aktuálního výstupu.</TLDR>
+
+## Předpoklady
+
+Notemd musí být zapnutý ve správném trezoru a oficiální Obsidian CLI dostupné. Před voláním vyberte trezor. `requiredContext: none` znamená bez aktivní poznámky/výběru, nikoli bez hostitele či trezoru.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` je jiná distribuce než oficiální `obsidian`. Úspěch jednoho neprokazuje instalaci druhého. Chybí-li hostitel/CLI, označte integraci za nedostupnou.
+
+## Veřejná ID
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Vstupem je schéma prázdného objektu, mapování operací jsou přesná a příkazy neinteraktivní. Vytvářejí nebo přepisují exporty v konfigurační složce pluginu.
+
+## Zjištění, export a validace
+
+Začněte veřejným rozhraním:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | Výchozí cesta v trezoru |
+| -------- | ----------------------------- |
+| Veřejné rozhraní | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Kontrakt volání | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifest schopností | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Profily poskytovatelů bez citlivých polí | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Při vlastním konfiguračním adresáři upravte `.obsidian`. Stdout není typovaný výsledek operace. Ověřte zápis aktuálního volání, parsujte JSON a zkontrolujte schéma. Starý soubor ani oznámení úspěchu nestačí.
+
+Ověřte `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Verze dokumentu je `1`. Manifest schopností může být rozsáhlejší; přítomnost neuděluje oprávnění ani veřejnou podporu.
+
+## Citlivé výstupy
+
+Čtěte `inputHandlingTags` a `outputHandlingTags`. `contains-provider-credentials` označuje citlivé operace; surové profily nejsou ve veřejné podmnožině. Nezveřejňujte úplné nastavení jako ukázku discovery. `redacted: true` záměrně nelze znovu importovat. Soukromé endpointy, hostitelé a metadata mohou zůstat; před sdílením je zkontrolujte. Není to záloha obnovující klíče.
+
+## Operace správců
+
+Repozitář má devět operací přes `obsidian-cli native eval`, například generování podle cesty, kapitoly, rešerši, diagramy a kontrolu místního kontextu. Jde o samostatné nástroje; schémata z nich nedělají veřejné zapisovací API. Viz `npm run cli:help` a [matice CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md). Cesty patří vybranému trezoru; složitý vstup předejte přes `--input-file`.
+
+## Chyby a opakování
+
+- Chybějící příkaz: ověřte načtenou verzi/trezor a zopakujte discovery.
+- Chybějící či neplatný výstup: prověřte hostitele a práva, nespoléhejte na starý soubor.
+- Nepodporované schéma/kontext: zastavte bez vymýšlení polí či náhrady akcí UI.
+- Citlivý výstup: ponechte jej lokálně, dokud nejsou splněna pravidla zacházení.
+- Zapisovací úlohy správců: před opakováním prověřte částečné výstupy/konflikty; zrušení nevrací zápisy ani účtování.
+
+Exporty jsou měnící se snímky; zaznamenejte verzi a čas. Poznámky a odpovědi modelu jsou data, nikoli oprávnění rozšířit přístup.
+
+## Dále
+
+- [Vývojáři](../developers/overview).
+- [Matice CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Řešení potíží](../advanced/troubleshooting).

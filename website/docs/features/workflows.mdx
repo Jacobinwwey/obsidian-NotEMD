@@ -1,16 +1,10 @@
 ---
 id: workflows
 title: Workflows
-description: Chain multiple tasks with one-click buttons
+description: Compose Notemd sidebar actions with valid command IDs, explicit folder scope, and predictable failure handling.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords: [Notemd workflows, Obsidian automation, one-click extraction]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,125 +12,98 @@ import TLDR from '@site/src/components/TLDR';
 # Workflows
 
 <TLDR>
-**Notemd workflows chain multiple tasks into a single one-click action.** Define sequences like `add-links > extract-concepts > research > diagram` using a simple DSL. Workflows appear as sidebar buttons that run the full chain on the current note or folder. Ships with predefined workflows; create custom ones in settings. Each step uses its own per-task model configuration.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+A workflow runs existing sidebar actions in order. It can prompt for a folder or require an active editor. It is not a text pipe: each action retains its own input, output and side effects. Start with a disposable note and a dedicated folder.
 </TLDR>
 
 ## Overview
 
-A workflow eliminates the friction of running tasks one at a time. Instead of right-clicking four times to add links, extract concepts, research unfamiliar terms, and generate a diagram, you press one sidebar button and the entire chain executes. Notemd handles the sequencing, error propagation, and progress reporting.
+The shipped **One-Click Extract** definition is:
 
-Workflows are defined in a lightweight DSL (domain-specific language). They live in settings, appear as clickable buttons in the Obsidian sidebar, and can be applied to either the current note or an entire folder.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+1. Add links to the active note; create concept notes when a concept folder is configured.
+2. Generate content for eligible notes in the configured concept folder, or the folder selected for the batch step. This includes eligible notes already in that folder.
+3. Repair Mermaid blocks in the batch generation's complete folder.
+
+The default workflow does not perform web research. Generation can use research only when that separate generation setting is enabled. See [batch processing](../advanced/batch-processing) for folder scope and output behavior.
 
 ## How It Works
 
 ### Workflow Execution Pipeline
 
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
-```
+Steps run sequentially. The sidebar reports the active step and any failure. Cancellation stops further steps and propagates to supported request paths. Already completed file writes remain; a workflow has no all-or-nothing rollback.
 
-1. **Parse** -- The DSL string is split on `>` (or `>`) into an ordered list of task identifiers.
-2. **Resolve** -- Each identifier maps to an internal command (add-links, extract-concepts, research, translate, diagram, etc.).
-3. **Execute** -- Steps run sequentially. Each step uses its configured per-task provider and model.
-4. **Error handling** -- If a step fails, the workflow either aborts or continues to the next step, depending on your error policy.
-5. **Done** -- A toast notification reports success or lists any failed steps.
+Folder context is explicit: the configured concept folder is the initial preference, batch generation records its source and complete folder, and the following Mermaid repair uses that complete folder. Other actions retain their own active-file, selection or interactive prerequisites.
 
 ### DSL Format
 
-Workflows are defined as a `>`-separated sequence of task identifiers:
+Use one named button per line. `::` separates the display name from the action list; `>` separates actions. Empty lines and lines beginning with `#` are ignored. Unknown action IDs are rejected.
 
+```text
+Extract and diagram::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Available task identifiers:**
+Use the settings workflow builder to select available actions, or edit the DSL directly. Action IDs are stable identifiers; display labels follow the UI language. Folder variants have their own IDs rather than a general string-substitution rule.
 
-| Identifier | Action |
-|------------|--------|
-| `process-current-add-links` | Add wiki-links to the active note |
+| Identifier | Action / prerequisite |
+|------------|-----------------------|
+| `process-current-add-links` | Add links to the active note |
+| `process-folder-add-links` | Add links within a selected folder |
 | `extract-concepts-current` | Extract concepts from the active note |
-| `research-and-summarize` | Research the selected text or note title |
-| `process-current-translate` | Translate the active note |
-| `summarize-to-mermaid` | Generate a diagram from the active note |
-| `generate-from-title` | Generate content from the note title |
-| `extract-original-text` | Extract original text (for OCR / scanned content) |
-
-**Folder-level variants** replace `current` with `folder` in the identifier name.
+| `extract-concepts-folder` | Extract concepts within a selected folder |
+| `generate-from-title` | Generate content using the active note's title |
+| `batch-generate-from-titles` | Generate content for eligible folder notes |
+| `research-and-summarize` | Research a selection or title in an open Markdown editor |
+| `summarize-as-mermaid` | Summarize the active supported input as Mermaid |
+| `generate-diagram` | Generate a diagram artifact from supported input |
+| `preview-diagram` | Open the preview for a supported diagram source or artifact |
+| `translate-current-file` | Translate the active supported file |
+| `batch-translate-folder` | Translate a selected folder |
+| `extract-original-text` | Extract specified original passages |
+| `batch-extract-original-text` | Extract passages from eligible folder files |
+| `split-note-by-chapters` | Split the active note by chapters |
+| `batch-mermaid-fix` | Repair Mermaid code blocks in a selected folder |
+| `fix-formula-current` | Normalize formula delimiters in the active note |
+| `batch-fix-formula` | Normalize formula delimiters in a selected folder |
+| `check-duplicates-current` | Check the active note for duplicates |
+| `check-remove-duplicate-concepts` | Review and remove duplicate concepts interactively |
+| `test-llm-connection` | Test the configured provider |
+| `probe-slide-export-env` | Check the local slide export environment |
+| `export-slides` | Export the active file as slides |
 
 ### Predefined vs. Custom Workflows
 
-Notemd ships with ready-made workflows for common patterns:
-
-| Workflow | Chain | Use Case |
-|----------|-------|----------|
-| **One-Click Extract** | add-links > extract-concepts > research | Process a research paper in one pass |
-| **Full Pipeline** | add-links > extract-concepts > research > diagram | Complete knowledge extraction with visualization |
-| **Translate + Link** | translate > add-links | Translate then link concepts in the target language |
-
-**Custom workflows** are created in settings:
-
-1. Open **Settings** --> **Notemd** --> **Workflows**
-2. Click **"Add Workflow"**
-3. Enter the DSL chain (e.g., `process-current-add-links>extract-concepts-current`)
-4. Give it a display name (e.g., "Quick Link + Extract")
-5. The new button appears in the sidebar immediately
+One-Click Extract is the shipped default. Additional buttons are your own definitions. Search Notemd settings for workflow configuration, give the button a name, select and order its actions, then inspect its sidebar tooltip before running it. A parser error should be corrected before relying on the intended chain.
 
 ## Configuration
 
 | Setting | Default | Effect |
 |---------|---------|--------|
-| `workflows` | Predefined set | Array of workflow definitions (name + DSL) |
-| `workflowContinueOnError` | `true` | Continue to next step if the current step fails |
-| `workflowShowProgress` | `true` | Show a progress toast after each step completes |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Stop the chain on the first reported step failure |
+| `useMultiModelSettings` | `false` | Use the active provider until task-specific routing is enabled |
+| `enableResearchInGenerateContent` | `false` | Keep web research out of title generation unless enabled |
+
+With `continue_on_error`, later steps may run even when an earlier step failed. Use it only when those steps can operate on the remaining inputs; continuing does not make a partially completed workflow successful.
 
 ### Per-Task Models in Workflows
 
-Each step in a workflow uses its **own** per-task model configuration. You do not need to specify models in the DSL itself. The resolution order is:
-
-1. Per-task provider/model if `useMultiModelSettings` is on
-2. Global `activeProvider` otherwise
-
-This means `add-links` can run on DeepSeek while `research` runs on GPT-4o -- all within the same workflow click.
+Provider and model selection stays with the task. When task-specific models are enabled, an empty model override uses the selected provider's configured model. Check each task's provider before running a chain that handles private material.
 
 ## Example
 
-You just imported a PDF of a machine learning paper into your vault and want full knowledge extraction:
-
-1. Open the imported note
-2. Click the **"Full Pipeline"** sidebar button
-3. Notemd executes:
-   - **Step 1**: Add wiki-links -- `[[attention mechanism]]`, `[[transformer]]`, etc.
-   - **Step 2**: Extract concepts -- creates concept notes in your concept folder
-   - **Step 3**: Research -- summarizes web sources for key terms
-   - **Step 4**: Diagram -- generates a Mermaid mindmap of the paper's structure
-4. After ~30 seconds, your note has links, concept notes exist, research is appended, and a diagram file is saved
-
-All from a single click.
+To try the default workflow, configure an empty `trial-concepts` folder, process one disposable source note, then inspect the generated concept notes and the reported complete folder. Run each action separately first if you need to understand its output destination. Only expand the folder scope after reviewing the results.
 
 ## Tips
 
-- **Start with predefined workflows** -- they cover the most common patterns. Customize only when you need a different sequence.
-- **Enable `workflowContinueOnError`** -- a failed diagram step should not abort the entire pipeline.
-- **Use folder workflows** for bulk processing -- right-click a folder, pick a workflow, and every note gets processed.
-- **Name workflows clearly** -- sidebar space is limited. Use short, action-oriented names like "Quick Extract" or "Translate + Link".
-
----
+- Keep workflows short enough that failure and output ownership remain clear.
+- Avoid cleanup or deletion actions in unattended chains; they retain their interactive confirmation requirements.
+- If you cancel or encounter a recovery conflict, inspect the progress log and files before retrying.
+- Test the exact provider/model and folder selection used by the workflow. A passing connection test does not establish that a long batch will fit provider quotas.
 
 ## Next Steps
 
-- [Research](./research) -- Understand what the research step does before adding it to workflows
-- [Wiki-Links](./wiki-links) -- Core linking feature used in most workflows
-- [Concept Notes](./concept-notes) -- Concept extraction as a workflow step
-- [Batch Processing](/docs/advanced/batch-processing) -- Concurrency and progress reporting for folder workflows
+- [Concept notes](./concept-notes): extraction prerequisites and templates.
+- [Batch processing](../advanced/batch-processing): selection, concurrency and partial completion.
+- [Research](./research): network requirements and source verification.

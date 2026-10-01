@@ -1,75 +1,64 @@
 ---
 id: china
-title: 中国供应商
-description: 配置 Qwen、DeepSeek、GLM 等。
+title: 中国地区 Provider
+description: 匹配地区账户、端点路径、模型或 deployment ID，正确配置 Notemd provider。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - 中国地区 Provider
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 中国供应商
+# 中国地区 Provider
 
 <TLDR>
-**Notemd** 通过主要兼容 OpenAI 的端点，支持中国地区及中国境内的服务提供商。目前的列表包括 DeepSeek、Qwen、Qwen Code、Doubao、Moonshot、Xiaomi MiMo、GLM、MiniMax、Baidu Qianfan、SiliconFlow、Huawei Cloud MaaS 和 Z AI。其优势在于覆盖范围广且成本可控，而风险则在于服务提供商特定的模型命名方式及账户访问限制。
-
-这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
+使用与账户和部署匹配的预设。即使共享 OpenAI-compatible 协议，地区端点、模型名和权限也不可互换。选择任务 provider 前先验证小样本。
 </TLDR>
 
 ## 设置
 
-创建提供商账户，生成一个 API 密钥，然后选择对应的 Notemd 提供商预设，而非使用通用的 OpenAI 配置文件。该预设包含默认的 Base URL、模型、API 测试模式、模型发现行为以及任何特定于提供商的 UI 字段。
+在所选 provider 创建 API 账户、获取密钥并选择对应预设。确认账户端点区域与模型权限，测试连接并运行可丢弃笔记。预设默认值不保证当前模型可用。
 
-在此应积极采用按任务选择模型的方式。例如，在需要大量推理的工作流中使用 DeepSeek 或 GLM，在处理广泛的中文内容时使用 Qwen 或 Moonshot，而当相关账户支持编码模型时，则将编码任务分配给 Qwen Code。
+## 端点与认证
 
-## 端点与身份验证
+| 预设 | 默认模型 | 默认基础 URL |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-| 服务提供商 | 默认模型 | 基础 URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | （需要端点 ID） | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
-
-**注意：** Doubao 需要一个 Ark 端点 ID（格式为 `ep-xxxxxxxx-xxxx-xxxx`），而非常规的模型名称。
-
-这些提供商中的大多数都使用兼容 OpenAI 的共享运行时，但它们的账户和模型语义有所不同。除非您已确认该账户的备用端点，否则请保留特定于预设的 Base URL。
+将 Doubao 占位符替换为部署支持的 Ark endpoint ID 或模型 ID。GLM 与 Z AI 使用不同地区预设；一个账户区域或订阅路径的密钥可能不适用于另一端点。按 provider 账户说明配置，不能仅按所在地域选择。
 
 ## 模型发现
 
-当提供方支持列表功能时，DeepSeek、Qwen、Qwen Code、Doubao、Moonshot、Xiaomi MiMo、GLM、Z AI、MiniMax、Baidu Qianfan 和 SiliconFlow 会使用与 OpenAI 兼容的模型发现机制。由于 ModelArts 的部署元数据与通用的 `/v1/models` 列表并不相同，因此 Huawei Cloud MaaS 会采用 `huaweicloud-modelarts-models` 模式。
+Provider 允许时使用模型发现。Huawei Cloud MaaS 使用部署感知发现，其他列出预设在支持时使用 OpenAI-compatible 路径。缺少列表权限不必然表示显式配置的模型无法生成。
 
-不要将发现失败视为聊天不可行的证据。有些服务提供商在限制模型列表权限的情况下仍允许聊天。在这种情况下，应在配置文件中明确指定模型ID，并通过连接测试进行验证。
+连接测试也随预设不同：DeepSeek 可仅凭模型列表响应成功，部分地区预设会执行短聊天请求。仍需实际任务验证提示词与输出要求。
 
-## 故障排除
+## 故障排查
 
-- 认证成功但聊天失败：模型名称可能超出了该账户的权限范围或所在区域。
-- 使用普通模型名称时 Doubao 会失败：如果部署有要求，请在模型字段中使用 Ark 端点 ID。
-- 推理响应被截断：请检查提供商规定的最大输出token数以及Notemd所对应的模型感知型最大token设置。
-- 区域网络配置各不相同：如果保险库机器位于中国境内，则应使用提供商的中国的端点；只有当账户和网络路径均有效时，才可使用国际端点。
+- 密钥接受但拒绝生成：检查模型授权、部署和账户区域。
+- Ark 模型拒绝：确认端点要求 deployment ID 还是 model ID。
+- 推理响应截断：检查输出上限与 provider 专用 thinking 设置。
+- 网络错误：从运行 Obsidian 的设备测试已配置端点，并检查传输错误。
 
-## 何时使用
+## 适用场景
 
-当区域延迟、支付/账户访问、中文内容质量或成本是主要限制因素时，应使用中国境内的服务提供商。如果需要更简单的协议结构或更高的跨服务商调试一致性，建议选择直接的 OpenAI、Anthropic、Google 或本地服务提供商。
+根据可访问端点、数据处理要求和实测任务输出选择。地区与模型品牌不是质量、隐私或费用保证。[Provider 概览](./overview)还列出可能更匹配部署的网关与本地服务。
 
----
+## 后续阅读
 
-## 后续步骤
-
-- [LLM 提供商](/docs/providers/overview) -- 完整配置、任务级模型以及重试逻辑
-- [故障排除](/docs/advanced/troubleshooting) -- 解决区域连接及认证错误问题
+- [Provider 概览](./overview)：36 个预设与任务路由。
+- [故障排查](../advanced/troubleshooting)：复现认证和模型错误。

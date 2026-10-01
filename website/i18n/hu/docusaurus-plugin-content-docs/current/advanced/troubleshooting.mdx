@@ -1,161 +1,84 @@
 ---
 id: troubleshooting
-title: "Hibaelhárítás"
-description: "Általános problémák és megoldások"
+title: Hibaelhárítás
+description: >-
+  Kis reprodukcióval különítse el a szolgáltatói, fájlírási, kötegelt és
+  exporthibákat.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [troubleshooting, errors, diagnostics, connection test]
-concepts: [Troubleshooting, Error Handling, Diagnostics]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Hibaelhárítás
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Hibaelhárítás
 
-<TLDR>
-**A legtöbb Notemd probléma négy kategóriába oszul: API kulcsfontosságú problémák, hálózati kapcsolat, autentikációs hibák (401/403) és sebességkorlátok (429).** A belső kapcsolat ellenőrzése és a diagnostikai panel gyorsan az alapvető okot azonosítja. Ez a oldal leírja minden általános hibajelzést, annak okát és a megoldást. Itt nem listált problémák esetén jelentse őket be a GitHub Issuesben a diagnostikai adatokkal.
-
-Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Próbajegyzeten, azonos szolgáltatóval, modellel és feladatbeállítással reprodukáljon. Olvassa a folyamatjelzést és kimeneti útvonalat. Válassza szét a hitelesítést, generálást, parsingot és írást; a kapcsolatteszt nem teljes munkafolyamat-próba.</TLDR>
 
 ## Áttekintés
 
-Notemd függ externi szolgáltatásoktól -- LLM fornalmazóktól és keresési API szolgáltatásoktól -- így a legtöbb probléma az alkalmazás magájából nem származik. A beállításokban található diagnostikai panel struktúrázott formában mutatja be a legutóbbi API kérést, beleértve a kérést URL, a válasz állapotát és a hiba tartalmát. Mindig először ellenőrizze ezt, mielőtt tovább kutasson.
+Rögzítse a Notemd/Obsidian verziót, OS-t, műveletet, protokollt, modellt és minimális lépéseket. Ne indítson újra, amíg a megszakítás lezárul. Tartsa meg a kimeneti és helyreállítási fájlokat, amíg meg nem érti eredetüket.
 
-## Működési módszer: Diagnostika
+## Diagnosztika
 
-### Kapcsolat ellenőrzése
+### Kapcsolatteszt
 
-Minden fornalmazó beállítási részben van egy **"Test Connection"** gomb. A gombra kattintva küldődik egy minimális API kérést (gyakran egy modelllistát vagy egy rövid teljesítést) és jelentkezik a sikerről vagy a konkrét HTTP hibáról. Ez a leggyorsabb módszer arra, hogy ellenőrizze, hogy a sua API kulcs és a alap URL helyesek-e.
+A **Test connection** csak modelllistát vagy rövid generálást is ellenőrizhet. Utána futtasson kis valódi feladatot a választott modellel és kimeneti formával.
 
-### Diagnostikai panel
+### Folyamat és fejlesztői diagnosztika
 
-**Beállítások --> Notemd --> Diagnostika** megjeleníti:
+A folyamatjelző állapotot, hibákat és helyeket mutat; az API-aktivitás megkülönbözteti a várakozást a befejezéstől. Csak szükség esetén engedélyezzen debugot. Hosszú diagnosztikai kérés kvótát fogyaszthat. Jelentésekben jegyzetek, részválaszok, végpontok és kulcsok lehetnek. Megosztás előtt helyben ellenőrizze és tisztítsa őket, a tisztított profilok metaadatait is.
 
-| Feltérváltozó | Tartalom |
-|-------|---------|
-| Legutóbbi fornalmazó | Mely fornalmazót legutóbb kértek el |
-| Legutóbbi modell | Mely modellt legutóbb kértek el |
-| Legutóbbi állapot | HTTP státuszkód vagy transzporthiba |
-| Az utolsó hiba | Szöveges hibaüzenet a API szólóval |
-| Az utolsó kérés URL | A legutóbbi kérés teljes URL-a (redaktált API kulcs) |
-| Az utolsó válasz tartalma | Kurczott választest (első 500 karakter) |
+## Gyakori hibák
 
-Kopítsd le a teljes diagnostikai kimenetet, ha problémákat jelented be a GitHub-on.
+### Hiányzó vagy érvénytelen kulcs
 
-## Általános hibák
+401: profil, végpont és véletlen szóközök. 403: fiók, projekt, modelljog és számlázás. Az újrapróbálás nem javít hibás hitelesítő adatot.
 
-### API Kulcs nem változó vagy hiányzik
+### Hálózat
 
-**Szimptom:** HTTP 401 vagy „Néveltetés nélküli API kulcs”
+Az Obsidian eszközéről ellenőrizze a szervert, portot, protokollt és útvonalat. Ollama/LM Studio fusson elérhető modellel. A `localhost` ezt az eszközt jelenti, nem más számítógépet. Válasszon megfelelő profilt; a fallback automatikus, nincs általános transportkapcsoló.
 
-**Oka:** A API kulcs hiányzik, tartalmaz üres helyeket, vagy tartozik egy másik fornecedőhez.
+### 429 korlát
 
-**Megoldás:**
-1. Ellenőrizze, hogy a kulcsnél nincs kezdeti/végépi tér.
-2. Ellenőrizze, hogy a kulcs megfelel a kiválasztott fornalmazóknak (ein OpenAI-Kulcs funktioniert nicht mit Anthropic).
-3. Ellenőrizze, hogy a fiókában kredite vannak vagy aktív abonelés van
-4. Kattintson a **"Test Connection"** gombra az ellenőrzéshez
+Csökkentse az egyidejű kéréseket, nézze meg a hívás/tokenkvótát és a kulcs egyéb forgalmát. Újrapróbálás csak bizonyos átmeneti hibát kezel.
 
-### Hálózati / Kötési hibák
+### Nem található modell
 
-**Túljelezés:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+Használja a **Fetch models** műveletet vagy ismert modell/deployment ID-t. Ellenőrizze az API-t és régiót. Példák elavulhatnak; Azure deploymentet, Ark endpoint-ID-t igényelhet.
 
-**Oka:** A API végpont nem érhető el a gépéből.
+### Hiányzó hivatkozás vagy fogalom
 
-**Megoldás:**
-1. Ellenőrizze az internetkapcsolatát
-2. Ha proxy vagy tűzvédelmi szolgáltatás mögé van, ellenőrizze, hogy a API domén nem blokkolva van
-3. A Ollama esetében: ellenőrizze, hogy a `ollama serve` működik (`ollama list` azonnal modellt válaszolna)
-4. A LMStudio esetében: ellenőrizze, hogy a szerver `localhost:1234` címén működik
-5. Próbáljon más transzporttartalmat – a mobilhasználók biztosítják kell, hogy a `requestUrl` transzport aktív legyen
-6. Hajtson be a `enableStableApiCall` automatikus újraértesítéshez áthajtó hibáknál
+Ellenőrizze a tényleges kimenetet, használható forrást, válaszformátumot és engedélyezett fogalommappát. Önálló kinyeréskor kezdetben csak címek vannak, visszahivatkozás nélkül. Hiányzó jelölésnél próbálja az alaputasítást.
 
-### 403 Kizárás
+### Hiányzó vagy máshová került kimenet
 
-**Túljelezés:** HTTP 403
+Olvassa a jelentett `_processed.md`, `_<language>.md` vagy complete útvonalat. Fordítási mappahibánál a forrásmappa lehet a cél. Ismétlés előtt vizsgálja a jogosultságot és konfliktusokat.
 
-**Oka:** A API kulcsa változatlan, de nincs hozzáférése a kérött forráshoz.
+### Fájlok megszakítás után
 
-**Megoldás:**
-1. Néhány modell különleges hozzáférést igényel (pl. a GPT-4 Azure által használatahoz egy telepítési nev szükséges)
-2. Néhány szolgáltató korlátozza a modelleket a tervszint szerint – ellenőrizze az összefüggéseit
-3. Regiókéntes korlátok lehetnek (néhány Kína-beli szolgáltató blokkolja a nemzetközi IP-címeket, és vice versa)
-4. Ellenőrizze, hogy a modellneve helyesen íródik (pl. `gpt-4o`, nem `gpt-4o-mini`, ha a mini modell azonos a tervében engedettekkel)
+Kész írás megmarad, elfogadott kérés befejeződhet. Törlés vagy a teljes mappa újrafuttatása előtt ellenőrizze a fájlokat és helyreállítási ütközéseket.
 
-### Háromszázhatodik hibakód (429)
+### Diagram vagy alkalmazásexport
 
-**Túljelezés:** HTTP 429 vagy "Háromszázhatodik hibakód elérve"
+Támogatott típust/forrást használjon, ellenőrizze a dia- vagy CircuitikZ-környezetet. Az előnézet nem célalkalmazás-teszt. Vizuális előnézet nélkül mentse a szöveges forrást a megfelelő külső eszközhöz. [Diagramok](../features/diagrams).
 
-**Oka:** Túl sok kérést történt egy korotartam alatt.
+## Hibajelentés
 
-**Megoldás:**
-1. Kemelje ki a `batchConcurrency`-t a `1`-ra vagy a `2`-ra
-2. Várjon néhány percet, majd próbálja újra
-3. Ellenőrizze a szolgáltató háromszázhatodik hibakód dokumentációját a saját tervszintéhez
-4. Engedélyezze a `enableStableApiCall`-t az automatikus újpróbához velejáráskal
-5. Fontosabb lehet átmenni egy magasabb korlátokat adó szolgáltatóra (DeepSeek, Ollama)
+1. Szintetikus jegyzet és próbamappa segítségével reprodukáljon.
+2. Adja meg a verziókat, műveletet, modellt, szükséges beállítást és várt/tényleges eredményt.
+3. Minimális fájlt/naplót csatoljon kulcsok, privát tartalom és felesleges végpontmetaadat nélkül.
+4. Jelezze, előáll-e egy fájllal és alaputasítással.
+5. Nyisson [GitHub Issue](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) bejegyzést.
 
-### Modell nem található
+Egy képernyőkép ritkán bizonyít formátum- vagy megszakítási hibát. Lehetőség szerint adjon forrást/kimenetet vagy minimális lépéseket.
 
-**Túljelezés:** "Modell nem található" vagy HTTP 404
+## Tovább
 
-**Oka:** A választott szolgáltatón a modellnev nem létezik.
-
-**Megoldás:**
-1. Kattints **"Get Model List"**-re, hogy látogass meg az összes elérhető modellt a szolgáltatódhoz
-2. Néhány modellneve idővel változik – ellenőrizd a jelenlegi nevet a szolgáltató dokumentációjában
-3. Ollama esetén: futtasson el `ollama list`-t, hogy látogass meg a letöltett modellt; csak azok a modellek vannak elérhetőek, amelyek letöltésre kerültek
-
-### Nincs hivatkozások / nincs koncepciók készültek
-
-**Túlzás:** A parancs fut, de nem ad ki semmilyen eredményt
-
-**Ok:** A LLM egy üres vagy megértési lehetetlenséges választ adott.
-
-**Megoldás:**
-1. Ellenőrizze a diagnostikai panelot a valódi LLM válaszához
-2. Próbáljon egy jobb képességű modellt (nagyon kis modellek néha nehezen kezelik a struktúrált eredményt)
-3. Biztosítsa, hogy a jegyzet elég tartalmat tartalmazza (>50 szó)
-4. Ellenőrizze a saját kifejezését, hogy nincsenek konfliktusos instrukciók
-5. Támlódjon az összetett kifejezések elszűrése korlátozását, hogy látogasson meg, hogyan erősen szűrheti az adatokat
-
-### Doubao végpont ID hiányzik
-
-**Túlzás:** Hiba a ByteDance Doubao szolgáltató használatakor
-
-**Ok:** A Doubao egy Ark végpont ID-t (formátum: `ep-xxxxxxxx-xxxx-xxxx`) igényel, nem a modellnevet.
-
-**Megoldás:** Cserélje ki a helyettesítő modellt a Volcengine konzolon található valós értékelői azonosítójával.
-
-## Konfiguráció
-
-| Diagnozis beállítások | Helyezés | Cél |
-|--------------------|----------|---------|
-| **Kapcsolat ellenőrzése** | Beállítások --> Társító rész | Ellenőrizze a API kulcsot és a kapcsolatot |
-| **Módelllista kérése** | Beállítások --> Társító rész | Következőket ellenőrizze: melyik modellek elérhetők. |
-| `enableStableApiCall` | Beállítások --> Fejlesztett | Hétfogadásot engedélyezés a visszakövetéskel |
-| `batchConcurrency` | Beállítások --> Hromadkezelés | Kontrollálja a paralellizmust, hogy elkerülje a sebességi korlátokat |
-
-## Hogyan jelenthetem be problémákat?
-
-Ha a probléma nem kerül fenti részben leírásra:
-
-1. Nyitja meg a **Beállítások --> Notemd --> Diagnozis** menüt
-2. Kopítsa le a teljes diagnozis kimenetét
-3. Nyitja egy GitHub Issue-t a címén: [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-4. Beillesse: Obsidian verziót, Notemd verziót, fornítót, modellt, diagnozis kimenetét és a probléma reprodukálásához szükséges lépéseket
-5. Törölnie kell a megosztott logokból a API kulcsát
-
----
-
-## További lépések
-
-- [LLM Fornítók](/docs/providers/overview) -- Teljes fornítóbeállítások referenciája
-- [Hromados feldolgozás](/docs/advanced/batch-processing) -- Nagy mennyiségű munkákhoz szükséges koncurrents és újrapróbálási beállítások
-- [Szerkeszthető kérések](/docs/advanced/custom-prompts) -- Kérések módosítása által a valósítmányban jelentkező LLM viselkedés helyreállítása
+- [Szolgáltatók](../providers/overview).
+- [Kötegek](./batch-processing).
+- [Egyéni promptok](./custom-prompts).
+- [Beállítások](../getting-started/configuration).

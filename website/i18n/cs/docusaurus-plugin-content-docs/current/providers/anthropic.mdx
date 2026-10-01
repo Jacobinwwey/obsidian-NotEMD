@@ -1,67 +1,56 @@
 ---
 id: anthropic
-title: "Anthropic"
-description: "Nastavit Anthropic Claude"
+title: Anthropic
+description: >-
+  Nastavte Claude přes nativní Messages API s modelem, ke kterému máte
+  oprávnění.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [anthropic, claude, provider, configuration]
-concepts: [Anthropic, Claude, API Configuration]
-citations:
-  - title: Anthropic API
-    url: https://docs.anthropic.com
-  - title: Claude
-    url: https://www.anthropic.com/claude
+keywords:
+  - Anthropic
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic Provider
+# Anthropic
 
-<TLDR>
-**Anthropic využívá nativní transport zpráv API, nikoli transport kompatibilní s OpenAI.** Aktuální přednastavení výchozím způsobem používá `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` a `temperature: 0.5`. Při ladění jej považujte za samostatnou protokolovou vrstvu.
+<TLDR>Profil slouží nativnímu Messages API. Pro Claude za OpenAI-compatible bránou použijte její profil. Historický výchozí model může být nutné nahradit dostupným.</TLDR>
 
-Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
-</TLDR>
+## Příprava
 
-## Nastavení
+Vyberte **Anthropic**, klíč a dostupný model. Nativní endpoint zachovejte, pokud jiné nasazení neposkytuje stejný protokol. Ověřte spojení a poznámku.
 
-Vytvořte klíč Anthropic API, přidejte profil poskytovatele `Anthropic` a nechte základní URL na nativním konci, pokud neprocházíte přes speciální profil brány. V poli modelu vyberte ID modelu Claude, který chcete použít; výchozí hodnota udržuje stávající základnu produktu stabilní.
+## Endpoint a autentizace
 
-Anthropic je vhodný kandidát pro vysoce kvalitní shrnování, syntézu výzkumu a extrakci konceptů. Pokud ho kombinujete s levnějšími poskytovateli, používejte ho pouze u úloh, které těží z kvality jeho výstupů.
-
-## Koncový bod a autentizace
-
-| Pole | Aktuální přednastavení |
-|-------|----------------|
+| Pole | Výchozí hodnota |
+| ------- | -------------- |
 | Transport | `anthropic` |
-| Klíč API | Požadované |
+| API klíč | Vyžadován |
 | Základní URL | `https://api.anthropic.com` |
-| Výchozí model | `claude-3-5-sonnet-20240620` |
+| Model | `claude-3-5-sonnet-20240620` |
 | Teplota | `0.5` |
-| Test spojení | Pouze chat |
+| Test spojení | `chat-only` |
 
-Běhový prostředí odesílá požadavky na `/v1/messages` pomocí `x-api-key` a `anthropic-version: 2023-06-01`. Pod tímto přednastavením nekonfigurujte koncový bod `/v1/chat/completions` ve stylu OpenAI; místo toho použijte přednastavení brány kompatibilní s OpenAI.
+Implementace používá `/v1/messages` s vlastními hlavičkami klíče/verze. Nepřidávejte cestu OpenAI chat. Výchozí hodnoty popisují konfiguraci repozitáře, nikoli dnešní dostupnost.
 
-## Objevování modelů
+## Modely
 
-Anthropic v registru poskytovatelů používá režim objevování `anthropic-models`. Pokud váš klíč nebo účet nemůže vytvořit seznam modelů, uchovejte ve profilu známý ID modelu a ověřte to pomocí testu připojení.
+Kde je povoleno, použijte nativní zjištění modelů. Při chráněném výpisu zadejte oprávněné ID a ověřte generování. Dlouhé či strukturované úlohy potřebují samostatný test.
 
-Tento transport není zaměnitelný s poskytovateli kompatibilními s OpenAI. Model Claude směrovaný přes OpenRouter, LiteLLM nebo jiný gateway patří do profilu tohoto gateway, nikoli do nativního profilu Anthropic.
+## Potíže
 
-## Řešení problémů
+- 401/403: klíč, projekt, účtování a přístup k modelu.
+- 404: adresa a dostupnost.
+- Odmítnuté ID brány: opravte profil a modelové ID.
+- Chyby dlouhých požadavků: ověřte limity dříve, než zvýšíte počet opakování.
 
-- `401` nebo `403`: zkontrolujte rozsah klíče, přístup k pracovnímu prostoru, fakturaci a zda klíč patří k očekávanému pracovnímu prostoru Anthropic.
-- `404`: základní URL je chybný nebo vybraný ID modelu není pro účet dostupný.
-- ID modelů ve stylu gateway selhávají: přesuňte profil k odpovídajícímu poskytovateli gateway, protože nativní Anthropic očekává nativní názvy modelů.
-- Dlouhé požadavky selhávají pozdě: snižte velikost výstupu modelu na jednu úlohu nebo použijte model s vyšší známou mezí výstupních tokenů.
+## Vhodné použití
 
-## Kdy použít
+Nativní Messages API. Srovnávejte vlastní zdroje, nikoli obecné pořadí poskytovatelů. Směrování podle úlohy umožňuje cílené použití.
 
-Použijte Anthropic, když je kvalita syntézy, výzkumných poznámek nebo strukturovaného psaní důležitější než čistá cena. Nepoužívejte ho jako obecnou náhradu kompatibilní s OpenAI; samostatný transport je klíčový a míchání protokolů ztěžuje diagnostiku.
+## Dále
 
----
-
-## Další kroky
-
-- [LLM Providers](/docs/providers/overview) -- Kompletní konfigurace, modely na jednu úlohu a logika opakování
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Náprava chyb 401/403 a chyb připojení
+- [Poskytovatelé](./overview).
+- [Řešení potíží](../advanced/troubleshooting).

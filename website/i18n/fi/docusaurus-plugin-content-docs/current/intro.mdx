@@ -1,189 +1,94 @@
 ---
 id: intro
-title: "Esittely Notemd:sta"
-description: "AI-välineet tietojenkerhojen luomiseen Obsidian:lle – joka mahdollistaa kestävät muutokset, työprosessit ja spec-first-diagrammit"
-keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links, Copilot alternative, Smart Connections alternative, obsidian AI plugin, auto wiki-link, concept notes]
+title: Notemd-esittely
+description: >-
+  Tee Obsidian-muistiinpanoista linkitettyä Markdownia, käsitteitä, tutkimusta,
+  käännöksiä ja tarkistettavia kaavioita.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, Knowledge Management, Wiki-Links, Copilot Alternative, Smart Connections Alternative, AI Plugin]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Notemd-esittely
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Esittely Notemd:sta
+# Notemd-esittely
 
-<TLDR>
-**Notemd** (Note + EMD — Enhanced Markdown Documents) on avoimen lähtekoodin Obsidian-plugini, joka muuntaa LLM-välineillä tehtyä lukemista kestävään tietoon. Erillisesti chat-pohjaisista AI-laitteista, joissa tiedot kadovat keskustelun jälkeen, Notemd kirjoittaa tulokset **direktiivisesti sinun vaultisiin** wiki-linkkejä, konseptitietoja, tutkimusyhteenvetoja, käännöksiä, työprosesseja ja diagrammeja. Se on suunniteltu tutkijille, opiskelijoille ja tietojenhankkijoille, jotka haluavat, että heidän lukemisensa, tutkimustensa ja visuaaliset selityksensä koonnistuvat strukturoituun, kehittyvään tietograafioon.
-</TLDR>
+<TLDR>Notemd on MIT-lisensoitu Obsidian-lisäosa, joka tuottaa tarkistettavaa wiki-linkitettyä Markdownia, käsitemuistiinpanoja, tutkimusyhteenvetoja, käännöksiä ja kaavioita. Valitse tarjoaja, tehtävä ja rajaus ja tarkista mallin tulos ennen tietopohjaan liittämistä.</TLDR>
 
-## Mitä on Notemd?
+## Mikä Notemd on?
 
-Notemd yhdistää **30+ suurta kielellistä mallia** (OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama ja muut) sinun Obsidian-työprosessisiin, jotta voidaan automatisoida tietojen poistaminen, organisoiminen, kääntö, tutkimus ja diagrammin luominen.
+Lisäosa yhdistää holvitehtävät 36 pilvi-, yhdyskäytävä- ja paikallispalvelinprofiiliin. Tehtävät kirjoittavat oman tulossopimuksensa mukaan. Käytä toimintoja erikseen tai sivupaneelin työnkuluissa. Tulokset säilyvät holvissa, mutta pilvitehtävä lähettää sisältöä ja verkkotutkimus käyttää verkkoa. Paikallinen tallennus ja paikallinen päättely ovat erillisiä valintoja.
 
-### Päätilanne: hetkelliset vs. kestävät tietot
+## Valitse aloitusreitti
 
-| Aspektti | Chat-pohjainen AI (ChatGPT jne.) | Notemd |
-|--------|-------------------------------|--------|
-| **Kuhaan tulokset menevät** | Chat-tiedot (kadovat) | Sinun Obsidian-vaultisi (kestää) |
-| **Muoto** | Simpelit tekstivastaukset | Strukturoituja tiedostoja: `[[wiki-links]]`, konseptitietot, diagrammit |
-| **Pikaaikainen arvo** | Tulee uudelleen kysyä jokaisen kerran | Koonnistuu tietograafioon |
-| **Poistotietoisuus** | Interneti on tarpeen | Toimii täysin poistotietoisuudessaan Ollama |
+| Tavoite | Aloita tästä |
+| -------------- | ------------ |
+| Asenna ja tarkista ensimmäinen tulos | [Pika-aloitus](./getting-started/quick-start) |
+| Toistuvat tiedosto-/kansiotehtävät | [Työnkulut](./features/workflows) ja [eräajo](./advanced/batch-processing) |
+| Käännä, testaa tai laajenna lisäosaa | [Kehittäjäopas](./developers/overview) |
+| Löydä tuetut Agent-sopimukset | [Agent-opas](./agents/overview) |
 
-## Päätoiminnot
+## Keskeiset toiminnot
 
-### 1. **Automaattinen wiki-yhdistäminen**
-- LLM tunnistaa keskeiset käsitteet sinun notioissasi
-- Lähetää `[[wiki-links]]` jokaisessa ilmumisessa
-- Vaihtoehtoisesti luodaan yhdistetyt käsitteetiedot
-- Synonyymien poistaminen dupliikkojen välttämiseksi
+### Wiki-linkit ja käsitteet
 
-### 2. **Käsitteetiedon luominen**
-- Tarkistaa keskeiset käsitteet artikkeleista, paperista ja notioista
-- Luo erilliset käsitteetiedot taustalinkkien kanssa
-- Kohdannettavat väljälaskutilat ja mallit
+Pyydä mallia poimimaan käsitteitä ja lisäämään linkit. Oletuslinkitys luo erillisen käsitellyn muistiinpanon. Käsitetiedostot vaativat valitun kansion; erillinen poiminta alkaa otsikoista ilman paluulinkkejä. [Linkit](./features/wiki-links), [käsitteet](./features/concept-notes).
 
-### 3. **Web-tutkimuksen yhdistäminen**
-- Etsi Tavily tai DuckDuckGo Obsidian sisällä
-- LLM yhteenvetoo tuloksetta lähtöviiteiden kanssa
-- Lisää tutkimustulokset nykyiseen notiin
+### Tutkimus ja paikallinen konteksti
 
-### 4. **Monikielinen kääntö**
-- Kääntä valituja osia tai koko notia
-- Toetetaan 21+ UI kieltä
-- Suora uloskirjautumiskielen konfigurointi
-- Pakettikääntön tuki
+Tavily/DuckDuckGo antaa taustan aktiiviseen muistiinpanoon lisättävään yhteenvetoon. Valinnainen rajattu paikallinen haku voi antaa katkelmia generointiin. Indeksi on leksikaalinen, ei upotuksiin perustuva semanttinen haku. [Tutkimus](./features/research).
 
-### 5. **Diagrammien luontaminen**
-- **Mermaid**: Vierailukartat, järjestys-, klassi-, tila-, ER- ja Gantt-diagrammit
-- **JSON Canvas**: Obsidian kansalliset paikannusmuodot
-- **Vega-Lite**: Datadiagrammit, aikaseriat ja hajureitodiat
-- **HTML / Muokattavat HTML/SVG**: Itsevalmis kuvat kohtaisilla semantisten annotaatioiden kanssa
-- **Draw.io / Drawnix artefaktien rajat**: Hoitajan käyttöön suunnatut eksportit samasta semantisesta kuvamallista
-- **Välinekuvadiagrammien suunnitelma**: circuitikz/TikZJax tuki suunnitellaan kuldisten viiteiden, rajoitettujen pyyntöjen, renderoinnin palautteiden ja topologian/paikannusvalvontan perusteella, ei raakaan, rajoitteittomaan LLM TikZ:ään
-- **Eelennäksen diagnostiikka**: Renderoidut artefaktit voivat paljastaa komentoinnin/renderoinnin virheiden diagnostiikan, ja epälinjaisia lähteitä voi tarkistaa ilman pluginin LaTeX-ytimen tarpeetta
-- Mermaid-virheiden syntaksi-autotoisto
+### Käännökset ja alkuperäiskatkelmat
 
-### 6. **Yhden painutuksen käyttöflussit**
-- Ketjosta useita toimintoja puutarhakkeen painikeiksi
-- DSL-pyyhin tööflussin määrittely
-- Esimerkki: `add-links > extract-concepts > research > diagram`
+Käännä tiedostot/kansiot tai poimi kysymyksiin vastaavat alkuperäiskatkelmat. Vertaa lainauksia lähteeseen. Valinta ei rajaa tiedostokäännöstä. [Käännös](./features/translation).
 
-## Kuka sollte Notemd käyttää?
+### Kaaviot ja vienti
 
-✅ **Tutkijat**, jotka läsentävät artikleja ja luovat kirjallisuusarvioita
-✅ **Opiskelijat**, jotka järjestävät opinnannottoja ja luovat konseptikaarteja
-✅ **Tietojenkäyttäjät**, jotka haluavat, että läsityksensä pysyisi
-✅ **Kaksikieliset ammattilaiset**, jotka tarvitsevat kääntöä + wiki-yhdistäyksiä
-✅ **Yksityisyystunneelliset käyttäjät**, jotka haluavat paikallista LLM-tukia (Ollama)
-✅ **Vaihtoehtoiset käyttäjät**, jotka kohandavat pyyntöjä ja tööflussia
+Valitse tyyppi ja yhteensopiva lähde, tarkista esikatselu ja säilytä lähde tai tuettu visuaalinen vienti. Suoritettavassa luettelossa on 33 kohtaa. Lähde- ja vientimuoto ovat eri asioita. [Kaaviot](./features/diagrams).
 
-## Miksi Notemd + Obsidian?
+### Työnkulut
 
-**Obsidian** on paikallisuuskeskistyn, markdown-pyyhin tietojankanta. **Notemd** lisää AI-voimia:
-- Sinun dataasi pysyy sinun avarassasi (ei pilvapalvelussa)
-- Toimii offline paikallisten mallien kanssa
-- Tasuta ja avoimen lähtekoodin (MIT-litsenssi)
-- Yhdistyy olemassaoleviin Obsidian-plugineihin
-- Skaalautuu kymmeniin tuhannoihin nooteihin
+**One-Click Extract** lisää linkit, generoi sopivat käsite-/valitun kansion muistiinpanot otsikoista ja korjaa Mermaidin complete-kansiossa. Myös aiemmat käsitteet voivat tulla mukaan. Jokainen toiminto säilyttää omat ehtonsa ja tuotoksensa. [Tarkka DSL](./features/workflows).
 
-## Alustus
+## Aloittaminen
 
-1. **Asenna**: Asetukset → Yhteisöpluginit → Selaa → "Notemd"
-2. **Konfiguroi**: Lisä sinun LLM-palveluntarjoajan API-avain (tai käytä lokalaista Ollama)
-3. **Proovi**: Avaa noiteen → Oikeasta paina → "Tulkita tiedosto (lisää linkkejä)"
-4. **Tutkii**: Katso sivupalkki yhdellä klikkaulla toimintaketjuja
+1. [Asenna](./getting-started/installation) oikeaan holviin.
+2. Testaa kertakäyttöisellä muistiinpanolla ja saatavilla olevalla mallilla.
+3. Tarkista käsitekansio ja tulospolut.
+4. Tarkista tulokset ennen suurempia eriä.
 
-👉 [Asennusohje](./getting-started/installation) | [Nopean alustuskoulutus](./getting-started/quick-start)
+Ei kiinteää suoritusaikaa tai yleistä vähimmäispituutta. Valitse pieni tarkistettava tehtävä.
 
-## Diagrammit – suunta kehityksessä
+## Kaavioiden rajat
 
-Notemd-diagrammit ovat muuttumassa "kysy mallilta kirjoittaa yksi syntaksisano"-mallista suoraan kerroksittuun käytäntöön:
+Tyypitetyt määritykset ja kohdekohtainen renderöinti määrittävät tuen. `DiagramSpec` ei lupaa kaikkea syntaksia tai täsmällistä viiteasettelua. `circuitikz` käyttää rajattuja rakenteita. TikZJax on ulkoinen; esikatselu ei todista natiivikäännöstä. Drawnixin staattiset haarojen väliset nuolet eivät takaa kiinnittymistä uudelleenjärjestelyn jälkeen.
 
-```mermaid
-graph LR
-    A[Source Note] --> B[DiagramSpec]
-    B --> C[Target Adapter]
-    C --> D[Rendered Artifact]
-    D --> E[Semantic Verification]
-    E --> F[Preview or Export]
-```
+## Rakenne
 
-Prahtinen rakentus tukee jo Mermaid, JSON Canvas, Vega-Lite, HTML-varauksia, muokattavaa HTML/SVG-, Draw.io XML-tuotteita, minimaalista Drawnix JSON-alamryhmää, ennittelydiagnostiikkaa/tai vain lähteetiedostoja varauksina sekä offline `CircuitSpec -> circuitikz`-proototyyppejä yleisille lähteille ja CMOS-inverterin kultatempliteille. Välineiden diagrammit ovat vaikeampia: circuitikz voi ilmaista täpsää elektrisen topologian, mutta rajoitsemattomat LLM-lauskitukset tuovat usein lukemattomia suunnittelua tai renderoituutta epätoivottavat LaTeX-tiedostot. Seuraava suunta on säilyttää circuitikz rajoitettuna kultatempliteiden, sijaintisilmukkien asetuksien, renderointidiagnostiikan ja kuvauskuvien palautusaheloiden avulla.
+Tehtävä menee valitulle tarjoajalle; vastaus jäsennetään/validoidaan ja kirjoitetaan muistiinpanoksi tai tuotokseksi. Haku tuo valinnaisen kontekstin; esikatselulla/viennillä on muotokohtaiset rajat. [Kehittäjäopas](./developers/overview) kuvaa vastuut ja testit, [Agent-opas](./agents/overview) rajatut julkiset viennit. Sisäinen rekisteri ei ole yleinen julkinen automaatio-API.
 
-Lue tarkemmat [Diagrammit](./features/diagrams)-artikkelissa.
+## Työkalujen vertailu {#notemd-vs-other-obsidian-ai-plugins}
 
-## Arkkitehtuuri
+Valitse tehtävän mukaan: tiedostomuunnos, keskustelu, deterministinen linkitys, haku tai natiivimuokkaus. Käytä ajantasaisia ohjeita ja samaa näytettä sekä kirjaa versiot/asetukset.
 
-```mermaid
-graph LR
-    A[Obsidian Note] --> B[Notemd Plugin]
-    B --> C{Task Selection}
-    C -->|Add Links| D[LLM Provider]
-    C -->|Research| E[Search API]
-    C -->|Translate| D
-    C -->|Diagram| D
-    D --> F[Structured Output]
-    E --> D
-    F --> G[Update Vault]
-    G --> H[Wiki Links]
-    G --> I[Concept Notes]
-    G --> J[Diagrams]
-    G --> K[Research Summaries]
-```
+## Tiedot ja yhteensopivuus
 
-## Notemd vs muut Obsidian-AI-pluginit
+Pilvitehtävät saavat syötteen, hakukyselyn ja sallitut paikalliset katkelmat. Tarkista yksityisen materiaalin reitit. Peruutus pysäyttää tuetun jatkotyön ja säilyttää valmiit tulokset; etägeneroinnin tai laskutuksen loppumista ei taata.
 
-Enimmäiset Obsidian-AI-pluginit ovat keskittyneet vuoropuheluun (sinä kysyt, AI vastaa, tiedot jäävät chatiin). Notemd on **kirjoituskeskistynyt**: AI töötlee sinun noitteesi ja kirjoittaa strukturoituja tulemusia suoraan sinun avaruksesiin.
-
-| Toimintavaihtoehto | Notemd | Copilot | Smart Connections | Text Generator |
-|-----------|--------|---------|-------------------|-----------------|
-| Auton wiki-linkin lisääminen | Jaa | Ei | Ei | Ei |
-| Kontsepttipyynnön luominen | Kyllä (backlinkit + duplikaatien poistaminen) | Ei | Ei | Ei |
-| Diagrammin luominen | Kyllä (Mermaid, Canvas, Vega-Lite, HTML, muokattavat artektit) | Ei | Ei | Ei |
-| Webin tutkimusten yhdistäminen | Kyllä (Tavily + DuckDuckGo) | Ei | Ei | Ei |
-| Pakettikanssojen töötely | Jaa | Rajoitettu | Ei | Rajoitettu |
-| Toimenpito per toimenpide | Kyllä (7 tehtävää, itsenäiset mallit) | Ei | Ei | Ei |
-| Yhdellä painamiskertaa toimintajonot | Kyllä (DSL) | Ei | Ei | Ei |
-| Kääntö (paketti) | Jaa | Ei | Ei | Ei |
-| Viestintä varastokoneen kanssa | Ei | Jaa | Ei | Ei |
-| Semantinen sarnasuuskysely | Ei | Ei | Jaa | Ei |
-| Mallipohjainen generointi | Ei | Ei | Ei | Jaa |
-| LLM palveluntarjoajat | 36 (pilvetti + käyttöpäässä + lokalisoinnin) | 3-5 | 2-3 | 3-5 |
-| Täysin offline | Kyllä (Ollama) | Osittainen | Osittainen | Osittainen |
-
-**Milloin valita Notemd**: Haluat, että AI luottaa pitkäaikaisen tietograafian – ei vain keskustele sinun muistatuksetta.
-
-**Milloin valita Copilot**: Haluat vestlevän AI-assistentin Obsidian sisällä.
-
-**Milloin valita Smart Connections**: Haluat avastaa olemassa olevat suhteet merkintöjen välillä semantisen hakun kautta.
-
-## Filosofia
-
-**Notemd uskee, että AI sollte den menschlichen Wissensaufbau ergänzen, nicht ersetzen.** Palvelu:
-- Pitoi sinut kontrollissa (tarkista ennen muutoksien soveltamista)
-- Ymmärtää kontekstin (kaikki tulokset viitavat lähteeseen)
-- Respektoi yksityisyttä (sijallinen LLM-tuki, ilman telemetriaa)
-- Jää laajentettavaksi (avattu APIs, käsiteltyt työprosessit)
+Manifesti sallii mobiililatauksen ja määrittää vähintään Obsidian `0.15.0`:n. Tätä versiota ja fyysisiä mobiililaitteita ei ole nyt varmennettu. Valinnaiset natiiviviennit voivat vaatia työpöytätyökaluja. Sivustossa on 34 kielireittiä ja UI:ssa 21 kieliversiota; mallin kielitaito on erillinen.
 
 <!-- notemd-acknowledgments -->
-## Kiitokset ja viiteprojektit
+## Kiitokset ja viitteet
 
-Notemdia ylläpidetään itsenäisesti. Kiitämme avoimen lähdekoodin projekteja ja yhteisöjä, jotka ovat vaikuttaneet dokumentoituihin suunnittelupäätöksiin tai tarjoavat integraatioiden perustan. Maininta tunnustaa vain vaikutuksen tai yhteentoimivuuden; se ei tarkoita hyväksyntää, sidossuhdetta, mukana toimitettua koodia tai väitettä koodin uudelleenkäytöstä.
+Notemd on itsenäisesti ylläpidetty. Viitteet kertovat vaikutteista tai yhteentoimivuudesta, eivät hyväksynnästä, organisaatioyhteydestä tai ilman näyttöä mukaan liitetystä koodista.
 
-- **Viiteprojektit:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
-- **Avoimen lähdekoodin perustat:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
-- Kukin projekti säilyttää oman lisenssinsä ja ehtonsa; Notemd on saatavilla [MIT-lisenssillä](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
+- Viitteet: [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- Perusta: [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Kullakin on oma lisenssinsä; Notemd käyttää [MIT-lisenssiä](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
 
-## Avoin lähtekoodi
+## Koodi ja tuki
 
-- **Litsenssi**: MIT
-- **Lähteekoodi**: [github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
-- **Kuntti**: [Discord](https://discord.gg/qnGgsQ9W) | [GitHub Discussions](https://github.com/Jacobinwwey/obsidian-NotEMD/discussions)
-- **Panostaminen**: PR:t ovat tervetut, katso [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
-
----
-
-**Järgующее**: [Installation →](./getting-started/installation)
+[Repositorio](https://github.com/Jacobinwwey/obsidian-NotEMD) · [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) · [Osallistuminen](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md). Ilmoita tarkat versiot, vaiheet ja puhdistettu näyttö. Aloita [pikaoppaasta](./getting-started/quick-start).

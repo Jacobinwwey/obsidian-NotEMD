@@ -1,0 +1,99 @@
+---
+id: overview
+title: Vývojářský průvodce
+description: >-
+  Sestavujte, testujte a rozšiřujte existující kontrakty poskytovatelů, operací,
+  vykreslování a dokumentace.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Vývojářský průvodce
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Vývojářský průvodce
+
+<TLDR>Pracujte na oddělené větvi, nainstalujte uzamčené závislosti a obě revize prohlížeče, spusťte build i celý Jest. Změnu umístěte k vlastníkovi kontraktu a udržujte dokumentaci, testy poskytovatelů a doklady cílových aplikací společně.</TLDR>
+
+## Pracovní kopie
+
+Klonujte [repozitář](https://github.com/Jacobinwwey/obsidian-NotEMD) a přečtěte [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md). CI pluginu používá Linux/Windows Node 20, web Node 24. Kořen a `website/` mají samostatné instalace.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Dva balíčky Playwright mohou potřebovat různé revize Chromium; jedna instalace nestačí. `main.js` se generuje a Git jej ignoruje. Starý lokální bundle neověří nový commit.
+
+## Odpovědnost modulů
+
+| Odpovědnost | Hlavní zdroj |
+| ---------------- | ---------------- |
+| Životní cyklus, příkazy a propojení s hostitelem | `src/main.ts` |
+| Profily, metadata protokolů a validace | `src/llmProviders.ts` |
+| Požadavky, transporty, opakování a streamy | `src/llmUtils.ts` |
+| Operace, schémata a veřejná podmnožina CLI | `src/operations/`, `src/cliContracts.ts` |
+| Souborové úlohy, rešerše a překlad | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Akce postupů a boční panel | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Specifikace diagramů a vykreslování | `src/diagram/`, `src/rendering/` |
+| Řetězce UI a jazyky | `src/i18n/` |
+| Veřejné návody a překlady | `website/docs/`, `website/i18n/` |
+| Pokyny údržby a datované doklady | `docs/maintainer/` |
+
+Produkční bundle je samostatný s vloženým hostitelem náhledu. Případná oddělená cesta hostitele není smlouvou distribuovaných souborů. Její aktivace vyžaduje sladit balení, assets, ověření a dokumentaci.
+
+## Omezená změna
+
+1. Reprodukujte problém a nejprve napište cílený selhávající test.
+2. Změňte vlastníka invariantu a validujte vnější hranici.
+3. Spusťte cílené i úplné testy; zachovejte zrušení, chyby a odolnost zápisu.
+4. Aktualizujte anglický zdroj a dotčené jazyky. Plány, úkoly a walkthrough potřebují oddělené úplné anglické/čínské verze v `docs/`.
+5. Vizuální či nativní změnu ověřte ve skutečné aplikaci; XML, obrázek či build nedokládají editovatelnost nebo připojené konektory.
+
+Poskytovatele přidejte do `llmProviders.ts`, použijte existující kompatibilní transport a doplňte `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README i testy spojení. Zachovejte streamy a přerušené odpovědi. Zveřejnění operace vyžaduje vstupní/výstupní schémata, kontext, vedlejší účinky a značky zacházení. Registrace sama nevytváří veřejný Agent endpoint. [Agent](../agents/overview).
+
+## Ověření
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint porovnává jednotlivé diagnostiky; nižší celkový počet neopravňuje novou regresi. Při změně retrieval spusťte `npm run benchmark:local-kb` a uveďte korpus/prostředí. Pro web použijte Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+V programu 1.9.8 píše a kontroluje překlady přímo Codex. Nespouštějte staré překladové skripty, LM Studio ani překladové služby. Nástroje mohou formátovat, ověřovat a vykreslovat již napsaný text.
+
+## Obsidian a cílové aplikace
+
+Použijte dočasný trezor s `.notemd-host-verification`; skripty kontrolují identitu kopírovaného bundlu. Uživatelské trezory držte odděleně. Vyzkoušejte `obsidian help` i `obsidian-cli help`; chybějící nástroj označte jako nedostupný, nikoli úspěšný hostitelský test.
+
+PowerPoint, CircuitikZ a snímky mají vlastní závislosti a artefakty. Sledujte [datovanou akceptaci](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) a [postup vydání](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Výslovně uvádějte neověřená fyzická mobilní zařízení a minimální verzi.
+
+## Příspěvky a vydání
+
+PR má popsat problém, výsledné chování, testy a hranice. Reprodukce patří do [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). Necommitujte klíče, soukromé poznámky ani nesouvisející soubory. Jediný publisher vlastní konzistentní verze, číselný tag, čistý zdroj na tagu, dvojjazyčné poznámky, ověřené draft assets, publikaci a výslovný Pages deploy. Veřejný tag neměňte. `.trellis/` je lokální workflow stav, nikoli závislost CI.
+
+## Dále
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Stav projektu](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

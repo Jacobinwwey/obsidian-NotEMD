@@ -1,10 +1,10 @@
 {
   "version.label": {
-    "message": "अगला",
-    "description": "The label for version current"
+    "message": "वर्तमान दस्तावेज़",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "शुरुआत करें",
+    "message": "शुरुआत",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
@@ -12,7 +12,7 @@
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "एलएलएम प्रदाता",
+    "message": "LLM प्रदाता",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

@@ -1,14 +1,13 @@
 ---
 id: intro
 title: Notemd 簡介
-description: 專為 Obsidian 打造的 AI 驅動型知識庫建構工具，具備持續性的筆記轉換、工作流程功能以及以規格為優先的圖表生成功能
-keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links, Copilot alternative, Smart Connections alternative, obsidian AI plugin, auto wiki-link, concept notes]
+description: 把 Obsidian 筆記轉為連結 Markdown、概念筆記、研究摘要、譯文與圖表，明確選擇 provider 及輸出範圍。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, Knowledge Management, Wiki-Links, Copilot Alternative, Smart Connections Alternative, AI Plugin]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Notemd 簡介
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,174 +15,88 @@ import TLDR from '@site/src/components/TLDR';
 # Notemd 簡介
 
 <TLDR>
-**Notemd**（Note + EMD — 增強型 Markdown 文件）是一個開源的 Obsidian 外掛，能將以 LLM 為基礎的閱讀內容轉換為持續性的知識。與會話結束後洞察即消失的聊天式 AI 不同，Notemd 會將結果**直接寫入您的資料庫**，呈現為維基連結、概念筆記、研究摘要、翻譯內容、工作流程及圖表。它專為那些希望將閱讀、研究及視覺化說明累積成結構化且持續演進的知識圖譜的研究人員、學生及知識工作者所設計。
+Notemd 是採 MIT 授權的 Obsidian 外掛，將筆記轉為可檢查並保留的 wiki 連結 Markdown、概念筆記、研究摘要、譯文與圖表。你選擇 provider、任務與輸出範圍；模型結果加入知識庫前仍需審核。
 </TLDR>
 
-## 什麼是 Notemd？
+## Notemd 是什麼？
 
-Notemd 將 **30 多個大型語言模型**（OpenAI、Anthropic、Google、DeepSeek、Qwen、Ollama 等）整合到您的 Obsidian 工作流程中，用於自動化知識提取、整理、翻譯、研究以及圖表生成。
+Notemd 以 36 個 provider 預設連接 Vault 工作流程，涵蓋雲端 API、閘道與本地伺服器。任務依自身契約寫入檔案或更新筆記，可單獨執行或組合為側欄流程。
 
-### 關鍵差異：暫時性知識與持久性知識
+產物儲存在 Vault，但雲端 provider 會收到任務內容，網路研究也會發出請求。本地儲存與本地推理是不同選擇。
 
-| 面向方面 | 以聊天為基礎的 AI（ChatGPT 等） | Notemd |
-|--------|-------------------------------|--------|
-| **結果存放處** | 聊天記錄（會消失） | 您的 Obsidian 金庫（會持續存在） |
-| **格式** | 純文字答案 | 結構化檔案：`[[wiki-links]]`、概念說明、圖表 |
-| **長期價值** | 每次都必須重新詢問。 | 累積成為知識圖譜 |
-| **離線存取** | 需要網際網路連線 | 可完全離線使用 Ollama |
+## 選擇起點
 
-## 核心功能
+| 目標 | 入口 |
+|---|---|
+| 安裝並檢查首次輸出 | [快速開始](./getting-started/quick-start) |
+| 重複執行筆記／資料夾任務 | [工作流程](./features/workflows)、[批次處理](./advanced/batch-processing) |
+| 建置、測試與擴充 | [開發者指南](./developers/overview) |
+| 探索公開 Agent 契約 | [Agent 指南](./agents/overview) |
 
-### 1. **自動維基連結功能**
-- LLM 用於標示筆記中的關鍵概念
-- 在每個出現的位置插入 `[[wiki-links]]`
-- 可選擇建立連結的概念筆記
-- 同義詞壓制以避免重複
+## 核心能力
 
-### 2. **概念說明書的撰寫**
-- 從論文、文章、筆記中提取核心概念
-- 產生帶有反向連結的專用概念檔案
-- 可自訂的輸出路徑與範本
+### Wiki 連結與概念筆記
 
-### 3. **網路研究整合**
-- 從 Obsidian 內查詢 Tavily 或 DuckDuckGo
-- LLM 會附上出處引用來總結結果
-- 將研究結果附加到目前的筆記中
+讓模型識別概念並添加連結，預設產生獨立處理後筆記。指定概念目錄後可建立概念檔；獨立擷取預設僅標題、無來源連結。差異見[連結](./features/wiki-links)與[概念筆記](./features/concept-notes)。
 
-### 4. **多語言翻譯**
-- 翻譯選取的內容或整份筆記
-- 支援 21 種以上 UI 語言
-- 獨立輸出語言設定
-- 批次翻譯支援
+### 研究與本地上下文
 
-### 5. **圖表產生**
-- **Mermaid**：流程圖、序列圖、類圖、狀態圖、ER圖、甘特圖
-- **JSON Canvas**：Obsidian 原生佈局
-- **Vega-Lite**：資料圖表、時間序列、散點圖
-- **HTML / 可編輯 HTML/SVG**：具備語意標註的獨立圖形檔案
-- **Draw.io / Drawnix 物件邊界**：來自相同語意圖形模型的、供維護者使用的匯出路徑
-- **電路圖規劃路線**： circuitikz/TikZJax 的支援是以黃金參考、限制條件提示、渲染回饋以及拓撲/佈局驗證為核心來設計，而非依賴原始且無限制的 LLM TikZ
-- **預覽診斷**：渲染瑕疵可能會顯示編譯/渲染相關的診斷資訊，且非內聯式來源亦可在不需插件端 LaTeX 執行環境的情況下被檢視。
-- 對 Mermaid 錯誤的自動語法修正
+選 Tavily 或 DuckDuckGo 搜尋，將模型摘要附加至活動筆記。可選限定範圍本地檢索能提供片段，當前索引為詞法，不是 embedding 語意搜尋。[研究](./features/research)說明來源與網路邊界。
 
-### 6. **一次點擊工作流程**
-- 將多個動作串聯成側邊欄按鈕
-- 以 DSL 為基礎的工作流程定義
-- 範例：`add-links > extract-concepts > research > diagram`
+### 翻譯與原文擷取
 
-## 誰適合使用 Notemd？
+依輸出語言翻譯檔案或資料夾，或按問題擷取源文段落並核對。選取文字不會使檔案翻譯限於選取範圍。[翻譯](./features/translation)說明命名與覆寫。
 
-✅ **研究人員**正在閱讀論文並撰寫文獻綜述
-✅ **學生**整理筆記並建立概念圖
-✅ **需要讓閱讀心得持續保留的知識工作者**
-✅ 需要翻譯及維基連結的**雙語專業人員**
-✅ **重視隱私的使用者**，希望獲得本地的 LLM 支援 (Ollama)
-✅ **高階使用者**，能自訂提示詞與工作流程
+### 圖表與匯出
 
-## 為什麼是 Notemd + Obsidian？
+選圖表類型、相容源格式，檢查預覽後儲存源檔或視覺匯出。可執行目錄有 33 項，源格式和匯出格式不同。[圖表](./features/diagrams)涵蓋 Draw.io、Drawnix、Mermaid、CircuitikZ 及原生應用限制。
 
-**Obsidian** 是一個以本地為主、基於 Markdown 的知識庫。**Notemd** 則增添了 AI 的強大功能：
-- 您的資料會保存在您的保險庫中（而非雲端服務）。
-- 可搭配本地模型離線運作
-- 免費且開源（MIT 授權）
-- 與現有的 Obsidian 外掛程式整合
-- 可擴展至數萬個音符
+### 工作流程
 
-## 入門指南
+預設 **One-Click Extract** 添加連結、為概念或所選資料夾的合格筆記生成正文，再修復 complete 目錄的 Mermaid，可能包含既有概念筆記。自訂流程保留各動作先決條件與輸出，DSL 見[工作流程](./features/workflows)。
 
-1. **安裝**：設定 → 社群外掛 → 瀏覽 → "Notemd"
-2. **設定**：新增您的 LLM 提供商 API 金鑰（或使用本機的 Ollama）
-3. **試試看**：打開筆記 → 右鍵點擊 → 「處理檔案（加入連結）」
-4. **探索**：在側邊欄查看一次點擊即可完成的工作流程
+## 開始使用
 
-👉 [安裝指南](./getting-started/installation) | [快速入門教學](./getting-started/quick-start)
+1. 在目標 Vault [安裝](./getting-started/installation)。
+2. 配置可用 provider/model，測試可捨棄筆記。
+3. 指定概念目錄與輸出位置。
+4. 審核後再擴大批次。
 
-## 圖表功能方向
+不保證完成時間或有用輸出的最小筆記長度；先用能完整核對的小樣本。
 
-Notemd的圖表生成方式正從「要求模型撰寫一個語法字串」轉變為分層式處理流程：
+## 圖表能力方向
 
-```mermaid
-graph LR
-    A[Source Note] --> B[DiagramSpec]
-    B --> C[Target Adapter]
-    C --> D[Rendered Artifact]
-    D --> E[Semantic Verification]
-    E --> F[Preview or Export]
-```
+管線以型別化規格和目標專用渲染處理受支援目錄。`DiagramSpec` 描述開發契約，不保證任意語法或所有參考版面。
 
-目前的實作已經支援 Mermaid、JSON Canvas、Vega-Lite、HTML 的回退機制，可編輯的 HTML/SVG，Draw.io XML 類型的元件，最簡化的 Drawnix JSON 子集，預覽診斷功能/僅源碼模式回退，以及適用於常見來源與 CMOS 開關金標準模板的離線 `CircuitSpec -> circuitikz` 原型。電路圖則較為複雜：雖然 circuitikz 能夠呈現精確的電氣拓撲結構，但缺乏限制的 LLM 輸出往往會產生難以辨識的走線或無法渲染的 LaTeX 內容。未來的發展方向是透過金標準參考模板、節點網格佈局規則、渲染診斷功能以及截圖回饋循環，來持續限制 circuitikz 的行為。
-
-請閱讀 [Diagrams](./features/diagrams) 中的詳細資料。
+電路限制於支援的 `circuitikz` 結構。TikZJax 是外部工具，外掛預覽不證明原生編譯。Drawnix 靜態關係不保證重排後跨分支箭頭附著；挑選後續編輯格式時須保留限制。
 
 ## 架構
 
-```mermaid
-graph LR
-    A[Obsidian Note] --> B[Notemd Plugin]
-    B --> C{Task Selection}
-    C -->|Add Links| D[LLM Provider]
-    C -->|Research| E[Search API]
-    C -->|Translate| D
-    C -->|Diagram| D
-    D --> F[Structured Output]
-    E --> D
-    F --> G[Update Vault]
-    G --> H[Wiki Links]
-    G --> I[Concept Notes]
-    G --> J[Diagrams]
-    G --> K[Research Summaries]
-```
+任務路由至所選 provider，校驗或解析輸出，再寫入筆記／產物。搜尋與本地檢索提供可選上下文，預覽與匯出有格式專用限制。
 
-## Notemd 與其他 Obsidian AI 外掛的比較
+模組歸屬與驗證見[開發者指南](./developers/overview)。受限公開匯出見 [Agent 指南](./agents/overview)，內部 operation 登錄表不是通用公開自動化 API。
 
-多數 Obsidian AI 外掛都是以對話為主（你提問，AI 回答，洞察內容都留在聊天中）。而 Notemd 則是**以撰寫為主**：AI 會處理你的筆記，並將結構化的結果直接寫入你的資料庫中。
+## 工具比較 {#notemd-vs-other-obsidian-ai-plugins}
 
-| 功能特性 | Notemd | Copilot | Smart Connections | Text Generator |
-|-----------|--------|---------|-------------------|-----------------|
-| 自動維基連結插入 | 是的 | 沒有 | 沒有 | 沒有 |
-| 概念說明書的撰寫 | 是（含反向連結 + 去重） | 沒有 | 沒有 | 沒有 |
-| 圖表生成 | 是的（Mermaid、Canvas、Vega-Lite、HTML、可編輯的工件） | 沒有 | 沒有 | 沒有 |
-| 網路研究整合 | 是的 (Tavily + DuckDuckGo) | 沒有 | 沒有 | 沒有 |
-| 批次資料夾處理 | 是的 | 限量版 | 沒有 | 限量版 |
-| 每任務模型路由 | 是（7個任務，獨立模型） | 沒有 | 沒有 | 沒有 |
-| 一次點擊的工作流程鏈接 | 是 (DSL) | 沒有 | 沒有 | 沒有 |
-| 翻譯（批次） | 是的 | 沒有 | 沒有 | 沒有 |
-| 與 vault 聊天 | 沒有 | 是的 | 沒有 | 沒有 |
-| 語意相似度搜尋 | 沒有 | 沒有 | 是的 | 沒有 |
-| 以模板為基礎的生成 | 沒有 | 沒有 | 沒有 | 是的 |
-| LLM 提供商 | 36（雲端 + 閘道 + 本地） | 3-5 | 2-3 | 3-5 |
-| 完全離線 | 是的 (Ollama) | 部分 | 部分 | 部分 |
+依檔案轉換、對話、確定性連結、檢索或原生編輯需求選擇。查看各專案當前文件，使用相同代表性任務，記錄版本和啟用功能再比較。
 
-**何時選擇 Notemd**：如果您希望 AI 建立持久的知識圖譜，而非僅僅針對您的筆記進行對話。
+## 資料與相容性邊界
 
-**何時選擇 Copilot**：如果您希望在 Obsidian 內部擁有一個對話式 AI 助手。
+雲端 provider 收到任務輸入，搜尋服務收到查詢，啟用本地上下文時片段也進入提示詞。判斷本地化前檢查各任務路由。取消在支援處停止後續工作並保留已完成輸出，不保證遠端生成／計費停止。
 
-**何時選擇 Smart Connections**：如果您希望透過語意搜尋來發現筆記之間的既有關聯。
-
-## 哲學
-
-**Notemd** 認為人工智慧應該輔助人類的知識工作，而非取代它。此外掛程式：
-- 讓您保持掌控權（在套用變更前先進行審核）
-- 保留上下文（所有結果皆回連至原始資料）
-- 尊重隱私（支援本地 LLM，無遠端監控）
-- 保持可擴展性（開放 APIs、自訂工作流程）
+manifest 最低版本為 `0.15.0` 且允許行動端載入，但實體行動裝置與最低版本尚未驗證。選用原生匯出可能需要桌面工具。網站 34 個語言路由、外掛 UI 21 個 locale 與模型翻譯能力是不同維度。
 
 <!-- notemd-acknowledgments -->
 ## 致謝與參考專案
 
-Notemd 由獨立維護。感謝為專案設計決策提供啟發，或為其整合能力提供基礎的開源專案與社群。此處列出僅用於說明參考或互通關係，不表示背書、隸屬關係、內建程式碼，也不表示存在程式碼重用。
+Notemd 獨立維護，引用用於致謝或互通說明，不表示背書、隸屬或未證實的程式碼綁定。
 
-- **參考專案:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
-- **開源基礎:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
-- 各專案均保留自己的授權條款；Notemd 採用 [MIT 授權](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE)。
+- 參考：[cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill)、[Drawnix](https://github.com/plait-board/drawnix)、[diagrams.net](https://www.diagrams.net/)、[repo-saga](https://github.com/teee32/repo-saga)。
+- 基礎工具：[Mermaid](https://github.com/mermaid-js/mermaid)、[Vega-Lite](https://vega.github.io/vega-lite/)、[Slidev](https://github.com/slidevjs/slidev)、[CircuitikZ](https://github.com/circuitikz/circuitikz)、[Tectonic](https://github.com/tectonic-typesetting/tectonic)、[Docusaurus](https://docusaurus.io)。
+- 各專案保留自身授權；Notemd 使用 [MIT](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE)。
 
-## 開源
+## 開源與支援
 
-- **授權條款**：MIT
-- **來源**：[github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
-- **社群**：[Discord](https://discord.gg/qnGgsQ9W) | [GitHub Discussions](https://github.com/Jacobinwwey/obsidian-NotEMD/discussions)
-- **貢獻**：歡迎提交 Pull Request，詳情請見 [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+[原始碼](https://github.com/Jacobinwwey/obsidian-NotEMD) · [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) · [參與貢獻](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
 
----
-
-**下一步**：[安裝 →](./getting-started/installation)
+回報問題請附精確版本、步驟與去識別化證據；首次任務從[快速開始](./getting-started/quick-start)進入。

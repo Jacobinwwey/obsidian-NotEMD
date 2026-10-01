@@ -1,67 +1,54 @@
 ---
 id: google
 title: Google
-description: Google Gemini를 설정하세요.
+description: 'Gemini Generative Language의 endpoint, 모델과 API 권한을 확인합니다.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords:
+  - Google
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google 제공업체
+# Google provider
 
-<TLDR>
-**Google는 기본 제공되는 Gemini 생성형 언어 API 전송 방식을 사용합니다.** 현재 프리셋은 `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1`, `temperature: 0.5`를 기본값으로 사용합니다. 이것은 OpenAI와 호환되는 프로필이 아닙니다.
+<TLDR>Google 프로필은 네이티브 Gemini Generative Language를 사용합니다. 허용된 키와 사용 가능한 모델을 설정하세요. 호환 gateway의 Gemini에는 gateway 프로필을 사용합니다.</TLDR>
 
-이것은 [Obsidian AI 지식 관리 가이드](/docs/pillar-ai-knowledge)의 일부입니다.
-</TLDR>
+## 준비
 
-## 설치
+**Google**, 키, 네이티브 endpoint와 해당 API 버전의 모델을 선택하고 연결/실제 노트를 시험합니다. 임의의 Google Cloud나 Vertex deployment를 자동 구성하는 프로필은 아닙니다.
 
-Gemini 접근 권한이 있는 Google AI Studio 또는 Google 클라우드 API 키를 생성하고, `Google` 공급업체 프로필을 추가한 다음 기본적인 Generative Language Base URL는 그대로 유지합니다. 빠른 번역 및 다양한 노트 작업 흐름을 위해 기본 Gemini Flash 프로필을 사용하고, 더 크거나 더 강력한 Gemini 모델이 필요할 때는 각 작업에 맞게 모델을 재지정합니다.
+## Endpoint와 인증
 
-OpenAI-호환 API를 통해 Gemini를 노출하는 게이트웨이를 명시적으로 사용하지 않는 한, OpenAI-호환 프로필에 Gemini 모델 ID를 포함시키지 마십시오.
-
-## 엔드포인트 및 인증
-
-| 필드 | 현재 프리셋 |
-|-------|----------------|
-| 전송 | `google` |
+| 항목 | 초기 값 |
+| ------- | -------------- |
+| 전송 프로토콜 | `google` |
 | API 키 | 필수 |
-| 베이스 URL | `https://generativelanguage.googleapis.com/v1` |
-| 기본 모델 | `gemini-2.0-flash-exp` |
+| 기본 URL | `https://generativelanguage.googleapis.com/v1` |
+| 모델 | `gemini-2.0-flash-exp` |
 | 온도 | `0.5` |
-| 연결 테스트 | 채팅 전용 |
+| 연결 시험 | `chat-only` |
 
-런타임이 `/models/{model}:generateContent?key={apiKey}`을 호출합니다. 플러그인 내의 네이티브 Gemini 엔드포인트가 연결된 방식상 키는 쿼리 파라미터로 전달됩니다.
+키를 사용해 `generateContent` 요청을 만듭니다. 초기 ID는 현재 지원을 보장하지 않습니다. 진단 URL에 인증 정보가 있을 수 있으므로 공유 전에 확인하세요.
 
-## 모델 발견
+## 모델
 
-Google은 `google-models` 발견 모드를 사용합니다. 발견 기능을 통해 API 키에서 사용할 수 있는 Gemini 모델들이 반환되어야 합니다. 선택기가 비어 있는 경우, 동일한 Base URL를 기준으로 해당 키를 테스트하여 해당 계정에서 모델 패밀리가 활성화되어 있는지 확인해야 합니다.
-
-공급업체 레지스트리에서는 알려진 출력 토큰 한도가 모델에 따라 다릅니다. 긴 번역문이나 다이어그램 설명이 잘린 경우, 더 높은 출력 한도를 지원하는 Gemini 모델을 선택하거나 요청하는 출력 크기를 줄이십시오.
+네이티브 목록과 선택 API의 생성을 확인합니다. 빈 목록은 권한·endpoint·모델 문제일 수 있습니다. 진단 없이 프로토콜부터 바꾸지 마세요.
 
 ## 문제 해결
 
-- `400`: 모델 ID는 일반적으로 네이티브 Gemini 루트와 일치하지 않거나, 요청이 모델이 지원하는 형태를 초과합니다.
-- `401` 또는 `403`: 키 제한 사항, 프로젝트/API 활성화 여부, 그리고 해당 키가 Gemini에 접근할 수 있는지 확인합니다.
-- `404`: 구성된 API 버전에서는 모델 ID를 사용할 수 없습니다.
-- 이 프로필에서는 게이트웨이 예제들이 작동하지 않습니다. 기본 Google 공급자 대신 게이트웨이 사전 설정을 사용하십시오.
+- 400: ID·파라미터·token/출력 한도.
+- 401/403: 키 제한·API 활성화·권한.
+- 404: 해당 API 버전에서 모델 지원 확인.
+- gateway 예제: 대응하는 OpenAI-compatible 프로필 사용.
 
-## 언제 사용할까요?
+## 적합한 용도
 
-빠른 번역, 대량의 노트 정리, 그리고 Gemini의 비용/성능 균형이 직접적인 OpenAI나 Anthropic보다 우수한 워크플로우의 경우 Google를 사용하십시오. OpenAI와 호환되는 추론 모델 처리가 필요한 워크플로우의 경우에는 다른 제공업체를 선호하십시오.
-
----
+네이티브 Gemini용입니다. 번역·연구·도표를 자신의 표본으로 평가하세요. 속도·비용·품질에 대한 범용 보장은 없습니다.
 
 ## 다음 단계
 
-- [LLM 제공업체](/docs/providers/overview) -- 전체 설정, 작업별 모델, 재시도 로직
-- [번역](/docs/features/translation) -- 대량의 번역 작업에는 Gemini Flash가 권장됩니다
+- [Provider](./overview).
+- [번역](../features/translation).

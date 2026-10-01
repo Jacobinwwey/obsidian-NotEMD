@@ -1,0 +1,217 @@
+{
+  "observedAt": "2026-10-01T05:12:06.702Z",
+  "authorization": "User explicitly selected open 1Knowledge Vault",
+  "scope": "Notemd-1.9.8-verification-1790831519903",
+  "bundle": {
+    "ok": true,
+    "projectRoot": "<repo>",
+    "vaultPath": "<vault>",
+    "pluginDir": "<vault>\\.obsidian\\plugins\\notemd",
+    "manifestVersion": "1.9.8",
+    "files": [
+      {
+        "name": "main.js",
+        "sourcePath": "<repo>\\main.js",
+        "deployedPath": "<vault>\\.obsidian\\plugins\\notemd\\main.js",
+        "expectedSha256": "dbccc6d309eae23475a7c0954eda41d15cf207a3500a736b41cc9249db06992f",
+        "actualSha256": "dbccc6d309eae23475a7c0954eda41d15cf207a3500a736b41cc9249db06992f",
+        "matches": true
+      },
+      {
+        "name": "styles.css",
+        "sourcePath": "<repo>\\styles.css",
+        "deployedPath": "<vault>\\.obsidian\\plugins\\notemd\\styles.css",
+        "expectedSha256": "d56c6c70ecaed75dbe9f64b4dd3d394a74a68422da3dfad55f97d8e7e7ee4bec",
+        "actualSha256": "d56c6c70ecaed75dbe9f64b4dd3d394a74a68422da3dfad55f97d8e7e7ee4bec",
+        "matches": true
+      },
+      {
+        "name": "manifest.json",
+        "sourcePath": "<repo>\\manifest.json",
+        "deployedPath": "<vault>\\.obsidian\\plugins\\notemd\\manifest.json",
+        "expectedSha256": "1852490833b18b225471096b633067ba7d73d6274e57ce1d11e3b1654dfe3677",
+        "actualSha256": "1852490833b18b225471096b633067ba7d73d6274e57ce1d11e3b1654dfe3677",
+        "matches": true
+      }
+    ]
+  },
+  "host": {
+    "appVersion": "1.13.7",
+    "versions": {
+      "node": "22.22.1",
+      "acorn": "8.15.0",
+      "ada": "2.9.2",
+      "amaro": "1.1.5",
+      "ares": "1.34.6",
+      "brotli": "1.0.9",
+      "cjs_module_lexer": "2.2.0",
+      "cldr": "44.1",
+      "icu": "74.2",
+      "llhttp": "9.3.0",
+      "modules": "140",
+      "napi": "10",
+      "nbytes": "0.1.1",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.64.0",
+      "openssl": "0.0.0",
+      "simdjson": "4.2.4",
+      "simdutf": "7.3.3",
+      "sqlite": "3.51.2",
+      "tz": "2025b",
+      "undici": "6.23.0",
+      "unicode": "15.1",
+      "uv": "1.51.0",
+      "uvwasi": "0.0.23",
+      "v8": "14.2.231.22-electron.0",
+      "zlib": "1.3.1",
+      "zstd": "1.5.8",
+      "electron": "39.8.3",
+      "chrome": "142.0.7444.265"
+    },
+    "platform": "win32",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12600K",
+    "ramBytes": 68494569472,
+    "vaultProcess": "function",
+    "fontFamily": "\"??\", \"??\", \"??\", ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, \"Segoe UI\", \"Google Sans Flex\", Roboto, \"Inter Variable\", Inter, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", sans-serif",
+    "devicePixelRatio": 1.5,
+    "visibility": "visible"
+  },
+  "activationMs": {
+    "samples": [
+      547.6999999880791,
+      309.6000000089407,
+      357.09999999403954,
+      549.7999999970198,
+      484.1000000089407,
+      380.30000001192093,
+      382.29999999701977,
+      351.79999999701977
+    ],
+    "p50": 380.30000001192093,
+    "p95": 549.7999999970198,
+    "standardDeviation": 87.36161824979716
+  },
+  "testFolder": "Notemd-1.9.8-verification-1790831519903",
+  "cancellation": {
+    "passed": true,
+    "requests": 2,
+    "settledMs": 44,
+    "commandWallMs": 259.20000000298023,
+    "generatedCount": 0,
+    "movedCount": 0,
+    "activeTasks": 0,
+    "reporter": "ag",
+    "lateResponsesObservedMs": 350
+  },
+  "persistence": {
+    "passed": true,
+    "externalEditPreserved": true,
+    "recoveryPath": "Notemd-1.9.8-verification-1790831519903/Artifact_diagram.canvas.notemd-recovery-mup2unvt-1",
+    "queueUsableAfterFailure": true,
+    "atomicApi": "Vault.process"
+  },
+  "previews": [
+    {
+      "name": "mermaid-small-cjk",
+      "firstUseMs": 98,
+      "warmMs": {
+        "samples": [
+          51.1000000089407,
+          30,
+          25.299999997019768,
+          29.5,
+          24.30000001192093,
+          27.099999994039536,
+          27.700000002980232,
+          28
+        ],
+        "p50": 27.700000002980232,
+        "p95": 51.1000000089407,
+        "standardDeviation": 8.035973807503813
+      }
+    },
+    {
+      "name": "mermaid-dense-cjk",
+      "firstUseMs": 115.90000000596046,
+      "warmMs": {
+        "samples": [
+          128.8999999910593,
+          109.29999999701977,
+          100.09999999403954,
+          101.90000000596046,
+          109.59999999403954,
+          111.1000000089407,
+          109.80000001192093,
+          107.79999999701977
+        ],
+        "p50": 109.29999999701977,
+        "p95": 128.8999999910593,
+        "standardDeviation": 8.118564757089565
+      }
+    },
+    {
+      "name": "vega-small-cjk",
+      "firstUseMs": 54.79999999701977,
+      "warmMs": {
+        "samples": [
+          24.80000001192093,
+          22.19999998807907,
+          23.400000005960464,
+          36.3999999910593,
+          23.30000001192093,
+          22.80000001192093,
+          23,
+          24.19999998807907
+        ],
+        "p50": 23.30000001192093,
+        "p95": 36.3999999910593,
+        "standardDeviation": 4.369907747380576
+      }
+    },
+    {
+      "name": "vega-dense-cjk",
+      "firstUseMs": 31.5,
+      "warmMs": {
+        "samples": [
+          31.799999997019768,
+          40.8999999910593,
+          29,
+          27.899999991059303,
+          27.900000005960464,
+          28.200000002980232,
+          36.80000001192093,
+          28.799999997019768
+        ],
+        "p50": 28.799999997019768,
+        "p95": 40.8999999910593,
+        "standardDeviation": 4.566573523631374
+      }
+    },
+    {
+      "name": "drawnix-knowledge-map",
+      "firstUseMs": 35.400000005960464,
+      "warmMs": {
+        "samples": [
+          28.80000001192093,
+          28.30000001192093,
+          23.80000001192093,
+          25.5,
+          26.299999997019768,
+          23.400000005960464,
+          22.5,
+          22.700000002980232
+        ],
+        "p50": 23.80000001192093,
+        "p95": 28.80000001192093,
+        "standardDeviation": 2.307562298362055
+      }
+    }
+  ],
+  "heap": {
+    "beforeBytes": 1040820484,
+    "afterCyclesBytes": 1097248080,
+    "collection": "not forced; retained-memory conclusion requires a separate CDP collection"
+  },
+  "passed": true
+}

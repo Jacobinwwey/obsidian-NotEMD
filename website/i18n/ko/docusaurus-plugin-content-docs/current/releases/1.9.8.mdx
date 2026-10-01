@@ -1,0 +1,71 @@
+---
+id: 1.9.8
+title: Notemd 1.9.8 업데이트
+description: 1.9.7 이후 안정성·네이티브 출력·문서 변경을 확인하고 통제된 업데이트를 검증합니다.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Notemd 1.9.8 업데이트
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.8 업데이트
+
+<TLDR>1.9.8은 취소, 출력 소유권, 일관된 배치 검색, 네이티브 출력과 정확한 문서에 집중합니다. GitHub 공개 Release를 확인하고 같은 릴리스 파일을 사용하세요. Provider와 도표 개수는 이미 존재하던 기능입니다.</TLDR>
+
+## 1.9.7 이후 변경
+
+| 영역 | 사용자 영향 |
+| ------ | ------------- |
+| 취소 | 스케줄러·전송·재시도가 상태 공유; 늦은 응답의 보호된 쓰기 방지 |
+| 산출물 저장 | 겹치는 저장·복구에서 같은 이름과 공유 첨부의 소유권 추적 |
+| 로컬 검색 | 제목 배치가 한 검색 스냅샷 사용; 고정 corpus와 메모리 측정 |
+| 네이티브 출력 | 병합 셀 아래 PowerPoint 구분선과 CircuitikZ 배선/label 수정 |
+| 검증 | Linux/Windows CI, 진단별 lint, 프로세스/네이티브 증거 |
+| 문서 | 기본값 교정, 네 독자 경로, 직접 번역과 통제된 배포 |
+
+히스토리 검색은 비동기 갱신 중 연속 입력과 caret을 유지합니다. drawer는 loading focus와 Tab을 내부에 유지하고 Escape가 상위 preview를 닫지 않도록 합니다. 재시도와 오래된 응답에 browser 회귀 시험이 있습니다.
+
+연구/번역은 마지막 원문 읽기나 출력 폴더 준비 후 실제 추가·생성·덮어쓰기 전에 취소를 재확인합니다. Vault가 이미 수락한 쓰기는 완료 결과로 남습니다. 다른 작업이 대기 중 번역 폴더를 만들면 재사용하되 자신이 생성했다고 기록하지 않습니다. 충돌 파일이나 계속 없는 폴더는 오류 보고와 원본 폴더 fallback을 유지합니다.
+
+36개 provider와 33개 도표는 1.9.7부터 존재합니다. 릴리스 설명은 코드·문서·merge를 구분해 같은 개선을 중복 계산하지 않습니다.
+
+## 안전한 업데이트
+
+1. 작업을 중지하고 Vault/설정을 백업합니다.
+2. Community plugins로 갱신하거나 같은 [공개 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8)의 `main.js`, `manifest.json`, `styles.css`를 받습니다.
+3. 수동 설치는 실행 파일만 교체하고 설정/출력은 유지합니다.
+4. 다시 로드해 버전을 확인합니다.
+5. 임시 노트와 작은 폴더를 시험한 후 큰 배치를 재개합니다.
+
+명령 ID와 설정 계약은 유지됩니다. One-Click Extract는 링크→배치 제목 생성→Mermaid 복구입니다. 문서 교정을 기본 체인의 연구 기능 추가로 오해하지 마세요.
+
+## 취소와 복구
+
+취소는 역트랜잭션이 아닙니다. 완료 파일은 남고 수락된 요청/쓰기는 끝날 수 있으며 원격 과금은 provider 소관입니다. 종료 후 출력을 검토하세요. 복구 충돌은 표시됩니다. 현재 노트와 복구 파일을 비교하고 오래된 산출물이 참조하는 companion 폴더를 보존하세요.
+
+## 출력과 호환성 제한
+
+- PowerPoint는 표적 네이티브 assertion으로 검증하며 전체 슬라이드 점수만으로는 결함을 놓쳤습니다.
+- PPTX Mermaid/SVG는 이미지 fallback일 수 있습니다.
+- Drawnix 정적 가지 간 연결은 재배치 후 부착을 보장하지 않습니다.
+- CircuitikZ preview와 TeX 컴파일 검증은 별도입니다.
+- 실제 모바일과 Obsidian 0.15.0은 미검증입니다.
+- 고정 어휘 검색 증거는 의미 검색 품질이나 임의 Vault의 성능을 증명하지 않습니다.
+
+## 배포 무결성
+
+Publisher가 버전·로컬/원격 tag를 확인하고 깨끗한 tagged source를 빌드해 draft로 올린 뒤 다운로드 hash를 검증합니다. 필수 파일은 `main.js`, `manifest.json`, `styles.css`, `README.md`입니다. 재시도가 무관한 byte로 공개 자산을 바꿀 수 없습니다.
+
+사이트는 공개 Release 확인 후 배포합니다. 이 문서는 Codex가 LM Studio나 번역 엔진 없이 직접 작성/검토합니다. 독립된 원어민 검토를 받았다는 주장은 아닙니다.
+
+## 다음 단계
+
+- [Release와 영어/중국어 노트](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [빠른 시작](../getting-started/quick-start).
+- [배치](../advanced/batch-processing).
+- [개발자](../developers/overview), [Agent](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)에 버전과 정제된 증거를 제공하세요.

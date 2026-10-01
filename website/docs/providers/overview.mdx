@@ -1,16 +1,10 @@
 ---
 id: overview
 title: LLM Providers
-description: Configure 36 LLM providers — cloud, gateway, and local — with per-task model selection
+description: Configure Notemd's 36 provider presets across five protocol families and verify the exact model used by each task.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
-concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: Anthropic API
-    url: https://docs.anthropic.com
+keywords: [Notemd providers, OpenAI compatible, Anthropic, Gemini, Azure OpenAI, Ollama]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,172 +12,128 @@ import TLDR from '@site/src/components/TLDR';
 # LLM Providers
 
 <TLDR>
-**Notemd supports 36 LLM providers across 4 transport types.** All API calls use raw HTTP (no SDKs) with automatic retry, transport fallback, and 5-minute response caching. Per-task model selection lets you use cheap models for concept extraction and powerful models for research. No API key needed for local providers (Ollama, LMStudio).
+Notemd has 36 provider presets across five protocol families: OpenAI-compatible, Anthropic, Google, Azure OpenAI and Ollama. Choose a preset matching your endpoint's protocol, enter the required credentials, and test an accessible model on a small note. Preset defaults are configurable starting values, not promises of current upstream model availability.
 </TLDR>
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 
 ## Provider Categories
 
+The following preset values come from the provider registry. Keep the full URL scheme and path. A placeholder model or endpoint must be replaced with your deployment's actual value. Hosted provider access, pricing and retirement schedules belong to the provider.
+
 ### Cloud Providers
 
-| Provider | Default Base URL | Default Model | Temperature |
-|----------|-----------------|---------------|-------------|
-| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
-| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
-| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
-| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
-| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
-| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
-| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
-| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
-| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+| Provider | Preset model | Preset base URL |
+|----------|--------------|-----------------|
+| **DeepSeek** | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| **Qwen** | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Qwen Code** | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Doubao** | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| **Moonshot** | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| **Xiaomi MiMo** | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| **Z AI** | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| **Baidu Qianfan** | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| **SiliconFlow** | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| **Huawei Cloud MaaS** | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
+| **OpenAI** | `gpt-4o` | `https://api.openai.com/v1` |
+| **Anthropic** | `claude-3-5-sonnet-20240620` | `https://api.anthropic.com` |
+| **Google** | `gemini-2.0-flash-exp` | `https://generativelanguage.googleapis.com/v1` |
+| **Mistral** | `mistral-large-latest` | `https://api.mistral.ai/v1` |
+| **Azure OpenAI** | `gpt-4o` | Configure your Azure resource endpoint |
+| **xAI** | `grok-4` | `https://api.x.ai/v1` |
+| **Groq** | `moonshotai/kimi-k2-instruct-0905` | `https://api.groq.com/openai/v1` |
+| **Together** | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | `https://api.together.xyz/v1` |
+| **Fireworks** | `accounts/fireworks/models/kimi-k2p5` | `https://api.fireworks.ai/inference/v1` |
+| **Nebius** | `openai/gpt-oss-120b` | `https://api.studio.nebius.com/v1` |
+| **Cerebras** | `gpt-oss-120b` | `https://api.cerebras.ai/v1` |
 
 ### Gateway / Proxy Providers
 
-| Provider | Default Base URL | Default Model | Notes |
-|----------|-----------------|---------------|-------|
-| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Adds `HTTP-Referer` + `X-Title` headers |
-| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Adds `X-GitHub-Api-Version` header |
-| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Adds `APP-Code` header |
-| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
-| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
-| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
-| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
-| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
-| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Optional API key |
-| **New API** | `localhost:3000/v1` | `gpt-4.1` | Optional API key |
-| **OpenAI Compatible** | (user-configured) | `your-model-id` | Custom endpoint |
-
-### China Providers
-
-| Provider | Default Base URL | Default Model | Notes |
-|----------|-----------------|---------------|-------|
-| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
-| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Coding-focused |
-| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (endpoint ID required) | ByteDance Volcengine |
-| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
-| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
-| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Zhipu, China endpoint |
-| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, international endpoint |
-| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
-| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
-| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Model hosting platform |
-| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
-
-**Doubao requires an Ark endpoint ID** (format: `ep-xxxxxxxx-xxxx-xxxx`). The default placeholder must be replaced.
+| Provider | Preset model | Preset base URL |
+|----------|--------------|-----------------|
+| **OpenRouter** | `anthropic/claude-3.7-sonnet` | `https://openrouter.ai/api/v1` |
+| **AIHubMix** | `gpt-4o-mini` | `https://aihubmix.com/v1` |
+| **GitHub Models** | `gpt-4o-mini` | `https://models.github.ai/inference` |
+| **PPIO** | `qwen/qwen3-32b` | `https://api.ppinfra.com/v3/openai` |
+| **New API** | `gpt-4.1` | `http://localhost:3000/v1` |
+| **LiteLLM** | `your-proxy-model` | `http://localhost:4000/v1` |
+| **Hugging Face** | `openai/gpt-oss-120b` | `https://router.huggingface.co/v1` |
+| **Vercel AI Gateway** | `anthropic/claude-sonnet-4.5` | `https://ai-gateway.vercel.sh/v1` |
+| **Requesty** | `anthropic/claude-3-7-sonnet-latest` | `https://router.requesty.ai/v1` |
+| **OpenAI Compatible** | `your-model-id` | `https://your-openai-compatible-endpoint/v1` |
 
 ### Local Providers
 
-| Provider | Default Base URL | Default Model | Notes |
-|----------|-----------------|---------------|-------|
-| **Ollama** | `localhost:11434/api` | `llama3` | No API key. NDJSON streaming. Model discovery via `/api/tags` |
-| **LMStudio** | `localhost:1234/v1` | `local-model` | Sends `"EMPTY"` as bearer token. OpenAI-compatible discovery |
-| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
-| **Azure OpenAI** | (user-configured) | `gpt-4o` | Deployment name in URL. `api-key` header |
+| Provider | Preset model | Preset base URL |
+|----------|--------------|-----------------|
+| **OVMS** | `openvino-model` | `http://localhost:8000/v3` |
+| **LMStudio** | `local-model` | `http://localhost:1234/v1` |
+| **Ollama** | `llama3` | `http://localhost:11434/api` |
+
+### China Providers
+
+See [regional provider setup](./china) for DeepSeek, Qwen, Doubao, Moonshot, GLM and related presets. The category describes configuration, not a guarantee of geographic availability or Chinese-language quality. Match account region, endpoint and model entitlement.
 
 ## Per-Task Model Selection
 
-Notemd supports independent provider and model for each task. Enable with `useMultiModelSettings: true`.
+Enable `useMultiModelSettings` to select separate providers and model overrides. Without it, tasks use `activeProvider`. An empty task-model override uses that provider's configured model; invalid saved provider choices are reconciled with the active provider when settings load.
 
-### Available Tasks
+| Task | Provider setting | Model override |
+|------|------------------|----------------|
+| Add links | `addLinksProvider` | `addLinksModel` |
+| Title generation | `generateTitleProvider` | `generateTitleModel` |
+| Research summary | `researchProvider` | `researchModel` |
+| Translation | `translateProvider` | `translateModel` |
+| Concept extraction | `extractConceptsProvider` | `extractConceptsModel` |
+| Mermaid summary | `summarizeToMermaidProvider` | `summarizeToMermaidModel` |
+| Original-text extraction | `extractOriginalTextProvider` | `extractOriginalTextModel` |
 
-| Task | Settings Key | Default Provider |
-|------|-------------|-----------------|
-| Add Links (wiki-link insertion) | `addLinksProvider` / `addLinksModel` | DeepSeek |
-| Research (web search + summarize) | `researchProvider` / `researchModel` | DeepSeek |
-| Generate from Title | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
-| Translation | `translateProvider` / `translateModel` | DeepSeek |
-| Diagram Generation | `summarizeToMermaidProvider` / `Model` | DeepSeek |
-| Concept Extraction | `extractConceptsProvider` / `Model` | DeepSeek |
-| Original Text Extraction | `extractOriginalTextProvider` / `Model` | DeepSeek |
-
-### Resolution Order
-
-1. If `useMultiModelSettings` is on → use the task-specific provider + model
-2. If task model override is empty → fall back to the provider's default model
-3. If task provider is invalid → fall back to the global `activeProvider`
-4. If `useMultiModelSettings` is off → all tasks use the global `activeProvider`
-
-### Recommended Configurations
-
-```
-# Researcher: power for research, cheap for everything else
-activeProvider: DeepSeek
-extractConceptsProvider: DeepSeek
-researchProvider: OpenAI        # GPT-4o for better research quality
-summarizeToMermaidProvider: DeepSeek
-
-# Privacy-first: local only
-activeProvider: Ollama
-addLinksProvider: Ollama
-extractConceptsProvider: Ollama
-
-# Budget bilingual
-activeProvider: DeepSeek
-translateProvider: Google      # Gemini Flash for translation
-researchProvider: SiliconFlow  # Cheaper China-based routing
-```
+The default active provider and saved task providers are DeepSeek. Verify each configured task before processing private material; changing only the active provider does not override enabled task-specific choices.
 
 ## API Call Architecture
 
 ### Transport Layers
 
-1. **Obsidian `requestUrl`** — primary (built-in, works on all platforms)
-2. **Desktop HTTP** — Node.js `http`/`https` modules (streaming + long requests)
-3. **Web `fetch`** — fallback when Node.js modules unavailable
-
-The plugin automatically cascades between transports on transient network errors.
+The plugin uses Obsidian request facilities and protocol-aware fallbacks. Desktop fallbacks can use Node HTTP streams; other environments can use fetch. The provider protocol and runtime transport are different concepts. A Claude model served by an OpenAI-compatible gateway uses that gateway preset, rather than the native Anthropic profile.
 
 ### Retry Logic
 
-- **Normal mode** (`enableStableApiCall: false`): Single attempt. On transient failure, auto-escalates to stable retry.
-- **Stable retry mode** (`enableStableApiCall: true`): Up to 4 attempts (1 + 3 retries) with 5s intervals.
-- **Transient errors that trigger retry**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
-- **Non-retryable**: HTTP 400, 401, 403, 404
+Stable request mode is off by default, with configured retry defaults of three retries and a five-second interval when applicable. Transient transport failures can enter the shared retry/fallback path. Authentication or invalid model configuration must be corrected instead of relying on retries. Long requests can still fail because of remote timeouts, model limits or quota exhaustion.
 
 ### Response Caching
 
-5-minute in-memory LRU cache keyed by provider + model + temperature + prompt + content. Subsequent identical requests within 5 minutes return cached results instantly.
+Successful responses can be reused by a bounded in-memory cache. Endpoint, model, generation settings, prompt and content contribute to request identity. Caching is not persistence, a cost meter or a guarantee that a repeat operation will avoid a new paid request.
 
 ### Reasoning Model Handling
 
-Models that don't support the `system` role (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) automatically have system + user prompts combined into a single user message.
-
-DeepSeek-specific: `thinkingEnabled` adds `{ thinking: { type: 'enabled' } }` to the request. `reasoningEffort` (low/medium/high) is passed as `reasoning_effort`. Validates that max output tokens ≥ 8000 when thinking is on.
+Reasoning and thinking controls are exposed where supported by the preset and model rules. Do not copy protocol-specific parameters between providers. Validate the exact task with the chosen model; a model that can chat may still reject particular reasoning, token or sampling settings.
 
 ### Token Estimation
 
-`estimateTokens(text)`: `Math.ceil(text.length / 4)` — 4-chars-per-token heuristic. Used to enforce `maxResearchContentTokens` before sending to LLM.
-
-No cost tracking is implemented.
+Text-length estimates and configured output limits are not exact provider token counts. Inspect the provider's actual usage for billing. The plugin does not provide a universal cost estimate.
 
 ## Model Discovery
 
-| Mode | Providers | Endpoint |
-|------|-----------|----------|
-| `ollama-tags` | Ollama | `/api/tags` |
-| `google-models` | Google | Models list API |
-| `anthropic-models` | Anthropic | Models list API |
-| `openai-compatible-models` | DeepSeek, Qwen, Mistral, etc. | `/v1/models` |
-| `openrouter-models` | OpenRouter | Model list API |
-| `github-models` | GitHub Models | Inference API |
-| `none` | Azure OpenAI | Disabled (requires deployment name) |
+**Fetch models** discovers models when supported by the preset. Some deployments require a manually entered model or deployment name. Listing permission and generation permission are independent.
+
+**Test connection** follows the preset's test mode. A `models-then-chat` preset can report success from the model-list endpoint alone; a `chat-only` preset performs a small generation request. Always run a small real task to verify the exact model and output shape needed by your workflow.
+
+- Anthropic and Google have native model-list protocols.
+- Ollama lists locally pulled model tags; LM Studio lists models exposed by its local server.
+- Azure OpenAI requires deployment configuration, including the API version; a generic model list is not a substitute.
+- Gateways may limit model discovery even when a specific model accepts chat requests.
 
 ## Quick Start
 
-1. **Pick a provider** — DeepSeek (China), OpenAI (International), or Ollama (Local/Free)
-2. **Enter API key** — Settings → Notemd → Provider → API Key
-3. **Test connection** — Click the test button
-4. **Optional: Per-task models** — Enable `useMultiModelSettings` and configure individually
+1. Select the matching preset in **Settings → Notemd**.
+2. Enter its endpoint, credentials and an actual model/deployment available to you.
+3. Run **Test connection**, then process one disposable note.
+4. Inspect the output and progress report before enabling batch work or task-specific routing.
 
-For Ollama: no API key needed. Just make sure `ollama serve` is running.
-
----
+For local operation, download/load the model and start its server first. Ollama has no API-key requirement; LM Studio accepts an optional key and the preset uses `EMPTY`. Set a real token if your server requires authentication. Local LLM use does not make web search or other network-dependent tasks offline.
 
 ## Next Steps
 
-- 📝 [Concept Notes](/docs/features/concept-notes) — Uses per-task extraction model
-- 🎨 [Diagrams](/docs/features/diagrams) — Uses per-task diagram model
-- 🔍 [Research](/docs/features/research) — Uses research-specific model
-- ⚙️ [Configuration](/docs/getting-started/configuration) — Full settings reference
+- [OpenAI](./openai), [Anthropic](./anthropic), [Google](./google), [China providers](./china) and [local models](./local): protocol-specific setup.
+- [Configuration](../getting-started/configuration): task settings and output destinations.
+- [Troubleshooting](../advanced/troubleshooting): failures, diagnostic limits and safe issue reports.

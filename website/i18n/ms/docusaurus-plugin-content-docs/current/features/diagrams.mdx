@@ -1,110 +1,109 @@
 ---
 id: diagrams
-title: "Diagram"
-description: "Jana diagram Mermaid, JSON Canvas, Vega-Lite, HTML, artifak gambar yang boleh diedit, Draw.io, Drawnix, dan diagram circuitikz terhad daripada nota anda menggunakan reka bentuk berasaskan spesifikasi terlebih dahulu"
+title: Rajah
+description: >-
+  Jana rajah daripada nota, lihat panel Drawnix dan Mermaid bersama, lalu
+  eksport setiap visual sebagai SVG, PNG atau PDF.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, circuitikz, TikZJax, Intent Detection, Spec-First Architecture]
-citations:
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Rajah
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Diagram
+# Rajah
 
-<TLDR>
-Pilih **jenis diagram yang diperlukan**, kemudian pilih **format sumber yang boleh diedit** untuknya. Tonton pratonton hasil lengkap dalam Obsidian, termasuk papan Drawnix serta visualisasi Mermaid yang terbenam di dalamnya, dan eksport setiap panel sebagai SVG, PNG, atau PDF.
-</TLDR>
+<TLDR>Pilih **jenis rajah yang diperlukan**, kemudian **format sumber boleh sunting**. Semak hasil lengkap dalam Obsidian, termasuk papan Drawnix dan visual Mermaid terbenam, lalu eksport setiap panel sebagai SVG, PNG atau PDF.</TLDR>
 
-## Fahami tiga pilihan yang ada
+## Fahami tiga pilihan
 
-| Pilihan | Apa yang dikawalnya | Contoh |
-|---|---|---|
-| Jenis diagram | Makna diagram tersebut | Alur kerja, diagram urutan, diagram litar, carta data |
-| Format sumber | Fail yang boleh diedit atau digunakan semula yang dihasilkan oleh Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Format eksport | Imej atau dokumen yang digunakan untuk dikongsi | SVG, PNG, PDF |
+| Pilihan | Perkara dikawal | Contoh |
+| --- | --- | --- |
+| Jenis rajah | Makna yang disampaikan rajah | Carta alir, rajah urutan, rajah litar, carta data |
+| Format sumber | Fail boleh sunting atau guna semula yang dicipta Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Format eksport | Imej atau dokumen untuk perkongsian | SVG, PNG, PDF |
 
-Draw.io dan Drawnix merupakan **format sumber**, bukannya jenis diagram. CircuitikZ ialah format sumber yang direka khusus untuk diagram litar. Pratonton yang sama boleh dieksport ke dalam beberapa format visual, jadi pemilihan CircuitikZ tidak akan membataskan anda hanya kepada SVG sahaja.
+Draw.io dan Drawnix ialah **format sumber**, bukan jenis rajah. CircuitikZ direka untuk litar. Pratonton sama boleh dieksport ke beberapa format visual; memilih CircuitikZ tidak mengehadkan eksport kepada SVG.
 
 ## Pilih format sumber
 
 | Format | Sesuai untuk | Fail sumber |
-|---|---|---|
-| Mermaid | Diagram yang disimpan terus dalam Markdown | Blok kod Mermaid |
-| JSON Canvas | Aliran kerja canvas asli Obsidian | `.canvas` |
-| Draw.io | Mengedit kemudian di diagrams.net atau alat serasi | `.drawio` |
-| Drawnix | Pengeditan gaya lukisan tangan atau papan putih | `.drawnix` |
-| CircuitikZ | Litar elektrik dan transistor yang terstruktur | `.tex` |
+| --- | --- | --- |
+| Mermaid | Rajah disimpan terus dalam Markdown | Blok kod Mermaid |
+| JSON Canvas | Aliran kanvas natif Obsidian | `.canvas` |
+| Draw.io | Suntingan kemudian dalam diagrams.net atau alat serasi | `.drawio` |
+| Drawnix | Suntingan gaya lukisan tangan atau papan putih | `.drawnix` |
+| CircuitikZ | Litar elektrik dan transistor berstruktur | `.tex` |
 
-Biarkan **Format sumber keutamaan** pada **Auto** jika anda tidak memerlukan editor tertentu. Notemd akan memilih format yang serasi untuk jenis diagram yang dipilih.
+Biarkan **Preferred source format** pada **Auto** jika tiada editor tertentu diperlukan. Notemd memilih format serasi dengan jenis rajah.
 
-## Jana dan eksport diagram
+## Jana dan eksport rajah
 
-1. Buka nota tersebut atau pilih teks yang ingin dipaparkan secara visual.
-2. Pilih **Generate diagram** daripada sidebar Notemd atau panel arahan.
-3. Pilih jenis **diagram**, atau biarkannya pada tetapan **Auto-detect**.
-4. Pilih format **sumber**, atau biarkannya pada tetapan **Auto**. Pilih **Drawnix** jika anda ingin peta pengetahuan dengan nod yang boleh diedit serta visualisasi Mermaid yang terbenam.
-5. Semak pratontonnya. Hasil berbilang panel akan mengekalkan papan Drawnix dan setiap panel Mermaid mengikut susunan asal dalam satu shell pratonton yang boleh digulung secara menegak; panel Mermaid akan menggunakan ketinggian yang telah diproses tanpa dipotong.
-6. Pilih tindakan **Export SVG**, **Export PNG**, atau **Export PDF** untuk setiap visual, atau gunakan eksport imej peringkat atasan untuk semua panel. Untuk beberapa panel, pilih folder sumber atau folder khusus yang berkaitan dengan Vault; Notemd akan menulis satu fail yang tetap untuk setiap panel dan meneruskan proses walaupun berlaku kegagalan pada salah satu daripadanya.
-7. Gunakan **Save source file** jika anda juga memerlukan fail sumber yang boleh diedit.
+1. Buka nota sumber disokong. Untuk satu petikan, letakkan dalam nota berasingan; pilihan teks tidak mengehadkan tindakan berasaskan fail.
+2. Dalam tetapan rajah, pilih **diagram type** atau **Auto-detect**.
+3. Pilih **source format** atau **Auto**. Pilih **Drawnix** untuk peta pengetahuan disokong dengan nod boleh sunting dan Mermaid terbenam.
+4. Jalankan **Generate diagram** melalui bar sisi atau palet arahan.
+5. Semak pratonton. Papan Drawnix dan semua panel Mermaid tersusun mengikut sumber dalam satu kawasan tatal menegak; panel Mermaid menggunakan ketinggian terpapar tanpa dipotong.
+6. Pilih **Export SVG**, **Export PNG** atau **Export PDF** pada panel untuk satu visual, atau eksport imej peringkat atas untuk semua panel. Bagi beberapa panel, pilih folder sumber atau folder tersuai relatif kepada Vault. Satu fail deterministik ditulis setiap panel dan proses diteruskan selepas kegagalan individu.
+7. Gunakan **Save source file** jika artifak boleh sunting diperlukan.
 
-Menu Eksport menyediakan tindakan **Export SVG**, **Export PNG**, dan **Export PDF** untuk pratonton visual semasa. Setiap tajuk panel menawarkan tindakan yang sama untuk satu visual Mermaid atau Drawnix, jadi pratonton yang besar tidak perlu dieksport sebagai satu imej yang tidak telus.
+Menu Export menawarkan **Export SVG**, **Export PNG** dan **Export PDF** bagi pratonton semasa. Pengepala setiap panel menawarkan tindakan sama untuk satu visual Mermaid/Drawnix, jadi pratonton besar tidak perlu menjadi satu imej yang sukar diubah.
 
-Pilih **History** dalam pratonton untuk membuka penarik sejarah Vault tanpa menyembunyikan diagram. Anda boleh mencari dan menapis diagram yang telah siap, membuka semula pratonton, atau membuka fail yang telah disimpan. Sejarah diagram juga tersedia secara langsung daripada panel arahan dan sidebar Notemd, walaupun tiada nota yang sedang aktif.
+Pilih **History** untuk membuka laci sejarah Vault tanpa menyembunyikan rajah. Cari/tapis rajah selesai, buka semula pratonton atau artifak tersimpan. Sejarah juga tersedia melalui palet arahan dan bar sisi walaupun tiada nota aktif.
 
-SVG dan PDF dihasilkan daripada geometri vektor; PDF menggunakan susunan SVG dan metrik teks yang sama dan bukannya merasterkan keseluruhan pratonton. Nilai PPI untuk eksport imej dalam tetapan Notemd hanya mengawal proses merasterkan PNG sahaja (72-600 PPI, 300 sebagai nilai lalai).
+SVG/PDF menggunakan geometri vektor; PDF menggunakan susun atur SVG dan metrik teks sama tanpa meraster seluruh pratonton. PPI hanya mengawal PNG: 72–600 PPI, lalai 300.
 
-## Pratonton yang mudah dibaca untuk rajah padat
+## Pratonton rajah padat yang mudah dibaca
 
-Rajah lane-grid HTML/SVG yang boleh diedit mengukur dan membungkus ringkasan sebelum meletakkan tajuk dan pengepala lane. Pengepala dialihkan ke bawah kawasan ringkasan yang dilindungi, dan sel dilukis sebelum penyambung serta label tepi. Tepi merentas lane menggunakan laluan grid ortogon yang sedar perlanggaran dan memperuntukkan ruang untuk label lane serta sel yang diduduki, jadi penerangan panjang tidak menutup teks atau memerlukan pan mendatar.
+Rajah grid lorong HTML/SVG boleh sunting mengukur dan membalut ringkasan sebelum tajuk serta pengepala lorong ditempatkan. Pengepala diletakkan di bawah kawasan ringkasan terlindung; sel dilukis sebelum penyambung/label tepi. Sambungan rentas lorong melalui grid ortogon yang mengelak perlanggaran dan mengekalkan ruang label serta sel, supaya huraian panjang tidak menutup teks atau memerlukan tatal mendatar.
 
-Rajah kuadran Mermaid menerima langkah normalisasi khusus family. Untuk `quadrantChart`, pembaikan petikan dan bentuk khusus flowchart dilangkau; kurungan yang disengajakan dalam tajuk, paksi dan nama kuadran kekal kelihatan. Kurungan pembuka yang disalin provider hanya dibuang apabila ia menjadi aksara terakhir yang tidak sepadan pada label titik.
+Carta kuadran Mermaid menerima penormalan khusus keluarga. Pembaikan petikan/bentuk untuk carta alir dilangkau bagi `quadrantChart`. Kurungan pembuka tersalin hanya dibuang apabila ia aksara akhir label titik yang tidak berpasangan; kurungan sengaja dalam tajuk, paksi dan nama kuadran kekal.
 
-Repositori mengekalkan set pembelajaran dan bukti daripada Vault sebenar untuk setiap jenis rajah boleh laku. Lihat [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) untuk nota input dwibahasa, hasil SVG/PNG yang dijana dan manifest status yang boleh dibaca mesin. Entri `passed` ialah larian melalui plugin bundle yang dimuatkan, bukan screenshot fixture statik.
+Repositori menyimpan set pembelajaran dan bukti Vault sebenar untuk setiap jenis rajah boleh laku. [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) mengandungi input dwibahasa, SVG/PNG serta manifest boleh baca mesin. `passed` merujuk pelaksanaan dan identiti bundle yang direkodkan, bukan pelaksanaan baharu semua jenis pada keluaran kemudian.
 
-## Pratonton Drawnix dengan visual Mermaid yang terbenam
+Katalog boleh laku semasa mempunyai 33 baris, UI pemalam 21 bahasa dan laluan laman 34 bahasa. Ini bidang berbeza; jumlah bahasa UI bukan jumlah bahasa dokumentasi. Lima tatabahasa rujukan tepat belum masuk pemilih sehingga kontrak susun aturnya mempunyai bukti bebas.
 
-Apabila sebuah artefak Drawnix mengandungi visual Mermaid, Notemd akan menyucikan SVG yang dihasilkan dan menyimpan sumber Mermaid bersamanya dalam metadata `.drawnix`. Oleh itu, pratonton boleh memaparkan imej Mermaid di dalam peta pengetahuan Drawnix tanpa memerlukan runtime Drawnix atau Plait. Laluan lalai adalah bersepadu dan tidak mencipta direktori `.assets` yang berasingan. Aktifkan opsyen **Juga eksport visual Mermaid yang lengkap** apabila anda memerlukan sumber Mermaid, SVG, serta fail manifest untuk diserahkan atau diedit di luar. Artefak sedia ada yang mempunyai direktori `.assets` masih disokong, dan SVG Mermaid lama yang hilang boleh dibina semula daripada teks sumber yang disimpan dalam metadata.
+## Pratonton Drawnix dengan Mermaid terbenam
 
-Imej yang telah diselesaikan juga akan menerima pratonton SVG yang disokong oleh data apabila memungkinkan; oleh itu, pemadaman folder sokongan lama tidak akan menyebabkan pratonton Drawnix yang disimpan hilang. Proses memuatkan pratonton menggunakan data terbenam terlebih dahulu, diikuti dengan fail sokongan lama, dan akhirnya kaedah gantian pembinaan semula daripada teks sumber.
+Notemd membersihkan SVG Mermaid dan menyimpan sumbernya dalam metadata `.drawnix`. Pratonton boleh memaparkan imej dalam peta Drawnix tanpa masa jalan Drawnix/Plait. Laluan lalai serba lengkap tanpa direktori `.assets` berasingan. Aktifkan **Also export complete Mermaid visuals** untuk sumber Mermaid, SVG dan manifest pendamping bagi serahan atau suntingan luaran. Artifak lama dengan `.assets` masih disokong; SVG lama hilang boleh dibina semula daripada sumber dalam metadata.
 
-Pratonton ini direka secara sengaja sebagai satu permukaan yang boleh digulung: kanvas utama Drawnix akan dipaparkan terlebih dahulu, diikuti oleh setiap panel Mermaid yang terbenam mengikut urutan asal. Menutup dan membuka semula entri sejarah yang disimpan akan membina semula senarai panel, dimensi, serta tindakan eksport yang sama.
+Imej terbenam yang diselesaikan menerima pratonton SVG berasaskan data apabila boleh. Pemuatan mendahulukan data terbenam, kemudian fail pendamping lama, lalu pembinaan semula daripada teks sumber. Kekalkan pendamping yang masih dirujuk; eksport baharu serba lengkap tidak membuktikan direktori lama dikongsi sudah tidak digunakan.
 
-Penjelasan hubungan dalam Drawnix disusun sebagai unsur visual peringkat pertama. Alat pemproses akan melukis anak panah putus-putus di sekeliling segi empat nod yang diletakkan, dan menetapkan ruang tajuk/ringkasan tertentu sebagai kawasan yang dilindungi. Ringkasan yang panjang serta label hubungan akan dipadatkan mengikut garis yang telah ditetapkan; bahagian “hutan” graf akan berada di bawah ketinggian tajuk yang terhasil, dan kotak label yang tidak telus akan dilukis selepas lapisan nod. Tajuk akan diproses paling akhir dengan latar belakang yang tidak telus, supaya anak panah luaran tidak dapat menutupi teks seperti `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` atau penjelasan hubungan seperti `RendererRegistry feeds Vault files, preview modal, and export`. Anak panah format asli `.drawnix` menggunakan atribut `shape`, `texts[]`, penanda, dan medan garisan yang serasi dengan Plait, sambil mengekalkan metadata lama untuk pengguna yang lebih lama. Jika peta Drawnix yang diminta tidak dapat mencari laluan atau kedudukan label yang bebas daripada pertindihan, proses penjanaan akan gagal kerana ralat format, dan bukannya menyimpan versi gantian Mermaid secara senyap di bawah operasi `.drawnix`.
+Pratonton ialah satu kawasan tatal: kanvas Drawnix dahulu, kemudian panel Mermaid mengikut susunan sumber. Membuka semula entri sejarah memulihkan senarai panel, dimensi dan tindakan eksport yang sama.
+
+Pratonton menyediakan ruang tajuk, ringkasan dan label hubungan serta menghalakan penyambung statik mengelilingi nod. Permintaan yang tidak dapat menghasilkan susun atur boleh baca disokong melaporkan ralat format. Anak panah rentas cabang disirikan sebagai hubungan statik; keterikatan selepas nod disusun semula dalam Drawnix belum disokong bukti semasa. Periksa artifak dalam editor sasaran.
+
+## Batas eksport natif
+
+Eksport sumber dan visual ialah hasil berasingan. Uji artifak perwakilan dalam aplikasi sasaran sebelum mengedar. Jadual PowerPoint mengekalkan struktur boleh sunting disokong termasuk pemisah diperbetul di bawah sel bercantum; Mermaid/SVG boleh menggunakan imej gantian dan bukannya bentuk natif boleh sunting. Pratonton pemalam atau skor tangkapan seluruh halaman tidak menggantikan pemeriksaan aplikasi natif.
 
 ## Rajah litar
 
-Pilih **Circuit diagram** bersama fail sumber **CircuitikZ** untuk permintaan litar yang disokong. Notemd akan menjana penerangan litar yang terstruktur terlebih dahulu, kemudian menulis kod sumber CircuitikZ. Cara ini lebih boleh dipercayai berbanding meminta model untuk menulis LaTeX tanpa sekatan.
+Pilih **Circuit diagram** bersama **CircuitikZ source file** untuk permintaan disokong. Notemd membina huraian litar berstruktur dahulu sebelum sumber CircuitikZ, lebih terkawal daripada meminta LaTeX tanpa batas.
 
-Sokongan untuk CircuitikZ pada masa kini sengaja dibataskan. Penguat NMOS yang menggunakan sumber umum serta blok binaan CMOS yang disokong memberikan prestasi terbaik. Sentiasa periksa pratonton dan kod sumber sebelum menggunakan litar yang dijana dalam kerja teknikal atau penerbitan.
+Sokongan CircuitikZ sengaja terhad. Penguat NMOS sumber sepunya dan blok CMOS disokong paling sesuai. Periksa pratonton dan sumber sebelum penggunaan teknikal atau penerbitan.
 
-Pratonton SVG merupakan alat bantu semakan yang dijana oleh Notemd. Ia bukan bukti bahawa pemasangan LaTeX atau TikZJax tempatan telah berjaya mengkompilasi fail `.tex`.
+Pratonton SVG ialah bahan semakan Notemd, bukan bukti pemasangan LaTeX/TikZJax setempat berjaya mengkompil `.tex`.
 
-**Kompilasi secara natif (pilihan).** Anda tidak memerlukan LaTeX untuk pratonton dalam plugin, eksport SVG, PNG, mahupun PDF pratonton. Di desktop, buka **CircuitikZ native compile environment** daripada tetapan rajah atau panel arahan apabila anda memerlukan maklumat diagnostik kompilasi atau fail PDF LaTeX secara natif. Notemd boleh menggunakan `tectonic` atau `pdflatex` sistem, melaksanakan program eksekutif khusus, atau memasang versi Tectonic yang diurus setelah anda memilih **Install** secara eksplisit. Panel persekitaran akan menunjukkan kemajuan dan ralat secara langsung, serta membolehkan anda membuang versi runtime yang diurus tersebut pada bila-bila masa.
+**Kompilasi natif pilihan.** LaTeX tidak diperlukan untuk pratonton pemalam atau eksport SVG, PNG dan PDF pratonton. Di desktop, buka **CircuitikZ native compile environment** daripada tetapan atau palet arahan untuk diagnostik atau PDF LaTeX natif. Notemd boleh menggunakan `tectonic`/`pdflatex` sistem, boleh laku tersuai atau memasang Tectonic terurus pada versi ditetapkan selepas anda memilih **Install**. Panel menunjukkan kemajuan/ralat dan membolehkan masa jalan terurus dibuang kemudian.
 
-## Penyelesaian Masalah
+## Penyelesaian masalah
 
-### Hasilnya ialah jenis diagram yang salah
+### Jenis rajah tidak tepat
 
-Pilih jenis diagram secara eksplisit daripada menggunakan fungsi Auto-detect. Untuk litar elektrik, pilih **Circuit diagram** dan gunakan arahan **Generate diagram**, bukannya arahan lama **Summarise as Mermaid diagram**.
+Pilih jenis secara jelas, bukan Auto-detect. Untuk litar, pilih **Circuit diagram** dan **Generate diagram**, bukan arahan lama **Summarise as Mermaid diagram**.
 
-Bahasa sasaran: Malay (ms)
-Blok 9/11:
 ### Format sumber tidak sesuai
 
-Kembalikan format sumber kepada **Auto**, atau pilih format yang sesuai untuk jenis diagram tersebut. CircuitikZ digunakan untuk diagram litar; Draw.io dan Drawnix pula direka khusus untuk diagram berstruktur yang disokong.
+Kembalikan ke **Auto** atau pilih format bagi jenis tersebut. CircuitikZ untuk litar; Draw.io/Drawnix untuk rajah berstruktur disokong.
 
-Bahasa sasaran: Bahasa Melayu (ms)
-Blok 10/11:
-### Menu Eksport tiada
+### Menu Export tiada
 
-SVG, PNG, dan PDF memerlukan pratonton visual. Jika hanya teks sumber yang tersedia, simpan fail sumber tersebut dan buka ia dalam alat luaran yang sesuai.
+SVG, PNG dan PDF memerlukan pratonton visual. Jika hanya teks ada, simpan sumber dan buka dalam alat luaran sesuai.
 
-### Fail CircuitikZ tidak boleh dikompil secara luaran
+### CircuitikZ gagal dikompil secara luaran
 
-Buka **persekitaran kompil asli CircuitikZ** dan jalankan pemeriksaan persekitaran tersebut. Perbaiki runtime yang digunakan atau sahkan bahawa kompiler khusus/sistem anda mampu mendapatkan pakej `circuitikz`. Notemd tidak menyertakan pengedaran TeX yang lengkap di dalam fail pluginnya.
+Buka **CircuitikZ native compile environment** dan jalankan semakan. Baiki masa jalan terurus atau pastikan pengkompil tersuai/sistem boleh mendapatkan pakej `circuitikz`. Fail pemalam tidak membungkus keseluruhan edaran TeX.

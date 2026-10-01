@@ -2,6 +2,7 @@ export const App = jest.fn();
 export const Editor = jest.fn();
 export const MarkdownView = jest.fn();
 export const Modal = jest.fn();
+export const Scope = jest.fn().mockImplementation(() => ({ register: jest.fn(), unregister: jest.fn() }));
 export const Notice = jest.fn();
 export const Menu = jest.fn().mockImplementation(() => ({
 	addItem: jest.fn().mockImplementation((configure: (item: unknown) => void) => {

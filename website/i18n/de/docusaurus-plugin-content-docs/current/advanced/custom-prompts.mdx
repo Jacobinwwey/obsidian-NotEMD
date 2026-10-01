@@ -1,134 +1,92 @@
 ---
 id: custom-prompts
-title: Benutzerdefinierte Anfragen
-description: Passen Sie die LLM-Anfragen Ihren Bedürfnissen an
+title: Eigene Prompts
+description: >-
+  Ersetze Aufgabenprompts, ohne benötigte Ausgabemarker und Eingabevariablen zu
+  verlieren.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [custom prompts, prompts, focused learning, domain]
-concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: LLM Prompt Engineering
-    url: https://platform.openai.com/docs/guides/prompt-engineering
+keywords:
+  - Eigene Prompts
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Benutzerdefinierte Anfragen
+# Eigene Prompts
 
 <TLDR>
-**Notemd ermöglicht es Ihnen, die Standard-LLM-Eingabeanfrage für jeden Aufgabentyp zu überschreiben.** Benutzerdefinierte Eingabeanfragen geben Ihnen die Kontrolle darüber, was das Modell priorisiert: Sie können die Konzeptextraktion auf ein bestimmtes Fachgebiet beschränken, den Verlinkungsstil ändern oder den Ton der Übersetzung anpassen. Prompt-Variablen wie `{{content}}` und `{{concept}}` werden zur Laufzeit ersetzt. Die Funktion „Fokussiertes Lerngebiet“ fügt Ihren Studiengang voran, um die Ergebnisse der Extraktion automatisch einzuschränken.
-
-Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
+Eigene Prompts ersetzen den Standard nur bei aktivierter globaler und aufgabenspezifischer Option sowie nichtleerem Text. Erhalte den Ausgabevertrag selbst; ein automatisches Vorlagensystem stellt ausgelassene Formatanweisungen nicht wieder her.
 </TLDR>
 
 ## Überblick
 
-Die integrierten Anweisungen von Notemd sind für allgemeine Aufgaben im Bereich des Wissensmanagements konzipiert. Sie funktionieren gut in verschiedenen Bereichen, lassen aber auch Raum für anwendungsspezifische Verbesserungen. Mit benutzerdefinierten Anweisungen können Sie dem LLM genau vorgeben, wie es sich in Ihrem spezifischen Fall verhalten soll – sei es das Extrahieren nur medizinischer Begriffe, das Verknüpfen nur benannter Entitäten oder die Übersetzung in einem formellen Stil.
+Teste zuerst den Standard. Lerndomäne oder Synonymbegrenzung können genügen. Passe den Prompt für eine konkrete Extraktionsregel, Struktur oder Übersetzungsart an und vergleiche vor einem Stapel.
 
-Benutzerdefinierte Anweisungen ersetzen den gesamten Systemprompt nicht. Sie überschreiben oder erweitern den **auf die Aufgabe bezogenen Anweisungsteil**, wobei das strukturelle Ausgabeformat (z. B. `CONCEPT:`-Zeilen, Wiki-Link-Syntax) beibehalten wird, von dem Notemd zur Parsing abhängt.
+## Ablauf
 
-## Wie es funktioniert
+### Zusammensetzung
 
-### Prompt-Architektur
+Notemd wählt Standard oder eigenen Prompt, ergänzt passende Domänen-/Sprachanweisungen und ersetzt von der Aufgabe bereitgestellte Variablen. Notiztext kann als eigene Nachricht gesendet werden. Recherchevariablen sind nicht automatisch überall verfügbar.
 
-Jede Notemd Aufgabe folgt derselben Prompt-Struktur:
+Ein eigener Prompt kann `CONCEPT:` oder Recherchebelege auslassen. Eine gültige Anfrage garantiert deshalb weder parsebare Ausgabe noch belegte Aussagen.
 
-```
-[System role: You are a helpful assistant...]
-[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
-[Custom task prompt]                                <-- your override (optional)
-[Output format instructions]                        <-- always preserved
-[Content: {{content}}]                              <-- runtime substitution
-```
+### Variablen
 
-1. **Grundsystemanweisung** -- Legt die Assistentenpersönlichkeit fest. Nicht überschreibbar.
-2. **Fokussiertes Lerngebiet** – Fügt `Relevant Fields: [medicine / law / computer science / ...]` voran, um den Umfang einzuschränken. Dies ist ein Schalter in den Einstellungen, kein Rohprompt.
-3. **Anpassung der Aufgabenanweisung** -- Ersetzt die Standard-Aufgabenanweisungen (z. B. welche Arten von Konzepten extrahiert werden sollen, wie aggressiv Verbindungen hergestellt werden sollen).
-4. **Ausgabeformat** -- Strukturelle Regeln (`CONCEPT:` Zeilen, Wiki-Link-Format). Immer mit Notemd abgeschlossen, um die Verarbeitbarkeit zu gewährleisten.
-5. **Inhalt** -- Der tatsächliche Notiztext, der zur Laufzeit über `{{content}}` ersetzt wird.
+Verwende genaue Großschreibung und einfache Klammern:
 
-### Prompt-Variablen
+| Aufgabe | Bereitgestellte Variablen |
+| ------ | ----------------------- |
+| Titelgenerierung | `{TITLE}`, `{RESEARCH_CONTEXT_SECTION}` |
+| Recherche-Zusammenfassung | `{TOPIC}`, `{LANGUAGE}`, `{SEARCH_RESULTS_CONTEXT}` |
+| Übersetzung | `{LANGUAGE}`, `{TEXT}` |
+| Originaltextextraktion | `{REFERENCE_CONTENT}`, `{USER_INPUT}` |
 
-Variablen werden zur Laufzeit ersetzt. Die verfügbaren Variablen unterscheiden sich je nach Aufgabe:
+`{LANGUAGE}` folgt der Aufgaben-Sprachregel. Links und eigenständige Konzepte senden Text als Aufgabeninhalt; dafür keine Variable erfinden. Unbekannte Namen werden nicht magisch gefüllt. Diese Ersetzungen sind keine Konzeptdateivorlagen.
 
-| Variable | Aufgaben | Ersetzt durch |
-|----------|-------|---------------|
-| `{{content}}` | Alles | Der Notiz- oder Auswahltext |
-| `{{concept}}` | Vorlage für eine Konzeptnotiz | Der extrahierte Konzeptname |
-| `{{description}}` | Vorlage für eine Konzeptnotiz | Von LLM erzeugte Konzeptbeschreibung |
-| `{{backlinks}}` | Vorlage für eine Konzeptnotiz | Liste der Quellennotizen mit Links |
-| `{{date}}` | Vorlage für eine Konzeptnotiz | Aktuelles Datum (JJJJ-MM-DD) |
-| `{{language}}` | Übersetzung | Ziel-Sprache der Ausgabe |
-| `{{source}}` | Vorlage für eine Konzeptnotiz | Quellenhinweis Basismodellname |
+### Lerndomäne
 
-### Fokussiertes Lerngebiet
+Aktiviere fokussiertes Lernen und gib beispielsweise `Elektrotechnik` an. Die Anweisung `Relevant Fields` lenkt die Aufmerksamkeit, ist aber kein harter Filter für fachfremde Begriffe.
 
-Die fokussierte Lernfunktion ist ein Shortcut für das Definieren des Anwendungsbereichs. Anstatt einen benutzerdefinierten Prompt zu schreiben, der Ihren Fachbereich erwähnt, geben Sie `focusedLearningDomain` in den Einstellungen ein:
+## Einstellungen
 
-```
-Settings → Advanced → Focused Learning Domain
-Example: "medicine" or "computer science" or "Chinese philosophy"
-```
+| Aufgabe | Aktivierung | Promptfeld |
+| ------ | --------------- | -------------- |
+| Links | `useCustomPromptForAddLinks` | `customPromptAddLinks` |
+| Titelgenerierung | `useCustomPromptForGenerateTitle` | `customPromptGenerateTitle` |
+| Recherche | `useCustomPromptForResearchSummarize` | `customPromptResearchSummarize` |
+| Mermaid-Zusammenfassung | `useCustomPromptForSummarizeToMermaid` | `customPromptSummarizeToMermaid` |
+| Konzepte | `useCustomPromptForExtractConcepts` | `customPromptExtractConcepts` |
+| Übersetzung | `useCustomPromptForTranslate` | `translatePrompt` |
+| Originaltext | `useCustomPromptForExtractOriginalText` | `customPromptExtractOriginalText` |
 
-Dies fügt `Relevant Fields: [medicine]` vor den Extraktionsauftrag ein, wodurch LLM domänenspezifische Konzepte bevorzugt und allgemeine Konzepte unterdrückt werden. Es ist leichter als ein vollständig angepasster Auftrag und funktioniert bei allen Extraktionsaufgaben.
-
-## Konfiguration
-
-| Einstellungen | Standard | Effekt |
-|---------|---------|--------|
-| `customAddLinksPrompt` | `''` | Überschreibe die Standardanfrage für die Aufgabe „Add Links“ |
-| `customExtractConceptsPrompt` | `''` | Überschreibe den Standard-Aufforderungstext für die Konzeptextraktion |
-| `customResearchPrompt` | `''` | Überschreibe die Standardanfrage für Forschung + Zusammenfassung |
-| `customTranslatePrompt` | `''` | Überschreibe die Standard-Anfrage zur Übersetzung |
-| `customDiagramPrompt` | `''` | Überschreibe die Standardanfrage zur Diagrammgenerierung |
-| `focusedLearningDomain` | `''` | Fügen Sie den Kontext der Disziplin den Prompts für Extraktion und Verlinkung hinzu. |
-| `extractConceptsMinimalTemplate` | `true` | Verwenden Sie das Konzeptpapier-Template nur mit Titel (beeinflusst den Gültigkeitsbereich des `{{concept}}`-Templates) |
-| `customConceptNoteTemplate` | `''` | Überschreibe das Vorlage-Dateiformat für die Konzeptnotiz mit voller Variablenunterstützung |
-
-**Wird ein benutzerdefiniertes Prompt-Feld leer gelassen, wird das eingebaute Standard-Prompt verwendet.**
+Alle benötigen `enableGlobalCustomPrompts`. Leerer Text fällt auf den Standard zurück. Zusammengeführte Originaltextextraktion hat ein eigenes eingebautes Format und nutzt nicht die gewöhnliche Überschreibung. Diagrammgenerierung hat typisierte Anforderungen; der Mermaid-Prompt ist kein universeller Diagrammprompt.
 
 ## Beispiel
 
-Sie sind ein medizinischer Forscher, der Konzepte aus Protokollen klinischer Studien extrahiert. Der Standardprompt extrahiert allgemeine Substantive zusammen mit medizinischen Begriffen, was Ihre Konzeptordner überflutet.
+Globale und Konzeptextraktionsoption einschalten und den Parsermarker bewahren:
 
-**Lösung:** Legen Sie ein fokussiertes Lerngebiet sowie einen benutzerdefinierten Extraktionsprompt fest.
-
-1. Setzen Sie `focusedLearningDomain` auf `medicine`
-2. Setzen Sie `customExtractConceptsPrompt` auf:
-
-```
-Extract only clinically relevant concepts: diseases, drug names,
-anatomical terms, measurement endpoints, and statistical methods.
-Ignore generic English nouns, brand names, and institutional names.
-Prioritize MeSH terminology where applicable.
+```text
+Extrahiere die zentralen elektrotechnischen Konzepte aus der Notiz.
+Bevorzuge konkrete Bauteile und physikalische Mechanismen vor allgemeinen Begriffen.
+Gib ein Konzept je Zeile exakt in dieser Form aus:
+CONCEPT: Begriffsname
+Keine Erklärungen oder umschließenden Codeblöcke hinzufügen.
 ```
 
-Wenn Sie nun „Extract concepts“ auf einer klinischen Notiz ausführen, erzeugt das LLM:
-
-```
-CONCEPT: Randomized Controlled Trial
-CONCEPT: Double-Blind Method
-CONCEPT: Myocardial Infarction
-CONCEPT: Creatine Kinase-MB
-CONCEPT: Kaplan-Meier Estimate
-```
-
-Anstelle des Standardverhaltens, das möglicherweise auch unerwünschte allgemeine Begriffe wie „Krankenhaus“ oder „Monat“ extrahiert.
+Teste eine Kopie, prüfe Einträge, Dateinamen und fehlende Konzepte und vergleiche mit dem Standard. Alten Prompt vor Änderungen sichern.
 
 ## Tipps
 
-- Beginnen Sie mit dem fokussierten Lernbereich, bevor Sie einen vollständigen benutzerdefinierten Prompt erstellen. Mit einer einzigen Einstellung deckt er 80 % der Anwendungsfälle ab.
-- **Format beibehalten** – Entfernen Sie niemals Formatanweisungen wie „eins pro Zeile“ oder „CONCEPT: Präfix“ aus benutzerdefinierten Anfragen. Der Parser von Notemd hängt davon ab.
-- **Zuerst mit einer einzigen Notiz testen** – Benutzerdefinierte Anfragen können unerwartete Auswirkungen auf die Umfang der Extraktion haben. Überprüfen Sie das an einer Notiz, bevor Sie in Batch-Prozesse wechseln.
-- **Halten Sie die Anfragen kurz** – Übermäßig lange benutzerdefinierte Anfragen verbrauchen Token und können die Konzentration des Modells beeinträchtigen.
+- Eine Aufgabe einzeln prüfen, bevor der Umfang wächst.
+- Quellenkontext und wörtliche Extrakte erhalten.
+- Prosa übersetzen, ausführbare IDs und Ausgabemarker stabil halten.
+- Nach Anbieter-/Modellwechsel neu prüfen; Anweisungen ersetzen keine Validierung.
 
----
+## Weitere Schritte
 
-## Nächste Schritte
-
-- [Wiki-Links](/docs/features/wiki-links) -- Was wird verlinkt, wenn Sie die Anfrage zur Hinzufügung von Links anpassen
-- [Concept Notes](/docs/features/concept-notes) -- Vorlagen für Konzeptnotizen und die `{{concept}}`-Variable
-- [Batchverarbeitung](/docs/advanced/batch-processing) -- Anwenden von benutzerdefinierten Anweisungen in allen Ordnern
-- [Fehlerbehebung](/docs/advanced/troubleshooting) -- Behebung von Problemen, bei denen benutzerdefinierte Anfragen unerwartete Ausgaben liefern
+- [Konzepte](../features/concept-notes).
+- [Recherche](../features/research).
+- [Übersetzung](../features/translation).
+- [Fehlerbehebung](./troubleshooting).

@@ -1,133 +1,76 @@
 ---
 id: installation
-title: "Írásbeállítás"
-description: "Hogyan írjuk be Notemd-t a Obsidian-ban"
+title: Telepítés
+description: >-
+  Telepítse a Notemd bővítményt az Obsidianból vagy egyetlen GitHub-kiadásból,
+  majd ellenőrizzen egy valódi feladatot.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Telepítés
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Írásbeállítás
+# Telepítés
 
-<TLDR>
-**Írjuk be Notemd-t 2 perc alatt.** Két módszer: (1) Obsidian közösségi pluginek (ajánlott, egy kattintással írásbeállítás), vagy (2) manuális írásbeállítás a GitHub Releases által. Elvégzéshez szükség van Obsidian 0.15.0+ verzióra. Működik Windows, macOS, Linux, iOS és Android rendszereken. Nincs külső függőségek. 4k+ letöltés, MIT licenc alatt.
-</TLDR>
+<TLDR>Telepítse a Notemd bővítményt a Community plugins felületén, vagy másolja egy kiadás három futtatási fájlját a vaultba. Engedélyezze, állítson be szolgáltatót, és próbáljon ki egy jegyzetet. A modellkiszolgálókat és az opcionális exporteszközöket külön kell előkészíteni.</TLDR>
 
-## Módszer 1: Közösségi pluginek (ajánlott)
+## 1. módszer: Community plugins, ajánlott
 
-1. Nyitjuk meg a **Obsidian beállításait** (⚙️ ikon vagy `Ctrl/Cmd + ,`)
-2. Menjünk a **Közösségi pluginek** részére
-3. Kattintjunk a **Browszolás**-ra
-4. Keresjük a **"Notemd"** nevűt
-5. Kattintjuk a **Írásbeállítás**-ra
-6. Kattintjuk a **Engedélyezés**-re
+1. A megfelelő vaultban nyissa meg a **Settings → Community plugins** oldalt.
+2. Szükség esetén engedélyezze a közösségi bővítményeket, majd válassza a **Browse** lehetőséget.
+3. Keresse meg a **Notemd** bővítményt, ellenőrizze a `Jacobinwwey/obsidian-NotEMD` tárolót, és kattintson az **Install** gombra.
+4. Válassza az **Enable** lehetőséget, majd nyissa meg az oldalsávot az ikonnal vagy a parancspalettáról.
 
-**Szia!** A bal oldalsávon látjuk a Notemd ikont.
+[Notemd megnyitása az Obsidianban](obsidian://show-plugin?id=notemd). Ha a böngésző nem adja át a hivatkozást, használja a fenti menüútvonalat. A dokumentáció olvasásához nem kell protokollkezelő.
 
-## Módszer 2: Manuális írásbeállítás
+## 2. módszer: kézi telepítés
 
-### Elvárások
-- Obsidian 0.15.0 vagy annál újabb verzió
-- Git (opcionális, klónoláshoz)
+### Előfeltételek
+
+Obsidian és biztonságosan menthető vault szükséges. A manifestben szereplő `0.15.0` minimum kompatibilitási nyilatkozat, nem a régi verzió friss tesztelésének bizonyítéka.
 
 ### Lépések
 
-1. **Letöltse a fájlokat** a [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) számítól:
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. Töltse le a `main.js`, `manifest.json` és `styles.css` fájlt ugyanabból a [GitHub-kiadásból](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest). A `README.md` útmutató, nem kötelező futtatási fájl.
+2. Másolja őket a `<vault>/.obsidian/plugins/notemd/` helyre; egyedi konfigurációs könyvtár esetén módosítsa az útvonalat.
+3. Töltse újra az Obsidiant, és engedélyezze a bővítményt.
+4. Ellenőrizze a verziót; új manifestet ne párosítson régi bundle-lel.
 
-2. **Keresse ki a vault-jának plugin mappáját:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## Alternatíva: BRAT
 
-Ha a `plugins` mappa nem létezik, hozz létre azt.
-
-3. **Hozz létre a Notemd mappát:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
-
-4. **Kopítsa be a három fájlt** a `notemd` mappába.
-
-5. **Uramollítson a Obsidian-t:**
-   - Nyomja meg a `Ctrl/Cmd + R`-t, vagy
-   - Újra indítson a Obsidian-t
-
-6. **Engedélyezze a plugin-t:**
-   - Beállítások → Közösségi pluginek
-   - Keresse ki a „Notemd”-ot a listában
-   - Nyomja be az engedélyezés gombot
-
-## Alternatíva: Instáláljon az BRAT útján
-
-Ha használja a [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat)-t:
-
-1. Nyitja meg a BRAT beállításait
-2. Kattints a "Hozzáadja a Beta-pluginet" gombra
-3. Írd be: `Jacobinwwey/obsidian-NotEMD`
-4. Kattints a "Hozzáadja a pluginet" gombra
-5. Engedélyezze a Notemd-t a Community-pluginekben
+Ha már használja a [BRAT](https://github.com/TfTHacker/obsidian42-brat) bővítményt, adja hozzá a tárolót a béta bővítmények eljárásával. Hibareprodukcióhoz rögzített kiadást válasszon. A BRAT különálló, opcionális eszköz.
 
 ## Ellenőrzés
 
-Az installáció után ellenőrizze, hogy a Notemd működik-e:
+Állítson be elérhető modellt, futtassa a **Test connection** műveletet, majd a [gyors kezdés](./quick-start) feladatát. A modelllista nem bizonyítja, hogy a kiválasztott modellel generálhat; nézze meg a valódi eredményt.
 
-1. Nyitja bármely jegyet
-2. Kattints jobb kattintással a szerkesztőben
-3. Létrejönnek az Notemd parancsok, például:
-   - "Fájl kezelése (hivatkozások hozzáadása)"
-   - "Konceptek kihozása"
-   - "Kutatás és összefoglalás"
+## Rendszerhatárok
 
-## További lépések
+| Terület | Határ |
+| --------- | ---------- |
+| Manifest | Legalább Obsidian `0.15.0`; `isDesktopOnly` false |
+| Ellenőrzési bizonyíték | Lásd a dátumozott jegyzőkönyveket; fizikai mobileszközök és 0.15.0 jelenleg nincsenek igazolva |
+| Felhőmodell | Hálózat, jogosult fiók/kulcs és elérhető modell |
+| Helyi modell | Külön telepített, futó kiszolgáló és letöltött/betöltött modell |
+| Prezentáció- és áramkörexport | Asztali eszközök és formátumfüggőségek; előbb környezetellenőrzés |
 
-- **Konfigurálja a LLM forrásot:** [Rácsomagolás →](./quick-start)
-- **Problémamegoldás:** [Általános problémák →](../advanced/troubleshooting)
+Nincs minden exportálóra érvényes operációsrendszer-verziógarancia. Az áramköri előnézet nem igazol TeX-fordítást, az asztali teszt pedig mobilos működést.
 
-## Szerverteljesítmények
+## Eltávolítás
 
-| Platform | Verzió | Státusz |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | Előírás |
-| **Windows** | 7+ | ✅ Támogatott |
-| **macOS** | 10.15+ | ✅ Támogatott |
-| **Linux** | Bármilyen | ✅ Támogatott |
-| **iOS** | 15+ | ✅ Támogatott |
-| **Android** | 5+ | ✅ Támogatott |
-
-## Előreállítás
-
-Notemd elszüntetéséhez:
-
-1. Beállítások → Közösségi plug-inek
-2. Keressük az "Notemd"-t
-3. Kattints a ❌ ikonra
-4. Választhatóan törljük a plug-in mappát: `<vault>/.obsidian/plugins/notemd/`
-
-A adataid (figyelemek, konceptfigyelemek stb.) nem érintetek meg.
+Tiltsa le vagy távolítsa el a Community plugins oldalon. A jegyzetek és a létrehozott fájlok a vaultban maradnak. Törlés előtt vizsgálja meg őket, és szükség esetén mentse a beállításokat. Az eltávolítás nem vonja vissza a kész módosításokat.
 
 ## Frissítés
 
-### Autófrissítés (tajánlott)
-Obsidian automatikusan ellenőrzi a plug-in frissítéseket. Ha új verzió elérhető:
-1. Beállítások → Közösségi plug-inek
-2. Kattints a "Frissítések ellenőrzése" gombra
-3. Kattints a Notemd mellett lévő "Frissíts" gombra
+Használja a **Check for updates** lehetőséget. Kézzel: állítsa le a feladatokat, mentse a vaultot és beállításait, cserélje le egy kiadás három futtatási fájlját, majd töltsön újra. Olvassa el a kiadási jegyzeteket, és tömeges munka előtt próbáljon kis mintát. A beállításfájlt ne írja felül terjesztési fájllal. Visszaállításhoz tudatosan kiválasztott kompatibilis verzió és mentés kell.
 
-### Manuális frissítés
-Letöltse a legújabb verziót és cserélje ki a három fájlt a plug-in mappájában.
+## Tovább
 
-## Segítség kérés
-
-- 📖 [Szybki kezdőguida](./quick-start)
-- ❓ [FAQ](../faq)
-- 💬 [Discord Közössége](https://discord.gg/qnGgsQ9W)
-- 🐛 [Problémák jelentése](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [Gyors kezdés](./quick-start).
+- [Beállítások](./configuration).
+- [Hibaelhárítás](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

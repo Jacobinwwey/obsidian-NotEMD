@@ -6,18 +6,19 @@
 
 import {themes as prismThemes} from 'prism-react-renderer';
 import {publishedLocaleCodes, publishedLocaleConfigMap} from './src/lib/publishedLocales.mjs';
+import releaseFacts from './src/lib/releaseFacts.cjs';
 
 const siteUrl = 'https://jacobinwwey.github.io';
 const baseUrl = '/obsidian-NotEMD/';
 const siteBaseUrl = `${siteUrl}${baseUrl}`;
-const currentSoftwareVersion = '1.9.7';
+const currentSoftwareVersion = releaseFacts.version;
 const personId = `${siteBaseUrl}#person-jacobinwwey`;
 const logoUrl = `${siteBaseUrl}img/logo.svg`;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Notemd',
-  tagline: 'AI-Powered Knowledge Base Builder for Obsidian',
+  tagline: 'Linked notes, concept collections and diagrams in Obsidian',
   favicon: 'img/favicon.svg',
 
   // Set the production url of your site here
@@ -34,7 +35,7 @@ const config = {
     softwareVersion: currentSoftwareVersion,
   },
 
-  onBrokenLinks: 'warn',
+  onBrokenLinks: 'throw',
   // Global JSON-LD Schema for entire site
   headTags: [
     {
@@ -45,6 +46,7 @@ const config = {
         "@graph": [
           {
             "@type": "WebSite",
+            "@id": `${siteBaseUrl}#website`,
             "name": "Notemd Documentation",
             "url": siteBaseUrl,
             "description": "AI-powered Obsidian plugin documentation - wiki-links, concept notes, research, translation, and diagrams",
@@ -78,11 +80,12 @@ const config = {
       innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
+        "@id": `${siteBaseUrl}#software`,
         "name": "Notemd",
         "alternateName": ["NotEMD", "obsidian-NotEMD"],
         "applicationCategory": "Productivity",
-        "operatingSystem": ["Windows", "macOS", "Linux", "iOS", "Android"],
-        "description": "AI-powered Obsidian plugin that enhances notes with wiki-links, concept notes, web research, translation, and diagram generation. Supports 30+ LLM providers.",
+        "softwareRequirements": `Obsidian >= ${releaseFacts.minimumObsidianVersion}; see release notes for tested environments`,
+        "description": releaseFacts.description,
         "softwareVersion": currentSoftwareVersion,
         "offers": {
           "@type": "Offer",
@@ -95,8 +98,8 @@ const config = {
           "url": "https://github.com/Jacobinwwey"
         },
         "url": "https://github.com/Jacobinwwey/obsidian-NotEMD",
-        "downloadUrl": "https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest",
-        "installUrl": "obsidian://show-plugin?id=notemd",
+        "downloadUrl": releaseFacts.releaseUrl,
+        "installUrl": releaseFacts.installUrl,
         "programmingLanguage": "TypeScript",
         "license": "https://opensource.org/licenses/MIT",
         "codeRepository": "https://github.com/Jacobinwwey/obsidian-NotEMD"
@@ -114,11 +117,12 @@ const config = {
   },
 
   themes: ['@docusaurus/theme-mermaid'],
+  plugins: ['./plugins/documentation-map.cjs'],
 
   markdown: {
     mermaid: true,
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
 
@@ -164,6 +168,16 @@ const config = {
         },
         items: [
           {
+            label: 'Start here',
+            position: 'left',
+            items: [
+              {label: 'Newcomers', to: '/docs/getting-started/quick-start'},
+              {label: 'User workflows', to: '/docs/features/workflows'},
+              {label: 'Developers', to: '/docs/developers/overview'},
+              {label: 'Agents', to: '/docs/agents/overview'},
+            ],
+          },
+          {
             to: '/docs/intro',
             position: 'left',
             label: 'Docs',
@@ -208,8 +222,8 @@ const config = {
                 href: 'https://discord.gg/qnGgsQ9W',
               },
               {
-                label: 'GitHub Discussions',
-                href: 'https://github.com/Jacobinwwey/obsidian-NotEMD/discussions',
+                label: 'GitHub Issues',
+                href: 'https://github.com/Jacobinwwey/obsidian-NotEMD/issues',
               },
             ],
           },

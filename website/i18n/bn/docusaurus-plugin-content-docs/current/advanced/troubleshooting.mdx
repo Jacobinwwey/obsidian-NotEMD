@@ -1,161 +1,84 @@
 ---
 id: troubleshooting
-title: "সমস্যা সমাধান"
-description: "সাধারণ সমস্যা ও তার সমাধান"
+title: সমস্যা সমাধান
+description: >-
+  ছোট পুনরুত্পাদনযোগ্য কাজ ও পরিষ্কার প্রমাণ দিয়ে provider, output, batch ও
+  export failure আলাদা করুন।
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [troubleshooting, errors, diagnostics, connection test]
-concepts: [Troubleshooting, Error Handling, Diagnostics]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - সমস্যা সমাধান
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # সমস্যা সমাধান
 
-<TLDR>
-**বেশিরভাগ Notemd সমস্যা চারটি বিভাগে পড়ে: API মূল সমস্যাগুলি, নেটওয়ার্ক সংযোগ, অথেনটিকেশন ত্রুটি (401/403), এবং রেট লিমিট (429)।** অন্তর্নির্মিত কানেকশন টেস্ট ও ডায়াগনস্টিক্স প্যানেল দ্রুত মূল কারণটি চিহ্নিত করে। এই পৃষ্ঠাটি প্রতিটি সাধারণ ত্রুটি বার্তা, তার কারণ এবং সমাধান নিয়ে আলোচনা করে। যেসব সমস্যা এখানে তালিকাভুক্ত নেই, সেগুলি ডায়াগনস্টিক্স আউটপুটসহ GitHub Issues-এ রিপোর্ট করুন.
+<TLDR>একটি disposable note-এ একই provider, model ও task settings দিয়ে সমস্যা পুনরুত্পাদন করুন। Progress log ও reported path দেখুন। Authentication, generation, parsing ও writing আলাদা; connection success পুরো workflow পরীক্ষা করে না।</TLDR>
 
-এটি [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge)-এর অংশ।
-</TLDR>
+## সারসংক্ষেপ
 
-## সংক্ষিপ্ত বিবরণ
+Notemd/Obsidian version, OS, action, protocol, model ও minimal steps লিখুন। Cancel settle না হওয়া পর্যন্ত নতুন task নয়। Output/recovery কার তৈরি বোঝার আগে সরাবেন না।
 
-Notemd বাহ্যিক সেবাগুলির উপর নির্ভরশীল -- LLM প্রদানকারী ও অনুসন্ধান API সার্ভিসগুলি -- তাই বেশিরভাগ সমস্যার উৎপত্তি প্লাগইনটির বাইরেই হয়। সেটিংসের ডায়াগনস্টিক্স প্যানেলটি শেষ API কলটির একটি কাঠামোবদ্ধ দৃশ্য প্রদান করে, যার মধ্যে রয়েছে রিকোয়েস্ট URL, রেসপন্স স্ট্যাটাস এবং ত্রুটি বডি। আরও তদন্ত করার আগে সর্বদা প্রথমে এটি পরীক্ষা করুন.
+## Diagnostics
 
-## কীভাবে এটি কাজ করে: ডায়াগনস্টিক্স
+### Connection test
 
-### কানেকশন টেস্ট
+**Test connection** profile অনুযায়ী list বা short generation পরীক্ষা করে। নির্বাচিত model/output-এর জন্য ছোট real task চালান।
 
-প্রতিটি প্রদানকারী কনফিগারেশন বিভাগে একটি **“Test Connection”** বাটন রয়েছে। এটি ক্লিক করলে একটি ন্যূনতম API রিকোয়েস্ট (সাধারণত একটি মডেল তালিকা বা সংক্ষিপ্ত কমপ্লিশন) পাঠানো হয় এবং সাফল্য বা নির্দিষ্ট HTTP ত্রুটি সম্পর্কে জানানো হয়। এটাই আপনার API কী ও বেস URL সঠিক আছে কিনা যাচাই করার সবচেয়ে দ্রুত উপায়.
+### Progress ও developer diagnostics
 
-### ডায়াগনস্টিক্স প্যানেল
+Progress status, error ও destination দেয়; API activity pending ও finished attempts আলাদা করে। Debug দরকারেই চালু করুন। Long diagnostic quota খরচ করতে পারে। Body-তে note, partial response, endpoint বা credentials থাকতে পারে; local review/redaction করে শেয়ার করুন। Redacted profile-ও metadata review চায়।
 
-**Settings --> Notemd --> Diagnostics** এ নিম্নলিখিতগুলি দেখানো হয়:
+## সাধারণ errors
 
-| ফিল্ড | কন্টেন্ট |
-|-------|---------|
-| শেষ প্রদানকারী | কোন প্রদানকারীকে সর্বশেষ কল করা হয়েছিল |
-| শেষ মডেল | কোন মডেলটিকে সর্বশেষ কল করা হয়েছিল |
-| শেষ অবস্থা | HTTP স্ট্যাটাস কোড অথবা ট্রান্সপোর্ট ত্রুটি |
-| শেষ ত্রুটি | API থেকে প্রাপ্ত কাঁচা ত্রুটি বার্তা |
-| শেষ রিকোয়েস্ট URL | শেষ রিকোয়েস্টের পূর্ণ URL (API কী মুছে দেওয়া হয়েছে) |
-| শেষ রেসপন্স বডি | সংক্ষিপ্ত রেসপন্স বডি (প্রথম 500 অক্ষর) |
+### ভুল বা ফাঁকা key
 
-GitHub-এ সমস্যা রিপোর্ট করার সময় পূর্ণ ডায়াগনস্টিক্স আউটপুট কপি করুন.
+401: সঠিক provider/endpoint-এর key ও অনিচ্ছাকৃত spaces দেখুন। 403: account/project rights, model entitlement ও billing। Retry credentials ঠিক করে না।
 
-## সাধারণ ত্রুটিসমূহ
+### Network
 
-### API কী অবৈধ বা অনুপস্থিত
+Obsidian device থেকে host, port, protocol ও route দেখুন। Ollama/LM Studio server এবং model প্রস্তুত থাকতে হবে। `localhost` বর্তমান device, অন্য computer নয়। Correct profile নিন; runtime fallback automatic, UI transport switch নয়।
 
-**লক্ষণ:** HTTP 401 অথবা "ভুল API কী প্রদান করা হয়েছে"
+### 429 limit
 
-**কারণ:** API কীটি অনুপস্থিত, এতে হোয়াইটস্পেস রয়েছে, অথবা এটি অন্য কোনো প্রোভাইডারের হতে পারে.
+Concurrency কমিয়ে request/token quota ও একই key-র অন্য clients দেখুন। Retry কিছু transient failure মাত্র সারায়।
 
-**সমাধান:**
-1. নিশ্চিত করুন যে কীটির শুরু ও শেষে কোনো স্পেস নেই
-2. নিশ্চিত করুন যে কীটি নির্বাচিত প্রোভাইডারের সাথে মিলে যায় (একটি OpenAI কী Anthropic-এর সাথে কাজ করবে না)
-3. আপনার অ্যাকাউন্টে ক্রেডিট বা সক্রিয় সাবস্ক্রিপশন আছে কিনা তা যাচাই করুন
-4. যাচাই করার জন্য **"Test Connection"**-এ ক্লিক করুন
+### Model নেই
 
-### নেটওয়ার্ক / কানেকশন ত্রুটি
+**Fetch models** বা পরিচিত model/deployment দিন। API version ও region দেখুন; historical preset অবসর নিতে পারে। Azure deployment name ও Ark endpoint ID চাইতে পারে।
 
-**লক্ষণ:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+### Links বা concepts নেই
 
-**কারণ:** আপনার মেশিন থেকে API এন্ডপয়েন্টটি অ্যাক্সেস করা যাচ্ছে না.
+প্রকৃত output, উপকারী source, expected response form ও nonempty active concept folder দেখুন। Standalone extraction title-only, backlinks off দিয়ে শুরু হয়। Custom prompt marker বাদ দিলে built-in দিয়ে তুলুন।
 
-**সমাধান:**
-1. আপনার ইন্টারনেট কানেকশন যাচাই করুন
-2. যদি প্রক্সি বা ফায়ারওয়ালের পিছনে থাকেন, তবে API ডোমেইনটি ব্লক হয়নি তা নিশ্চিত করুন
-3. Ollama-এর জন্য: `ollama serve` চালু আছে কিনা নিশ্চিত করুন (`ollama list` থেকে models রিটার্ন হওয়া উচিত)
-4. LMStudio-এর জন্য: `localhost:1234`-এ সার্ভারটি চালু আছে কিনা নিশ্চিত করুন
-5. অন্য কোনো ট্রান্সপোর্ট ব্যবহার করে দেখুন -- মোবাইল ব্যবহারকারীদের `requestUrl` ট্রান্সপোর্টটি সক্রিয় আছে তা নিশ্চিত করা উচিত
-6. অস্থায়ী ত্রুটিগুলোর জন্য স্বয়ংক্রিয় পুনরাবৃত্তির জন্য `enableStableApiCall` সক্রিয় করুন
+### Output অনুপস্থিত বা অন্যত্র
 
-### 403 Forbidden
+Reported `_processed.md`, `_<language>.md` বা complete path দেখুন। Translation folder create ব্যর্থ হলে source folder fallback হতে পারে। Retry-এর আগে collision ও permissions দেখুন।
 
-**লক্ষণ:** HTTP 403
+### Cancel-এর পরে files
 
-**কারণ:** আপনার API কীটি বৈধ হলেও অনুরোধকৃত রিসোর্সের জন্য অনুমতি নেই.
+Completed writes থাকে এবং accepted requests/writes শেষ হতে পারে। Delete বা whole-folder repeat-এর আগে per-file ফল ও recovery conflicts দেখুন।
 
-**সমাধান:**
-1. কিছু মডেলের জন্য বিশেষ অ্যাক্সেস প্রয়োজন (উদাহরণস্বরূপ, Azure-এর মাধ্যমে GPT-4-এর জন্য একটি ডিপ্লয়মেন্ট নাম দরকার)
-2. কিছু প্রদানকারী প্ল্যান স্তর অনুযায়ী মডেলগুলোকে সীমিত করে -- আপনার অ্যাকাউন্ট পরীক্ষা করুন
-3. আঞ্চলিক সীমাবদ্ধতা প্রযোজ্য হতে পারে (কিছু চীনা প্রদানকারী আন্তর্জাতিক IP-গুলোকে ব্লক করে এবং উল্টোটাও হয়)
-4. নিশ্চিত হওয়া উচিত যে মডেলের নামটি সঠিকভাবে লেখা হয়েছে (উদাহরণস্বরূপ, আপনার প্ল্যানে যখন শুধুমাত্র মিনি মডেল অনুমোদিত থাকে তখন `gpt-4o` নয়, `gpt-4o-mini` ব্যবহার করবেন)
+### Diagram বা native export
 
-### রেট লিমিট (429)
+Supported type/source নিন এবং slide/CircuitikZ environment check করুন। Preview native verification নয়। শুধু text থাকলে source রেখে matching external tool-এ খুলুন। [Diagrams](../features/diagrams)।
 
-**লক্ষণ:** HTTP 429 অথবা "রেট লিমিট অতিক্রান্ত"
+## সমস্যা জানান
 
-**কারণ:** সংক্ষিপ্ত সময়ের মধ্যে অতিরিক্ত সংখ্যক রিকোয়েস্ট করা হয়েছে.
+1. Synthetic small note ও আলাদা folder-এ reproduce করুন।
+2. Versions, action, model, দরকারি settings, expected ও actual লিখুন।
+3. Secrets/private content/অপ্রয়োজনীয় endpoint metadata বাদ দিয়ে minimal artifacts ও logs দিন।
+4. একটি file ও built-in prompt-এও হয় কি না জানান।
+5. [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) খুলুন।
 
-**সমাধান:**
-1. `batchConcurrency` কে `1` অথবা `2` এ কমিয়ে আনুন
-2. পুনরায় চেষ্টা করার আগে কয়েক মিনিট অপেক্ষা করুন
-3. আপনার প্ল্যান স্তরের জন্য আপনার প্রদানকারীর রেট লিমিট সংক্রান্ত নির্দেশিকা পরীক্ষা করুন
-4. ব্যাকঅফ সহ স্বয়ংক্রিয় পুনরায় চেষ্টার জন্য `enableStableApiCall` সক্রিয় করুন
-5. উচ্চতর লিমিটযুক্ত প্রদানকারীতে স্বিচ করার কথা বিবেচনা করুন (DeepSeek, Ollama)
+Screenshot একা format বা cancellation issue খুব কমই প্রমাণ করে। সম্ভব হলে source/output বা minimal sequence দিন।
 
-### মডেল পাওয়া যায়নি
+## পরবর্তী ধাপ
 
-**লক্ষণ:** "মডেল পাওয়া যায়নি" অথবা HTTP 404
-
-**কারণ:** নির্বাচিত প্রদানকারীর কাছে মডেলের নামটি অস্তিত্বহীন।
-
-**সমাধান:**
-1. আপনার প্রোভাইডারের জন্য উপলব্ধ সমস্ত মডেল দেখতে **"Get Model List"**-এ ক্লিক করুন
-2. কিছু মডেলের নাম সময়ের সাথে পরিবর্তিত হয় -- প্রোভাইডারের ডকুমেন্টেশনে বর্তমান নামটি যাচাই করুন
-3. Ollama-এর জন্য: পুল করা মডেলগুলো দেখতে `ollama list` চালান; শুধুমাত্র ডাউনলোড করা মডেলগুলোই উপলব্ধ
-
-### কোনো লিঙ্ক/কোনো কনসেপ্ট তৈরি হয়নি
-
-**লক্ষণ:** কমান্ডটি চলে কিন্তু কোনো আউটপুট পাওয়া যায় না
-
-**কারণ:** LLM একটি খালি বা অপারেট করা যায় না এমন রেসপন্স ফেরত দিয়েছে.
-
-**সমাধান:**
-1. প্রকৃত LLM রেসপন্স দেখার জন্য ডায়াগনস্টিক্স প্যানেলটি পরীক্ষা করুন
-2. আরও শক্তিশালী একটি মডেল চেষ্টা করুন (কিছু ছোট মডেল স্ট্রাকচারড আউটপুট নিয়ে সমস্যায় পড়ে)
-3. নোটটিতে যথেষ্ট বিষয়বস্তু থাকছে তা নিশ্চিত করুন (>50 শব্দ)
-4. পরস্পর বিরোধী নির্দেশাবলী থাকলে আপনার কাস্টম প্রম্পটটি পর্যালোচনা করুন
-5. এটি খুব বেশি কঠোরভাবে ফিল্টার করছে কিনা দেখতে অস্থায়ীভাবে সিনোনিম সাপ্রেশন নিষ্ক্রিয় করুন
-
-### Doubao এন্ডপয়েন্ট ID অনুপস্থিত
-
-**লক্ষণ:** ByteDance Doubao প্রোভাইডার ব্যবহার করার সময় ত্রুটি
-
-**কারণ:** Doubao-এর জন্য মডেলের নামের পরিবর্তে একটি Ark এন্ডপয়েন্ট ID (ফরম্যাট: `ep-xxxxxxxx-xxxx-xxxx`) প্রয়োজন.
-
-**সংশোধন:** Volcengine কনসোল থেকে আপনার প্রকৃত এন্ডপয়েন্ট ID দিয়ে ডিফল্ট প্লেসহোল্ডার মডেলটি প্রতিস্থাপন করুন।
-
-## কনফিগারেশন
-
-| ডায়াগনস্টিক সেটিং | অবস্থান | উদ্দেশ্য |
-|--------------------|----------|---------|
-| **কানেকশন পরীক্ষা করুন** | Settings --> Provider বিভাগ | API কী এবং সংযোগ যোগ্যতা যাচাই করুন |
-| **মডেল তালিকা পাওয়া** | Settings --> Provider বিভাগ | কোন মডেলগুলো অ্যাক্সেসযোগ্য তা নিশ্চিত করুন |
-| `enableStableApiCall` | Settings --> Advanced | ব্যাকঅফ সহ রিট্রাই সক্রিয় করুন |
-| `batchConcurrency` | Settings --> Batch | রেট লিমিট এড়াতে প্যারালালিজম নিয়ন্ত্রণ করুন |
-
-## সমস্যা রিপোর্ট করার উপায়
-
-যদি আপনার সমস্যা উপরে উল্লিখিত না থাকে:
-
-1. Open **Settings --> Notemd --> Diagnostics**
-2. Copy the full diagnostics output
-3. Open a GitHub Issue at [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-4. Include: Obsidian version, Notemd version, provider, model, diagnostics output, and steps to reproduce
-5. Redact your API key from any shared logs
-
----
-
-## পরবর্তী ধাপসমূহ
-
-- [LLM Providers](/docs/providers/overview) -- Full provider configuration reference
-- [Batch Processing](/docs/advanced/batch-processing) -- Concurrency and retry settings for large operations
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Fix unexpected LLM behavior by adjusting prompts
+- [Providers](../providers/overview)।
+- [Batch](./batch-processing)।
+- [নিজের prompts](./custom-prompts)।
+- [কনফিগারেশন](../getting-started/configuration)।

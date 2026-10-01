@@ -1,133 +1,76 @@
 ---
 id: installation
-title: "Instalace"
-description: "Jak nainstalovat Notemd v Obsidian"
+title: Instalace
+description: >-
+  Nainstalujte Notemd z katalogu Obsidian nebo z jedné verze GitHub Release a
+  ověřte skutečnou úlohu.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Instalace
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Instalace
 
-<TLDR>
-**Nainstalujte Notemd za méně než 2 minuty.** Dva způsoby: (1) pluginy komunity Obsidian (doporučeno, jednokliková instalace), nebo (2) ruční instalace prostřednictvím GitHub Releases. Vyžaduje Obsidian 0.15.0+. Funguje na Windows, macOS, Linux, iOS a Android. Žádné externí závislosti. Více než 4k stažení, licencováno podle MIT.
-</TLDR>
+<TLDR>Nainstalujte Notemd přes Community plugins nebo vložte tři soubory stejné verze do trezoru. Zapněte plugin, připravte poskytovatele a vyzkoušejte jednu poznámku. Servery modelů a volitelné nástroje pro export se instalují samostatně.</TLDR>
 
-## Metoda 1: Komunitní pluginy (doporučeno)
+## Metoda 1: Community plugins, doporučeno
 
-1. Otevřete **Obsidian Nastavení** (ikona ⚙️ nebo `Ctrl/Cmd + ,`)
-2. Přejděte na **Community plugins**
-3. Klikněte na **Procházet**
-4. Vyhledejte **"Notemd"**
-5. Klikněte na **Install**
-6. Klikněte na **Enable**
+1. V cílovém trezoru otevřete **Settings → Community plugins**.
+2. Povolte komunitní pluginy a zvolte **Browse**.
+3. Vyhledejte **Notemd**, ověřte repozitář `Jacobinwwey/obsidian-NotEMD` a zvolte **Install**.
+4. Zvolte **Enable** a otevřete panel ikonou nebo z palety příkazů.
 
-**Hotovo!** V levé nabídce uvidíte ikonu Notemd.
+[Otevřít Notemd v Obsidianu](obsidian://show-plugin?id=notemd). Pokud prohlížeč odkaz nepředá aplikaci, použijte uvedenou cestu v nastavení. Čtení dokumentace obsluhu protokolu nevyžaduje.
 
 ## Metoda 2: Ruční instalace
 
 ### Předpoklady
-- Obsidian 0.15.0 nebo novější
-- Git (volitelné, pro kopírování)
 
-### Kroky
+Potřebujete Obsidian a trezor, který můžete bezpečně zálohovat. Minimum `0.15.0` v manifestu je deklarace kompatibility, nikoli doklad o čerstvém testu této staré verze.
 
-1. **Stáhněte soubory** z [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+### Postup
 
-2. **Najděte složku pluginů vašeho trezoru:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+1. Stáhněte `main.js`, `manifest.json` a `styles.css` ze stejného [GitHub Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest). `README.md` je dokumentace, nikoli povinný soubor pro běh.
+2. Vložte je do `<vault>/.obsidian/plugins/notemd/`; při změně konfiguračního adresáře upravte cestu.
+3. Znovu načtěte Obsidian a plugin zapněte.
+4. Ověřte verzi. Nekombinujte nový manifest se starým bundlem.
 
-Pokud složka `plugins` neexistuje, vytvořte ji.
+## Alternativa: BRAT
 
-3. **Vytvořte složku Notemd:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
-
-4. **Zkopírujte tři soubory** do složky `notemd`.
-
-5. **Přenačtěte Obsidian:**
-   - Stiskněte `Ctrl/Cmd + R`, nebo
-   - Přezačněte Obsidian
-
-6. **Aktivujte plugin:**
-   - Nastavení → Komunitní pluginy
-   - V seznamu najděte "Notemd"
-   - Přepněte ho na zapnuté
-
-## Alternativa: Nainstalujte prostřednictvím BRAT
-
-Pokud používáte [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat):
-
-1. Otevřete nastavení BRAT
-2. Klikněte na "Přidat beta plugin"
-3. Zadejte: `Jacobinwwey/obsidian-NotEMD`
-4. Klikněte na "Přidat plugin"
-5. Povolte Notemd v komunitních pluginách
+Pokud již používáte [BRAT](https://github.com/TfTHacker/obsidian42-brat), přidejte repozitář jeho postupem pro beta pluginy. Pro reprodukci chyby zvolte konkrétní verzi. BRAT je volitelný externí nástroj.
 
 ## Ověření
 
-Po instalaci ověřte, zda Notemd funguje:
+Nastavte dostupný model, spusťte **Test connection** a pokračujte [rychlým startem](./quick-start). Seznam modelů neprokazuje oprávnění generovat s vybraným modelem; zkontrolujte skutečný výstup.
 
-1. Otevřete jakoukoli poznámku
-2. Klikněte pravým tlačítkem v editoru
-3. Měli byste vidět příkazy Notemd jako například:
-   - "Zpracovat soubor (přidat odkazy)"
-   - "Vytáhnout koncepty"
-   - "Výzkum a shrnutí"
+## Systémové hranice
 
-## Další kroky
+| Oblast | Hranice |
+| --------- | ---------- |
+| Manifest | Obsidian alespoň `0.15.0`; `isDesktopOnly` je false |
+| Doklady o ověření | Viz datované záznamy; fyzická mobilní zařízení a 0.15.0 nejsou aktuálně ověřeny |
+| Cloudový model | Síť, oprávněný účet/klíč a dostupný model |
+| Lokální model | Samostatně připravený běžící server a stažený/načtený model |
+| Export do prezentací a obvodů | Desktopové nástroje a závislosti formátu; nejprve ověřte prostředí |
 
-- **Nastavte poskytovatele LLM:** [Rychlý start →](./quick-start)
-- **Řešení problémů:** [Běžné problémy →](../advanced/troubleshooting)
-
-## Požadavky na systém
-
-| Platforma | Verze | Stav |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | Požadované |
-| **Windows** | 7+ | ✅ Podporováno |
-| **macOS** | 10.15+ | ✅ Podporováno |
-| **Linux** | Jakékoli | ✅ Podporováno |
-| **iOS** | 15+ | ✅ Podporováno |
-| **Android** | 5+ | ✅ Podporováno |
+Všechny exportéry nesdílejí jednu zaručenou verzi operačního systému. Náhled obvodu není důkaz kompilace TeXu a desktopový test neprokazuje chování mobilu.
 
 ## Odinstalace
 
-Chcete-li odstranit Notemd:
-
-1. Nastavení → Komunitní pluginy
-2. Najděte "Notemd"
-3. Klikněte na ikonu ❌
-4. Volitelně odstraňte složku s pluginem: `<vault>/.obsidian/plugins/notemd/`
-
-Vaše data (poznámky, konceptové poznámky atd.) zůstávají nedotčena.
+Plugin vypněte nebo odinstalujte v Community plugins. Poznámky a vygenerované soubory zůstávají běžnými soubory trezoru. Před mazáním je prověřte a podle potřeby zálohujte nastavení. Odinstalace nevrací dokončené změny.
 
 ## Aktualizace
 
-### Automatická aktualizace (doporučeno)
-Obsidian automaticky kontroluje aktualizace pluginů. Jakmile je k dispozici nová verze:
-1. Nastavení → Komunitní pluginy
-2. Klikněte na "Zkontrolovat aktualizace"
-3. Klikněte na "Aktualizovat" vedle Notemd
+Použijte **Check for updates**. Při ruční aktualizaci zastavte úlohy, zálohujte trezor/nastavení, nahraďte tři soubory jedné verze a aplikaci znovu načtěte. Přečtěte poznámky k vydání a proveďte malý test. Nenahrazujte soubor nastavení distribučním souborem. Návrat vyžaduje záměrně zvolenou kompatibilní verzi a zálohu.
 
-### Manuální aktualizace
-Stáhněte nejnovější verzi a nahraďte tři soubory ve vaší složce s pluginem.
+## Dále
 
-## Získat pomoc
-
-- 📖 [Průvodce rychlým začátkem](./quick-start)
-- ❓ [FAQ](../faq)
-- 💬 [Komunita Discord](https://discord.gg/qnGgsQ9W)
-- 🐛 [Nahlásit problémy](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [Rychlý start](./quick-start).
+- [Nastavení](./configuration).
+- [Řešení potíží](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

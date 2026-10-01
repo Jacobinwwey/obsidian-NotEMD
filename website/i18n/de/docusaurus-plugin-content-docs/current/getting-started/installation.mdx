@@ -1,14 +1,15 @@
 ---
 id: installation
 title: Installation
-description: Wie installiert man Notemd in Obsidian
+description: >-
+  Installiere Notemd aus dem Obsidian-Katalog oder einem geprüften GitHub
+  Release und teste anschließend einen Anbieter.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Installation
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,118 +17,64 @@ import TLDR from '@site/src/components/TLDR';
 # Installation
 
 <TLDR>
-**Installieren Sie Notemd in weniger als 2 Minuten.** Zwei Methoden: (1) Obsidian Community Plugins (empfohlen, ein-Klick-Installation), oder (2) Manuelle Installation über GitHub Releases. Erfordert Obsidian 0.15.0+. Funktioniert unter Windows, macOS, Linux, iOS und Android. Keine externen Abhängigkeiten. Mehr als 4k Downloads, lizenziert nach MIT.
+Installiere **Notemd** über Obsidians Community-Erweiterungen oder kopiere die drei Plugin-Dateien derselben GitHub-Version in deinen Vault. Aktiviere das Plugin, richte einen Anbieter ein und prüfe eine Testnotiz. Lokale Modellserver und native Exporte benötigen eigene Voraussetzungen.
 </TLDR>
 
-## Methode 1: Community-Plugins (empfohlen)
+## Methode 1: Community-Erweiterungen (empfohlen)
 
-1. Öffnen Sie die **Obsidian Einstellungen** (⚙️-Icon oder `Ctrl/Cmd + ,`)
-2. Gehen Sie zu **Community Plugins**
-3. Klicken Sie auf **Browse**
-4. Suche nach **"Notemd"**
-5. Klicken Sie auf **Installieren**
-6. Klicken Sie auf **Enable**
+1. Öffne im gewünschten Vault **Settings → Community plugins**.
+2. Aktiviere Community-Erweiterungen bei Bedarf und wähle **Browse**.
+3. Suche **Notemd**, prüfe das Repository `Jacobinwwey/obsidian-NotEMD` und wähle **Install**.
+4. Wähle **Enable** und öffne die Notemd-Seitenleiste über das Menüband oder die Befehlspalette.
 
-**Erledigt!** Sie werden das Notemd-Icon in Ihrer linken Seitenleiste sehen.
+[Notemd in Obsidian öffnen](obsidian://show-plugin?id=notemd). Erkennt der Browser diesen Link nicht, verwende die Schritte oben.
 
 ## Methode 2: Manuelle Installation
 
 ### Voraussetzungen
-- Obsidian 0.15.0 oder neuer
-- Git (optional, zum Clonen)
+
+Du brauchst Obsidian und einen Vault, den du sichern kannst. Das Manifest nennt `0.15.0` als Mindestversion; das belegt keinen aktuellen Test auf dieser alten Version.
 
 ### Schritte
 
-1. **Dateien herunterladen** von [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. Lade `main.js`, `manifest.json` und `styles.css` aus demselben [GitHub Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest). Die ebenfalls veröffentlichte `README.md` ist Referenzmaterial, keine Laufzeitvoraussetzung.
+2. Kopiere die Dateien nach `<vault>/.obsidian/plugins/notemd/`. Passe `.obsidian` an, falls dein Vault ein anderes Konfigurationsverzeichnis nutzt.
+3. Lade Obsidian neu und aktiviere Notemd.
+4. Prüfe die angezeigte Version. Kombiniere kein neues Manifest mit einem alten Bundle.
 
-2. **Finden Sie den Plugin-Ordner Ihres Tresors:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## Alternative: BRAT
 
-Falls das Verzeichnis `plugins` nicht existiert, erstellen Sie es.
+Wer [BRAT](https://github.com/TfTHacker/obsidian42-brat) bereits nutzt, kann `Jacobinwwey/obsidian-NotEMD` über dessen Beta-Plugin-Ablauf hinzufügen. Verwende für Fehlerreproduktionen eine konkrete Version. BRAT bleibt optional.
 
-3. **Erstellen Sie den Ordner Notemd:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
+## Prüfung
 
-4. **Kopieren Sie die drei Dateien** in den Ordner `notemd`.
+Wähle einen erreichbaren Anbieter und ein verfügbares Modell, dann **Verbindung testen**. Bearbeite anschließend eine kopierte Notiz aus dem [Schnellstart](./quick-start). Manche Verbindungstests prüfen nur die Modellliste; erst eine Aufgabe prüft Generierung und Speicherung.
 
-5. **Neuladen von Obsidian:**
-   - Drücken Sie `Ctrl/Cmd + R`, oder
-   - Restarte Obsidian
+## Systemvoraussetzungen
 
-6. **Plugin aktivieren:**
-   - Einstellungen → Community-Plugins
-   - Suche nach "Notemd" in der Liste
-   - Schalte es ein.
+| Bereich | Grenze |
+| --------- | ---------- |
+| Plugin-Manifest | Mindestversion `0.15.0`; `isDesktopOnly` ist false |
+| Prüfnachweise | Datierte Abnahme der Version prüfen; physische Mobilgeräte und Obsidian 0.15.0 derzeit nicht verifiziert |
+| Gehostetes LLM | Netzwerk, berechtigtes Konto/Schlüssel und unterstütztes Modell |
+| Lokales LLM | Separat installierter laufender Server mit heruntergeladenem oder geladenem Modell |
+| Native Folien-/Schaltungsexporte | Desktop-Werkzeuge und formatspezifische Abhängigkeiten vorher prüfen |
 
-## Alternative: Über BRAT installieren
-
-Wenn Sie den [BRAT-Plugin](https://github.com/TfTHacker/obsidian42-brat) verwenden:
-
-1. Öffne die Einstellungen von BRAT
-2. Klicken Sie auf „Beta-Plugin hinzufügen“.
-3. Eingeben: `Jacobinwwey/obsidian-NotEMD`
-4. Klicken Sie auf „Plugin hinzufügen“.
-5. Aktiviere Notemd in den Community-Plugins
-
-## Überprüfung
-
-Nach der Installation überprüfen Sie, ob Notemd funktioniert:
-
-1. Öffne jede Notiz
-2. Rechtsklick im Editor
-3. Sie sollten Notemd Befehle wie folgt sehen:
-   - „Datei verarbeiten (Verknüpfungen hinzufügen)“
-   - „Konzepte extrahieren“
-   - "Forschung durchführen und zusammenfassen"
-
-## Nächste Schritte
-
-- **Konfigurieren Sie den LLM-Anbieter:** [Schnellstart →](./quick-start)
-- **Fehlerbehebung:** [Häufige Probleme →](../advanced/troubleshooting)
-
-## Systemanforderungen
-
-| Plattform | Version | Status |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | Erforderlich |
-| **Windows** | 7+ | ✅ Unterstützt |
-| **macOS** | 10.15+ | ✅ Unterstützt |
-| **Linux** | Jeder | ✅ Unterstützt |
-| **iOS** | 15+ | ✅ Unterstützt |
-| **Android** | 5+ | ✅ Unterstützt |
+Es gibt keine pauschale OS-Versionsgarantie für alle optionalen Exporte. Eine Schaltungsvorschau beweist keine native TeX-Kompilierung; ein Desktop-Test beweist keine Mobilkompatibilität.
 
 ## Deinstallation
 
-Um Notemd zu entfernen:
+Deaktiviere oder entferne Notemd über die Community-Erweiterungen. Erzeugte Notizen und Artefakte bleiben Vault-Dateien. Prüfe sie vor dem Löschen und sichere Einstellungen für eine Neuinstallation. Deinstallation macht abgeschlossene Änderungen nicht rückgängig.
 
-1. Einstellungen → Community-Plugins
-2. Finde „Notemd“
-3. Klicken Sie auf das ❌-Icon
-4. Optional können Sie das Plugin-Verzeichnis löschen: `<vault>/.obsidian/plugins/notemd/`
+## Aktualisierung
 
-Ihre Daten (Notizen, Konzeptnotizen usw.) bleiben unberührt.
+Nutze **Check for updates** und aktualisiere Notemd. Manuell: laufende Aufgaben beenden, Vault und Einstellungen sichern, die drei Laufzeitdateien aus derselben Version ersetzen und neu laden. Lies die Versionshinweise und teste klein vor weiteren Stapeln.
 
-## Aktualisieren
+Ersetze keine Vault-Einstellungsdatei durch ein Release-Asset. Installiere für einen Rückwechsel bewusst eine bekannte kompatible Version und behalte benötigte Ausgaben.
 
-### Automatische Aktualisierung (empfohlen)
-Obsidian überprüft automatisch nach Updates für Plugins. Wenn eine neue Version verfügbar ist:
-1. Einstellungen → Community-Plugins
-2. Klicken Sie auf „Nach Updates suchen“.
-3. Klicken Sie auf „Aktualisieren“ neben Notemd
+## Weitere Schritte
 
-### Manuelle Aktualisierung
-Laden Sie die neueste Version herunter und ersetzen Sie die drei Dateien in Ihrem Plugin-Ordner.
-
-## Hilfe holen
-
-- 📖 [Schnellstartanleitung](./quick-start)
-- ❓ [FAQ](../faq)
-- 💬 [Discord-Community](https://discord.gg/qnGgsQ9W)
-- 🐛 [Probleme melden](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [Schnellstart](./quick-start).
+- [Konfiguration](./configuration).
+- [Fehlerbehebung](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

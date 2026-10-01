@@ -1,7 +1,7 @@
 {
   "version.label": {
-    "message": "Nächster Schritt",
-    "description": "The label for version current"
+    "message": "Aktuelle Dokumentation",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "Einstieg",

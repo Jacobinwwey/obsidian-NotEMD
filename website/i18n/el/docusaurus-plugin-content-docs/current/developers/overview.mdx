@@ -1,0 +1,99 @@
+---
+id: overview
+title: Οδηγός προγραμματιστή
+description: >-
+  Χτίστε, δοκιμάστε και επεκτείνετε τις υπάρχουσες συμβάσεις παρόχων,
+  λειτουργιών, σχεδίασης και τεκμηρίωσης.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Οδηγός προγραμματιστή
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Οδηγός προγραμματιστή
+
+<TLDR>Εργαστείτε σε ξεχωριστό branch, εγκαταστήστε κλειδωμένες εξαρτήσεις και τις δύο εκδόσεις φυλλομετρητή, κάντε build και πλήρες Jest. Αλλάξτε τον υπάρχοντα ιδιοκτήτη της σύμβασης και διατηρήστε μαζί τεκμηρίωση, δοκιμές παρόχων και στοιχεία εφαρμογών προορισμού.</TLDR>
+
+## Αντίγραφο εργασίας
+
+Κλωνοποιήστε το [αποθετήριο](https://github.com/Jacobinwwey/obsidian-NotEMD) και διαβάστε [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md). Το CI του plugin χρησιμοποιεί Linux/Windows Node 20· ο ιστότοπος Node 24. Ρίζα και `website/` εγκαθιστούν εξαρτήσεις χωριστά.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Τα δύο πακέτα Playwright μπορεί να απαιτούν διαφορετικές εκδόσεις Chromium· μία εγκατάσταση δεν αρκεί. Το `main.js` παράγεται και αγνοείται από Git. Παλιό τοπικό bundle δεν επικυρώνει νέο commit.
+
+## Εντοπισμός ευθύνης
+
+| Ευθύνη | Κύρια πηγή |
+| ---------------- | ---------------- |
+| Κύκλος ζωής, εντολές και σύνδεση με εφαρμογή | `src/main.ts` |
+| Προφίλ παρόχων, μεταδεδομένα πρωτοκόλλων και επικύρωση | `src/llmProviders.ts` |
+| Αιτήματα, μεταφορές, επαναλήψεις και ροές | `src/llmUtils.ts` |
+| Λειτουργίες, σχήματα και δημόσιο υποσύνολο CLI | `src/operations/`, `src/cliContracts.ts` |
+| Εργασίες αρχείων, έρευνα και μετάφραση | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Ενέργειες ροών και πλαϊνό πάνελ | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Προδιαγραφές διαγραμμάτων και rendering | `src/diagram/`, `src/rendering/` |
+| Συμβολοσειρές UI και γλώσσες | `src/i18n/` |
+| Δημόσιοι οδηγοί και μεταφράσεις | `website/docs/`, `website/i18n/` |
+| Οδηγίες συντήρησης και χρονολογημένα στοιχεία | `docs/maintainer/` |
+
+Το bundle παραγωγής είναι αυτοτελές με ενσωματωμένο host προεπισκόπησης. Πιθανή ανεξάρτητη διαδρομή host δεν είναι σύμβαση παραδομένων αρχείων. Ενεργοποίηση απαιτεί συντονισμένες αλλαγές σε πακετάρισμα, assets, ελέγχους και έγγραφα.
+
+## Περιορισμένη αλλαγή
+
+1. Αναπαράγετε και γράψτε πρώτα στοχευμένη δοκιμή που αποτυγχάνει.
+2. Αλλάξτε στον ιδιοκτήτη του κανόνα και επικυρώστε στο εξωτερικό όριο.
+3. Εκτελέστε στοχευμένες/πλήρεις δοκιμές· διατηρήστε ακύρωση, σφάλματα και ανθεκτική εγγραφή.
+4. Ενημερώστε αγγλική πηγή και επηρεαζόμενες γλώσσες. Σχέδια, εργασίες και walkthrough χρειάζονται πλήρεις χωριστές αγγλικές/κινεζικές εκδόσεις στο `docs/`.
+5. Ελέγξτε οπτικές ή εγγενείς αλλαγές στην πραγματική εφαρμογή· XML, εικόνα ή build δεν αποδεικνύει δυνατότητα επεξεργασίας ή συνδεδεμένους συνδέσμους.
+
+Προσθέστε πάροχο στο `llmProviders.ts`, επαναχρησιμοποιήστε συμβατή μεταφορά και καλύψτε `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README και δοκιμές σύνδεσης. Διατηρήστε streaming και διακοπείσες απαντήσεις. Έκθεση λειτουργίας απαιτεί σχήματα εισόδου/αποτελέσματος, πλαίσιο, παρενέργειες και ετικέτες χειρισμού. Εγγραφή στο μητρώο δεν σημαίνει δημόσιο Agent endpoint. [Agent](../agents/overview).
+
+## Επαλήθευση
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Το lint συγκρίνει μεμονωμένες διαγνώσεις· μικρότερο σύνολο δεν δικαιολογεί νέες παλινδρομήσεις. Σε αλλαγές ανάκτησης εκτελέστε `npm run benchmark:local-kb` και αναφέρετε σώμα δεδομένων/περιβάλλον. Για τον ιστότοπο με Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Στο πρόγραμμα 1.9.8 οι μεταφράσεις γράφονται και ελέγχονται απευθείας από Codex. Μην εκτελείτε παλιά scripts μετάφρασης, LM Studio ή υπηρεσίες μετάφρασης. Τα εργαλεία μπορούν να μορφοποιούν, να επικυρώνουν και να αποδίδουν ήδη γραμμένο κείμενο.
+
+## Obsidian και εφαρμογές προορισμού
+
+Χρησιμοποιήστε προσωρινό vault με `.notemd-host-verification`· τα scripts ελέγχουν την αντιγραμμένη δέσμη. Κρατήστε τα vaults χρήστη χωριστά. Δοκιμάστε και `obsidian help` και `obsidian-cli help`· απόν εργαλείο είναι μη διαθέσιμο, όχι επιτυχής έλεγχος host.
+
+PowerPoint, CircuitikZ και διαφάνειες έχουν χωριστές προϋποθέσεις/αρχεία. Ακολουθήστε τη [χρονολογημένη αποδοχή](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) και τη [διαδικασία έκδοσης](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Δηλώστε ρητά ότι οι φυσικές κινητές συσκευές και η ελάχιστη έκδοση Obsidian παραμένουν χωρίς τρέχουσα επαλήθευση.
+
+## Συνεισφορά και έκδοση
+
+Στο PR περιγράψτε πρόβλημα, τελικό αποτέλεσμα, δοκιμές και όρια. Δώστε αναπαραγωγή στα [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). Μην κάνετε commit κλειδιά, ιδιωτικές σημειώσεις ή άσχετα αρχεία. Ένας publisher αναλαμβάνει συνεπείς εκδόσεις, αριθμητικό tag, καθαρή πηγή στο tag, δίγλωσσες σημειώσεις, ελεγμένα draft assets, δημοσίευση και ρητό Pages deploy. Μην αλλάζετε δημοσιευμένο tag. Το `.trellis/` είναι τοπική κατάσταση εργασίας, όχι εξάρτηση CI.
+
+## Συνέχεια
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Κατάσταση έργου](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

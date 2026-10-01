@@ -1,446 +1,103 @@
 ---
 id: configuration
-title: "Configurație"
-description: "Configurați setările și preferințele Notemd"
+title: Configurare
+description: >-
+  Configurați furnizorii, destinațiile, limbile și fluxurile conform limitelor
+  reale ale sarcinilor.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Configurare
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Configurație
+# Configurare
 
-<TLDR>
-**Configurația Notemd acoperă 6 domenii principale:** (1) furnizori LLM și chei API, (2) selecția modelului pentru fiecare sarcină, (3) căile de ieșire și șabloanele, (4) limbajul UI și limbajul de ieșire, (5) serviciile de căutare (Tavily/DuckDuckGo), (6) fluxuri de lucru personalizate. Toate setările se găsesc în Obsidian Settings → Notemd. Schimbările intră în vigoare imediat.
-</TLDR>
+<TLDR>Deschideți Settings → Notemd și căutați câmpul. Alegeți furnizorul și destinația înainte de pornire. Testați modificările pe o notă; o sarcină pornită poate păstra configurația inițială.</TLDR>
 
-## Prezentare generală a setărilor
+## Prezentare
 
-Acces: **Obsidian Settings (⚙️) → Notemd**
-
-### Secțiuni principale
-
-1. **Configurația furnizorului** — chei API, URLs de bază, modele
-2. **Setările sarcinii** — selecția modelului pentru fiecare sarcină
-3. **Configurația ieșirii** — unde se salvează fișierele generate
-4. **Setările limbajului** — UI și limbajul de ieșire
-5. **Integrarea căutării** — configurarea Tavily/DuckDuckGo
-6. **Fluxuri de lucru** — lanțuri personalizate de butoane
-7. **Avansate** — diagnostic, procesare în lot, fragmentare
+Furnizorul inițial este DeepSeek cu autentificare necompletată. Selectarea profilului nu creează conturi, nu instalează modele și nu acordă drepturi. Vedeți [furnizori](../providers/overview).
 
 <!-- notemd-settings-favorites-guide -->
-## Descoperirea setărilor și preferințele Notemd
+## Căutare și favorite
 
-Pagina de setări este concepută pentru utilizare repetată, nu doar pentru o configurare unică:
+**Search settings** caută nume, descrieri, aliasuri și categorii vizibile și deschide câmpul. **★ Favorites** afișează setările salvate cu descriere, categorie și destinație. Persistă per vault după restart; ID-urile învechite se curăță. Interogarea rămâne la restrângerea barei. Lista favoritelor este distinctă de filtrul care caută doar în favorite.
 
-- Folosiți caseta de căutare **Search settings** care știe ce câmpuri sunt disponibile pentru a găsi o setare după numele ei, descrierea, aliasul sau categoria vizibilă. Rezultatele sunt clasificate în funcție de relevanță și vă conduc direct la setarea dorită.
-- Folosiți **★ Favorites** pentru a păstra setările ajustate frecvent în Vault curent. Apăsând pe el se deschide o listă dedicată cu numele setării, descrierea, categoria și un obiectiv de navigare directă. Eliminați o preferință din listă fără a părăsi pagina de setări.
-- Bara de descoperire este extinsă în mod implicit. Folosiți butonul cu chevron pentru a o reduc la un control plutit în coltul din dreapta sus atunci când aveți nevoie de mai mult spațiu vertical; interogarea curentă este păstrată și restabilită atunci când se extinde din nou.
-- Lista preferințelor este independentă de filtrul dedicat doar preferințelor. Preferințele folosesc ID-uri stabile ale setărilor, supraviețuiesc reinicierilor Obsidian și ID-urile obsolete sunt eliminate în siguranță atunci când o anumită setare nu mai există.
+**Diagram preview export PPI** are implicit 300, interval 72–600, și afectează numai PNG. SVG/PDF păstrează geometria vectorială suportată. **Also export complete Mermaid visuals** controlează fișierele însoțitoare, nu afișarea Mermaid în previzualizarea Drawnix.
 
-Setarea **Diagram preview export PPI** are o valoare implicită de **300 PPI** și accepte valori între **72-600**. Ea controlează doar rasterizarea PNG; SVG și PDF păstrează geometria vectorială. Setarea **Also export complete Mermaid visuals** controlează elementele externe opționale Mermaid și nu influențează vizibilitatea acestora în previsualizările Drawnix.
----
+## 1. Furnizor
 
-## 1. Configurația furnizorului
+Introduceți endpoint-ul protocolului corect, cheia cerută și modelul disponibil. Verificați separat listarea și generarea. Serverul/modelul local trebuie pregătite; cloud-ul și gateway-ul primesc conținut. Înainte de date private, verificați și rutarea fiecărei sarcini.
 
-### Adăugarea unui furnizor
+## 2. Modele per sarcină
 
-1. **Selectați furnizorul** din listă deschisă (peste 30 disponibile)
-2. **Introduceți cheia API**
-3. **Opțional**: Setați o bază personalizată URL (pentru proxy-uri/gatewee)
-4. **Faceți clic pe „Get Model List"** pentru a verifica conexiunea
-5. **Selectați modelul implicit**
+`useMultiModelSettings` permite profil/model separat pentru linkuri, titluri, cercetare, traducere, concepte, pasaje originale și Mermaid. Modelul gol îl preia pe cel al furnizorului; cu opțiunea oprită se folosește furnizorul activ. Comparați precizia, latența și costul real pe aceeași notă.
 
-### Provideri comuni
+## 3. Rezultate
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
+| Sarcină | Rezultat implicit |
+| ------ | ------------------------- |
+| Adăugare de linkuri | `_processed.md` separat lângă sursă; mutarea originalului este oprită |
+| Extragere independentă de concepte | Folder de concepte selectat; doar titlu, fără backlink |
+| Traducere | Lângă sursă ca `_<language>.md`; destinația existentă poate fi suprascrisă |
+| Cercetare | Rezumat adăugat notei Markdown active |
+| Generare în lot din titluri | Scrie sursele eligibile și le mută în `<folder>_complete` alăturat dacă destinația permite |
+| Previzualizare/export de diagramă | Alegeți sursă sau export vizual suportat și verificați calea raportată |
 
-#### Anthropic (Claude)
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
+Folderul de concepte este inițial gol; `concepts` este un exemplu. Notele independente au variantă minimă/completă, nu un motor general de șabloane. [Concepte](../features/concept-notes). Procesarea și traducerea au sufixe/foldere separate. Verificați coliziunile; anularea nu revine asupra scrierilor finalizate.
 
-#### Ollama (Local)
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
+## 4. Limbi
+
+UI are 21 de localizări, site-ul 34 de rute lingvistice. `uiLocale: auto` alege o potrivire suportată, altfel engleza. Limba generării este separată, implicit engleză; unele sarcini o pot suprascrie. Traducerea folosește `language`. Numerele nu dovedesc competența lingvistică a modelului.
+
+## 5. Căutare
+
+Alegeți Tavily cu cheie sau DuckDuckGo explicit. Cheia goală nu schimbă serviciul. Ambele folosesc rețeaua; DuckDuckGo poate descărca pagini rezultate. Cercetarea din generarea după titlu este oprită: `enableResearchInGenerateContent`. Căutarea locală este și ea oprită, cu propriile limite de foldere/sarcini. Fragmentele locale adăugate sunt trimise LLM-ului ales.
+
+## 6. Fluxuri
+
+Folosiți editorul de fluxuri sau câte un rând DSL numit pentru fiecare buton:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
+`::` separă numele de acțiuni, `>` separă ID-urile. Implicit fluxul se oprește la o eroare raportată. Vedeți [fluxuri](../features/workflows) pentru context și continuarea după erori.
 
-### Provideri multiple
+## 7. Valori avansate
 
-Puteți configura mai mulți provideri și să schimbați între ei pentru fiecare sarcină:
-- **Providerul principal**: Folosit ca soluție de rezervă
-- **Provideri specifici pentru sarcini**: Suprascrie pentru sarcini specifice
+| Setare | Valoare implicită | Efect |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | Furnizor fără rutare specifică sarcinii |
+| `useMultiModelSettings` | `false` | Furnizor/model per sarcină |
+| `useCustomConceptNoteFolder` | `true` | Permite rezultate de concepte după selectarea folderului |
+| `conceptNoteFolder` | `''` | Niciun folder de concepte ales |
+| `extractConceptsMinimalTemplate` | `true` | Doar titlu pentru concepte independente |
+| `extractConceptsAddBacklink` | `false` | Backlink la extragerea independentă |
+| `moveOriginalFileOnProcess` | `false` | Păstrarea sursei la adăugarea linkurilor |
+| `chunkWordCount` | `3000` | Mărime aproximativă a fragmentului, nu limită de tokenuri |
+| `batchConcurrency` | `1` | Concurență inițială a lotului |
+| `enableBatchParallelism` | `false` | Planificare paralelă în căile care folosesc comutatorul |
+| `enableStableApiCall` | `false` | Mod stabil de cereri activat explicit |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Oprirea fluxului la eroare raportată |
 
----
+Mărimea fragmentului nu este bugetul de tokenuri de ieșire. Fragmente mai mici nu rezolvă orice limită de context, iar concurența scăzută nu previne toate erorile 429.
 
-## 2. Modele specifice sarcinii
+## Profiluri de setări
 
-Configurați modele diferite pentru sarcini diferite pentru a optimiza costul/calitatea:
+Setările sunt date ale extensiei în vault. Salvați-le înainte de modificare. Exportul furnizorilor are un contract propriu de eliminare a câmpurilor sensibile, nu este backup complet. Chiar și profilurile curățate pot păstra endpoint-uri private și metadate. Nu publicați setări brute sau diagnostice cu note private.
 
-### Tipuri de sarcini
+## Probleme de configurare
 
-| Sarcină | Modelul implicit | Scop |
-|------|--------------|---------|
-| **Legături** | Providerul principal | Identificați conceptele pentru link-urile wiki |
-| **Generare a conceptului** | furnizor principal | Extrage și descrie conceptele |
-| **Cercetare** | furnizor principal | Rezumă rezultatele căutării pe web |
-| **Traducere** | furnizor principal | Traduce textul |
-| **Generarea diagramelor** | furnizor principal | Generează diagrame Mermaid/Canvas |
+Testați exact profilul/modelul pe o notă mică. Pentru câmpuri lipsă, verificați căutarea, categoria, vizibilitatea în modul dezvoltator și vault-ul activ. Raportați versiunea și setările minime fără secrete.
 
-### Exemplu: Configurație optimizată din punct de vedere al costurilor
+## În continuare
 
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### Cum se configurează
-
-1. **Setări → Notemd → Setări ale sarcinii**
-2. Pentru fiecare sarcină, alegeți:
-   - ✅ **Utiliza furnizorul principal** (valoare implicită)
-   - 🔄 **Utiliza furnizor personalizat** → selectați furnizor + model
-
----
-
-## 3. Configurația de ieșire
-
-### Outputul notițelor despre concepte
-
-**Unde sunt salvate notele de concept nou:**
-
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Șablonul:**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### Opțiuni de structură a folderului
-
-**Opțiunea 1: Plată (toate conceptele într-un singur folder)**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**Opțiunea 2: Ierarhică (după folderul sursă)**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-Configurație: **Settings → Output → Use Hierarchical Folders**
-
-### Rezultatul diagramului
-
-**Unde sunt salvate diagramele:**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**Format:**
-- `.mmd` (Mermaid sursă)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
-
-## 4. Setări de limbă
-
-### UI Limbă
-
-**Limbajul interfeței** (butoane, meniuri, dialoguri):
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-Suportate: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية și altele.
-
-### Limbajul de ieșire
-
-**Limba conținutului generat** (note conceptuale, rezumate de cercetare):
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**Caz de utilizare:** Chineză UI + rezultate în engleză pentru cercetare bilingvă.
-
-### Destinația traduceri
-
-**Limba țintă implicită** pentru sarcinile de traducere:
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
-
-## 5. Integrare cu căutare
-
-### Tavily (Recomandat)
-
-**Serviciu de căutare optimizat pentru AI:**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-Obține cheie: [tavily.com](https://tavily.com/)
-
-**Caracteristici:**
-- Rezultate de înaltă calitate
-- Rezumate optimizate pentru AI
-- Citești sursă
-
-### DuckDuckGo (Experimental)
-
-**Nu este necesară cheia API:**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**Notă:** Calitate mai scăzută, fără personalizare.
-
----
-
-## 6. Configurarea fluxului de lucru
-
-### Crearea de fluxuri de lucru personalizate
-
-**Fluxurile de lucru combină mai multe sarcini într-un singur buton.**
-
-1. **Setări → Fluxuri de lucru → Adăuga flux de lucru**
-2. **Nume**: "Paper Analysis Flow"
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **Salvează**
-
-Un nou buton apare în bara laterală stângă.
-
-### Sintaxa DSL
-
-**Format:** `action1>action2>action3`
-
-**Acțiuni disponibile:**
-- `process-current-add-links` — Adaugă linkuri wiki în nota curentă
-- `extract-concepts-current` — Generează note conceptuale
-- `research-and-summarize` — Cercetare pe web + rezumat
-- `translate-current` — Traduce nota curentă
-- `summarize-as-mermaid` — Generează diagrama Mermaid
-- `process-folder-add-links` — Procesează în lot folderul
-
-**Exemple de fluxuri de lucru:**
-
-**Extracție rapidă a conceptelor:**
-```
-process-current-add-links>extract-concepts-current
-```
-
-**Cercetare profundă:**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**Analiză multilingvă:**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
-
-## 7. Setări avansate
-
-### Procesare în loturi
-
-**Procesează mai multe fișiere în paralel:**
-
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
-
-Valoare mai mare = mai rapid, dar mai multe apeluri API.
-
-### Fragmentare inteligentă
-
-**Pentru note lungi, împarteți-le în fragmente:**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-Previnerea erorilor din cauza limitelor de token.
-
-### Panoul de diagnostic
-
-**Vizualizați jurnale detaliate:**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-Afișează:
-- API cereri/răspunsuri
-- Utilizarea tokenilor
-- Timpurile de procesare
-- Erori
-
-### Detectarea conceptelor duplicate
-
-**Evita concepte aproape duplicate:**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-Cât mai mare = fuziune mai agresivă.
-
----
-
-## Profiluri de configurare
-
-### Setări de export/import
-
-**Partajează configurațiile între dispozitive:**
-
-1. **Setări → Avansate → Exporta configurație**
-2. Salvează `notemd-config.json`
-3. Pe un dispozitiv nou: **Importa configurație**
-
-**Ce este inclus:**
-- Chei API ale furnizorului (opțional)
-- Selecții de model
-- Căi de ieșire
-- Fluxuri de lucru personalizate
-
----
-
-## Configurații recomandate
-
-### Pentru studenți
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### Pentru cercetători
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### Pentru utilizatorii care se preocupează de confidențialitate
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### Pentru lucrări bilingve
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## Dezolvarea problemelor de configurare
-
-### Setările nu sunt salvate
-- Verificați permisiunile fișierului în `.obsidian/plugins/notemd/`
-- Încercați: Dezactivați pluginul → Reactivați-l
-
-### Cheia API este invalidă
-- Fără spații suplimentare
-- Verificați expirarea
-- Verificați creditele în panoul de control al furnizorului
-
-### Modelele nu se încarcă
-- Faceți clic pe „Obține lista modelelor“ pentru a actualiza
-- Verificați conectivitatea rețelei
-- Încercați un alt furnizor
-
----
-
-## Următoarele pași
-
-- 📖 [Explorați funcțiile](../features/wiki-links)
-- 🔌 [Ghiduri de configurare a furnizorului](../providers/overview)
-- ❓ [FAQ](../faq)
+- [Primii pași](./quick-start).
+- [Loturi](../advanced/batch-processing).
+- [Prompturi personalizate](../advanced/custom-prompts).
+- [Depanare](../advanced/troubleshooting).

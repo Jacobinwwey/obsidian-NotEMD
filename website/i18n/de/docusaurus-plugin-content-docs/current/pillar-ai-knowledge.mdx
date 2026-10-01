@@ -1,341 +1,121 @@
 ---
 id: pillar-ai-knowledge
-title: Obsidian Leitfaden zur KI-basierten Wissensverwaltung
-description: Umfassender Leitfaden zum Aufbau einer vernetzten Wissensdatenbank mit KI – von Wiki-Verknüpfungen und Konzeptextraktion bis hin zu Forschung, Übersetzung und Diagrammgenerierung
+title: KI-Wissensarbeit in Obsidian
+description: >-
+  Bewahre Quellen, begrenze Aufgaben, prüfe Ergebnisse und erweitere
+  Automatisierung mit Notemd bewusst.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [obsidian, AI, knowledge management, wiki-links, concept notes, LLM, diagrams, research, translation, workflows, Copilot alternative, Smart Connections alternative, obsidian AI plugin]
-concepts: [Notemd, Obsidian, AI Knowledge Management, Wiki-Links, Concept Notes, LLM Integration, Diagrams, Research, Translation, Workflows, Copilot Alternative]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Tavily
-    url: https://tavily.com
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - KI-Wissensarbeit in Obsidian
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Obsidian Leitfaden zur KI-basierten Wissensverwaltung
+# KI-Wissensarbeit in Obsidian
 
 <TLDR>
-**Notemd verwandelt das mit LLM angetriebene Lesen in dauerhaftes Wissen: Wiki-Verlinkungen verbinden Konzepte, Konzeptnotizen erstellen ein abrufbares Netzwerk, Forschung bringt das Internet in Ihren Schatzkasten, Übersetzungen beseitigen sprachliche Barrieren, Diagramme machen die Struktur sichtbar, und Workflows verknüpfen alles mit nur einem Klick.** Dieser Leitfaden behandelt den gesamten Prozess – von Rohnotizen bis hin zu einer vernetzten, visuellen, mehrsprachigen Wissensdatenbank.
+Nützliche Wissensarbeit hält Quellen, Modellausgaben und eigene Korrekturen unterscheidbar. Notemd bietet Links, Extraktion, Recherche, Übersetzung und Diagramme als überprüfbare Dateien. Erst eine Quelle prüfen, dann einen begrenzten Ordner automatisieren.
 </TLDR>
 
-## Warum KI-basiertes Wissensmanagement?
+## Ergebnis festlegen
 
-Traditionelles Notieren erzeugt flache Dateien. Selbst mit manuellen Wiki-Verknüpfungen bleiben die meisten Notizen unvernetzt. Notemd verwendet LLMs, um die Verbindungslogik zu automatisieren:
+Wähle die benötigte Ausgabe: verlinkte Lesenotiz, Konzepte, belegte Recherche, Übersetzung oder Diagramm. Mehr Dateien und Links verbessern Verständnis oder Suche nicht automatisch. Lege Prüfung und späteres Wiederfinden fest.
 
-- **LLMs lesen Ihren Inhalt** und ermitteln, was wichtig ist – Begriffe, Methoden, Personen, Theorien
-- **Verlinkungen werden automatisch** bei jedem Vorkommen eines Konzepts eingefügt, nicht in „siehe auch“ versteckt.
-- **Konzeptnotizen werden** als eigenständige, abrufbare Dateien erzeugt
-- **Forschung bereichert Notizen** mit aus dem Web stammendem Kontext
-- **Diagramme machen die Struktur sichtbar** – Mind Maps, Flussdiagramme, Datencharts aus demselben Inhalt
-
-Das Ergebnis: Ein Wissensgraphen, der mit jeder bearbeiteten Notiz wächst – und nicht nur dann, wenn man daran denkt, Links hinzuzufügen.
-
-## Der gesamte Pipeline
+## Gesamtablauf
 
 ```mermaid
-graph TD
-    A[Raw Note] --> B[Add Links]
-    B --> C[Wiki-Linked Note]
-    B --> D[Concept Notes]
-    C --> E[Connected Knowledge Graph]
+flowchart TD
+    A[Kopierte Quellnotiz] --> B[Aufgabe und Umfang wählen]
+    B --> C[Verlinkte Notiz oder Konzepte]
+    B --> D[Recherche, Übersetzung oder Diagramm]
+    C --> E[Mit Quelle und Belegen vergleichen]
     D --> E
-    F[Web Research] --> E
-    G[Translation] --> E
-    H[Diagram Generation] --> I[Visual Structure]
-    E --> H
-    I --> E
-    J[One-Click Workflow] --> B
-    J --> F
-    J --> G
-    J --> H
+    E --> F[Korrigierte Ergebnisse im Vault behalten]
 ```
 
-Jeder Schritt ist unabhängig. Verwenden Sie einen oder alle. Die wirksamste Reihenfolge: **Add Links → Concept Notes → Diagrams**.
+Dies sind verfügbare Aufgaben, keine vollständige Standard-Schaltfläche. Quelle bewahren und Ziele jeder Aktion vor der Verkettung prüfen.
 
----
+## 1. Wiki-Links: Beziehungen ausdrücken
 
-## 1. Wiki-Links: Verbindungen explizit herstellen
+**Datei verarbeiten (Links hinzufügen)** an einer Testnotiz starten und `_processed.md` prüfen. Nützliche Navigationsbegriffe sowie Zitate, Code und Formeln mit der Quelle vergleichen.
 
-Wiki-Links bilden das Rückgrat eines Wissensgraphen. Notemd verwendet ein LLM, um:
+Lerndomäne und Synonymanweisungen garantieren keine begriffliche Gleichheit oder numerischen Schwellen. Für reproduzierbare bestehende Namen deterministischen Titelabgleich erwägen. [Wiki-Links](./features/wiki-links).
 
-1. Lesen Sie den Inhalt Ihrer Notiz (in Abschnitte aufgeteilt für lange Dokumente)
-2. Identifizieren Sie die Kernkonzepte – indem Sie spezifische, technische Begriffe vor allgemeinen Substantiven priorisieren
-3. Fügen Sie `[[wiki-links]]` bei jedem Vorkommen ein.
-4. Unterdrücke Synonyme, damit „ML“ und „Machine Learning“ keine separaten Knoten erzeugen.
+## 2. Konzepte: Begriffe und Erklärungen trennen
 
-### Wann verwenden
+Konzeptordner wählen. Eigenständige Extraktion erzeugt standardmäßig nur Titel und lässt die Quelle unverändert. Für `Linked From` in neuen Notizen Rücklinks an- und Minimalvorlage ausschalten.
 
-- **Jede Notiz >100 Wörter** – kürzere Notizen liefern nur wenige Konzepte
-- **Forschungsarbeiten, technische Dokumentationen, Meeting-Notizen** – reich an fachspezifischen Begriffen
-- **Nachdem der Inhalt stabil ist** – verarbeiten Sie Entwürfe nicht wiederholt.
+**Stapelweise aus Titeln generieren** ist eine eigene Operation und kann bestehende geeignete Konzepte bearbeiten. Testordner nutzen und complete-Verschiebung prüfen. Namensähnlichkeit beweist keine fachliche Gleichheit; Dubletten bestätigen. [Konzeptnotizen](./features/concept-notes).
 
-### Einstellungen der Schlüssel
+## 3. Recherche: Nachweise behalten
 
-| Einstellungen | Empfohlen | Warum |
-|---------|-----------|-----|
-| `addLinksProvider` | DeepSeek oder GPT-4o-mini | Gute Genauigkeit zu niedrigem Preis |
-| Synonymunterdrückung | Eingeschaltet | Verhindert doppelte Knoten |
-| Kontextfenster | Absatz | Ausgleich zwischen Genauigkeit und Kosten |
+Thema oder Titel sowie Tavily/DuckDuckGo wählen und **Recherchieren & zusammenfassen** ausführen. Leerer Tavily-Schlüssel wechselt nicht automatisch. Original-URLs und Aussagen prüfen.
 
-→ [Einsatz von Wiki-Links im Detail](/docs/features/wiki-links)
+Optionale lokale Suche ist lexikalisch und sendet Auszüge an das gewählte LLM. Lokal indiziert bedeutet nicht vollständig offline oder nur auf dem Gerät verarbeitet. [Recherche](./features/research).
 
----
+## 4. Übersetzung: Bedeutung und Struktur prüfen
 
-## 2. Konzeptnotizen: Abrufbare Wissensknoten
+Zielsprache und Dateiaktion wählen. Standard ist `_<language>.md`, vorhandene Ziele können überschrieben werden. Einzelne Passage zuerst in eine temporäre Notiz kopieren.
 
-Wiki-Links verbinden Ideen direkt im Text, während Konzeptnotizen es ermöglichen, jede Idee unabhängig abzurufen. Jedes Konzept erhält seine eigene `.md`-Datei:
+Terminologie, Zahlen, Code, Links und Formeln prüfen. Abschnittsgrenzen begrenzen Kontext. 21 UI-Sprachen und 34 Website-Routen belegen keine Sprachpaarqualität. [Übersetzung](./features/translation).
 
-```markdown
-# Machine Learning
+## 5. Diagramme: Bearbeitbare Quellen wählen
 
-## Linked From
-- [[My Research Notes]]
-- [[Neural Networks Explained]]
+Typ und kompatible Quelle wählen, Vorschau prüfen und Quelle samt benötigten SVG/PNG/PDF sichern. Ein Bild garantiert keinen vollständigen Erhalt semantischer Beziehungen im anderen Editor.
+
+CircuitikZ ist begrenzt und verlangt eigene native Umgebungsprüfung. Drawnix-Astpfeile sind statisch nach Umordnung. PowerPoint-Tabellen sind verbessert, Mermaid/SVG können Bilder bleiben. [Diagramme](./features/diagrams).
+
+## 6. Workflows: Geprüfte Folgen automatisieren
+
+Name, `::` und durch `>` getrennte IDs definieren die Kette:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### Der Extraktionsprozess
+Sie ergänzt Links, generiert Ordnerinhalte aus Titeln und repariert Mermaid, ohne allgemeine Recherche oder Diagrammgenerierung. Aktionen behalten Voraussetzungen und Ziele; kein beliebiges Text-Pipelining.
 
-Der LLM-Prompt ist stark strukturiert:
-- In die Singularform normalisieren
-- Bevorzugen Sie mehrwortige Begriffe vor Einzelwörtern („Dielektrische Entspannung“ statt „Entspannung“)
-- Überspringen Sie die Abschnitte mit Referenzen/Bibliografie
-- Geben Sie den Ausgang als `CONCEPT:` Zeilen für deterministische Parsing aus
+Fehler stoppen standardmäßig. Fortsetzen nur, wenn verbleibende Eingaben genügen. Abbruch behält fertige Ausgaben. [Workflows](./features/workflows).
 
-Konzepte werden über die einzelnen Blöcke hinweg mittels `Set<string>` dedupliziert. Fehler bei einzelnen Blöcken durch LLM führen nicht zum Abbruch der Operation.
+## 7. Anbieter: Protokoll und Aufgabe abstimmen
 
-### Backlinks
+36 Profile decken fünf Protokolle ab. Endpoint, Modellrechte, Datenregeln und gemessene Ausgabe vergleichen. Für Tempo und Kosten gleiche Quelle und Prompt nutzen.
 
-Wenn es aktiviert ist, verfolgt jede Konzeptnotiz, welche Quellennotizen sie erwähnen. Das eingebaute Backlink-Panel von Obsidian zeigt außerdem umgekehrte Verbindungen an.
+Aufgabenrouting ist standardmäßig aus. Nur bei gewünschter Trennung aktivieren und alle Profile prüfen, bevor der Ablauf als lokal gilt. [Anbieter](./providers/overview).
 
-### Deduplizierung
+## Startprüfung
 
-Der 4-Schritte-Deduplizierungsmechanismus von Notemd erkennt:
-1. **Genaue Übereinstimmungen** – unabhängige von Groß-/Kleinschreibung Vergleich der Dateinamen
-2. **Mehrzahlformen** — „Models.md“ gegenüber „Model.md“
-3. **Symbolnormalisierung** — „A-B.md“ gegenüber „A B.md“
-4. **Einzelwort-Enthaltung** – „ML.md“ wird markiert, wenn „Machine Learning.md“ vorhanden ist
+1. Installieren und Quellen sichern.
+2. Exakten Anbieter und Modell testen.
+3. Konzeptordner und getrennte Ziele wählen.
+4. Eine Aufgabe an einer Kopie ausführen.
+5. Ergebnis vergleichen und korrigieren.
+6. Kleinen Ordner samt Teilabschlüssen prüfen, bevor die Kette wächst.
 
-### Einstellungen der Schlüssel
+## Häufige Abläufe
 
-| Einstellungen | Empfohlen | Warum |
-|---------|-----------|-----|
-| `conceptNoteFolder` | `concepts/` oder `🧠 concepts/` | Hält das Tresor-Verzeichnis organisiert |
-| `extractConceptsAddBacklink` | Eingeschaltet | Ermöglicht die umgekehrte Abfrage |
-| `extractConceptsMinimalTemplate` | Aus | Vollständiges Template mit „Von“-Verlinkung |
-| Modell pro Aufgabe | DeepSeek | Konzeptextraktion benötigt keine teuren Modelle |
-| Synonymunterdrückung | Eingeschaltet | Die gleiche Einstellung beeinflusst sowohl das Verknüpfen als auch das Extrahieren. |
+### Fachartikel bearbeiten
 
-→ [Einsatz von Konzeptnotizen im Detail](/docs/features/concept-notes)
+Extern nach Markdown konvertieren und Formeln, Tabellen, Bilder prüfen. Konzepte oder Originalpassagen extrahieren, gezielte Fragen recherchieren und Diagramme nur für überprüfbare Beziehungen erzeugen. Original und Korrekturen verlinken.
 
----
+### Konzeptbestand pflegen
 
-## 3. Forschung: Die Einbeziehung des Webs
+Eigenen Ordner verwenden, Terminologie prüfen und ausgewählte Teilmenge erklären lassen. Vor Dublettenbereinigung sichern. Menge ersetzt keine genauen Definitionen und nützlichen Links.
 
-Notemd integriert die Websuche in Ihren Notizmanagement-Prozess:
+### Private Quellen
 
-1. **Abfragen erstellen** – der Titel oder die Auswahl Ihrer Notiz wird zu einer Suchabfrage
-2. **Websuche** — Tavily (empfohlen, Schlüssel API erforderlich) oder DuckDuckGo (kostenlos, kein Schlüssel)
-3. **LLM Zusammenfassung** – Die Suchergebnisse werden zu einer relevanten Zusammenfassung gekürzt
-4. **Anmerkung hinzufügen** – Zusammenfassung wird an die Cursorposition eingefügt oder als neuer Abschnitt.
+Server, Modelle und Abhängigkeiten lokal vorbereiten, Aufgabenrouten prüfen und netzabhängige Recherche vermeiden, wenn Offline-Verarbeitung nötig ist. Diagnosen vor Teilen prüfen. Loopback-Voreinstellung verhindert keine später konfigurierte entfernte Adresse.
 
-### Wann verwenden
+### Unterbrochene Stapel fortsetzen
 
-- Bevor ein neues Thema verarbeitet wird – holen Sie zunächst den Web-Kontext.
-- Wenn eine Konzeptnote erweitert werden muss – fügen Sie dann Forschungslinks hinzu.
-- Für Literaturübersichten – durchführen Sie eine Batch-Forschung in einem Ordner mit Notizen
+Abbruch/Fehler abwarten. Bericht, fertige Ausgaben und Wiederherstellung prüfen, Konflikte vergleichen, nur Gewünschtes erneut ausführen. Abgebrochen bedeutet nicht leer; Begleiter erst nach Referenzprüfung entfernen.
 
-### Einstellungen der Schlüssel
+## Weitere Schritte
 
-| Einstellungen | Empfohlen | Warum |
-|---------|-----------|-----|
-| `researchProvider` | GPT-4o oder Claude | Forschung benötigt eine hochwertigere Zusammenfassung |
-| Suchdienst | Tavily | Bessere Relevanz, konfigurierbare Tiefe |
-| `maxResearchContentTokens` | 4000 | Ausgleich zwischen Tiefe und Kosten |
-
-→ [Erforschung im Detail](/docs/features/research)
-
----
-
-## 4. Übersetzung: Sprachbarrieren überwinden
-
-Notemd übersetzt Notizen mithilfe Ihrer konfigurierten LLM – es handelt sich dabei nicht um eine spezielle Übersetzungsmaschine API. Das bedeutet:
-
-- **kontextbezogene Übersetzungen** – der LLM versteht den gesamten Dokument, nicht nur Satz für Satz
-- **Umgang mit technischen Begriffen** – „gradient descent“ bleibt als „梯度下降“ und nicht als „坡度向下“.
-- **Batch-Unterstützung** – Übersetzen Sie einen ganzen Ordner mit Notizen in einer einzigen Operation
-- **Per-Task-Modell** – verwenden Sie Gemini Flash für Übersetzungen (schnell, günstig, mehrsprachig)
-
-### Sprachunterstützung
-
-Notemd selbst unterstützt 21 UI Sprachen. Die Zielsprache der Übersetzung kann pro Aufgabe konfiguriert werden. Häufige Paare: EN↔ZH, EN↔JA, EN↔KO, EN↔DE, EN↔FR, EN↔ES.
-
-→ [Einsatz von Übersetzungen im Detail](/docs/features/translation)
-
----
-
-## 5. Diagramme: Die Struktur sichtbar machen
-
-Der Diagramm-Pipeline von Notemd basiert auf einer spezifizierungsgestützten Vorgehensweise: Der LLM erzeugt ein strukturiertes `DiagramSpec` JSON, wobei Adapter es anschließend in das Zielformat übersetzen. Dadurch entsteht zuverlässigeres Ergebnis als wenn man vom LLM eine rohe Mermaid-Syntax anfordert.
-
-### Intenterkennung
-
-Notemd ermittelt den besten Diagrammtyp aus dem Inhalt:
-
-- **Tabellen mit Zahlen** → Datengrafik (Vega-Lite)
-- **Client/Server-Vokabular** → Sequenzdiagramm (Mermaid)
-- **Entität/Primärschlüssel** → ER-Diagramm (Mermaid)
-- **Schritt/Ablauffluss** → Flussdiagramm (Mermaid)
-- **Schlüsselwörter für Konzeptkarten** → JSON Canvas (Obsidian native)
-- **Standard** → Mindmap (Mermaid)
-
-### Renderkette
-
-Primäres Ziel → Ersatz → Ersatz → HTML. Wenn die Syntax von Mermaid fehlschlägt, versucht es einmal erneut mit dem Fehlerkontext an LLM, bevor es auf ein minimales Diagramm zurückgreift.
-
-### Einstellungen der Schlüssel
-
-| Einstellungen | Empfohlen | Warum |
-|---------|-----------|-----|
-| `enableExperimentalDiagramPipeline` | Eingeschaltet | Bessere Qualität durch vordefinierte Spezifikationen |
-| `experimentalDiagramCompatibilityMode` | `best-fit` | Natives Ziel pro Intent |
-| `summarizeToMermaidProvider` | GPT-4o oder Claude | Die Spezifikationen für Diagramme erfordern räumliches Denken. |
-| `autoMermaidFixAfterGenerate` | Eingeschaltet | Fängt automatisch Syntaxfehler von LLM ab |
-| Erweiterung des lokalen Wissens | Eingeschaltet für domänenspezifisch | Verbessert die Genauigkeit im Vault-Kontext |
-
-→ [Einsatz von Diagrammen im Detail](/docs/features/diagrams)
-
----
-
-## 6. Workflows: Ein-Klick-Automatisierung
-
-Workflows verknüpfen mehrere Aufgaben zu einem einzigen Schaltflächen-Button in der Seitenleiste. Das DSL-Format lautet:
-
-```
-task1 | task2 | task3
-```
-
-Beispiel: `addLinks` | Konzepte extrahieren | generateDiagram` – wandelt eine Notiz aus Rohtext in einem Klick in einen voll vernetzten, visuellen Wissensknoten um.
-
-### Empfohlene Arbeitsabläufe
-
-| Workflow | Kette | Anwendungsfall |
-|----------|-------|----------|
-| Vollständiger Prozess | `addLinks \| extractConcepts \| generateDiagram` | Neue Notizen |
-| Zuerst Forschung betreiben | `research \| addLinks` | Unbekannte Themen |
-| Polyglott | `translate \| addLinks` | Mehrsprachige Notizen |
-| Nur Diagramm | `generateDiagram` | Schnelle Visualisierung |
-
-→ [Einsatz von Workflows im Detail](/docs/features/workflows)
-
----
-
-## 7. LLM Anbieter: 36 Optionen von Cloud bis lokal
-
-Notemd unterstützt 36 Anbieter in 4 Transporttypen. Schlüsselgruppen:
-
-- **Internationale Cloud**: OpenAI, Anthropic, Google, Mistral, xAI
-- **China Cloud**: DeepSeek, Qwen, Doubao, Moonshot, GLM, Baidu, SiliconFlow
-- **Gateways**: OpenRouter, GitHub Models, Hugging Face, Vercel
-- **Lokal**: Ollama, LMStudio, OVMS — keine API-Einstellung, keine Daten verlassen Ihren Rechner
-
-### Strategie des Modells pro Aufgabe
-
-Die kostengünstigste Konfiguration verwendet günstige Modelle für einfache Aufgaben und leistungsstarke Modelle für komplexe Aufgaben:
-
-```
-extractConcepts  → DeepSeek (fast, cheap, accurate enough)
-addLinks          → DeepSeek or GPT-4o-mini
-research          → GPT-4o or Claude (needs quality)
-generateDiagram   → GPT-4o or Claude (needs spatial reasoning)
-translate         → Gemini Flash (fast, multilingual)
-```
-
-→ [Überblick über LLM Anbieter](/docs/providers/overview)
-
----
-
-## Checkliste zum Einstieg
-
-1. **Installieren von Notemd** — [Community Plugins](/docs/getting-started/installation) (empfohlen) oder manuell
-2. **Anbieter konfigurieren** — DeepSeek (am einfachsten), OpenAI oder Ollama (kostenlos)
-3. **Erstes Notiz bearbeiten** – Rechtsklick → „Datei bearbeiten (Verlinkungen hinzufügen)“
-4. **Konzeptordner festlegen** — Einstellungen → Notemd → Ausgabe → Konzeptordner
-5. **Konzepte extrahieren** — führen Sie „Konzepte extrahieren“ auf derselben Notiz aus
-6. **Diagramm erstellen** – führen Sie „Diagramm erstellen“ aus, um die Verbindungen zu visualisieren
-7. **Einen Workflow erstellen** – verknüpfe die obigen Schritte zu einem Klick-Button
-
-## Empfohlene Konfigurationen
-
-### Student (Budget)
-
-```
-Provider: DeepSeek (free tier available)
-Concept extraction: DeepSeek
-Research: DuckDuckGo (free) + DeepSeek
-Diagrams: Off (or legacy Mermaid)
-Workflows: addLinks | extractConcepts
-```
-
-### Forscher (Qualität)
-
-```
-Provider: GPT-4o (primary)
-Concept extraction: DeepSeek (cost savings)
-Research: GPT-4o + Tavily
-Diagrams: best-fit mode, GPT-4o
-Workflows: research | addLinks | extractConcepts | generateDiagram
-```
-
-### Datenschutz voran (nur lokal)
-
-```
-Provider: Ollama (llama3 or qwen2.5:7b)
-All tasks: Ollama
-Research: DuckDuckGo (free, no API key)
-Diagrams: legacy Mermaid mode
-```
-
-### Zweisprachig (ZH + EN)
-
-```
-Primary: DeepSeek (Chinese queries)
-Translation: Google Gemini Flash
-Research: Tavily + DeepSeek (Chinese search context)
-Language output: per-task (extractConceptsLanguage: zh-CN)
-```
-
----
-
-## Gängige Muster
-
-### Muster: Ein Forschungspapier verarbeiten
-
-1. Importieren Sie den Inhalt von PDF (oder kopieren Sie ihn ein).
-2. **Forschung** – erhalte Web-Kontext zum Thema
-3. **Verknüpfungen hinzufügen** – identifizieren und verknüpfen Sie Schlüsselkonzepte
-4. **Konzepte extrahieren** – eigenständige Notizen erstellen
-5. **Diagramm erstellen** – die Struktur des Papers visualisieren
-
-### Muster: Erweiterung der Tagesnotiz
-
-1. Tägliche Notiz schreiben
-2. **Links hinzufügen** – verbindet die heutigen Ideen mit bestehenden Konzepten
-3. Konzeptnotizen aktualisieren sich automatisch mit Rückverweisen
-
-### Muster: Literaturübersicht
-
-1. Erstelle einen Ordner mit papers/notes
-2. **Batch Add Links** – gesamte Ordner verarbeiten
-3. **Konzepte duplizieren** – überflüssige, nahezu identische Notizen entfernen
-4. **Diagramm erstellen** – Mindmap der gesamten Literatur
-
----
-
-*Notemd ist Open Source (MIT) und funktioniert mit Obsidian 0.15.0+ auf allen Plattformen. [Jetzt installieren](/docs/getting-started/installation) oder [auf GitHub ansehen](https://github.com/Jacobinwwey/obsidian-NotEMD).*
+- [Schnellstart](./getting-started/quick-start).
+- [Stapelverarbeitung](./advanced/batch-processing).
+- [Entwickler](./developers/overview).
+- [Agents](./agents/overview).

@@ -1,67 +1,60 @@
 ---
 id: openai
-title: "OpenAI"
-description: "Cấu hình OpenAI (GPT-4, GPT-4o)"
+title: OpenAI
+description: >-
+  Thiết lập điểm cuối OpenAI cho đường Chat Completions dùng chung của Notemd và
+  kiểm tra quyền mô hình.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Nhà cung cấp OpenAI
 
-<TLDR>
-**OpenAI sử dụng giao thức chia sẻ tương thích với OpenAI.** Cài đặt mặc định hiện tại là `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5` và bài kiểm tra kết nối `models-then-chat`. Hãy dùng trang này khi bạn cần ý nghĩa chính xác của các trường; hãy dùng tổng quan [LLM Providers](/docs/providers/overview) để chọn theo danh mục.
+<TLDR>Hồ sơ OpenAI dùng đường Chat Completions tương thích OpenAI chung của Notemd. Cấu hình khóa API và mô hình nhận giao thức đó. Mô hình đặt sẵn chỉ là giá trị ban đầu, không bảo đảm quyền truy cập hiện tại hay khuyến nghị cho mọi tác vụ.</TLDR>
 
-Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Thiết lập
 
-## Cài đặt
+Chọn **OpenAI**, nhập khóa API và giữ `https://api.openai.com/v1` nếu dùng điểm cuối chính thức. Chọn mô hình tài khoản được phép dùng và hỗ trợ Chat Completions. Mô hình chỉ có trên API khác không trở nên tương thích chỉ vì xuất hiện trong danh sách.
 
-Tạo một khóa OpenAI API, thêm hồ sơ nhà cung cấp `OpenAI` vào cài đặt Notemd, và giữ nguyên Base URL mặc định trừ khi bạn cố ý chỉ định một cổng tương thích với OpenAI. Trường mô hình có thể giữ nguyên ở `gpt-4o` cho công việc tổng quát hoặc được thay thế bằng ID mô hình OpenAI khác mà tài khoản của bạn có thể gọi.
+Với cổng trung gian, chọn hồ sơ tương ứng để dùng đúng điểm cuối và header. Với Azure, dùng **Azure OpenAI**, cấu hình deployment và phiên bản API riêng.
 
-Sử dụng các mô hình dành riêng cho nhiệm vụ để kiểm soát chi phí: giữ các mô hình mạnh hơn cho nghiên cứu, trích xuất khái niệm và tái cấu trúc văn bản dài; sử dụng các mô hình rẻ hơn hoặc nhanh hơn cho việc dịch, đề xuất liên kết và tóm tắt ngắn.
+## Điểm cuối và xác thực
 
-## Endpoint Và Xác thực
-
-| Trường | Cài đặt mặc định |
-|-------|----------------|
-| Giao thức truyền tin | `openai-compatible` |
-| Khóa API | Yêu cầu |
-| Base URL | `https://api.openai.com/v1` |
+| Trường | Giá trị đặt sẵn |
+| ------- | -------------- |
+| Giao vận | `openai-compatible` |
+| Khóa API | Bắt buộc |
+| URL cơ sở | `https://api.openai.com/v1` |
 | Mô hình mặc định | `gpt-4o` |
 | Temperature | `0.5` |
-| Kiểm tra kết nối | `/models`, sau đó là `/chat/completions` |
+| Thử kết nối | `models-then-chat` |
 
-Notemd chuẩn hóa các base URL tương thích với OpenAI trước khi thêm `chat/completions` hoặc `models`. Đừng bao gồm `/chat/completions` cuối cùng trong Base URL; điều đó sẽ tạo ra một đường dẫn trùng lặp.
+Chương trình chuẩn hóa các dạng URL cơ sở đã biết trước khi tạo tuyến danh sách hoặc chat. Bắt đầu từ URL đặt sẵn và kiểm tra tuyến đã giải khi debug, thay vì đoán rồi nối thêm đoạn đường dẫn.
 
-## Khám phá mô hình
+## Tìm mô hình
 
-OpenAI sử dụng con đường khám phá mô hình tổng quát tương thích với OpenAI. Cài đặt UI trước tiên hỏi `/v1/models`, sau đó xác minh mô hình được chọn bằng yêu cầu chat nhẹ. Nếu việc khám phá thất bại nhưng chat vẫn hoạt động, hãy kiểm tra xem khóa của bạn có quyền truy cập danh sách mô hình hay không hoặc liệu có cổng nào chặn việc liệt kê mô hình hay không.
+**Fetch models** truy vấn điểm cuối đã cấu hình. **Kiểm tra kết nối** có thể thành công từ danh sách mà chưa xác minh sinh chat. Sau phép thử, chạy ghi chú dùng một lần với đúng nhà cung cấp/mô hình.
 
-Các mô hình lý luận được coi là trường hợp đặc biệt của giao thức: Notemd kết hợp nội dung mệnh lệnh hệ thống và người dùng thành các ID lý luận OpenAI mà từ chối vai trò `system` riêng biệt, và chỉ hiển thị `reasoningEffort` khi định nghĩa nhà cung cấp hỗ trợ nó.
+Suy luận, tư duy, lấy mẫu và token đầu ra phụ thuộc hồ sơ cùng quy tắc lúc chạy cho mô hình. Kiểm tra tổ hợp thật; xuất hiện trong danh sách không bảo đảm mọi tham số được nhận.
 
 ## Khắc phục sự cố
 
-- `401` hoặc `403`: kiểm tra khóa, quyền truy cập dự án, trạng thái thanh toán và xem mô hình được chọn có được kích hoạt cho khóa đó hay không.
-- `404` trên chat: Base URL thường sai hoặc đã bao gồm `/chat/completions` rồi.
-- Mô hình xuất hiện trong tài liệu nhưng không có trong bộ lựa chọn: quyền truy cập danh sách mô hình và quyền truy cập chat là hai điểm thất bại riêng biệt; hãy kiểm tra ID mô hình chính xác bằng tay trong hồ sơ nhà cung cấp.
-- Mô hình lý luận từ chối tin nhắn: hãy dùng ID mô hình nằm trong con đường xử lý lý luận OpenAI hoặc chuyển sang mô hình chat không lý luận.
+- `401`/`403`: kiểm tra khóa API, quyền dự án, quyền mô hình và trạng thái tài khoản.
+- `404`: kiểm tra điểm cuối, ID và API mô hình hỗ trợ.
+- Danh sách hoạt động nhưng tác vụ lỗi: xem lỗi chat thực tế và tham số yêu cầu.
+- Kết quả dài bị lỗi hoặc cắt: xem giới hạn đầu ra, kích thước nguồn và phản hồi; phép thử ngắn không tái hiện mọi lỗi yêu cầu dài.
 
-## Khi nào nên sử dụng
+## Khi nên dùng
 
-Hãy dùng OpenAI khi bạn muốn con đường lưu trữ mặc định dễ dự đoán nhất, khi việc khám phá `/v1/models` rất quan trọng, hoặc khi quy trình làm việc phụ thuộc vào ý nghĩa mô hình lý luận OpenAI. Hãy ưu tiên sử dụng cổng hoặc nhà cung cấp địa phương khi việc định tuyến, bảo mật hoặc kiểm soát chi phí quan trọng hơn hành vi trực tiếp của OpenAI API.
+Dùng cho mô hình OpenAI trực tiếp nhận Chat Completions đã triển khai. Đánh giá bằng ghi chú đại diện trước khi chọn cho công việc. Giá và khả năng dùng mô hình thay đổi độc lập với bản phát hành Notemd.
 
----
+## Tiếp theo
 
-## Các bước tiếp theo
-
-- [LLM Providers](/docs/providers/overview) -- Cấu hình đầy đủ, mô hình mỗi nhiệm vụ và logic thử lại
-- [Giải quyết sự cố](/docs/advanced/troubleshooting) -- Sửa lỗi 401/403 và lỗi giới hạn tần suất
+- [Tổng quan](./overview): định tuyến và giao thức.
+- [Khắc phục sự cố](../advanced/troubleshooting): bằng chứng đã lọc và lỗi đầu ra.

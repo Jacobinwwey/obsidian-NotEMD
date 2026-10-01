@@ -6,16 +6,28 @@ on:
       - main
     paths:
       - 'website/**'
+      - 'package.json'
+      - 'manifest.json'
+      - 'scripts/lib/packaging-contract.js'
+      - 'docs/maintainer/github-pages-*'
+      - 'GEO_ROADMAP.md'
+      - '.github/workflows/deploy-docs.yml'
+  pull_request:
+    paths:
+      - 'website/**'
+      - 'package.json'
+      - 'manifest.json'
+      - 'scripts/lib/packaging-contract.js'
+      - 'docs/maintainer/github-pages-*'
+      - 'GEO_ROADMAP.md'
       - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'publication' }}
   cancel-in-progress: false
 
 jobs:
@@ -44,18 +56,53 @@ jobs:
       - name: Audit website build
         run: npm run audit:build
 
+      - name: Install pinned browser
+        run: npx --no-install playwright install --with-deps chromium
+
+      - name: Verify audience journeys and accessibility
+        run: npm run audit:navigation
+
+      - name: Retain browser evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: website-navigation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/verification/website-navigation
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
         with:
           path: website/build
 
   deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url || steps.deployment_second.outputs.page_url || steps.deployment_first.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Checkout verified documentation revision
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Require the advertised public release
+        run: node website/scripts/verify-published-release.cjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Deploy to GitHub Pages
         id: deployment_first
         continue-on-error: true

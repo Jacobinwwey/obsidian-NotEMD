@@ -8,15 +8,35 @@
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "ডকুমেন্টস",
+    "message": "নথিপত্র",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "সাধারণ প্রশ্ন",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "এখানে শুরু করুন",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "নতুন ব্যবহারকারী",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "দৈনন্দিন কাজ",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "ডেভেলপার",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

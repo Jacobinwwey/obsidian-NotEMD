@@ -1,67 +1,57 @@
 ---
 id: google
 title: Google
-description: 設定 Google Gemini
+description: 透過原生 Generative Language API 設定 Gemini 並核驗模型。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords:
+  - Google
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google 提供服務商
+# Google 提供方
 
 <TLDR>
-**Google 使用原生的 Gemini 生成式語言 API 傳輸機制。** 目前的預設值為 `gemini-2.0-flash-exp`、`https://generativelanguage.googleapis.com/v1` 與 `temperature: 0.5`。它並非與 OpenAI 相容的設定檔。
-
-這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+Google 預設使用原生 Gemini Generative Language API。填入獲授權的 API key，選當前可用模型。透過 OpenAI-compatible 聊天提供 Gemini 的閘道應選閘道預設。
 </TLDR>
 
-## 安裝
+## 設定
 
-建立一個具有 Gemini 存取權的 Google AI Studio 或 Google 雲端 API 金鑰，新增一個 `Google` 提供商設定檔，並保留原生的生成式語言基礎 URL。可使用預設的 Gemini Flash 設定檔以實現快速翻譯及廣泛的筆記工作流程，而在需要更大或功能更強大的 Gemini 模型時，則可針對每個任務覆寫模型。
-
-除非您明確使用能透過 OpenAI 相容的 API 來呈現 Gemini 的網關，否則請避免在 OpenAI 相容的設定檔中放入 Gemini 模型識別碼。
+選 **Google**，填金鑰並保留原生端點，選該 API version 提供的模型。測試連線後翻譯或處理可捨棄筆記。此預設不會自動配置任意 Google Cloud／Vertex 部署。
 
 ## 端點與認證
 
-| 欄位 | 目前的預設值 |
-|-------|----------------|
-| 運輸 | `google` |
-| API 金鑰 | 必填項目 |
-| 基底 URL | `https://generativelanguage.googleapis.com/v1` |
+| 欄位 | 預設值 |
+| ------- | -------------- |
+| 傳輸協定 | `google` |
+| API key | 必填 |
+| 基礎 URL | `https://generativelanguage.googleapis.com/v1` |
 | 預設模型 | `gemini-2.0-flash-exp` |
-| 溫度 | `0.5` |
-| 連線測試 | 僅聊天功能 |
+| Temperature | `0.5` |
+| 連線測試 | `chat-only` |
 
-執行階段會呼叫 `/models/{model}:generateContent?key={apiKey}`。該金鑰是以查詢參數的方式傳遞，因為這是插件中原生 Gemini 終端點的連線方式。
+執行時以 API key 認證建立模型 `generateContent` 請求。歷史模型 ID 不保證當前可用；分享診斷前審核 URL，請求細節可能包含認證資訊。
 
 ## 模型探索
 
-Google 使用 `google-models` 的探索模式。探索功能應該能返回 API 金鑰可使用的 Gemini 模型；如果選擇器為空，則需以相同的 Base URL 來測試該金鑰，並確認該帳戶已啟用相關的模型系列。
+可用時使用原生 Google 模型探索，確認所選模型支援該 API version 的生成。空清單可能涉及權限、端點或模型可用性；核對實際設定，不隨意切換協定。
 
-供應商註冊表中已知的輸出令牌上限會根據模型類型而有所不同。如果長篇的翻譯或圖表說明被截斷，請選擇支援更大輸出上限的 Gemini 模型，或降低所需的輸出大小。
+## 疑難排解
 
-## 故障排除
+- `400`：核對模型 ID、參數及 token／輸出上限。
+- `401`／`403`：核對金鑰限制、API 是否啟用和模型權限。
+- `404`：確認模型是否存在於該 API version。
+- 閘道範例失敗：使用對應 OpenAI-compatible 閘道預設。
 
-- `400`：模型 ID 通常與原生 Gemini 路由不符，或者請求的格式超出了該模型所支援的範圍。
-- `401` 或 `403`：驗證金鑰限制、專案/API 的啟用狀態，以及該金鑰是否可以存取 Gemini。
-- `404`：在所設定的 API 版本中，無法取得模型識別碼。
-- 在此設定檔下，網關範例會失敗：請改用預設的網關，而非原生的 Google 提供者。
+## 適用情境
 
-## 何時使用
+適用原生 Gemini API，以代表性樣本評估翻譯、研究或圖表。本文不保證相對速度、費用或翻譯品質。
 
-在需要快速翻譯、大量筆記整理，以及 Gemini 的成本/效能比優於直接使用 OpenAI 或 Anthropic 的工作流程中，請使用 Google。對於需要支援 OpenAI 兼容型推理模型的工作流程，則建議選用其他供應商。
+## 延伸閱讀
 
----
-
-## 接下來的步驟
-
-- [LLM 提供商](/docs/providers/overview) -- 完整的設定、每個任務的模型，以及重試邏輯
-- [翻譯](/docs/features/translation) -- 對於大量翻譯任務，建議使用 Gemini Flash
+- [Provider 概覽](./overview)：路由與協定。
+- [疑難排解](../advanced/troubleshooting)：區分連線與任務錯誤。
+- [翻譯](../features/translation)：輸出、語言與審核。

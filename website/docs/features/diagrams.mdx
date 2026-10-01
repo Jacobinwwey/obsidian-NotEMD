@@ -40,10 +40,10 @@ Leave **Preferred source format** on **Auto** if you do not need a particular ed
 
 ## Generate and export a diagram
 
-1. Open the note or select the text you want to visualize.
-2. Choose **Generate diagram** from the Notemd sidebar or command palette.
-3. Select a **diagram type**, or leave it on **Auto-detect**.
-4. Select a **source format**, or leave it on **Auto**. Choose **Drawnix** when you want a knowledge map with editable nodes and embedded Mermaid visuals.
+1. Open the supported source note. To visualize only a passage, put it in a separate note; selecting text does not narrow a file-based generation action.
+2. In Notemd's diagram settings, select a **diagram type**, or leave it on **Auto-detect**.
+3. Select a **source format**, or leave it on **Auto**. Choose **Drawnix** for a supported knowledge map with editable nodes and embedded Mermaid visuals.
+4. Choose **Generate diagram** from the Notemd sidebar or command palette.
 5. Review the preview. A multi-panel result keeps the Drawnix board and every Mermaid panel in source order inside one vertically scrollable preview shell; Mermaid panels use their rendered height instead of being clipped.
 6. Choose a panel's **Export SVG**, **Export PNG**, or **Export PDF** action for one visual, or use a top-level image export for all panels. For multiple panels, choose the source folder or a custom Vault-relative folder; Notemd writes one deterministic file per panel and continues after an individual failure.
 7. Use **Save source file** when you also need the editable artifact.
@@ -60,7 +60,7 @@ Editable HTML/SVG lane-grid diagrams measure and wrap the summary before placing
 
 Mermaid quadrant charts receive a family-specific normalization pass. Flowchart-only quote and shape repairs are skipped for `quadrantChart`, and a provider-copied opening bracket is removed only when it is the unmatched trailing character of a point label. Intentional brackets in titles, axes, and quadrant names remain visible.
 
-The repository keeps a real-Vault learning and evidence set for every executable diagram type. See [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) for bilingual input notes, generated SVG/PNG results, and the machine-readable status manifest. `passed` entries represent a run through the loaded plugin bundle, not a static screenshot fixture.
+The repository keeps a real-Vault learning and evidence set for every executable diagram type. See [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) for bilingual inputs, generated SVG/PNG files and the machine-readable manifest. A `passed` entry refers to its recorded run and bundle identity; it does not establish a fresh run of every type on a later release.
 
 The current executable catalog has 33 rows, while the plugin UI has 21 locales and the published website route set has 34 locales. These are different surfaces: UI locale count is not the same as published documentation locale count. Five exact reference grammars remain outside the selector until their layout contracts have independent evidence.
 
@@ -68,11 +68,15 @@ The current executable catalog has 33 rows, while the plugin UI has 21 locales a
 
 When a Drawnix artifact contains Mermaid visuals, Notemd sanitizes the rendered SVG and keeps the Mermaid source alongside it in the `.drawnix` metadata. The preview can therefore show the Mermaid image inside the Drawnix knowledge map without requiring the Drawnix or Plait runtime. The default path is self-contained and does not create a separate `.assets` directory. Enable **Also export complete Mermaid visuals** when you need Mermaid source, SVG, and manifest companions for handoff or external editing. Existing artifacts with `.assets` remain supported, and a missing legacy Mermaid SVG can be rebuilt from source text retained in metadata.
 
-Resolved image embeds also receive a data-backed SVG preview when possible, so removing an old companion folder does not make a saved Drawnix preview disappear. Preview loading uses embedded data first, then legacy companion files, then the source-text rebuild fallback.
+Resolved image embeds receive a data-backed SVG preview when possible. Preview loading uses embedded data first, then legacy companion files, then source-text rebuilding where available. Keep existing companion files while artifacts still reference them; a self-contained new export does not prove that a shared old directory is unused.
 
 The preview is intentionally a single scrollable surface: the main Drawnix canvas appears first, followed by each embedded Mermaid panel in source order. Closing and reopening a saved history entry reconstructs the same panel list, dimensions, and export actions.
 
-Drawnix relationship explanations are laid out as first-class visual elements. The renderer routes dashed arrows around placed node rectangles and reserves a measured title/summary header as a protected region. Long summaries and relation labels wrap to measured lines, the forest moves below the resulting header height, and an opaque label box is painted after the node layer. The header is rendered last with an opaque background, so an outer route cannot obscure text such as `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` or a relation explanation such as `RendererRegistry feeds Vault files, preview modal, and export`. The native `.drawnix` arrow uses Plait-compatible `shape`, `texts[]`, markers, and stroke fields while retaining legacy metadata for older readers. If a requested Drawnix map cannot find a collision-free route or label position, generation fails with a format error instead of silently saving a Mermaid fallback under a `.drawnix` operation.
+Drawnix previews reserve space for titles, summaries and relationship labels and route static connectors around nodes. If the requested map cannot produce a supported readable layout, generation reports a format error. Cross-branch arrows are serialized as static relationships: attachment after rearranging nodes in Drawnix is not supported by the current evidence. Inspect the artifact in the editor you intend to use.
+
+## Native export boundaries
+
+Source export and visual export are separate deliverables. Test a representative artifact in its destination application before distributing it. PowerPoint table export preserves supported editable table structure, including the corrected separators beneath merged cells; Mermaid and SVG content can use image fallback rather than editable native shapes. An in-plugin preview or a whole-page screenshot score is not a substitute for a native-consumer check.
 
 ## Circuit diagrams
 

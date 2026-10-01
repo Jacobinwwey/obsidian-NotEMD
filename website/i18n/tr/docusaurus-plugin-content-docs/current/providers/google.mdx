@@ -1,67 +1,56 @@
 ---
 id: google
-title: "Google"
-description: "Google Gemini'yi yapılandırın"
+title: Google
+description: >-
+  Gemini Generative Language’ı doğru API sürümü, anahtar ve modelle
+  yapılandırın.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords:
+  - Google
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google Sağlayıcı
+# Google
 
-<TLDR>
-**Google, yerel Gemini Üretken Dil API taşıma mekanizmasını kullanır.** Mevcut öncelikli ayarlar `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` ve `temperature: 0.5` olarak belirlenmiştir. Bu, OpenAI ile uyumlu bir profilde değildir.
+<TLDR>Google, doğrudan Gemini Generative Language kullanır. Yetkili anahtar ve erişilebilir model girin. Uyumlu bir geçitteki Gemini için geçit profilini seçin.</TLDR>
 
-Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
-</TLDR>
+## Hazırlık
 
-## Kurulum
+**Google**, anahtar, doğrudan uç nokta ve seçili API sürümündeki modeli kullanın. Bağlantıyı ve notu test edin. Bu, rastgele Google Cloud/Vertex kurulumunu otomatik ayarlamaz.
 
-Gemini erişimine sahip bir Google AI Studio veya Google Cloud API anahtarı oluşturun, bir `Google` sağlayıcı profilini ekleyin ve yerel Üretken Dil Tabanı URL'yi koruyun. Hızlı çeviri ve geniş not iş akışları için varsayılan Gemini Flash profilini kullanın; daha büyük veya daha güçlü bir Gemini modeline ihtiyaç duyduğunuzda görev bazında modelleri değiştirin.
+## Uç nokta ve kimlik doğrulama
 
-Gemini model kimliklerini, OpenAI ile uyumlu API aracılığıyla Gemini'yi sunan bir ağ geçidi kullanmadığınız sürece OpenAI ile uyumlu bir profile yerleştirmekten kaçının.
-
-## Uç Nokta ve Kimlik Doğrulama
-
-| Alan | Mevcut ayarlar |
-|-------|----------------|
-| Taşıma | `google` |
+| Alan | Başlangıç |
+| ------- | -------------- |
+| Aktarım | `google` |
 | API anahtarı | Gerekli |
-| Base URL | `https://generativelanguage.googleapis.com/v1` |
-| Varsayılan model | `gemini-2.0-flash-exp` |
+| Temel URL | `https://generativelanguage.googleapis.com/v1` |
+| Model | `gemini-2.0-flash-exp` |
 | Sıcaklık | `0.5` |
-| Bağlantı testi | Yalnızca sohbet |
+| Bağlantı testi | `chat-only` |
 
-Çalışma zamanı `/models/{model}:generateContent?key={apiKey}`'yi çağırır. Anahtar, eklentide yerel Gemini uç noktasının bağlandığı şekilde bir sorgu parametresi olarak iletilir.
+Anahtarla `generateContent` isteği yapılır. Eski kimlikler erişim garantisi değildir. Tanılama URL’lerini paylaşmadan kontrol edin; kimlik bilgileri içerebilir.
 
-## Model Keşfi
+## Modeller
 
-Google, `google-models` keşif modunu kullanır. Keşif, API anahtarı için kullanılabilir Gemini modellerini döndürmelidir; seçici boşsa, aynı Taban URL üzerinde anahtarı test edin ve hesap için model ailesinin etkinleştirildiğinden emin olun.
+Doğrudan keşfi kullanın ve seçili API’de üretimi doğrulayın. Boş liste yetki, uç nokta veya eksik modelden kaynaklanabilir. Protokol değiştirmeden nedeni araştırın.
 
-Sağlayıcı kayıt defterinde bilinen çıktı token sınırları model bilgisine göre belirlenir. Uzun bir çeviri veya diyagram açıklaması kısaltılırsa, daha yüksek desteklenen çıktı kapasitesine sahip bir Gemini modeli seçin veya istenen çıktı boyutunu azaltın.
+## Sorunlar
 
-## Sorun Giderme
+- 400: kimlik, parametreler ve girdi/çıktı sınırları.
+- 401/403: anahtar kısıtları, açık API ve yetkiler.
+- 404: model bu API sürümünde var mı?
+- Geçit örnekleri: doğru OpenAI uyumlu profili kullanın.
 
-- `400`: Model kimliği genellikle yerel Gemini rotasıyla eşleşmez veya istek, modelin desteklediği yapıyı aşar.
-- `401` veya `403`: Anahtar kısıtlamalarını, proje/API etkinleştirmesini ve anahtarın Gemini'ye erişip erişemeyeceğini doğrulayın.
-- `404`: Model kimliği, yapılandırılan API sürümünde mevcut değildir.
-- Bu profile göre ağ geçidi örnekleri başarısız olur: yerel Google sağlayıcısı yerine ağ geçidi öncelikli ayarını kullanın.
+## Ne zaman seçilmeli
 
-## Ne Zaman Kullanılmalı
+Doğrudan Gemini için. Çeviri, araştırma veya diyagramı kendi malzemenizle test edin. Genel hız, fiyat veya kalite garantisi yoktur.
 
-Hızlı çeviri, büyük hacimli not temizleme ve Gemini'nin maliyet/performans dengesinin doğrudan OpenAI veya Anthropic'dan daha iyi olduğu iş akışları için Google kullanın. OpenAI ile uyumlu akıl yürütme modeli işlemleri gerektiren iş akışları için başka bir sağlayıcı tercih edin.
+## Sonraki adımlar
 
----
-
-## Sonraki Adımlar
-
-- [LLM Sağlayıcılar](/docs/providers/overview) -- Tam yapılandırma, görev başına modeller ve yeniden deneme mantığı
-- [Çeviri](/docs/features/translation) -- Yüksek hacimli çeviri görevleri için Gemini Flash önerilir
+- [Sağlayıcılar](./overview).
+- [Çeviri](../features/translation).

@@ -1,319 +1,124 @@
 ---
 id: wiki-links
-title: "Wiki-links"
-description: "Automatische generatie van wiki-links voor belangrijke concepten"
+title: Wiki-links
+description: >-
+  Laat een model koppelingen voorstellen en schrijf een apart resultaat met
+  optionele conceptbestanden.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
-concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Auto Link Plugin
-    url: https://github.com/ov7a/obsidian-auto-link
+keywords:
+  - Wiki-links
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Wiki-links
 
-<TLDR>
-**Notemd voegt automatisch `[[wiki-links]]` toe aan belangrijke concepten in uw notities.** De LLM leest uw inhoud, identificeert belangrijke termen in de context en plaatst Obsidian-stijl wiki-links bij elke voorkomst. Optioneel worden conceptnotities met backlinks gemaakt. Het ondersteunt het onderdrukken van synoniemen, linkintegriteit bij hernoemen/verwijderen en pure extractiemodus (geen bestandswijzigingen). In tegenstelling tot Auto Link, dat alleen bestaande notietitels matcht, gebruikt Notemd AI om nieuwe concepten te identificeren en overeenkomstige notities te maken. Dit maakt deel uit van de [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Process file (add links) vraagt de gekozen LLM om begrippen te herkennen en Obsidian-links toe te voegen. Standaard ontstaat een apart `_processed.md` en blijft de bron bestaan. Conceptbestanden vereisen een ingestelde map. Controleer de uitvoer voordat je uitbreidt.</TLDR>
 
 ## Overzicht
 
-Wiki-linking is het kernfunctie van Notemd. Het transformeert gewone tekst in een verbonden kennisgraaf door:
+Modelkeuzes kunnen per uitvoering verschillen en naar nog niet bestaande concepten verwijzen. Een wiki-link is een navigatiedoel, geen bewijs dat begrippen gelijkwaardig zijn of een uitleg klopt.
 
-1. **Uw notitie te analyseren** met een LLM
-2. **Belangrijke concepten te identificeren** (termen, personen, methoden, theorieën)
-3. **`[[wiki-links]]` toe te voegen** bij elke voorkomst
-4. **Conceptnotities te maken** (optioneel) met backlinks
+## Werking
 
-## Hoe het werkt
+### Verwerking
 
-### Proces
-
-```mermaid
-graph LR
-    A[Your Note] --> B[LLM Analysis]
-    B --> C{Concepts Found}
-    C --> D[Insert Wiki-Links]
-    C --> E[Create Concept Notes]
-    D --> F[Updated Note]
-    E --> F
-    F --> G[Connected Knowledge Graph]
-```
+De notitie wordt opgedeeld, naar provider/model gestuurd en uit antwoorden samengesteld. De taak kan conceptbestanden maken of bijwerken in de gekozen map. Bekijk gedeeltelijke fouten en het werkelijke pad in de voortgang.
 
 ### Voorbeeld
 
-**Voorheen:**
-```markdown
-Machine learning models use neural networks to learn patterns from data.
-The transformer architecture revolutionized natural language processing.
+Bron:
+
+```text
+Machine learning gebruikt neurale netwerken om patronen te herkennen.
 ```
 
-**Na:**
+Mogelijke uitvoer:
+
 ```markdown
-[[Machine learning]] models use [[neural networks]] to learn patterns from data.
-The [[transformer architecture]] revolutionized [[natural language processing]].
+[[Machine learning]] gebruikt [[neurale netwerken]] om patronen te herkennen.
 ```
+
+Een illustratie, geen gegarandeerde selectie: bron, model en prompt bepalen de termen.
 
 ## Gebruik
 
-### Basis: Links toevoegen aan huidige notitie
+### Huidige notitie
 
-1. Een notitie openen
-2. Rechtermuisknop in editor → **"Process file (add links)"**
-3. Wacht enkele seconden
-4. Concepten zijn nu met elkaar verbonden!
+Voer **Bestand verwerken (links toevoegen)** uit op een kopie en bekijk de standaard aangrenzende `_processed.md`. Eigen suffixen, uitvoermappen en bronverplaatsing kunnen dit veranderen.
 
-### Batch: Meerdere notities verwerken
+### Meerdere notities
 
-1. Rechtsklik op een map in File Explorer
-2. Kies **"Notemd: Map verwerken (links toevoegen)"**
-3. Configureren:
-   - Paralleliteit (hoeveel bestanden tegelijk)
-   - Bestaande links overschrijven (ja/nee)
-4. Klik op **Verwerken**
+Kies **Map verwerken (links toevoegen)**, controleer map en bereik en begin klein. Er is geen gedeelde overschrijven/overslaan-schakelaar voor elke maptaak. Zie [batchverwerking](../advanced/batch-processing).
 
-### Selectief: Specifieke tekst linken
+### Zelf een term kiezen
 
-1. Tekst markeren die verwerkt moet worden
-2. Rechtsklik → **"Verwerking van geselecteerde tekst (links toevoegen)"**
-3. Alleen het gemarkeerde deel wordt geanalyseerd
+**Create wiki link and generate note from selection** is een afzonderlijke actie voor een gekozen term. Het beperkt de hele-bestandsactie niet tot de selectie. Controleer de conceptnotitie en eventuele gegenereerde inhoud.
 
-## Notemd versus Auto Link
+## Aanpak kiezen
 
-Obsidian biedt twee manieren voor automatische wiki-linking:
+Modelkoppeling helpt kandidaatbegrippen uit inhoud te ontdekken. Deterministische titelmatching past beter wanneer herhaalbaarheid over bestaande namen prioriteit heeft. Vergelijk andere plug-ins op actuele documentatie en een gedateerde gelijke test.
 
-| | **Auto Link** | **Notemd** |
-|--|---------------|-------------|
-| Bron van de link | Bestaande notitietitels in de kluis | Concepten die door LLM zijn geïdentificeerd in de inhoud |
-| Nieuwe concepten kunnen worden gelinkt | Nee — de titel moet al bestaan | Ja — AI identificeert concepten en maakt notities |
-| Omgaan met synoniemen | Nee | Ja — onderdrukking van synoniemen |
-| Creatie van conceptnotities | Nee | Ja — met backlinks en duplicaatverwijdering |
-| Batchverwerking | Nee (één bestand) | Ja (op mapniveau) |
-| Modelrouting per taak | Nee | Ja |
+## Mogelijkheden
 
-**Auto Link** doet een titelvergelijking: als er een notitie genaamd "Machine Learning" bestaat, wordt de tekst in `[[Machine Learning]]` gewikkeld. Als de notitie niet bestaat, gebeurt er niets.
+### Synoniemen beperken
 
-**Notemd** wordt door AI aangestuurd: de LLM leest je inhoud, begrijpt de context, identificeert concepten die *gelinkt* moeten worden — zelfs als er nog geen notitie bestaat — en maakt zowel de link als de conceptnotitie.
-
-## Kenmerken
-
-### Onderdrukking van synoniemen
-
-**Probleem:** "transformer", "transformers", "Transformer architecture" → 3 aparte concepten
-
-**Oplossing:** Notemd detecteert bijna-duplicaten en gebruikt de canonieke vorm.
-
-**Configuratie:**
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (0 = off, 1 = aggressive)
-```
+`replaceSynonymsDuringConceptExtraction` voegt een instructie tegen overlappende begrippen toe. Het is een standaard uitgeschakelde Boolean, geen numerieke gelijkenisdrempel. Controleer afkortingen en nabijgelegen betekenissen zelf.
 
 ### Linkintegriteit
 
-**Wanneer je een conceptnotitie hernoemt:**
-- Alle wiki-links worden automatisch bijgewerkt (Obsidian kernfunctie)
-- Backlinks blijven intact
+Obsidian beheert hernoemupdates volgens zijn instellingen en de gebruikte bewerking. Een verwijderd doel kan een onopgeloste wiki-link achterlaten; dat is iets anders dan een niet-gekoppelde vermelding. Controleer dezelfde bestandsnamen in meerdere mappen.
 
-**Wanneer je een conceptnotitie verwijdert:**
-- Links blijven bestaan maar worden weergegeven als "onverwezen meldingen"
-- Je kunt ze opnieuw maken vanuit elke voorkomst
+### Alleen extractie
 
-### Pure Extractiemodus
+Gebruik **Concepten extraheren (huidig bestand)** voor concepten zonder de bron te herschrijven. Minimale sjablonen en teruglinks verschillen van links toevoegen. [Conceptnotities](./concept-notes).
 
-**Extracteer concepten zonder de oorspronkelijke te wijzigen:**
+## Conceptbestanden
 
-1. Rechtermuisknop → **"Concepten extraheren (geen linken)"**
-2. Conceptnotities worden gemaakt
-3. Oorspronkelijke bestand blijft onveranderd
+### Automatisch aanmaken
 
-Gebruiksgeval: Verwerking van alleen-lezen inhoud of definitieve versies.
+Met geactiveerde en ingestelde conceptmap kunnen notities met titel en `Linked From` ontstaan. Onderzochte uitleg, verwante-conceptsecties of algemene frontmatter-sjablonen worden niet automatisch toegevoegd. Genereer inhoud afzonderlijk vanuit titels.
 
-## Conceptnotitiegeneratie
+### Instellen
 
-### Automatische creatie
+Zoek conceptmap, verwerkte-bestandenmap, suffix en bronverplaatsing. De conceptmap begint leeg. Houd testuitvoer gescheiden van bronnen.
 
-**Wanneer geactiveerd (standaard), Notemd maakt:**
+## Geavanceerd
 
-```markdown
----
-tags: [concept, auto-generated]
-created: 2026-06-13
-source: [[Original Note Name]]
----
+### Context en prompts
 
-# Machine Learning
+`chunkWordCount` begrenst fragmenten bij benadering. Gerichte domeinen en eigen prompts kunnen de selectie sturen. Algemene zins-/alineaselectoren, minimumfrequenties en conceptsjabloonvariabelen zijn geen beschreven opties van deze taak.
 
-A branch of artificial intelligence that enables computers
-to learn from data without explicit programming.
+## Goede werkwijze
 
-## Occurrences in Your Vault
-
-- [[Original Note Name#Section]]
-- [[Another Note#Header]]
-
-## Related Concepts
-
-- [[Neural Networks]]
-- [[Deep Learning]]
-- [[Supervised Learning]]
-```
-
-### Configuratie
-
-**Uitvoermap:**
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Hiërarchische structuur:**
-```
-Settings → Output → Use Hierarchical Folders
-If enabled:
-  papers/my-paper.md → papers/concepts/Concept.md
-If disabled:
-  → concepts/Concept.md
-```
-
-**Template:**
-```
-Settings → Output → Concept Template
-Customize with variables:
-  {{concept}} — Concept name
-  {{description}} — LLM-generated description
-  {{backlinks}} — List of source notes
-  {{date}} — Creation date
-```
-
-## Geavanceerde opties
-
-### Contextvenster
-
-**Hoeveel omringend tekst te sturen:**
-
-```
-Settings → Linking → Context Window
-Options: Sentence | Paragraph | Full Note
-Default: Paragraph
-```
-
-Groter = betere nauwkeurigheid, hogere kosten.
-
-### Minimum voorkomsten
-
-**Alleen concepten linken die meerdere keren voorkomen:**
-
-```
-Settings → Linking → Min Occurrences
-Default: 1 (link all)
-```
-
-Stel in op 2 of 3 om te focussen op herhalende thema’s.
-
-### Uitsluiten van patronen
-
-**Bepaalde woorden overslaan:**
-
-```
-Settings → Linking → Exclude List
-Example: note, idea, example, thing
-```
-
-Voorkomt het te veel linken van algemene termen.
-
-### Aanpasbare prompts
-
-**Standaard LLM instructies overschrijven:**
-
-```
-Settings → Advanced → Custom Linking Prompt
-Default:
-  "Identify key concepts, theories, methods, and technical
-   terms in the following text. Return as a list..."
-```
-
-Pas aan voor domeinspecifieke behoeften (bijv. "Focus op medische terminologie").
-
-## Tips en beste praktijken
-
-### ✅ DO
-
-- **Verwerk notities met meer dan 100 woorden** — Korte notities leveren weinig concepten op
-- **Gebruik krachtige modellen** voor een betere conceptidentificatie (GPT-4o, Claude)
-- **Controleer voordat je accepteert** — Zorg dat de voorgestelde links logisch zijn
-- **Bouw iteratief** — Verwerk 5-10 notities, bekijk de grafiek en pas de instellingen aan
-
-### ❌ NIET DOEN
-
-- **Te veel links** — Niet elke zelfstandig naamwoord heeft een link nodig
-- **Verwerk conceptversies herhaaldelijk** — Concepten kunnen veranderen, wacht tot ze stabiel zijn
-- **Negeer synoniemen** — Schakel onderdrukking in om "ML" en "Machine Learning" te vermijden
+- Vergelijk citaten, formules en code met de bron.
+- Bepaal welke termen een conceptnotitie verdienen.
+- Test promptwijzigingen op een vaste steekproef.
+- Maak een back-up voordat je bronnen verplaatst of bestaande doelen opnieuw beschrijft.
 
 ## Prestaties
 
-### Snelheid
+Tijd en kosten hangen af van provider, model, invoer, uitvoer en herhaalde pogingen. Er is geen vaste tijd per notitie of prijs per honderd bestanden. Meet je eigen steekproef en werkelijk verbruik.
 
-| Grootte van notitie | GPT-4o-mini | Claude Sonnet | Ollama (lokaal) |
-|-----------|-------------|---------------|----------------|
-| 500 woorden | 2-3 seconden | 3-5 seconden | 5-10 seconden |
-| 2000 woorden | 5-8 seconden | 10-15 seconden | 20-40 sec |
-| 5000+ woorden | In delen (meerdere oproepen) | In delen | In delen |
+## Problemen
 
-### Kosteninschatting
+### Geen links
 
-**Voorbeeld: 1000-talige notitie met GPT-4o-mini**
-- Invoer: ~1500 tokens
-- Uitvoer: ~200 tokens
-- Kosten: ~
-
-**Batchverwerking van 100 notities:** ~
-
-## Probleemoplossing
-
-### Geen links toegevoegd
-
-**Controleer:**
-1. LLM oproep is geslaagd (Instellingen → Diagnostiek)
-2. Het notitieblok bevat voldoende inhoud (>50 woorden).
-3. Concepten zijn technisch/specifiek (niet alleen voornaamwoorden)
-
-**Probeer:**
-- Gebruik een krachtiger model
-- Contextvenster vergroten
-- Controleer de geldigheid van de API-sleutel
+Controleer aanvraag, antwoord, bedoelde bron en gemeld uitvoerbestand. Geen minimumaantal woorden garandeert nuttige links.
 
 ### Te veel links
 
-**Oplossingen:**
-1. Verhoog het minimale aantal voorkomsten (2 of 3)
-2. Voeg veelvoorkomende woorden toe aan de uitsluitingslijst
-3. Gebruik een minder agressieve model
+Vernauw prompt of domein. Synonieminstructies sturen de LLM maar dwingen geen woordenlijst af.
 
-### Verkeerde concepten gekoppeld
+### Links na hernoemen
 
-**Oplossingen:**
-1. Gebruik een aangepaste prompt voor domeinspecifieke inhoud
-2. Activeer het onderdrukken van synoniemen
-3. Controleer handmatig en maak de link los
+Controleer Obsidian-instellingen en bestaande naamambiguïteit. Herstel het doel bewust. Een LLM opnieuw uitvoeren is geen deterministische linkreparatie.
 
-### Links breken na hernaamgeving
+## Verder
 
-**Dit is normaal Obsidian gedrag.**
-
-Om alle links bij te werken:
-1. Hernameer de conceptnota
-2. Obsidian actualiseert automatisch `[[old]]` → `[[new]]`
-
----
-
-## Volgende stappen
-
-- 📖 [Conceptnotities](./concept-notes) — Diepgaande informatie over het genereren van conceptnotities
-- 🔍 [Onderzoek integratie](./research) — Combineer linken met webonderzoek
-- 🎨 [Diagrammen](./diagrams) — Visualiseer je kennisgraaf
+- [Conceptnotities](./concept-notes).
+- [Workflows](./workflows).
+- [Eigen prompts](../advanced/custom-prompts).

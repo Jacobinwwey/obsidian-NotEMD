@@ -1,57 +1,40 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Notemd — Obsidian AI 知识库构建插件
 
-> **Notemd**（Note + EMD — 增强型 Markdown 文档）将 LLM 驱动的阅读转化为持久知识：wiki 链接、概念笔记、研究摘要、翻译和图表，全部写回你的 Obsidian 库。
+> **Notemd** 将笔记处理为带链接的 Markdown、概念笔记、研究摘要、译文和图表。选择模型、检查输出，再将结果保存在 Obsidian 库中。
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-📚 更多语言文档：请查看 [语言中心](./docs/i18n/README_zh.md)  
-📖 浏览仓库文档：请查看 [文档中心](./docs/README.zh-CN.md)  
-🖼️ 查看已交付图形类型与生产预览：[图形 Gallery](./docs/diagram-gallery.zh-CN.md)
-❓ **新增：** [常见问题 (FAQ)](./docs/faq.zh-CN.md)
+## 从这里开始
 
-```
-=============================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-=============================================
-      AI驱动的多语言知识增强工具
-=============================================
-```
+| 读者 | 入口 | 可完成的任务 |
+|---|---|---|
+| 新人 | [快速开始](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start) | 配置 provider 并验证一篇笔记 |
+| 用户 | [工作流](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/workflows) | 控制文件夹范围、输出与恢复 |
+| 开发者 | [开发指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/developers/overview) | 构建、测试并扩展现有契约 |
+| Agent | [集成指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/agents/overview) | 发现四个受支持的导出命令 |
 
 ## 什么是 Notemd？
 
-Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (LLM)，将你的笔记转化为结构化、可搜索的知识库。
+Notemd 是采用 **MIT 许可证的 Obsidian 插件**，提供文件式知识工作流，支持云端 provider、网关和本地模型服务器。输出保存在库中；云端任务会向选定端点发送内容，Web 研究也会联网。
 
-与基于聊天的 AI 工具不同（见解在会话后消失），Notemd 将结果**直接写入你的库**，形式包括：
-- **[[Wiki 链接]]** 连接关键概念
-- **概念笔记** 记录术语和想法
-- **研究摘要** 附带来源引用
-- **翻译** 支持多语言工作流
-- **Mermaid 图表** 和可视化图表
+**版本:** 1.9.8
 
-**结果：** 你的阅读和研究积累成持久的、不断演化的知识图谱，永远伴随你。
+- **取消与恢复：** 取消状态贯穿调度和重试；最终文件准备期间取消时，阻止研究／翻译继续写入。保留完成产物并报告恢复冲突。
+- **历史与原生导出：** 历史抽屉保留连续搜索输入和键盘焦点；修复 PowerPoint 合并单元格下方分隔线与 CircuitikZ 连线／标签。批量本地检索使用一致快照。
+- **发布与文档：** 验证干净源码归属及下载资产，提供明确的受众入口和直接撰写的多语言指南。
+
+36 个 provider 预设和 33 项可执行图表在 1.9.7 已存在。参阅[升级指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/releases/1.9.8)，以[公开 Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) 确认版本可用性。
+
+Drawnix 跨分支箭头重排后仍有静态坐标限制，PPTX 中 Mermaid／SVG 可能采用图片回退。取消不是撤销，不保证远端生成或计费停止。实体移动设备与 Obsidian 0.15.0 仍未验证。
+
+[文档中心](./docs/README.zh-CN.md) · [语言中心](./docs/i18n/README_zh.md) · [图形 Gallery](./docs/diagram-gallery.zh-CN.md) · [常见问题](./docs/faq.zh-CN.md)
 
 如果您喜欢使用 Notemd，请考虑 [⭐ 给 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 请喝杯咖啡](https://ko-fi.com/jacobinwwey)。
-
-**版本:** 1.9.7
-
-**主线可靠性更新（尚未发布新版本）：** 取消信号已贯穿并发 LLM 任务与重试等待；图表保存失败时会保留冲突编辑并报告恢复副本。旧 Drawnix 附件目录保留供检查。本地知识批处理使用不可变读取快照，PowerPoint 表格保留各侧边线、透明度与合并单元格外边线。Circuitikz NAND／NOR 与传输门的连线更清晰，镜像布局中的标签仍保持可读。[实现与验收证据](./docs/maintainer/reliability-acceptance-2026-09-12.zh-CN.md) 列明实测环境和剩余限制。
-
-Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐标，应用重排节点后可能脱离。检查连接关系时请使用 SVG 预览。取消不会撤销已经完成的写入；宿主传输无法物理中止请求时，也不能保证服务端停止生成。
-
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/1d97ca0d-2ea6-41a4-accc-be3be9590088" />
 
 ## 目录
 - [快速入门](#快速入门)
@@ -69,13 +52,26 @@ Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐
 
 ## 快速入门
 
-1.  **安装与启用**：从 Obsidian 市场获取插件。
-2.  **配置 LLM**：进入 `设置 -> Notemd`，选择您的 LLM 提供商（如 OpenAI 或本地提供商如 Ollama），并输入 API 密钥/URL。
-3.  **打开侧边栏**：点击左侧工具栏中的 Notemd 魔法棒图标以打开侧边栏。
-4.  **处理笔记**：打开任意笔记，在侧边栏中点击 **“处理文件 (添加链接)”**，即可自动为关键概念添加 `[[wiki-links]]` 链接。
-5.  **运行快捷工作流**：使用默认的 **“One-Click Extract”** 按钮，可一键串联处理、批量生成与 Mermaid 修复。
+1. 在 **设置 → 第三方插件 → 浏览** 中安装并启用 **Notemd**。[安装指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/installation)。
+2. 打开 Notemd 设置，配置准确的 provider 端点、凭据和模型，执行连接测试，再用下一步实际验证生成。模型列表可访问不等于具备对话生成权限。
+3. 创建空文件夹 `trial-concepts` 并将其设为**概念笔记文件夹**；初始设置为空。创建可丢弃的 `Notemd trial.md`，放入允许发送给 provider 的短段落。
+4. 运行**处理文件（添加链接）**，检查原文旁的 `Notemd trial_processed.md`，核对链接和概念笔记。默认保留原文，模型输出需要审核。
+5. 重新打开测试原文，再用该测试文件夹运行 **One-Click Extract**：添加链接、为合格的文件夹笔记生成正文、修复 complete 文件夹的 Mermaid。范围内已有合格笔记也可能被处理。
 
-完成！探索更多设置以解锁网页搜索、翻译和内容生成等功能。
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+研究与图表生成是独立动作。取消后等待任务收敛，检查已完成和恢复产物，再决定重试范围。
+
+<details>
+<summary>界面示例</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/1d97ca0d-2ea6-41a4-accc-be3be9590088" />
+
+</details>
 
 ## 语言支持
 
@@ -99,7 +95,7 @@ Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐
 - **多 LLM 支持**: 连接到各种云和本地 LLM 提供商（参见 [支持的LLM提供商](#支持的llm提供商)）。
 - **智能分块**: 根据字数自动将大型文档分割成易于管理的小块进行处理。
 - **内容保留**: 在添加结构和链接的同时，旨在保持原始内容格式。
-- **进度跟踪**: 通过 Notemd 侧边栏或进度模式进行实时更新。
+- **进度跟踪**: 通过 Notemd 侧边栏或进度弹窗显示实时状态。
 - **可取消操作**: 可以通过侧边栏的专用取消按钮取消任何处理任务（单个或批量）。命令面板操作使用模式窗口，也可以取消。
 - **多模型配置**: 为不同任务（添加链接、研究、生成标题）使用不同的 LLM 提供商*和*特定模型，或为所有任务使用单一提供商。
 - **稳定的 API 调用（重试逻辑）**: 可选择为失败的 LLM API 调用启用自动重试，并可配置重试间隔和尝试次数限制。
@@ -108,9 +104,9 @@ Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐
 - **OpenAI-compatible 稳定长请求链路加固**: 在稳定模式下，OpenAI-compatible 每次调用现在会按 `直连流式 -> 直连非流式 -> requestUrl` 的顺序依次尝试（必要时 `requestUrl` 仍可升级为流式解析），再决定是否进入下一次重试。这可降低“Provider 实际已返回非流式结果，但流式链路不稳定”导致的误失败。
 - **全 LLM API 的协议感知流式回退**: 长耗时回退请求现在不再只覆盖 OpenAI-compatible Provider，而是扩展到所有内置 LLM 路径。Notemd 现在会在桌面 `http/https` 与非桌面 `fetch` 回退阶段，分别处理 OpenAI/Azure 风格 SSE、Anthropic Messages SSE、Google Gemini SSE，以及 Ollama 的 NDJSON 流式输出，其余直连的 OpenAI 风格 Provider 入口也会复用同一套共享回退路径。
 - **中国区 Provider 预设增强**: 内置补充了 `Qwen`、`Qwen Code`、`Doubao`、`Moonshot`、`Xiaomi MiMo`、`GLM`、`Z AI`、`MiniMax`、`Huawei Cloud MaaS`、`Baidu Qianfan`、`SiliconFlow` 等中国区常用云端模型服务商预设。
-- **可靠的批处理**: 改进了并发处理逻辑，通过**交错的API调用**来防止速率限制错误，确保在大型批处理作业中性能稳定。新的实现确保任务在不同时间间隔启动，而不是同时启动。
-- **准确的进度报告**: 修复了进度条可能卡住的错误，确保用户界面始终反映操作的真实状态。
-- **健壮的并行批处理**: 解决了并行批处理操作过早停止的问题，确保所有文件都能可靠高效地处理。
+- **可靠的批处理**: 交错安排 API 调用以减少突发压力；请求／token 配额及其他客户端仍可能触发限流，扩大并发前先测量小批次。
+- **准确的进度报告**: 区分完成、失败与取消；运行中断时结合逐文件结果和实际输出路径判断。
+- **健壮的并行批处理**: 调度器等待活动任务收敛并报告部分失败；文件夹处理不具备整体回滚事务语义。
 - **进度条准确性**: 修复了“创建维基链接并生成笔记”命令进度条卡在95%的错误，确保现在能正确显示100%完成。
 - **增强的API调试**: “API错误调试模式”现在不仅可以捕获来自 LLM 提供商和搜索服务（Tavily/DuckDuckGo）的完整响应体，还会记录按尝试维度展开的传输时间线，包括脱敏后的请求 URL、耗时、响应头、部分响应体、已解析的部分流式内容与堆栈信息，从而更适合定位 OpenAI-compatible、Anthropic、Google、Azure OpenAI、Ollama 等链路上的 429/500 错误、网关断连和其他 API 故障。
 - **开发者模式面板**: 设置中新增独立 Developer 诊断面板，默认隐藏，只有开启“Developer mode”后才显示。该面板支持选择诊断调用方式，并可按指定方式执行多轮稳定性测试。
@@ -128,7 +124,7 @@ Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐
 - **概念笔记创建（可选和可定制）**: 在指定的 vault 文件夹中自动为发现的概念创建新笔记。
 - **可定制的输出路径**: 在您的 vault 中为保存处理过的文件和新创建的概念笔记配置单独的相对路径。
 - **可定制的输出文件名（添加链接）**: 在处理文件以添加链接时，可选择**覆盖原始文件**或使用自定义后缀/替换字符串，而不是默认的 `_processed.md`。
-- **链接完整性维护**: 在 vault 内重命名或删除笔记时，基本处理更新链接的功能。
+- **链接完整性维护**: 重命名链接更新由 Obsidian 及其设置负责；删除目标可能留下未解析链接，同名笔记需要核查歧义。
 - **纯概念提取**: 提取概念并创建相应的概念笔记，而不修改原始文档。这对于从现有文档中填充知识库而不改变它们是理想的。此功能具有用于创建最简概念笔记和添加反向链接的可配置选项。
 - **概念生成前置守卫**: 当概念笔记路径未按要求启用或配置时，相关流程会先弹窗提示，并可直接跳转到对应设置位置。
 - **概念同义词抑制**: 可选地让模型在处理文件/文件夹与提取概念时，尽量避免抽取同义词、语义近似核心概念或近重复关键词。
@@ -142,10 +138,10 @@ Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐
     - **大文件支持**：在发送给 LLM 之前，会根据 `分块字数` 设置将大文件自动拆分为更小的块。翻译后的块随后会无缝地合并回单个文档中。
     - 支持多种语言之间的翻译。
     - 可在设置或 UI 中自定义目标语言。
-    - 自动在原始文本右侧打开翻译后的文本，便于阅读。
+    - 单文件命令会在工作区打开保存后的译文；具体窗格位置不作保证，以报告路径检查产物。
 - **批量翻译**:
-    - 一键翻译所选文件夹中的所有文件。
-    - 当“启用批处理并行化”开启时，支持并行处理。
+    - 按筛选范围翻译合格文件；默认仅包含直接子文件，高级筛选档案可调整范围。已有同名译文会被覆盖。
+    - 文件夹翻译直接使用配置的批量并发数，默认为 1。
     - 如果已配置，则使用自定义提示进行翻译。
 	- 在文件浏览器的上下文菜单中添加“批量翻译此文件夹”选项。
 - **禁用自动翻译**: 启用此选项后，非翻译任务将不再强制输出为特定语言，从而保留原始语言上下文。明确的“翻译”任务仍将按配置执行翻译。
@@ -161,8 +157,8 @@ Drawnix 支持原生树节点编辑，但导出的跨分支箭头使用固定坐
     - 利用笔记标题通过LLM生成内容并替换原有文本。
     - 可选在生成前自动执行网页研究，丰富生成上下文。
 - **批量根据标题生成内容**:
-    - 一键批量处理选定文件夹下所有笔记，自动跳过已处理文件。
-    - 可配置“完成”子文件夹名称，避免重复处理。
+    - 为选定范围内合格笔记生成正文；已生成与已移动数量分别报告。
+    - 默认移动到同级 `[文件夹名]_complete`，也可配置名称。目标占用会阻止移动，但不会跳过之前的生成；重跑前核对实际产物。
 - **Mermaid 自动修复耦合**:
     - 当启用 Mermaid 自动修复后，处理、按标题生成、批量按标题生成、研究与摘要、总结为 Mermaid、翻译等 Mermaid 相关流程都会在输出后自动执行修复，减少图表语法残留与人工返工。
 
@@ -557,7 +553,7 @@ Notemd 不会把完整 TeX 发行版塞进插件包。桌面端可从图形设�
 
   :
 
-  - **禁用 (默认)**: 成功生成的文件将移动到相对于原始文件夹父目录的名为 `[原始文件夹名称]_complete` 的子文件夹中（如果原始文件夹是根目录，则为 `Vault_complete`）。
+  - **禁用 (默认)**: 生成后尝试将文件移动到同级 `[foldername]_complete` 文件夹，仓库根目录使用 `Vault_complete`；目标已被占用时只阻止移动，已生成内容仍已保存。
   - **启用**: 允许您为移动已完成文件的子文件夹指定自定义名称。
 
 - **自定义输出文件夹名称**: (仅在启用上述选项时可见) 输入子文件夹所需的名称（例如 `Generated Content`, `_complete`）。不允许使用无效字符。如果留空，则默认为 `_complete`。此文件夹创建在原始文件夹的父目录内。
@@ -578,7 +574,7 @@ Notemd 不会把完整 TeX 发行版塞进插件包。桌面端可从图形设�
     *   **禁用（默认）**：插件对所有操作使用其内置的默认提示词。
     *   **启用**：激活为下面列出的任务设置自定义提示词的功能。这是此功能的主开关。
 
--   **为[任务名称]使用自定义提示词**：（仅��启用上述功能时可见）
+-   **为[任务名称]使用自定义提示词**：（仅在启用上述功能时可见）
     *   对于每个支持的任务（“添加链接”、“从标题生成”、“研究与摘要”、“提取概念”），您可以单独启用或禁用您的自定义提示词。
     *   **禁用**：此特定任务将使用默认提示词。
     *   **启用**：此任务将使用您在下方相应“自定义提示词”文本区域中提供的文本。
@@ -622,7 +618,7 @@ Notemd 不会把完整 TeX 发行版塞进插件包。桌面端可从图形设�
 #### 专注学习领域
 -   **启用专注学习领域**:
     *   **禁用 (默认)**: 发送给LLM的提示词使用标准的通用指令。
-    *   **启用**: 允许您指定一个或多个研究���域，以提高LLM的上下文理解能力。
+    *   **启用**: 允许您指定一个或多个研究领域，以提高LLM的上下文理解能力。
 -   **学习领域**: (仅在启用上述选项时可见) 输入您的特定领域，例如“材料科学”、“高分子物理”、“机器学习”。这将在提示词的开头添加一行“相关领域: [...]”，帮助LLM为您的特定研究领域生成更准确、更相关的链接和内容。
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/e8d5e407-d39d-4a21-a18f-446ca660276f" />
 
@@ -665,12 +661,12 @@ Notemd 不会把完整 TeX 发行版塞进插件包。桌面端可从图形设�
     *   选中文本可仅翻译选区，无选区则翻译全文。
     *   运行 `Notemd: 翻译笔记/选区 (Notemd: Translate Note/Selection)`。
     *   弹窗可确认/修改目标语言（默认使用设置）。
-    *   翻译内容保存到指定路径并在原文右侧新窗格打开。
+    *   翻译内容使用配置的路径和后缀保存，然后在 Obsidian 工作区打开已保存的文件；窗格位置取决于可用布局。
     *   任务可随时取消。
 
 3.  **批量翻译**：
     *   从命令面板运行 `Notemd: 批量翻译文件夹` 并选择一个文件夹，或在文件浏览器中右键单击一个文件夹并选择“批量翻译此文件夹”。
-    *   插件将翻译所选文件夹中的所有 Markdown 文件。
+    *   默认翻译所选文件夹直属的合格文件，不递归进入子文件夹；高级文件选择可更改范围，已存在的输出文件可能被覆盖。
     *   翻译后的文件将保存到配置的翻译路径中，但不会自动打开。
     *   此过程可以通过进度模式取消。
 
@@ -690,8 +686,8 @@ Notemd 不会把完整 TeX 发行版塞进插件包。桌面端可从图形设�
 
 5.  **批量从标题生成内容**：
     *   运行 `Notemd: 从标题批量生成内容 (Notemd: Batch Generate Content from Titles)`。
-    *   选择要处理的文件夹，自动跳过已完成文件。
-    *   成功处理的文件自动移动到指定“完成”子文件夹。
+    *   选择文件夹后，处理合格的 `.md` 文件，排除 `_processed.md` 和指定 complete 目录树；依标题生成并替换原内容，遵循可选研究设置。
+    *   生成后才尝试移动到 complete 文件夹。目标已被占用时只阻止移动，先前生成的内容仍已保存；生成数与移动数分别计算。默认目标是同级 `[foldername]_complete` 文件夹，仓库根目录使用 `Vault_complete`。
     *   任务可随时取消。
 
 6.  **提取概念（纯模式）**:
@@ -834,7 +830,7 @@ Notemd 在本地 Obsidian 运行，但部分功能会发起外部网络请求。
 ### 常见问题
 - **插件未加载**：确保`manifest.json`、`main.js`、`styles.css`均放置在 `<保险库>/.obsidian/plugins/notemd/` 并重启Obsidian。启动异常可通过开发者控制台查看。
 - **处理失败/API错误**：
-    1. 文件必须为`.md`或`.txt`格式；
+    1. 默认格式依任务为 `.md` 或 `.md`/`.txt`；在开发者模式启用放宽输入格式后，翻译、概念提取等部分保留来源的任务可读取更多文本格式与 PDF，添加链接仍限于 `.md`/`.txt`；
     2. “测试LLM连接”命令可验证API设置（Notemd: Test LLM Connection）；
     3. 检查API Key、Base URL、模型名等参数是否填写正确；
     4. 本地模型需确保服务端已启动，Base URL无误；
@@ -898,7 +894,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.7 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.8 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史

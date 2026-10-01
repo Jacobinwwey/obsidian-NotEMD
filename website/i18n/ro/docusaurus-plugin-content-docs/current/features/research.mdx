@@ -1,125 +1,88 @@
 ---
 id: research
-title: "Cercetare și căutare pe web"
-description: "Integra căutarea pe web în notele tale"
+title: Cercetare și căutare web
+description: 'Rezumă surse recuperate, separând dovezile web de contextul local opțional.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - Cercetare și căutare web
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Cercetare și căutare pe web
+# Cercetare și căutare web
 
-<TLDR>
-**Notemd citește pe web și injectează rezultatele LLM-summarizate direct în notele tale.** Tavily API este backend-ul principal de căutare; DuckDuckGo servește drept opțiune fără configurare. Rezultatele sunt sumarizate cu citate din surse și adăugate sub o titlul `## Research`. Suportă cercetare într-o singură notă, cercetare în folderuri în lot și selecție a modelului pentru pasul de sumarizare în funcție de sarcină.
+<TLDR>Research & summarize caută după selecție sau titlu, cere LLM-ului un rezumat al contextului disponibil și îl adaugă notei Markdown active. Alegeți explicit Tavily sau DuckDuckGo și verificați sursele citate.</TLDR>
 
-Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Prezentare
 
-## Prezentare generală
-
-Cercetarea este una dintre cele mai puternice integrări ale Notemd: ea încheie ciclul între citire, căutare și scriere. În loc să treci la un browser pentru a căuta un termen necunoscut, poți evidenția-l și lăsa pe Notemd să caute, să sumarizeze și să adauge rezultatele – totul în cadrul seifului tău.
-
-Procesul este complet configurabil. Alegi furnizorul de căutare, LLM care scrie sumarul și dacă rezultatele sunt adăugate în nota activă sau scrise în fișiere separate. Modul în lot îți permite să cercetezi toate notele dintr-un folder cu un singur clic.
+Motorul de căutare și modelul de rezumare sunt alegeri separate. Tavily cere cheie; DuckDuckGo nu, dar necesită rețea și poate limita traficul. Un model local nu transformă cercetarea web într-o sarcină offline.
 
 ## Cum funcționează
 
-### Pipeline-ul Căutare-apoi-Sumarizare
+### Căutare și rezumare
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+1. Deschideți destinația în editorul Markdown și selectați un subiect sau folosiți titlul.
+2. Rulați **Research & summarize**.
+3. Tavily furnizează fragmente; DuckDuckGo poate descărca pagini rezultate.
+4. Contextul local permis poate fi adăugat din domeniul ales.
+5. Modelul scrie sub `Research Summary`, cu subiect și tip de sursă.
+6. Deschideți URL-urile și verificați afirmațiile. Contextul recuperat nu dovedește fiecare citat generat.
 
-1. **Extragerea interogărilor** -- Notemd extrage termenii de căutare din selecția ta sau din titlul notei.
-2. **Căutarea pe web** -- Mai întâi se încearcă Tavily. Dacă nu este configurată nicio cheie API, se folosește automat DuckDuckGo (fără nevoie de cheie).
-3. **Sumarizarea cu LLM** -- Rezultatele brute de căutare sunt trimise către LLM configurat, care generează un sumar concis cu citate din surse inline.
-4. **Adăugare** -- Sumarul format este adăugat sub o titlul `## Research` în nota activă.
+### Tavily sau DuckDuckGo
 
-### Tavily vs. DuckDuckGo
+| Alegere | Pregătire | Limită operațională |
+| -------- | ------- | ---------------------- |
+| Tavily | Selectați Tavily și introduceți cheia | Cote de cont și fragmente returnate |
+| DuckDuckGo | Selectați DuckDuckGo explicit | Fără cheie; restricții de căutare și disponibilitate a paginilor |
 
-| Aspect | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| Cheia API | Requerit (există nivel gratuit) | Nu este necesar |
-| Calitatea rezultatului | Superioară (construită special pentru AI) | Adevată pentru interogări generale |
-| Limite de rată | Nivel gratuit generos | Supus throttling-ului |
-| Configurație | `tavilyApiKey` în setările | Fără configurație – fallback automat |
+Cheia Tavily goală sau greșită nu schimbă serviciul. Cu puțin context web, citiți raportul. Fragmentele locale activate pot susține un rezumat; eticheta sursei îl diferențiază de conținutul bazat pe web.
 
-### Cercetare în folderul în lot
+### Cercetare în generarea din titluri
 
-Faceți clic dreapta pe un folder și alegeți **"Notemd: Folder de cercetare"**. Fiecare fișier `.md` din folder este procesat secvențial (sau paralel până la concurența configurată). Fiecare notă primește propriul său rezumat de cercetare.
+**Enable research in "Generate from title"** adaugă cercetare și loturilor, fiind oprită implicit. Aceasta este calea suportată pentru foldere; nu există o acțiune independentă generală Research Folder.
 
-## Configurație
+## Setări
 
-| Setare | Implicit | Efect |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Cheia Tavily API. Când este golă, se folosește exclusiv DuckDuckGo. |
-| `researchProvider` / `researchModel` | DeepSeek | LLM pe sarcină pentru rezumarea rezultatelor de căutare |
-| `maxResearchContentTokens` | `4000` | Bugetul de tokeni pentru conținutul trimis la LLM. Excesul este trunchiat. |
-| `researchAppendToNote` | `true` | Adaugă rezumatul la nota sursă. Dacă este false, se creează un fișier separat. |
-| `researchLanguage` | `'en'` | Limba de ieșire pentru cercetarea rezumată |
+| Setare | Valoare implicită | Efect |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Serviciu de căutare |
+| `tavilyApiKey` | `''` | Cheie Tavily |
+| `tavilyMaxResults` | `5` | Număr cerut de rezultate Tavily |
+| `tavilySearchDepth` | `basic` | Adâncime Tavily |
+| `ddgMaxResults` | `5` | Număr cerut de rezultate DuckDuckGo |
+| `ddgFetchTimeout` | `15` | Timeout al paginilor în secunde |
+| `maxResearchContentTokens` | `3000` | Buget aproximativ de context web |
+| `researchProvider` | `DeepSeek` | Furnizor de rezumare la rutare per sarcină |
+| `researchModel` | `''` | Gol preia modelul furnizorului |
+| `researchSummarizeLanguage` | `en` | Limba rezultatului per sarcină |
+| `enableResearchInGenerateContent` | `false` | Permite cercetarea la generarea din titluri |
+| `enableLocalKnowledgeRetrieval` | `false` | Activează separat căutarea locală |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Context local pentru această sarcină |
 
-### Recomandare de model pe sarcină
+### Context și model
 
-Cercetarea beneficiază de un model care gestionează conținutul multilingv și produce texturi bine structurate. Luați în considerare:
-
-- **DeepSeek** -- standard, accesibil, calitate bună
-- **GPT-4o** -- rezumări de calitate superioară, cost mai ridicat
-- **Gemini Flash** -- rapid și ieftin, potrivit pentru interogări simple
+Bugetele sunt estimări, nu tokenuri exacte ale furnizorului. Trunchierea poate elimina dovezi. Restrângeți întrebarea și ajustați modelul/bugetul. Indexul local caută lexical, fără embeddings ascunse sau garanție de recuperare completă.
 
 ## Exemplu
 
-Citiți un articol despre *mecanismele de atenție transformer* și întâlniți un termen necunoscut: *relative positional encoding*. În loc să lăsați Obsidian:
+Creați `Codificare pozițională relativă`, cercetați și comparați cu publicațiile originale ori documentația oficială. Păstrați întrebarea, URL-urile reale și corecturile. Exemplul nu pretinde o căutare deja efectuată în vault-ul dvs.
 
-1. Highlightați **"relative positional encoding"**
-2. Faceți clic dreapta --> **"Notemd: Cercetare și rezumare"**
-3. Notemd căută pe web, rezumă cele mai bune rezultate și adaugă:
+## Anulare și confidențialitate
 
-```markdown
-## Research
+Adăugările finalizate rămân. Cererile de model/pagini deja acceptate pot termina. Motorul primește întrebarea, site-urile cererile, iar LLM-ul tot contextul, inclusiv fragmente locale permise. Verificați diagnosticele înainte de partajare.
 
-### Relative Positional Encoding
+## Recomandări
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
+- Separați sursa web, nota locală și concluzia modelului.
+- Verificați citatele, datele și afirmațiile în original.
+- Testați căutarea și LLM-ul separat, cu o întrebare mică.
+- Citiți rezumatele existente înainte de o nouă adăugare.
 
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
+## În continuare
 
-Rezumatul face acum parte din depozitul dumneavoastră, fiabil pentru căutare, linkabil și accesibil offline.
-
-## Sfaturi
-
-- **Setați o cheie Tavily pentru cele mai bune rezultate** -- chiar nivelul gratuit oferă o relevanță mai bună decât DuckDuckGo brut.
-- **Folosiți un model de rezumare capabil** -- modelele ieftine pot simplifica conținutul tehnic subtil.
-- **Cercetați în lot** după o citire inițială pentru a umple lacunele din multiple note simultan.
-- **Verificați rezumaturile adăugate** -- LLM poate inventa detalii despre sursă. Verificați afirmațiile esențiale.
-
----
-
-## Următoarele pași
-
-- [Concept Notes](./concept-notes) -- Extrageți și păstrați termenii cheie din rezultatele cercetării
-- [Wiki-Links](./wiki-links) -- Legați conceptele obținute din cercetare între ele în depozitul dumneavoastră
-- [Translation](./translation) -- Traduceți rezumaturile de cercetare într-o altă limbă
-- [LLM Furnizori](/docs/providers/overview) -- Configura modelul utilizat pentru rezumat
+- [Configurare](../getting-started/configuration).
+- [Prompturi](../advanced/custom-prompts).
+- [Depanare](../advanced/troubleshooting).

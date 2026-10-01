@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "Arbejdsmønster"
-description: "Kopler flere opgaver sammen med en-klik-knapper"
+title: Arbejdsgange
+description: >-
+  Forbind eksisterende handlinger med gyldige ID’er, tydelig mappekontekst og
+  forudsigelig fejlhåndtering.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Arbejdsgange
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Arbejdsmønster
+# Arbejdsgange
 
-<TLDR>
-**Notemd Arbejdsmønster kopler flere opgaver til en enkelt en-klik-handling.** Definer sekvenser som `add-links > extract-concepts > research > diagram` med en enkel DSL. Arbejdsmønster vises som knapper i sidebaren, der kører hele kedjen på den aktuelle note eller mapp. Det leverer fordefinerte arbejdsmønster; skab egne i indstillingerne. Hver trin bruger sin egen konfiguration for modellen per opgave.
+<TLDR>En arbejdsgang kører sidepanelhandlinger efter hinanden. En handling kan kræve mappevalg eller aktiv editor. Det er ikke en tekstpipeline: hvert trin beholder egne input, output og sideeffekter. Begynd med en testnote og separat mappe.</TLDR>
 
-Dette er en del af [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+## Overblik
 
-## Översikt
+Den medfølgende **One-Click Extract**:
 
-Et arbejdsmønster fjerner trængseln ved at køre opgaver en efter en. I stedet for at klikke højre fire gange for at tilføje links, extrahere koncepter, undersøge ukendte termer og generere en diagram, trykker du på en knap i sidebaren og hele kedjen køres. Notemd hanterer sekvenseringen, fejloverførsel og fremgangsrapportering.
-
-Arbejdsmønster defineres med en letvægig DSL (domænespecifik språk). De findes i indstillingerne, vises som klikbare knapper i Obsidian sidebaren og kan tilpasses enten den aktuelle note eller en hel mapp.
-
-## Hvordan det virker
-
-### Kørespipeline for arbejdsmønster
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Parse** -- DSL-strengen delses ved `>` (eller `>`) i en ordnet liste over opgavidentifikatorer.
-2. **Resolve** -- Hver identifikator mappes til en interner kommando (add-links, extract-concepts, research, translate, diagram osv.).
-3. **Execute** -- Trinne køres sekventielt. Hvert trin bruger den konfigurerede leverandør og modellen per opgave.
-4. **Error handling** -- Hvis et trin fejler, afbryder arbejdsmønsteret eller fortsætter til det næste trin, afhængigt af din fejlpolitik.
-5. **Done** -- En toast-meddelelse rapporterer succes eller listar alle fejlige trin.
+1. Tilføj links til den aktive note; opret begreber, hvis en mappe er valgt.
+2. Generér indhold til egnede noter i begrebs-/valgt mappe, også eksisterende noter.
+3. Reparér Mermaid i genereringens complete-mappe.
 
-### DSL-format
+Standardkæden udfører ikke webresearch. Titelgenerering kan tilføje research via en separat indstilling. Se [batcher](../advanced/batch-processing).
 
-Arbejdsmønster defineres som en `>`-skilt sekvens af opgavidentifikatorer:
+## Sådan virker det
 
+### Udførelse
+
+Trin kører sekventielt med status og fejl i sidepanelet. Annullering stopper kommende trin og når understøttede anmodninger. Færdige filer bevares; kæden er ingen transaktion. Begrebsmappen er første mappepræference. Batchgenerering husker kilde-/complete-mappe, og Mermaid bruger complete. Andre handlinger beholder krav til fil, markering og interaktion.
+
+### DSL
+
+Én navngiven knap pr. linje. `::` adskiller navn fra handlinger; `>` adskiller handlings-ID’er. Tomme linjer og linjer med indledende `#` ignoreres; ukendte ID’er afvises.
+
+```text
+Udtræk og tegn::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Tilgængelige opgavidentifikatorer:**
+Brug arbejdsgangsbyggeren eller redigér DSL. ID’er er stabile, mens etiketter følger UI-sproget. Mappevarianter har egne ID’er; de udledes ikke ved vilkårlig teksterstatning.
 
-| Identifikator | Aktion |
-|------------|--------|
-| `process-current-add-links` | Læg til wiki-linker i den aktive note |
-| `extract-concepts-current` | Udtræk koncept fra den aktive note |
-| `research-and-summarize` | Undersøg den valgte tekst eller notes titel |
-| `process-current-translate` | Oversæt den aktive note |
-| `summarize-to-mermaid` | Generer en diagram af den aktive note |
-| `generate-from-title` | Generer indhold fra notes titel |
-| `extract-original-text` | Udtræk den oprindelige tekst (for OCR / skannet indhold) |
+| ID | Handling / forudsætning |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Links i aktiv note |
+| `process-folder-add-links` | Links i valgt mappe |
+| `extract-concepts-current` | Begreber fra aktiv note |
+| `extract-concepts-folder` | Begreber fra valgt mappe |
+| `generate-from-title` | Indhold fra aktiv titel |
+| `batch-generate-from-titles` | Indhold til egnede mappenoter |
+| `research-and-summarize` | Undersøg markering/titel i åben Markdown-editor |
+| `summarize-as-mermaid` | Opsummér understøttet aktivt input som Mermaid |
+| `generate-diagram` | Diagram fra understøttet input |
+| `preview-diagram` | Preview af understøttet kilde eller diagram |
+| `translate-current-file` | Oversæt aktiv understøttet fil |
+| `batch-translate-folder` | Oversæt valgt mappe |
+| `extract-original-text` | Udtræk efterspurgte originalpassager |
+| `batch-extract-original-text` | Passager fra egnede mappefiler |
+| `split-note-by-chapters` | Opdel aktiv note i kapitler |
+| `batch-mermaid-fix` | Reparér Mermaid-kodeblokke i valgt mappe |
+| `fix-formula-current` | Normalisér formelafgrænsere i aktiv note |
+| `batch-fix-formula` | Normalisér formelafgrænsere i mappe |
+| `check-duplicates-current` | Kontrollér dubletter i aktiv note |
+| `check-remove-duplicate-concepts` | Gennemgå og fjern begrebsdubletter interaktivt |
+| `test-llm-connection` | Test konfigureret udbyder |
+| `probe-slide-export-env` | Kontrollér lokalt præsentationseksportmiljø |
+| `export-slides` | Eksportér aktiv fil til slides |
 
-**Varianter på mappenivå**: Erstat `current` med `folder` i identifikationsnavnet.
+### Standard eller egen kæde
 
-### Fordefinerte vs. egne arbejdsmetoder
+One-Click Extract er forudindstillet. Definér øvrige knapper med navn og rækkefølge, og kontrollér sidepanelets værktøjstip. Ret parserfejl før brug.
 
-Notemd leverer færdige arbejdsmetoder for algemme mønster:
+## Indstillinger
 
-| Arbejdsmetode | Kedje | Brugsscenario |
-|----------|-------|----------|
-| **En-klik-udtrækning** | add-links > extract-concepts > research | Behandle en forskningsartikel i én gang |
-| **Komplet pipeline** | add-links > extract-concepter > research > diagram | Fuldført kunnskapsutvinning med visualisering |
-| **Oversæt + Link** | translate > add-links | Oversæt og link koncepter i målmandskabet |
+| Indstilling | Startværdi | Virkning |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Stop ved første rapporterede trinfejl |
+| `useMultiModelSettings` | `false` | Aktiv udbyder, indtil opgaverouting aktiveres |
+| `enableResearchInGenerateContent` | `false` | Ingen research ved titelgenerering før aktivering |
 
-**Egen arbejdsmetoder** skrives i indstillingerne:
+`continue_on_error` fortsætter efter fejl. Brug det kun, hvis efterfølgende handlinger kan arbejde med det resterende input. Fortsættelse gør ikke en delvis arbejdsgang vellykket.
 
-1. Åbne **Indstillinger** --> **Notemd** --> **Arbejdsmetoder**
-2. Klik på **"Add Workflow"**
-3. Indtast DSL-keden (f.eks. `process-current-add-links>extract-concepts-current`)
-4. Giv det en visningsnavn (f.eks. "Snabb Link + Extract")
-5. Den nye knap vises umiddelbart i sidemenuet
+### Model pr. trin
 
-## Konfiguration
-
-| Indstilling | Standard | Effekt |
-|---------|---------|--------|
-| `workflows` | Fordefineret set | Array af arbejdsmetodedefinitioner (navn + DSL) |
-| `workflowContinueOnError` | `true` | Fortsæt til næste trin hvis det aktuelle trin fejler |
-| `workflowShowProgress` | `true` | Vis en progress-tost efter hver trin er fuldført |
-
-### Modeller per opgave i arbejdsmetoder
-
-Hver trin i en arbejdsmetode bruger sin egen modellkonfiguration per opgave. Du behøver ikke at specifice modeller i DSL’en selv. Resolutionstilstanden er:
-
-1. Provider/modell per opgave, hvis `useMultiModelSettings` findes på
-2. Global `activeProvider` i anden tilfælde
-
-Det betyder, at `add-links` kan køres på DeepSeek mens `research` køres på GPT-4o – alt indenfor samme arbejdsmetodeklik.
+Opgaven ejer modelvalget. Tom override bruger den valgte udbyders model. Kontrollér alle ruter før privat indhold.
 
 ## Eksempel
 
-Du har netop importert en PDF fra en maskininlæringsartikel til din vault og vil have fuld kunstighedsudvinning:
-
-1. Åbne den importerede note
-2. Klik på sidemenuknappen **"Full Pipeline"**
-3. Notemd udfører:
-   - **Trin 1**: Tilføj wiki-linker – `[[attention mechanism]]`, `[[transformer]]` osv.
-   - **Trin 2**: Udvinde koncepter – skaber konceptnoter i din konceptmapp
-   - **Trin 3**: Forskning – sammanfatter webkilder for nøgleord
-   - **Trin 4**: Diagram – genererer en Mermaid mindmap af artiklets struktur
-4. Efter ca. 30 sekunder har din note linker, konceptnoter findes, forskningen er tilføjet og en diagramfil er gemt
-
-Alt fra en enkelt klik.
+Vælg en tom `trial-concepts` og en testkilde. Gennemgå begreber og rapporteret complete-mappe. Kør trinnene separat først, hvis destinationen er uklar. Udvid efter kontrol.
 
 ## Tips
 
-- **Start med fordefinerte arbejdsmetoder** – de dekker de mest almindelige mønstre. Anpass kun, når du behøver en ander sekvens.
-- **Aktiver `workflowContinueOnError`** – et fejlt diagramtrin bør ikke afbryde hele pipeline’en.
-- **Brug mapparbejdsfloder** for massbehandling -- klick med højre på en mappe, vælg en arbejdsflow, og alle noter bliver behandlet.
-- **Giv arbejdsfloder klare navne** -- pladsen i sidebaren er begrænset. Brug korte, handlingstilpassede navne som "Snabb udextraktion" eller "Oversæt + Link".
-
----
+- Hold kæder overskuelige, så fejl og filernes oprindelse kan følges.
+- Sletning beholder interaktiv bekræftelse; undgå sådanne trin i uovervågede kæder.
+- Se log og filer efter annullering eller genoprettelseskonflikt.
+- Test samme model/mappe; forbindelsestest beviser ikke kvoter til lange batcher.
 
 ## Næste trin
 
-- [Research](./research) -- Forstå, hvad forskningsstegen gør, før du tilføjer den til arbejdsfloder
-- [Wiki-Links](./wiki-links) -- Hovedligningsfunktionen, som bruges i de fleste arbejdsfloder
-- [Concept Notes](./concept-notes) -- Konceptudextraktion som en arbejdsflodesteg
-- [Batch Processing](/docs/advanced/batch-processing) -- Konkurrence og fremgangsrapportering for mapparbejdsfloder
+- [Begreber](./concept-notes).
+- [Batcher](../advanced/batch-processing).
+- [Research](./research).

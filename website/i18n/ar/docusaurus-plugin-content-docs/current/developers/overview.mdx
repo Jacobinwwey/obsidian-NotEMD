@@ -1,0 +1,109 @@
+---
+id: overview
+title: دليل المطوّر
+description: >-
+  ابنِ Notemd واختبره ووسّعه وفق عقود المزوّدين والعمليات والرسم والوثائق
+  الحالية.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - دليل المطوّر
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# دليل المطوّر
+
+<TLDR>
+ابدأ بفرع عمل، وثبّت الاعتمادات المقفلة ونسختي المتصفح ثم نفّذ البناء ومجموعة Jest كاملة. عدّل الوحدة المالكة للعقد، وحدث الوثائق واختبارات المزوّد والأدلة في التطبيقات الأصلية مع السلوك.
+</TLDR>
+
+## تجهيز نسخة العمل
+
+استنسخ [المستودع](https://github.com/Jacobinwwey/obsidian-NotEMD)، واقرأ [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)، وأنشئ فرعًا. تستخدم اختبارات الإضافة Node 20 في Linux وWindows، ويُتحقق من الموقع بـNode 24. ثبّت اعتماداتهما مستقلًا في الجذر وفي `website/`.
+
+من الجذر:
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+قد تثبّت حزمتا Playwright مراجعتين مختلفتين من Chromium؛ تثبيت واحدة لا يكفي لبيئة نظيفة. `main.js` منتج بناء متجاهل في Git؛ حزمة محلية قديمة لا تثبت صحة commit جديد.
+
+## حدد المالك قبل التعديل
+
+| المسؤولية | المصدر الأساسي |
+| ---------------- | ---------------- |
+| دورة حياة الإضافة والأوامر وتوجيه المضيف | `src/main.ts` |
+| إعدادات المزوّد وبيانات البروتوكول والتحقق | `src/llmProviders.ts` |
+| صياغة الطلبات والنقل والمحاولات والتدفق | `src/llmUtils.ts` |
+| العمليات والمخططات واختيار CLI العام | `src/operations/`, `src/cliContracts.ts` |
+| مهام الملفات والبحث والترجمة | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| تركيب الأفعال والشريط الجانبي | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| مواصفات الرسوم وإظهارها | `src/diagram/`, `src/rendering/` |
+| نصوص الواجهة ولغاتها | `src/i18n/` |
+| الأدلة العامة والترجمات | `website/docs/`, `website/i18n/` |
+| دليل الصيانة والأدلة المؤرخة | `docs/maintainer/` |
+
+حزمة الإنتاج ذاتية الاكتفاء وتتضمن مضيف المعاينة المدمج. مسار render-host المنفصل المرشح ليس عقد أصل مشحون. لا تفعله دون مزامنة التغليف وأصول الإصدار والتدقيق والوثائق.
+
+## تنفيذ تغيير محدد
+
+1. أعد إنتاج السلوك واكتب اختبارًا مركزًا يفشل قبل التغيير.
+2. عدّل مالك الثابت، وتحقق من المدخلات الخارجية عند الحد، دون نسخ معرفة المزوّد أو العملية بين المستدعين.
+3. أعد الاختبارات المستهدفة ثم الكاملة؛ غطّ الإلغاء والأخطاء والتخزين عند الكتابة.
+4. حدث الأصل الإنجليزي واللغات المتأثرة. للخطط والمهام وwalkthrough نسختان كاملتان منفصلتان بالإنجليزية والصينية ضمن `docs/`.
+5. افحص التطبيق المستهلك عند تغيير العرض أو التصدير الأصلي؛ XML أو صورة أو بناء ناجح لا يثبت التحرير أو التصاق الموصلات.
+
+لإضافة مزوّد، عدّل `llmProviders.ts` واستخدم النقل القائم عند التوافق، وحدث `llmProviders.test.ts` و`llmUtilsProviderSupport.test.ts` وREADME واختبارات الاتصال. حافظ على التدفق وتشخيص الاستجابة المنقطعة.
+
+عرّف مخططات الإدخال والنتيجة والسياق والآثار ووسوم التعامل قبل كشف عملية. التسجيل لا ينشئ تلقائيًا نقطة Agent عامة؛ راجع [دليل الوكلاء](../agents/overview).
+
+## التحقق من التغيير
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+يقارن lint كل تشخيص بالمرجع؛ الدين القائم أو انخفاض العدد الإجمالي لا يبرران خطأ جديدًا. استخدم `npm run benchmark:local-kb` عند تعديل الاسترجاع، واذكر مجموعة البيانات والبيئة بدل ضمان سرعة عام.
+
+للموقع استخدم Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+يكتب Codex ترجمات برنامج 1.9.8 ويراجعها مباشرة. لا تشغّل نصوص الترجمة القديمة ولا تستدعِ LM Studio أو API ترجمة لإعداد الوثائق. يمكن للأدوات تنسيق النص المكتوب وفحصه وعرضه.
+
+## الاختبار في Obsidian والتطبيقات الأصلية
+
+استخدم خزنة مؤقتة. تتطلب نصوص المضيف العلامة `.notemd-host-verification` وتتحقق من الحزمة المنسوخة؛ لا تستخدم خزائن حقيقية. جرّب `obsidian help` و`obsidian-cli help` وسجّل غياب الأدوات، ولا تعتبر أمرًا وهميًا دليل مضيف ناجح.
+
+لاختبارات PowerPoint وCircuitikZ والشرائح متطلبات وأصول خاصة. اتبع [سجل القبول](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) و[دليل الإصدار](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). أبقِ عدم تحقق المحمول والنسخة الدنيا واضحًا.
+
+## المساهمة والإصدار
+
+صف في PR المشكلة والسلوك النهائي والاختبارات والحدود. استخدم [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) لبلاغ قابل للتكرار. لا تضف مفاتيح أو مواد خزنة خاصة أو منتجات غير مرتبطة.
+
+يمتلك الناشر ودليل المستودع مسار الإصدار: بيانات متفقة، tag رقمي، مصدر نظيف، وصف ثنائي اللغة وأصول مسودة متحققة، ثم نشر وإطلاق Pages صريح. لا تنقل tag عامًا لتبديل حزمته. `.trellis/` حالة عمل محلية وليست اعتماد CI.
+
+## الخطوات التالية
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): التنفيذ والمراجعة.
+- [حالة المشروع](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md): الخطط والأدلة.
+- [الوكلاء](../agents/overview): القدرات وعقود الاستدعاء.
+- [1.9.8](../releases/1.9.8): الترقية وآثارها.

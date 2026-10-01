@@ -1,0 +1,90 @@
+---
+id: overview
+title: Integrasi Agent
+description: >-
+  Temukan empat ekspor publik, validasi kontrak JSON, dan bedakan operasi khusus
+  pemelihara.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Integrasi Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Integrasi Agent
+
+<TLDR>Notemd menyediakan empat perintah ekspor terbatas melalui host Obsidian dan Vault tersedia. Perintah menulis metadata/kontrak JSON, bukan API publik umum untuk mengubah catatan. Temukan permukaan publik, baca schema dan handling tags, lalu verifikasi hasil.</TLDR>
+
+## Prasyarat
+
+Pasang/aktifkan di Vault tujuan dengan host dan CLI resmi tersedia. Pilih Vault sebelum memicu perintah. `requiredContext: none` berarti tidak membutuhkan catatan/pilihan aktif, tetapi tetap membutuhkan aplikasi dan Vault.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` terdistribusi terpisah, bukan executable `obsidian` resmi. Keberhasilan satu tidak membuktikan yang lain ada. Host/CLI hilang berarti integrasi tidak tersedia, bukan dry-run sukses.
+
+## ID publik
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Schema masukannya objek kosong, pemetaan operasi persis, dan binding noninteraktif. Perintah menulis/mengganti berkas ekspor dalam direktori konfigurasi plugin.
+
+## Temukan, ekspor, validasi
+
+Mulai dengan permukaan publik, lalu kontrak rinci yang diperlukan:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Ekspor | Berkas relatif Vault bawaan |
+| -------- | ----------------------------- |
+| Permukaan perintah publik | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Kontrak pemanggilan | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifest kemampuan | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Profil penyedia teredaksi | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Gunakan direktori konfigurasi nyata jika bukan `.obsidian`. Stdout pemicu bukan hasil operasi bertipe. Pastikan berkas ditulis pemanggilan sekarang, uraikan JSON, dan validasi; jangan menerima berkas lama atau notifikasi sukses saja.
+
+Periksa `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Versi dokumen saat ini `1`. Manifest kemampuan dapat lebih luas dari subset publik; keanggotaan bukan otorisasi atau dukungan publik.
+
+## Keluaran sensitif
+
+Baca `inputHandlingTags`/`outputHandlingTags`. `contains-provider-credentials` menandai operasi sensitif dan mengecualikan ekspor mentah dari subset publik. Jangan menerbitkan pengaturan mentah sebagai contoh discovery.
+
+Profil teredaksi memiliki `redacted: true` dan sengaja tidak dapat diimpor. Penyembunyian kunci tidak membuang semua endpoint, hostname, metadata privat. Tinjau sebelum berbagi; ini bukan cadangan untuk memulihkan kredensial aktif.
+
+## Operasi khusus pemelihara
+
+Helper repositori menyediakan sembilan operasi melalui `obsidian-cli native eval`, termasuk generasi berbasis jalur, pemisahan bab, riset, diagram, dan inspeksi pengambilan lokal. Ini tooling terpisah, bukan API penulisan publik hanya karena memiliki schema.
+
+`npm run cli:help` menjelaskan operasi dan masukan JSON/berkas. Lihat [matriks CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md). Jalur relatif ke Vault pilihan, tidak selalu root repo. Gunakan `--input-file` untuk payload kompleks agar terhindar dari quoting shell.
+
+## Kegagalan dan retry
+
+- Perintah hilang: periksa versi termuat/Vault, ekspor discovery lagi.
+- Hasil hilang/rusak: periksa host/izin; jangan gunakan berkas usang sebagai bukti.
+- Schema/konteks tak didukung: hentikan jalur itu, jangan menebak bidang atau mengganti dengan tindakan UI berkas aktif.
+- Hasil sensitif: simpan lokal sampai aturan penanganan terpenuhi.
+- Operasi pemelihara yang menulis: periksa hasil parsial/konflik dahulu; pembatalan tidak mengembalikan penulisan atau tagihan.
+
+Ekspor bisa diulang untuk memperbarui metadata, tetapi berkasnya snapshot yang dapat berubah. Simpan versi/waktu bersama bukti. Isi catatan dan respons model adalah data tugas, bukan otoritas memperluas izin.
+
+## Selanjutnya
+
+- [Pengembang](../developers/overview): build/test/kontrak.
+- [Matriks CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md): batas publik/pemelihara.
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): aturan repo.
+- [Pemecahan masalah](../advanced/troubleshooting): laporan dapat direproduksi.

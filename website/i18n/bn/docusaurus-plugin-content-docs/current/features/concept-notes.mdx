@@ -1,184 +1,115 @@
 ---
 id: concept-notes
-title: "কনসেপ্ট নোটস"
-description: "কনসেপ্ট নোটস তৈরি ও ব্যবস্থাপনা করুন — আপনার ভল্ট থেকে বের করা গুরুত্বপূর্ণ ধারণাগুলোর জন্য স্বতন্ত্র নোট"
+title: ধারণার নোট
+description: >-
+  নির্বাচিত ফোল্ডারে ধারণা বের করুন এবং template, backlinks ও duplicates যাচাই
+  করুন।
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - ধারণার নোট
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# কনসেপ্ট নোটস
+# ধারণার নোট
 
-<TLDR>
-**Notemd আপনার নোটগুলো থেকে গুরুত্বপূর্ণ ধারণাগুলো বের করে স্বতন্ত্র কনসেপ্ট নোট ফাইল তৈরি করে।** LLM মূল শব্দগুলো চিহ্নিত করে, কনফিগার করা ফোল্ডারে প্রতিটি ধারণার জন্য একটি `.md` ফাইল তৈরি করে, এবং ইচ্ছামতো সোর্স নোটে ব্যাকলিঙ্ক যোগ করে। এটি সিনোনিম সাপ্রেশন, প্রতি-টাস্ক মডেল নির্বাচন, ফাইলনাম স্যানিটাইজেশন এবং ৪-ধাপী ডিডুপ্লিকেশন ইঞ্জিন সমর্থন করে। এটি [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge)-এর অংশ।
-</TLDR>
+<TLDR>স্বাধীন extraction মূল পড়ে নির্বাচিত folder-এ Markdown concept files বানায়। Folder প্রথমে নির্ধারিত নয়। নতুন নোটে শুধু title এবং backlinks বন্ধ থাকে। Add-links-এর concept template আলাদা।</TLDR>
 
-## সংক্ষিপ্ত বিবরণ
+## সারসংক্ষেপ
 
-কনসেপ্ট নোটসগুলো একটি সংযুক্ত জ্ঞান ভিত্তির গঠনমূলক উপাদান। যখন আপনি একটি নোট প্রক্রিয়াকরণ করেন, Notemd:
+আগে **Concept note folder path** ঠিক করুন। আলাদা folder output, duplicate review ও পরবর্তী generation scope বোঝা সহজ করে। Extraction ফাইল বানায়, প্রতিটিতে গবেষণাসমৃদ্ধ ব্যাখ্যা ভরে না।
 
-1. **একটি LLM-এ আপনার টেক্সট পাঠায়** এবং একটি কাঠামোগত এক্সট্রাকশন প্রম্পট দেয়
-2. **LLM রেসপন্স থেকে `CONCEPT:` লাইনগুলো পার্স করে**
-3. **নির্ধারিত ফোল্ডারে প্রতিটি ধারণার জন্য একটি `.md` ফাইল তৈরি করে**
-4. **(সক্রিয় করা হলে) সোর্স নোটে ব্যাকলিঙ্ক যোগ করে**
+## কীভাবে কাজ করে
 
-## এটি কীভাবে কাজ করে
+### Extraction ধাপ
 
-### এক্সট্রাকশন পাইপলাইন
+LLM-এ content পাঠিয়ে `CONCEPT:` entries parse, একই operation-এ নাম deduplicate ও files create/update হয়। বড় নোট chunk হয়। Failed chunks দেখুন; model response সম্পূর্ণ ধারণাতালিকা নয়।
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### Prompt
 
-### এক্সট্রাকশন প্রম্পট
-
-LLM একটি প্রম্পট পায় যা এটিকে নির্দেশ দেয় যেন এটি:
-
-- ডকুমেন্টের বিষয়বস্তুর কেন্দ্রীয় **বিশেষ্য বা বিশেষ্য ফ্রেজ** বের করে
-- **নির্দিষ্টতাকে অগ্রাধিকার দেয়** — "Dielectric Relaxation"-কে "Relaxation"-এর চেয়ে বেশি গুরুত্ব দেয়
-- **একবচনে রূপান্তর করে** — "models" হয়ে যায় "model"
-- **সাব-কনসেপ্টগুলো দমন করে** — যদি "dielectric relaxation" থাকে, তবে "relaxation" বের করা হয় না
-- **Skip** রেফারেন্স/বিবলিওগ্রাফি বিভাগ, সাধারণ বিশেষ্য, কোম্পানি/পণ্যের নাম
-- প্রতি লাইনে একটি করে ধারণা `CONCEPT: Term Name` হিসেবে আউটপুট করুন
-
-**Synonym suppression** (ঐচ্ছিক): প্রম্পটের শুরুতে "Avoid extracting synonyms, semantically similar core concepts, or keywords whenever possible" যোগ করুন.
-
-**Focused learning domain** (ঐচ্ছিক): একটি নির্দিষ্ট ডিসিপ্লিনে আউটপুট সীমাবদ্ধ করতে `Relevant Fields: [domain]` যোগ করুন.
-
-**Language override** (ঐচ্ছিক): শেষে "The output concepts MUST be in [language]." যোগ করুন.
+Built-in নির্দেশ topic-specific concrete concepts চায়। Domain ও synonym instructions canonical vocabulary নিশ্চিত করে না। Custom prompt-এ `CONCEPT: Term` রাখুন। [Prompts](../advanced/custom-prompts)।
 
 ### Chunking
 
-দীর্ঘ নোটগুলো `settings.chunkWordCount` দ্বারা ভাগ করা হয়। প্রতিটি চাঙ্ক আলাদাভাবে পাঠানো হয়। সমস্ত চাঙ্ক থেকে ধারণাগুলো `Set`-এ সংগ্রহ করা হয় — চাঙ্কগুলোর মধ্যে ডুপ্লিকেটগুলো নীরবে অপসারণ করা হয়। প্রতিটি চাঙ্কে LLM ধরনের ত্রুটি থাকলেও অপারেশনটি বন্ধ হয় না.
+`chunkWordCount` প্রথমে 3000, শব্দভিত্তিক অনুমান, provider token budget নয়। Chunk-এর মধ্যে context সীমিত; সম্পর্ক ও ambiguous names দেখুন।
 
-## Concept Note Creation
+## ফাইল তৈরি
 
-### Filename Rules
+### নামের নিয়ম
 
-| Rule | বিহেভিয়ার |
-|------|----------|
-| Hyphens/underscores | Replaced with spaces |
-| Special characters | Stripped: backslash, forward slash, colon, asterisk, question mark, quotes, angle brackets, pipe, hash, caret, brackets |
-| Whitespace | Collapsed and trimmed |
-| সর্বোচ্চ দৈর্ঘ্য | ১০০ অক্ষর (ট্রাঙ্কুটেড + পুনরায় ট্রিম করা) |
-| খালি/সব ডট ফলাফল | নীরবে বাদ দেওয়া |
+অনুপযুক্ত path characters বাদ, spaces normalise, দীর্ঘ নাম truncate এবং ফাঁকা ফল skip হয়। আলাদা শব্দগুচ্ছ একই filename হতে পারে। বড় collection-এর আগে নাম পরীক্ষা করুন।
 
-উদাহরণ: `A-B: Key*Term` এর পরিবর্তে `A B KeyTerm.md` হয়
+### Templates
 
-### টেমপ্লেটস
-
-**পূর্ণ টেমপ্লেট** (ব্যাকলিঙ্কস সক্রিয়, ন্যূনতম টেমপ্লেট বন্ধ):
+নতুন minimal note:
 
 ```markdown
-# Concept Name
+# ধারণার নাম
+```
+
+নতুন স্বাধীন নোটে backlink চাইলে **Add "Linked From" backlink** চালু ও **Create minimal concept notes** বন্ধ করুন:
+
+```markdown
+# ধারণার নাম
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[মূল নোট]]
 ```
 
-**ন্যূনতম টেমপ্লেট** (যখন `extractConceptsMinimalTemplate: true` থাকে):
+Add-links concept output সক্রিয় থাকলে full form ও backlinks দেয়। স্বাধীন extraction switches সেই আচরণ বদলায় না।
 
-```markdown
-# Concept Name
-```
+### বিদ্যমান নোট
 
-### বিদ্যমান নোটস আপডেট করা
+Backlinks চালু থাকলে `## Linked From`-এ অনুপস্থিত source link যোগ হতে পারে। পুরোনো body থাকে, একই backlink আবার যোগ হয় না। Source basename ব্যবহৃত হয়, তাই একই নামের উৎস পরীক্ষা করুন।
 
-যখন একটি কনসেপ্ট ফাইল ইতিমধ্যে বিদ্যমান থাকে:
+### সেটিংস
 
-1. যদি ব্যাকলিঙ্কস সক্রিয় থাকে এবং সোর্স নোটটি ইতিমধ্যে তালিকাভুক্ত না থাকে, তবে একটি ব্যাকলিঙ্ক যোগ করুন
-2. যদি কোনো `## Linked From` সেকশন থাকে, তবে পরবর্তী `##` হেডারের আগে সেটি সন্নিবেশ করুন
-3. যদি কোনো `## Linked From` না থাকে, তবে শেষে সেকশনটি যোগ করুন
-4. ডুপ্লিকেট ব্যাকলিঙ্কস পরীক্ষা করে বাদ দেওয়া হয়
+| সেটিং | প্রাথমিক মান | প্রভাব |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | Folder বাছলে concept output অনুমোদন |
+| `conceptNoteFolder` | `''` | শুরুতে folder নেই |
+| `extractConceptsMinimalTemplate` | `true` | স্বাধীন নতুন নোটে title মাত্র |
+| `extractConceptsAddBacklink` | `false` | স্বাধীন extraction backlinks |
+| `extractConceptsProvider` | `DeepSeek` | Task-specific routing-এর provider |
+| `extractConceptsModel` | `''` | ফাঁকা হলে provider-এর model |
+| `extractConceptsLanguage` | `en` | Task-specific ভাষার নির্বাচন |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Synonym suppression নির্দেশ |
+| `generateConceptLogFile` | `false` | ঐচ্ছিক concept log তৈরি |
 
-### কনফিগারেশন
+## Duplicates
 
-| সেটিং | ডিফল্ট | প্রভাব |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | মাস্টার টগল। বন্ধ = কোনো নোটস তৈরি হবে না |
-| `conceptNoteFolder` | `''` (অক্ষম) | কনসেপ্ট নোটগুলোর ফোল্ডার পাথ |
-| `extractConceptsMinimalTemplate` | `true` | শুধুমাত্র শিরোনামযুক্ত নোট (Linked From ছাড়া) |
-| `extractConceptsAddBacklink` | `false` | স্ট্যান্ডঅ্যালোন এক্সট্রাকশনের সময় ব্যাকলিঙ্ক যোগ করুন |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | কনসেপ্ট এক্সট্রাকশনের জন্য প্রতি-টাস্ক LLM |
-| `extractConceptsLanguage` | `'en'` | কনসেপ্ট নামগুলোর আউটপুট ভাষা |
-| `replaceSynonymsDuringConceptExtraction` | `false` | প্রম্পটে সিনোনিম সাপ্রেশন সক্রিয় করুন |
-| `generateConceptLogFile` | `false` | তৈরি হওয়া কনসেপ্টগুলোর `.log` তালিকা লিখুন |
+Filename heuristics-এ case, plural, symbol normalisation ও অনুমোদিত scope-এ single-word containment থাকে। এগুলো semantic equivalence-এর প্রমাণ নয়। অনিয়মিত plural ও প্রযুক্তিগত অর্থভেদ নিজে দেখুন। **Check & remove duplicates**-এ শুধু উদ্দেশ্য অনুযায়ী files নিশ্চিত করুন; Obsidian trash ব্যবহার হয়। Concept folder disposable cache নয়, আগে backup নিন।
 
-**গুরুত্বপূর্ণ:** `extractConceptsAddBacklink` এবং `extractConceptsMinimalTemplate` সেটিংগুলো শুধুমাত্র **ডেডিকেটেড এক্সট্রাকশন কমান্ড**-কেই প্রভাবিত করে। "Add Links" কমান্ডটি সর্বদা ব্যাকলিঙ্কসহ পূর্ণ-টেমপ্লেট নোট তৈরি করে.
+### তুলনার scope
 
-## ডুপ্লিকেশন দূরীকরণ
-
-ডুপ্লিকেশন দূরীকরণ কমান্ড (`Notemd: Check & remove duplicate concept notes`) ৫-ধাপের বিশ্লেষণ চালায়:
-
-### ধাপ ১: সঠিক ফাইলনাম ম্যাচ
-
-কনফিগার করা স্কোপ জুড়ে কেস-ইনসেনসিটিভ বেসনেম তুলনা.
-
-### ধাপ ২: প্লুরাল ফর্ম সনাক্তকরণ
-
-সাফিক্সগুলো অপসারণ করা হয়: `-ies` থেকে `-y`, `-es` অপসারিত, `-s` অপসারিত। সিঙ্গুলার ফর্মটি স্কোপ ফাইলগুলোর সাথে তুলনা করা হয়। অনিয়মিত প্লুরালগুলো (children/child) এর জন্য এটি কাজ করে না.
-
-### ধাপ ৩: সিম্বল নরমালাইজেশন
-
-প্রযোজ্য: `toLowerCase()`, হাইফন/আন্ডারস্কোরগুলোকে স্পেস দিয়ে প্রতিস্থাপন করুন, অ-অঙ্কবর্ণীয় অংশ অপসারণ করুন, হোয়াইটস্পেস একীভূত করুন। যেগুলো একইভাবে নরমালাইজ হয় সেগুলোকে চিহ্নিত করা হয়।
-
-### ধাপ ৪: এক-শব্দের ধারণা নিরীক্ষা
-
-এক-শব্দের ধারণা নোটগুলোকে মাল্টি-ওয়ার্ড স্কোপ ফাইলের বেসনেমের সাথে তুলনা করা হয়। যখন স্কোপ `concept_folder_only` হয় তখন এটি চালানো হয় না।
-
-### ধাপ ৫: নিশ্চিতকরণ ও মুছে ফেলা
-
-সমস্ত প্রার্থীকে একটি নিশ্চিতকরণ মডালে উপস্থাপন করা হয়। অনুমোদিত আইটেমগুলো সিস্টেমের ট্র্যাশে সরিয়ে দেওয়া হয়। প্রতিটি মুছে ফেলার মধ্যে অপারেশনটি বাতিল করা যায়।
-
-### স্কোপ মোডস
-
-| মোড | তুলনা করা হয় নিম্নলিখিতগুলোর সাথে |
-|------|-------------------|
-| `vault` (ডিফল্ট) | কনসেপ্ট ফোল্ডার বাদে সমস্ত ভল্ট `.md` ফাইল |
-| `concept_folder_only` | ফোল্ডারের মধ্যে অন্যান্য কনসেপ্ট নোট |
-| `include` | নির্দিষ্ট তালিকাভুক্ত ফোল্ডারগুলোর মধ্যে ফাইলসমূহ |
-| `exclude` | কনসেপ্ট ফোল্ডার ও তালিকাভুক্ত ফোল্ডারগুলো বাদে সমস্ত ভল্ট ফাইল |
+Vault, concept folder নিজে, included folders অথবা কিছু folder বাদ দিয়ে তুলনা করা যায়। Scope প্রার্থী বদলায়, duplicate-এর অর্থ নয়। Delete-এর আগে নির্বাচন দেখুন।
 
 ## ব্যবহার
 
-### কনসেপ্টস এক্সট্রাক্ট (স্ট্যান্ডঅ্যালোন)
+### স্বাধীন extraction
 
-1. একটি নোট খুলুন
-2. কমান্ড প্যালেট থেকে **"Notemd: Extract concepts"** চালান
-3. কনফিগার করা ফোল্ডারে কনসেপ্ট নোটসমূহ তৈরি হয়
+Markdown খুলে folder নিশ্চিত করে **Extract concepts (current file)** চালান। মূল বদলায় না। Names, coverage ও optional backlinks দেখুন।
 
-### কন্টেন্ট বের করুন + তৈরি করুন
+### Extraction ও content
 
-**"Notemd: ধারণাগুলো বের করুন এবং শিরোনাম তৈরি করুন"** — ধারণাগুলো বের করে, তারপর ধারণা ফোল্ডারের প্রতিটি নোটের উপর "Generate from Title" কমান্ডটি চালায়। এর ফলে ফোল্ডারের **সমস্ত** ধারণা নোটের জন্য কন্টেন্ট তৈরি হয়, শুধুমাত্র নতুন তৈরি হওয়া নোটগুলোর জন্য নয়.
+**Batch generate from titles** ব্যাখ্যা যোগ করে এবং পুরোনো যোগ্য notes-ও নিতে পারে। আগে folder দেখুন, পরে reported complete destination যাচাই করুন।
 
-### নির্বাচিত অংশ থেকে উইকি লিঙ্ক তৈরি করুন
+### Selection থেকে link
 
-1. এডিটরে টেক্সটকে হাইলাইট করুন
-2. **"Notemd: নির্বাচিত অংশ থেকে উইকি লিঙ্ক তৈরি করুন"** কমান্ডটি চালান
-3. টেক্সটটি `[[...]]` দিয়ে র্যাপ করা হয় এবং একটি ধারণা নোট তৈরি হয়
+নির্বাচিত শব্দ wiki-link করে নির্ধারিত destination-এ concept বানাতে পারে। পুরো নোট থেকে model-কে বাছতে দেওয়ার বদলে নিজের শব্দ বেছে নিতে এটি ব্যবহার করুন।
 
-## টিপস
+## পরামর্শ
 
-- **প্রথমে ধারণা ফোল্ডারটি সেট করুন** — এটি না থাকলে কোনো নোট তৈরি হয় না। এটি সেট না করলে একটি সতর্কতা মডাল দেখানো হয়.
-- **প্রতিটি টাস্কের জন্য আলাদা মডেল ব্যবহার করুন** — ধারণা বের করার কাজে সস্তা মডেলগুলো (GPT-4o-mini, DeepSeek) ভালো কাজ করে। গবেষণা/অনুবাদের জন্য ব্যয়বহুল মডেলগুলো সংরক্ষণ করুন.
-- **প্রযুক্তিগত ক্ষেত্রে সিনোনিম সাপ্রেশন সক্রিয় করুন** — যেখানে একাধিক শব্দ একই ধারণাকে নির্দেশ করে সেখানে এটি কাজে আসে.
-- **নিয়মিতভাবে ডুপ্লিকেট অপসারণ করুন** — ব্যাচ প্রক্রিয়াকরণের পর ডুপ্লিকেট অপসারণ কমান্ডটি চালান যাতে প্রায়-ডুপ্লিকেটগুলো ধরা যায়.
-- **প্রতিবার চালানোর সময় লগ ফাইলটি ওভাররাইট হয়**, অ্যাপেন্ড হয় না। পূর্ববর্তী ফলাফল দরকার হলে এটি কপি করুন.
+- ছোট source ও আলাদা concept folder।
+- বড় সংগ্রহের আগে output language।
+- Synonyms ও duplicate candidates আলাদা review।
+- পরের run overwrite করার আগে দরকারি log রাখুন।
 
----
+## পরবর্তী ধাপ
 
-## পরবর্তী ধাপসমূহ
-
-- [Wiki-Links](./wiki-links) — ধারণাগুলো কীভাবে ইনলাইনে লিঙ্ক হয়
-- [Diagrams](./diagrams) — ধারণাগুলোর মধ্যকার সম্পর্ক দৃশ্যমান করা
-- [Workflows](./workflows) — অন্যান্য টাস্কের সাথে ধারণা বের করার প্রক্রিয়া সংযুক্ত করা
+- [উইকি লিংক](./wiki-links)।
+- [কর্মপ্রবাহ](./workflows)।
+- [Batch](../advanced/batch-processing)।

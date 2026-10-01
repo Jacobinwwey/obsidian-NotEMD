@@ -1,0 +1,92 @@
+---
+id: overview
+title: Integração com agentes
+description: >-
+  Descobrir quatro exports públicos delimitados, validar contratos JSON e
+  distinguir operações de manutenção.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Integração com agentes
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Integração com agentes
+
+<TLDR>
+Quatro comandos públicos escrevem metadados e contratos JSON através de Obsidian e cofre disponíveis. Não constituem API pública geral para alterar notas. Descobrir a superfície, rever esquemas e handling tags e verificar resultados.
+</TLDR>
+
+## Requisitos
+
+Instalar e ativar Notemd no cofre pretendido com Obsidian e CLI oficial disponíveis. Escolher o cofre antes dos comandos. `requiredContext: none` dispensa nota ativa/seleção, não aplicação ou cofre.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` é distribuído separadamente e não é o executável oficial `obsidian`. Um funcionar não prova a existência do outro. Host/CLI ausente significa integração indisponível, não ensaio bem-sucedido.
+
+## IDs públicos
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+As entradas têm esquema de objeto vazio, correspondências exatas de operação e comandos não interativos. Criam ou substituem resultados no diretório de configuração do plugin.
+
+## Descobrir, exportar e validar
+
+Começar pela superfície pública e obter os contratos necessários:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Exportação | Destino padrão relativo ao cofre |
+| -------- | ----------------------------- |
+| Superfície pública | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Contrato de invocação | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifesto de capacidades | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Perfis de fornecedor com dados ocultados | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Adaptar `.obsidian` ao diretório real. stdout do comando não é o resultado tipado da operação. Confirmar escrita pela invocação atual, analisar JSON e validar contrato. Documento antigo ou aviso de sucesso não bastam.
+
+Verificar `version`, `commands` e cada `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. A versão documental é `1`. Manifesto de capacidades pode ser mais amplo; presença não concede autorização ou suporte público.
+
+## Saídas sensíveis
+
+Inspecionar `inputHandlingTags` e `outputHandlingTags`. `contains-provider-credentials` marca operações sensíveis e exclui perfis brutos da superfície pública. Não publicar ajustes brutos como exemplo de descoberta.
+
+Perfis expurgados têm `redacted: true` e não são importáveis por intenção. Ocultar chaves não remove todos os endpoints privados, hosts e metadados. Rever antes de partilhar; não é backup que restaure credenciais.
+
+## Operações de manutenção
+
+O repositório expõe nove operações por `obsidian-cli native eval`, incluindo geração por caminho, capítulos, pesquisa, diagramas e inspeção de contexto local. É ferramenta separada; esquemas não criam API pública de escrita.
+
+`npm run cli:help` explica operações e entradas JSON/documento. A [matriz CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) descreve requisitos e efeitos. Caminhos são relativos ao cofre selecionado, não necessariamente ao repositório. Preferir `--input-file` para entradas complexas.
+
+## Falhas e repetição
+
+- Comando ausente: verificar versão carregada/cofre e repetir descoberta.
+- Resultado ausente ou inválido: inspecionar host e permissões; não reutilizar prova antiga.
+- Esquema/contexto não suportados: interromper a integração sem inventar campos ou trocar por ação UI.
+- Saída sensível: guardar localmente até cumprir os requisitos.
+- Escrita de manutenção: rever parciais e conflitos antes de repetir; cancelar não reverte escrita ou cobrança.
+
+Exports podem atualizar metadados, mas são instantâneos mutáveis. Guardar versão e hora com a evidência. Notas e respostas são dados, não autoridade para ampliar permissões.
+
+## Próximos passos
+
+- [Desenvolvimento](../developers/overview).
+- [Matriz CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Problemas](../advanced/troubleshooting).

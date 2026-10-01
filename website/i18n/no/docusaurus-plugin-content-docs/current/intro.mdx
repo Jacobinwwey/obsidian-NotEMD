@@ -1,189 +1,94 @@
 ---
 id: intro
-title: "Introduksjon til Notemd"
-description: "Byggere av kunnskapsbaser med AI for Obsidian som muliggjør permanente omformeringer av notater, arbeidsfløier og diagrammer basert på spesifikasjoner"
-keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links, Copilot alternative, Smart Connections alternative, obsidian AI plugin, auto wiki-link, concept notes]
+title: Introduksjon til Notemd
+description: >-
+  Gjør Obsidian-notater til lenket Markdown, begreper, undersøkelser,
+  oversettelser og kontrollerbare diagrammer.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, Knowledge Management, Wiki-Links, Copilot Alternative, Smart Connections Alternative, AI Plugin]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Introduksjon til Notemd
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Introduksjon til Notemd
 
-<TLDR>
-**Notemd** (Note + EMD — Enhanced Markdown Documents) er en open-source Obsidian-plugin som transformerer lestning med LLM til permanente kunnskaper. Tverskyggt med chat-baseret AI der insikter forsvinner etter sesjonen, skriver Notemd resultater **direkte inn i din vault** som wiki-linker, konseptnotater, forskningsoppsummeringer, oversettelser, arbeidsfløier og diagrammer. Den er bygget for forskere, studenter og kunnskapsarbeidere som ønsker at lestning, forskning og visuelle forklaringer samles inn i en strukturert, utviklingstilpasset kunnskapsgraph.
-</TLDR>
+<TLDR>Notemd er en MIT-lisensiert Obsidian-utvidelse som lager wiki-lenket Markdown, begrepsnotater, undersøkelsesoppsummeringer, oversettelser og diagrammer du kan kontrollere og lagre. Velg leverandør, oppgave og omfang og vurder modellresultater før de tas inn i kunnskapsbasen.</TLDR>
 
 ## Hva er Notemd?
 
-Notemd integrerer **30+ store språkmodeller** (OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama og mer) i din Obsidian-arbeidsfløye for å automatisere utvinning, organisering, oversettelse, forskning og generering av diagrammer.
+Utvidelsen kobler hvelvoppgaver til 36 profiler for sky, gatewayer og lokale servere. Hver oppgave skriver etter egen resultatkontrakt. Handlinger kan kjøres alene eller i arbeidsflyter i sidepanelet. Resultater ligger i hvelvet, men skyoppgaver sender innhold og nettundersøkelser bruker nettverk. Lokal lagring og lokal inferens er separate valg.
 
-### Kjernemunskap: Tidligenskappende vs. permanente kunnskap
+## Velg inngang
 
-| Aspekt | Chat-baseret AI (ChatGPT osv.) | Notemd |
-|--------|-------------------------------|--------|
-| **Hvor resultaterne går** | Chathistorikk (forsvinner) | Din Obsidian vault (persisterer) |
-| **Format** | Plaintekstsvarer | Strukturerte filer: `[[wiki-links]]`, konseptnotater, diagrammer |
-| **Langtidsverdien** | Må spørre om alt på nytt | Samles inn i en kunnskapsgraph |
-| **Utenfor nettverk** | Kræver internett | Virker fullstendig utenfor nettverk med Ollama |
+| Mål | Start her |
+| -------------- | ------------ |
+| Installer og se første resultat | [Hurtigstart](./getting-started/quick-start) |
+| Gjentatte notat-/mappeoppgaver | [Arbeidsflyter](./features/workflows) og [batcher](./advanced/batch-processing) |
+| Bygg, test eller utvid programmet | [Utviklerguide](./developers/overview) |
+| Finn støttede agentkontrakter | [Agentguide](./agents/overview) |
 
-## Kernfunksjoner
+## Viktige funksjoner
 
-### 1. **Automatisk Wiki-linking**
-- LLM identifiserer nøkkelpersoner i dine notater
-- Setter inn `[[wiki-links]]` ved hver oppførelse
-- Skaper valgfritt linkede konsepnotater
-- Synonymsuppresjon for å unngå duplikater
+### Wiki-lenker og begreper
 
-### 2. **Generering av konsepnotater**
-- Ekstraherer kernkonsepter fra artikler, papirer og notater
-- Genererer spesialiserte konsepfiler med baklinker
-- Anpasselige utdatemuligheter og maller
+Be modellen finne begreper og legge til lenker. Standard lenking lager et separat behandlet notat. Begrepsfiler krever valgt mappe; selvstendig uttrekk begynner med tittel uten tilbakekoblinger. [Lenker](./features/wiki-links), [begreper](./features/concept-notes).
 
-### 3. **Integrasjon med webben**
-- Søk Tavily eller DuckDuckGo innenfor Obsidian
-- LLM sammanfatter resultater med kilder
-- Legger til forskningsresultater til den nåværende noten
+### Undersøkelser og lokal kontekst
 
-### 4. **Multilingual Translation**
-- Oversette utvalgte deler eller hele noter
-- Støtter over 21 UI språk
-- Uavhengig konfigurasjon av utdataspråk
-- Støtte for batch-oversettelse
+Tavily/DuckDuckGo gir grunnlag til oppsummeringer i aktivt notat. Valgfri avgrenset lokal henting kan gi utdrag til generering. Indeksen er leksikal, ikke embeddingbasert semantisk søk. [Undersøkelser](./features/research).
 
-### 5. **Diagram Generering**
-- **Mermaid**: Flødesskjemer, sekvens-, klass-, tilstand-, ER- og Gantt-diagrammer
-- **JSON Canvas**: Obsidian innbyggde layouter
-- **Vega-Lite**: Datakurver, tidsserier og sprøytdiagrammer
-- **HTML / Editable HTML/SVG**: Selvstendige figurartefakter med semantiske annotasjoner
-- **Draw.io / Drawnix artifact boundaries**: Eksporveier for vedlikeholdere fra samme semantiske figurmodell
-- **Circuit diagrams roadmap**: Støtte for circuitikz/TikZJax designes rundt gullstandarder, begrenset prompter, renderingsfeilrapporter og validasjon av topologi/layout fremfor ukontrolleret LLM TikZ
-- **Preview diagnostics**: Renderartefakter kan vise kompilering-/renderingsfeilrapporter, og ikke-inline-kilder kan undersøkes uten å kreve en LaTeX-runtime på plugin-siden
-- Automatisk feilretting for Mermaid-feil
+### Oversettelse og originalpassasjer
 
-### 6. **One-Click Workflows**
-- Koble flere handlinger sammen til siderbarkknapper
-- Definisjon av arbeidsfluss basert på DSL
-- Eksempel: `add-links > extract-concepts > research > diagram`
+Oversett filer/mapper eller hent originalpassasjer til bestemte spørsmål. Sammenlign sitater med kilden. Markering avgrenser ikke filoversettelse. [Oversettelse](./features/translation).
 
-## Hver bør bruke Notemd?
+### Diagrammer og eksport
 
-✅ **Forskere** som les artikler og bygger litteraturoversikter
-✅ **Studenter** som organiserer studienotater og skaper konseptkarteler
-✅ **Kunnskapsarbeidere** som ønsker at lesingsinsikter skal behandles lokalt
-✅ **Bilinguala profesjonelle** som trenger oversettelse + wiki-linking
-✅ **Brukere med privatlivsbevissthet** som ønsker lokal LLM-støtte (Ollama)
-✅ **Kraftige brukere** som anpasser prompter og arbeidsflisser
+Velg type og kompatibel kilde, se forhåndsvisning og lagre kilde eller støttet visuell eksport. Den kjørbare katalogen har 33 oppføringer. Kildeformat og eksportformat er ulike. [Diagrammer](./features/diagrams).
 
-## Hvorfor Notemd + Obsidian?
+### Arbeidsflyter
 
-**Obsidian** er en lokalførst, markdown-basert kunnskapsbas. **Notemd** tilbyr AI-superkrafter:
-- Dina data forblir i din egen databas (ikke i en molnettjeneste)
-- Virker offline med lokale modeller
-- Kostnadsfri og åpen kildekod (MIT-licens)
-- Integrasjon med eksisterende Obsidian-pluginer
-- Skalerer til ti tusenvis av noter
+**One-Click Extract** legger til lenker, genererer egnede notater fra titler i begreps-/valgt mappe og reparerer Mermaid i complete-mappen. Tidligere begreper kan inngå. Hver handling beholder egne krav og resultater. [Nøyaktig DSL](./features/workflows).
 
-## Start med
+## Kom i gang
 
-1. **Installasjon**: Innstillinger → Community Plugins → Søk → "Notemd"
-2. **Konfigurering**: Legg til din LLM-leverandørs API-nyckel (eller bruk lokale Ollama)
-3. **Prøv det**: Åpne en note → Høyreklikk → "Processer fil (legg til lenker)"
-4. **Utforsk**: Sjekk sidenfor en-klikk-arbeidsfluer
+1. [Installer](./getting-started/installation) i riktig hvelv.
+2. Test et engangsnotat med tilgjengelig modell.
+3. Kontroller begrepsmappe og resultatstier.
+4. Gjennomgå resultater før større batcher.
 
-👉 [Installasjonsguide](./getting-started/installation) | [Snabbstarttutoriale](./getting-started/quick-start)
+Ingen fast tid eller universell minste notatlengde. Velg noe lite nok til å kontrollere.
 
-## Riktning for diagramfunksjonalitet
+## Diagrammenes grenser
 
-Notemds diagramarbeid beveger seg bort fra "be modellen om å skrive en syntaksstrang" og mot en laget pipeline:
+Typede spesifikasjoner og målspesifikk rendering avgrenser støtten. `DiagramSpec` lover ikke all syntaks eller eksakt referanselayout. `circuitikz` bruker avgrensede strukturer. TikZJax er eksternt; forhåndsvisning beviser ikke native kompilering. Statiske Drawnix-piler mellom grener garanterer ikke feste etter omorganisering.
 
-```mermaid
-graph LR
-    A[Source Note] --> B[DiagramSpec]
-    B --> C[Target Adapter]
-    C --> D[Rendered Artifact]
-    D --> E[Semantic Verification]
-    E --> F[Preview or Export]
-```
+## Struktur
 
-Den nåværende implementasjonen støtter allerede Mermaid, JSON Canvas, Vega-Lite, HTML-fallback, redigerbare HTML/SVG, Draw.io XML-artefakter, en minimal Drawnix JSON-undermengde, forhandsvisningssjekk/allekilde-fallback, og en offline `CircuitSpec -> circuitikz`-prototyp for vanlige-kilde og CMOS-inverter-guldetemplater. Kretsdiagrammer er en sværere klasse: circuitikz kan uttrykke nøyaktig elektrisk topologi, men ukontrolleret LLM-utdata gir ofte ulesbar routering eller LaTeX som ikke renderes. Neste retningen er å holde circuitikz kontrollert med guldetilnærmingstemplater, regler for nodgridslayout, renderingssjekk, og screenshot-feedbackslinger.
+Oppgaven sendes til valgt leverandør, svaret parses/valideres og skrives som notat eller artefakt. Søk gir valgfri kontekst; forhåndsvisning/eksport har formatgrenser. [Utviklerguiden](./developers/overview) viser kildeansvar og tester; [Agentguiden](./agents/overview) avgrensede offentlige eksporter. Internt register er ikke et generelt offentlig automatiserings-API.
 
-Lest detaljene i [Diagrammer](./features/diagrams).
+## Sammenligne verktøy {#notemd-vs-other-obsidian-ai-plugins}
 
-## Arkitektur
+Velg etter oppgave: filomforming, samtale, deterministisk lenking, henting eller native redigering. Bruk oppdaterte dokumenter og samme prøve med registrerte versjoner/innstillinger.
 
-```mermaid
-graph LR
-    A[Obsidian Note] --> B[Notemd Plugin]
-    B --> C{Task Selection}
-    C -->|Add Links| D[LLM Provider]
-    C -->|Research| E[Search API]
-    C -->|Translate| D
-    C -->|Diagram| D
-    D --> F[Structured Output]
-    E --> D
-    F --> G[Update Vault]
-    G --> H[Wiki Links]
-    G --> I[Concept Notes]
-    G --> J[Diagrams]
-    G --> K[Research Summaries]
-```
+## Data og kompatibilitet
 
-## Notemd vs andre Obsidian AI-pluginer
+Skyoppgaver får inndata, søkespørsmål og aktiverte lokale utdrag. Kontroller private dataruter. Avbrudd stopper støttet videre arbeid og bevarer resultater, men garanterer ikke stoppet fjernarbeid eller fakturering.
 
-De fleste Obsidian AI-pluginene er konversasjonsfokusert (du spør, AI svarer, insikter forblir i chaten). Notemd er **skriv-fokusert**: AI bearbeider dine noter og skriver strukturerte resultater direkte inn i din vault.
-
-| Funksjonalitet | Notemd | Copilot | Smart Connections | Text Generator |
-|-----------|--------|---------|-------------------|-----------------|
-| Automatisk innføring av wiki-linker | Ja | Nei | Nei | Nei |
-| Generering av konseptnotater | Ja (med baklinker + duplikatkortning) | Nei | Nei | Nei |
-| Generering av diagrammer | Ja (Mermaid, Canvas, Vega-Lite, HTML, redigerbare artefakter) | Nei | Nei | Nei |
-| Integrasjon med webbenforhold | Ja (Tavily + DuckDuckGo) | Nei | Nei | Nei |
-| Behandling av mapper i batch | Ja | Begrenset | Nei | Begrenset |
-| Modellrutning per oppgave | Ja (7 oppgaver, uavhengige modeller) | Nei | Nei | Nei |
-| En-klikk-workflow-kjeder | Ja (DSL) | Nei | Nei | Nei |
-| Oversettelse (batch) | Ja | Nei | Nei | Nei |
-| Chatt med vault | Nei | Ja | Nei | Nei |
-| Semitisk likhetssøk | Nei | Nei | Ja | Nei |
-| Mønsterbasert generering | Nei | Nei | Nei | Ja |
-| LLM leverandører | 36 (cloud + gateway + lokal) | 3-5 | 2-3 | 3-5 |
-| Fullt offline | Ja (Ollama) | Delvis | Delvis | Delvis |
-
-**Når du velger Notemd**: Du vil at AI skal bygge en permanent kunnskapsgraph – ikke bare chatte om dine notater.
-
-**Når du velger Copilot**: Du ønsker en konversasjonsbasert AI-assistent inni Obsidian.
-
-**Når du velger Smart Connections**: Du vil oppdage eksisterende forhold mellom notater gjennom semantisk søk.
-
-## Filosofi
-
-**Notemd anser at AI bør styrke menneskers kunnskapsskapende arbeid, ikke ersatte det.** Pluginet:
-- Holder deg i kontrollen (gjennomgå før du setter inn endringer)
-- Bevarer konteksten (alle resultater refererer tilknytning til kilden)
-- Respekterer privatlivet (lokalt LLM-støtte, ingen telemetri)
-- Forblir ekstensibel (åpne APIs, egne arbeidsfluer)
+Manifestet angir minst Obsidian `0.15.0` og tillater mobil innlasting. Den versjonen og fysiske mobilenheter er ikke nå verifisert. Native eksport kan kreve skrivebordsverktøy. Nettstedet har 34 språkruter, UI 21 språkversjoner; modellens språkferdigheter er separate.
 
 <!-- notemd-acknowledgments -->
-## Takk og referanseprosjekter
+## Takk og referanser
 
-Notemd vedlikeholdes uavhengig. Vi takker prosjektene og fellesskapene med åpen kildekode som har påvirket dokumenterte designbeslutninger eller gir integrasjonsgrunnlag. Oppføringen anerkjenner bare innflytelse eller interoperabilitet; den innebærer ikke godkjenning, tilknytning, medfølgende kode eller en påstand om gjenbruk av kode.
+Notemd vedlikeholdes uavhengig. Referanser viser inspirasjon eller samspill, ikke godkjenning, organisatorisk tilknytning eller udokumentert medlevert kode.
 
-- **Referanseprosjekter:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
-- **Grunnlag med åpen kildekode:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
-- Hvert prosjekt beholder sin egen lisens og sine egne vilkår; Notemd er tilgjengelig under [MIT-lisensen](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
+- Referanser: [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- Grunnlag: [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Hvert prosjekt har egen lisens; Notemd bruker [MIT](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
 
-## Open Source
+## Kildekode og støtte
 
-- **Lisens**: MIT
-- **Kildekod**: [github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
-- **Samfunnet**: [Discord](https://discord.gg/qnGgsQ9W) | [GitHub Discussions](https://github.com/Jacobinwwey/obsidian-NotEMD/discussions)
-- **Bidra**: PRs er velkomne, se [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
-
----
-
-**Neste**: [Installation →](./getting-started/installation)
+[Repositorium](https://github.com/Jacobinwwey/obsidian-NotEMD) · [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) · [Bidrag](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md). Oppgi eksakte versjoner, trinn og renset dokumentasjon. Start med [hurtigstart](./getting-started/quick-start).

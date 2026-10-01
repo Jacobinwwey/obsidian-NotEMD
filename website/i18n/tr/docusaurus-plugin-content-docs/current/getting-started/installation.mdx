@@ -1,133 +1,76 @@
 ---
 id: installation
-title: "Kurulum"
-description: "Obsidian içinde Notemd'yi nasıl kurarsınız"
+title: Kurulum
+description: >-
+  Notemd’i Obsidian kataloğundan veya tek bir GitHub sürümünden kurun ve gerçek
+  bir görevle doğrulayın.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Kurulum
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Kurulum
 
-<TLDR>
-**2 dakikadan kısa sürede Notemd'yi kurun.** İki yöntem: (1) Obsidian Topluluk Eklentileri (tavsiye edilir, tek tıkla kurulum), veya (2) GitHub Releases üzerinden manuel kurulum. Obsidian 0.15.0+ sürümü gereklidir. Windows, macOS, Linux, iOS ve Android üzerinde çalışır. Harici bağımlılıklar yoktur. 4k'dan fazla indirme, MIT lisanslıdır.
-</TLDR>
+<TLDR>Notemd’i Community plugins üzerinden kurun ya da aynı GitHub sürümünün üç çalışma dosyasını kasaya yerleştirin. Eklentiyi etkinleştirip sağlayıcı seçin ve bir deneme notu çalıştırın. Model sunucuları ve isteğe bağlı yerel dışa aktarma araçları ayrıca hazırlanır.</TLDR>
 
-## Yöntem 1: Topluluk Eklentileri (Tavsiye Edilir)
+## Yöntem 1: Community plugins, önerilen
 
-1. **Obsidian Ayarları**nı açın (⚙️ simgesi veya `Ctrl/Cmd + ,`)
-2. **Topluluk eklentileri**ne gidin
-3. **Gözat** butonuna tıklayın
-4. **"Notemd"** için arama yapın
-5. **Kur** butonuna tıklayın
-6. **Etkinleştir** butonuna tıklayın
+1. Hedef kasada **Settings → Community plugins** bölümünü açın.
+2. Gerekirse topluluk eklentilerine izin verip **Browse** seçin.
+3. **Notemd** arayın, `Jacobinwwey/obsidian-NotEMD` deposunu doğrulayın ve **Install** seçin.
+4. **Enable** ile etkinleştirip şeritten veya komut paletinden yan paneli açın.
 
-**Bitti!** Sol kenar çubuğunuzda Notemd simgesini göreceksiniz.
+[Notemd’i Obsidian’da açın](obsidian://show-plugin?id=notemd). Tarayıcı bağlantıyı açmıyorsa yukarıdaki menüyü kullanın. Bu rehberi okumak için protokol işleyicisi gerekmez.
 
-## Yöntem 2: Manuel Kurulum
+## Yöntem 2: Elle kurulum
 
 ### Ön koşullar
-- Obsidian 0.15.0 veya daha yeni sürümü
-- Git (klonlamak için isteğe bağlı)
+
+Obsidian ve yedekleyebileceğiniz bir kasa gerekir. Manifestteki en düşük `0.15.0` sürümü bir bildirimdir; güncel adayın bu eski sürümde test edildiğini göstermez.
 
 ### Adımlar
 
-1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) adresinden **dosyaları indirin**:
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. Aynı [GitHub sürümünden](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) `main.js`, `manifest.json` ve `styles.css` dosyalarını alın. `README.md` bir başvuru belgesidir, zorunlu çalışma dosyası değildir.
+2. Üç dosyayı `<vault>/.obsidian/plugins/notemd/` içine koyun. Yapılandırma klasörünü değiştirdiyseniz gerçek yolu kullanın.
+3. Obsidian’ı yeniden yükleyip eklentiyi etkinleştirin.
+4. Sürümü kontrol edin; yeni manifesti eski paketle karıştırmayın.
 
-2. **Kasanızın eklenti klasörünü bulun:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## Alternatif: BRAT
 
-Eğer `plugins` klasörü mevcut değilse, onu oluşturun.
-
-3. **Notemd klasörü oluşturun:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
-
-4. Üç dosyayı `notemd` klasörüne **kopyalayın**.
-
-5. **Obsidian Yeniden Yükleme:**
-   - `Ctrl/Cmd + R`'ye basın, ya da
-   - Obsidian'yi yeniden başlatın
-
-6. **Eklentiyi etkinleştirin:**
-   - Ayarlar → Topluluk eklentileri
-   - Listede "Notemd"'yi bulun
-   - Açın.
-
-## Alternatif: BRAT üzerinden yükleme
-
-Eğer [BRAT eklentisini](https://github.com/TfTHacker/obsidian42-brat) kullanıyorsanız:
-
-1. BRAT ayarlarını açın
-2. "Beta eklentisi ekle"ye tıklayın
-3. Girin: `Jacobinwwey/obsidian-NotEMD`
-4. "Eklenti ekle"ye tıklayın
-5. Topluluk eklentilerinde Notemd'yı etkinleştirin
+Zaten [BRAT](https://github.com/TfTHacker/obsidian42-brat) kullanıyorsanız depoyu beta eklentisi akışıyla ekleyebilirsiniz. Hata tekrarı için belirli bir sürüm seçin. BRAT isteğe bağlı harici bir araçtır.
 
 ## Doğrulama
 
-Kurulumdan sonra Notemd'nun çalıştığını doğrulayın:
+Erişilebilir model ayarlayıp **Bağlantıyı test et**, ardından [hızlı başlangıç](./quick-start) görevini çalıştırın. Model listesi, o modelde üretim yetkisini kanıtlamaz; gerçek çıktıyı inceleyin.
 
-1. Herhangi bir not açın
-2. Düzenleyicide sağ tıklayın
-3. Aşağıdaki gibi Notemd komutlarını görmelisiniz:
-   - "Dosyayı işle (bağlantılar ekle)"
-   - "Kavramları çıkar"
-   - "Araştır ve özetle"
+## Sistem sınırları
 
-## Sonraki Adımlar
+| Bileşen | Sınır |
+| --------- | ---------- |
+| Manifest | En az Obsidian `0.15.0`; `isDesktopOnly` false |
+| Test kanıtı | Tarihli raporlara bakın; fiziksel mobil cihazlar ve 0.15.0 güncel kabulde doğrulanmadı |
+| Bulut modeli | Ağ, yetkili hesap/anahtar ve erişilebilir model |
+| Yerel model | Ayrıca kurulmuş çalışan sunucu ve indirilmiş/yüklenmiş model |
+| Yerel uygulamalara slayt/devre aktarımı | Masaüstü araçları ve biçime özgü bağımlılıklar; önce ortamı kontrol edin |
 
-- **LLM sağlayıcısını yapılandırın:** [Hızlı Başlangıç →](./quick-start)
-- **Sorun giderme:** [Yaygın Sorunlar →](../advanced/troubleshooting)
-
-## Sistem Gereksinimleri
-
-| Platform | Sürüm | Durum |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | Gerekli |
-| **Windows** | 7+ | ✅ Destekleniyor |
-| **macOS** | 10.15+ | ✅ Destekleniyor |
-| **Linux** | Herhangi | ✅ Destekleniyor |
-| **iOS** | 15+ | ✅ Destekleniyor |
-| **Android** | 5+ | ✅ Destekleniyor |
+Tüm isteğe bağlı dışa aktarıcılar için ortak işletim sistemi sürümü garantisi yoktur. Devre önizlemesi TeX derlemesini, masaüstü testi mobil davranışı kanıtlamaz.
 
 ## Kaldırma
 
-Notemd'yı kaldırmak için:
-
-1. Ayarlar → Topluluk eklentileri
-2. "Notemd"'yi bulun
-3. ❌ simgesine tıklayın
-4. İsteğe bağlı olarak eklenti klasörünü silin: `<vault>/.obsidian/plugins/notemd/`
-
-Verileriniz (notlar, konsept notları vb.) değişmeden kalır.
+Community plugins bölümünden devre dışı bırakın veya kaldırın. Oluşturulan notlar ve dosyalar kasada normal dosyalar olarak kalır. Silmeden önce inceleyin; gerekiyorsa ayar yedeğini saklayın. Eklentiyi kaldırmak tamamlanmış düzenlemeleri geri almaz.
 
 ## Güncelleme
 
-### Otomatik güncelleme (Önerilir)
-Obsidian otomatik olarak eklenti güncellemelerini kontrol eder. Yeni bir sürüm mevcut olduğunda:
-1. Ayarlar → Topluluk eklentileri
-2. "Güncellemeleri kontrol et"e tıklayın
-3. Notemd'nin yanındaki "Güncelle"ye tıklayın
+**Check for updates** kullanın. Elle güncellerken görevleri durdurun, kasa ve ayarları yedekleyin, aynı sürümün üç çalışma dosyasını değiştirip yeniden yükleyin. Toplu işlemlerden önce sürüm notlarını okuyup küçük test yapın. Ayar dosyasını sürüm varlıklarıyla değiştirmeyin. Geri dönüş için bilinçli seçilmiş uyumlu sürüm ve yedek gerekir.
 
-### Manuel güncelleme
-En yeni sürümü indirin ve eklenti klasörünüzdeki üç dosyayı değiştirin.
+## Sonraki adımlar
 
-## Yardım Almak
-
-- 📖 [Hızlı Başlangıç Kılavuzu](./quick-start)
-- ❓ [Sık Sorulan Sorular](../faq)
-- 💬 [Discord Topluluğu](https://discord.gg/qnGgsQ9W)
-- 🐛 [Sorunları Rapor Et](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [Hızlı başlangıç](./quick-start).
+- [Yapılandırma](./configuration).
+- [Sorun giderme](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

@@ -1,0 +1,77 @@
+---
+id: 1.9.8
+title: Panduan naik taraf Notemd 1.9.8
+description: >-
+  Fahami perubahan kebolehpercayaan, eksport natif dan dokumentasi sejak 1.9.7
+  serta sahkan naik taraf terkawal.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Panduan naik taraf Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Panduan naik taraf Notemd 1.9.8
+
+<TLDR>1.9.8 menumpukan pembatalan dan pemilikan hasil, dapatan kelompok konsisten, ketepatan eksport natif serta dokumentasi tepat. Semak ketersediaan GitHub Release awam dan muat turun semua fail masa jalan daripada keluaran sama. Jumlah katalog penyedia dan rajah ialah keupayaan sedia ada, bukan penambahan versi ini.</TLDR>
+
+## Perubahan sejak 1.9.7
+
+| Bahagian | Kesan kepada pengguna |
+| ------ | ------------- |
+| Pembatalan | Keadaan pembatalan dikongsi mencapai kerja dijadualkan, penghantaran penyedia dan ulangan; respons lewat tidak meneruskan laluan penulisan yang dilindungi |
+| Penyimpanan artifak | Simpanan bertindih dan pemulihan menjejaki pemilikan hasil, termasuk sumber bernama sama dan lampiran dikongsi |
+| Dapatan setempat | Penjanaan tajuk kelompok menggunakan petikan keadaan dapatan konsisten; ukuran memori tertahan dan korpus tetap direkodkan |
+| Hasil natif | Pemisah jadual PowerPoint di bawah sel bercantum serta wayar/label CircuitikZ menerima pembaikan terfokus |
+| Pengesahan | CI Linux/Windows, lint pada aras diagnostik, ujian proses dan bukti aplikasi natif memperkukuh pintu keluaran |
+| Dokumentasi | Lalai tugas diperbetul, laluan pengguna baharu/pengguna/pembangun/Agent jelas, terjemahan ditulis terus dan penerbitan terkawal |
+
+Carian sejarah kini mengekalkan ketukan kekunci berturutan dan karet semasa penyegaran tak segerak. Laci sejarah pratonton mengekalkan navigasi Tab di dalamnya, mengurus fokus ketika memuatkan dan menangani Escape tanpa menutup pratonton induk. Ulangan serta respons lapuk mempunyai ujian regresi pelayar.
+
+Penyelidikan dan terjemahan menyemak semula pembatalan selepas bacaan sumber terakhir atau penyediaan folder hasil, sebelum menambah, mencipta atau menulis ganti fail. Penulisan yang sudah diterima Vault mengekalkan hasil selesai.
+
+36 pratetap penyedia dan 33 entri rajah boleh laku sudah ada dalam 1.9.7. Nota keluaran membezakan perubahan masa jalan, dokumentasi dan rekod gabungan tanpa mengira perubahan sama dua kali.
+
+Jika tugas lain mencipta folder destinasi terjemahan ketika penciptaan masih menunggu, terjemahan menggunakan direktori itu. Fail yang bercanggah atau direktori masih tiada mengekalkan penggunaan folder sumber gantian yang dilaporkan; tugas tidak mendakwa memiliki direktori ciptaan tugas lain.
+
+## Naik taraf terkawal
+
+1. Hentikan tugas aktif dan sandarkan Vault serta tetapan pemalam.
+2. Kemas kini melalui Community plugins atau muat turun `main.js`, `manifest.json`, `styles.css` daripada [Release 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) awam yang sama.
+3. Untuk pemasangan manual, ganti fail masa jalan sahaja. Kekalkan tetapan Vault dan hasil terjana.
+4. Muat semula Obsidian dan semak versi dimuatkan.
+5. Uji satu nota, periksa laluan hasil dan cuba folder kecil sebelum aliran besar.
+
+ID arahan dan tetapan sedia ada kekal sebagai kontrak naik taraf. One-Click Extract masih tambah pautan, penjanaan tajuk kelompok dan pembaikan Mermaid kelompok. Pembetulan dokumentasi bukan perubahan menambah penyelidikan ke rantaian lalai.
+
+## Pembatalan dan pemulihan
+
+Pembatalan bukan transaksi undur. Fail selesai kekal, permintaan/penulisan luaran yang diterima boleh selesai, dan penjanaan serta bil jauh dikawal penyedia. Tunggu tugas stabil dan periksa hasil sebelum mengulang.
+
+Konflik pemulihan dipaparkan, bukan dianggap penggantian berjaya secara senyap. Bandingkan nota semasa dengan fail pemulihan sebelum membuang salah satu. Kekalkan direktori pendamping yang masih digunakan artifak lama walaupun eksport baharu boleh membenamkan visual.
+
+## Batas eksport dan keserasian
+
+- Pembaikan jadual PowerPoint disokong asersi natif terfokus; skor imej seluruh slaid sahaja dahulu tidak mengesan pemisah cacat.
+- Mermaid/SVG dalam PPTX boleh menggunakan imej gantian; bukan semua visual menjadi bentuk PowerPoint boleh sunting.
+- Hubungan statik rentas cabang Drawnix tidak membuktikan anak panah kekal terikat selepas susun semula.
+- Pratonton CircuitikZ dan kompilasi TeX natif mempunyai semakan/kebergantungan berasingan.
+- Peranti mudah alih fizikal dan Obsidian 0.15.0 belum disahkan; minimum manifest bukan ujian keserasian baharu.
+- Bukti dapatan leksikal korpus tetap tidak membuktikan mutu carian semantik atau prestasi pada sebarang Vault.
+
+## Integriti keluaran
+
+Aliran penerbitan mengesahkan metadata versi dan identiti tag setempat/jauh, membina bundle daripada sumber bertag bersih, memuat naik draf dan menyemak hash aset dimuat turun sebelum penerbitan. Empat aset ialah `main.js`, `manifest.json`, `styles.css`, `README.md`. Ulangan tidak boleh mengganti aset awam dengan bait tidak berkaitan secara senyap.
+
+Deployment laman awam mengikuti pengesahan keluaran tersedia. Dalam program ini, Codex menulis dan menyemak terjemahan secara langsung tanpa panggilan LM Studio atau enjin terjemahan. Kepengarangan AI bukan dakwaan semakan penutur asli bebas.
+
+## Seterusnya
+
+- [Keluaran awam dan nota dwibahasa](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Mula pantas](../getting-started/quick-start): sahkan tugas selepas naik taraf.
+- [Pemprosesan kelompok](../advanced/batch-processing): skop, hasil dan penyiapan separa.
+- [Panduan pembangun](../developers/overview) dan [Agent](../agents/overview): batas pelaksanaan/integrasi.
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): laporkan regresi dengan versi tepat serta bukti dibersihkan.

@@ -1,14 +1,10 @@
 ---
 id: quick-start
 title: Quick Start Guide
-description: Get started with Notemd in 5 minutes
+description: Configure a provider, process a test note, and inspect Notemd's output before running a folder workflow.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords: [Notemd, Obsidian, quick start, wiki-links, concept notes]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,166 +12,68 @@ import TLDR from '@site/src/components/TLDR';
 # Quick Start Guide
 
 <TLDR>
-**Start using Notemd in 5 minutes.** Three steps: (1) Add an LLM API key (or use local Ollama), (2) Open a note and run "Process file (add links)", (3) Explore one-click workflows in the sidebar. Supports 36 provider definitions. No coding required. Works offline with Ollama.
+Start with one disposable Markdown note and a provider you can already access. Check the generated file before processing a folder. Cloud calls send task content to your provider; a local model still needs a running server and downloaded model.
 </TLDR>
 
-## Step 1: Configure Your First LLM Provider (2 min)
+## Step 1: Configure Your First LLM Provider
 
-### Option A: Cloud Provider (OpenAI, Anthropic, etc.)
+1. [Install and enable Notemd](./installation), then open **Settings → Notemd**.
+2. Select your provider, enter its endpoint and credentials where required, and choose a model available to your account. Use **Fetch models** where the provider supports discovery; a listed model still needs a successful chat test.
+3. Run **Test connection**. Resolve authentication, model or endpoint errors before starting a workflow.
+4. Search settings for **Concept note folder path**. Choose a dedicated folder, such as `concepts`, if you want concept files. The initial folder setting is empty; `concepts/` is an example you choose, not a preconfigured destination.
 
-1. Open **Settings** → **Notemd**
-2. Under **LLM Provider Configuration**, select a provider from the dropdown
-3. Enter your **API Key**
-4. (Optional) Click **"Get Model List"** to see available models
-5. Select a model for each task type
+For Ollama, pull a model first and set its exact local name. The preset endpoint is `http://localhost:11434/api`. For LM Studio, start its local server and use the `LMStudio` preset. See [local model setup](../providers/local). Web research still needs network access even when the summarization model is local.
 
-**Popular choices:**
-- **OpenAI**: `gpt-4o-mini` (fast, affordable)
-- **Anthropic**: `claude-sonnet-4-6` (high quality)
-- **DeepSeek**: `deepseek-chat` (very affordable)
+## Step 2: Try Your First Task
 
-### Option B: Local Ollama (No API Key Needed)
+Create `Notemd trial.md` with a short paragraph you can safely send to the selected provider:
 
-1. Install [Ollama](https://ollama.com/)
-2. Download a model: `ollama pull llama3.1`
-3. In Notemd settings, select **"Ollama"** as provider
-4. Model name: `llama3.1` (or any model you downloaded)
-
-## Step 2: Try Your First Task (1 min)
-
-### Add Wiki-Links to a Note
-
-1. Open any note with meaningful content
-2. Right-click in the editor
-3. Select **"Process file (add links)"**
-4. Wait a few seconds
-5. Key concepts are now `[[wiki-linked]]`!
-
-**Example:**
-
-**Before:**
-```
-Machine learning models use neural networks to process data.
+```text
+Machine learning models use neural networks to learn patterns from examples.
 ```
 
-**After:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
+Run **Process file (add links)** from the Notemd sidebar or command palette. By default, this produces a separate `Notemd trial_processed.md` in the source folder and preserves the original. Open the output and inspect the actual links; model output varies. A plausible result is:
+
+```markdown
+[[Machine learning]] models use [[neural networks]] to learn patterns from examples.
 ```
 
-## Step 3: Explore Features (2 min)
+A selected concept folder can also receive concept notes. These files and links require review; processing is not an assertion that the model identified every important concept correctly.
+
+## Step 3: Explore Features
 
 ### Extract Concept Notes
 
-1. Right-click → **"Extract concepts from current file"**
-2. Notemd creates separate files for each concept
-3. Check your configured concept folder (default: `concepts/`)
-4. Each concept note has a backlink to your original note
+Use **Extract concepts (current file)** to extract concepts without rewriting the source. A configured concept folder is required. The standalone extraction defaults are title-only notes and no source backlinks. Enable backlinks explicitly when you need them. [Concept notes](../features/concept-notes) explains how this differs from add-links output.
 
 ### Research & Summarize
 
-1. Highlight a topic in your note
-2. Right-click → **"Research and summarize"**
-3. Notemd queries web search (Tavily or DuckDuckGo)
-4. Summary appends to your note with sources
+Select a topic in an open Markdown editor, or use the note title, then run **Research & summarize**. Choose Tavily with its API key or DuckDuckGo explicitly in settings. The summary is appended to the current note. Open and verify its sources before relying on a claim.
 
 ### One-Click Workflows
 
-1. Check the **left sidebar** for workflow buttons
-2. Click **"One-Click Extract"** on any note
-3. It runs: add links → extract concepts → research → generate diagram
-4. All in one click!
+The default **One-Click Extract** button runs this exact definition:
 
-## Common First Tasks
-
-### Task 1: Process a Paper/Article
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### Task 2: Translate Notes
+It adds links, generates content for eligible notes in the concept or selected folder, then repairs Mermaid blocks in the generated complete folder. It can therefore affect existing eligible concept notes as well as newly created ones. Use a dedicated test folder for the first run. It does not automatically add a web research or diagram-generation step.
 
-```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
+## Cancellation And Output Review
 
-### Task 3: Create a Knowledge Map
-
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
-
-## Customization Tips
-
-### Per-Task Model Selection
-
-You can use different models for different tasks:
-
-| Task | Recommended Model | Why |
-|------|------------------|-----|
-| Add Links | `gpt-4o-mini`, `deepseek-chat` | Fast, many calls |
-| Extract Concepts | `claude-sonnet-4-6`, `gpt-4o` | Quality extraction |
-| Research | `perplexity`, `gpt-4o` | Web-grounded |
-| Translation | `gemini-flash`, `gpt-4o` | Multilingual |
-| Diagrams | `claude-opus`, local model | Complex reasoning |
-
-Configure in: **Settings → Notemd → Task-Specific Models**
-
-### Custom Workflows
-
-Create your own button:
-
-1. Settings → Notemd → Workflows
-2. Click "Add Workflow"
-3. Enter DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Name it: "My Research Flow"
-5. New button appears in sidebar
+Use **Cancel** in the progress surface to stop further work. Completed outputs remain; cancellation is not an undo transaction and cannot guarantee that a provider stops generating or charging. Wait for the task to settle before starting another run. Inspect the reported output paths and any recovery conflicts rather than assuming a cancelled run produced nothing.
 
 ## Troubleshooting
 
-### "API Key Invalid"
-- Check if key is correct (no extra spaces)
-- Verify account has credits
-- Test with "Connection Test" button in settings
-
-### "Model Not Found"
-- Click "Get Model List" to see available models
-- Some providers require specific model names (e.g., `gpt-4o` not `gpt-4`)
-
-### Links Not Appearing
-- Ensure note has enough content (>50 words)
-- Try a more powerful model
-- Check if LLM call succeeded (see diagnostics panel)
-
-### Slow Performance
-- Use faster models (`gpt-4o-mini` instead of `gpt-4o`)
-- Reduce chunk size in settings
-- Enable parallel processing for batch tasks
+- Authentication or missing model: check the exact provider profile and rerun **Test connection**.
+- No concept files: verify that a concept folder is configured and enabled.
+- No useful links: inspect the response and custom prompt. There is no documented minimum word count that guarantees extraction.
+- Rate limits: keep batch concurrency at its default of `1` while investigating account quotas.
 
 ## Next Steps
 
-- 📖 [Explore All Features](../features/wiki-links)
-- ⚙️ [Advanced Configuration](./configuration)
-- 🔧 [LLM Provider Setup](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## Video Tutorial
-
-Watch the 3-minute quickstart video (Chinese):
-[【全开源免费！NotEMD 三分钟速通】](https://b23.tv/lqR0RlA)
-
-## Getting Help
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Docs**: [Full Documentation](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Configuration](./configuration): settings search, favorites, output paths and language choices.
+- [Workflows](../features/workflows): valid action IDs and error policy.
+- [Troubleshooting](../advanced/troubleshooting): diagnostics and a reproducible issue report.
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): report problems with sanitized evidence.

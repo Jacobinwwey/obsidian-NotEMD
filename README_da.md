@@ -1,39 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Notemd-plugin til Obsidian
 
+> Notemd er et Obsidian-plugin med MIT-licens til Markdown med links, begrebsnoter, resuméer, oversættelser og diagrammer. Filer bliver i boksen; cloudopgaver sender indhold til den valgte udbyder, og webundersøgelser bruger netværket.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Begynd her
+
+| Læser | Indgang | Mål |
+|---|---|---|
+| Begynder | [Hurtig start](https://jacobinwwey.github.io/obsidian-NotEMD/da/docs/getting-started/quick-start) | Indstil en udbyder og kontroller en note |
+| Bruger | [Arbejdsgange](https://jacobinwwey.github.io/obsidian-NotEMD/da/docs/features/workflows) | Styr mapper, resultater og gendannelse |
+| Udvikler | [Udviklervejledning](https://jacobinwwey.github.io/obsidian-NotEMD/da/docs/developers/overview) | Byg, test og udvid eksisterende kontrakter |
+| Agent | [Agentvejledning](https://jacobinwwey.github.io/obsidian-NotEMD/da/docs/agents/overview) | Find fire understøttede eksportkommandoer |
+
+**Version:** 1.9.8
+
+- **Annullering og gendannelse:** annullering virker under planlægning og genforsøg og blokerer sene skrivninger fra undersøgelser og oversættelser. Færdige resultater bevares, og gendannelseskonflikter rapporteres.
+- **Historik og eksport:** søgetekst og tastaturfokus bevares. Skillelinjer under flettede PowerPoint-celler samt CircuitikZ-forbindelser og etiketter er rettet. Lokal søgning i grupper bruger et ensartet øjebliksbillede.
+- **Udgivelse og dokumentation:** oprindelsen af rene kilder og downloadede filer kontrolleres; læsergrupper får egne indgange og direkte skrevne oversættelser.
+
+De 36 udbyderforvalg og 33 eksekverbare diagramtyper fandtes allerede i 1.9.7. [Opgraderingsvejledning](https://jacobinwwey.github.io/obsidian-NotEMD/da/docs/releases/1.9.8) · [Kontroller offentlig udgivelse](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Drawnix-pile mellem grene forbliver statiske efter flytning. Mermaid/SVG i PPTX kan bruge billeder som reserve. Annullering fortryder ikke gemte ændringer og garanterer ikke stop af ekstern generering eller fakturering. Fysiske mobilenheder og Obsidian 0.15.0 er ikke verificeret.
 
 Læs dokumentation på flere sprog: [Sprogcenter](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
-      AI-drevet flersproget vidensforbedring
-==================================================
-```
-
-En nem måde at opbygge din egen vidensbase på.
-
-Notemd forbedrer dit Obsidian-workflow ved at integrere med forskellige store sprogmodeller (LLM'er) til at behandle dine flersprogede noter, automatisk generere wiki-links til nøglebegreber, oprette tilsvarende konceptnoter, udføre webresearch og hjælpe dig med at opbygge stærke vidensgrafer med mere.
-
-If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\�\�\�\�\�\�\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
-
 Hvis du elsker at bruge Notemd, overvej venligst at [⭐ give en stjerne på GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) eller [☕️ købe en kaffe til mig](https://ko-fi.com/jacobinwwey).
-
-**Version:** 1.9.7
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Indholdsfortegnelse
 
@@ -52,13 +50,26 @@ Hvis du elsker at bruge Notemd, overvej venligst at [⭐ give en stjerne på Git
 
 ## Hurtig start
 
-1. **Installer og aktiver**: Hent pluginet fra Obsidian Marketplace.
-2. **Konfigurer LLM**: Gå til `Settings -> Notemd`, vælg din LLM-udbyder, for eksempel OpenAI eller en lokal udbyder som Ollama, og indtast din API-nøgle/URL.
-3. **Åbn sidepanelet**: Klik på Notemd-tryllestavsikonet i venstre sidebjælke for at åbne sidepanelet.
-4. **Behandl en note**: Åbn en vilkårlig note og klik på **"Process File (Add Links)"** i sidepanelet for automatisk at tilføje `[[wiki-links]]` til vigtige begreber.
-5. **Kør et hurtigt workflow**: Brug standardknappen **"One-Click Extract"** til at kæde behandling, batchgenerering og Mermaid-oprydning fra ét indgangspunkt.
+1. Installer og aktivér **Notemd** via **Indstillinger → Community-plugins → Gennemse**.
+2. Angiv det præcise endepunkt, legitimationsoplysninger og model. Test forbindelsen og derefter reel generering; en modelliste beviser ikke chatadgang.
+3. Opret den tomme mappe `trial-concepts`, og vælg den til begrebsnoter; stien er oprindeligt tom. Læg en kort tekst, som må sendes til udbyderen, i testfilen `Notemd trial.md`.
+4. Kør **Process File (Add Links)**. Kontroller `Notemd trial_processed.md` ved siden af den bevarede kilde samt links og begrebsnoter.
+5. Åbn testkilden igen, og kør **One-Click Extract** med testmappen: tilføj links, generér indhold ud fra titlerne på egnede noter, og ret Mermaid i complete-mappen. Eksisterende egnede noter kan indgå.
 
-Det er det. Udforsk indstillingerne for at låse op for flere funktioner som webresearch, oversættelse og indholdsgenerering.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Webundersøgelser og diagramgenerering er særskilte handlinger. Vent efter annullering, til aktive opgaver er afsluttet, og kontroller færdige resultater og gendannelsesfiler før næste forsøg.
+
+<details>
+<summary>Eksempler på brugerfladen</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Sprogunderstøttelse
 
@@ -91,9 +102,9 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
 - **Forstærket kæde for lange OpenAI-compatible-kald**: I stabil tilstand bruger OpenAI-compatible-kald nu en eksplicit trefaset rækkefølge for hvert forsøg: direct streaming transport, direct non-stream transport og derefter `requestUrl` fallback, som stadig kan opgraderes til streamed parsing efter behov. Det reducerer falsk-negative resultater, når udbyderen faktisk afslutter buffrede svar, men streaming-pipelinen er ustabil.
 - **Protocol-aware streaming fallback på tværs af hele LLM-API-overfladen**: Fallback-forsøg for lange anmodninger bruger nu protocol-aware streamed parsing på alle indbyggede LLM-veje, ikke kun OpenAI-compatible-endpoints. Notemd håndterer nu OpenAI/Azure SSE, Anthropic Messages streaming, Google Gemini SSE og Ollama NDJSON i både desktop `http/https` og ikke-desktop `fetch`, og øvrige OpenAI-lignende udbyderveje genbruger den samme delte fallback-sti.
 - **Kina-klare presets**: Indbyggede presets dækker nu `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` og `SiliconFlow`, ud over de eksisterende globale og lokale udbydere.
-- **Pålidelig batchbehandling**: Logikken for samtidig behandling er forbedret med **staggered API calls** for at undgå rate limiting og give stabil ydeevne i store batchjobs. Opgaver starter nu med forskellige intervaller i stedet for alle på én gang.
-- **Præcis fremdriftsrapportering**: En fejl, der kunne få progress bar til at hænge, er rettet, så UI'et nu altid afspejler operationens reelle status.
-- **Robust parallel batchbehandling**: Et problem, der fik parallelle batchoperationer til at stoppe for tidligt, er løst, så alle filer nu behandles pålideligt og effektivt.
+- **Pålidelig batchbehandling**: Forskudte API-kald reducerer spidsbelastning. Udbyderens kvoter og hastighedsgrænser gælder fortsat.
+- **Præcis fremdriftsrapportering**: Fremdriften skelner mellem fuldførte, mislykkede og annullerede filer. En afsluttet kørsel betyder ikke, at alle filer lykkedes.
+- **Robust parallel batchbehandling**: Aktive opgaver afsluttes før opsummeringen. Annullering stopper det videre arbejde, men fortryder ikke gemte ændringer; mappen er ikke én samlet transaktion.
 - **Nøjagtighed i progress bar**: En fejl, der fik progress bar for kommandoen "Create Wiki-Link & Generate Note" til at hænge ved 95 %, er rettet og viser nu korrekt 100 % ved fuldførelse.
 - **Forbedret API-debugging**: "API Error Debugging Mode" indsamler nu hele response body fra LLM-udbydere og søgetjenester som Tavily og DuckDuckGo og logger også en transporttidslinje pr. forsøg med sanerede request-URL'er, tidsforbrug, response headers, partial response body, parsed partial stream output og stack traces for nemmere fejlfinding på tværs af OpenAI-compatible, Anthropic, Google, Azure OpenAI og Ollama fallback-stier.
 - **Panel til Developer Mode**: Indstillingerne indeholder nu et dedikeret diagnosepanel til udviklere, som forbliver skjult, indtil "Developer mode" aktiveres. Det understøtter valg af diagnostic call path og kørsel af gentagne stabilitetsprober for den valgte tilstand.
@@ -107,7 +118,7 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
 - **Oprettelse af konceptnoter, valgfrit og tilpasningsbart**: Opretter automatisk nye noter for opdagede begreber i en angivet mappe i dit vault.
 - **Tilpasselige outputstier**: Konfigurer separate relative stier i dit vault til at gemme processed files og nyoprettede konceptnoter.
 - **Tilpasselige outputfilnavne (Add Links)**: Du kan vælge at **overskrive originalfilen** eller bruge et tilpasset suffix eller en erstatningsstreng i stedet for standard `_processed.md`, når filer behandles for at tilføje links.
-- **Bevarelse af linkintegritet**: Grundlæggende håndtering findes til at opdatere links, når noter omdøbes eller slettes i vaultet.
+- **Bevarelse af linkintegritet**: Opdatering af links ved omdøbning afhænger af Obsidian og dets indstillinger. Sletning kan efterlade uløste links; kontrollér noter med samme navn.
 - **Ren begrebsudtrækning**: Udtræk begreber og opret tilsvarende konceptnoter uden at ændre originaldokumentet. Det er ideelt til at udfylde en vidensbase fra eksisterende dokumenter uden at ændre kildematerialet. Funktionen har konfigurerbare muligheder for minimale konceptnoter og backlinks.
 
 ### Oversættelse
@@ -117,10 +128,10 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
   - **Understøttelse af store filer**: Store filer opdeles automatisk i mindre chunks baseret på indstillingen `Chunk word count`, før de sendes til LLM'en, og de oversatte dele samles derefter sømløst til ét dokument.
   - Understøtter oversættelse mellem mange sprog.
   - Målsproget kan tilpasses via indstillinger eller UI.
-  - Den oversatte tekst kan automatisk åbnes i panelet til højre for originalteksten for nem sammenligning.
+  - Åbner den gemte oversættelse i Obsidians arbejdsområde efter det tilgængelige layout.
 - **Batch-oversættelse**:
-  - Oversætter alle filer i en valgt mappe.
-  - Understøtter parallel behandling, hvis "Enable Batch Parallelism" er aktiveret.
+  - Oversætter som standard egnede filer direkte i den valgte mappe uden undermapper. Avanceret filvalg kan ændre omfanget; eksisterende målfiler kan blive overskrevet.
+  - Oversættelse bruger `batchConcurrency` direkte (standard: 1), uafhængigt af `enableBatchParallelism`.
   - Bruger custom prompts til oversættelse, hvis det er konfigureret.
   - Tilføjer valgmuligheden "Batch translate this folder" til kontekstmenuen i filudforskeren.
 - **Deaktiver automatisk oversættelse**: Når dette er aktiveret, tvinger ikke-Translate-opgaver ikke længere output til et bestemt sprog, så den oprindelige sprogkontekst bevares. Den eksplicitte opgave `Translate` oversætter stadig i henhold til konfigurationen.
@@ -136,7 +147,7 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
 - **Indholdsgenerering fra titel**:
   - Bruger notens titel til at generere indledende indhold via LLM og erstatter eventuelt eksisterende indhold.
   - **Valgfri research**: Du kan konfigurere, om webresearch først skal køres med den valgte udbyder for at give yderligere kontekst til genereringen.
-- **Batchgenerering af indhold fra titler**: Genererer indhold for alle noter i en valgt mappe baseret på deres titler med respekt for den valgfrie researchindstilling. Filer, der behandles korrekt, flyttes til en **konfigurerbar "complete"-undermappe**, for eksempel `[foldername]_complete` eller et brugerdefineret navn, for at undgå genbehandling.
+- **Batchgenerering af indhold fra titler**: Genererer og erstatter indhold i egnede `.md`-filer efter researchindstillingen. `_processed.md` og hele den udpegede complete-mappes træ udelades. Efter generering forsøges filen flyttet til complete-mappen. Et optaget mål blokerer flytningen, men ikke den allerede gemte generering; genererede og flyttede filer tælles separat.
 - **Kobling til Mermaid auto-fix**: Når Mermaid auto-fix er aktiveret, reparerer Mermaid-relaterede workflows automatisk genererede filer eller outputmapper efter behandling. Det omfatter Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid og Translate.
 
 ### Hjælpefunktioner
@@ -291,8 +302,8 @@ Få adgang til pluginindstillingerne via:
 
 #### Uddata for konceptnoter
 - **Customize Concept Note Path**:
-  - **Fra (standard)**: Automatisk oprettelse af noter for `[[linked concepts]]` er deaktiveret.
-  - **Til**: Giver dig mulighed for at angive en mappe, hvor nye konceptnoter skal oprettes.
+  - **Fra**: Opretter ikke automatisk noter for linkede begreber.
+  - **Til som standard**: Stien er tom fra starten. Angiv en gyldig sti relativt til vaulten, før der oprettes begrebsnoter.
 - **Concept Note Folder Path**: Kun synlig, når ovenstående er aktiveret. Indtast en *relativ sti* i dit vault, for eksempel `Concepts` eller `Generated/Topics`, hvor nye konceptnoter skal gemmes. Mapper oprettes automatisk, hvis de ikke findes. **Skal udfyldes, hvis tilpasning er aktiveret.** **Brug ikke absolutte stier eller ugyldige tegn.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -339,8 +350,8 @@ Få adgang til pluginindstillingerne via:
 
 #### Batchvis Mermaid-rettelse
 - **Enable Mermaid Error Detection**:
-  - **Fra (standard)**: Fejldetektion springes over efter behandling.
-  - **Til**: Scanner behandlede filer for tilbageværende Mermaid-syntaksfejl og genererer en rapport `mermaid_error_{foldername}.md`.
+  - **Fra**: Springer fejldetektion over efter behandling.
+  - **Til som standard**: Finder tilbageværende Mermaid-fejl og opretter `mermaid_error_{foldername}.md`.
 - **Move files with Mermaid errors to specified folder**:
   - **Fra**: Filer med fejl bliver liggende.
   - **Til**: Flytter alle filer, som stadig indeholder Mermaid-syntaksfejl efter rettelsesforsøget, til en dedikeret mappe til manuel gennemgang.
@@ -356,7 +367,7 @@ Få adgang til pluginindstillingerne via:
 - **API Call Interval (ms)**: Mindste forsinkelse i millisekunder *før og efter* hvert enkelt LLM API-kald. Vigtigt for API'er med lav hastighedsgrænse eller for at undgå 429-fejl. Sæt til 0 for ingen kunstig forsinkelse. Standard: 500 ms.
 - **Chunk Word Count**: Maksimalt antal ord pr. chunk, der sendes til LLM'en. Påvirker antallet af API-kald for store filer. Standard: 3000.
 - **Enable Duplicate Detection**: Slår den grundlæggende kontrol for dublette ord i behandlet indhold til eller fra, resultater vises i konsollen. Standard: Til.
-- **Max Tokens**: Maksimalt antal tokens, som LLM'en må generere pr. svar-chunk. Påvirker omkostning og detaljegrad. Standard: 4096.
+- **Max Tokens**: Maksimalt antal tokens, som LLM'en må generere pr. svar-chunk. Påvirker omkostning og detaljegrad. Standard: 8192. En udbyderspecifik outputgrænse kan tilsidesætte værdien; der findes også modelafhængige standardværdier.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Oversættelse
@@ -384,7 +395,7 @@ Få adgang til pluginindstillingerne via:
   - **Change Prompt Word**: Giver dig mulighed for at ændre prompt-ordet for en specifik opgave.
   - **Custom Prompt Word**: Indtast dit brugerdefinerede prompt-ord for opgaven.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Fra (standard)**: Filer, der genereres korrekt, flyttes til en undermappe med navnet `[OriginalFolderName]_complete` relativt til originalmappens forælder eller `Vault_complete`, hvis originalmappen var roden.
+  - **Fra (standard)**: Målet er søstermappen `[foldername]_complete`, eller `Vault_complete` ved vaultens rod. Den aktiverede indstilling tillader et brugerdefineret navn.
   - **Til**: Giver dig mulighed for at angive et tilpasset navn til undermappen, hvor færdige filer flyttes.
 - **Custom Output Folder Name**: Kun synlig, når ovenstående er aktiveret. Indtast det ønskede navn til undermappen, for eksempel `Generated Content` eller `_complete`. Ugyldige tegn er ikke tilladt. Hvis feltet efterlades tomt, bruges `_complete`. Mappen oprettes relativt til originalmappens overordnede mappe.
 
@@ -488,11 +499,11 @@ Dette er kernefunktionen, der fokuserer på at identificere begreber og tilføje
    - Kør kommandoen `Notemd: Translate Note/Selection`, via command palette eller knappen i sidepanelet.
    - En modal vises, hvor du kan bekræfte eller ændre **Target Language**, som standard hentes fra konfigurationen.
    - Pluginet bruger den konfigurerede **LLM Provider**, i henhold til Multi-Model-indstillingerne, til at udføre oversættelsen.
-   - Det oversatte indhold gemmes på den konfigurerede **Translation Save Path** med det korrekte suffix og åbnes i **en ny rude til højre** for originalindholdet for nem sammenligning.
+   - Gemmer oversættelsen med den konfigurerede sti og det valgte suffix og åbner den gemte fil i Obsidians arbejdsområde.
    - Du kan annullere denne opgave via knappen i sidepanelet eller modalens cancel-knap.
 3. **Batchoversættelse**:
    - Kør kommandoen `Notemd: Batch Translate Folder` fra command palette og vælg en mappe, eller højreklik på en mappe i filudforskeren og vælg "Batch translate this folder".
-   - Pluginet oversætter alle Markdown-filer i den valgte mappe.
+   - Oversætter som standard egnede filer direkte i den valgte mappe uden undermapper. Avanceret filvalg kan ændre omfanget; eksisterende målfiler kan blive overskrevet.
    - Oversatte filer gemmes på den konfigurerede oversættelsessti, men åbnes ikke automatisk.
    - Denne proces kan annulleres via progress modal.
 
@@ -519,7 +530,7 @@ Dette er kernefunktionen, der fokuserer på at identificere begreber og tilføje
    - Kør kommandoen `Notemd: Batch Generate Content from Titles`, via command palette eller knappen i sidepanelet.
    - Vælg den mappe, der indeholder de noter, du vil behandle.
    - Pluginet gennemgår hver `.md`-fil i mappen, undtagen `_processed.md`-filer og filer i den udpegede "complete"-mappe, og genererer indhold ud fra notens titel og erstatter eksisterende indhold. Filer behandles i baggrunden uden at blive åbnet i editoren.
-   - Filer, der behandles korrekt, flyttes til den konfigurerede "complete"-mappe.
+   - Efter generering forsøges filen flyttet til complete-mappen. Et optaget mål blokerer flytningen, men ikke den allerede gemte generering; genererede og flyttede filer tælles separat.
    - Kommandoen respekterer indstillingen **"Enable Research in 'Generate from Title'"** for hver behandlet note.
    - Du kan annullere denne opgave via knappen i sidepanelet eller modalens cancel-knap.
    - Fremdrift og resultater, som antal ændrede filer og fejl, vises i sidepanelets eller modalens log.
@@ -571,6 +582,8 @@ Dette er kernefunktionen, der fokuserer på at identificere begreber og tilføje
    - Du kan valgfrit konfigurere pluginet til at flytte disse problematiske filer til en separat mappe til gennemgang.
 
 ## Understøttede LLM-udbydere
+
+Tabellen viser udvalgte eksempler. Se [vejledningen til 36 udbydere](https://jacobinwwey.github.io/obsidian-NotEMD/da/docs/providers/overview) for forudindstillinger og krav.
 
 | Udbyder | Type | API-nøgle kræves | Bemærkninger |
 |--------------------|---------|------------------------|-----------------------------------------------------------------------|
@@ -640,7 +653,7 @@ Notemd kører lokalt inde i Obsidian, men nogle funktioner sender udgående anmo
 ### Almindelige problemer
 - **Pluginet indlæses ikke**: Sørg for, at `manifest.json`, `main.js` og `styles.css` ligger i den korrekte mappe, `<Vault>/.obsidian/plugins/notemd/`, og genstart Obsidian. Kontroller Developer Console, `Ctrl+Shift+I` eller `Cmd+Option+I`, for fejl under opstart.
 - **Behandlingsfejl / API-fejl**:
-  1. **Kontrollér filformatet**: Sørg for, at filen, du forsøger at behandle eller kontrollere, har endelsen `.md` eller `.txt`. Notemd understøtter i øjeblikket kun disse tekstbaserede formater.
+  1. **Kontrollér formatet**: Standardformaterne afhænger af opgaven (`.md` eller `.md`/`.txt`). Udviklertilstand med udvidede inputformater tillader andre tekster og PDF til visse opgaver, der bevarer kilden, som oversættelse og begrebsudtræk. Tilføjelse af links er fortsat begrænset til `.md`/`.txt`.
   2. Brug kommandoen eller knappen "Test LLM Connection" til at verificere indstillingerne for den aktive udbyder.
   3. Dobbelttjek API Key, Base URL, Model Name og API Version, for Azure. Sørg for, at API-nøglen er korrekt og har tilstrækkelige kreditter eller rettigheder.
   4. Sørg for, at din lokale LLM-server, LMStudio eller Ollama, kører, og at Base URL er korrekt, for eksempel `http://localhost:1234/v1` for LMStudio.
@@ -701,7 +714,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.7 - Forbedr din Obsidian-vidensgraf med AI.*
+*Notemd v1.9.8 - Forbedr din Obsidian-vidensgraf med AI.*
 
 
 <!-- repo-chronicle:start -->

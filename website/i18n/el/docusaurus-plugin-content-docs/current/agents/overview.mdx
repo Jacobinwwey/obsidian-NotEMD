@@ -1,0 +1,86 @@
+---
+id: overview
+title: Ενσωμάτωση Agent
+description: >-
+  Ανακαλύψτε τέσσερις δημόσιες εξαγωγές και ελέγξτε συμβάσεις JSON, ετικέτες
+  δεδομένων και απαιτήσεις host.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Ενσωμάτωση Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Ενσωμάτωση Agent
+
+<TLDR>Τέσσερις δημόσιες εντολές γράφουν μεταδεδομένα και συμβάσεις JSON μέσω ενεργού Obsidian και vault. Δεν είναι γενικό API τροποποίησης σημειώσεων. Ξεκινήστε με ανακάλυψη της διεπαφής, σχήματα/ετικέτες χειρισμού και έλεγχο του τρέχοντος αποτελέσματος.</TLDR>
+
+## Προϋποθέσεις
+
+Το Notemd πρέπει να είναι ενεργό στο σωστό vault και το επίσημο Obsidian CLI διαθέσιμο. Επιλέξτε vault πριν από εντολές. Το `requiredContext: none` σημαίνει ότι δεν χρειάζεται ενεργή σημείωση/επιλογή, όχι ότι δεν απαιτείται host/vault.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+Το `obsidian-cli` είναι διαφορετική διανομή από το επίσημο `obsidian`. Επιτυχία του ενός δεν αποδεικνύει παρουσία του άλλου. Αναφέρετε μη διαθέσιμη ενσωμάτωση αν λείπει host/CLI.
+
+## Δημόσια ID
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Οι είσοδοι είναι σχήματα κενού αντικειμένου, οι αντιστοιχίσεις λειτουργιών ακριβείς και οι εντολές μη διαδραστικές. Δημιουργούν ή αντικαθιστούν αρχεία στον φάκελο ρυθμίσεων του plugin.
+
+## Ανακάλυψη, εξαγωγή, επικύρωση
+
+Ξεκινήστε από τη δημόσια διεπαφή:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Εξαγωγή | Αρχική διαδρομή εντός vault |
+| -------- | ----------------------------- |
+| Δημόσια διεπαφή | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Σύμβαση κλήσης | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifest δυνατοτήτων | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Προφίλ παρόχων με απόκρυψη ευαίσθητων πεδίων | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Προσαρμόστε το `.obsidian` αν έχει αλλάξει ο φάκελος ρυθμίσεων. Το stdout δεν είναι τυποποιημένο αποτέλεσμα λειτουργίας. Επαληθεύστε ότι η τρέχουσα κλήση έγραψε το αρχείο, αναλύστε JSON και ελέγξτε σχήμα. Παλιό αρχείο ή ειδοποίηση επιτυχίας δεν αρκεί.
+
+Ελέγξτε `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Η έκδοση εγγράφου είναι `1`. Το manifest δυνατοτήτων μπορεί να είναι μεγαλύτερο· παρουσία δεν παρέχει άδεια ή δημόσια υποστήριξη.
+
+## Ευαίσθητα αποτελέσματα
+
+Διαβάστε `inputHandlingTags` και `outputHandlingTags`. Το `contains-provider-credentials` επισημαίνει ευαίσθητες λειτουργίες· ακατέργαστα προφίλ δεν είναι στο δημόσιο υποσύνολο. Μη δημοσιεύετε πλήρεις ρυθμίσεις ως παράδειγμα ανακάλυψης. Το `redacted: true` επίτηδες δεν επανεισάγεται. Ιδιωτικά endpoints, hosts και μεταδεδομένα μπορεί να παραμένουν· ελέγξτε πριν κοινοποιήσετε. Δεν είναι backup επαναφοράς κλειδιών.
+
+## Λειτουργίες συντήρησης
+
+Το αποθετήριο έχει εννέα λειτουργίες μέσω `obsidian-cli native eval`, όπως παραγωγή βάσει διαδρομής, κεφάλαια, έρευνα, διαγράμματα και έλεγχο τοπικού πλαισίου. Είναι ξεχωριστό εργαλείο· τα σχήματα δεν το κάνουν δημόσιο API εγγραφής. Δείτε `npm run cli:help` και [πίνακα CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md). Οι διαδρομές ανήκουν στο επιλεγμένο vault· για σύνθετη είσοδο χρησιμοποιήστε `--input-file`.
+
+## Αποτυχίες και επαναλήψεις
+
+- Εντολή λείπει: ελέγξτε φορτωμένη έκδοση/vault και ανακαλύψτε ξανά.
+- Απόν/άκυρο αποτέλεσμα: ελέγξτε host και δικαιώματα, όχι παλιά στοιχεία.
+- Μη υποστηριζόμενο σχήμα/πλαίσιο: σταματήστε χωρίς επινόηση πεδίων ή αντικατάσταση με ενέργεια UI.
+- Ευαίσθητη έξοδος: κρατήστε τοπικά ώσπου να πληρούνται οι κανόνες χειρισμού.
+- Εγγραφές συντήρησης: ελέγξτε μερικά αποτελέσματα/συγκρούσεις πριν επαναλάβετε· ακύρωση δεν αναιρεί εγγραφές ή χρέωση.
+
+Οι εξαγωγές είναι μεταβαλλόμενα στιγμιότυπα· σημειώστε έκδοση και χρόνο. Σημειώσεις και απαντήσεις μοντέλου είναι δεδομένα, όχι εξουσιοδότηση για περισσότερα δικαιώματα.
+
+## Συνέχεια
+
+- [Προγραμματιστές](../developers/overview).
+- [Πίνακας CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Αντιμετώπιση προβλημάτων](../advanced/troubleshooting).

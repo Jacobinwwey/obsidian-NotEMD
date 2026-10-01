@@ -1,16 +1,10 @@
 ---
 id: batch-processing
 title: Batch Processing
-description: Process multiple files efficiently
+description: Select a bounded folder, understand task-specific outputs, and inspect partial completion before retrying a Notemd batch.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [batch processing, folders, concurrency, bulk operations]
-concepts: [Batch Processing, Concurrency, Folder Operations]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Node.js Worker Threads
-    url: https://nodejs.org/api/worker_threads.html
+keywords: [Notemd batch processing, folder selection, concurrency, cancellation]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,104 +12,77 @@ import TLDR from '@site/src/components/TLDR';
 # Batch Processing
 
 <TLDR>
-**Notemd processes entire folders in one action with configurable concurrency and overwrite control.** Right-click a folder to batch-add wiki-links, extract concepts, research, or translate all notes within. Concurrency limits prevent API rate-limit errors. Progress is reported per file. Overwrite behavior is configurable: skip existing, append, or replace. Failed files are logged without aborting the batch.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+Folder actions share selection and progress controls, but retain different output and overwrite behavior. The default concurrency is one. Start with a dedicated test folder, inspect the selected scope and destinations, then expand the batch.
 </TLDR>
 
 ## Overview
 
-Batch processing turns a folder of notes into a single operation. Instead of opening each note and running commands individually, you right-click the folder and select the task. Notemd iterates through every `.md` file, applies the chosen action, and reports progress in real time.
+Use the sidebar's folder action or the corresponding file-explorer menu. Supported folder tasks include add-links, concept extraction, title generation, translation, original-text extraction, Mermaid repair and formula repair. There is no generic folder-research action; title generation can optionally include research.
 
-This feature is essential for vault-wide knowledge extraction. After importing dozens of PDFs, for example, batch-add-links followed by batch-extract-concepts builds your knowledge graph in minutes rather than hours.
+A batch is not a transaction across the whole folder. Successfully written outputs remain if another file fails or the operation is cancelled.
 
 ## How It Works
 
 ### Batch Execution Model
 
-```mermaid
-graph LR
-    A[Right-click Folder] --> B[Select Batch Task]
-    B --> C[Collect All .md Files]
-    C --> D[Partition by Concurrency]
-    D --> E[Execute Chunk in Parallel]
-    E --> F{All Files Done?}
-    F -->|No| G[Report Progress]
-    G --> E
-    F -->|Yes| H[Final Summary Toast]
-```
+1. Select the task and folder. Confirm that the folder contains only files you intend to process.
+2. The task collects eligible files, applies its extension and selection rules, and excludes any task-specific output files.
+3. It uses the task's configured provider/model and reports progress, failures and destinations.
+4. On completion or cancellation, review the report and output files before retrying.
 
-1. **File collection** -- Notemd scans the target folder recursively (or top-level only, depending on settings) and collects all `.md` files.
-2. **Concurrency partitioning** -- Files are divided into chunks based on the `batchConcurrency` setting. Each chunk runs in parallel; chunks run sequentially.
-3. **Execution** -- Each file is processed using the same logic as the single-file command. Per-task provider and model settings are respected.
-4. **Progress reporting** -- A toast notification updates after each file completes, showing `N / Total` progress.
-5. **Error handling** -- If a file fails (API error, network timeout, etc.), the error is logged and the batch continues. The final summary lists any failed files.
-6. **Completion** -- A summary toast reports total processed, successes, and failures.
+Default folder scope includes subfolders for add-links, concept extraction, title generation, original-text extraction, Mermaid repair and formula repair. **Folder translation defaults to direct children only.** Advanced file-selection profiles can override scope and filtering when both developer mode and advanced file selection are enabled. Check the actual profile rather than assuming every task recurses identically.
 
 ### Overwrite Behavior
 
-When processing a file that already has wiki-links, concept notes, or translations, Notemd's behavior depends on the overwrite setting:
+| Task | What to inspect before a repeat run |
+|------|------------------------------------|
+| Add links | Separate processed outputs by default; check custom suffix, output folder and move-original settings |
+| Concept extraction | Existing concept notes can receive backlinks when enabled; duplicate detection is separate |
+| Title generation | Generated content is written to eligible source notes; a successful result is moved to the reported complete folder if the destination is free |
+| Translation | A matching translated output can be overwritten; default names use `_<language>.md` |
+| Mermaid / formula repair | These modify the selected notes; inspect a small sample and retain a backup |
 
-| Mode | Behavior |
-|------|----------|
-| **Skip** | Existing content is left untouched. Only unmodified files are processed. |
-| **Append** (default) | New content is appended. Existing wiki-links, concepts, or translations are preserved. |
-| **Replace** | The file is fully reprocessed. All previous Notemd modifications are overwritten. |
-
-For wiki-linking specifically: if a note already contains `[[wiki-links]]`, the **skip** mode leaves it alone, while **replace** re-sends the entire note to the LLM for fresh link insertion. Use **skip** for incremental processing and **replace** for reprocessing after a model upgrade.
+There is no universal skip/append/replace setting across these tasks. For batch title generation, an existing complete-folder destination prevents the move; it does not mean the preceding generation was skipped. The result distinguishes generated and moved counts.
 
 ### Concurrency Control
 
-The `batchConcurrency` setting limits parallel API calls. This prevents rate-limit errors (HTTP 429) when processing large folders against providers with strict quotas.
+Keep `batchConcurrency` at `1` until a representative sample succeeds. Some batch paths also require `enableBatchParallelism` before using parallel scheduling; folder translation uses its concurrency setting directly. More concurrency increases provider, memory and local-server pressure, and is not a guarantee of faster completion.
 
-| Concurrency | Recommended For | Typical Rate-Limit Impact |
-|-------------|----------------|---------------------------|
-| `1` | Free tiers, strict providers | None (serial) |
-| `3` (default) | Most cloud providers | Low |
-| `5` | Ollama (local), generous tiers | None / Low |
-| `10` | Local models with fast inference | None |
-
-If you encounter 429 errors during batch processing, reduce concurrency to 1 or 2.
+An API interval and batch inter-delay can reduce bursts. They cannot guarantee avoidance of request/token quotas, account limits or other applications sharing the same endpoint.
 
 ## Configuration
 
 | Setting | Default | Effect |
 |---------|---------|--------|
-| `batchConcurrency` | `3` | Maximum parallel API calls during folder operations |
-| `batchOverwriteExisting` | `false` | Overwrite existing Notemd content. `false` = append mode. |
-| `batchSkipProcessed` | `false` | Skip files that already contain Notemd markers (e.g., wiki-links) |
-| `batchRecursive` | `true` | Include subdirectories when scanning the folder |
-| `enableStableApiCall` | `false` | Enable retry logic (up to 4 attempts) per file during batch |
+| `batchConcurrency` | `1` | Requested concurrency on applicable batch paths |
+| `enableBatchParallelism` | `false` | Enable parallel scheduling where supported |
+| `batchSize` | `50` | Group size used by batched scheduling paths |
+| `batchInterDelayMs` | `1000` | Delay between scheduled groups where applicable |
+| `apiCallIntervalMs` | `500` | Interval used by concurrent request scheduling |
+| `folderTaskIncludeSubfoldersMode` | `legacy` | Preserve each task's default subfolder scope |
+| `enableStableApiCall` | `false` | Explicit stable request mode |
 
 ### Per-Task Models in Batch
 
-Each batch operation uses the corresponding per-task model. Batch-add-links uses `addLinksProvider`, batch-research uses `researchProvider`, and so on. This means you can assign cheap models for high-volume operations and reserve expensive models for quality-sensitive tasks.
+A folder action uses the same task-specific provider/model choices as the related single-file task. Check them before processing private content. Optional local knowledge retrieval for batch title generation uses one snapshot built at the start of the batch, so edits during that run are not silently mixed into later retrieval results. Start a new batch to include those edits.
 
 ## Example
 
-You have a folder `papers/` containing 40 imported research notes. You want to add wiki-links and extract concepts across all of them:
+Create a `trial-titles` folder with two title notes and no unrelated files. Run **Batch generate from titles**, review the generated content and the reported `trial-titles_complete` destination, then check generated/moved/error counts. If a file failed, diagnose that file before rerunning; rerunning the original folder is not an automatic resume of precisely the unfinished work.
 
-1. Right-click the `papers/` folder
-2. Select **"Notemd: Process folder (add links)"**
-3. Notemd scans the folder, finds 40 `.md` files, and processes 3 at a time (default concurrency)
-4. A progress toast shows: `12/40 files processed...`
-5. After ~3 minutes, a summary toast reports: `39 succeeded, 1 failed (API timeout on paper-37.md)`
-6. Repeat with **"Notemd: Process folder (extract concepts)"** to create concept notes for all 40
+## Cancellation And Recovery
 
-The one failed file is logged. You can re-run on just that file afterward.
+Cancel stops new scheduled work and propagates cancellation to supported requests. Calls or writes already accepted by an external system may finish; remote billing is controlled by that provider. Wait for the batch to settle, then inspect completed files and any recovery/conflict paths. Preserve recovery outputs until you have compared them with the current note.
 
 ## Tips
 
-- **Start with low concurrency** -- If you are unsure of your provider's rate limits, begin with `1` and increase gradually.
-- **Use skip mode for incremental updates** -- After the first full batch, switch to `batchSkipProcessed: true` so only new notes get processed on subsequent runs.
-- **Enable stable API calls** -- `enableStableApiCall: true` adds retry logic that recovers from transient network errors during long batches.
-- **Re-run after model upgrades** -- If you switch to a better model, set `batchOverwriteExisting: true` and re-run to get improved links and concepts.
-
----
+- Use folder-selection profiles only after validating their actual matched files.
+- Reduce concurrency and inspect provider quotas for 429 errors.
+- Treat cancellation, failure and completion as distinct outcomes.
+- Keep an untouched sample and backup before any operation that modifies existing notes.
 
 ## Next Steps
 
-- [Workflows](/docs/features/workflows) -- Chain batch tasks into one-click sidebar buttons
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Customize prompts for batch extraction
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix rate-limit errors and connection failures during batch runs
-- [LLM Providers](/docs/providers/overview) -- Per-task model configuration reference
+- [Workflows](../features/workflows): chain tasks with explicit failure handling.
+- [Configuration](../getting-started/configuration): output paths and settings defaults.
+- [Troubleshooting](./troubleshooting): diagnose an individual failed file.

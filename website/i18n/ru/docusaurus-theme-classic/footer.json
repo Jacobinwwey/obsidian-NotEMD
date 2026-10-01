@@ -8,7 +8,7 @@
     "description": "The title of the footer links column with title=Community in the footer"
   },
   "link.title.More": {
-    "message": "Другое",
+    "message": "Ещё",
     "description": "The title of the footer links column with title=More in the footer"
   },
   "link.item.label.Getting Started": {
@@ -16,27 +16,27 @@
     "description": "The label of footer link with label=Getting Started linking to /docs/intro"
   },
   "link.item.label.FAQ": {
-    "message": "Часто задаваемые вопросы",
+    "message": "Частые вопросы",
     "description": "The label of footer link with label=FAQ linking to /docs/faq"
   },
   "link.item.label.Discord": {
     "message": "Discord",
     "description": "The label of footer link with label=Discord linking to https://discord.gg/qnGgsQ9W"
   },
-  "link.item.label.GitHub Discussions": {
-    "message": "GitHub Discussions",
-    "description": "The label of footer link with label=GitHub Discussions linking to https://github.com/Jacobinwwey/obsidian-NotEMD/discussions"
-  },
   "link.item.label.GitHub": {
     "message": "GitHub",
     "description": "The label of footer link with label=GitHub linking to https://github.com/Jacobinwwey/obsidian-NotEMD"
   },
   "link.item.label.Sponsor": {
-    "message": "Спонсор",
+    "message": "Поддержать",
     "description": "The label of footer link with label=Sponsor linking to https://github.com/sponsors/Jacobinwwey"
   },
   "copyright": {
-    "message": "Copyright © 2026 Notemd. Создано с использованием Docusaurus. | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">Лицензия MIT</a>",
+    "message": "Copyright © 2026 Notemd. Создано на Docusaurus. | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">Лицензия MIT</a>",
     "description": "The footer copyright"
+  },
+  "link.item.label.GitHub Issues": {
+    "message": "Сообщить об ошибке",
+    "description": "Repository issue tracker"
   }
 }

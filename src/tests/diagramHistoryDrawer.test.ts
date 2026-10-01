@@ -57,9 +57,10 @@ describe('DiagramHistoryDrawer', () => {
         drawer.open(trigger as unknown as HTMLElement);
         const layer = find(host, 'notemd-diagram-history-layer')!;
         const listener = layer.addEventListener.mock.calls[0][1];
-        const event = { key: 'Escape', preventDefault: jest.fn() };
+        const event = { key: 'Escape', preventDefault: jest.fn(), stopPropagation: jest.fn() };
         listener(event);
         expect(event.preventDefault).toHaveBeenCalled();
+        expect(event.stopPropagation).toHaveBeenCalled();
         expect(drawer.isOpen()).toBe(false);
 
         drawer.open(trigger as unknown as HTMLElement);

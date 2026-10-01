@@ -18,5 +18,25 @@
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Empieza aquí",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Primeros pasos",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Uso habitual",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Desarrolladores",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agentes",
+    "description": "Navbar label: Agents"
   }
 }

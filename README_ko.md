@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Obsidian용 Notemd 플러그인
 
+> Notemd는 MIT 라이선스의 Obsidian 플러그인으로, 링크가 있는 Markdown, 개념 노트, 요약, 번역과 다이어그램을 만듭니다. 파일은 보관함에 저장되지만 클라우드 작업은 선택한 제공업체로 내용을 보내며 웹 조사는 네트워크를 사용합니다.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## 여기서 시작하세요
+
+| 대상 | 시작점 | 목표 |
+|---|---|---|
+| 입문자 | [빠른 시작](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/getting-started/quick-start) | 제공업체를 설정하고 노트 하나 검증하기 |
+| 사용자 | [워크플로우](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/features/workflows) | 폴더 범위, 출력과 복구 관리하기 |
+| 개발자 | [개발 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/developers/overview) | 기존 계약에 따라 빌드, 테스트, 확장하기 |
+| 에이전트 | [에이전트 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/agents/overview) | 지원되는 네 가지 내보내기 명령 확인하기 |
+
+**버전:** 1.9.8
+
+- **취소와 복구:** 작업 예약과 재시도 중에도 취소 상태를 유지하고 조사·번역의 마지막 파일 준비 중 취소된 뒤 쓰기가 실행되지 않도록 합니다. 완료된 출력은 보존하고 복구 충돌을 알립니다.
+- **기록과 기본 형식 내보내기:** 검색 입력과 키보드 초점을 유지합니다. PowerPoint 병합 셀 아래 구분선과 CircuitikZ 배선·레이블을 수정했으며 일괄 로컬 검색은 일관된 스냅샷을 사용합니다.
+- **배포와 문서:** 변경 사항이 없는 소스의 출처와 다운로드한 배포 파일을 검증하고, 대상별 안내와 직접 작성한 번역을 제공합니다.
+
+제공업체 사전 설정 36개와 실행 가능한 다이어그램 항목 33개는 1.9.7에도 있었습니다. [업그레이드 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/releases/1.9.8) · [공개 릴리스 확인](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Drawnix에서 가지 사이 화살표는 재배치 후에도 정적 좌표로 남습니다. PPTX의 Mermaid/SVG는 이미지로 대체될 수 있습니다. 취소는 저장된 변경의 실행 취소가 아니며 원격 생성이나 과금 중단을 보장하지 않습니다. 실제 모바일 기기와 Obsidian 0.15.0은 아직 검증하지 않았습니다.
 
 다른 언어로 된 문서 읽기: [언어 센터](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
-      AI 기반 다국어 지식 강화 도구
-==================================================
-```
-
-나만의 지식 베이스를 만드는 가장 쉬운 방법!
-
-Notemd는 다양한 거대 언어 모델(LLM)과 통합되어 다국어 노트를 처리하고, 주요 개념에 대한 위키 링크를 자동으로 생성하며, 대응하는 개념 노트를 만들고, 웹 리서치를 수행하는 등 Obsidian 워크플로우를 강화하여 강력한 지식 그래프를 구축할 수 있도록 돕습니다.
-
 Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.com/Jacobinwwey/obsidian-NotEMD) [☕️ 커피를 사주세요](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## 목차
 
@@ -50,13 +50,26 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
 
 ## 빠른 시작
 
-1.  **설치 및 활성화**: Obsidian 커뮤니티 마켓플레이스에서 플러그인을 다운로드합니다.
-2.  **LLM 설정**: `Settings -> Notemd`로 이동하여 LLM 제공업체(예: OpenAI 또는 로컬 Ollama)를 선택하고 API 키/URL을 입력합니다.
-3.  **사이드바 열기**: 왼쪽 리본에 있는 Notemd 마법 지팡이 아이콘을 클릭하여 사이드바를 엽니다.
-4.  **노트 처리**: 노트를 열고 사이드바에서 **"파일 처리 (링크 추가)"**를 클릭하면 핵심 개념에 `[[wiki-links]]`가 자동으로 추가됩니다.
-5.  **빠른 워크플로우 실행**: 기본 제공되는 **"One-Click Extract"** 버튼을 사용하여 처리, 일괄 생성, Mermaid 수정을 한 번에 실행합니다.
+1. **설정 → 커뮤니티 플러그인 → 탐색**에서 **Notemd**를 설치하고 활성화합니다.
+2. Notemd 설정에 정확한 엔드포인트, 인증 정보와 모델을 입력합니다. 연결 테스트 후 실제 생성도 확인합니다. 모델 목록 조회 성공만으로 채팅 권한을 확인할 수는 없습니다.
+3. 빈 `trial-concepts` 폴더를 만들어 개념 노트 폴더로 지정합니다. 초기 경로는 비어 있습니다. 제공업체로 보내도 되는 짧은 문단을 테스트용 `Notemd trial.md`에 넣습니다.
+4. **파일 처리(링크 추가)**를 실행합니다. 보존된 원본 옆의 `Notemd trial_processed.md`와 링크, 개념 노트를 확인합니다.
+5. 테스트 원본을 다시 열고 해당 폴더로 **One-Click Extract**를 실행합니다. 링크 추가, 대상 노트의 제목을 이용한 일괄 생성, complete 폴더의 Mermaid 수정 순서로 진행됩니다. 기존의 처리 대상 노트도 포함될 수 있습니다.
 
-완료되었습니다! 웹 리서치, 번역, 콘텐츠 생성 등 더 많은 기능을 활용하려면 설정을 살펴보세요.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+웹 조사와 다이어그램 생성은 별도 작업입니다. 취소 후에는 실행 중인 작업이 끝날 때까지 기다리고 완료·복구 출력을 확인한 뒤 다시 실행하세요.
+
+<details>
+<summary>화면 예시</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## 언어 지원
 
@@ -89,9 +102,9 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
 - **OpenAI 호환 안정적 장기 요청 체인 강화**: 안정 모드에서 OpenAI 호환 호출은 각 시도에 대해 명시적인 3단계 순서(기본 직접 스트리밍, 직접 비스트리밍, `requestUrl` 폴백(필요시 스트리밍 파싱으로 업그레이드 가능))를 사용합니다. 이는 제공업체가 버퍼링된 응답은 완료했지만 스트리밍 파이프가 불안정한 경우의 오탐 오류를 줄여줍니다.
 - **모든 LLM API에 대한 프로토콜 인식 스트리밍 폴백**: 장기 요청 폴백 시도는 이제 OpenAI 호환 엔드포인트뿐만 아니라 모든 기본 제공 LLM 경로에서 프로토콜 인식 스트리밍 파싱으로 업그레이드됩니다. Notemd는 데스크톱 `http/https` 및 비데스크톱 `fetch` 모두에서 OpenAI/Azure 스타일 SSE, Anthropic 메시지 스트리밍, Google Gemini SSE 응답, Ollama NDJSON 스트림을 처리하며, 나머지 OpenAI 스타일 직접 제공업체 진입점은 동일한 공유 폴백 경로를 재사용합니다.
 - **중국 지역 전용 프리셋**: 기존의 글로벌 및 로컬 제공업체 외에 `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow` 프리셋이 추가되었습니다.
-- **신뢰할 수 있는 일괄 처리**: 대규모 일괄 작업 중 속도 제한 오류를 방지하고 안정적인 성능을 보장하기 위해 **시차를 둔 API 호출**이 포함된 개선된 동시 처리 로직을 적용했습니다. 새로운 구현은 작업이 동시에 시작되지 않고 서로 다른 간격으로 시작되도록 보장합니다.
-- **정확한 진행 보고**: 진행률 표시줄이 멈추는 버그를 수정하여 UI가 항상 실제 작업 상태를 반영하도록 했습니다.
-- **견고한 병렬 일괄 처리**: 병렬 일괄 작업이 중간에 중단되는 문제를 해결하여 모든 파일이 안정적이고 효율적으로 처리되도록 보장합니다.
+- **신뢰할 수 있는 일괄 처리**: API 호출 시작 시점을 분산해 요청 집중을 줄입니다. 공급자의 사용량과 속도 제한은 그대로 적용됩니다.
+- **정확한 진행 보고**: 완료, 실패, 취소된 파일을 구분해 표시합니다. 작업 종료가 모든 파일의 성공을 뜻하지는 않습니다.
+- **견고한 병렬 일괄 처리**: 실행 중인 작업이 끝난 뒤 결과를 집계합니다. 취소는 이후 작업을 중단하지만 이미 저장한 변경을 되돌리지 않습니다. 폴더 전체를 하나의 트랜잭션으로 처리하지 않습니다.
 - **진행률 표시줄 정확도**: "위키 링크 생성 및 노트 생성" 명령의 진행률 표시줄이 95%에서 멈추는 버그를 수정하여 완료 시 100%가 올바르게 표시되도록 했습니다.
 - **개선된 API 디버깅**: "API 오류 디버깅 모드"는 이제 LLM 제공업체 및 검색 서비스(Tavily/DuckDuckGo)의 전체 응답 본문을 캡처하며, OpenAI, Anthropic, Google, Azure OpenAI, Ollama 폴백에서 더 나은 문제 해결을 위해 삭제된 요청 URL, 경과 시간, 응답 헤더, 부분 응답 본문, 파싱된 부분 스트림 콘텐츠 및 스택 추적을 포함하는 시도별 전송 타임라인을 기록합니다.
 - **개발자 모드 패널**: 설정에 개발자 전용 진단 패널이 포함되어 있으며, "개발자 모드"를 켰을 때만 표시됩니다. 진단 호출 경로 선택 및 선택한 모드에 대한 반복적인 안정성 프로브 실행을 지원합니다.
@@ -106,7 +119,7 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
 - **개념 노트 생성 (선택 사항 및 사용자 정의 가능)**: 지정된 보관함 폴더에 발견된 개념에 대한 새 노트를 자동으로 생성합니다.
 - **사용자 정의 가능한 출력 경로**: 처리된 파일과 새로 생성된 개념 노트를 저장하기 위해 보관함 내에 별도의 상대 경로를 구성합니다.
 - **사용자 정의 가능한 출력 파일명 (링크 추가)**: 링크 처리 시 기본값인 `_processed.md` 대신 **원본 파일을 덮어쓰거나** 사용자 정의 접미사/교체 문자열을 사용하도록 선택할 수 있습니다.
-- **링크 무결성 유지**: 보관함 내에서 노트의 이름이 변경되거나 삭제될 때 링크를 업데이트하는 기본 처리 기능을 제공합니다.
+- **링크 무결성 유지**: 이름 변경 시 링크 갱신은 Obsidian과 해당 설정에 따릅니다. 삭제하면 미해결 링크가 남을 수 있으며, 이름이 같은 노트는 직접 확인해야 합니다.
 - **순수 개념 추출**: 원본 문서를 수정하지 않고 개념을 추출하고 해당 개념 노트를 생성합니다. 이는 원본을 변경하지 않고 기존 문서에서 지식 베이스를 구축하는 데 이상적입니다. 이 기능은 최소한의 개념 노트를 생성하고 백링크를 추가하기 위한 구성 가능한 옵션을 제공합니다.
 
 
@@ -117,10 +130,10 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
     - **대용량 파일 지원**: LLM으로 보내기 전에 `청크 단어 수` 설정에 따라 대용량 파일을 자동으로 작은 조각으로 나눕니다. 번역된 조각은 나중에 하나의 문서로 매끄럽게 합쳐집니다.
     - 여러 언어 간의 번역을 지원합니다.
     - 설정 또는 UI에서 대상 언어를 사용자 정의할 수 있습니다.
-    - 읽기 편하도록 원문 오른쪽에 번역된 텍스트를 자동으로 엽니다.
+    - 저장된 번역 파일을 Obsidian 작업 공간에서 엽니다. 표시 위치는 사용 가능한 레이아웃에 따라 달라집니다.
 - **일괄 번역**:
-    - 선택한 폴더 내의 모든 파일을 번역합니다.
-    - "일괄 병렬화 활성화"가 켜져 있을 때 병렬 처리를 지원합니다.
+    - 기본적으로 선택한 폴더 바로 아래의 적합한 파일을 번역하며 하위 폴더는 제외합니다. 고급 파일 선택으로 범위를 변경할 수 있고, 기존 출력 파일은 덮어쓸 수 있습니다.
+    - 번역은 `enableBatchParallelism`과 관계없이 `batchConcurrency`를 직접 사용합니다. 기본값은 1입니다.
     - 구성된 경우 번역에 사용자 정의 프롬프트를 사용합니다.
 	- 파일 탐색기 컨텍스트 메뉴에 "이 폴더 일괄 번역" 옵션을 추가합니다.
 - **자동 번역 비활성화**: 이 옵션이 켜져 있으면 번역 이외의 작업은 출력을 특정 언어로 강제하지 않고 원래 언어 문맥을 유지합니다. 명시적인 "번역" 작업은 설정에 따라 계속 번역을 수행합니다.
@@ -137,7 +150,7 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
 - **제목 기반 콘텐츠 생성**:
     - 노트 제목을 사용하여 기존 내용을 대체하고 LLM을 통해 초기 콘텐츠를 생성합니다.
     - **리서치 옵션**: 생성 시 문맥을 제공하기 위해 웹 리서치(선택한 제공업체 사용)를 수행할지 여부를 구성할 수 있습니다.
-- **제목 기반 일괄 콘텐츠 생성**: 선택한 폴더 내의 모든 노트에 대해 제목을 기반으로 콘텐츠를 생성합니다(리서치 옵션 설정 준수). 성공적으로 처리된 파일은 재처리를 방지하기 위해 **구성 가능한 "완료" 하위 폴더**(예: `[폴더명]_complete` 또는 사용자 정의 이름)로 이동됩니다.
+- **제목 기반 일괄 콘텐츠 생성**: 적합한 `.md` 파일의 내용을 제목으로 생성해 교체합니다. `_processed.md`와 지정한 complete 폴더 트리는 제외하며 연구 설정을 따릅니다. 생성 후 complete 폴더로 이동을 시도합니다. 대상 경로가 이미 사용 중이면 이동만 중단하며 생성한 내용은 저장되어 있습니다. 생성 수와 이동 수는 별도로 집계합니다.
 - **Mermaid 자동 수정 연결**: Mermaid 자동 수정이 활성화된 경우, Mermaid 관련 워크플로우는 처리 후 생성된 파일이나 출력 폴더를 자동으로 수정합니다. 이는 처리, 제목 기반 생성, 제목 기반 일괄 생성, 리서치 및 요약, Mermaid로 요약, 번역 워크플로우에 적용됩니다.
 
 
@@ -294,8 +307,8 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
 
 #### 개념 노트 출력
 -   **개념 노트 경로 사용자 정의**:
-    *   **비활성화 (기본값)**: `[[연결된 개념]]`에 대한 자동 노트 생성이 비활성화됩니다.
-    *   **활성화**: 새 개념 노트가 생성될 폴더를 지정할 수 있습니다.
+    *   **비활성화**: 연결된 개념의 노트를 자동으로 만들지 않습니다.
+    *   **기본적으로 활성화**: 초기 폴더 경로는 비어 있습니다. 개념 노트를 만들기 전에 보관함 내부의 유효한 상대 경로를 지정하세요.
 -   **개념 노트 폴더 경로**: (위 옵션이 활성화된 경우에만 표시) 새 개념 노트가 저장될 보관함 내의 *상대 경로*(예: `Concepts` 또는 `Generated/Topics`)를 입력합니다. 폴더가 없으면 자동으로 생성됩니다. **사용자 정의가 활성화된 경우 반드시 입력해야 합니다.** **절대 경로나 잘못된 문자를 사용하지 마세요.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -342,8 +355,8 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
 
 #### 일괄 Mermaid 수정
 -   **Mermaid 오류 감지 활성화**:
-    *   **비활성화 (기본값)**: 처리 후 오류 감지를 건너뜁니다.
-    *   **활성화**: 처리된 파일에서 남은 Mermaid 구문 오류를 스캔하고 `mermaid_error_{foldername}.md` 보고서를 생성합니다.
+    *   **끄기**: 처리 후 오류 검사를 건너뜁니다.
+    *   **기본적으로 켜기**: 남은 Mermaid 문법 오류를 검사하고 `mermaid_error_{foldername}.md` 보고서를 만듭니다.
 -   **Mermaid 오류가 있는 파일을 지정된 폴더로 이동**:
     *   **비활성화**: 오류가 있는 파일이 제자리에 유지됩니다.
     *   **활성화**: 수정 시도 후에도 여전히 Mermaid 구문 오류가 포함된 파일을 수동 검토를 위해 전용 폴더로 이동합니다.
@@ -359,7 +372,7 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
 -   **API 호출 간격 (ms)**: 각 개별 LLM API 호출 *전후*의 최소 지연 시간(밀리초)입니다. 저속 API나 429 오류 방지에 중요합니다. 인위적인 지연을 없애려면 0으로 설정하세요. (기본값: 500ms)
 -   **청크 단어 수**: LLM으로 전송되는 각 청크의 최대 단어 수입니다. 대용량 파일의 API 호출 횟수에 영향을 미칩니다. (기본값: 3000)
 -   **중복 감지 활성화**: 처리 중인 내용 내에서 중복 단어에 대한 기본 체크 여부를 전환합니다(결과는 콘솔에 표시). (기본값: 활성화)
--   **최대 토큰 수**: 각 응답 청크에 대해 LLM이 생성해야 하는 최대 토큰 수입니다. 비용과 상세도에 영향을 미칩니다. (기본값: 4096)
+-   **최대 토큰 수**: 각 응답 청크에 대해 LLM이 생성해야 하는 최대 토큰 수입니다. 비용과 상세도에 영향을 미칩니다. (기본값: 8192) 공급자별 출력 제한이 이 값을 덮어쓸 수 있으며 모델별 기본값도 적용됩니다.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### 번역
@@ -387,7 +400,7 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
     *   **프롬프트 단어 변경**: 특정 작업에 대한 프롬프트 단어를 변경할 수 있습니다.
     *   **사용자 정의 프롬프트 단어**: 작업에 대한 사용자 정의 프롬프트 단어를 입력합니다.
 -   **"제목에서 생성"에 사용자 정의 출력 폴더 사용**:
-    *   **비활성화 (기본값)**: 성공적으로 생성된 파일은 원본 폴더의 상위 폴더를 기준으로 `[원본폴더명]_complete`라는 하위 폴더로 이동됩니다(원본 폴더가 루트인 경우 `Vault_complete`).
+    *   **비활성화 (기본값)**: 이동 대상은 원래 폴더와 같은 수준의 `[foldername]_complete`이며 보관함 루트에서는 `Vault_complete`입니다. 옵션을 켜면 이름을 지정할 수 있습니다.
     *   **활성화**: 완료된 파일이 이동될 하위 폴더의 사용자 정의 이름을 지정할 수 있습니다.
 -   **사용자 정의 출력 폴더명**: (위 옵션이 활성화된 경우에만 표시) 하위 폴더의 원하는 이름(예: `Generated Content`, `_complete`)을 입력합니다. 잘못된 문자는 허용되지 않습니다. 비워 두면 기본값은 `_complete`입니다. 이 폴더는 원본 폴더의 상위 디렉토리를 기준으로 생성됩니다.
 
@@ -492,11 +505,11 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
     *   `Notemd: Translate Note/Selection` 명령을 실행합니다(명령 팔레트 또는 사이드바 버튼 이용).
     *   **대상 언어**(설정에 지정된 값이 기본값)를 확인하거나 변경할 수 있는 모달이 나타납니다.
     *   플러그인은 구성된 **LLM 제공업체**(멀티 모델 설정 기반)를 사용하여 번역을 수행합니다.
-    *   번역된 내용은 적절한 접미사와 함께 구성된 **번역 저장 경로**에 저장되며, 쉽게 비교할 수 있도록 원본 내용 **오른쪽의 새 창**에서 열립니다.
+    *   설정한 번역 저장 경로와 접미사로 저장한 다음 해당 파일을 Obsidian 작업 공간에서 엽니다.
     *   사이드바 버튼이나 모달의 취소 버튼을 통해 이 작업을 취소할 수 있습니다.
 3.  **일괄 번역**:
     *   명령 팔레트에서 `Notemd: Batch Translate Folder`를 실행하고 폴더를 선택하거나, 파일 탐색기에서 폴더를 마우스 오른쪽 버튼으로 클릭하고 "이 폴더 일괄 번역"을 선택합니다.
-    *   플러그인이 선택한 폴더 내의 모든 Markdown 파일을 번역합니다.
+    *   기본적으로 선택한 폴더 바로 아래의 적합한 파일을 번역하며 하위 폴더는 제외합니다. 고급 파일 선택으로 범위를 변경할 수 있고, 기존 출력 파일은 덮어쓸 수 있습니다.
     *   번역된 파일은 구성된 번역 경로에 저장되지만 자동으로 열리지는 않습니다.
     *   이 프로세스는 진행률 모달을 통해 취소할 수 있습니다.
 
@@ -523,7 +536,7 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
     *   `Notemd: Batch Generate Content from Titles` 명령을 실행합니다(명령 팔레트 또는 사이드바 버튼 이용).
     *   처리하려는 노트가 포함된 폴더를 선택합니다.
     *   플러그인은 폴더 내의 각 `.md` 파일(`_processed.md` 파일 및 지정된 "완료" 폴더 내 파일 제외)을 순회하며 노트 제목을 기반으로 콘텐츠를 생성하고 기존 내용을 대체합니다. 파일은 에디터에서 열리지 않고 백그라운드에서 처리됩니다.
-    *   성공적으로 처리된 파일은 구성된 "완료" 폴더로 이동됩니다.
+    *   생성 후 complete 폴더로 이동을 시도합니다. 대상 경로가 이미 사용 중이면 이동만 중단하며 생성한 내용은 저장되어 있습니다. 생성 수와 이동 수는 별도로 집계합니다.
     *   이 명령은 처리되는 각 노트에 대해 **"제목에서 생성" 시 리서치 활성화"** 설정을 준수합니다.
     *   사이드바 버튼이나 모달의 취소 버튼을 통해 이 작업을 취소할 수 있습니다.
     *   진행 상황과 결과(수정된 파일 수, 오류)가 사이드바 로그/모달에 표시됩니다.
@@ -575,6 +588,8 @@ Notemd를 사랑한다면, [⭐ GitHub에서 별을 주거나](https://github.co
     *   필요에 따라 이러한 문제가 있는 파일들을 검토를 위해 별도의 폴더로 이동하도록 플러그인을 구성할 수 있습니다.
 
 ## 지원되는 LLM 제공업체
+
+아래 표는 선택된 예시입니다. 전체 프리셋과 요구 사항은 [36개 공급자 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/providers/overview)를 확인하세요.
 
 | 제공업체           | 유형    | API 키 필요           | 비고                                                                 |
 |--------------------|---------|-----------------------|-----------------------------------------------------------------------|
@@ -644,7 +659,7 @@ Notemd는 Obsidian 내에서 로컬로 실행되지만 일부 기능은 외부 �
 ### 일반적인 문제
 -   **플러그인이 로드되지 않음**: `manifest.json`, `main.js`, `styles.css`가 올바른 폴더(`<Vault>/.obsidian/plugins/notemd/`)에 있는지 확인하고 Obsidian을 재시작하세요. 시작 시 오류는 개발자 콘솔(`Ctrl+Shift+I` 또는 `Cmd+Option+I`)에서 확인하세요.
 -   **처리 실패 / API 오류**:
-    1.  **파일 형식 확인**: 처리하거나 확인하려는 파일의 확장자가 `.md` 또는 `.txt`인지 확인하세요. Notemd는 현재 이러한 텍스트 기반 형식만 지원합니다.
+    1.  **파일 형식 확인**: 기본 형식은 작업에 따라 `.md` 또는 `.md`/`.txt`입니다. 개발자 모드에서 확장 입력 형식을 켜면 번역과 개념 추출처럼 원본을 보존하는 일부 작업에서 다른 텍스트 형식과 PDF를 사용할 수 있습니다. 링크 추가는 `.md`/`.txt`만 지원합니다.
     2.  "LLM 연결 테스트" 명령/버튼을 사용하여 활성 제공업체 설정을 검증하세요.
     3.  API 키, 기준 URL, 모델 이름, API 버전(Azure의 경우)을 다시 확인하세요. API 키가 올바르고 크레딧/권한이 충분한지 확인하세요.
     4.  로컬 LLM 서버(LMStudio, Ollama)가 실행 중이고 기준 URL이 올바른지 확인하세요(예: LMStudio의 경우 `http://localhost:1234/v1`).
@@ -705,7 +720,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.7 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.8 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 

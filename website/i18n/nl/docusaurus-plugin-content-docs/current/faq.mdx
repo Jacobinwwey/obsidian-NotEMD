@@ -1,359 +1,193 @@
 ---
 id: faq
-title: "Vaak gestelde vragen"
-description: "Algemene vragen over de installatie, functies en gebruiksmanier van Notemd"
-keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+title: Veelgestelde vragen
+description: >-
+  Controleerbare antwoorden over installatie, modellen, uitvoer, privacy,
+  annulering en agents.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Ollama
-    url: https://ollama.com
+keywords:
+  - Veelgestelde vragen
+  - Notemd
+  - Obsidian
 faqItems:
-  - question: "Hoe installeer ik Notemd in Obsidian?"
-    answer: "Open de Instellingen van Obsidian, ga naar Community Plugins, Browse, zoek op Notemd, installeer het en schakel het in. Er is Obsidian 0.15.0 of nieuw vereist. Een handmatige installatie is ook mogelijk via GitHub Releases."
-  - question: "Welke LLM-aanbieders ondersteunt Notemd?"
-    answer: "Notemd ondersteunt meer dan 30 aanbieders, waaronder OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter en veel in China gevestigde aanbieders zoals Qwen, Doubao, Moonshot en GLM."
-  - question: "Kan Notemd werken met lokale LLM’s?"
-    answer: "Ja. Notemd werkt met Ollama, LM Studio, vLLM, LocalAI en elke OpenAI-compatibele endpoint. Alle taken werken ook met lokale modellen, inclusief het maken van links, conceptgeneratie, vertalingen, onderzoek en diagrammen."
-  - question: "In wat opzicht verschilt Notemd van ChatGPT?"
-    answer: "ChatGPT genereert tijdelijke antwoorden voor gesprekken. Notemd schrijft permanente, gestructureerde resultaten rechtstreeks in je Obsidian‑vault als wiki‑gelinkte bestanden, conceptnotities, diagrammen en vertalingen die samen een kennisbasis vormen."
-  - question: "Hoe vergelijkt Notemd zich met Copilot of Smart Connections?"
-    answer: "Copilot is gespreksgericht om over notities te praten. Smart Connections is ontdekkinggericht om soortgelijke notities te vinden. Notemd is schrijvingsgericht: het verwerkt notities met AI en genereert gestructureerde resultaten in je vault. Alle drie vullen elkaar aan."
-  - question: "Welke zoekdiensten werken samen met het onderzoeksfunctie van Notemd?"
-    answer: "Tavily (aanbevolen, AI‑geoptimaliseerde zoekopdracht, vereist een API‑sleutel) en DuckDuckGo (experimenteel, geen API‑sleutel nodig). De onderzoeksresultaten worden door de LLM samengevat en met bronverwijzingen toegevoegd aan je notitie."
-  - question: "Ondersteunt Notemd Chinees of andere talen?"
-    answer: "Het UI ondersteunt meer dan 21 talen. De taal van de uitvoer van taken kan apart worden ingesteld, zodat je bijvoorbeeld een Chinees UI kunt gebruiken met Engelse uitvoer of omgekeerd."
-  - question: "Kan ik Notemd gebruiken voor het lezen van artikelen of PDF’s?"
-    answer: "Ja. Converteer eerst een PDF naar Markdown met MinerU, open dit in Obsidian en voer daarna Notemd‑taken uit om wiki‑links toe te voegen, conceptnotities te genereren, tekst te extraheren, achtergrondinformatie op te zoeken, delen van de tekst te vertalen en Mermaid‑diagrammen te maken."
-  - question: "Welke diagramtypen kan Notemd genereren?"
-    answer: "Mermaid (flowchart, sequence, class, state, ER, Gantt met automatische syntaxiscorrectie), JSON Canvas (native in Obsidian), Vega-Lite (gegevenscharts), HTML‑fallback en expliciet bewerkbare HTML/SVG‑afbeeldingen. Er zijn ook mogelijkheden voor Draw.io XML- en Drawnix JSON‑export om deterministische testen uit te voeren."
-  - question: "Is Notemd gratis en open source?"
-    answer: "Ja. Het is onder licentie MIT uitgebracht, er zijn geen betaaldes, geen cloud‑lock‑in en geen telemetry. De broncode staat op GitHub met meer dan 234 sterren. Pull requests worden welkom geheten."
-  - question: "Kan Notemd 100% offline werken?"
-    answer: "Ja, met Ollama. Er is geen API‑sleutel of internet nodig. Alle functies werken offline, inclusief wiki‑links, conceptnotities, vertalingen en diagrammen. Ook DuckDuckGo‑onderzoek werkt zonder API‑sleutel."
-  - question: "Worden mijn gegevens naar de cloud gestuurd?"
-    answer: "Met Ollama of LM Studio verlaten geen gegevens je apparaat. Met cloudaanbieders zoals OpenAI of Anthropic wordt de inhoud van je notitie als API‑invoer verzonden. Notemd zelf verzamelt geen telemetry of gebruikersgegevens."
+  - question: Hoe installeer ik Notemd?
+    answer: >-
+      Open Settings → Community plugins → Browse, zoek Notemd, installeer en
+      activeer. Gebruik handmatig main.js, manifest.json en styles.css uit
+      dezelfde GitHub Release. Het manifest noemt Obsidian 0.15.0; die oude
+      versie en fysieke mobiele apparaten zijn niet actueel getest.
+  - question: Welke LLM-providers worden ondersteund?
+    answer: >-
+      Er zijn 36 profielen in vijf families: OpenAI-compatible, Anthropic,
+      Google, Azure OpenAI en Ollama. Cloud, gateways en lokale servers vereisen
+      eigen endpoint, sleutel en model. Een profiel of modellijst garandeert
+      geen actuele beschikbaarheid of generatierecht.
+  - question: Kan ik lokale modellen gebruiken?
+    answer: >-
+      Ja, met Ollama, LM Studio, OVMS of een actieve compatibele eigen server.
+      Bereid het model voor en test een taak. Lokale inferentie maakt webzoeken,
+      afhankelijkheden installeren of afzonderlijk naar de cloud gerouteerde
+      taken niet offline.
+  - question: Wat verschilt er van ChatGPT?
+    answer: >-
+      Notemd richt zich op expliciete documenttaken in Obsidian: links,
+      concepten, toegevoegd onderzoek, vertaling en diagrammen. Kies naar je
+      kluiswerk. Vergelijk actuele opslag, export en integratie; chatgereedschap
+      kan ook geschiedenis bewaren en documenten produceren.
+  - question: Hoe vergelijk ik Copilot of Smart Connections?
+    answer: >-
+      Vergelijk concrete taken met actuele versies, instellingen en
+      documentatie. Notemd bewerkt notities en biedt begrensd lexicaal ophalen,
+      geen algemene kluischat of semantische embeddingzoekfunctie. Er wordt geen
+      actuele rangorde van andere projecten geclaimd.
+  - question: Welke zoekmachines gebruikt Notemd?
+    answer: >-
+      Kies Tavily met sleutel of DuckDuckGo expliciet. Een lege Tavily-sleutel
+      schakelt niet om. Beide gebruiken netwerk. De LLM vat webcontext en
+      optionele lokale fragmenten samen en voegt dit aan de actieve
+      Markdown-notitie toe. Controleer URL’s en belangrijke beweringen.
+  - question: Welke talen zijn beschikbaar?
+    answer: >-
+      De UI heeft 21 locales en de website 34 taalroutes. Generatietaal wordt
+      afzonderlijk gekozen en per ondersteunde taak aangepast. Vertaalbereik en
+      kwaliteit hangen af van het model, niet van deze aantallen.
+  - question: Kan ik papers of PDF gebruiken?
+    answer: >-
+      Converteer eerst met geschikt extern gereedschap naar Markdown en
+      controleer formules, tabellen en figuren. Gebruik daarna concepten,
+      oorspronkelijke passages, onderzoek, vertaling of diagrammen. Native
+      PDF-OCR of foutloze extractie uit elk binair document wordt niet beloofd.
+  - question: Welke diagrammen zijn beschikbaar?
+    answer: >-
+      De uitvoerbare catalogus heeft 33 items met passende bronnen en previews.
+      Mermaid, JSON Canvas, Vega-Lite, bewerkbare HTML/SVG, Draw.io, Drawnix en
+      beperkt CircuitikZ dienen verschillende doelen. Kies ondersteunde
+      combinaties en test in de doelapp; preview bewijst geen native bewerking
+      of compilatie.
+  - question: Is Notemd gratis en open source?
+    answer: >-
+      Notemd heeft een MIT-licentie en publieke repository en verwelkomt
+      bijdragen. Providers, inferentie, zoeken en externe tools hebben eigen
+      kosten en voorwaarden. De plug-inlicentie maakt niet alle aangesloten
+      diensten gratis.
+  - question: Werkt alles offline?
+    answer: >-
+      Sommige taken gebruiken een lokaal model na voorbereiding van server,
+      modellen en afhankelijkheden. Webzoeken, ook DuckDuckGo, blijft online.
+      Controleer taakroutering en exportafhankelijkheden vóór ontkoppelen. Er is
+      geen algemene offlinegarantie.
+  - question: Gaan gegevens naar de cloud?
+    answer: >-
+      Prompt en inhoud gaan naar het ingestelde LLM-endpoint. Zoekdiensten
+      ontvangen vragen en websites aanvragen. Lokale fragmenten kunnen in een
+      cloudprompt terechtkomen; een lokaal profiel kan naar een externe host
+      wijzen. Controleer routes en diagnostiek. Lokale opslag garandeert geen
+      verwerking alleen op het apparaat.
+  - question: Wat doet One-Click Extract?
+    answer: >-
+      De standaardketen voegt links toe, genereert geschikte notities in de
+      concept- of gekozen map vanuit titels en herstelt Mermaid in complete.
+      Bestaande concepten kunnen worden meegenomen. Webonderzoek en
+      diagramgeneratie worden niet automatisch toegevoegd. De gids toont de
+      exacte DSL name::action>action.
+  - question: Maakt annulering veranderingen ongedaan?
+    answer: >-
+      Nee. Ondersteund vervolgwerk stopt en voltooide resultaten blijven.
+      Geaccepteerde aanvragen of schrijfacties kunnen afronden en de provider
+      bepaalt facturering. Wacht, controleer paden en conflicten en herhaal
+      alleen wat nodig is.
+  - question: Kan een Agent Notemd automatiseren?
+    answer: >-
+      Vier beperkte publieke opdrachten exporteren geredigeerde profielen,
+      capaciteiten, aanroepcontract en publiek CLI-oppervlak via werkende
+      Obsidian en kluis. Ze schrijven uitvoer. Repositorybeheeroperaties zijn
+      apart; het interne aantal is geen publieke API. Begin bij de Agent-gids.
+  - question: Waar begin ik als ontwikkelaar?
+    answer: >-
+      De ontwikkelaarsgids beschrijft omgeving, build, volledige tests, modules
+      en uitbreidingscontracten. AGENTS.md is de geversioneerde
+      uitvoeringsautoriteit. Meld reproducties met exacte versies en opgeschoond
+      bewijs en valideer vóór integratie.
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Vraag en antwoord over veelvoorkomende onderwerpen
+# Veelgestelde vragen
 
-<TLDR>
-**Snelle antwoorden op de meest voorkomende Notemd vragen.** Hierin wordt aandacht besteed aan installatie (5 minuten instellen), ondersteuning voor 30+ LLM providers, opties voor lokale/cloud model, workflow’s met één klik, meertalige UI (21 talen), automatisering van wiki-linking, integratie met onderzoek, PDF leesworkflows, diagramgeneratie en open-source licentie. Alle functies werken offline met Ollama.
-</TLDR>
+<TLDR>Begin met een wegwerpnotitie, bereikbare provider en duidelijke bestemmingen. Deze antwoorden beschrijven geïmplementeerde grenzen; de gidsen geven voorbereiding en controle van de resultaten.</TLDR>
 
----
+## Vragen
 
-## Installatie en opzet
+### Hoe installeer ik Notemd?
 
-### Hoe installeer ik Notemd in Obsidian?
+Open Settings → Community plugins → Browse, zoek Notemd, installeer en activeer. Gebruik handmatig main.js, manifest.json en styles.css uit dezelfde GitHub Release. Het manifest noemt Obsidian 0.15.0; die oude versie en fysieke mobiele apparaten zijn niet actueel getest.
 
-Open Obsidian **Instellingen → Community Plugins → Zoeken** → zoek op **"Notemd"** → **Installeer** → **Activeren**.
+### Welke LLM-providers worden ondersteund?
 
-**Eisen:**
-- Obsidian 0.15.0+
-- Wordt ondersteund op desktop (Windows, macOS, Linux) en mobiel (iOS, Android)
+Er zijn 36 profielen in vijf families: OpenAI-compatible, Anthropic, Google, Azure OpenAI en Ollama. Cloud, gateways en lokale servers vereisen eigen endpoint, sleutel en model. Een profiel of modellijst garandeert geen actuele beschikbaarheid of generatierecht.
 
-**Handmatige installatie:**
-1. Download `main.js`, `styles.css`, `manifest.json` van [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)
-2. Plaats ze in `<your-vault>/.obsidian/plugins/notemd/`
-3. Laad Obsidian opnieuw op en activeer de plugin
+### Kan ik lokale modellen gebruiken?
 
-**Statistieken:** 4k+ downloads, 44 releases, onder licentie MIT.
+Ja, met Ollama, LM Studio, OVMS of een actieve compatibele eigen server. Bereid het model voor en test een taak. Lokale inferentie maakt webzoeken, afhankelijkheden installeren of afzonderlijk naar de cloud gerouteerde taken niet offline.
 
----
+### Wat verschilt er van ChatGPT?
 
-## LLM Configuratie
+Notemd richt zich op expliciete documenttaken in Obsidian: links, concepten, toegevoegd onderzoek, vertaling en diagrammen. Kies naar je kluiswerk. Vergelijk actuele opslag, export en integratie; chatgereedschap kan ook geschiedenis bewaren en documenten produceren.
 
-### Welke LLM providers ondersteunt Notemd?
+### Hoe vergelijk ik Copilot of Smart Connections?
 
-Notemd ondersteunt **30+ providers**:
+Vergelijk concrete taken met actuele versies, instellingen en documentatie. Notemd bewerkt notities en biedt begrensd lexicaal ophalen, geen algemene kluischat of semantische embeddingzoekfunctie. Er wordt geen actuele rangorde van andere projecten geclaimd.
 
-**Cloudproviders:**
-- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
-- Anthropic (Claude Opus, Sonnet, Haiku)
-- Google (Gemini Pro, Flash, Ultra)
-- xAI (Grok)
-- Mistral, DeepSeek, Qwen, Moonshot, GLM
+### Welke zoekmachines gebruikt Notemd?
 
-**Gericht op China:**
-- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
-- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+Kies Tavily met sleutel of DuckDuckGo expliciet. Een lege Tavily-sleutel schakelt niet om. Beide gebruiken netwerk. De LLM vat webcontext en optionele lokale fragmenten samen en voegt dit aan de actieve Markdown-notitie toe. Controleer URL’s en belangrijke beweringen.
 
-**Lokal/zelf gehost:**
-- Ollama
-- LM Studio
-- Elke OpenAI-compatibele endpoint
+### Welke talen zijn beschikbaar?
 
-**Gateways:**
-- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
-- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
-- Hugging Face, Vercel AI Gateway, Requesty
+De UI heeft 21 locales en de website 34 taalroutes. Generatietaal wordt afzonderlijk gekozen en per ondersteunde taak aangepast. Vertaalbereik en kwaliteit hangen af van het model, niet van deze aantallen.
 
-### Kan Notemd werken met lokale LLMs?
+### Kan ik papers of PDF gebruiken?
 
-**Ja, volledig ondersteund.** Notemd werkt met:
-- **Ollama** (native integratie)
-- **LM Studio** (via OpenAI-compatible endpoint)
-- **vLLM, LocalAI, text-generation-webui** (via OpenAI-compatible mode)
+Converteer eerst met geschikt extern gereedschap naar Markdown en controleer formules, tabellen en figuren. Gebruik daarna concepten, oorspronkelijke passages, onderzoek, vertaling of diagrammen. Native PDF-OCR of foutloze extractie uit elk binair document wordt niet beloofd.
 
-Alle taken werken met lokale modellen: linken, conceptgeneratie, vertaling, onderzoek en diagramgeneratie.
+### Welke diagrammen zijn beschikbaar?
 
-**Voorbeeld van mix & match:**
-- Ollama (lokaal) voor linken → snel, privé, gratis
-- OpenAI voor onderzoek → hoge kwaliteit, integratie met webzoekmachine
-- Gemini voor vertaling → multimodale ondersteuning
-
-### Hoe configureer ik verschillende modellen voor verschillende taken?
-
-In **Notemd Settings** heeft elke taak onafhankelijke selectoren voor provider/modelen:
-
-| Taak | Voorbeeldconfiguratie |
-|------|----------------------|
-| **Linken** | DeepSeek (snel, goedkoop) |
-| **Conceptgeneratie** | Claude Opus (hoge kwaliteit) |
-| **Onderzoek** | Perplexity of GPT-4o (webgebaseerd) |
-| **Vertaling** | Gemini Flash (multimodaal) |
-| **Diagramgeneratie** | Ollama (lokaal, privé) |
-
-Deze optimalisatie per taak brengt snelheid, kosten en kwaliteit in balans.
-
----
-
-## Core Features
-
-### Hoe verschilt Notemd van ChatGPT bij het lezen van artikelen?
-
-| Dimensie | ChatGPT | Notemd |
-|-----------|---------|--------|
-| **Outputlocatie** | Chatgeschiedenis (tijdelijk) | Obsidian vault (persistent bestanden) |
-| **Resultaatformaat** | Tekstantwoord | Wiki-links, conceptnotities, diagrammen, vertalingen |
-| **Langdurige waarde** | Verdwijnt na sessie | Wordt opgeslagen in een kennisbase |
-| **Herbruikbaarheid** | Moet opnieuw worden opgevraagd | Bestanden blijven bestaan, link blijft, ontwikkelt zich verder |
-
-**Gebruik ChatGPT voor:** Snelle vragen en antwoorden, éénmalige uitleggingen
-**Gebruik Notemd voor:** Het opbouwen van een persistente, gestructureerde kennisbase gedurende weken/manden
-
-### Hoe voegt Notemd wiki-links toe aan notities?
-
-**Proces:**
-1. U voert "Process file (add links)" uit op een notitie
-2. Notemd stuurt de tekst naar uw gedefinieerde LLM
-3. De LLM identificeert belangrijke concepten in de context
-4. Notemd voegt `[[wiki-links]]` toe bij elke voorkomst van een concept
-5. Optioneel worden automatisch conceptnotities gemaakt in een door u aangewezen map
-
-**Kenmerken:**
-- Synoniemsuppressie (vermijdt duplicaten zoals "transformer" vs "transformers")
-- Backlinks van conceptnotities naar de bron
-- Linkintegriteit bij hernoemen of verwijderen
-- Pure extractiemodus (haalt concepten eruit zonder het origineel te wijzigen)
-
-### Wat is het Notemd één-klikwerkflow?
-
-**Één-klikwerkflows** koppelen meerdere acties aan een **enkele zijbalkknop**.
-
-**Standaardwerkflow:** `One-Click Extract`
-```
-process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
-```
-
-**Resultaat:** Met één klik worden uitgevoerd:
-1. Wiki-links toevoegen aan de huidige notitie
-2. Conceptnotities genereren voor nieuwe termen
-3. Onderzoek doen en achtergrondinformatie toevoegen
-4. Comprimeren tot een Mermaid diagram
-
-**Aanpasbare workflows:** Definieer de uwe in Instellingen met het DSL-formaat. Elke workflow wordt een herbruikbare knop in de zijbalk.
-
-### Hoe vergelijkt Notemd zich met Copilot of Smart Connections?
-
-Deze plugins lossen verschillende problemen op:
-
-- **Copilot** — Conversatiegericht. U chatten met een AI over uw notities. De antwoorden van de AI blijven in het chatvenster; ze wijzigen uw vault niet.
-- **Smart Connections** — Ontdekkinggericht. Het vindt semantisch vergelijkbare notities met behulp van embeddings. Het creëert of wijzigt geen inhoud.
-- **Notemd** — Schrijfgereicht. De AI verwerkt uw notities en genereert gestructureerde resultaten (wiki-links, conceptnotities, onderzoek, diagrammen, vertalingen) rechtstreeks in uw vault als permanente bestanden.
-
-| Wat u nodig heeft | Aanbevolen plugin |
-|----------------|-------------------|
-| Chatten met AI over notities | Copilot |
-| Vind vergelijkbare/gerelateerde notities | Smart Connections |
-| Automatisch wiki-links invoegen en een kennisgraaf opbouwen | **Notemd** |
-| Conceptnotities genereren met backlinks | **Notemd** |
-| Diagrammen maken van notitieinhoud | **Notemd** |
-| Onderzoek een onderwerp en voeg samenvattingen toe | **Notemd** |
-
-Alle drie kunnen samen worden gebruikt — ze vullen elkaar aan in plaats van met elkaar te concurreren.
-
----
-
-## Onderzoek & Vertaling
-
-### Welke zoekdiensten werken met Notemd onderzoek?
-
-| Dienst | API Sleutel vereist | Kwaliteit | Opmerkingen |
-|---------|-----------------|---------|-------|
-| **Tavily** | Ja | Hoog | Aanbevolen, AI-geoptimaliseerde zoekopdracht |
-| **DuckDuckGo** | Nee | Experimenteel | Geen instellingen nodig, lagere kwaliteit |
-
-**Hoe "Onderzoek en samenvatten" werkt:**
-1. U kiest een onderwerp of voert het uit op de huidige notitie
-2. Notemd vraagt de zoekservice om gegevens
-3. Resultaten → LLM samenvatting
-4. Samenvatting wordt toegevoegd aan uw notitie met bronverwijzingen
-
-**Resultaat:** Een permanente onderzoekslijn in uw opslag, geen browsertabbladen.
-
-### Steunt Notemd het Chinees of andere talen?
-
-**UI talen:** 21+ ondersteund
-- Engels, 中文 (简体), 中文 (繁體), 日本語, 한국어
-- Arabisch, Duits, Frans, Spaans, Russisch, Portugees, Italiaans
-- Hindi, Bengaals, Thais, Vietnamees, Turks, Pools, Tsjechisch en nog veel meer
-
-**Taal van de taakuitvoer:** Onafhankelijke instelling
-- UI in het Chinees + uitvoer in het Engels: ✅
-- UI in het Engels + uitvoer in het Chinees: ✅
-
-**Toepassingsgeval:** Bilingual onderzoekers kunnen UI in hun moedertaal houden terwijl ze Engelse notities genereren voor publicatie.
-
----
-
-## PDF en academische workflows
-
-### Kan ik Notemd gebruiken voor het lezen van artikelen/PDF?
-
-**Ja.** Workflow:
-1. **Converteer PDF naar Markdown** met [MinerU](https://github.com/opendatalab/MinerU) (aanbevolen voor academische artikelen)
-2. Open de Markdown-bestand in Obsidian
-3. Voer Notemd-taken uit:
-   - **Voeg wiki-links toe** aan belangrijke termen
-   - **Genereer conceptnotities** voor onbekende terminologie
-   - **Haal het originele tekst** op via aangepaste vragen (bijv. "Wat zijn de beperkingen?")
-   - **Onderzoek de achtergrond** van geciteerde methoden/datasets
-   - **Vertaal** moeilijke delen
-   - **Comprimeer tot Mermaid**-diagram voor structureel begrip
-
-**Versie 1.9.1+:** Extractie van hoofdstukstructuur met TOC-ondersteuning
-
-**Resultaat:** Het lezen van uw artikel wordt een gestructureerd, linkbaar kennisobject in uw vault.
-
----
-
-## Diagrammen en visualisatie
-
-### Welke grafiek/diagramtypen kan Notemd genereren?
-
-| Type | Ondersteuning | Kenmerken |
-|------|---------|----------|
-| **Mermaid** | Volledig | Stroomdiagram, sequentie, klasse, staat, ER, Gantt, automatische syntaxiscorrectie, batchvalidatie |
-| **JSON Canvas** | Volledig | Obsidian-native canvas-indelingen |
-| **Vega-Lite** | Volledig | Gegevensgrafieken, tijdsreeksen, staafdiagrammen, verspreidingsdiagrammen, aanpasbaar |
-| **HTML** | Fallback | Voor onondersteunde diagramtypen |
-| **Editable HTML/SVG** | Expliciet doelwit | Zelfstandige inline SVG met semantische Draw.io-stijl annotaties |
-| **Draw.io / Drawnix artefacten** | Exportgrens | Deterministisch XML/JSON uit `SemanticFigureModel`; geen afhankelijkheid van editor-runtime |
-
-**Mermaid automatische correctie:** Herstel in diepe debugmodus:
-- Broken pijlen (`-->`, `-.->`, `==>`)
-- Ongeldige labels, opmerkingen
-- Syntaxfouten in subgraphen
-- Vormnotatie (`[`, `(`, `{`, `((`)
-- Pijtkarakters in labels
-- Opmerkingen als bijlage
-
-**Workflow:**
-1. Voer "Samenvatten als Mermaid diagram" uit op een notitie
-2. Vooraf bekijken in modalvenster
-3. Exporteren als SVG of PNG
-4. Of sla het op als `.mmd` bestand in de kluis
-
----
-
-## Open Source & Community
+De uitvoerbare catalogus heeft 33 items met passende bronnen en previews. Mermaid, JSON Canvas, Vega-Lite, bewerkbare HTML/SVG, Draw.io, Drawnix en beperkt CircuitikZ dienen verschillende doelen. Kies ondersteunde combinaties en test in de doelapp; preview bewijst geen native bewerking of compilatie.
 
 ### Is Notemd gratis en open source?
 
-**Ja.**
-- **Licentie:** MIT (permissief, commercieel gebruik toegestaan)
-- **Broncode:** https://github.com/Jacobinwwey/obsidian-NotEMD
-- **Geen betaalde niveaus, geen cloud-lock-in, geen telemetry**
-- **Community:** 234+ GitHub sterren, actieve Discord
+Notemd heeft een MIT-licentie en publieke repository en verwelkomt bijdragen. Providers, inferentie, zoeken en externe tools hebben eigen kosten en voorwaarden. De plug-inlicentie maakt niet alle aangesloten diensten gratis.
 
-**U bezit:**
-- Uw gegevens (blijven in uw kluis)
-- Uw workflows (aanpassen van prompts, modellen, chains)
-- Uw privacy (lokale LLM ondersteuning)
+### Werkt alles offline?
 
-**Bijdragen:** Pull requests zijn welkom. Zie [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+Sommige taken gebruiken een lokaal model na voorbereiding van server, modellen en afhankelijkheden. Webzoeken, ook DuckDuckGo, blijft online. Controleer taakroutering en exportafhankelijkheden vóór ontkoppelen. Er is geen algemene offlinegarantie.
 
----
+### Gaan gegevens naar de cloud?
 
-## Probleemoplossing
+Prompt en inhoud gaan naar het ingestelde LLM-endpoint. Zoekdiensten ontvangen vragen en websites aanvragen. Lokale fragmenten kunnen in een cloudprompt terechtkomen; een lokaal profiel kan naar een externe host wijzen. Controleer routes en diagnostiek. Lokale opslag garandeert geen verwerking alleen op het apparaat.
 
-### Mijn LLM oproepen falen. Wat moet ik controleren?
+### Wat doet One-Click Extract?
 
-1. **Is de API sleutel geldig?** Controleer Settings → Provider Configuration
-2. **Is de modelnaam correct?** Gebruik de knop "获取模型列表" (Get Model List) in de instellingen
-3. **Is het netwerk toegankelijk?** Sommige aanbieders vereisen een VPN
-4. **Snelheidsbeperkingen?** Controleer het dashboard van de aanbieder
-5. **Diagnostiek:** Voer "Connection Test" uit in de instellingen voor gedetailleerde foutlogboeken
+De standaardketen voegt links toe, genereert geschikte notities in de concept- of gekozen map vanuit titels en herstelt Mermaid in complete. Bestaande concepten kunnen worden meegenomen. Webonderzoek en diagramgeneratie worden niet automatisch toegevoegd. De gids toont de exacte DSL name::action>action.
 
-### Notemd is traag. Hoe kan ik de snelheid verhogen?
+### Maakt annulering veranderingen ongedaan?
 
-1. **Gebruik snelere modellen:** DeepSeek, Gemini Flash, GPT-4o-mini
-2. **Verklein de chunk-grootte:** Instellingen → Smart Chunking → verlaag het woordtal
-3. **Parallelle verwerking:** Instellingen → Batch Processing → verhoog de paralleliteit
-4. **Lokale modellen:** Ollama voor taken die geen webzoekopdrachten nodig hebben
+Nee. Ondersteund vervolgwerk stopt en voltooide resultaten blijven. Geaccepteerde aanvragen of schrijfacties kunnen afronden en de provider bepaalt facturering. Wacht, controleer paden en conflicten en herhaal alleen wat nodig is.
 
-### Kan Notemd 100% offline werken?
+### Kan een Agent Notemd automatiseren?
 
-**Ja, met Ollama.** Zonder API sleutel, zonder internet, gaan er geen gegevens van uw apparaat weg:
+Vier beperkte publieke opdrachten exporteren geredigeerde profielen, capaciteiten, aanroepcontract en publiek CLI-oppervlak via werkende Obsidian en kluis. Ze schrijven uitvoer. Repositorybeheeroperaties zijn apart; het interne aantal is geen publieke API. Begin bij de Agent-gids.
 
-1. Installeer [Ollama](https://ollama.com) en start `ollama serve`
-2. In de Notemd instellingen selecteert u **Ollama** als uw aanbieder
-3. Laad een model op: `ollama pull llama3` (of qwen2.5, gemma2, enz.)
-4. Alle functies werken: wiki-links, conceptnotities, vertaling, diagrammen
+### Waar begin ik als ontwikkelaar?
 
-**DuckDuckGo onderzoek** werkt ook zonder een API sleutel (experimentele kwaliteit).
+De ontwikkelaarsgids beschrijft omgeving, build, volledige tests, modules en uitbreidingscontracten. AGENTS.md is de geversioneerde uitvoeringsautoriteit. Meld reproducties met exacte versies en opgeschoond bewijs en valideer vóór integratie.
 
-Bij cloudaanbieders (OpenAI, Anthropic, Google, DeepSeek, enz.) wordt de inhoud van uw notities als API invoer verzonden. Controleer de privacyverklaring van elke aanbieder voor details over gegevensverwerking.
+## Verder
 
-### Worden mijn gegevens naar de cloud gestuurd?
-
-**Het hangt af van uw provider:**
-
-| Type provider | Worden gegevens naar de cloud gestuurd? | Opmerkingen |
-|--------------|---------------------|-------|
-| **Ollama (lokaal)** | Nee | Alles blijft op uw apparaat |
-| **LMStudio (lokaal)** | Nee | Hetzelfde als Ollama |
-| **DeepSeek, OpenAI, etc.** | Ja | Let op: de inhoud wordt als API-invoer verstuurd voor verwerking |
-| **OpenRouter, AIHubMix** | Ja | Poort die naar cloudproviders leidt |
-
-Notemd verzamelt zelf **geen telemetry, geen analytics, geen gebruikersgegevens**. Het plugin is volledig open source (MIT). De enige gegevens die uw machine verlaten zijn die u expliciet naar uw geconfigureerde LLM provider stuurt.
-
-### Welk Obsidian AI-plugin is het beste voor onderzoek?
-
-Dat hangt af van uw onderzoeksworkflow:
-
-| Nodig | Plugin | Waarom |
-|------|--------|-----|
-| Gerelateerde artikelen/notities vinden | Smart Connections | Ontdekking van semantische gelijkenis |
-| Chatten over uw bronnen | Copilot | Conversatie met vault-context |
-| Automatisch concepten linken + notities genereren | **Notemd** | AI identificeert concepten, voegt links toe en maakt notities aan |
-| Webonderzoek + samenvatten in notities | **Notemd** | Tavily/DuckDuckGo zoeken → LLM samenvatting → toegevoegd aan notitie |
-| Diagrammen genereren op basis van onderzoek | **Notemd** | Mermaid/Canvas/Vega-Lite uit inhoud van notitie |
-
-**Aanbevolen combinatie:** Smart Connections (ontdekking) + Notemd (structureren) + Copilot (discussie).
-
----
-
-## Hulp krijgen
-
-- **Documentatie:** https://jacobinwwey.github.io/obsidian-NotEMD/
-- **GitHub Issues:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
-- **Discord:** https://discord.gg/qnGgsQ9W
-- **Sponsor:** https://github.com/sponsors/Jacobinwwey
+- [Snel starten](./getting-started/quick-start).
+- [Workflows](./features/workflows).
+- [Diagrammen](./features/diagrams).
+- [Ontwikkelaars](./developers/overview).
+- [Agents](./agents/overview).
+- [Problemen oplossen](./advanced/troubleshooting).

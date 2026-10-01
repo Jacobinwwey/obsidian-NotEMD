@@ -1,106 +1,109 @@
 ---
 id: diagrams
-title: "Sơ đồ"
-description: "Tạo ra các đồ thị Mermaid, JSON Canvas, Vega-Lite, HTML, các tệp đồ họa có thể chỉnh sửa, Draw.io, Drawnix, cùng các sơ đồ circuitikz có giới hạn dựa trên ghi chú của bạn thông qua kiến trúc lấy mô tả làm ưu tiên"
+title: Sơ đồ
+description: >-
+  Tạo sơ đồ từ ghi chú, xem Drawnix cùng các bảng Mermaid và xuất từng hình
+  thành SVG, PNG hoặc PDF.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, circuitikz, TikZJax, Intent Detection, Spec-First Architecture]
-citations:
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Sơ đồ
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Sơ đồ
 
-<TLDR>
-Hãy chọn **loại sơ đồ mà bạn cần**, sau đó chọn **định dạng nguồn có thể chỉnh sửa** tương ứng. Xem trước kết quả hoàn chỉnh trong Obsidian, bao gồm bảng điều khiển Drawnix cùng các hình ảnh Mermaid được nhúng bên trong, rồi xuất từng khung hình ra dạng SVG, PNG hoặc PDF.
-</TLDR>
+<TLDR>Chọn **loại sơ đồ cần dùng**, rồi chọn **định dạng nguồn có thể chỉnh sửa**. Xem toàn bộ kết quả trong Obsidian, gồm bảng Drawnix và các hình Mermaid nhúng, rồi xuất từng bảng thành SVG, PNG hoặc PDF.</TLDR>
 
-## Tìm hiểu ba lựa chọn
+## Phân biệt ba lựa chọn
 
-| Lựa chọn | Điều kiểm soát | Ví dụ |
-|---|---|---|
-| Loại sơ đồ | Ý nghĩa của sơ đồ | Sơ đồ luồng, sơ đồ trình tự, sơ đồ mạch điện, biểu đồ dữ liệu |
-| Định dạng nguồn | Tệp tin có thể chỉnh sửa hoặc tái sử dụng mà Notemd tạo ra | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Định dạng xuất | Hình ảnh hoặc tài liệu dùng để chia sẻ | SVG, PNG, PDF |
+| Lựa chọn | Điều khiển gì | Ví dụ |
+| --- | --- | --- |
+| Loại sơ đồ | Ý nghĩa của sơ đồ | Lưu đồ, sơ đồ tuần tự, mạch, biểu đồ dữ liệu |
+| Định dạng nguồn | Tệp có thể sửa hoặc tái dùng mà Notemd tạo | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Định dạng xuất | Ảnh hoặc tài liệu để chia sẻ | SVG, PNG, PDF |
 
-Draw.io và Drawnix là **định dạng nguồn**, không phải loại sơ đồ. CircuitikZ là một định dạng nguồn được thiết kế riêng cho các sơ đồ mạch điện. Cùng một bản xem trước có thể được xuất ra nhiều định dạng hình ảnh khác nhau, vì vậy việc chọn CircuitikZ không hạn chế bạn chỉ sử dụng SVG.
+Draw.io và Drawnix là **định dạng nguồn**, không phải loại sơ đồ. CircuitikZ là nguồn dành cho mạch. Cùng bản xem trước có thể xuất nhiều định dạng hình, nên chọn CircuitikZ không giới hạn ở SVG.
 
 ## Chọn định dạng nguồn
 
-| Định dạng | Phù hợp nhất cho | Tệp nguồn |
-|---|---|---|
-| Mermaid | Các sơ đồ được giữ nguyên trực tiếp trong Markdown | Khối mã Mermaid |
-| JSON Canvas | Công việc với bảng canvas tích hợp sẵn trong Obsidian | `.canvas` |
-| Draw.io | Chỉnh sửa sau trên diagram.net hoặc các công cụ tương thích | `.drawio` |
-| Drawnix | Chỉnh sửa theo phong cách vẽ tay hoặc bảng trắng | `.drawnix` |
-| CircuitikZ | Các mạch điện và transistor có cấu trúc rõ ràng | `.tex` |
+| Định dạng | Phù hợp với | Tệp nguồn |
+| --- | --- | --- |
+| Mermaid | Sơ đồ giữ trực tiếp trong Markdown | Khối mã Mermaid |
+| JSON Canvas | Quy trình canvas gốc của Obsidian | `.canvas` |
+| Draw.io | Sửa tiếp trong diagrams.net hoặc công cụ tương thích | `.drawio` |
+| Drawnix | Chỉnh sửa dạng bảng trắng hoặc vẽ tay | `.drawnix` |
+| CircuitikZ | Mạch điện và transistor có cấu trúc | `.tex` |
 
-Nếu bạn không yêu cầu sử dụng công cụ biên tập cụ thể nào, hãy để **Định dạng nguồn ưu tiên** ở chế độ **Tự động**. Notemd sẽ tự chọn một định dạng phù hợp với loại sơ đồ đã chọn.
+Giữ **Preferred source format** ở **Auto** nếu không cần trình sửa cụ thể. Notemd chọn định dạng tương thích với loại sơ đồ.
 
 ## Tạo và xuất sơ đồ
 
-1. Mở ghi chú hoặc chọn đoạn văn bản bạn muốn biến thành sơ đồ.
-2. Chọn tùy chọn **Tạo sơ đồ** từ thanh bên Notemd hoặc bảng điều khiển lệnh.
-3. Chọn một **loại sơ đồ**, hoặc để nó ở chế độ **Nhận diện tự động**.
-4. Chọn một **định dạng nguồn**, hoặc để nó ở chế độ **Tự động**. Hãy chọn **Drawnix** nếu bạn muốn tạo bản đồ kiến thức với các nút có thể chỉnh sửa và hình ảnh Mermaid được nhúng bên trong.
-5. Xem xét bản xem trước. Kết quả gồm nhiều khung hình sẽ giữ nguyên bảng điều khiển Drawnix cùng từng khung Mermaid theo thứ tự nguồn trong một vỏ xem trước có thể cuộn dọc; các khung Mermaid sẽ được hiển thị ở chiều cao đã được tính toán chính xác thay vì bị cắt đi.
-6. Chọn tùy chọn **Xuất SVG**, **Xuất PNG** hoặc **Xuất PDF** cho từng khung hình riêng lẻ, hoặc sử dụng tùy chọn xuất hình ảnh cấp cao để xuất toàn bộ các khung. Đối với nhiều khung, hãy chọn thư mục nguồn hoặc một thư mục tương đối trong Vault; Notemd sẽ tạo ra một tệp duy nhất cho từng khung và tiếp tục xử lý ngay cả khi có lỗi xảy ra ở một khung nào đó.
-7. Sử dụng tùy chọn **Lưu tệp nguồn** nếu bạn cũng cần tệp có thể chỉnh sửa.
+1. Mở nguồn hỗ trợ. Muốn trực quan hóa một đoạn, đặt nó trong ghi chú riêng; chọn văn bản không thu hẹp tác vụ dựa trên tệp.
+2. Chọn **diagram type** trong cài đặt hoặc để **Auto-detect**.
+3. Chọn **source format** hoặc **Auto**. Chọn **Drawnix** cho bản đồ kiến thức hỗ trợ có nút sửa được và hình Mermaid nhúng.
+4. Chạy **Tao so do** từ thanh bên hoặc bảng lệnh.
+5. Xem kết quả. Nhiều bảng giữ Drawnix và Mermaid theo thứ tự nguồn trong một khung cuộn dọc; bảng Mermaid dùng chiều cao dựng thực tế thay vì bị cắt.
+6. Chọn **Xuất SVG**, **Xuất PNG**, **Export PDF** trên một bảng, hoặc xuất ảnh cấp trên cho tất cả. Với nhiều bảng, chọn thư mục nguồn hoặc đích tương đối với kho; mỗi bảng có tên tệp xác định, lỗi riêng không dừng toàn bộ.
+7. Dùng **Lưu tệp nguồn** khi cần sản phẩm chỉnh sửa được.
 
-Menu Xuất cung cấp các lựa chọn **Xuất SVG**, **Xuất PNG** và **Xuất PDF** dành cho bản xem trước hình ảnh hiện tại. Mỗi tiêu đề khung đều hiển thị các tùy chọn tương tự cho một hình ảnh Mermaid hoặc Drawnix riêng lẻ, vì vậy không cần thiết phải xuất toàn bộ bản xem trước lớn dưới dạng một hình ảnh đen kín.
+Menu Export có **Xuất SVG**, **Xuất PNG**, **Export PDF** cho hình đang xem. Đầu mỗi bảng có cùng hành động cho một hình Mermaid/Drawnix; không cần biến cả bản xem lớn thành một ảnh duy nhất.
 
-Trong bản xem trước, hãy chọn **Lịch sử** để mở ngăn lưu trữ lịch sử của Vault mà không làm mất đi sơ đồ. Bạn có thể tìm kiếm và lọc các sơ đồ đã tạo xong, mở lại bản xem trước hoặc mở các tệp đã lưu. Lịch sử sơ đồ cũng có sẵn ngay từ bảng điều khiển lệnh và thanh bên Notemd, ngay cả khi không có ghi chú nào đang được mở.
+Chọn **History** để mở ngăn lịch sử kho mà không che mất sơ đồ. Có thể tìm/lọc sơ đồ hoàn thành, mở lại bản xem hoặc tệp đã lưu. Lịch sử còn mở được từ bảng lệnh và thanh bên ngay cả khi không có ghi chú hiện tại.
 
-SVG và PDF được tạo ra từ hình học vector; PDF sử dụng cùng cấu trúc SVG và các thông số văn bản thay vì hiển thị toàn bộ bản xem trước dưới dạng raster. Giá trị PPI khi xuất hình ảnh trong cài đặt Notemd chỉ kiểm soát việc raster hóa PNG (từ 72–600 PPI, mức mặc định là 300).
+SVG và PDF dùng hình học vector; PDF dùng cùng bố cục SVG và số đo chữ thay vì raster hóa toàn bản xem. PPI chỉ điều khiển PNG: 72-600, mặc định 300.
 
-## Bản xem trước dễ đọc cho sơ đồ dày đặc
+## Đọc sơ đồ dày đặc
 
-Sơ đồ lane-grid HTML/SVG có thể chỉnh sửa sẽ đo và xuống dòng phần tóm tắt trước khi đặt tiêu đề và header của lane. Header được chuyển xuống dưới vùng tóm tắt được bảo vệ, còn các ô được vẽ trước connector và nhãn cạnh. Các cạnh đi qua lane dùng tuyến lưới vuông góc có tính đến va chạm, dành chỗ cho nhãn lane và các ô đã chiếm dụng, vì vậy mô tả dài không che chữ và không cần kéo ngang để hiểu sơ đồ.
+Sơ đồ lưới làn HTML/SVG chỉnh sửa được đo và xuống dòng tóm tắt trước khi đặt tiêu đề và đầu làn. Đầu làn nằm dưới vùng tóm tắt được bảo vệ; ô được vẽ trước đường nối/nhãn. Đường qua làn dùng lưới vuông góc tránh va chạm, chừa nhãn và ô đã chiếm để mô tả dài không che chữ hoặc buộc cuộn ngang mới hiểu.
 
-Sơ đồ quadrant của Mermaid nhận bước chuẩn hóa theo family. Với `quadrantChart`, chỉ bỏ qua các sửa lỗi dấu ngoặc kép và hình dạng dành riêng cho flowchart; dấu ngoặc vuông được cố ý đặt trong tiêu đề, trục và tên quadrant vẫn hiển thị. Dấu ngoặc mở bị provider sao chép chỉ bị xóa khi nó là ký tự cuối không khớp của nhãn điểm.
+Biểu đồ góc phần tư Mermaid có chuẩn hóa riêng. Sửa dấu nháy/hình chỉ dành lưu đồ không áp dụng cho `quadrantChart`; dấu ngoặc mở mô hình chép vào chỉ bị bỏ nếu là ký tự cuối chưa ghép của nhãn điểm. Ngoặc chủ ý trong tiêu đề, trục và tên phần tư được giữ.
 
-Kho lưu trữ có bộ học tập và bằng chứng từ Vault thật cho mọi loại sơ đồ có thể thực thi. Xem [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) để đọc ghi chú đầu vào song ngữ, kết quả SVG/PNG và manifest trạng thái có thể đọc bằng máy. Mục `passed` là lần chạy qua plugin bundle đã tải, không phải screenshot fixture tĩnh.
+Repo giữ tập học và bằng chứng kho thật cho mỗi loại thực thi. Xem [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) về đầu vào song ngữ, SVG/PNG và manifest máy đọc. `passed` chỉ lần chạy và bundle được ghi, không chứng minh đã chạy mới mọi loại ở bản sau.
 
-## Bản xem trước Drawnix với hình ảnh Mermaid được nhúng
+Danh mục hiện tại có 33 dòng; giao diện có 21 ngôn ngữ, website có 34 tuyến. Đây là các bề mặt khác nhau. Năm ngữ pháp tham chiếu chính xác vẫn ngoài bộ chọn đến khi hợp đồng bố cục có bằng chứng độc lập.
 
-Khi một tệp Drawnix chứa các hình ảnh Mermaid, Notemd sẽ xử lý lại SVG đã được hiển thị và giữ nguyên mã nguồn Mermaid bên cạnh nó trong phần metadata `.drawnix`. Nhờ đó, bản xem trước có thể hiển thị hình ảnh Mermaid bên trong bản đồ kiến thức Drawnix mà không cần phải sử dụng môi trường chạy Drawnix hoặc Plait. Đường dẫn mặc định là tự chứa đầy đủ thông tin và không tạo ra thư mục `.assets` riêng biệt. Hãy bật tùy chọn **Xuất thêm toàn bộ hình ảnh Mermaid** nếu bạn cần mã nguồn Mermaid, SVG cùng các tệp manifest đi kèm để chuyển giao hoặc chỉnh sửa bên ngoài. Các tệp hiện có đã chứa thư mục `.assets` vẫn được hỗ trợ, và nếu thiếu SVG Mermaid cũ thì vẫn có thể tái tạo lại từ văn bản nguồn được lưu trong metadata.
+## Drawnix có Mermaid nhúng
 
-Các liên kết hình ảnh đã được xử lý xong cũng sẽ nhận được bản xem trước SVG dựa trên dữ liệu khi có thể, vì vậy việc xóa thư mục phụ cũ không làm biến mất bản xem trước Drawnix đã lưu. Quá trình tải bản xem trước sẽ ưu tiên sử dụng dữ liệu được nhúng trước, sau đó mới dùng các tệp phụ cũ, và cuối cùng mới sử dụng phương án tái tạo từ văn bản nguồn nếu cần.
+Khi sản phẩm Drawnix chứa Mermaid, Notemd làm sạch SVG đã dựng và giữ nguồn Mermaid trong siêu dữ liệu `.drawnix`. Bản xem hiển thị hình trong bản đồ mà không cần runtime Drawnix/Plait. Đường mặc định tự chứa, không tạo `.assets` riêng. Bật **Also export complete Mermaid visuals** khi cần nguồn Mermaid, SVG và manifest đi kèm để bàn giao/sửa ngoài. Sản phẩm cũ có `.assets` vẫn hỗ trợ; SVG cũ thiếu có thể dựng lại từ nguồn trong metadata.
 
-Bản xem trước được thiết kế thành một bề mặt duy nhất có thể cuộn: trước tiên là bảng canvas chính của Drawnix, sau đó là từng khung Mermaid được nhúng theo thứ tự nguồn. Việc đóng và mở lại một mục lịch sử đã lưu sẽ tái tạo lại danh sách các khung, kích thước cũng như các tùy chọn xuất giống hệt ban đầu.
+Ảnh nhúng đã giải được dùng bản xem SVG chứa dữ liệu khi có thể. Nạp ưu tiên dữ liệu nhúng, rồi tệp đi kèm cũ, rồi dựng lại từ nguồn nếu có. Giữ tệp đi kèm còn được tham chiếu; bản xuất mới tự chứa không chứng minh thư mục chung cũ hết dùng.
 
-Các giải thích về mối quan hệ trong sơ đồ Drawnix được trình bày dưới dạng các yếu tố hình ảnh có vai trò quan trọng. Bộ xử lý sẽ vẽ các mũi tên chấm chấm xung quanh các hình chữ nhật biểu diễn nút và dành ra một khu vực bảo vệ để hiển thị tiêu đề hoặc tóm tắt. Các phần tóm tắt dài và nhãn mối quan hệ sẽ được gấp vào các dòng có kích thước đã được tính toán trước, phần nội dung chính sẽ nằm dưới chiều cao của tiêu đề, và một khung nhãn trong suốt sẽ được vẽ sau lớp nút. Tiêu đề sẽ được hiển thị cuối cùng với nền trong suốt, giúp ngăn chặn các đường mũi tên bên ngoài che khuất các văn bản như `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` hoặc giải thích mối quan hệ như `RendererRegistry feeds Vault files, preview modal, and export`. Mũi tên gốc trong `.drawnix` sử dụng các thuộc tính `shape`, `texts[]`, markers và stroke phù hợp với Plait, đồng thời vẫn giữ nguyên metadata cũ để hỗ trợ những người dùng cũ. Nếu bản đồ Drawnix được yêu cầu không tìm thấy lộ trình hoặc vị trí nhãn không bị chèn chéo, quá trình tạo sẽ thất bại do lỗi định dạng thay vì lặng lẽ tạo ra phiên bản Mermaid dự phòng dưới dạng tệp `.drawnix`.
+Bản xem là một vùng cuộn: canvas Drawnix trước, từng bảng Mermaid sau theo thứ tự nguồn. Đóng và mở lại lịch sử dựng cùng danh sách bảng, kích thước và hành động xuất.
 
-## Sơ đồ mạch điện
+Bản xem chừa chỗ cho tiêu đề, tóm tắt và nhãn quan hệ, định tuyến đường nối tĩnh quanh nút. Nếu không tạo được bố cục hỗ trợ dễ đọc, sinh báo lỗi định dạng. Mũi tên giữa nhánh được lưu như quan hệ tĩnh; bằng chứng hiện tại không hỗ trợ cam kết gắn sau khi đổi vị trí nút trong Drawnix. Kiểm tra trong trình sửa sẽ dùng.
 
-Đối với các yêu cầu sơ đồ mạch điện được hỗ trợ, hãy chọn **Sơ đồ mạch điện** kèm theo tệp nguồn **CircuitikZ**. Notemd sẽ tạo ra mô tả mạch có cấu trúc rõ ràng trước, sau đó mới viết mã nguồn CircuitikZ. Cách làm này đáng tin cậy hơn so với yêu cầu mô hình tự viết mã LaTeX không bị giới hạn.
+## Giới hạn xuất gốc
 
-Khả năng hỗ trợ CircuitikZ hiện tại được thiết kế sao cho có phạm vi hạn chế. Các bộ khuếch đại NMOS có mã nguồn phổ biến và các thành phần CMOS được hỗ trợ sẽ hoạt động tốt nhất. Luôn kiểm tra kỹ bản xem trước và mã nguồn trước khi sử dụng sơ đồ đã tạo trong công việc kỹ thuật hoặc xuất bản.
+Nguồn và hình là hai sản phẩm riêng. Thử mẫu trong ứng dụng đích trước khi phân phối. Bảng PowerPoint giữ cấu trúc chỉnh sửa được trong phạm vi hỗ trợ, gồm đường kẻ dưới ô gộp đã sửa; Mermaid/SVG có thể dùng ảnh thay đối tượng gốc. Xem trong tiện ích hay điểm so ảnh toàn trang không thay kiểm tra ứng dụng đích.
 
-Bản xem trước dạng SVG là tài liệu hỗ trợ để xem lại, được Notemd tạo ra. Nó không phải là bằng chứng cho thấy máy tính đã cài đặt LaTeX hoặc TikZJax thành công và biên dịch tệp `.tex` một cách ổn định.
+## Sơ đồ mạch
 
-**Tùy chọn biên dịch gốc (tự động).** Bạn không cần phải sử dụng LaTeX để xem trước trong plugin hoặc xuất SVG, PNG và PDF. Trên máy tính để bàn, hãy mở **Môi trường biên dịch gốc CircuitikZ** từ cài đặt sơ đồ hoặc bảng điều khiển lệnh nếu bạn cần xem thông tin chẩn đoán biên dịch hoặc tạo PDF LaTeX gốc. Notemd có thể tái sử dụng chương trình `tectonic` hoặc `pdflatex` của hệ thống, sử dụng tệp thực thi tùy chỉnh, hoặc cài đặt môi trường Tectonic được quản lý sau khi bạn chọn **Cài đặt** một cách rõ ràng. Bảng thông tin môi trường sẽ hiển thị tiến trình và lỗi ngay trên màn hình, đồng thời cho phép bạn xóa môi trường quản lý này sau này.
+Chọn **Circuit diagram** cùng **CircuitikZ source file** cho yêu cầu được hỗ trợ. Notemd tạo mô tả mạch có cấu trúc trước rồi viết nguồn CircuitikZ; cách này đáng tin cậy hơn yêu cầu mô hình viết LaTeX không giới hạn.
+
+CircuitikZ hiện có phạm vi chủ ý hẹp. Bộ khuếch đại NMOS cực nguồn chung và khối CMOS được hỗ trợ phù hợp nhất. Luôn xem nguồn và bản xem trước khi dùng cho kỹ thuật hoặc xuất bản.
+
+SVG là bản đối chiếu Notemd tạo; không chứng minh LaTeX/TikZJax cục bộ đã biên dịch `.tex` thành công.
+
+**Biên dịch gốc tùy chọn.** Xem trước trong tiện ích và xuất SVG/PNG/PDF xem trước không cần LaTeX. Trên máy tính, mở **CircuitikZ native compile environment** từ cài đặt hoặc bảng lệnh khi cần chẩn đoán hoặc PDF LaTeX gốc. Có thể dùng `tectonic`/`pdflatex` hệ thống, tệp thực thi riêng, hoặc cài Tectonic được khóa phiên bản sau khi chủ động chọn **Install**. Bảng môi trường báo tiến độ/lỗi tại chỗ và cho gỡ runtime quản lý sau.
 
 ## Khắc phục sự cố
 
-### Kết quả tạo ra loại sơ đồ sai
+### Sai loại sơ đồ
 
-Hãy chọn loại sơ đồ một cách rõ ràng thay vì để ở chế độ Nhận diện tự động. Đối với sơ đồ mạch điện, hãy chọn **Sơ đồ mạch điện** và sử dụng lệnh **Tạo sơ đồ**, thay vì lệnh cũ **Tóm tắt thành sơ đồ Mermaid**.
+Chọn rõ loại thay vì Auto-detect. Với mạch, chọn **Circuit diagram** và **Tao so do**, không dùng lệnh cũ **Tóm tắt thành sơ đồ Mermaid**.
 
-### Định dạng nguồn không phù hợp
+### Nguồn không phù hợp
 
-Hãy đặt lại định dạng nguồn về chế độ **Tự động**, hoặc chọn một định dạng phù hợp với loại sơ đồ đó. CircuitikZ chỉ dành cho sơ đồ mạch điện; Draw.io và Drawnix được thiết kế cho các sơ đồ có cấu trúc được hỗ trợ.
+Đưa về **Auto** hoặc chọn định dạng dành cho loại đó. CircuitikZ dành mạch; Draw.io/Drawnix dành sơ đồ cấu trúc được hỗ trợ.
 
-### Menu Xuất không xuất hiện
+### Không thấy menu Export
 
-SVG, PNG và PDF đều yêu cầu phải có bản xem trước hình ảnh. Nếu chỉ có văn bản nguồn, hãy lưu tệp nguồn rồi mở nó trong công cụ bên ngoài tương ứng.
+SVG/PNG/PDF cần bản xem hình. Nếu chỉ có nguồn, lưu tệp và mở bằng công cụ ngoài tương ứng.
 
-### Tệp CircuitikZ không thể biên dịch bên ngoài
+### CircuitikZ không biên dịch bên ngoài
 
-Hãy mở **Môi trường biên dịch gốc CircuitikZ** và chạy kiểm tra môi trường. Sửa lỗi trong môi trường quản lý hoặc kiểm tra xem máy tính của bạn có thể tải được gói `circuitikz` hay không. Notemd không bao gồm toàn bộ bộ phân phối TeX trong tệp plugin của mình.
+Mở **CircuitikZ native compile environment** và chạy kiểm tra. Sửa runtime quản lý hoặc xác nhận compiler riêng/hệ thống lấy được gói `circuitikz`. Tệp tiện ích không đóng gói một bộ TeX đầy đủ.

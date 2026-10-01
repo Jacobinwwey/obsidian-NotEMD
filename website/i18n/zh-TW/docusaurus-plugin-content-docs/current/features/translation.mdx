@@ -1,16 +1,13 @@
 ---
 id: translation
-title: "翻譯"
-description: "翻譯筆記與選取內容"
+title: 翻譯
+description: 以所選 LLM 翻譯檔案或資料夾，核對語言、輸出名稱和覆寫行為。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [translation, languages, i18n, batch translation]
-concepts: [Translation, Multi-Language, Batch Processing]
-citations:
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
-  - title: Google Translate API
-    url: https://cloud.google.com/translate
+keywords:
+  - 翻譯
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,106 +15,72 @@ import TLDR from '@site/src/components/TLDR';
 # 翻譯
 
 <TLDR>
-**Notemd** 可透過 LLM 提供的翻譯技術，將文字在 21 種以上語言之間互相轉換。支援單筆選取翻譯、整篇內容翻譯以及批次資料夾翻譯。每個翻譯任務皆可透過個別設定，使用專屬的供應商與模型。輸出語言可獨立於 UI 語言進行設定。根據您的需求，結果會被附加在原文件後，或寫入新的檔案中。
-
-這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+Notemd 使用配置的 LLM 翻譯活動檔案或目錄內合格檔案，預設寫出有語言後綴的獨立檔。語言涵蓋與品質依模型而定；21 個 UI 與 34 個網站 locale 不是翻譯能力保證或限制。
 </TLDR>
 
 ## 概覽
 
-Notemd 中的翻譯並非透過字典查詢完成——而是由 LLM 驅動、具備情境感知能力的翻譯。模型能完整理解整段文字或筆記，從而保留原文的語氣、專業術語及句子結構。這種方式所產生的成果品質遠高於逐字翻譯的服務，尤其適用於技術、學術及創意寫作領域。
+先選輸出語言和翻譯 provider，以含術語、連結與程式碼的代表性副本測試。此功能使用所選 LLM，不是專門的 Google Translate 整合。
 
-此功能支援三種範圍：選取內容、目前開啟的筆記，以及整個資料夾。結合每個任務的模型選擇機制，您可以在不更換全局供應商的情況下，使用快速模型（Gemini Flash）進行一般性翻譯，或使用強大模型（Claude Sonnet）處理需要細膩表達的內容。
+翻譯動作針對檔案和資料夾。僅需段落時，先複製至暫存筆記；編輯器選取文字不會縮小 **翻譯目前檔案** 範圍。
 
-## 它是如何運作的
+## 工作原理
 
-### 翻譯指令
+### 翻譯命令
 
-```mermaid
-graph LR
-    A[User selects text or note] --> B[Determine source language]
-    B --> C[Build translation prompt]
-    C --> D[LLM translates with context]
-    D --> E[Parse translated text]
-    E --> F{Append or new file?}
-    F -->|Append| G[Insert after selection]
-    F -->|New file| H[Write translated .md]
-```
+1. 選擇輸出語言，預設英文，與 UI 無關。
+2. 開啟源檔，執行 **翻譯目前檔案**。
+3. 長文分塊傳給翻譯 provider/model，再合併回應。
+4. 打開報告路徑，核對意義、術語、引用、連結與程式碼。
 
-1. **來源偵測** -- LLM 會根據內容自動推斷出來源語言，您無需手動指定。
-2. **提示詞構建** -- Notemd 會建立一個包含目標語言、可選的領域提示，以及待翻譯內容的提示詞。
-3. **LLM 翻譯** -- 已設定的 `translateProvider` / `translateModel` 會處理該請求。此模型能保留 Markdown 格式、維基連結以及程式碼區塊。
-4. **輸出** -- 翻譯後的文字會附加在原文中下方，或寫入金庫中的新檔案中。
+預設將 `Example.md` 翻譯為法文，會在同目錄產生 `Example_fr.md`，保留原文。既有同名輸出會覆寫；沒有預設附加至源文模式或保證存在的 `Translation` 標題。
 
-### 語言對組
+### 語言配對
 
-Notemd 可支援底層 LLM 所支援的任何語言組合。常見的組合包括：
+模型推斷源語言，選單列出目標不證明特定語言對準確。以樣本檢查術語與混語內容，分塊可能失去跨塊上下文。
 
-| 來源 | Target | 典型品質 |
-|--------|--------|----------------|
-| 英文 | 簡體中文 | 非常棒 |
-| 漢語 | 英文 | 非常棒 |
-| 英文 | 日文 | 非常好 |
-| 英文 | 德文 / 法文 / 西班牙文 | 非常好 |
-| 任何受支援的 | 任何受支援的 | 模型相依性 |
+### 任務專用模型
 
-`translateLanguage` 的設定用來控制**輸出語言**。原始語言會自動偵測。
+啟用任務模型後使用 `translateProvider`、`translateModel`，否則用活動 provider。本地模型需執行中的服務與下載模型；雲端會接收提示詞和內容。
 
-### 每任務模型選擇
+以領域樣本對照源文驗證，不只依通用速度／品質排名選擇。
 
-不同模型的翻譯品質差異很大。Notemd 可讓您專為翻譯任務指定特定的模型：
+### 資料夾批次翻譯
 
-| 型號 | 速度 | 品質 | 成本 | 最適用於 |
-|-------|-------|--------|------|----------|
-| `gemini-2.0-flash-exp` | 快速 | 不錯 | 低 | 隨性、高產量 |
-| `gpt-4o-mini` | 快速 | 不錯 | 低 | 快速查詢 |
-| `deepseek-chat` | 中號 | 不錯 | 非常低 | 預算多語言版 |
-| `claude-3-5-sonnet` | 中號 | 非常棒 | 中號 | 技術 / 學術 |
-| `gpt-4o` | 中號 | 非常棒 | 中號 | 注重細微差異的散文寫作 |
-
-### 批次資料夾翻譯
-
-在資料夾上按右鍵，選擇 **"Notemd: Translate folder"** 即可翻譯該資料夾中的所有筆記。每個檔案都會被獨立處理。併發設定用來控制同時翻譯的檔案數量。
+執行 **批次翻譯資料夾**，選目錄並核對範圍。預設只含直接子檔案，高級選取 profile 可改變。輸出沿用 basename 和語言後綴，同名源檔集中至一個自訂目錄可能衝突；明確選擇位置，重跑前檢查舊譯文。
 
 ## 設定
 
-| 設定 | 預設值 | 效果 |
-|---------|---------|--------|
-| `translateProvider` / `translateModel` | DeepSeek | 專門用於翻譯任務的供應商 |
-| `translateLanguage` | `'en'` | 目標輸出語言 |
-| `translationAppendToNote` | `true` | 在原文字下方附加翻譯內容。若為 false，則建立新檔案。 |
-| `batchConcurrency` | `3` | 批次翻譯時同時處理的檔案數量 |
+| 設定 | 預設 | 作用 |
+| --------- | --------- | -------- |
+| `language` | `en` | 目標輸出語言 |
+| `translateProvider` | `DeepSeek` | 專用路由啟用時的翻譯 provider |
+| `translateModel` | `''` | 空白時使用 provider 模型 |
+| `useCustomTranslationSuffix` | `false` | 預設語言代碼後綴 |
+| `translationCustomSuffix` | `_translated` | 啟用自訂後綴後使用的值 |
+| `useCustomTranslationSavePath` | `false` | 預設儲存於源檔旁 |
+| `translationSavePath` | `''` | 自訂 Vault 相對目錄 |
+| `batchConcurrency` | `1` | 目錄翻譯要求的並行數 |
+
+自訂目錄建立失敗可回退源目錄，實際位置以報告為準。空自訂後綴可指向源檔名稱；需要獨立譯文時使用不同後綴。
 
 ## 範例
 
-您正在閱讀一份中文研究報告，希望獲得其英文版本：
+輸出設英文，將短中文筆記複製至測試目錄，翻譯後與 `_en.md` 並排核對。術語、數字、公式與連結正確後再處理整個目錄。
 
-1. 打開筆記
-2. 按右鍵 --> **"Notemd: 翻譯目前檔案"**
-3. Notemd 會偵測中文，並翻譯成您所設定的目標語言（英文），之後再附加：
+## 取消與審核
 
-```markdown
-## Translation (English)
+取消在支援處停止後續工作，不回復既有譯文，也不保證遠端停止計費。檢查報告與檔案。要求保留 Markdown 是提示詞要求，不是解析器保證語意相等。
 
-The experimental results show that the proposed method achieves
-a 12% improvement in F1 score compared to the baseline, primarily
-due to the enhanced feature extraction module described in Section 3.
-```
+## 建議
 
-翻譯內容上方的原始中文文字保持不變。`## Translation` 標題讓兩個版本能存在同一個檔案中，以便參考。
+- 保留源文備份並檢查名稱衝突。
+- 試驗用獨立後綴與目錄。
+- 人工核對標識符、數學符號、來源 URL 與專名。
+- 分享診斷前移除私密內容。
 
-## 技巧
+## 延伸閱讀
 
-- **使用 Gemini Flash 進行大量翻譯** -- 這是對大型資料夾進行批次翻譯時最快且最便宜的選項。
-- **保留維基連結** -- Notemd 的指示要求 LLM 在翻譯時保持 `[[wiki-links]]` 完整不變。翻譯完成後請再次確認，因為有些模型有時會將其解包。
-- **明確設定輸出語言** -- 來源語言可自動偵測，但請務必設定 `translateLanguage`，以避免對目標語言產生歧義。
-- **批次翻譯概念說明文件** -- 如果您的概念資料夾是某種語言，而您需要它轉換成另一種語言，則可透過資料夾層級的翻譯功能一步完成。
-
----
-
-## 接下來的步驟
-
-- [研究](./research) -- 以任何語言進行搜尋與摘要整理，再翻譯結果
-- [工作流程](./workflows) -- 透過維基連結或概念抽取進行串聯翻譯
-- [批次處理](/docs/advanced/batch-processing) -- 資料夾操作的同時執行與覆寫行為
-- [LLM 提供商](/docs/providers/overview) -- 選擇適合您語言對的最優模型
+- [批次處理](../advanced/batch-processing)：範圍與部分完成。
+- [自訂提示詞](../advanced/custom-prompts)：翻譯替換。
+- [Provider 設定](../providers/overview)：端點和測試。

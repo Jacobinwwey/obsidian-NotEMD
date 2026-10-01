@@ -1,189 +1,144 @@
 ---
 id: overview
-title: LLM Anbieter
-description: Konfigurieren Sie 36 LLM Anbieter – Cloud, Gateway und lokal – mit einer pro-Aufgabe-Modellauswahl
+title: LLM-Anbieter
+description: >-
+  Konfiguriere 36 Profile über fünf Protokollfamilien und prüfe die tatsächlich
+  genutzten Aufgabenmodelle.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
-concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: Anthropic API
-    url: https://docs.anthropic.com
+keywords:
+  - LLM-Anbieter
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# LLM Anbieter
+# LLM-Anbieter
 
 <TLDR>
-**Notemd unterstützt 36 LLM-Anbieter über 4 Transporttypen.** Alle API-Aufrufe verwenden rohes HTTP (ohne SDKs) mit automatischem Wiederholungsversuch, Transport-Fallback und 5-minütiger Antwortcaching. Die Auswahl des Modells pro Aufgabe ermöglicht es Ihnen, günstige Modelle für die Konzeptextraktion sowie leistungsstarke Modelle für Forschungszwecke zu verwenden. Für lokale Anbieter (Ollama, LMStudio) ist kein API-Schlüssel erforderlich.
+Notemd bietet 36 Profile für OpenAI-kompatible APIs, Anthropic, Google, Azure OpenAI und Ollama. Wähle das Protokoll deines Endpunkts, setze Zugangsdaten und prüfe eine kleine Aufgabe. Voreinstellungen sind änderbare Ausgangswerte, keine Zusage aktueller Modellverfügbarkeit.
 </TLDR>
 
-Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
+## Kategorien
 
-## Kategorien von Anbietern
+Die Tabellen stammen aus dem Register. URL-Schema und Pfad erhalten, Platzhalter durch tatsächliche Deploymentwerte ersetzen. Zugang, Preise und Abkündigungen verantwortet der Anbieter.
 
 ### Cloud-Anbieter
 
-| Anbieter | Standardbasis URL | Standardmodell | Temperatur |
-|----------|-----------------|---------------|-------------|
-| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
-| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
-| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
-| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
-| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
-| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
-| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
-| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
-| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+| Anbieter | Voreingestelltes Modell | Voreingestellte Basis-URL |
+| ---------- | -------------- | ----------------- |
+| **DeepSeek** | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| **Qwen** | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Qwen Code** | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Doubao** | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| **Moonshot** | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| **Xiaomi MiMo** | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| **Z AI** | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| **Baidu Qianfan** | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| **SiliconFlow** | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| **Huawei Cloud MaaS** | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
+| **OpenAI** | `gpt-4o` | `https://api.openai.com/v1` |
+| **Anthropic** | `claude-3-5-sonnet-20240620` | `https://api.anthropic.com` |
+| **Google** | `gemini-2.0-flash-exp` | `https://generativelanguage.googleapis.com/v1` |
+| **Mistral** | `mistral-large-latest` | `https://api.mistral.ai/v1` |
+| **Azure OpenAI** | `gpt-4o` | Endpunkt der eigenen Azure-Ressource konfigurieren |
+| **xAI** | `grok-4` | `https://api.x.ai/v1` |
+| **Groq** | `moonshotai/kimi-k2-instruct-0905` | `https://api.groq.com/openai/v1` |
+| **Together** | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | `https://api.together.xyz/v1` |
+| **Fireworks** | `accounts/fireworks/models/kimi-k2p5` | `https://api.fireworks.ai/inference/v1` |
+| **Nebius** | `openai/gpt-oss-120b` | `https://api.studio.nebius.com/v1` |
+| **Cerebras** | `gpt-oss-120b` | `https://api.cerebras.ai/v1` |
 
-### Gateway-/Proxy-Anbieter
+### Gateways und Proxys
 
-| Anbieter | Standardbasis URL | Standardmodell | Notizen |
-|----------|-----------------|---------------|-------|
-| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Fügt die Header `HTTP-Referer` + `X-Title` hinzu |
-| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Fügt den Header `X-GitHub-Api-Version` hinzu |
-| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Fügt den Header `APP-Code` hinzu |
-| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
-| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
-| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
-| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
-| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
-| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Optionale API-Schlüssel |
-| **Neu API** | `localhost:3000/v1` | `gpt-4.1` | Optionale API-Schlüssel |
-| **OpenAI Compatible** | (von dem Benutzer konfiguriert) | `your-model-id` | Benutzerdefinierter Endpunkt |
-
-### Chinesische Anbieter
-
-| Anbieter | Standardbasis URL | Standardmodell | Notizen |
-|----------|-----------------|---------------|-------|
-| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
-| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | kodierungsorientiert |
-| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (Ein Endpunkt-ID ist erforderlich) | ByteDance Volcengine |
-| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
-| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
-| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Zhipu, chinesischer Endpunkt |
-| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu, internationaler Endpunkt |
-| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
-| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
-| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Modell-Hosting-Plattform |
-| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
-
-**Doubao benötigt eine Ark-Endpunkt-ID** (Format: `ep-xxxxxxxx-xxxx-xxxx`). Der Standard-Ersatztext muss ersetzt werden.
+| Anbieter | Voreingestelltes Modell | Voreingestellte Basis-URL |
+| ---------- | -------------- | ----------------- |
+| **OpenRouter** | `anthropic/claude-3.7-sonnet` | `https://openrouter.ai/api/v1` |
+| **AIHubMix** | `gpt-4o-mini` | `https://aihubmix.com/v1` |
+| **GitHub Models** | `gpt-4o-mini` | `https://models.github.ai/inference` |
+| **PPIO** | `qwen/qwen3-32b` | `https://api.ppinfra.com/v3/openai` |
+| **New API** | `gpt-4.1` | `http://localhost:3000/v1` |
+| **LiteLLM** | `your-proxy-model` | `http://localhost:4000/v1` |
+| **Hugging Face** | `openai/gpt-oss-120b` | `https://router.huggingface.co/v1` |
+| **Vercel AI Gateway** | `anthropic/claude-sonnet-4.5` | `https://ai-gateway.vercel.sh/v1` |
+| **Requesty** | `anthropic/claude-3-7-sonnet-latest` | `https://router.requesty.ai/v1` |
+| **OpenAI Compatible** | `your-model-id` | `https://your-openai-compatible-endpoint/v1` |
 
 ### Lokale Anbieter
 
-| Anbieter | Standardbasis URL | Standardmodell | Notizen |
-|----------|-----------------|---------------|-------|
-| **Ollama** | `localhost:11434/api` | `llama3` | Kein API-Schlüssel. NDJSON-Streaming. Modellentdeckung über `/api/tags` |
-| **LMStudio** | `localhost:1234/v1` | `local-model` | Sendet `"EMPTY"` als Trägertoken. Entdeckung, kompatibel mit OpenAI |
-| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Modellserver |
-| **Azure OpenAI** | (von dem Benutzer konfiguriert) | `gpt-4o` | Namens des Deployments in URL. `api-key`-Header |
+| Anbieter | Voreingestelltes Modell | Voreingestellte Basis-URL |
+| ---------- | -------------- | ----------------- |
+| **OVMS** | `openvino-model` | `http://localhost:8000/v3` |
+| **LMStudio** | `local-model` | `http://localhost:1234/v1` |
+| **Ollama** | `llama3` | `http://localhost:11434/api` |
 
-## Modellauswahl pro Aufgabe
+### Chinesische Anbieter
 
-Notemd unterstützt einen eigenständigen Anbieter und ein eigenständiges Modell für jede Aufgabe. Aktivieren Sie es mit `useMultiModelSettings: true`.
+Siehe [regionale Einrichtung](./china) für DeepSeek, Qwen, Doubao, Moonshot, GLM und weitere Profile. Die Kategorie verspricht weder geografische Verfügbarkeit noch Sprachqualität. Kontoregion, Endpoint und Modellrechte müssen passen.
 
-### Verfügbare Aufgaben
+## Aufgabenmodelle
 
-| Aufgabe | Einstellungen-Schlüssel | Standardanbieter |
-|------|-------------|-----------------|
-| Links hinzufügen (Einfügung eines Wiki-Links) | `addLinksProvider` / `addLinksModel` | DeepSeek |
-| Recherche (Websuche + Zusammenfassung) | `researchProvider` / `researchModel` | DeepSeek |
-| Erstellen aus Titel | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
-| Übersetzung | `translateProvider` / `translateModel` | DeepSeek |
-| Diagrammgenerierung | `summarizeToMermaidProvider` / `Model` | DeepSeek |
-| Konzeptextraktion | `extractConceptsProvider` / `Model` | DeepSeek |
-| Extraktion des Originaltextes | `extractOriginalTextProvider` / `Model` | DeepSeek |
+`useMultiModelSettings` aktiviert getrennte Anbieter und Modellüberschreibungen. Sonst gilt `activeProvider`. Leere Modelle übernehmen das Anbietermodell; ungültig gespeicherte Anbieter werden beim Laden mit dem aktiven Anbieter abgeglichen.
 
-### Auflösungsreihenfolge
+| Aufgabe | Anbietereinstellung | Modellüberschreibung |
+| ------ | ------------------ | ---------------- |
+| Links | `addLinksProvider` | `addLinksModel` |
+| Titelgenerierung | `generateTitleProvider` | `generateTitleModel` |
+| Recherche | `researchProvider` | `researchModel` |
+| Übersetzung | `translateProvider` | `translateModel` |
+| Konzepte | `extractConceptsProvider` | `extractConceptsModel` |
+| Mermaid-Zusammenfassung | `summarizeToMermaidProvider` | `summarizeToMermaidModel` |
+| Originaltext | `extractOriginalTextProvider` | `extractOriginalTextModel` |
 
-1. Wenn `useMultiModelSettings` aktiv ist → verwenden Sie den für die Aufgabe spezifischen Anbieter + Modell
-2. Wenn die Task-Modell-Überwriteung leer ist → weichen Sie auf das Standardmodell des Anbieters aus
-3. Wenn der Aufgabenzuweiser ungültig ist → wechseln auf den globalen `activeProvider`
-4. Wenn `useMultiModelSettings` ausgeschaltet ist → alle Aufgaben verwenden das globale `activeProvider`
+DeepSeek ist Standard für aktiven und gespeicherte Aufgabenanbieter. Ein Wechsel nur des aktiven Profils ersetzt keine eingeschalteten Aufgabenumleitungen. Vor privaten Inhalten jede Aufgabe prüfen.
 
-### Empfohlene Konfigurationen
+## API-Architektur
 
-```
-# Researcher: power for research, cheap for everything else
-activeProvider: DeepSeek
-extractConceptsProvider: DeepSeek
-researchProvider: OpenAI        # GPT-4o for better research quality
-summarizeToMermaidProvider: DeepSeek
+### Transportschichten
 
-# Privacy-first: local only
-activeProvider: Ollama
-addLinksProvider: Ollama
-extractConceptsProvider: Ollama
+Obsidian-Anfragen besitzen protokollgerechte Fallbacks: Node-HTTP-Streams auf Desktop, fetch in anderen Umgebungen. Protokoll und Transport sind verschieden. Claude über ein OpenAI-Gateway nutzt dessen Profil, nicht das native Anthropic-Profil.
 
-# Budget bilingual
-activeProvider: DeepSeek
-translateProvider: Google      # Gemini Flash for translation
-researchProvider: SiliconFlow  # Cheaper China-based routing
-```
+### Wiederholungen
 
-## API Aufrufarchitektur
+Stabiler Modus ist standardmäßig aus. Wo anwendbar sind drei Wiederholungen und fünf Sekunden Intervall konfiguriert. Vorübergehende Fehler können den gemeinsamen Wiederholungs-/Fallbackpfad nutzen. Zugangsdaten und ungültige Modelle korrigieren; entfernte Timeouts oder Quoten können lange Aufgaben weiter scheitern lassen.
 
-### Transportebenen
+### Antwortcache
 
-1. **Obsidian `requestUrl`** — primär (eingebaut, funktioniert auf allen Plattformen)
-2. **Desktop HTTP** — Node.js `http`/`https`-Module (Streaming + lange Anfragen)
-3. **Web `fetch`** – Rückfall, wenn Node.js-Module nicht verfügbar sind
+Ein begrenzter Speichercache kann erfolgreiche Antworten wiederverwenden. Endpoint, Modell, Generierungsparameter, Prompt und Inhalt bestimmen die Identität. Kein dauerhafter Speicher, Kostenmesser oder Versprechen, bezahlte Anfragen zu vermeiden.
 
-Der Plugin wechselt bei vorübergehenden Netzwerkfehlern automatisch zwischen den Transportmethoden.
+### Reasoning-Modelle
 
-### Wiederholungslogik
+Reasoning-/Thinking-Regler folgen Profil- und Modellregeln. Keine protokollspezifischen Parameter zwischen Anbietern kopieren. Ein funktionierender Chat garantiert keine beliebigen Token-, Sampling- oder Reasoning-Einstellungen.
 
-- **Normalmodus** (`enableStableApiCall: false`): Einzelversuch. Bei vorübergehendem Fehler wird automatisch auf einen stabilen Neversuch umgestiegen.
-- **Stabiler Wiederholungsmodus** (`enableStableApiCall: true`): Bis zu 4 Versuche (1 + 3 Wiederholungen) mit 5-Sekunden-Intervallen.
-- **Vorübergehende Fehler, die eine Wiederholung auslösen**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
-- **Nicht wiederholbar**: HTTP 400, 401, 403, 404
+### Tokenschätzung
 
-### Antwort-Caching
+Textschätzungen und Ausgabelimits sind keine exakten Anbieter-Tokenzahlen. Reale Nutzung beim Anbieter prüfen. Ein allgemeiner Kostenrechner wird nicht bereitgestellt.
 
-5-minütiger In-Memory-LRU-Cache, der nach Provider + Modell + Temperatur + Prompt + Inhalt keyt wird. Nachfolgende identische Anfragen innerhalb von 5 Minuten liefern sofort die aus dem Cache geladenen Ergebnisse.
+## Modelle finden
 
-### Verarbeitung von Reasoning-Modellen
+**Fetch models** ist profilabhängig; einzelne Deployments benötigen manuelle Modell-/Deploymentnamen. Listenrecht und Generierungsrecht sind unabhängig.
 
-Modelle, die die `system`-Rolle nicht unterstützen (DeepSeek R1, OpenAI o1/o3/o4/gpt-5), kombinieren automatisch die System- und Benutzereingaben zu einer einzigen Benutzernachricht.
+**Verbindung testen** verwendet den Profilmodus: `models-then-chat` kann schon anhand der Liste erfolgreich sein, `chat-only` sendet eine kleine Generierung. Anschließend eine echte Aufgabe prüfen.
 
-DeepSeek-spezifisch: `thinkingEnabled` fügt `{ thinking: { type: 'enabled' } }` zur Anfrage hinzu. `reasoningEffort` (niedrig/mittel/hoch) wird als `reasoning_effort` übergeben. Es wird überprüft, dass die maximale Anzahl an Ausgabetokens ≥ 8000 ist, wenn das Nachdenken aktiviert ist.
-
-### Token-Schätzung
-
-`estimateTokens(text)`: `Math.ceil(text.length / 4)` — Heuristik mit 4 Zeichen pro Token. Wird verwendet, um `maxResearchContentTokens` vor dem Senden an LLM durchzusetzen.
-
-Es wird keine Kostenverfolgung implementiert.
-
-## Modellentdeckung
-
-| Moden | Anbieter | Endpunkt |
-|------|-----------|----------|
-| `ollama-tags` | Ollama | `/api/tags` |
-| `google-models` | Google | Liste der Modelle API |
-| `anthropic-models` | Anthropic | Liste der Modelle API |
-| `openai-compatible-models` | DeepSeek, Qwen, Mistral, usw. | `/v1/models` |
-| `openrouter-models` | OpenRouter | Modellliste API |
-| `github-models` | GitHub Models | Schlussfolgerung API |
-| `none` | Azure OpenAI | Deaktiviert (erfordert Namen der Bereitstellung) |
+- Anthropic und Google haben native Listenprotokolle.
+- Ollama zeigt geladene Tags, LM Studio die Modelle seines Servers.
+- Azure benötigt Deployment samt API-Version.
+- Gateways können Listen sperren und explizite Chatmodelle dennoch erlauben.
 
 ## Schnellstart
 
-1. **Wählen Sie einen Anbieter** – DeepSeek (China), OpenAI (International) oder Ollama (Lokal/Kostenlos)
-2. **Drücken Sie die API-Taste** — Einstellungen → Notemd → Anbieter → API-Schlüssel
-3. **Verbindung testen** — Klicken Sie auf die Test-Kнопpe
-4. **Optionell: Modell pro Aufgabe** – Aktivieren Sie `useMultiModelSettings` und konfigurieren Sie sie einzeln
+1. Passendes Profil in **Settings → Notemd** wählen.
+2. Adresse, Zugang und verfügbares Modell/Deployment eintragen.
+3. Verbindung und Testnotiz prüfen.
+4. Ausgabe und Fortschritt vor Stapeln und Aufgabenrouting kontrollieren.
 
-Für Ollama: Es ist keine API-Einstellung erforderlich. Stellen Sie einfach sicher, dass `ollama serve` läuft.
+Lokal Modell vorbereiten und Server starten. Ollama benötigt keinen Schlüssel; LM Studio einen optionalen, voreingestellt `EMPTY`. Falls nötig echten Token verwenden. Websuche bleibt netzabhängig.
 
----
+## Weitere Schritte
 
-## Nächste Schritte
-
-- 📝 [Konzeptnotizen](/docs/features/concept-notes) — Verwendet ein Modell zur Extraktion pro Aufgabe
-- 🎨 [Diagrams](/docs/features/diagrams) — Verwendet das Diagramm-Modell pro Aufgabe
-- 🔍 [Forschung](/docs/features/research) — Verwendet ein modell speziell für Forschungszwecke
-- ⚙️ [Konfiguration](/docs/getting-started/configuration) — Vollständige Referenz der Einstellungen
+- [OpenAI](./openai), [Anthropic](./anthropic), [Google](./google), [regionale](./china) und [lokale Anbieter](./local).
+- [Konfiguration](../getting-started/configuration).
+- [Fehlerbehebung](../advanced/troubleshooting).

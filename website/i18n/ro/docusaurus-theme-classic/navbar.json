@@ -4,19 +4,39 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Logo înalt",
+    "message": "Sigla Notemd",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "Documinte",
+    "message": "Documentație",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Întrebări frecvente",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Începeți aici",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Utilizatori noi",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Fluxuri de lucru",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Dezvoltatori",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

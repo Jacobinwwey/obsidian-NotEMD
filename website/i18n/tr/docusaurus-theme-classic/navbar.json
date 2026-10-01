@@ -8,15 +8,35 @@
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "Dokümanlar",
+    "message": "Belgeler",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "SSS",
+    "message": "Sık sorulan sorular",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Buradan başlayın",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Yeni kullanıcılar",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Günlük işler",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Geliştiriciler",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

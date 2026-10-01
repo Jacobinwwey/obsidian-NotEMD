@@ -1,0 +1,99 @@
+---
+id: overview
+title: Utviklerguide
+description: >-
+  Bygg, test og utvid eksisterende kontrakter for leverandører, operasjoner,
+  rendering og dokumentasjon.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Utviklerguide
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Utviklerguide
+
+<TLDR>Bruk en funksjonsgren, installer låste avhengigheter og begge nettleserrevisjoner, bygg og kjør hele Jest-suiten. Endre kontraktens eksisterende eier og hold dokumentasjon, leverandørtester og native forbrukerbevis samlet.</TLDR>
+
+## Arbeidskopi
+
+Klon [repositoriet](https://github.com/Jacobinwwey/obsidian-NotEMD) og les [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md). Plugin-CI kjører Linux/Windows Node 20; nettstedet Node 24. Roten og `website/` installerer avhengigheter separat.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Playwright-pakkene kan kreve ulike Chromium-revisjoner; én installasjon er ikke nok. `main.js` genereres og ignoreres av Git. En eldre lokal bundle verifiserer ikke en ny commit.
+
+## Finn ansvaret
+
+| Ansvar | Primær kilde |
+| ---------------- | ---------------- |
+| Livssyklus, kommandoer og vertsruting | `src/main.ts` |
+| Leverandørprofiler, protokollmetadata og validering | `src/llmProviders.ts` |
+| Kall, transporter, nye forsøk og strømming | `src/llmUtils.ts` |
+| Operasjoner, skjemaer og offentlig CLI-utvalg | `src/operations/`, `src/cliContracts.ts` |
+| Filoppgaver, undersøkelser og oversettelse | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Arbeidsflythandlinger og sidepanel | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Diagramspesifikasjoner og rendering | `src/diagram/`, `src/rendering/` |
+| UI-tekster og språkversjoner | `src/i18n/` |
+| Offentlige veiledninger og oversettelser | `website/docs/`, `website/i18n/` |
+| Vedlikeholdsrutiner og daterte bevis | `docs/maintainer/` |
+
+Produksjonsbundlen er selvstendig med innebygd forhåndsvisningsvert. En mulig separat vertsbane er ikke en levert filkontrakt. Aktivering krever samordnet endring i pakking, filer, revisjoner og dokumentasjon.
+
+## Avgrensede endringer
+
+1. Reproduser og skriv en målrettet test som feiler først.
+2. Endre invariantens eier og valider ved ekstern grense.
+3. Kjør målrettede/fulle tester; bevar avbrudd, feil og persistens ved skrivning.
+4. Oppdater engelsk kilde og berørte språk. Planer, oppgaver og gjennomganger krever hele separate engelske/kinesiske versjoner i `docs/`.
+5. Se visuelle/native endringer i faktisk forbruker; XML, skjermbilde eller build beviser ikke redigerbarhet eller tilkoblede forbindelser.
+
+Legg leverandører i `llmProviders.ts`, gjenbruk kompatibel transport og utvid `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README og forbindelsestester. Bevar strømming og avbrutte svar. Eksponering krever inndata-/resultatskjemaer, kontekst, sideeffekter og håndteringstagger. Registerpost betyr ikke offentlig Agent-endepunkt. [Agenter](../agents/overview).
+
+## Verifisering
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint sammenligner enkeltdiagnoser; lavere total unnskylder ikke nye regresjoner. Ved endret henting kjør `npm run benchmark:local-kb` og oppgi korpus/miljø. For nettstedet med Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Oversettelser i 1.9.8-programmet skrives og gjennomgås direkte av Codex. Ikke kjør eldre oversettelsesskript, LM Studio eller oversettelsesendepunkter. Verktøy kan formatere, validere og rendere skrevet tekst.
+
+## Obsidian og native forbrukere
+
+Bruk et engangshvelv merket `.notemd-host-verification`; skriptene kontrollerer kopiert bundle. Hold brukernes hvelv utenfor. Prøv både `obsidian help` og `obsidian-cli help`; manglende verktøy er utilgjengelig, ikke en bestått vertstest.
+
+PowerPoint, CircuitikZ og lysbilder har egne krav/artefakter. Følg [datert akseptanse](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) og [utgivelsesrutinen](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Merk utestet mobil/minimumsversjon.
+
+## Bidrag og utgivelse
+
+Beskriv problem, sluttatferd, tester og grenser i PR. Legg reproduksjon i [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). Ikke commit nøkler, private notater eller uvedkommende filer. Én publiserer eier synkronisert versjon, numerisk tagg, ren tagget kilde, tospråklige notater, verifiserte utkastfiler, publisering og eksplisitt Pages-distribusjon. Ikke flytt publiserte tagger. `.trellis/` er lokal arbeidsflyttilstand, ikke CI-avhengighet.
+
+## Neste trinn
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Prosjektstatus](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agenter](../agents/overview).
+- [1.9.8](../releases/1.9.8).

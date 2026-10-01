@@ -1,123 +1,82 @@
 ---
 id: translation
-title: "Çeviri"
-description: "Notlar ve seçimler çevrilir"
+title: Çeviri
+description: >-
+  Dosya ve klasörleri seçili LLM ile çevirin; dili, yolları ve üzerine yazmayı
+  kontrol edin.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [translation, languages, i18n, batch translation]
-concepts: [Translation, Multi-Language, Batch Processing]
-citations:
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
-  - title: Google Translate API
-    url: https://cloud.google.com/translate
+keywords:
+  - Çeviri
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Çeviri
 
-<TLDR>
-**Notemd, LLM destekli çeviri özelliğiyle 21'den fazla dil arasında metin çevirisi yapar.** Tek seçimli çeviri, tüm notun çevirisi ve toplu klasör çevirisi özelliklerini destekler. Her çeviri görevi, görev bazlı ayarlar aracılığıyla özel bir sağlayıcı ve model kullanabilir. Çıktı dili, UI dilinden bağımsız olarak ayrıca yapılandırılabilir. Sonuçlar tercihinize göre mevcut dosyaya eklenir veya yeni bir dosyaya yazılır.
+<TLDR>Notemd etkin dosyayı veya uygun klasör dosyalarını seçili LLM ile çevirir. Varsayılan sonuç dil son ekli ayrı dosyadır. Kalite modele bağlıdır; 21 arayüz ve 34 site dili, çevirinin sınırı veya garantisi değildir.</TLDR>
 
-Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
-</TLDR>
+## Genel bakış
 
-## Genel Bakış
+Hedef dil ve sağlayıcı seçip terimler, bağlantılar ve kod içeren kopyada test edin. Bu, özel Google Translate entegrasyonu değil, seçili LLM’yi kullanır. Komutlar dosya/klasör düzeyindedir. Tek parçayı geçici nota koyun; seçim **Geçerli dosyayı çevir** kapsamını daraltmaz.
 
-Notemd içindeki çeviri bir sözlük araması değildir -- bu, LLM destekli, bağlam bilincine sahip bir çeviridir. Model, tonu, alan terimlerini ve cümle yapısını koruyarak tam paragrafı veya notu inceler. Bu sayede özellikle teknik, akademik ve yaratıcı yazılar için kelime kelime hizmetlerden daha kaliteli sonuçlar elde edilir.
+## Nasıl çalışır
 
-Bu özellik seçim, aktif not ve tüm klasör olmak üzere üç farklı kapsamı destekler. Görev bazlı model seçimiyle birlikte, gündelik çeviriler için hızlı bir model (Gemini Flash) ve nüanslara duyarlı içerikler için güçlü bir model (Claude Sonnet) kullanılabilir -- küresel sağlayıcınızı değiştirmenize gerek kalmaz.
+### Çeviri görevi
 
-## Nasıl Çalışır
+1. Arayüzden bağımsız hedef dili seçin; başlangıçta İngilizcedir.
+2. Kaynağı açıp **Geçerli dosyayı çevir** çalıştırın.
+3. Uzun metin bölünür, gönderilir ve birleştirilir.
+4. Bildirilen dosyada anlamı, terimleri, alıntıları, Markdown bağlantılarını ve kodu inceleyin.
 
-### Çevirme Komutu
+`Example.md` dosyasının Fransızcası varsayılan olarak korunan kaynağın yanındaki `Example_fr.md` olur. Mevcut çıktı üzerine yazılır. Kaynağa ekleme veya sabit `Translation` başlığı varsayılan garanti değildir.
 
-```mermaid
-graph LR
-    A[User selects text or note] --> B[Determine source language]
-    B --> C[Build translation prompt]
-    C --> D[LLM translates with context]
-    D --> E[Parse translated text]
-    E --> F{Append or new file?}
-    F -->|Append| G[Insert after selection]
-    F -->|New file| H[Write translated .md]
-```
+### Dil çiftleri
 
-1. **Kaynak tespiti** -- LLM, içerikten kaynak dilini otomatik olarak tahmin eder. Manuel olarak belirtmenize gerek yoktur.
-2. **İstek oluşturma** -- Notemd, hedef dili, isteğe bağlı alan ipucunu ve çevrilecek içeriği içeren bir istek oluşturur.
-3. **LLM çevirisi** -- Yapılandırılan `translateProvider` / `translateModel`, isteği işler. Model, markdown biçimlendirmesini, wiki bağlantılarını ve kod bloklarını korur.
-4. **Çıktı** -- Çevrilmiş metin ya orijinalinin altına eklenir ya da vault'ta yeni bir dosyaya yazılır.
+Model kaynak dili çıkarır. Menüde dil seçeneği olması o çift için doğruluk kanıtı değildir. Karışık dilleri ve terimleri deneyin; parçalama bağlam kaybettirebilir.
 
-### Dil Çiftleri
+### Göreve özel model
 
-Notemd, altta yatan LLM'ın desteklediği her dil çiftini destekler. Yaygın çiftler arasında şunlar bulunur:
+Görev rotası `translateProvider`/`translateModel` kullanır; yoksa etkin sağlayıcı kullanılır. Yerel için sunucu/model gerekir, bulut içeriği ve istemi alır. Genel sıralama yerine alanınıza özgü örneği değerlendirin.
 
-| Kaynak Dili | Hedef | Tipik Kalite |
-|--------|--------|----------------|
-| İngilizce | Çince (Basitleştirilmiş) | Mükemmel |
-| Çince | İngilizce | Mükemmel |
-| İngilizce | Japonca | Çok iyi |
-| İngilizce | Almanca / Fransızca / İspanyolca | Çok iyi |
-| Herhangi bir desteklenen dil | Herhangi bir desteklenen dil | Modele bağlı |
+### Klasör çevirisi
 
-`translateLanguage` ayarı **çıktı dili**ni kontrol eder. Kaynak dili otomatik olarak tespit edilir.
+**Klasörü toplu çevir** varsayılan olarak yalnız doğrudan alt dosyaları alır; gelişmiş profiller değiştirebilir. Aynı adlı kaynakların ortak çıktı klasörü çakışma yaratabilir. Tekrardan önce eski çevirileri ve hedefleri inceleyin.
 
-### Görev Bazlı Model Seçimi
+## Ayarlar
 
-Çeviri kalitesi modele göre büyük ölçüde değişir. Notemd, sadece çeviri için özel bir model atamanıza olanak tanır.
+| Ayar | Başlangıç | Etkisi |
+| --------- | --------- | -------- |
+| `language` | `en` | Seçili hedef dil |
+| `translateProvider` | `DeepSeek` | Görev rotaları etkinken sağlayıcı |
+| `translateModel` | `''` | Boşsa sağlayıcının modeli |
+| `useCustomTranslationSuffix` | `false` | Varsayılan son ek olarak dil kodu |
+| `translationCustomSuffix` | `_translated` | Özel seçenek açıkken son ek |
+| `useCustomTranslationSavePath` | `false` | Varsayılan olarak kaynağın yanına kayıt |
+| `translationSavePath` | `''` | Kasaya göre özel çıktı klasörü |
+| `batchConcurrency` | `1` | Klasör çevirisinin istenen eşzamanlılığı |
 
-| Model | Hız | Kalite | Maliyet | En İyi İçin |
-|-------|-------|--------|------|----------|
-| `gemini-2.0-flash-exp` | Hızlı | İyi | Düşük | Günlük, yüksek hacimli |
-| `gpt-4o-mini` | Hızlı | İyi | Düşük | Hızlı arama |
-| `deepseek-chat` | Orta | İyi | Çok düşük | Bütçe dostu çok dillilik |
-| `claude-3-5-sonnet` | Orta | Mükemmel | Orta | Teknik / akademik |
-| `gpt-4o` | Orta | Mükemmel | Orta | Nüanslara duyarlı metin yazımı |
-
-### Toplu Klasör Çevirisi
-
-Bir klasöre sağ tıklayın ve **"Notemd: Klasörü çevir"** seçeneğini seçerek o klasördeki tüm notları çevirin. Her dosya ayrı ayrı işlenir. Eşzamanlılık ayarı, kaç dosyanın paralel olarak çevrileceğini kontrol eder.
-
-## Yapılandırma
-
-| Ayar | Varsayılan | Etki |
-|---------|---------|--------|
-| `translateProvider` / `translateModel` | DeepSeek | Çeviri görevleri için özel sağlayıcı |
-| `translateLanguage` | `'en'` | Hedef çıktı dili |
-| `translationAppendToNote` | `true` | Çevrilmiş metni orijinalinin altına ekleyin. Bu değer false ise yeni bir dosya oluşturulur. |
-| `batchConcurrency` | `3` | Toplu çeviri sırasında paralel olarak işlenen dosya sayısı |
+Özel klasör oluşturulamazsa kaynak klasörüne dönülebilir. Gerçek yolu okuyun. Boş özel son ek kaynağın kendisini hedefleyebilir; ayrı çeviri için ayırt edici son ek seçin.
 
 ## Örnek
 
-Bir Çince araştırma notu okuyorsunuz ve İngilizce versiyonunu istiyorsunuz:
+Kısa bir Çince notu deneme klasörüne kopyalayın, İngilizce seçip dosyayı çevirin. `_en.md` içindeki terim, sayı, formül ve bağlantıları kaynakla karşılaştırın. Sonra kapsamı büyütün.
 
-1. Notu açın
-2. Sağ tıklayın --> **"Notemd: Mevcut dosyayı çevir"**
-3. Notemd Çinceyi algılar, ayarladığınız hedef dil (İngilizce) olarak çevirir ve şunu ekler:
+## İptal ve kontrol
 
-```markdown
-## Translation (English)
-
-The experimental results show that the proposed method achieves
-a 12% improvement in F1 score compared to the baseline, primarily
-due to the enhanced feature extraction module described in Section 3.
-```
-
-Orijinal Çince metin, çevirinin üstünde değiştirilmeden kalır. `## Translation` başlığı her iki versiyonu da aynı dosyada tutarak kolay erişim sağlar.
+İptal, desteklenen ileri işi durdurur; tamamlanmış çevirileri geri almaz veya ücretlendirmeyi kesin durdurmaz. Raporu ve dosyaları inceleyin. Markdown’ın korunması model talimatıdır, anlam eşitliğine ilişkin ayrıştırıcı garantisi değildir.
 
 ## İpuçları
 
-- **Büyük klasörlerin toplu çevirisi için Gemini Flash kullanın** -- bu, büyük klasörlerin toplu çevirisinde en hızlı ve en ucuz seçenektir.
-- **Viki bağlantılarını koru** -- Notemd'ın talimatları, LLM'ye çeviride `[[wiki-links]]`'yı bozmadan tutmasını söyler. Bazı modellerin bunları ara sıra açtığı için çeviriden sonra kontrol edin.
-- **Çıktı dilini açıkça belirle** -- Kaynak için otomatik algılama işe yarar, ancak hedef konusunda belirsizlikleri önlemek amacıyla her zaman `translateLanguage`'yı yapılandırın.
-- **Kavram notlarını topluca çevir** -- Eğer kavram dosyanız bir dildeyse ve başka bir dilde olmasını istiyorsanız, dosya düzeyindeki çeviri bunu tek adımda halleder.
+- Kaynağı yedekleyip ad çakışmalarını kontrol edin.
+- Ayrı test son eki ve klasörü kullanın.
+- Kod, matematik, URL ve özel adları elle inceleyin.
+- Tanılamayı paylaşmadan kontrol edin.
 
----
+## Sonraki adımlar
 
-## Sonraki Adımlar
-
-- [Araştırma](./research) -- Herhangi bir dilde arama yapın ve özet çıkarın, ardından sonuçları çevirin
-- [İş Akışları](./workflows) -- Viki bağlantılaması veya kavram çıkarma ile çeviriyi zincirleme yapın
-- [Toplu İşleme](/docs/advanced/batch-processing) -- Dosya işlemleri için eşzamanlılık ve üzerine yazma davranışları
-- [LLM Sağlayıcılar](/docs/providers/overview) -- Dil çiftiniz için en iyi modeli seçin
+- [Toplu işleme](../advanced/batch-processing).
+- [Özel istemler](../advanced/custom-prompts).
+- [Sağlayıcılar](../providers/overview).

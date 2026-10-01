@@ -4,7 +4,7 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Alternativ logo",
+    "message": "Notemd-logo",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
@@ -12,11 +12,31 @@
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Ofte stillede spørgsmål",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Start her",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Nye brugere",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Dagligt arbejde",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Udviklere",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agenter",
+    "description": "Navbar label: Agents"
   }
 }

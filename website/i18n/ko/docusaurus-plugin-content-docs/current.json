@@ -1,18 +1,18 @@
 {
   "version.label": {
-    "message": "다음 단계",
-    "description": "The label for version current"
+    "message": "현재 문서",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "시작하기",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "핵심 기능",
+    "message": "주요 기능",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM 제공자",
+    "message": "LLM 제공업체",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

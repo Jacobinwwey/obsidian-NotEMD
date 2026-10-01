@@ -23,20 +23,20 @@
     "message": "Discord",
     "description": "The label of footer link with label=Discord linking to https://discord.gg/qnGgsQ9W"
   },
-  "link.item.label.GitHub Discussions": {
-    "message": "GitHub Discussions",
-    "description": "The label of footer link with label=GitHub Discussions linking to https://github.com/Jacobinwwey/obsidian-NotEMD/discussions"
-  },
   "link.item.label.GitHub": {
     "message": "GitHub",
     "description": "The label of footer link with label=GitHub linking to https://github.com/Jacobinwwey/obsidian-NotEMD"
   },
   "link.item.label.Sponsor": {
-    "message": "贊助",
+    "message": "贊助專案",
     "description": "The label of footer link with label=Sponsor linking to https://github.com/sponsors/Jacobinwwey"
   },
   "copyright": {
-    "message": "Copyright © 2026 Notemd. 以 Docusaurus 建置。 | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">MIT 授權</a>",
+    "message": "Copyright © 2026 Notemd. 使用 Docusaurus 建置。 | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">MIT 授權</a>",
     "description": "The footer copyright"
+  },
+  "link.item.label.GitHub Issues": {
+    "message": "回報問題",
+    "description": "Repository issue tracker"
   }
 }

@@ -1,319 +1,126 @@
 ---
 id: wiki-links
-title: "Wiki-Links"
-description: "Geração automática de links wiki para conceitos-chave"
+title: Links wiki
+description: >-
+  Adicionar links propostos pelo modelo e conceitos opcionais numa pasta
+  definida explicitamente.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
-concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Auto Link Plugin
-    url: https://github.com/ov7a/obsidian-auto-link
+keywords:
+  - Links wiki
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Wiki-Links
+# Links wiki
 
 <TLDR>
-**Notemd adiciona automaticamente `[[wiki-links]]` aos conceitos-chave em suas anotações.** O LLM lê seu conteúdo, identifica termos importantes no contexto e insere links wiki no estilo Obsidian em cada ocorrência. Opcionalmente cria arquivos de notas de conceito com backlinks. Suporta supressão de sinônimos, integridade dos links ao renomear/excluir e modo de extração pura (sem modificação de arquivos). Diferentemente do Auto Link, que apenas corresponde a títulos de anotações existentes, Notemd utiliza IA para identificar novos conceitos e criar as anotações correspondentes. Isso faz parte do [Obsidian Guia de Gestão de Conhecimento com IA](/docs/pillar-ai-knowledge).
+**Processar arquivo (adicionar links)** pede ao LLM conceitos e links Obsidian. Por padrão escreve `_processed.md` separado e preserva a origem. Conceitos exigem pasta escolhida. Rever a saída antes de ampliar o lote.
 </TLDR>
 
-## Visão Geral
+## Visão geral
 
-A criação de links wiki é a funcionalidade principal do Notemd. Ela transforma texto simples em um grafo de conhecimento interconectado por meio de:
+Os termos podem mudar entre execuções e apontar para conceitos ainda sem nota. Um link é um destino de navegação, não prova de equivalência conceptual ou de uma explicação correta.
 
-1. **Analisando sua anotação** com um LLM
-2. **Identificando conceitos-chave** (termos, pessoas, métodos, teorias)
-3. **Inserindo `[[wiki-links]]`** em cada ocorrência
-4. **Criando notas de conceito** (opcional) com backlinks
-
-## Como Funciona
+## Funcionamento
 
 ### Processo
 
-```mermaid
-graph LR
-    A[Your Note] --> B[LLM Analysis]
-    B --> C{Concepts Found}
-    C --> D[Insert Wiki-Links]
-    C --> E[Create Concept Notes]
-    D --> F[Updated Note]
-    E --> F
-    F --> G[Connected Knowledge Graph]
-```
+A nota é dividida, enviada ao fornecedor/modelo, reunida e escrita. Notas de conceitos podem ser criadas ou atualizadas. Verificar falhas parciais e caminho real no relatório.
 
 ### Exemplo
 
-**Antes:**
-```markdown
-Machine learning models use neural networks to learn patterns from data.
-The transformer architecture revolutionized natural language processing.
+Origem:
+
+```text
+A aprendizagem automática utiliza redes neuronais para reconhecer padrões.
 ```
 
-**Depois:**
+Saída possível:
+
 ```markdown
-[[Machine learning]] models use [[neural networks]] to learn patterns from data.
-The [[transformer architecture]] revolutionized [[natural language processing]].
+A [[aprendizagem automática]] utiliza [[redes neuronais]] para reconhecer padrões.
 ```
+
+Os termos concretos dependem de origem, modelo e prompt.
 
 ## Uso
 
-### Básico: Adicionar links à anotação atual
+### Nota atual
 
-1. Abra uma nota
-2. Clique com o botão direito no editor → **"Processar arquivo (adicionar links)"**
-3. Aguarde alguns segundos
-4. Os conceitos agora estão vinculados!
+Abrir uma cópia Markdown e executar **Processar arquivo (adicionar links)**. Verificar `_processed.md`. Sufixos, pasta de processados e movimento da origem podem mudar o destino.
 
-### Lote: Processar várias anotações
+### Várias notas
 
-1. Clique com o botão direito em uma pasta no explorador de arquivos
-2. Selecione **"Notemd: Processar pasta (adicionar links)"**
-3. Configurar:
-   - Concorrência (quantos arquivos em paralelo)
-   - Sobrescrever links existentes (sim/não)
-4. Clique em **Processar**
+Escolher **Processar pasta (adicionar links)** e confirmar pasta e âmbito. Começar pequeno. Não existe opção global substituir/ignorar para todas as tarefas. Ver [lotes](../advanced/batch-processing).
 
-### Seletivo: Vincular texto específico
+### Texto escolhido
 
-1. Destacar o texto a ser processado
-2. Clique com o botão direito → **"Processar seleção (adicionar links)"**
-3. Apenas a parte destacada é analisada
+**Create wiki link and generate note from selection** permite escolher o termo. É uma ação separada; seleção não limita o processamento do documento completo. Rever conceito e conteúdo.
 
-## Notemd vs Auto Link
+## Escolher o método
 
-Obsidian possui duas abordagens para vinculação automática em wiki:
+Modelos ajudam a descobrir conceitos no conteúdo. Correspondência determinista de títulos é preferível quando a prioridade é repetibilidade sobre nomes existentes. Comparar outros plugins pelas versões e documentação atuais, sem superioridade não medida.
 
-| | **Auto Link** | **Notemd** |
-|--|---------------|-------------|
-| Fonte do link | Títulos de anotações existentes no vault | Conceitos identificados por LLM no conteúdo |
-| Pode criar links para novos conceitos | Não — o título já deve existir | Sim — a IA identifica conceitos e cria notas |
-| Tratamento de sinônimos | Não | Sim — supressão de sinônimos |
-| Criação de nota de conceito | Não | Sim — com backlinks e eliminação de duplicatas |
-| Processamento em lote | Não (arquivo único) | Sim (nível de pasta) |
-| Roteamento de modelo por tarefa | Não | Sim |
+## Funções
 
-**Auto Link** faz correspondência de título: se houver uma nota chamada "Machine Learning", ela envolve as ocorrências em `[[Machine Learning]]`. Se a nota não existir, nada acontece.
+### Reduzir termos equivalentes
 
-**Notemd** é controlado pela IA: o LLM lê seu conteúdo, entende o contexto, identifica conceitos que *deveriam* ser vinculados — mesmo que ainda não haja nota — e cria tanto o link quanto a nota de conceito.
+`replaceSynonymsDuringConceptExtraction` acrescenta instrução contra conceitos equivalentes ou muito próximos. É booleano desligado por padrão, não limiar numérico de semelhança. Rever abreviaturas e termos próximos.
 
-## Recursos
+### Integridade dos links
 
-### Supressão de Sinônimos
+Obsidian gere atualização após renomeação segundo os seus ajustes e a operação usada. Apagar um destino pode deixar link não resolvido, diferente de uma menção sem link. Verificar basenames iguais em pastas distintas.
 
-**Problema:** "transformer", "transformers", "Transformer architecture" → 3 conceitos separados
+### Extração independente
 
-**Solução:** Notemd detecta quase duplicatas e usa a forma canônica.
+**Extrair conceitos (arquivo atual)** cria conceitos sem reescrever a origem. Os controlos de forma mínima e backlinks diferem da tarefa de links. Ver [conceitos](./concept-notes).
 
-**Configuração:**
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (0 = off, 1 = aggressive)
-```
-
-### Integridade do link
-
-**Ao renomear uma nota conceitual:**
-- Todos os links da wiki são atualizados automaticamente (Obsidian recurso principal)
-- Os backlinks permanecem intactos
-
-**Ao excluir uma nota conceitual:**
-- Os links permanecem, mas aparecem como "menções desvinculadas"
-- É possível recriá‑la a partir de qualquer ocorrência
-
-### Modo de extração pura
-
-**Extraia conceitos sem modificar o original:**
-
-1. Clique com o botão direito → **"Extrair conceitos (sem vinculação)"**
-2. As notas conceituais são criadas
-3. O arquivo original permanece inalterado
-
-Caso de uso: Processamento de conteúdo somente leitura ou rascunhos finais.
-
-## Geração de Nota Conceitual
+## Notas de conceitos
 
 ### Criação automática
 
-**Quando ativado (padrão), Notemd cria:**
+Com pasta definida e saída ativa, podem surgir título e backlink `Linked From`. Não são criadas automaticamente explicações pesquisadas, secções de conceitos relacionados ou frontmatter personalizável. Usar geração por títulos separadamente para conteúdo.
 
-```markdown
----
-tags: [concept, auto-generated]
-created: 2026-06-13
-source: [[Original Note Name]]
----
+### Ajustes
 
-# Machine Learning
+Procurar pasta de conceitos, pasta de processados, sufixo e movimento da origem. O caminho de conceitos começa vazio. Separar destinos de teste e coleção original.
 
-A branch of artificial intelligence that enables computers
-to learn from data without explicit programming.
+## Opções avançadas
 
-## Occurrences in Your Vault
+### Contexto e prompts
 
-- [[Original Note Name#Section]]
-- [[Another Note#Header]]
+`chunkWordCount` define tamanho aproximado. Domínio e prompt próprio podem restringir conceitos. Não há seletores documentados de frase/parágrafo, frequência mínima ou variáveis gerais de modelo de nota.
 
-## Related Concepts
+## Boas práticas
 
-- [[Neural Networks]]
-- [[Deep Learning]]
-- [[Supervised Learning]]
-```
-
-### Configuração
-
-**Pasta de saída:**
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Estrutura hierárquica:**
-```
-Settings → Output → Use Hierarchical Folders
-If enabled:
-  papers/my-paper.md → papers/concepts/Concept.md
-If disabled:
-  → concepts/Concept.md
-```
-
-**Modelo:**
-```
-Settings → Output → Concept Template
-Customize with variables:
-  {{concept}} — Concept name
-  {{description}} — LLM-generated description
-  {{backlinks}} — List of source notes
-  {{date}} — Creation date
-```
-
-## Opções Avançadas
-
-### Janela de Contexto
-
-**Quantidade de texto ao redor a ser enviado:**
-
-```
-Settings → Linking → Context Window
-Options: Sentence | Paragraph | Full Note
-Default: Paragraph
-```
-
-Maior = maior precisão, custo mais alto.
-
-### Ocorrências Mínimas
-
-**Somente vincular conceitos que aparecem várias vezes:**
-
-```
-Settings → Linking → Min Occurrences
-Default: 1 (link all)
-```
-
-Defina como 2 ou 3 para focar em temas recorrentes.
-
-### Padrões a Excluir
-
-**Pular certas palavras:**
-
-```
-Settings → Linking → Exclude List
-Example: note, idea, example, thing
-```
-
-Impede o vinculamento excessivo de termos genéricos.
-
-### Prompts Personalizados
-
-**Sobrescrever instruções padrão do LLM:**
-
-```
-Settings → Advanced → Custom Linking Prompt
-Default:
-  "Identify key concepts, theories, methods, and technical
-   terms in the following text. Return as a list..."
-```
-
-Modifique para necessidades específicas do domínio (por exemplo, "Foco em terminologia médica").
-
-## Dicas e Melhores Práticas
-
-### ✅ FAÇA
-
-- **Processe notas com >100 palavras** — Notas curtas geram poucos conceitos
-- **Use modelos poderosos** para uma melhor identificação de conceitos (GPT-4o, Claude)
-- **Revise antes de aceitar** — Verifique se os links sugeridos fazem sentido
-- **Construa de forma iterativa** — Processe 5-10 notas, revise o grafo, ajuste as configurações
-
-### ❌ NÃO FAÇA
-
-- **Excesso de links** — Nem todo substantivo precisa de um link
-- **Processe rascunhos repetidamente** — Os conceitos podem mudar, aguarde até que fiquem estáveis
-- **Ignore sinônimos** — Ative a supressão para evitar "ML" vs "Machine Learning"
+- Comparar origem e saída, incluindo citações, fórmulas e código.
+- Avaliar quais termos precisam de nota própria.
+- Testar prompts numa amostra estável.
+- Criar backup antes de mover fontes ou reescrever destinos.
 
 ## Desempenho
 
-### Velocidade
+Tempo e custo dependem de fornecedor, modelo, entrada, saída e tentativas. Não se prometem segundos por nota ou custo por cem notas. Medir uma amostra e consultar uso real.
 
-| Tamanho da Nota | GPT-4o-mini | Claude Sonnet | Ollama (local) |
-|-----------|-------------|---------------|----------------|
-| 500 palavras | 2-3 segundos | 3-5 segundos | 5-10 segundos |
-| 2000 palavras | 5-8 segundos | 10-15 segundos | 20-40 seg |
-| 5000+ palavras | Em blocos (várias chamadas) | Em blocos | Em blocos |
+## Problemas
 
-### Estimativa de Custo
+### Sem links
 
-**Exemplo: nota de 1000 palavras com GPT-4o-mini**
-- Entrada: ~1500 tokens
-- Saída: ~200 tokens
-- Custo: ~
+Verificar pedido, resposta, nota escolhida e saída real. Nenhum tamanho mínimo garante links úteis.
 
-**Processamento em lote de 100 notas:** ~
+### Links em excesso
 
-## Solução de problemas
+Restringir prompt ou domínio e rever. A orientação sobre equivalência não impõe vocabulário.
 
-### Nenhum link adicionado
+### Links quebrados após renomear
 
-**Verificar:**
-1. LLM A chamada foi bem-sucedida (Configurações → Diagnóstico)
-2. A nota tem conteúdo suficiente (>50 palavras)
-3. Os conceitos são técnicos/específicos (não apenas pronomes)
-
-**Tente:**
-- Use um modelo mais poderoso
-- Aumentar a janela de contexto
-- Verificar a validade da chave API
-
-### Muitos links
-
-**Soluções:**
-1. Aumentar o número mínimo de ocorrências (2 ou 3)
-2. Adicionar palavras comuns à lista de exclusão
-3. Use um modelo menos agressivo
-
-### Conceitos errados vinculados
-
-**Correções:**
-1. Use um prompt personalizado para especificidade de domínio
-2. Habilite a supressão de sinônimos
-3. Revise manualmente e desvincule
-
-### Os links quebram após renomear
-
-**Esse é um comportamento normal Obsidian.**
-
-Para atualizar todos os links:
-1. Renomeie a nota conceitual
-2. Obsidian atualiza automaticamente `[[old]]` → `[[new]]`
-
----
+Verificar atualização de links do Obsidian e ambiguidade anterior. Reparar o destino deliberadamente; repetir LLM não é reparação determinista.
 
 ## Próximos passos
 
-- 📖 [Notas Conceituais](./concept-notes) — Análise aprofundada da geração de notas conceituais
-- 🔍 [Integração de Pesquisa](./research) — Combine vinculação com pesquisa na web
-- 🎨 [Diagramas](./diagrams) — Visualize seu grafo de conhecimento
+- [Conceitos](./concept-notes).
+- [Fluxos](./workflows).
+- [Prompts](../advanced/custom-prompts).

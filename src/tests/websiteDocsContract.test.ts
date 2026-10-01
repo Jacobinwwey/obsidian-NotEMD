@@ -1,7 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { createRequire } from 'module';
 
 const matter = require('gray-matter');
+const requireScript = createRequire(__filename);
+const { assertReviewedDocument } = requireScript('../../website/scripts/audit-build.cjs');
 
 type PublishedDocumentationLocale = {
     locale: string;
@@ -94,6 +97,7 @@ describe('website documentation contract', () => {
         'utf8'
     ));
     const publishedLocaleContract = loadPublishedLocaleContract(websiteRoot);
+    const sourceReview = JSON.parse(fs.readFileSync(path.join(websiteRoot, 'i18n', 'source-review.json'), 'utf8'));
     const localizedLocales = publishedLocaleContract.documentationLocales.map(({ locale }) => locale);
     const localizedFillerMarkers = [
         '这一部分解释产品行为',
@@ -128,8 +132,12 @@ describe('website documentation contract', () => {
 
         expect(englishIntro).toContain('Diagram Capability Direction');
         expect(chineseIntro).toMatch(/图表.*方向/);
-        expect(englishIntro).toContain('Notemd vs Other Obsidian AI Plugins');
-        expect(chineseIntro).toContain('Notemd 与其他 Obsidian AI 插件对比');
+        for (const content of [englishIntro, chineseIntro]) {
+            expect(content).toContain('{#notemd-vs-other-obsidian-ai-plugins}');
+            for (const route of ['./getting-started/quick-start', './features/workflows', './developers/overview', './agents/overview']) {
+                expect(content).toContain(`](${route})`);
+            }
+        }
 
         for (const content of [englishIntro, chineseIntro]) {
             expect(content).toContain('DiagramSpec');
@@ -231,6 +239,15 @@ describe('website documentation contract', () => {
         }
     });
 
+    test('localized navigation preserves the logo identity for screen readers', () => {
+        for (const locale of localizedLocales) {
+            const navigation = JSON.parse(fs.readFileSync(path.join(
+                websiteRoot, 'i18n', locale, 'docusaurus-theme-classic', 'navbar.json'
+            ), 'utf8'));
+            expect(navigation['logo.alt']?.message).toMatch(/notemd/i);
+        }
+    });
+
     test('all localized docs mirror English heading structure without generated filler or placeholder leakage', () => {
         const docsRoot = path.join(websiteRoot, 'docs');
 
@@ -250,6 +267,7 @@ describe('website documentation contract', () => {
                 );
                 const localizedContent = fs.readFileSync(localizedPath, 'utf8');
 
+                assertReviewedDocument(englishContent, localizedContent, sourceReview.locales?.[locale]?.[sourcePath], `${locale}/${sourcePath}`);
                 expect(() => matter(localizedContent)).not.toThrow();
                 expect(markdownHeadingLevels(localizedContent)).toEqual(expectedHeadingLevels);
                 expect(localizedContent).not.toMatch(placeholderPollutionPattern);

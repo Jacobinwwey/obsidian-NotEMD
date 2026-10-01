@@ -1,134 +1,90 @@
 ---
 id: custom-prompts
-title: "Các mẫu yêu cầu tùy chỉnh"
-description: "Tùy chỉnh các mẫu yêu cầu LLM theo nhu cầu của bạn"
+title: Lời nhắc tùy chỉnh
+description: >-
+  Thay lời nhắc tác vụ được hỗ trợ mà vẫn giữ định dạng đầu ra mà bộ xử lý yêu
+  cầu.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [custom prompts, prompts, focused learning, domain]
-concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: LLM Prompt Engineering
-    url: https://platform.openai.com/docs/guides/prompt-engineering
+keywords:
+  - Lời nhắc tùy chỉnh
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Các mẫu yêu cầu tùy chỉnh
+# Lời nhắc tùy chỉnh
 
-<TLDR>
-**Notemd cho phép bạn thay thế mẫu yêu cầu mặc định LLM cho mọi loại nhiệm vụ.** Các mẫu yêu cầu tùy chỉnh giúp bạn kiểm soát những gì mô hình ưu tiên: bạn có thể giới hạn việc trích xuất khái niệm trong một lĩnh vực cụ thể, thay đổi phong cách liên kết, hoặc điều chỉnh giọng văn dịch thuật. Các biến mẫu như `{{content}}` và `{{concept}}` sẽ được thay thế tại thời điểm chạy. Tính năng lĩnh vực học tập tập trung sẽ đặt trước tên lĩnh vực nghiên cứu của bạn để tự động giới hạn kết quả trích xuất.
-
-Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Lời nhắc tùy chỉnh thay lời nhắc tích hợp khi công tắc chung và công tắc tác vụ đều bật, đồng thời nội dung không trống. Bạn phải giữ hợp đồng đầu ra. Không có hệ thống mẫu tự khôi phục mọi chỉ dẫn định dạng bị bỏ sót.</TLDR>
 
 ## Tổng quan
 
-Các mẫu yêu cầu có sẵn của Notemd được viết cho công việc kiến thức tổng quát. Chúng hoạt động tốt trên nhiều lĩnh vực, nhưng vẫn còn chỗ để cải thiện theo từng lĩnh vực cụ thể. Các mẫu yêu cầu tùy chỉnh cho phép bạn chỉ định rõ cho LLM cách hoạt động phù hợp với trường hợp sử dụng của mình – dù đó là chỉ trích xuất thuật ngữ y tế, chỉ liên kết các thực thể có tên, hay dịch thuật theo phong cách trang trọng.
+Thử lời nhắc mặc định trên mẫu đại diện trước. Dùng học tập có trọng tâm hoặc hạn chế đồng nghĩa nếu đủ giải quyết vấn đề. Tùy chỉnh khi cần chính sách trích xuất, cấu trúc hoặc văn phong dịch cụ thể; so kết quả trước khi chạy hàng loạt.
 
-Các mẫu yêu cầu tùy chỉnh không thay thế toàn bộ mẫu yêu cầu hệ thống. Chúng sẽ thay thế hoặc bổ sung phần **hướng dẫn riêng cho từng nhiệm vụ** trong khi vẫn giữ nguyên định dạng kết quả cấu trúc (ví dụ: các dòng `CONCEPT:`, cú pháp liên kết wiki) mà Notemd dựa vào để phân tích.
+## Cách hoạt động
 
-## Cách thức hoạt động
+### Cấu trúc lời nhắc
 
-### Kiến trúc mẫu yêu cầu
+Notemd chọn lời nhắc tích hợp hoặc tùy chỉnh đã bật, thêm chỉ dẫn trọng tâm/ngôn ngữ phù hợp rồi thay các biến mà tác vụ cung cấp. Nội dung ghi chú còn có thể nằm trong thông điệp riêng. Đầu vào khác nhau theo tác vụ; biến của nghiên cứu không tự có ở mọi nơi.
 
-Mỗi nhiệm vụ Notemd đều tuân theo cùng một cấu trúc mẫu yêu cầu:
+Thay lời nhắc trích xuất có thể làm mất `CONCEPT:`. Thay lời nhắc nghiên cứu có thể bỏ ngữ cảnh truy xuất. Yêu cầu hợp lệ không chứng minh kết quả phân tích được hoặc có nguồn hỗ trợ.
 
-```
-[System role: You are a helpful assistant...]
-[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
-[Custom task prompt]                                <-- your override (optional)
-[Output format instructions]                        <-- always preserved
-[Content: {{content}}]                              <-- runtime substitution
-```
+### Biến lời nhắc
 
-1. **Mẫu yêu cầu hệ thống cơ bản** -- Đặt vai trò của trợ lý. Không thể thay thế.
-2. **Lĩnh vực học tập tập trung** -- Đặt trước `Relevant Fields: [medicine / law / computer science / ...]` để giới hạn phạm vi. Đây là tùy chọn thiết lập, không phải mẫu yêu cầu nguyên thủy.
-3. **Mẫu yêu cầu nhiệm vụ tùy chỉnh** -- Thay thế các hướng dẫn nhiệm vụ mặc định (ví dụ: loại khái niệm nào cần trích xuất, mức độ liên kết mạnh như thế nào).
-4. **Định dạng kết quả** -- Các quy tắc cấu trúc (các dòng `CONCEPT:`, định dạng liên kết wiki). Luôn được Notemd thêm vào cuối để đảm bảo khả năng phân tích.
-5. **Nội dung** -- Văn bản ghi chú thực tế, được thay thế tại thời điểm chạy thông qua `{{content}}`.
+Dùng đúng tên viết hoa và một cặp ngoặc nhọn:
 
-### Các biến mẫu yêu cầu
+| Tác vụ | Biến được cung cấp |
+| ------ | ----------------------- |
+| Sinh theo tiêu đề | `{TITLE}`, `{RESEARCH_CONTEXT_SECTION}` |
+| Tóm tắt nghiên cứu | `{TOPIC}`, `{LANGUAGE}`, `{SEARCH_RESULTS_CONTEXT}` |
+| Dịch | `{LANGUAGE}`, `{TEXT}` |
+| Trích nguyên văn | `{REFERENCE_CONTENT}`, `{USER_INPUT}` |
 
-Các biến sẽ được thay thế khi thực thi. Các biến có sẵn khác nhau tùy theo nhiệm vụ:
+`{LANGUAGE}` được giải theo chính sách ngôn ngữ của tác vụ. Thêm liên kết và trích khái niệm độc lập gửi văn bản dưới dạng nội dung tác vụ; không tự đặt biến nội dung cho chúng. Tên không biết không tự được điền. Đây là thay thế trong lời nhắc, không phải mẫu tệp ghi chú khái niệm.
 
-| Biến | Các nhiệm vụ | Đã thay thế bằng |
-|----------|-------|---------------|
-| `{{content}}` | Tất cả | Văn bản ghi chú hoặc văn bản được chọn |
-| `{{concept}}` | Mẫu ghi chú ý tưởng | Tên ý tưởng đã trích xuất |
-| `{{description}}` | Mẫu ghi chú ý tưởng | Mô tả ý tưởng được tạo ra bởi LLM |
-| `{{backlinks}}` | Mẫu ghi chú ý tưởng | Danh sách các ghi chú nguồn kèm liên kết |
-| `{{date}}` | Mẫu ghi chú ý tưởng | Ngày hiện tại (YYYY-MM-DD) |
-| `{{language}}` | Dịch thuật | Ngôn ngữ đầu ra mục tiêu |
-| `{{source}}` | Mẫu ghi chú ý tưởng | Tên tệp gốc của ghi chú |
+### Lĩnh vực học tập có trọng tâm
 
-### Lĩnh vực học tập tập trung
-
-Tính năng học tập tập trung là một cách tắt để xác định phạm vi lĩnh vực. Thay vì viết một mẫu yêu cầu tùy chỉnh ghi rõ lĩnh vực của bạn, bạn chỉ cần thiết lập `focusedLearningDomain` trong cài đặt:
-
-```
-Settings → Advanced → Focused Learning Domain
-Example: "medicine" or "computer science" or "Chinese philosophy"
-```
-
-Điều này sẽ thêm `Relevant Fields: [medicine]` vào mẫu yêu cầu trích xuất, khiến LLM ưu tiên các khái niệm liên quan đến lĩnh vực và loại bỏ những khái niệm chung. Phương pháp này nhẹ hơn so với mẫu yêu cầu tùy chỉnh đầy đủ và hoạt động được trên mọi nhiệm vụ trích xuất.
+Bật học tập có trọng tâm và nhập lĩnh vực, chẳng hạn `electrical engineering`. Lời nhắc nhận chỉ dẫn `Relevant Fields`. Nó hướng sự chú ý của mô hình, không phải bộ lọc cứng hay bằng chứng rằng khái niệm ngoài lĩnh vực sẽ bị loại.
 
 ## Cấu hình
 
-| Thiết lập | Mặc định | Tác động |
-|---------|---------|--------|
-| `customAddLinksPrompt` | `''` | Đặt lại mẫu yêu cầu nhiệm vụ thêm liên kết mặc định |
-| `customExtractConceptsPrompt` | `''` | Đặt lại mẫu yêu cầu trích xuất khái niệm mặc định |
-| `customResearchPrompt` | `''` | Đặt lại mẫu yêu cầu nghiên cứu + tóm tắt mặc định |
-| `customTranslatePrompt` | `''` | Đặt lại mẫu yêu cầu dịch thuật mặc định |
-| `customDiagramPrompt` | `''` | Đặt lại mẫu yêu cầu tạo sơ đồ mặc định |
-| `focusedLearningDomain` | `''` | Thêm bối cảnh lĩnh vực vào các mẫu yêu cầu trích xuất và liên kết |
-| `extractConceptsMinimalTemplate` | `true` | Sử dụng mẫu ghi chú khái niệm chỉ chứa tiêu đề (ảnh hưởng đến phạm vi mẫu `{{concept}}`) |
-| `customConceptNoteTemplate` | `''` | Đặt lại mẫu tệp ghi chú khái niệm với khả năng hỗ trợ biến đầy đủ |
+| Tác vụ | Công tắc bật | Trường lời nhắc |
+| ------ | --------------- | -------------- |
+| Thêm liên kết | `useCustomPromptForAddLinks` | `customPromptAddLinks` |
+| Sinh theo tiêu đề | `useCustomPromptForGenerateTitle` | `customPromptGenerateTitle` |
+| Tóm tắt nghiên cứu | `useCustomPromptForResearchSummarize` | `customPromptResearchSummarize` |
+| Tóm tắt Mermaid | `useCustomPromptForSummarizeToMermaid` | `customPromptSummarizeToMermaid` |
+| Trích xuất khái niệm | `useCustomPromptForExtractConcepts` | `customPromptExtractConcepts` |
+| Dịch | `useCustomPromptForTranslate` | `translatePrompt` |
+| Trích nguyên văn | `useCustomPromptForExtractOriginalText` | `customPromptExtractOriginalText` |
 
-**Khi trường mẫu yêu cầu tùy chỉnh trống, mẫu yêu cầu mặc định sẽ được sử dụng.**
+Tất cả cần `enableGlobalCustomPrompts`. Lời nhắc tùy chỉnh rỗng dùng lại mặc định. Trích nguyên văn dạng gộp có định dạng tích hợp riêng và không dùng ghi đè thông thường. Sinh sơ đồ có yêu cầu đầu ra có kiểu riêng; ghi đè tóm tắt Mermaid không phải lời nhắc chung cho mọi sơ đồ.
 
 ## Ví dụ
 
-Bạn là nhà nghiên cứu y học đang trích xuất các khái niệm từ ghi chú thử nghiệm lâm sàng. Mẫu yêu cầu mặc định sẽ trích xuất cả các danh từ chung lẫn thuật ngữ y khoa, khiến thư mục khái niệm của bạn bị lộn xộn.
+Với ghi chú mạch điện, bật công tắc chung và trích khái niệm, rồi dùng chỉ dẫn giữ hợp đồng bộ phân tích:
 
-**Giải pháp:** Thiết lập một lĩnh vực học tập tập trung và một mẫu yêu cầu trích xuất tùy chỉnh.
-
-1. Đặt `focusedLearningDomain` thành `medicine`
-2. Đặt `customExtractConceptsPrompt` thành:
-
-```
-Extract only clinically relevant concepts: diseases, drug names,
-anatomical terms, measurement endpoints, and statistical methods.
-Ignore generic English nouns, brand names, and institutional names.
-Prioritize MeSH terminology where applicable.
+```text
+Trích xuất các khái niệm kỹ thuật điện cốt lõi từ ghi chú được cung cấp.
+Ưu tiên tên linh kiện cụ thể và cơ chế vật lý hơn danh từ chung.
+Mỗi dòng trả về một khái niệm theo đúng định dạng:
+CONCEPT: Tên thuật ngữ
+Không thêm giải thích hoặc bọc kết quả trong khối mã.
 ```
 
-Khi bạn chạy lệnh "Extract concepts" trên một ghi chú lâm sàng, LLM sẽ tạo ra:
+Chạy trên bản sao. Kiểm tra các mục, tên tệp và khái niệm thiếu rồi so với lời nhắc mặc định. Giữ bản gốc trước khi sửa để có thể khôi phục.
 
-```
-CONCEPT: Randomized Controlled Trial
-CONCEPT: Double-Blind Method
-CONCEPT: Myocardial Infarction
-CONCEPT: Creatine Kinase-MB
-CONCEPT: Kaplan-Meier Estimate
-```
+## Gợi ý
 
-Thay vì hành vi mặc định có thể trích xuất những thuật ngữ chung không mong muốn như "hospital" hoặc "month".
+- Thử từng tác vụ; điều chỉnh phạm vi trước khi tăng số tệp.
+- Giữ bằng chứng nguồn trong lời nhắc nghiên cứu và nguyên văn chính xác trong trích xuất.
+- Giữ định danh và dấu đầu ra bắt buộc khi dịch phần chỉ dẫn.
+- Kiểm tra lại sau khi đổi mô hình hoặc nhà cung cấp; chỉ dẫn không phải bảo đảm xác thực.
 
-## Mẹo
+## Tiếp theo
 
-- **Hãy bắt đầu với lĩnh vực học tập cụ thể** trước khi viết một mẫu yêu cầu tùy chỉnh đầy đủ. Cách này có thể đáp ứng 80% các trường hợp sử dụng chỉ với một thiết lập duy nhất.
-- **Giữ nguyên định dạng kết quả** -- Đừng bao giờ xóa các hướng dẫn về định dạng như "mỗi dòng một mục" hoặc "CONCEPT: prefix" khỏi các mẫu yêu cầu tùy chỉnh. Bộ phân tích của Notemd phụ thuộc vào chúng.
-- **Thử nghiệm với một ghi chú duy nhất trước** -- Các mẫu yêu cầu tùy chỉnh có thể gây ra những tác động bất ngờ đối với phạm vi trích xuất. Hãy kiểm tra trên một ghi chú trước khi xử lý theo nhóm.
-- **Giữ cho các mẫu yêu cầu ngắn gọn** -- Các mẫu yêu cầu quá dài sẽ tiêu tốn token và có thể làm giảm mức độ tập trung của mô hình.
-
----
-
-## Các bước tiếp theo
-
-- [Wiki-Links](/docs/features/wiki-links) -- Những gì sẽ được liên kết khi bạn tùy chỉnh mẫu yêu cầu add-links
-- [Concept Notes](/docs/features/concept-notes) -- Các mẫu ghi chú khái niệm và biến `{{concept}}`
-- [Batch Processing](/docs/advanced/batch-processing) -- Áp dụng các mẫu yêu cầu tùy chỉnh cho toàn bộ thư mục
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Khắc phục các vấn đề khi các mẫu yêu cầu tùy chỉnh tạo ra kết quả bất ngờ
+- [Ghi chú khái niệm](../features/concept-notes): mẫu tệp hỗ trợ.
+- [Nghiên cứu](../features/research): thu thập ngữ cảnh và xem nguồn.
+- [Dịch](../features/translation): ngôn ngữ và xử lý đầu ra.
+- [Khắc phục sự cố](./troubleshooting): phản hồi sai định dạng hoặc rỗng.

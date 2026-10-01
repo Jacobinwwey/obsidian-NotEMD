@@ -1,184 +1,115 @@
 ---
 id: concept-notes
-title: "Kontekstitietoiset tiedot"
-description: "Luo ja hallita konseptitietoja – eraldiseiset tiedot tärkeistästä konseptista, jotka on poistettu sinun avarastostasi"
+title: Käsitemuistiinpanot
+description: >-
+  Poimi käsitteet valittuun kansioon ja tarkista mallipohjat, paluulinkit ja
+  kaksoiskappaleet.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - Käsitemuistiinpanot
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Kontekstitietoiset tiedot
+# Käsitemuistiinpanot
 
-<TLDR>
-**Notemd poistaa tärkeimmät käsitteet sinun notioistasi ja luoo itsenäiset käsitteennottojen tiedostot.** LLM tunnistaa keskeiset terminit, luo yhden `.md` -tiedoston jokaiselle käsiteelle konfiguroitavassa kaustassa ja voitiin lisätä taaslinkkejä lähtönotkoon. Se toetaa samasanojen poistamista, tehtävittäistä mallin valintaa, tiedostonimien puhastusta sekä 4-vaiheisen duplikaatien poistamisen mekanismia. Tämä on osa [Obsidian AI-tietojen hallinnan ohjeesta](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Erillinen poiminta lukee lähteen ja luo Markdown-käsitteet valittuun kansioon. Kansiota ei ole aluksi määritetty. Uusissa muistiinpanoissa on vain otsikko eikä paluulinkkiä. Linkkien lisäys käyttää eri käsitemuotoa.</TLDR>
 
-## Yleenvaate
+## Yleiskuva
 
-Kontekstitietoiset ovat yhdistyvän tietotekon rakentuskiveet. Kun sinulla on käsiteltävä tieto, Notemd:
+Määritä ensin **Concept note folder path**. Erillinen kansio helpottaa tuotosten, kaksoiskappaleiden ja myöhemmän otsikkogeneroinnin tarkistusta. Poiminta ei automaattisesti täytä tiedostoja tutkituilla selityksillä.
 
-1. **Lähetää sinun tekstisi LLM:lle** strukturoituun extraktiokysymykseen
-2. **Tarkistaa `CONCEPT:` rivit** LLM vastauksista
-3. **Luo yhden `.md`-failin jokaiselle konseptille** määritellyttyssä kaustassa
-4. **Lisää taaslinkkejä** lähteetietoon (jos aktivoitu)
+## Toiminta
 
-## Kuidas se toimii
+### Poiminta
 
-### Extraktio-pipeline
+Valittu LLM vastaanottaa tekstin. Tehtävä tulkitsee `CONCEPT:`-rivit, poistaa toistuvat nimet ajon sisällä ja luo tai päivittää tiedostot. Pitkät tekstit jaetaan. Tarkista epäonnistuneet osat; vastaus ei ole täydellinen käsiteinventaario.
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### Poimintakehote
 
-### Extraktointi-ohje
+Oletus pyytää konkreettisia olennaisia käsitteitä. Aihealue- ja synonyymiohje eivät takaa vakiintunutta sanastoa. Säilytä omassa kehotteessa `CONCEPT: Term`. [Kehotteet](../advanced/custom-prompts).
 
-LLM saa käskyn, joka ohjelee sitä toimimaan seuraavasti:
+### Tekstiosat
 
-- Eritä dokumentin teeman keskeiset **nimissä ovat tai nimisanojen lauseet**
-- **Eritellävyys on prioriteetti** — “Dielectric Relaxation” sijaan “Relaxation”
-- **Normaloi yksilöön** — “models” muuttuu “model”-iksi
-- **Suppress sub-conceptit** — jos ilmenee “dielectric relaxation”, älä löydy kauppaa “relaxation”-sta
-- **Jätä pois** viite-/bibliografiakohdat, yleiset nimet, yritysten/tuotteiden nimet
-- Luo yksi käsite rivillä kuten `CONCEPT: Term Name`
+`chunkWordCount` on aluksi noin 3000 sanaa, ei tarjoajan tokenbudjetti. Osarajojen yli näkyvä konteksti on rajattu; tarkista suhteet ja monitulkintaiset nimet.
 
-**Synonyymien poistaminen** (valinta): lisätään pyyntöön alkuun "Vältä synonyymien, semantisesti sarnain pääkäsiteiden tai avainasemien poistamista mahdollisimman aikaa".
+## Tiedostojen luonti
 
-**Keskittyvä oppimisalue** (valinta): lisätään `Relevant Fields: [domain]` alkuun, jotta poistaminen rajoitetaan tiettyyn alueeseen.
+### Nimet
 
-**Kielin asettaminen** (valinta): lisätään lopuun "Lähtökäsitteet PEUVAT olla [kielessä]."
+Virheelliset polkumerkit poistetaan, välilyönnit normalisoidaan ja pitkät nimet lyhennetään; tyhjät ohitetaan. Eri termeistä voi näin tulla sama polku. Tarkista nimet ennen suurta ajoa.
 
-### Osien jakaminen
+### Mallipohjat
 
-Pikat tiedot jakataan `settings.chunkWordCount` avulla. Jokainen osa lähetetään erikseen. Kaikista osista saatuja käsiteitä kerätään `Set` – duplikaatit osien välillä poistetaan vaikuttamatta muihin. LLM virheet yksittäisissä osissa ei estä toimintaa.
-
-## Käsitteiden notoinnin luominen
-
-### Failin nimen sääntöket
-
-| Sääntö | Toiminta |
-|------|----------|
-| Kosketus-/alakosketukset | Asennetaan tilanteeseen tilat |
-| Eriomaiset merkit | Poistetaan: taaskosketus, eduskosketus, kulkuristi, tähertähti, kysymysmärki, quoteit, nurkkikorvot, toru, hasi, virvokkeus, sulkeutuvat korvot |
-| Tily | Sulkeaan ja poistetaan tilat |
-| Maksimipikkus | 100 kirjoa (piirrettynä + uudelleen poistettuna) |
-| Tyhjä/kokonaan tilapisteet sisältävä tulos | Vaikuttamattomasti poistetaan |
-
-Esimerkki: `A-B: Key*Term` muutuu `A B KeyTerm.md`
-
-### Mallit
-
-**Täysin malli** (palautuslinkit aktivoituja, minimaalinen malli poistettu):
+Uuden tiedoston suppea muoto:
 
 ```markdown
-# Concept Name
+# Käsitteen nimi
+```
+
+Uuden erillisen tiedoston paluulinkkiä varten ota **Add "Linked From" backlink** käyttöön ja poista **Create minimal concept notes** käytöstä:
+
+```markdown
+# Käsitteen nimi
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Lähdemuistiinpano]]
 ```
 
-**Minimaalinen malli** (kun `extractConceptsMinimalTemplate: true` on):
+Linkkien lisäys luo täyden muodon lähdeviitteineen, kun käsitetulokset ovat käytössä. Erillisen poiminnan kytkimet eivät muuta tätä reittiä.
 
-```markdown
-# Concept Name
-```
+### Olemassa olevat tiedostot
 
-### Olemassa olevien merkintöjen päivitys
+Kun paluulinkit ovat käytössä, puuttuva lähdeviite voidaan lisätä `## Linked From` -osioon. Nykyinen teksti säilyy eikä sama paluulinkki toistu. Lähteen perusnimi voi olla epäselvä eri kansioiden samannimisille tiedostoille.
 
-Kun konsepttipalkki on juba olemassa:
+### Asetukset
 
-1. Jos palautuslinkit ovat aktivoituja ja lähtömerkintä ei ole jo listattu, lisätään palautuslinkki
-2. Jos `## Linked From`-osio on olemassa, se lisätään ennen seuraavaa `##`-ohjeen
-3. Jos ei ole `## Linked From`, osio lisätään lopuun
-4. Kertomuksetta samat palautuslinkit kontrolloidaan ja poistetaan
+| Asetus | Alkuarvo | Vaikutus |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | Käsitetulokset kansion valinnan jälkeen |
+| `conceptNoteFolder` | `''` | Kansiota ei ole asetettu |
+| `extractConceptsMinimalTemplate` | `true` | Erillisiin käsitteisiin vain otsikko |
+| `extractConceptsAddBacklink` | `false` | Paluulinkit erillisessä poiminnassa |
+| `extractConceptsProvider` | `DeepSeek` | Tarjoaja tehtäväkohtaisessa reitityksessä |
+| `extractConceptsModel` | `''` | Tyhjä käyttää tarjoajan mallia |
+| `extractConceptsLanguage` | `en` | Tehtäväkohtainen kieli |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Synonyymejä rajoittava ohje |
+| `generateConceptLogFile` | `false` | Valinnainen käsiteloki |
 
-### Konfigurointi
+## Kaksoiskappaleet
 
-| Asetus | Omistusasetus | Vaikutus |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | Päävalinta. Poissa = ei luoda merkintöjä |
-| `conceptNoteFolder` | `''` (poistettu) | Konseptitietojen kansiopath |
-| `extractConceptsMinimalTemplate` | `true` | Ainoastaan nimet – ei Linked From -tietoa |
-| `extractConceptsAddBacklink` | `false` | Lisää palautuslinkkejä yksityisen extraktionin aikana |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Konseptien extraktionin jokaiselle tehtävälle LLM |
-| `extractConceptsLanguage` | `'en'` | Konseptinimien välittömä kieli |
-| `replaceSynonymsDuringConceptExtraction` | `false` | Aktivoi sanonyhden estö ohjeessa |
-| `generateConceptLogFile` | `false` | Kirjoita `.log` -luettelo luodutista konseptista |
+Tarkistus käyttää tiedostonimiheuristiikkaa: kirjainkoko, monikko, symbolien normalisointi ja sallituissa tapauksissa yhden sanan sisältyminen toiseen nimeen. Tämä ei todista merkitysten yhtäläisyyttä. Tarkista poikkeavat taivutukset ja tekniset erot. Käy **Check & remove duplicates** läpi ja hyväksy vain tarkoitettu poistaminen. Obsidian hoitaa roskakoriin siirron. Käsitekansio ei ole kertakäyttöinen välimuisti; varmuuskopioi se.
 
-**Tärkeää:** `extractConceptsAddBacklink` - ja `extractConceptsMinimalTemplate` -asetukset vaikuttavat vain **erityiseen extraktiokomentoihin**. Komento "Lisää linkkejä" luostaa aina täysin mallilla varustetut tiedot palautuslinkkeillä.
+### Vertailualue
 
-## Deduplikointi
-
-Dedup -komento (`Notemd: Check & remove duplicate concept notes`) käyttää 5-vaiheista analyysiä:
-
-### Vaihe 1: Täpäinen tiedostonnimen sopimukset
-
-Olkotunnistuseta nimenosan vertailu konfiguroituun ulottuvuuteen.
-
-### Vaihe 2: Monimuotojen tunnistaminen
-
-Poistetaan lopulliset säännöt: `-ies` tilaa `-y`, `-es` poistetaan, `-s` poistetaan. Verrataan yksilömuoto ulottuvuuskansioihin. Ei käsitle epäregulaireja monimuotoja (children/child).
-
-### Vaihe 3: Symbolien normalointi
-
-Soveltuu: `toLowerCase()`, aseta hyphenit/alustakohdat tilaan, poista epänumerolliset merkit, yhdistä tühjät tilat. Merkitetään ne, jotka normaloidaan samalla tavalla.
-
-### Vaihe 4: Yksikössä sanojen sisältö
-
-Yksikössä sanoista koettavat tiedot kontrolloidaan yhteen sanoista koostuvien skopeen tiedostojen nimien vastaan. Tämä vaihe ei käytetä, kun skopee on `concept_folder_only`.
-
-### Vaihe 5: Vahvistus ja poistaminen
-
-Kaikki kandidaatit näytetään vahvistusmodaalissa. Hyväksytty tiedot siirretään systeemin prümmiin. Toiminta saa poisteta jokaisen poistamisen välillä.
-
-### Skopeen režimit
-
-| Režimi | Verrattava |
-|------|-------------------|
-| `vault` (omistusasetus) | Kaikki varaston `.md` -tiedostot, jotka eivät ole konseptikokoja |
-| `concept_folder_only` | Muiet konseptitiedot samassa kohdassa |
-| `include` | Tiedostot specificoiduissa listattuissa kohdissa |
-| `exclude` | Kaikki varaston tiedostot, jotka eivät ole konseptikokoja + listattuja kohdoja |
+Vertaa holviin, käsitekansioon, sisällytettyihin kansioihin tai rajaukseen poissulkuineen. Rajaus muuttaa ehdokkaita, ei kaksoiskappaleen merkitystä.
 
 ## Käyttö
 
-### Konsepttien poistaminen (ytsestä)
+### Erillinen poiminta
 
-1. Avaa tiedon
-2. Käynnista **"Notemd: Extract concepts"** komentopalvelustosta
-3. Konseptitiedot luodut konfiguroituun kohdaan
+Avaa Markdown, tarkista kansio ja valitse **Extract concepts (current file)**. Lähde säilyy. Tarkista nimet, kattavuus ja paluulinkit.
 
-### Sisällön extraktointi + luonto
+### Poiminta ja sisältö
 
-**"Notemd: Eritä konseptit ja luoda otsikkeet"** – se eritää konsepttejä, sitten käyttää toimintaa "Generate from Title" kaikille märkintöille konsepttien kansioissa. Tämä luostaa sisältö **kaikille** kansiossa oleville konsepttimärkintöille, ei vain uusia.
+**Batch generate from titles** täydentää käsitteitä, mutta voi ottaa mukaan aiempia sopivia muistiinpanoja. Tarkista kansio ennen ajoa ja raportoitu complete-kansio jälkeen.
 
-### Luo Wikipedia-linkki valinnasta
+### Linkki valinnasta
 
-1. Esitä teksti muokkikoneessa
-2. Käytä **"Notemd: Luo wiki-linkki valituista"**
-3. Teksti on sulkeutunut `[[...]]` ja luodetaan käsitelunnotto
+Valintatoiminto tekee valitusta termistä wiki-linkin ja voi luoda käsitetiedoston määritettyyn kohteeseen. Näin päätät termin itse.
 
 ## Vinkit
 
-- **Aseta ensin konseptikansiola** — ilman sitä ei luoda mitään merkintöjä. Jos se ei ole asetettu, ilmenee varoitusmodaalikenttä.
-- **Käytä tehtävän mukaisia modeleja** – käsitteiden extraktio toimii hyvin halvempien modellien (GPT-4o-mini, DeepSeek) avulla. Säästä kalleita modeleja tutkimuksille/tulkinnalle.
-- **Aktivoi sanonyksyjen poistaminen** teknisissä alueissa, joissa useat terminit viitovat samalle käytäntöön.
-- **Poistaa duplikaat regulaarisesti** — käytä dedup-komentoa puhelupalvelun käsittelyn jälkeen, jotta löydät lähellisiä duplikaateja.
-- **Logifaili kirjoitetaan uudelleen** jokaisen käynnistyskerran aikana, se ei liitetä. Kopioi se, jos sinun on tarpeen aiemmat tulokset.
+- Pieni lähde ja erillinen kansio.
+- Valitse kieli ennen massaluontia.
+- Arvioi synonyymit ja kaksoiskappaleet erikseen.
+- Säilytä tarpeelliset lokit ennen korvaavaa ajoa.
 
----
+## Seuraavaksi
 
-## Järguvät toimet
-
-- [Wiki-Linkit](./wiki-links) — Kuidas käsitelut yhdistetään sisällöön
-- [Diagrammit](./diagrams) — Kuvasta konsepttien suhteet
-- [Workflows](./workflows) — Ahelman poistaminen muiden tehtävien kanssa
+- [Wiki-linkit](./wiki-links).
+- [Työnkulut](./workflows).
+- [Eräajo](../advanced/batch-processing).

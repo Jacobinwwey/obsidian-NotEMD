@@ -1,121 +1,87 @@
 ---
 id: batch-processing
-title: "Hromados feldolgozás"
-description: "Nagy számú fájlt hatékonyan feldolgozik"
+title: Kötegelt feldolgozás
+description: >-
+  Válasszon korlátozott mappát, és ismétlés előtt ellenőrizze a kimeneteket és
+  részleges teljesítést.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [batch processing, folders, concurrency, bulk operations]
-concepts: [Batch Processing, Concurrency, Folder Operations]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Node.js Worker Threads
-    url: https://nodejs.org/api/worker_threads.html
+keywords:
+  - Kötegelt feldolgozás
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Hromados feldolgozás
+# Kötegelt feldolgozás
 
-<TLDR>
-**Notemd egyetlen lépésben feldolgozza az összes mappát, és lehetővé teszi a konfigurálható egyidejű munkavégzést és az átírás kezelését.** Kattintson hajtókattintással egy mappára, hogy hromadilag hozzáadjon wiki-hivatkozásokat, kivegye a koncepteket, végezzen kutatást vagy fordítsa át az összes feljegyzést benne. A egyidejű munkavégzés korlátai megakadályozzák a API szintű határozati hibákat. A folyamat állapota az egyes fájlok alapján jelölik meg. Az átírás viselkedése konfigurálható: elhagyja a már létező fájlokat, csatlakoztatja őket vagy helyettesíti őket. A hibás fájlok bejegyezésre kerülnek, de a hromados feldolgozás nem leáll.
-
-Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>A mappaműveletek kiválasztást és folyamatjelzést osztanak meg, nem egységes felülírási politikát. Alapból egy feladat fut egyszerre. Próbáljon kis mappát, ellenőrizze a hatókört és célokat, majd növelje a köteget.</TLDR>
 
 ## Áttekintés
 
-A hromados feldolgozás egy mappában lévő feljegyzéseket egyetlen operációként átváltja. Nem kell az egyes feljegyzést nyitni és külön-külön parancsokat futtatni – kattintson hajtókattintással a mappára és válassza ki a munkát. Notemd átfogja minden `.md` fájlt, alkalmazza a kiválasztott műveletet és azonnal jelenti meg a folyamat állapotát.
+Panelből és fájlkezelőből indítható hivatkozás-, fogalom-, cím-, fordítás-, eredetirészlet-, Mermaid- és képletfeldolgozás. Általános önálló mappakutatás nincs; címgeneráláshoz adható kutatás. A köteg nem mappatranzakció: kész fájlok hiba vagy megszakítás után is maradnak.
 
-Ez a funkció fontos a teljes tároló szintű tudományos adatok kihozásához. Például, miután importálta többek között több PDF-t, a hromadilag hivatkozások hozzáadása után következően a konceptek hromadilag kivegtetése csak néhány perc alatt építi fel a tudományos grafikonát, nem órák alatt.
+## Működés
 
-## Hogyan működik
+### Végrehajtási modell
 
-### Hromados futtatási modell
+1. Válasszon feladatot és megfelelő fájlokat tartalmazó mappát.
+2. Kiterjesztések, kiválasztás és feladatspecifikus kimenetszűrők határozzák meg a jelölteket.
+3. A feladat saját szolgáltatójával/modelljével fut, állapotot, hibákat és útvonalakat jelent.
+4. Befejezés vagy megszakítás után ellenőrizze a jelentést és fájlokat az ismétlés előtt.
 
-```mermaid
-graph LR
-    A[Right-click Folder] --> B[Select Batch Task]
-    B --> C[Collect All .md Files]
-    C --> D[Partition by Concurrency]
-    D --> E[Execute Chunk in Parallel]
-    E --> F{All Files Done?}
-    F -->|No| G[Report Progress]
-    G --> E
-    F -->|Yes| H[Final Summary Toast]
-```
+A hivatkozások, fogalmak, címek, eredeti részletek, Mermaid és képletek alapból almappákat is bevonnak. **A mappafordítás alapból csak közvetlen gyermekfájlokat vesz figyelembe.** Fejlesztői mód és haladó kiválasztási profil módosíthatja ezt; ellenőrizze a tényleges találatokat.
 
-1. **Fájlok gyűjtése** – Notemd rekurszívül keresi át a célmappát (vagy csak a felső szintű fájlokat, attól függően a beállításoktól) és gyűjtözi össze az összes `.md` fájlt.
-2. **Egyidejű munkavégzés osztása** – A fájlok oszlokká válnak a `batchConcurrency` beállítás alapján. Minden oszlok egyidejűen fut; az oszlokok pedig sorrendben futnak.
-3. **Feldolgozás** – Az egyes fájlok feldolgozása azonos logikával történik, mint a egyetlen fájlra vonatkozó parancs esetében. A munka alapú fornincsok és a modell beállításai figyelembe vennék.
-4. **Folyamat jelentése** – Minden fájl lefuttatása után frissül egy üzenet, amely az `N / Total` folyamat állapotát mutatja be.
-5. **Hibák kezelése** – Ha egy fájl hibásul (API hiba, hálózati időkötés stb.), a hiba bejegyezésre kerül és a hromados feldolgozás továbbra is folytatódik. A végleges összefoglalásban listázhatók az összes hibás fájl.
-6. **Lezárás** – Egy összefoglaló üzenet jelenti meg a teljesen feldolgozott fájlok számát, a sikereket és a hibákat.
+### Felülírás
 
-### Üleírás elvényszerűlete
+| Feladat | Ismétlés előtti ellenőrzés |
+| ------ | ------------------------------------ |
+| Hivatkozások | Külön alap-kimenet; utótag, mappa és eredetiáthelyezés ellenőrzése |
+| Fogalmak | Engedélyezett visszahivatkozás kiegészíti a meglévőt; duplikátumkezelés külön |
+| Címgenerálás | Alkalmas forrást ír, és szabad complete cél esetén áthelyez |
+| Fordítás | Létező fordítást felülírhat; alapból `_<language>.md` |
+| Mermaid / képletek | A kiválasztott jegyzeteket módosítja; mentse és vizsgálja őket |
 
-Amikor folyamatozunk egy fájljal, amely már tartalmaz wiki-hivatkozásokat, konceptjelzéseket vagy fordításokat, Notemd elvényszerűlete attól függ, milyen üleírás beállítása van:
+Nincs általános kihagyás/hozzáfűzés/felülírás mód. Foglalt complete cél az áthelyezést akadályozza a címgenerálás után, nem az előző tartalomírást. A generált és áthelyezett darabszám külön érték.
 
-| Módszer | Elvényszerűlet |
-|------|----------|
-| **Elhagyás** | A meglévő tartalom megmarad. Csak az nem módosított fájlok folyamatoznak. |
-| **Hozzáadás** (alapértelmezett) | Új tartalom hozzáadódik. A meglévő wiki-hivatkozások, konceptek vagy fordítások megőriződnek. |
-| **Cserélés** | A fájl teljesen újra folyamatozik. Minden korábbi Notemd módosítása üleírásra kerül. |
+### Párhuzamosság
 
-Wiki-hivatkozások esetében: ha egy jelzés már tartalmaz `[[wiki-links]]`-t, az **elhagyás** módszer nem érinti meg azt, míg a **cserélés** módszer újra küldi az összes jelzést a LLM-hez, hogy új hivatkozások kerüljenek be. Inkrementális folyamatozásra használjuk az **elhagyás**-t, míg a modellek frissítése utáni újrafolyamatozásra az **cserélés**-t.
+Sikeres mintáig tartsa a `batchConcurrency: 1` értéket. Néhány útvonal `enableBatchParallelism` engedélyt is kér; mappafordítás közvetlenül használja a párhuzamosságot. Több egyidejű kérés nagyobb szolgáltatói, memória- és szerverterhelés, nem garantált gyorsulás. Időközök nem védenek minden kvótától vagy ugyanazon fiók más forgalmától.
 
-### Konkurenccsi kezelés
+## Beállítások
 
-A `batchConcurrency` beállítása korlátozza a paralel API kéréseket. Ez megakadályozza a sebességi korlát hibáit (HTTP 429) nagy mappák folyamatozásákor olyan szolgáltatókkal, akikkél szigorúak a korlátozásuk.
+| Beállítás | Alapérték | Hatás |
+| --------- | --------- | -------- |
+| `batchConcurrency` | `1` | Kért párhuzamosság a megfelelő útvonalakon |
+| `enableBatchParallelism` | `false` | Támogatott párhuzamos ütemezés engedélyezése |
+| `batchSize` | `50` | Csoportméret csoportos végrehajtáskor |
+| `batchInterDelayMs` | `1000` | Szünet ütemezett csoportok között |
+| `apiCallIntervalMs` | `500` | Egyidejű API-kérések közti idő |
+| `folderTaskIncludeSubfoldersMode` | `legacy` | Feladat saját almappaszabályainak megtartása |
+| `enableStableApiCall` | `false` | Kifejezetten bekapcsolható stabil kérésmód |
 
-| Konkurenccsi kezelés | Tajékoztatás | Tipikus sebességi korlát hatása |
-|-------------|----------------|---------------------------|
-| `1` | Inklúzív szintek, szigorú fornalmazók | Nincs (soros) |
-| `3` (alapértelmezett) | A legtöbb felhőforrás | Kisebb |
-| `5` | Ollama (lokal), nagyosztályú szintek | Nincs / Kisebb |
-| `10` | Hagyományos modellek gyors értékelésével | Nincs |
+### Feladatmodellek
 
-Ha batch feldolgozás során 429 hibák jelentek meg, csökkentsd a koncurrentitást 1 vagy 2-re.
+A mappa a megfelelő fájlművelet modelljét használja. Nézze át a privát adatútvonalakat. A címköteg helyi kontextusa induláskori közös pillanatképből keres; menet közbeni változás nem keveredik a későbbi lekérésekbe. Új tartalomhoz indítson új köteget.
 
-## Konfiguráció
+## Példa
 
-| Beállítás | Alapértelmezett | Hatás |
-|---------|---------|--------|
-| `batchConcurrency` | `3` | Maksimális paralel API kérések mappafeldolgozások során |
-| `batchOverwriteExisting` | `false` | Másolja le a meglévő Notemd tartalmat. `false` = csatlakoztatási módban. |
-| `batchSkipProcessed` | `false` | Elhagyja azokat a fájlokat, amelyek már tartalmaznak Notemd jelölőket (pl. wiki-hivatkozásokat) |
-| `batchRecursive` | `true` | Beolvasza a mappát ellenőrizetté váltva a alamappákat is. |
-| `enableStableApiCall` | `false` | Engedélyezze a újrapróbálási logikát (legfeljebb 4 körrel) az egyes fájlok esetén a batch művelet során |
+Hozzon létre `trial-titles` mappát két címes jegyzettel. Futtassa a **Batch generate from titles** műveletet, és nézze meg a tartalmat, szomszédos `trial-titles_complete` mappát és generált/áthelyezett/hibás számokat. Előbb a sikertelen fájlt vizsgálja. A forrásmappa újrafuttatása nem pontos automatikus folytatás.
 
-### Batch-ben lévő munkavégzési modellek
+## Megszakítás és helyreállítás
 
-Az egyes batch műveletek az igényes munkavégzési modellt használják. A batch-add-links `addLinksProvider`-t, a batch-research `researchProvider`-t stb. használ; ez azt jelenti, hogy lehetősége van használni olcsó modelleket nagy mennyiségű műveletekhez, és drágább modelleket pedig minőségre fontos munkáknak.
+A megszakítás új ütemezést és támogatott kéréseket állít le. Külső rendszerek elfogadott kérést/írást befejezhetnek; a számlázás szolgáltatói döntés. Várjon, hasonlítsa össze a kész fájlokat a helyreállítási/ütközési útvonalakkal, és csak ellenőrzés után takarítson.
 
-## példa
+## Javaslatok
 
-Olyan mappát tartozik, amely `papers/` néven van, és benne 40 importált kutatási jelentés van. Szüksége van wiki-hivatkozások hozzáadására és az összesükben lévő konceptek kihozására:
+- Nézze meg a profil tényleges kiválasztását.
+- 429 esetén csökkentsen párhuzamosságot és vizsgáljon kvótát.
+- Különböztesse meg a megszakadt, hibás és kész állapotot.
+- Tartson változatlan mintát és mentést.
 
-1. Jobb kattintson a `papers/` mappára
-2. Válassza ki **"Notemd: Process folder (add links)"**-t
-3. Notemd ellenőrzi a mappát, talál 40 `.md` fájlt, és kezel 3-at egyre (alapértelmezett konvergencia)
-4. Egy fejlépési üzenet mutatja meg: `12/40 files processed...`
-5. Körülbelül 3 perc után egy összefoglaló üzenet jelenti meg: `39 succeeded, 1 failed (API timeout on paper-37.md)`
-6. Ugyanazt tegye **"Notemd: Process folder (extract concepts)"**-vel, hogy az 40 fájlnak is konceptjelöltetése történjen
+## Tovább
 
-A nem sikerült fájl bejegyzésre kerül. Ezt a fájlt később újra lehet kezelni.
-
-## Tippek
-
-- **Kezdje alacsony konvergenciával** -- Ha nem biztos abban, milyen határok vannak a szolgáltatójaé, kezdje `1`-vel és növelje gradually.
-- **Használja a skip módot inkrementális frissítésekhez** -- A first teljes batch után váltson meg `batchSkipProcessed: true`-ra, így csak a új jelöltetések kezelődnek a következő futásokban.
-- **Engedélyezze a stabil API kéréseket** -- `enableStableApiCall: true` hozzáad egy újra próbálkozó logikát, amely helyreállítja a hosszú batchok során jelentkező áthajtó hibákat.
-- **Újra futtasson az újabb modell frissítésektől után** -- Ha egy jobb modellt használ, állítsa be `batchOverwriteExisting: true`-t és újra futtasson, hogy jobb hivatkozások és konceptek kapjon.
-
----
-
-## További lépések
-
-- [Workflows](/docs/features/workflows) -- Összekötje a batch munkákat egy kattintással elérhető sávoldali gombokká
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Szabályozza a batch extrakcióhoz szükséges promptokat
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Elszolgálja a rate-limit hibákat és a kapcsolati problémákat a batch futások során
-- [LLM Társadalmak](/docs/providers/overview) -- Munkaalapú modell konfigurációs referencia
+- [Munkafolyamatok](../features/workflows).
+- [Beállítások](../getting-started/configuration).
+- [Hibaelhárítás](./troubleshooting).

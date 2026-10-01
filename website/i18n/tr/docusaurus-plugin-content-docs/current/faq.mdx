@@ -1,359 +1,189 @@
 ---
 id: faq
-title: "Sık Sorulan Sorular"
-description: "Notemd'in kurulumu, özellikleri ve kullanımıyla ilgili yaygın sorular"
-keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes, Copilot alternative, Smart Connections alternative, obsidian AI plugin comparison]
+title: Sık sorulan sorular
+description: >-
+  Kurulum, modeller, çıktı, gizlilik, iptal ve Agent kullanımı hakkında
+  doğrulanabilir yanıtlar.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base, Copilot Alternative, AI Plugin Comparison]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Ollama
-    url: https://ollama.com
+keywords:
+  - Sık sorulan sorular
+  - Notemd
+  - Obsidian
 faqItems:
-  - question: "Obsidian'da Notemd'i nasıl kurarım?"
-    answer: "Obsidian Ayarları'nı açın, Topluluk Eklentileri'ne gidin, Arama yapın, Notemd'i bulun, Kurun ve Etkinleştirin. Obsidian 0.15.0 veya daha yeni sürümleri gereklidir. GitHub Releases üzerinden manuel kurulum da mümkündür."
-  - question: "Notemd hangi LLM sağlayıcılarını destekler?"
-    answer: "Notemd, OpenAI, Anthropic, Google, xAI, Mistral, DeepSeek, Qwen, Ollama, LM Studio, Azure OpenAI, OpenRouter ve Qwen, Doubao, Moonshot, GLM gibi Çin odaklı birçok sağlayıcı da dahil olmak üzere 30'dan fazla sağlayıcıyı destekler."
-  - question: "Notemd yerel LLM'lerle çalışabilir mi?"
-    answer: "Evet. Notemd, Ollama, LM Studio, vLLM, LocalAI ve OpenAI ile uyumlu herhangi bir uç nokta ile çalışır. Bağlantı oluşturma, kavram üretimi, çeviri, araştırma ve diyagram oluşturma gibi tüm görevler yerel modellerle gerçekleştirilebilir."
-  - question: "Notemd, ChatGPT'den nasıl farklıdır?"
-    answer: "ChatGPT geçici sohbet cevapları üretir. Notemd ise kalıcı, yapılandırılmış sonuçları doğrudan Obsidian arşivinizde wiki bağlantılı dosyalar, kavram notları, diyagramlar ve çeviriler şeklinde kaydeder; bunlar bir bilgi tabanı olarak birikir."
-  - question: "Notemd, Copilot veya Smart Connections ile nasıl karşılaştırılır?"
-    answer: "Copilot, notlar hakkında sohbet etmeye odaklıdır. Smart Connections ise benzer notları bulmaya yöneliktir. Notemd ise yazmaya odaklıdır; notları AI ile işler ve yapılandırılmış sonuçları arşivinize yazar. Üçü de birbirini tamamlar."
-  - question: "Notemd araştırma özelliği hangi arama hizmetleriyle çalışır?"
-    answer: "Tavily (önerilir, AI ile optimize edilmiş arama, API anahtarı gereklidir) ve DuckDuckGo (deneysel, API anahtarı gerekmez). Araştırma sonuçları LLM tarafından özetlenir ve kaynak atıflarıyla birlikte notunuza eklenir."
-  - question: "Notemd Çince veya diğer dilleri destekler mi?"
-    answer: "Kullanıcı arayüzü 21'den fazla dili destekler. Görev çıktısının dilini ayrı olarak yapılandırabilirsiniz; bu sayede Çince arayüz ile İngilizce çıktı veya tam tersi gibi karışık ayarlar mümkündür."
-  - question: "Notemd'i makale veya PDF okumak için kullanabilir miyim?"
-    answer: "Evet. MinerU kullanarak PDF'yi Markdown'a dönüştürün, Obsidian'da açın ve ardından wiki bağlantıları eklemek, kavram notları oluşturmak, metin çıkarmak, arka plan araştırması yapmak, bölümleri çevirmek ve Mermaid diyagramları oluşturmak için Notemd görevleri çalıştırın."
-  - question: "Notemd hangi diyagram türlerini üretebilir?"
-    answer: "Mermaid (akış şeması, sıralama, sınıf, durum, ER, otomatik sözdizimi düzeltmesiyle Gantt), JSON Canvas (Obsidian yerel formatı), Vega-Lite (veri grafikleri), HTML yedek format ve açıkça düzenlenebilir HTML/SVG görsel dosyaları. Belirli sonuç testleri için Draw.io XML ve Drawnix JSON dışa aktarım sınırları da mevcuttur."
-  - question: "Notemd ücretsiz ve açık kaynak mıdır?"
-    answer: "Evet. MIT lisanslıdır; ücretli plan yoktur, bulut bağımlılığı veya izleme özelliği bulunmaz. GitHub üzerinde 234'den fazla yıldızı vardır. Pull request'ler memnuniyetle kabul edilir."
-  - question: "Notemd %100 çevrimdışı çalışabilir mi?"
-    answer: "Ollama ile evet. API anahtarı veya internet gerekliliği yoktur. Wiki bağlantıları, kavram notları, çeviri ve diyagramlar dahil tüm özellikler çevrimdışı çalışır. DuckDuckGo araştırması da API anahtarı olmadan kullanılabilir."
-  - question: "Verilerim buluta gönderiliyor mu?"
-    answer: "Ollama veya LM Studio ile verileriniz cihazınızdan dışarı çıkmaz. OpenAI veya Anthropic gibi bulut sağlayıcıları kullanıldığında not içeriğiniz API girdisi olarak gönderilir. Notemd'in kendisi hiçbir izleme veya kullanıcı verisi toplamaz."
+  - question: Notemd nasıl kurulur?
+    answer: >-
+      Settings → Community plugins → Browse açın, Notemd’i bulup kurun ve
+      etkinleştirin. Elle kurulumda aynı GitHub sürümünün main.js, manifest.json
+      ve styles.css dosyalarını kullanın. Manifest Obsidian 0.15.0 bildirir; bu
+      eski sürüm ve fiziksel mobil cihazlar güncel olarak doğrulanmadı.
+  - question: Hangi LLM sağlayıcıları desteklenir?
+    answer: >-
+      Beş ailede 36 profil vardır: OpenAI-compatible, Anthropic, Google, Azure
+      OpenAI ve Ollama. Bulut, geçitler ve yerel sunucular kendi uç noktası,
+      anahtarı ve modelini gerektirir. Profil veya model listesi güncel erişimi
+      ya da üretim yetkisini garanti etmez.
+  - question: Yerel model kullanabilir miyim?
+    answer: >-
+      Evet; Ollama, LM Studio, OVMS veya çalışan uyumlu özel sunucuyla. Modeli
+      hazırlayıp görevi deneyin. Yerel çıkarım, web aramasını, bağımlılık
+      kurulumunu veya ayrı bulut görevlerini çevrimdışı yapmaz.
+  - question: ChatGPT’den farkı nedir?
+    answer: >-
+      Notemd Obsidian’da açık belge görevlerine odaklanır: bağlantılar,
+      kavramlar, eklenen araştırma, çeviri ve diyagramlar. Kasa işinize göre
+      seçin. Güncel depolama, dışa aktarma ve entegrasyonu karşılaştırın; sohbet
+      araçları da geçmiş tutup belge üretebilir.
+  - question: Copilot veya Smart Connections ile nasıl karşılaştırılır?
+    answer: >-
+      Somut görevleri güncel sürüm, ayar ve belgelerle karşılaştırın. Notemd
+      notları işler ve sınırlı sözcüksel getirme sunar; genel kasa sohbeti veya
+      embedding tabanlı anlamsal arama değildir. Başka projeler için güncel
+      üstünlük sıralaması iddia edilmez.
+  - question: Hangi arama motorları kullanılır?
+    answer: >-
+      Tavily ve anahtarını ya da DuckDuckGo’yu açıkça seçin. Boş Tavily anahtarı
+      hizmeti değiştirmez. İkisi de ağ kullanır. LLM web bağlamını ve isteğe
+      bağlı yerel parçaları özetleyip etkin Markdown’a ekler. URL’leri ve önemli
+      iddiaları doğrulayın.
+  - question: Hangi diller vardır?
+    answer: >-
+      Arayüz 21 dil, site 34 dil rotası sunar. Üretim dili ayrı seçilir ve
+      desteklenen görevlerde değiştirilebilir. Çeviri kapsamı ve kalitesi bu
+      sayılara değil modele bağlıdır.
+  - question: Makale veya PDF kullanabilir miyim?
+    answer: >-
+      Önce uygun dış araçla Markdown’a çevirip formül, tablo ve resimleri
+      kontrol edin. Sonra kavram, özgün parça, araştırma, çeviri veya diyagram
+      görevlerini kullanın. Yerleşik PDF OCR veya her ikili belgeden kusursuz
+      çıkarma sözü verilmez.
+  - question: Hangi diyagramlar vardır?
+    answer: >-
+      Çalıştırılabilir katalog uygun kaynak/önizlemelerle 33 öğe sunar. Mermaid,
+      JSON Canvas, Vega-Lite, düzenlenebilir HTML/SVG, Draw.io, Drawnix ve
+      sınırlı CircuitikZ farklı amaçlara hizmet eder. Desteklenen eşleşmeyi
+      seçip hedef uygulamada deneyin; önizleme gerçek düzenlemeyi veya derlemeyi
+      kanıtlamaz.
+  - question: Notemd ücretsiz ve açık kaynak mı?
+    answer: >-
+      Notemd MIT lisanslıdır, deposu açıktır ve katkılara açıktır. Sağlayıcılar,
+      çıkarım, arama ve dış araçların kendi ücretleri/koşulları vardır. Eklenti
+      lisansı bağlı hizmetleri ücretsiz yapmaz.
+  - question: Her şey çevrimdışı çalışır mı?
+    answer: >-
+      Sunucu, modeller ve bağımlılıklar hazırlandıktan sonra bazı görevler yerel
+      modelle çalışabilir. DuckDuckGo dahil web araması çevrimiçi kalır.
+      Bağlantıyı kesmeden görev rotalarını ve dışa aktarma bağımlılıklarını
+      kontrol edin. Genel çevrimdışı garantisi yoktur.
+  - question: Veriler buluta gider mi?
+    answer: >-
+      İstem ve içerik ayarlı LLM uç noktasına gönderilir. Arama hizmeti sorguyu,
+      siteler istekleri alır. Yerel parçalar bulut istemine girebilir, yerel
+      profil uzak sunucuya işaret edebilir. Rotaları ve tanılamayı inceleyin.
+      Yerel depolama yalnız cihazda işleme garantisi değildir.
+  - question: One-Click Extract ne yapar?
+    answer: >-
+      Varsayılan zincir bağlantı ekler, kavram/seçili klasördeki uygun notları
+      başlıklardan üretir ve complete içinde Mermaid onarır. Mevcut kavramlar da
+      kapsanabilir. Web araştırması ve diyagram üretimi otomatik eklenmez.
+      Rehber tam DSL biçimini gösterir: name::action>action.
+  - question: İptal değişiklikleri geri alır mı?
+    answer: >-
+      Hayır. Desteklenen devam işi durur ve tamamlanan sonuçlar kalır. Kabul
+      edilmiş istek/yazmalar bitebilir; ücretlendirmeyi sağlayıcı yönetir.
+      Bekleyin, yolları ve çakışmaları inceleyin, yalnız gerekli işi
+      tekrarlayın.
+  - question: Agent Notemd’i otomatik kullanabilir mi?
+    answer: >-
+      Dört sınırlı açık komut çalışan Obsidian ve kasa üzerinden maskelenmiş
+      profilleri, yetenekleri, çağrı sözleşmesini ve açık CLI arayüzünü dışa
+      aktarır. Dosya yazarlar. Depodaki bakım işlemleri ayrıdır; iç sayı açık
+      API değildir. Agent rehberinden başlayın.
+  - question: Geliştirici olarak nereden başlanır?
+    answer: >-
+      Geliştirici rehberi ortam, derleme, tam testler, modül sahipliği ve
+      genişletme sözleşmelerini açıklar. AGENTS.md sürümlenen çalışma
+      otoritesidir. Hata tekrarını tam sürüm ve temizlenmiş kanıtla bildirin;
+      birleştirmeden doğrulayın.
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Sık Sorulan Sorular
+# Sık sorulan sorular
 
-<TLDR>
-**En sık sorulan Notemd sorularına hızlı cevaplar.** Kurulum (5 dakikalık ayar), 30'dan fazla LLM sağlayıcı desteği, yerel/bulut model seçenekleri, tek tıklamalı iş akışları, çok dilli UI (21 dil), wiki bağlantısı otomasyonu, araştırma entegrasyonu, PDF okuma iş akışları, diyagram oluşturma ve açık kaynak lisanslama gibi özellikler Ollama ile çevrimdışı da çalışır.
-</TLDR>
+<TLDR>Deneme notu, erişilebilir sağlayıcı ve açık hedeflerle başlayın. Yanıtlar uygulanmış sınırları açıklar; rehberler hazırlığı ve çıktı kontrolünü gösterir.</TLDR>
 
----
+## Sorular
 
-## Kurulum ve Ayarlar
+### Notemd nasıl kurulur?
 
-### Obsidian içine Notemd'yı nasıl kurarım?
+Settings → Community plugins → Browse açın, Notemd’i bulup kurun ve etkinleştirin. Elle kurulumda aynı GitHub sürümünün main.js, manifest.json ve styles.css dosyalarını kullanın. Manifest Obsidian 0.15.0 bildirir; bu eski sürüm ve fiziksel mobil cihazlar güncel olarak doğrulanmadı.
 
-Obsidian'da **Ayarlar → Topluluk Eklentileri → Gözat**'a gidin, **"Notemd"** olarak arayın, **Kur** ve **Etkinleştir** seçeneklerini kullanın.
+### Hangi LLM sağlayıcıları desteklenir?
 
-**Gereksinimler:**
-- Obsidian 0.15.0+
-- Masaüstü (Windows, macOS, Linux) ve Mobil (iOS, Android) cihazlarda desteklenir.
+Beş ailede 36 profil vardır: OpenAI-compatible, Anthropic, Google, Azure OpenAI ve Ollama. Bulut, geçitler ve yerel sunucular kendi uç noktası, anahtarı ve modelini gerektirir. Profil veya model listesi güncel erişimi ya da üretim yetkisini garanti etmez.
 
-**El ile kurulum:**
-1. `main.js`, `styles.css` ve `manifest.json`'yı [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) adresinden indirin.
-2. Bunları `<your-vault>/.obsidian/plugins/notemd/` içine yerleştirin.
-3. Obsidian'yu yeniden yükleyin ve eklentiyi etkinleştirin.
+### Yerel model kullanabilir miyim?
 
-**İstatistikler:** 4k'dan fazla indirme, 44 sürüm, MIT lisanslı.
+Evet; Ollama, LM Studio, OVMS veya çalışan uyumlu özel sunucuyla. Modeli hazırlayıp görevi deneyin. Yerel çıkarım, web aramasını, bağımlılık kurulumunu veya ayrı bulut görevlerini çevrimdışı yapmaz.
 
----
+### ChatGPT’den farkı nedir?
 
-## LLM Yapılandırması
+Notemd Obsidian’da açık belge görevlerine odaklanır: bağlantılar, kavramlar, eklenen araştırma, çeviri ve diyagramlar. Kasa işinize göre seçin. Güncel depolama, dışa aktarma ve entegrasyonu karşılaştırın; sohbet araçları da geçmiş tutup belge üretebilir.
 
-### Notemd hangi LLM sağlayıcılarını destekler?
+### Copilot veya Smart Connections ile nasıl karşılaştırılır?
 
-Notemd **30'dan fazla sağlayıcıyı** destekler:
+Somut görevleri güncel sürüm, ayar ve belgelerle karşılaştırın. Notemd notları işler ve sınırlı sözcüksel getirme sunar; genel kasa sohbeti veya embedding tabanlı anlamsal arama değildir. Başka projeler için güncel üstünlük sıralaması iddia edilmez.
 
-**Bulut sağlayıcıları:**
-- OpenAI (GPT-4, GPT-4o, GPT-4o-mini, o1, o3)
-- Anthropic (Claude Opus, Sonnet, Haiku)
-- Google (Gemini Pro, Flash, Ultra)
-- xAI (Grok)
-- Mistral, DeepSeek, Qwen, Moonshot, GLM
+### Hangi arama motorları kullanılır?
 
-**Çin odaklı:**
-- Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax
-- Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow
+Tavily ve anahtarını ya da DuckDuckGo’yu açıkça seçin. Boş Tavily anahtarı hizmeti değiştirmez. İkisi de ağ kullanır. LLM web bağlamını ve isteğe bağlı yerel parçaları özetleyip etkin Markdown’a ekler. URL’leri ve önemli iddiaları doğrulayın.
 
-**Yerel/kendi sunucunuzda çalışan:**
-- Ollama
-- LM Studio
-- Herhangi bir OpenAI-uyumlu uç nokta
+### Hangi diller vardır?
 
-**Ağ geçitleri:**
-- Azure OpenAI, OpenRouter, Together AI, Groq, AIHubMix
-- GitHub Models, Fireworks, LiteLLM, Nebius, Cerebras
-- Hugging Face, Vercel AI Gateway, Requesty
+Arayüz 21 dil, site 34 dil rotası sunar. Üretim dili ayrı seçilir ve desteklenen görevlerde değiştirilebilir. Çeviri kapsamı ve kalitesi bu sayılara değil modele bağlıdır.
 
-### Notemd yerel LLM'larla çalışabilir mi?
+### Makale veya PDF kullanabilir miyim?
 
-**Evet, tamamen desteklenir.** Notemd şunlarla çalışır:
-- **Ollama** (yerel entegrasyon)
-- **LM Studio** (OpenAI-uyumlu uç noktası aracılığıyla)
-- **vLLM, LocalAI, text-generation-webui** (OpenAI-uyumlu mod aracılığıyla)
+Önce uygun dış araçla Markdown’a çevirip formül, tablo ve resimleri kontrol edin. Sonra kavram, özgün parça, araştırma, çeviri veya diyagram görevlerini kullanın. Yerleşik PDF OCR veya her ikili belgeden kusursuz çıkarma sözü verilmez.
 
-Tüm görevler yerel modellerle çalışır: bağlantı kurma, kavram üretimi, çeviri, araştırma ve diyagram oluşturma.
+### Hangi diyagramlar vardır?
 
-**Karıştırma ve eşleştirme örneği:**
-- Bağlantı kurmak için yerel Ollama → hızlı, özel, ücretsiz
-- Araştırma için OpenAI → yüksek kalite, web arama entegrasyonu
-- Çeviri için Gemini → çok modlu destek
+Çalıştırılabilir katalog uygun kaynak/önizlemelerle 33 öğe sunar. Mermaid, JSON Canvas, Vega-Lite, düzenlenebilir HTML/SVG, Draw.io, Drawnix ve sınırlı CircuitikZ farklı amaçlara hizmet eder. Desteklenen eşleşmeyi seçip hedef uygulamada deneyin; önizleme gerçek düzenlemeyi veya derlemeyi kanıtlamaz.
 
-### Farklı görevler için farklı modelleri nasıl yapılandırabilirim?
+### Notemd ücretsiz ve açık kaynak mı?
 
-**Notemd Ayarları**'nda her görevin bağımsız sağlayıcı/model seçicileri vardır:
+Notemd MIT lisanslıdır, deposu açıktır ve katkılara açıktır. Sağlayıcılar, çıkarım, arama ve dış araçların kendi ücretleri/koşulları vardır. Eklenti lisansı bağlı hizmetleri ücretsiz yapmaz.
 
-| Görev | Örnek Yapılandırma |
-|------|----------------------|
-| **Bağlantı Oluşturma** | DeepSeek (hızlı, ucuz) |
-| **Kavram Oluşturma** | Claude Opus (yüksek kalite) |
-| **Araştırma** | Perplexity veya GPT-4o (web tabanlı) |
-| **Çeviri** | Gemini Flash (çok modlu) |
-| **Diyagram Oluşturma** | Ollama (yerel, özel) |
+### Her şey çevrimdışı çalışır mı?
 
-Bu görev bazlı optimizasyon hızı, maliyeti ve kaliteyi dengeler.
+Sunucu, modeller ve bağımlılıklar hazırlandıktan sonra bazı görevler yerel modelle çalışabilir. DuckDuckGo dahil web araması çevrimiçi kalır. Bağlantıyı kesmeden görev rotalarını ve dışa aktarma bağımlılıklarını kontrol edin. Genel çevrimdışı garantisi yoktur.
 
----
+### Veriler buluta gider mi?
 
-## Temel Özellikler
+İstem ve içerik ayarlı LLM uç noktasına gönderilir. Arama hizmeti sorguyu, siteler istekleri alır. Yerel parçalar bulut istemine girebilir, yerel profil uzak sunucuya işaret edebilir. Rotaları ve tanılamayı inceleyin. Yerel depolama yalnız cihazda işleme garantisi değildir.
 
-### Kağıt okuma konusunda Notemd, ChatGPT'dan nasıl farklıdır?
+### One-Click Extract ne yapar?
 
-| Boyut | ChatGPT | Notemd |
-|-----------|---------|--------|
-| **Çıktı konumu** | Sohbet geçmişi (geçici) | Obsidian kasası (kalıcı dosyalar) |
-| **Sonuç formatı** | Metin cevabı | Viki bağlantıları, kavram notları, diyagramlar, çeviriler |
-| **Uzun vadeli değer** | Seans bittikten sonra silinir | Bilgi tabanına birikir |
-| **Yeniden kullanılabilirlik** | Yeniden sorgulama gereklidir | Dosyalar kalır, bağlantılar devam eder, gelişir |
+Varsayılan zincir bağlantı ekler, kavram/seçili klasördeki uygun notları başlıklardan üretir ve complete içinde Mermaid onarır. Mevcut kavramlar da kapsanabilir. Web araştırması ve diyagram üretimi otomatik eklenmez. Rehber tam DSL biçimini gösterir: name::action>action.
 
-**ChatGPT'yu şunlar için kullanın:** Hızlı soru-cevap, tek seferlik açıklamalar
-**Notemd'yu şunlar için kullanın:** Haftalar/aylar boyunca kalıcı ve yapılandırılmış bir bilgi tabanı oluşturmak
+### İptal değişiklikleri geri alır mı?
 
-### Notemd notlara viki bağlantılarını nasıl ekler?
+Hayır. Desteklenen devam işi durur ve tamamlanan sonuçlar kalır. Kabul edilmiş istek/yazmalar bitebilir; ücretlendirmeyi sağlayıcı yönetir. Bekleyin, yolları ve çakışmaları inceleyin, yalnız gerekli işi tekrarlayın.
 
-**Süreç:**
-1. Bir not üzerinde "Dosyayı işle (bağlantı ekle)" komutunu çalıştırırsınız
-2. Notemd metni ayarlanmış LLM'ınıza gönderir
-3. LLM, bağlamdaki temel kavramları tanımlar
-4. Notemd, her kavramın geçtiği yerde `[[wiki-links]]` ekler
-5. İsteğe bağlı olarak, belirttiğiniz bir klasörde otomatik olarak kavram notları oluşturur
+### Agent Notemd’i otomatik kullanabilir mi?
 
-**Özellikler:**
-- Eşanlamlı kelime bastırma ("transformer" ile "transformers" gibi tekrarları önler)
-- Kavram notlarından kaynağa geri bağlantılar
-- Yeniden adlandırma/silme durumunda bağlantı bütünlüğü
-- Saf çıkarma modu (orijinali değiştirmeden kavramları çıkarır)
+Dört sınırlı açık komut çalışan Obsidian ve kasa üzerinden maskelenmiş profilleri, yetenekleri, çağrı sözleşmesini ve açık CLI arayüzünü dışa aktarır. Dosya yazarlar. Depodaki bakım işlemleri ayrıdır; iç sayı açık API değildir. Agent rehberinden başlayın.
 
-### Notemd tek tıklamalı iş akışı nedir?
+### Geliştirici olarak nereden başlanır?
 
-**Tek tıklamalı iş akışları**, birden fazla eylemi **tek bir kenar çubuğu düğmesi** altında birleştirir.
+Geliştirici rehberi ortam, derleme, tam testler, modül sahipliği ve genişletme sözleşmelerini açıklar. AGENTS.md sürümlenen çalışma otoritesidir. Hata tekrarını tam sürüm ve temizlenmiş kanıtla bildirin; birleştirmeden doğrulayın.
 
-**Varsayılan iş akışı:** `One-Click Extract`
-```
-process-current-add-links > extract-concepts-current > research-and-summarize > summarize-as-mermaid
-```
+## Sonraki adımlar
 
-**Sonuç:** Tek bir tıklamayla şunlar gerçekleşir:
-1. Mevcut nota wiki bağlantıları eklemek
-2. Yeni terimler için kavram notları oluşturmak
-3. Araştırma yaparak arka plan bilgileri eklemek
-4. Bir Mermaid diyagramına sıkıştırmak
-
-**Özel iş akışları:** DSL formatını kullanarak Ayarlar bölümünde kendi iş akışlarınızı tanımlayın. Her iş akışı yeniden kullanılabilir bir kenar çubuğu düğmesi haline gelir.
-
-### Notemd, Copilot veya Smart Connections ile nasıl karşılaştırılır?
-
-Bu eklentiler farklı sorunları çözer:
-
-- **Copilot** — Sohbet odaklı. Notlarınız hakkında bir yapay zeka ile sohbet edersiniz. Yapay zeka yanıtları sohbet panelinde kalır; notlarınızın saklandığı alanı değiştirmez.
-- **Smart Connections** — Keşif odaklı. Gömülü modeller kullanarak anlamsal olarak benzer notları bulur. İçerik oluşturmaz veya değiştirmez.
-- **Notemd** — Yazma odaklı. Yapay zeka notlarınızı işler ve yapılandırılmış sonuçları (wiki bağlantıları, kavram notları, araştırma, diyagramlar, çeviriler) kalıcı dosyalar olarak doğrudan notlarınızın saklandığı alana yazar.
-
-| İhtiyacınız olanlar | Önerilen eklenti |
-|----------------|-------------------|
-| Notlar hakkında yapay zeka ile sohbet etme | Copilot |
-| Benzer/ilişkili notları bulma | Smart Connections |
-| Wiki bağlantılarını otomatik olarak ekleyip bir bilgi grafiği oluşturma | **Notemd** |
-| Geri bağlantılarla kavram notları üretme | **Notemd** |
-| Not içeriğinden diyagramlar oluşturma | **Notemd** |
-| Bir konu üzerine araştırma yapın ve özetler ekleyin | **Notemd** |
-
-Üçü de birlikte kullanılabilir — birbirleriyle rekabet etmek yerine birbirlerini tamamlarlar.
-
----
-
-## Araştırma ve Çeviri
-
-### Hangi arama servisleri Notemd araştırmalarıyla çalışır?
-
-| Servis | API Anahtarı Gerekli | Kalite | Notlar |
-|---------|-----------------|---------|-------|
-| **Tavily** | Evet | Yüksek | Önerilen, AI ile optimize edilmiş arama |
-| **DuckDuckGo** | Hayır | Deneysel | Ayar gerekmez, kalite daha düşük |
-
-**"Araştır ve özetle" nasıl çalışır?:**
-1. Bir konu seçersiniz veya mevcut notunuzda çalıştırırsınız
-2. Notemd arama servisine sorgu gönderir
-3. Sonuçlar → LLM özetleme
-4. Özet, kaynak atıflarıyla birlikte notunuza eklenir
-
-**Sonuç:** Veri havuzunuzda kalıcı bir araştırma izi oluşur, tarayıcı sekmelerinde değil.
-
-### Notemd Çince veya diğer dilleri destekler mi?
-
-**UI desteklenen diller:** 21+
-- İngilizce, 中文 (简体), 中文 (繁體), 日本語, 한국어
-- Arapça, Almanca, Fransızca, İspanyolca, Rusça, Portekizce, İtalyanca
-- Hindi, Bengalce, Tayca, Vietnamca, Türkçe, Lehçe, Çekçe ve daha fazlası
-
-**Görev çıktısı dili:** Bağımsız yapılandırma
-- UI Çince olarak + çıktı İngilizce: ✅
-- UI İngilizce olarak + çıktı Çince: ✅
-
-**Kullanım durumu:** Çift dilli araştırmacılar, yayın için İngilizce notlar oluştururken UI'yi anadillerinde tutabilirler.
-
----
-
-## PDF ve Akademik İş Akışları
-
-### Notemd'u makale/PDF okuma işlemlerinde kullanabilir miyim?
-
-**Evet.** İş akışı şu şekildedir:
-1. [MinerU](https://github.com/opendatalab/MinerU) kullanarak **PDF'yu Markdown'a dönüştürün** (akademik makaleler için önerilir)
-2. Markdown dosyasını Obsidian içinde açın
-3. Notemd görevlerini çalıştırın:
-   - Anahtar terimlere **wiki bağlantıları ekleyin**
-   - Bilinmeyen terimler için **kavram notları oluşturun**
-   - Özel sorular aracılığıyla **orijinal metni çıkarın** (örneğin, "Sınırlamalar nelerdir?")
-   - Atıfta bulunulan yöntemler/kaynaklar için **araştırma arka planı hazırlayın**
-   - Zor bölümleri **çevirin**
-   - Yapısal anlayış sağlamak amacıyla **Mermaid diyagramına sıkıştırın**
-
-**Sürüm 1.9.1+:** TOC desteğiyle bölüm yapısı çıkarma özelliği
-
-**Sonuç:** Makale okuma işleminiz, kasanızda yapılandırılmış ve bağlantılı bir bilgi nesnesine dönüşür.
-
----
-
-## Diyagramlar ve Görselleştirme
-
-### Notemd hangi grafik/diagram türlerini oluşturabilir?
-
-| Tür | Destek | Özellikler |
-|------|---------|----------|
-| **Mermaid** | Tam | Akış şeması, sıralama, sınıf, durum, ER, Gantt, sözdizimi otomatik düzeltme, toplu doğrulama |
-| **JSON Canvas** | Tam | Obsidian yerel çizim tahtası düzenleri |
-| **Vega-Lite** | Tam | Veri grafikleri, zaman serisi, çubuk, dağılım, özelleştirilebilir |
-| **HTML** | Yedek | Desteklenmeyen diyagram türleri için |
-| **Düzenlenebilir HTML/SVG** | Açık hedef | Anlamsal Draw.io-stili açıklamalar içeren, kendi kendine yeterli içe yerleşik SVG |
-| **Draw.io / Drawnix ürünleri** | İhracat sınırı | `SemanticFigureModel`'dan belirgin XML/JSON; herhangi bir editör çalışma zamanı bağımlılığı yok |
-
-**Mermaid otomatik düzeltme:** Derin hata ayıklama modu onarımları:
-- Kırık oklar (`-->`, `-.->`, `==>`)
-- Geçersiz etiketler, yorumlar
-- Alt grafik sözdizimi hataları
-- Şekil gösterimi (`[`, `(`, `{`, `((`)
-- Etiketlerde boru karakterleri
-- Not ekleri
-
-**İş akışı:**
-1. Bir not üzerinde "Mermaid diyagramı olarak özetle" komutunu çalıştırın
-2. Modal pencerede önizleme
-3. SVG veya PNG olarak dışa aktar
-4. Veya vaultta `.mmd` dosyası olarak kaydedin
-
----
-
-## Açık Kaynak ve Topluluk
-
-### Notemd ücretsiz ve açık kaynak mıdır?
-
-**Evet.**
-- **Lisans:** MIT (hoşgörülü, ticari kullanım izinlidir)
-- **Kaynak kodu:** https://github.com/Jacobinwwey/obsidian-NotEMD
-- **Ücretli seviyeler yok, bulut bağımlılığı yok, izleme yok**
-- **Topluluk:** 234+ GitHub yıldızı, aktif Discord
-
-**Sahip olduğunuz şeyler:**
-- Verileriniz (vaultunuzda kalır)
-- İş akışlarınız (prompt'ları, modelleri, zincirleri özelleştirin)
-- Gizliliğiniz (yerel LLM desteği)
-
-**Katkıda bulunun:** Pull request'ler memnuniyetle kabul edilir. [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md) adresine bakın
-
----
-
-## Sorun Giderme
-
-### LLM çağrılarım başarısız oluyor. Ne kontrol etmeliyim?
-
-1. **API anahtarı geçerli mi?** Ayarlar → Sağlayıcı Yapılandırması'na bakın
-2. **Model adı doğru mu?** Ayarlardaki "获取模型列表" (Model Listesi Al) butonunu kullanın
-3. **Ağa erişilebilir mi?** Bazı sağlayıcılar VPN gerektirir
-4. **Hız sınırlamaları?** Sağlayıcı panosunu kontrol edin
-5. **Teşhis:** Ayrıntılı hata günlükleri için ayarlar içinde "Bağlantı Testi"ni çalıştırın
-
-### Notemd yavaş. Hızını nasıl artırabilirim?
-
-1. **Daha hızlı modeller kullanın:** DeepSeek, Gemini Flash, GPT-4o-mini
-2. **Blok boyutunu azaltın:** Ayarlar → Akıllı Bloklandırma → kelime sayısını düşürün
-3. **Paralel işleme:** Ayarlar → Toplu İşleme → eşzamanlılık seviyesini artırın
-4. **Yerel modeller:** Web araması gerekmeyen görevler için Ollama kullanın
-
-### Notemd %100 çevrimdışı çalışabilir mi?
-
-**Evet, Ollama ile.** API anahtarı yok, internet yok, veriler makinenizden çıkmaz:
-
-1. [Ollama](https://ollama.com) uygulamasını yükleyin ve `ollama serve`'u çalıştırın
-2. Notemd ayarlarında sağlayıcınız olarak **Ollama** seçin
-3. Bir model indirin: `ollama pull llama3` (veya qwen2.5, gemma2 vb.)
-4. Tüm özellikler çalışır: wiki bağlantıları, kavram notları, çeviri, diyagramlar
-
-**DuckDuckGo araştırması** da API anahtarı olmadan çalışır (deneysel kalitede).
-
-Bulut sağlayıcıları (OpenAI, Anthropic, Google, DeepSeek vb.) ile not içeriğiniz API girdisi olarak gönderilir. Veri işleme detayları için her sağlayıcının gizlilik politikasını kontrol edin.
-
-### Verilerim buluta mı gönderiliyor?
-
-**Bu, sağlayıcınıza bağlıdır:**
-
-| Sağlayıcı türü | Veriler buluta mı gönderiliyor? | Notlar |
-|--------------|---------------------|-------|
-| **Ollama (yerel)** | Hayır | Her şey cihazınızda kalır |
-| **LMStudio (yerel)** | Hayır | Ollama ile aynı |
-| **DeepSeek, OpenAI, vb.** | Evet | İçerik, işleme için API girdisi olarak gönderilir |
-| **OpenRouter, AIHubMix** | Evet | Bulut sağlayıcılarına yönlendirme yapan ağ geçidi |
-
-Notemd kendisi **hiçbir izleme verisi, hiçbir analiz verisi, hiçbir kullanıcı verisi toplamaz**. Eklenti tamamen açık kaynaklıdır (MIT). Makinenizden çıkan tek veri, yapılandırdığınız LLM sağlayıcısına açıkça gönderdiğiniz verilerdir.
-
-### Araştırma için en iyi Obsidian AI eklentisi hangisidir?
-
-Araştırma iş akışınıza bağlıdır:
-
-| İhtiyaç | Eklenti | Neden |
-|------|--------|-----|
-| İlgili makaleler/notlar bulmak | Smart Connections | Anlamsal benzerlik tespiti |
-| Kaynaklarınız hakkında sohbet etmek | Copilot | Saklama alanı bağlamıyla konuşma |
-| Kavramları otomatik olarak bağla + notlar oluştur | **Notemd** | AI kavramları tanır, bağlantılar ekler, notlar oluşturur |
-| Web araştırması + notlara özetleme | **Notemd** | Tavily/DuckDuckGo arama → LLM özet → notaya eklendi |
-| Araştırmalardan diyagramlar oluştur | **Notemd** | Notun içeriğinden Mermaid/Canvas/Vega-Lite alın |
-
-**Önerilen kombinasyon:** Smart Connections (keşif) + Notemd (yapılandırma) + Copilot (tartışma).
-
----
-
-## Yardım Almak
-
-- **Belgeler:** https://jacobinwwey.github.io/obsidian-NotEMD/
-- **GitHub Sorunları:** https://github.com/Jacobinwwey/obsidian-NotEMD/issues
-- **Discord:** https://discord.gg/qnGgsQ9W
-- **Sponsor:** https://github.com/sponsors/Jacobinwwey
+- [Hızlı başlangıç](./getting-started/quick-start).
+- [İş akışları](./features/workflows).
+- [Diyagramlar](./features/diagrams).
+- [Geliştiriciler](./developers/overview).
+- [Agent](./agents/overview).
+- [Sorun giderme](./advanced/troubleshooting).

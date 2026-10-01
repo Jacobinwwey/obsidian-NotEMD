@@ -4,7 +4,7 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "Logo Notemd",
+    "message": "Biểu trưng Notemd",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
@@ -18,5 +18,25 @@
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Bắt đầu ở đây",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Người mới",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Quy trình sử dụng",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Nhà phát triển",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

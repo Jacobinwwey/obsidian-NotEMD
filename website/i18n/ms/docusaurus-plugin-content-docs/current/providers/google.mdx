@@ -1,67 +1,56 @@
 ---
 id: google
-title: "Google"
-description: "Konfigurasikan Google Gemini"
+title: Google
+description: >-
+  Sediakan Gemini melalui API Generative Language natif Notemd dan sahkan model
+  pilihan.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords:
+  - Google
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Pembekal Google
+# Penyedia Google
 
-<TLDR>
-**Google menggunakan kaedah penghantaran Bahasa Generatif Gemini API yang asli.** Tetapan lalai semasa ialah `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1`, dan `temperature: 0.5`. Ia bukan profil yang serasi dengan OpenAI.
+<TLDR>Pratetap Google menggunakan API Generative Language Gemini natif. Tetapkan kunci yang dibenarkan untuk titik akhir itu dan model yang tersedia kini. Gemini melalui sembang gerbang serasi OpenAI menggunakan pratetap gerbang.</TLDR>
 
-Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Persediaan
 
-## Pengaturan
+Pilih **Google**, masukkan kunci, kekalkan titik akhir Generative Language natif dan pilih model yang dilayan versi API itu. Jalankan **Test connection**, kemudian terjemah atau proses nota ujian. Pratetap tidak mengkonfigurasi sebarang deployment Google Cloud atau Vertex secara automatik.
 
-Buat kunci Cloud API jenis Google AI Studio atau Google dengan akses Gemini, tambah profil penyedia `Google`, dan kekalkan Base Bahasa Generatif yang asli URL. Gunakan profil Gemini Flash lalai untuk terjemahan pantas dan kerja aliran nota yang luas, kemudian gantikan model mengikut tugas apabila anda memerlukan model Gemini yang lebih besar atau berkeupayaan tinggi.
+## Titik akhir dan pengesahan
 
-Elakkan meletakkan ID model Gemini dalam profil yang serasi dengan OpenAI kecuali jika anda menggunakan gateway secara eksplisit yang memaparkan Gemini melalui API yang serasi dengan OpenAI.
-
-## Titik Hujung Dan Pengesahan
-
-| Medan | Tetapan pra‑tetap semasa |
-|-------|----------------|
-| Pengangkutan | `google` |
+| Medan | Nilai pratetap |
+| ------- | -------------- |
+| Penghantaran | `google` |
 | Kunci API | Diperlukan |
-| Base URL | `https://generativelanguage.googleapis.com/v1` |
+| URL asas | `https://generativelanguage.googleapis.com/v1` |
 | Model lalai | `gemini-2.0-flash-exp` |
 | Suhu | `0.5` |
-| Ujian sambungan | Hanya sembang |
+| Ujian sambungan | `chat-only` |
 
-Masa jalankan memanggil `/models/{model}:generateContent?key={apiKey}`. Kunci dihantar sebagai parameter pertanyaan kerana itulah cara titik hujung Gemini asli disambungkan dalam plugin.
+Masa jalan membina permintaan model `generateContent` natif dengan pengesahan kunci API. ID model lama pratetap bukan jaminan tersedia kini. Periksa URL sebelum berkongsi diagnostik kerana butiran permintaan boleh mengandungi pengesahan.
 
-## Penemuan Model
+## Penemuan model
 
-Google menggunakan mod penemuan `google-models`. Penemuan sepatutnya mengembalikan model Gemini yang tersedia untuk kunci API; jika pemilih kosong, uji kunci terhadap Base URL yang sama dan sahkan keluarga model diaktifkan untuk akaun tersebut.
+Gunakan penemuan natif Google apabila tersedia. Pastikan model menyokong penjanaan pada versi API yang ditetapkan. Senarai kosong boleh menandakan masalah izin, titik akhir atau ketersediaan; uji konfigurasi sebenar, jangan menukar protokol secara rawak.
 
-Had token output yang diketahui adalah berdasarkan model dalam daftar penyedia. Jika terjemahan panjang atau penjelasan diagram dipotong, pilih model Gemini dengan had output yang lebih besar atau kurangkan saiz output yang diminta.
+## Penyelesaian masalah
 
-## Pemecahan masalah
+- `400`: periksa ID model, parameter serta had token/keluaran.
+- `401` / `403`: semak sekatan kunci, pengaktifan API dan akses model.
+- `404`: semak model wujud pada versi API pilihan.
+- Contoh gerbang gagal: gunakan pratetap gerbang serasi OpenAI yang sepadan.
 
-- `400`: ID model biasanya tidak sepadan dengan laluan Gemini asli atau permintaan melebihi bentuk yang disokong oleh model.
-- `401` atau `403`: semak sekatan kunci, pengaktifan projek/API, dan sama ada kunci boleh mengakses Gemini.
-- `404`: ID model tidak tersedia pada versi API yang dikonfigurasikan.
-- Contoh gateway gagal di bawah profil ini: gunakan tetapan gateway sebaliknya daripada penyedia Google yang asli.
+## Bila digunakan
 
-## Bila Perlu Digunakan
+Gunakan untuk API Gemini natif. Nilai tugas terjemahan, penyelidikan atau rajah sebenar pada sampel perwakilan. Panduan ini tidak menjanjikan kelajuan relatif, kos atau mutu terjemahan model.
 
-Gunakan Google untuk terjemahan pantas, pembersihan nota dalam kuantiti besar, dan kerja aliran di mana pertukaran kos/performance Gemini lebih baik berbanding OpenAI atau Anthropic secara langsung. Pilih penyedia lain untuk kerja aliran yang memerlukan pengendalian model penalaran yang serasi dengan OpenAI.
+## Seterusnya
 
----
-
-## Langkah Seterusnya
-
-- [LLM Providers](/docs/providers/overview) -- Konfigurasi penuh, model setiap tugas, dan logik percubaan semula
-- [Terjemahan](/docs/features/translation) -- Gemini Flash disyorkan untuk tugas terjemahan dalam kuantiti besar
+- [Gambaran penyedia](./overview): pemilihan protokol dan model tugas.
+- [Terjemahan](../features/translation): nama hasil, bahasa dan semakan.

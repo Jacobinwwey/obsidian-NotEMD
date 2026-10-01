@@ -1,16 +1,10 @@
 ---
 id: anthropic
 title: Anthropic
-description: Configure Anthropic Claude
+description: Configure Claude through the native Anthropic Messages protocol used by Notemd.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [anthropic, claude, provider, configuration]
-concepts: [Anthropic, Claude, API Configuration]
-citations:
-  - title: Anthropic API
-    url: https://docs.anthropic.com
-  - title: Claude
-    url: https://www.anthropic.com/claude
+keywords: [Notemd Anthropic, Claude, Messages API, provider configuration]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,50 +12,42 @@ import TLDR from '@site/src/components/TLDR';
 # Anthropic Provider
 
 <TLDR>
-**Anthropic uses the native Messages API transport, not the OpenAI-compatible transport.** The current preset defaults to `claude-3-5-sonnet-20240620`, `https://api.anthropic.com`, and `temperature: 0.5`. Treat it as a separate protocol surface when debugging.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+Use the Anthropic preset for the native Messages API. A Claude model served by an OpenAI-compatible gateway belongs in that gateway's preset. Confirm current model access before running a task; the historical preset default may need to be changed.
 </TLDR>
 
 ## Setup
 
-Create an Anthropic API key, add an `Anthropic` provider profile, and leave the Base URL on the native endpoint unless you are routing through a dedicated gateway profile. Choose the Claude model ID you want to use in the model field; the default keeps the existing product baseline stable.
-
-Anthropic is a good candidate for high-quality summarization, research synthesis, and concept extraction. If you mix it with cheaper providers, set it only on the tasks that benefit from its output quality.
+Select **Anthropic**, enter an Anthropic API key and retain the native endpoint unless your deployment explicitly exposes the same protocol. Enter a currently available Claude model ID, run **Test connection**, and try a disposable note with the intended task.
 
 ## Endpoint And Authentication
 
-| Field | Current preset |
-|-------|----------------|
+| Field | Preset value |
+|-------|--------------|
 | Transport | `anthropic` |
 | API key | Required |
 | Base URL | `https://api.anthropic.com` |
 | Default model | `claude-3-5-sonnet-20240620` |
 | Temperature | `0.5` |
-| Connection test | Chat-only |
+| Connection test | `chat-only` |
 
-The runtime sends requests to `/v1/messages` with `x-api-key` and `anthropic-version: 2023-06-01`. Do not configure an OpenAI-style `/v1/chat/completions` endpoint under this preset; use an OpenAI-compatible gateway preset instead.
+The runtime uses `/v1/messages` with the native API-key and API-version headers. Do not put an OpenAI-style chat route into this preset. The model default records a repository setting, not a statement that the upstream provider still serves it.
 
 ## Model Discovery
 
-Anthropic uses the `anthropic-models` discovery mode in the provider registry. If your key or account cannot list models, keep a known model ID in the profile and validate through the connection test.
-
-The transport is not interchangeable with OpenAI-compatible providers. A Claude model routed through OpenRouter, LiteLLM, or another gateway belongs in that gateway profile, not in the native Anthropic profile.
+Model discovery uses the native Anthropic model-list route where available. If listing is restricted, enter an accessible model ID and use the chat-based connection test. Verify long or structured tasks separately from the short test.
 
 ## Troubleshooting
 
-- `401` or `403`: check key scope, workspace access, billing, and whether the key belongs to the expected Anthropic workspace.
-- `404`: the Base URL is wrong or the selected model ID is not available to the account.
-- Gateway-style Claude model IDs fail: move the profile to the matching gateway provider because native Anthropic expects native model names.
-- Long requests fail late: lower per-task model output size or use a model with a larger known output-token ceiling.
+- `401` or `403`: check key, workspace/project access, billing and model permissions.
+- `404`: verify endpoint and current model availability.
+- Gateway model IDs fail: use the matching gateway preset and its expected identifier.
+- Long responses fail: inspect output limits and provider errors before increasing retries.
 
 ## When To Use
 
-Use Anthropic when quality on synthesis, research notes, or structured writing matters more than raw cost. Do not use it as a generic OpenAI-compatible fallback; the separate transport is the point, and mixing the protocols makes diagnosis harder.
-
----
+Choose the native preset when your endpoint serves the Anthropic Messages protocol. Compare model output on your own sources instead of treating provider selection as a universal quality ranking. Task-specific routing lets you use this provider only where it meets your requirements.
 
 ## Next Steps
 
-- [LLM Providers](/docs/providers/overview) -- Full configuration, per-task models, and retry logic
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix 401/403 and connection errors
+- [Provider overview](./overview): routing, retries and other protocols.
+- [Troubleshooting](../advanced/troubleshooting): isolate connection and task failures.

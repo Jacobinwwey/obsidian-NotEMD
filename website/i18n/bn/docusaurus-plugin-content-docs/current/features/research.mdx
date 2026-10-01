@@ -1,125 +1,88 @@
 ---
 id: research
-title: "গবেষণা ও ওয়েব সার্চ"
-description: "আপনার নোটগুলিতে ওয়েব সার্চ একীভূত করুন"
+title: গবেষণা ও ওয়েব অনুসন্ধান
+description: উৎস থেকে সারাংশ নোটে যোগ করুন এবং web ও optional local context আলাদা রাখুন।
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - গবেষণা ও ওয়েব অনুসন্ধান
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# গবেষণা ও ওয়েব সার্চ
+# গবেষণা ও ওয়েব অনুসন্ধান
 
-<TLDR>
-**Notemd ওয়েব অনুসন্ধান করে এবং LLM-সারাংশিত ফলাফলগুলি সরাসরি আপনার নোটগুলিতে যোগ করে।** Tavily API হলো প্রধান অনুসন্ধান ব্যাকএন্ড; DuckDuckGo শূন্য-কনফিগারেশনের ফলস্বরূপ ব্যবহৃত হয়। ফলাফলগুলি সূত্রের উদ্ধৃতি সহ সারাংশিত হয় এবং `## Research` শিরোনামের নিচে যুক্ত হয়। এটি একক-নোট গবেষণা, ব্যাচ ফোল্ডার গবেষণা এবং সারাংশিকরণ ধাপের জন্য প্রতি-টাস্ক মডেল নির্বাচনকে সমর্থন করে।
+<TLDR>Research & summarize নির্বাচিত বিষয় বা note title খুঁজে LLM দিয়ে context-এর summary বানায় ও active Markdown-এ যোগ করে। Tavily বা DuckDuckGo স্পষ্ট বাছুন। Search results ও model citations review করতে হবে।</TLDR>
 
-এটি [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge)-এর অংশ।
-</TLDR>
+## সারসংক্ষেপ
 
-## সংক্ষিপ্ত বিবরণ
+Search provider ও summary model আলাদা। Tavily key চায়; DuckDuckGo key ছাড়া হলেও network ও rate limits মেনে চলে। Local model web research offline করে না।
 
-গবেষণা হলো Notemd-এর অন্যতম শক্তিশালী ইন্টিগ্রেশন: এটি পড়া, অনুসন্ধান ও লেখার মধ্যে একটি চক্র সম্পন্ন করে। অপরিচিত শব্দ খুঁজে বের করার জন্য ব্রাউজারে যাওয়ার পরিবর্তে, আপনি সেটিকে হাইলাইট করুন এবং Notemd-কে অনুসন্ধান, সারাংশ তৈরি ও ফলাফলগুলি যোগ করতে দিন -- সবকিছুই আপনার ভল্টের মধ্যেই।
+## কীভাবে কাজ করে
 
-এই প্রক্রিয়াটি সম্পূর্ণরূপে কনফিগারযোগ্য। আপনি অনুসন্ধান প্রদানকারী, সারাংশ লেখার LLM এবং ফলাফলগুলি সক্রিয় নোটে যোগ হবে নাকি আলাদা ফাইলে লেখা হবে তা নির্বাচন করতে পারেন। ব্যাচ মোড আপনাকে এক ক্লিকে ফোল্ডারের প্রতিটি নোট নিয়ে গবেষণা করার সুযোগ দেয়।
+### Search তারপর summary
 
-## এটি কীভাবে কাজ করে
+1. Target Markdown খুলে ছোট topic বাছুন বা title নিন।
+2. **Research & summarize** চালান।
+3. Tavily snippets দেয়; DuckDuckGo result pages আনতে পারে।
+4. সক্ষম local retrieval scoped excerpts যোগ করতে পারে।
+5. Research model বিষয় ও source label-সহ `Research Summary`-র নিচে লেখে।
+6. Source URLs খুলে দাবিগুলো মিলান; context পাওয়া সব generated citation সঠিক প্রমাণ করে না।
 
-### সার্চ-থেন-সামারাইজ পাইপলাইন
+### Tavily ও DuckDuckGo
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+| পছন্দ | প্রস্তুতি | পরিচালনার সীমা |
+| -------- | ------- | ---------------------- |
+| Tavily | Tavily বেছে key দিন | Account quota ও ফেরত snippets |
+| DuckDuckGo | DuckDuckGo স্পষ্ট বাছুন | Key নেই; search throttling ও page availability প্রযোজ্য |
 
-1. **কোয়েরি এক্সট্রাকশন** -- Notemd আপনার নির্বাচন বা নোটের শিরোনাম থেকে অনুসন্ধান শব্দগুলি বের করে।
-2. **ওয়েব সার্চ** -- প্রথমে Tavily ব্যবহার করা হয়। যদি কোনো API কী কনফিগার না করা থাকে, তবে DuckDuckGo স্বয়ংক্রিয়ভাবে ব্যবহৃত হয় (কোনো কীর প্রয়োজন নেই)।
-3. **LLM সামারাইজেশন** -- কাঁচা অনুসন্ধান ফলাফলগুলি কনফিগার করা LLM-এ পাঠানো হয়, যা ইনলাইন সূত্রের উদ্ধৃতি সহ একটি সংক্ষিপ্ত সারাংশ তৈরি করে।
-4. **অ্যাপেন্ড** -- ফরম্যাট করা সারাংশটি সক্রিয় নোটের `## Research` শিরোনামের নিচে যুক্ত হয়।
+ফাঁকা বা ভুল Tavily key নিজে engine বদলায় না। কাজের web context না পেলে রিপোর্ট দেখুন। সক্রিয় available local context summary দিতে পারে; source label সেটিকে web-backed research থেকে আলাদা করে।
 
-### Tavily বনাম DuckDuckGo
+### Title generation-এ research
 
-| দিক | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| API কী | প্রয়োজন (ফ্রি টিয়ার উপলব্ধ) | প্রয়োজন নয় |
-| ফলাফলের গুণমান | উচ্চতর (AI-এর জন্য বিশেষভাবে তৈরি) | সাধারণ অনুরোধের জন্য যথেষ্ট |
-| রেট লিমিট | উদার বিনামূল্যের স্তর | থ্রটলিংয়ের অধীনে |
-| কনফিগারেশন | সেটিংসে `tavilyApiKey` | শূন্য কনফিগারেশন -- স্বয়ংক্রিয় ফলবতী |
+**Enable research in "Generate from title"** চালু করলে batch-সহ title generation research নিতে পারে। প্রথমে বন্ধ। এটিই supported folder route; আলাদা সাধারণ Research Folder action নেই।
 
-### ব্যাচ ফোল্ডার রিসার্চ
+## সেটিংস
 
-একটি ফোল্ডারে রাইট-ক্লিক করুন এবং **"Notemd: Research folder"** নির্বাচন করুন। ফোল্ডারের প্রতিটি `.md` ফাইল ধারাবাহিকভাবে (অথবা কনফিগার করা কনকারেন্সি পর্যন্ত সমান্তরালভাবে) প্রক্রিয়াকৃত হয়। প্রতিটি নোট তার নিজস্ব গবেষণা সারসংক্ষেপ পায়.
+| সেটিং | প্রাথমিক মান | প্রভাব |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Search backend বাছা |
+| `tavilyApiKey` | `''` | Tavily key |
+| `tavilyMaxResults` | `5` | Requested Tavily result count |
+| `tavilySearchDepth` | `basic` | Tavily search depth |
+| `ddgMaxResults` | `5` | Requested DuckDuckGo count |
+| `ddgFetchTimeout` | `15` | Page fetch timeout, seconds |
+| `maxResearchContentTokens` | `3000` | আনুমানিক web-context budget |
+| `researchProvider` | `DeepSeek` | Task routing-এ summary provider |
+| `researchModel` | `''` | ফাঁকা হলে provider model |
+| `researchSummarizeLanguage` | `en` | Task language সক্রিয় হলে output |
+| `enableResearchInGenerateContent` | `false` | Title generation research চালু |
+| `enableLocalKnowledgeRetrieval` | `false` | Local retrieval আলাদা চালু |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | এই কাজে local retrieval ব্যবহার |
 
-## কনফিগারেশন
+### Context ও model
 
-| সেটিং | ডিফল্ট | প্রভাব |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Tavily API কী। খালি থাকলে, শুধুমাত্র DuckDuckGo ব্যবহৃত হয়. |
-| `researchProvider` / `researchModel` | DeepSeek | অনুসন্ধান ফলাফল সারসংক্ষেপ করার জন্য প্রতি-টাস্ক LLM |
-| `maxResearchContentTokens` | `4000` | LLM-এ পাঠানো বিষয়বস্তুর জন্য টোকেন বাজেট। অতিরিক্ত অংশ কাটা হয়. |
-| `researchAppendToNote` | `true` | সূত্র নোটে সারসংক্ষেপ যোগ করুন। যদি false হয়, তবে আলাদা একটি ফাইল তৈরি হয়. |
-| `researchLanguage` | `'en'` | সারসংক্ষেপিত গবেষণার জন্য আউটপুট ভাষা |
-
-### প্রতি-টাস্ক মডেল সুপারিশ
-
-বহুভাষিক বিষয়বস্তু পরিচালনা এবং ভালোভাবে গঠিত গদ্য উৎপাদন করতে সক্ষম একটি মডেল গবেষণার জন্য উপকারী। বিবেচনা করুন:
-
-- **DeepSeek** -- ডিফল্ট, সাশ্রয়ী, ভালো মান
-- **GPT-4o** -- উচ্চতর মানের সারসংক্ষেপ, উচ্চতর খরচ
-- **Gemini Flash** -- দ্রুত ও সস্তা, সাধারণ প্রশ্নের জন্য উপযুক্ত
+Context limit অনুমান, provider-exact tokenization নয়। Truncation প্রমাণ বাদ দিতে পারে। প্রশ্ন সুনির্দিষ্ট ও model/budget উপযুক্ত রাখুন। Local index lexical; embeddings বা complete recall-এর নিশ্চয়তা নয়।
 
 ## উদাহরণ
 
-আপনি *transformer attention mechanisms* বিষয়ক একটি গবেষণাপত্র পড়ছেন এবং *relative positional encoding* নামে একটি অপরিচিত শব্দ দেখতে পাচ্ছেন: Obsidian রেখে যাওয়ার পরিবর্তে.
+`আপেক্ষিক অবস্থান এনকোডিং` নোটে research করে মূল papers বা official docs-এর সঙ্গে তুলনা করুন। প্রশ্ন, প্রকৃত URL ও correction রাখুন যাতে সিদ্ধান্ত যাচাই করা যায়। Guide-এর example আপনার vault-এর executed research নয়।
 
-1. **"relative positional encoding"** কে হাইলাইট করুন
-2. রাইট-ক্লিক --> **"Notemd: Research and summarize"**
-3. Notemd ওয়েব অনুসন্ধান করে, শীর্ষ ফলাফলগুলো সারসংক্ষেপ করে এবং যোগ করে:
+## Cancel ও privacy
 
-```markdown
-## Research
+সম্পন্ন appends থাকে এবং accepted provider/page request শেষ হতে পারে। Search query, website request এবং LLM সংগৃহীত context ও সক্ষম local excerpts পায়। Reports শেয়ারের আগে পরীক্ষা করুন।
 
-### Relative Positional Encoding
+## পরামর্শ
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
+- Web source, local note ও model inference আলাদা করুন।
+- Quotes, dates ও গুরুত্বপূর্ণ দাবির মূল দেখুন।
+- ছোট query-তে search ও LLM failure আলাদা পরীক্ষা করুন।
+- Repeat-এর আগে আগের summary দেখে duplication এড়ান।
 
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
+## পরবর্তী ধাপ
 
-এখন সারসংক্ষেপটি আপনার ভল্টের অংশ হয়ে গেছে, যা অনুসন্ধানযোগ্য, লিঙ্কযোগ্য এবং অফলাইনে অ্যাক্সেসযোগ্য।
-
-## টিপস
-
-- **সর্বোত্তম ফলাফলের জন্য একটি Tavily কী সেট করুন** -- এমনকি ফ্রি টিয়ারও খাঁটি DuckDuckGo-এর তুলনায় ভালো সামঞ্জস্য প্রদান করে.
-- **একটি শক্তিশালী সারসংক্ষেপকারী মডেল ব্যবহার করুন** -- সস্তা মডেলগুলো সূক্ষ্ম প্রযুক্তিগত বিষয়বস্তুকে সরল করে দিতে পারে.
-- **প্রাথমিক পঠনের পর ব্যাচ গবেষণা** করুন যাতে একসাথে অনেক নোটের মধ্যে ঘাটতিগুলো পূরণ করা যায়.
-- **যোগ করা সারসংক্ষেপগুলো পর্যালোচনা করুন** -- LLM-এর ফলে উৎসের বিবরণ ভুল হতে পারে। গুরুত্বপূর্ণ দাবিগুলো যাচাই করুন.
-
----
-
-## পরবর্তী ধাপসমূহ
-
-- [Concept Notes](./concept-notes) -- গবেষণার ফলাফল থেকে গুরুত্বপূর্ণ শব্দগুলো বের করে সংরক্ষণ করুন
-- [Wiki-Links](./wiki-links) -- আপনার ভল্টে গবেষণা থেকে প্রাপ্ত ধারণাগুলোকে একে অপরের সাথে লিঙ্ক করুন
-- [Translation](./translation) -- গবেষণার সারসংক্ষেপগুলোকে অন্য ভাষায় অনুবাদ করুন
-- [LLM প্রদানকারীগণ](/docs/providers/overview) -- সারসংক্ষেপণের জন্য ব্যবহৃত মডেলটি কনফিগার করুন
+- [কনফিগারেশন](../getting-started/configuration)।
+- [নিজের prompts](../advanced/custom-prompts)।
+- [সমস্যা সমাধান](../advanced/troubleshooting)।

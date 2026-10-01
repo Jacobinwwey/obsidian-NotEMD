@@ -17,11 +17,14 @@
 
 以下位置现在承载活跃文档真值：
 
+- `website/docs/` 与 `website/i18n/` - 公开任务指南、受众入口及已复核翻译
 - `docs/README.md` 与 `docs/README.zh-CN.md` - 仓库文档入口
 - `docs/maintainer/` - 维护者控制文档与工作流契约
 - `docs/brainstorms/` - 带日期的进度审计、收口分析与后续方向文档
 - `docs/superpowers/plans/` - 长周期计划与路线图
 - `docs/releases/` - 发布说明
+
+公开 FAQ 的同一源文档承载可见答案与结构化 FAQ 元数据。`docs/faq.md` 及中文对应文件只是发现入口，不维护第二份答案目录。`CONTRIBUTING.md` 将贡献者引向开发者指南，执行规则仍归 AGENTS 所有。网站发行事实在 `website/src/lib/releaseFacts.cjs` 中从 package／manifest 元数据进行小型投影，供浏览器与 Node 工具共用。历史验收与编年史记录保留各自的日期和源 revision。
 
 ### 归档文档
 
@@ -36,6 +39,7 @@
 根目录 Markdown 现在应只保留仓库契约或发现入口：
 
 - `README*.md`
+- `CONTRIBUTING.md`
 - `AGENTS.md`
 - `GEMINI.md`
 - `change.md`

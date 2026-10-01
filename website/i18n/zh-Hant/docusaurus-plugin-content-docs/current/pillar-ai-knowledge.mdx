@@ -1,341 +1,135 @@
 ---
 id: pillar-ai-knowledge
-title: Obsidian AI知識管理指南
-description: 運用 AI 建構連結式知識庫的完整指南——從維基連結與概念抽取，到研究、翻譯及圖表生成
+title: Obsidian AI 知識管理指南
+description: 保留源文，明確任務範圍，審核結果後再擴大 Notemd 自動化。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [obsidian, AI, knowledge management, wiki-links, concept notes, LLM, diagrams, research, translation, workflows, Copilot alternative, Smart Connections alternative, obsidian AI plugin]
-concepts: [Notemd, Obsidian, AI Knowledge Management, Wiki-Links, Concept Notes, LLM Integration, Diagrams, Research, Translation, Workflows, Copilot Alternative]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Tavily
-    url: https://tavily.com
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Obsidian AI 知識管理指南
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Obsidian AI知識管理指南
+# Obsidian AI 知識管理指南
 
 <TLDR>
-**Notemd 能將由 LLM 提供動力的閱讀內容轉化為持續性的知識：維基連結可串接各種概念，概念筆記能建立可搜尋的圖譜，研究功能可將網路上的資訊納入您的知識庫，翻譯功能可打破語言障礙，圖表則能讓結構一目了然，而工作流程則能讓所有功能僅透過一次點擊即可串聯起來。** 本指南將完整介紹從原始筆記到具有連結性、視覺化且多語言的知識庫的整個流程。
+有用的流程會區分源材料、模型生成與你的修正。Notemd 的連結、擷取、研究、翻譯與圖表任務寫入可審核檔案。先驗證一篇來源，再自動化有限資料夾。
 </TLDR>
 
-## 為何選擇 AI 知識管理？
+## 定義目標
 
-傳統的筆記方式會產生純文本檔案。即便有手動建立的維基連結，大多數筆記仍保持分離狀態。Notemd 利用 LLM 來自動化處理這些連結層：
+先決定需要連結閱讀筆記、概念集合、有來源摘要、譯文還是圖表。更多檔案或連結不自動改善理解及檢索；先想好如何驗證及日後找到材料。
 
-- **LLMs 會讀取您的內容**，並辨別出重點——包括術語、方法、人物與理論。
-- **連結會自動插入**在每個概念出現的位置，而非藏在「另請參見」中。
-- **概念說明文件會以獨立的可取得檔案形式產生**
-- **研究透過網路取得的背景資料來豐富筆記**
-- **圖表讓結構一目了然** — 由相同內容所產生的思維導圖、流程圖與資料圖表
-
-結果就是：一個會隨著您處理的每條筆記而不斷擴充的知識圖譜，而非只有在您想起要添加連結時才會更新。
-
-## 完整的處理流程
+## 完整流程
 
 ```mermaid
-graph TD
-    A[Raw Note] --> B[Add Links]
-    B --> C[Wiki-Linked Note]
-    B --> D[Concept Notes]
-    C --> E[Connected Knowledge Graph]
+flowchart TD
+    A[源筆記副本] --> B[選任務與輸出範圍]
+    B --> C[連結筆記或概念筆記]
+    B --> D[研究、翻譯或圖表]
+    C --> E[對照源文和證據]
     D --> E
-    F[Web Research] --> E
-    G[Translation] --> E
-    H[Diagram Generation] --> I[Visual Structure]
-    E --> H
-    I --> E
-    J[One-Click Workflow] --> B
-    J --> F
-    J --> G
-    J --> H
+    E --> F[在 Vault 保留修正結果]
 ```
 
-每個步驟都是獨立的。可選擇使用其中一個或全部。最具影響力的順序為：**添加連結 → 概念說明 → 圖表**。
+這些是可選任務，不表示一個預設按鈕完成全部。保留源檔，組合工作流程前核對每項輸出位置。
 
----
+## 1. Wiki 連結：明確建立關係
 
-## 1. Wiki-連結：明確建立連接
+試跑 **處理檔案（新增連結）**，預設檢查同層 `_processed.md`。核對連結有無導覽價值，以及引文、程式碼、公式是否忠實。
 
-維基連結是知識圖譜的支柱。Notemd 使用 LLM 來：
+聚焦學習和同義詞抑制可引導模型，不保證概念等價或數值閾值。重視按既有檔名可重現匹配時，使用確定性標題比對。
 
-1. 讀取您的筆記內容（長文件會分割成多個區塊）
-2. 辨別核心概念——優先考慮具體的技術術語，而非一般名詞
-3. 在每個出現的位置插入 `[[wiki-links]]`
-4. 抑制同義詞，如此一來「ML」和「Machine Learning」就不會產生不同的節點
+[Wiki 連結](./features/wiki-links)
 
-### 何時使用
+## 2. 概念筆記：區分術語與說明
 
-- **每則筆記超過 100 個字** — 字數較少的筆記所含概念較少
-- **研究論文、技術文件、會議筆記** — 內含大量領域專有術語
-- **在內容穩定之後** — 請勿反複處理草稿
+擷取前指定概念目錄。獨立擷取預設僅標題，源文不變；新檔需 `Linked From` 時開啟反向連結並關閉最小模板。
 
-### 關鍵設定
+擷取與解釋生成是不同操作。**從標題批次生成** 可能處理目錄內既有及新增合格筆記。測試用專用目錄，核對 complete 移動行為。
 
-| 設定 | 推薦 | 為什麼 |
-|---------|-----------|-----|
-| `addLinksProvider` | DeepSeek 或 GPT-4o-mini | 低成本下仍具良好精確度 |
-| 同義詞抑制 | 開啟 | 防止重複節點 |
-| 上下文視窗 | 段落 | 精確度與成本的平衡 |
+重複審核依檔名啟發式，移除前確認，相近名稱可能代表不同技術概念。
 
-→ [Wiki-Links 深入探討](/docs/features/wiki-links)
+[概念筆記](./features/concept-notes)
 
----
+## 3. 研究：保留證據鏈
 
-## 2. 概念說明：可檢索的知識節點
+選主題或活動標題，在設定選 Tavily／DuckDuckGo，執行 **研究並摘要**。缺 Tavily key 不自動換 DuckDuckGo，打開來源核驗附加摘要。
 
-維基連結可將概念以內聯方式串接起來，但概念筆記則能讓每個概念被獨立查詢。每個概念都會有自己的 `.md` 檔案：
+選用本地檢索加入範圍內片段，其索引為詞法，片段傳至任務 LLM。本地索引不代表研究完全離線或只在裝置內。
 
-```markdown
-# Machine Learning
+[研究指南](./features/research)
 
-## Linked From
-- [[My Research Notes]]
-- [[Neural Networks Explained]]
+## 4. 翻譯：核對意義與結構
+
+選輸出語言，執行檔案翻譯。預設 `_<language>.md`，既有目標可覆寫。只需片段先複製至暫存筆記。
+
+檢查術語、數字、程式碼、連結和數學符號。長文分塊可能失去上下文，21 個 UI 和 34 個網站 locale 不證明任何語言對品質。
+
+[翻譯指南](./features/translation)
+
+## 5. 圖表：選可編輯產物
+
+選圖表類型及相容源格式，審核預覽，儲存源檔與所需 SVG／PNG／PDF。圖片不能證明另一編輯器保留所有語意關係。
+
+選擇受支援目錄。CircuitikZ 有受限輸出與獨立原生編譯檢查；Drawnix 靜態跨分支線不保證重排附著；PowerPoint 表格修復改善原生輸出，但 Mermaid／SVG 仍可圖片回退。
+
+[圖表指南](./features/diagrams)
+
+## 6. 工作流程：自動化已驗證步驟
+
+以名稱、`::` 和 `>` 分隔動作 ID，預設：
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### 提取流程
+依序連結、目錄標題生成、Mermaid 修復，不增加通用研究或圖表生成。各動作保留先決條件與輸出，不是任意文字管線。
 
-LLM 的提示語結構相當嚴謹：
-- 轉換為單數形式
-- 較偏好多字詞概念而非單字詞（例如使用「介電弛豫」而非「弛豫」）
-- 跳過參考文獻/參考資料章節
-- 以 `CONCEPT:` 行的形式輸出，以便進行確定性解析
+預設遇回報失敗停止，只有後續能用剩餘輸入才適合繼續。取消保留完成產物，不是回復。
 
-概念會透過 `Set<string>` 在各個區塊之間去除重複。單個區塊出現的 LLM 錯誤不會中斷整個操作。
+[工作流程](./features/workflows)
 
-### 反向連結
+## 7. Provider：匹配協定與工作負載
 
-啟用後，每個概念筆記都會追蹤有哪些來源筆記提到了它。Obsidian 的原生反向連結面板也會顯示反向連線。
+36 個預設涵蓋五類協定，依端點、存取權、資料政策及實測結果選擇。比較速度／費用採相同源文與提示詞。
 
-### 去重
+任務專用路由預設關閉。明確需要不同 profile 時才啟用，判斷本地化前逐項檢查。
 
-Notemd的4步去重引擎可偵測：
-1. **完全匹配** — 不區分大小寫的檔名比對
-2. **複數形式** — 「Models.md」與「Model.md」的差異
-3. **符號標準化** — 「A-B.md」與「A B.md」的差異
-4. **單字包含** — 當存在「Machine Learning.md」時，「ML.md」會被標記
+[Provider 概覽](./providers/overview)
 
-### 關鍵設定
+## 開始使用清單
 
-| 設定 | 推薦 | 為什麼 |
-|---------|-----------|-----|
-| `conceptNoteFolder` | `concepts/` 或 `🧠 concepts/` | 保持金庫井然有序 |
-| `extractConceptsAddBacklink` | 開啟 | 啟用反向查詢 |
-| `extractConceptsMinimalTemplate` | 關閉 | 包含「Linked From」的完整模板 |
-| 每任務模型 | DeepSeek | 概念抽取不需要昂貴的模型。 |
-| 同義詞抑制 | 開啟 | 相同的設定會同時影響連結與提取。 |
-
-→ [概念說明深入解析](/docs/features/concept-notes)
-
----
-
-## 3. 研究：將網路引入
-
-Notemd 將網路搜尋整合到您的筆記工作流程中：
-
-1. **查詢建構** — 您的筆記標題或選取內容會成為搜尋查詢
-2. **網路搜尋** — Tavily（推薦，需 API 金鑰）或 DuckDuckGo（免費，無需金鑰）
-3. **LLM 摘要功能** — 將搜尋結果簡化為相關的摘要
-4. **新增到筆記** — 在游標位置或作為新章節加入摘要
-
-### 何時使用
-
-- 在處理新主題之前——先取得網路上下文
-- 當概念說明需要補充內容時——進行研究後再添加連結
-- 用於文獻回顧——對資料夾中的筆記進行批次研究
-
-### 關鍵設定
-
-| 設定 | 推薦 | 為什麼 |
-|---------|-----------|-----|
-| `researchProvider` | GPT-4o 或 Claude | 研究需要更高品質的摘要生成 |
-| 搜尋服務 | Tavily | 更高的相關性，可設定的深度 |
-| `maxResearchContentTokens` | 4000 | 深度與成本之間的平衡 |
-
-→ [深入研究](/docs/features/research)
-
----
-
-## 4. 翻譯：打破語言障礙
-
-Notemd 會使用您所設定的 LLM 來翻譯筆記——而非專用的翻譯 API。這意味著：
-
-- **情境感知式翻譯** — LLM 能理解整份文件，而非僅逐句翻譯
-- **技術術語處理** — "gradient descent" 仍保持為「梯度下降」，而非「坡度向下」
-- **批次支援** — 一次操作即可翻譯整個筆記資料夾
-- **每任務模型** — 使用 Gemini Flash 進行翻譯（快速、便宜且支援多語言）
-
-### 語言支援
-
-Notemd 本身支援 21 種 UI 語言。翻譯目標語言可依任務進行設定。常見的語言組合包括：EN↔ZH、EN↔JA、EN↔KO、EN↔DE、EN↔FR、EN↔ES。
-
-→ [翻譯深入解析](/docs/features/translation)
-
----
-
-## 5. 圖表：讓結構顯現出來
-
-Notemd的圖表處理流程是以規格為優先： LLM會產生結構化的 `DiagramSpec` JSON，接著轉換器會將其轉換為目標格式。這種方式比要求 LLM直接處理原始的 Mermaid 語法，能產出更可靠的輸出結果。
-
-### 意圖偵測
-
-Notemd 會根據內容判斷最適合的圖表類型：
-
-- **帶有數字的表格** → 數據圖表 (Vega-Lite)
-- **用戶端/伺服器術語** → 序列圖 (Mermaid)
-- **實體/主鍵** → ER圖表 (Mermaid)
-- **步驟/流程圖** → 流程圖 (Mermaid)
-- **概念圖關鍵字** → JSON Canvas (Obsidian 本機)
-- **預設** → 思維導圖 (Mermaid)
-
-### 渲染鏈路
-
-主要目標 → 替代方案 → 替代方案 → HTML。如果 Mermaid 的語法出錯，它會帶著錯誤內容向 LLM 重試一次，否則就退而使用最簡化的圖表。
-
-### 關鍵設定
-
-| 設定 | 推薦 | 為什麼 |
-|---------|-----------|-----|
-| `enableExperimentalDiagramPipeline` | 開啟 | 以規格為先，提升品質 |
-| `experimentalDiagramCompatibilityMode` | `best-fit` | 每個意圖的本機目標 |
-| `summarizeToMermaidProvider` | GPT-4o 或 Claude | 圖表規格需要空間推理能力 |
-| `autoMermaidFixAfterGenerate` | 開啟 | 自動偵測 LLM 語法錯誤 |
-| 本地知識增強 | 針對特定領域啟用 | 透過金庫上下文提升精確度 |
-
-→ [圖表深入解析](/docs/features/diagrams)
-
----
-
-## 6. 工作流程：一鍵自動化
-
-工作流程可將多個任務串聯成一個側邊欄按鈕。其 DSL 格式為：
-
-```
-task1 | task2 | task3
-```
-
-範例：`addLinks` | 提取概念 | generateDiagram` — 一鍵將筆記從原始文字轉換為完全連接的視覺化知識節點。
-
-### 推薦的工作流程
-
-| 工作流程 | 鏈條 | 使用案例 |
-|----------|-------|----------|
-| 完整流程 | `addLinks \| extractConcepts \| generateDiagram` | 新筆記 |
-| 先進行研究 | `research \| addLinks` | 不熟悉的話題 |
-| 多語言支援 | `translate \| addLinks` | 多語言筆記 |
-| 僅圖表 | `generateDiagram` | 快速視覺化 |
-
-→ [工作流程深入探討](/docs/features/workflows)
-
----
-
-## 7. LLM 提供商：從雲端到本地的 36 種選項
-
-Notemd 支持 4 種傳輸類型下的 36 家供應商。關鍵群組：
-
-- **國際雲端**：OpenAI、Anthropic、Google、Mistral、xAI
-- **中國雲端**：DeepSeek、Qwen、Doubao、Moonshot、GLM、百度、SiliconFlow
-- **網關**：OpenRouter、GitHub Models、Hugging Face、Vercel
-- **本地**：Ollama、LMStudio、OVMS — 沒有 API 金鑰，資料不會離開您的電腦
-
-### 每任務模型策略
-
-最具成本效益的設定方式是，對於簡單任務使用便宜的模型，對於複雜任務則使用強大的模型：
-
-```
-extractConcepts  → DeepSeek (fast, cheap, accurate enough)
-addLinks          → DeepSeek or GPT-4o-mini
-research          → GPT-4o or Claude (needs quality)
-generateDiagram   → GPT-4o or Claude (needs spatial reasoning)
-translate         → Gemini Flash (fast, multilingual)
-```
-
-→ [LLM 提供商概覽](/docs/providers/overview)
-
----
-
-## 入門檢查清單
-
-1. **安裝 Notemd** — [Community Plugins](/docs/getting-started/installation)（建議使用）或手動安裝
-2. **設定供應商** — DeepSeek（最簡單）、OpenAI，或 Ollama（免費）
-3. **處理您的第一張筆記** — 右鍵點擊 → 「處理檔案（新增連結）」
-4. **設定概念資料夾** — 設定 → Notemd → 输出 → 概念資料夾
-5. **提取概念** — 在同一張筆記上執行「提取概念」指令
-6. **產生圖表** — 執行「Generate diagram」以視覺化這些連線
-7. **建立工作流程** — 將上述步驟串聯成一個按一下即可執行的按鈕
-
-## 推薦的設定
-
-### 學生（預算）
-
-```
-Provider: DeepSeek (free tier available)
-Concept extraction: DeepSeek
-Research: DuckDuckGo (free) + DeepSeek
-Diagrams: Off (or legacy Mermaid)
-Workflows: addLinks | extractConcepts
-```
-
-### 研究員（品質）
-
-```
-Provider: GPT-4o (primary)
-Concept extraction: DeepSeek (cost savings)
-Research: GPT-4o + Tavily
-Diagrams: best-fit mode, GPT-4o
-Workflows: research | addLinks | extractConcepts | generateDiagram
-```
-
-### 以隱私為首（僅限本地）
-
-```
-Provider: Ollama (llama3 or qwen2.5:7b)
-All tasks: Ollama
-Research: DuckDuckGo (free, no API key)
-Diagrams: legacy Mermaid mode
-```
-
-### 雙語（ZH + EN）
-
-```
-Primary: DeepSeek (Chinese queries)
-Translation: Google Gemini Flash
-Research: Tavily + DeepSeek (Chinese search context)
-Language output: per-task (extractConceptsLanguage: zh-CN)
-```
-
----
+1. 安裝並備份源文。
+2. 設定、測試精確 provider/model。
+3. 指定概念目錄及獨立輸出。
+4. 對副本執行一項任務。
+5. 對照來源，保留更正。
+6. 擴至小目錄，檢查部分完成後再組較長流程。
 
 ## 常見模式
 
-### 模式：處理一篇研究論文
+### 處理研究論文
 
-1. 匯入 PDF 內容（或貼上）
-2. **研究** — 取得該主題的網路相關資料
-3. **新增連結** — 檢出並連結關鍵概念
-4. **提取概念** — 建立獨立筆記
-5. **產生圖表** — 可視化論文的結構
+以外部工具轉為可讀 Markdown，先檢查公式、表格和圖片。擷取概念／原文，研究指定問題，只有有助於核對關係時才生成圖表。保留論文連結與更正。
 
-### 模式：每日筆記豐富化
+### 維護概念集
 
-1. 寫每日筆記
-2. **新增連結** — 將今日的構想與現有的概念相連結
-3. 概念說明會隨著反向連結自動更新
+用專用目錄，擷取後審核術語，只為選定子集生成解釋。去重前備份；數量無法取代精確定義和有效導覽。
 
-### 模式：文獻綜述
+### 處理私密材料
 
-1. 建立名為 papers/notes 的資料夾
-2. **批次新增連結** — 處理整個資料夾
-3. **去除重複概念** — 清理幾乎重複的筆記
-4. **產生圖表** — 整個文獻的思維導圖
+先裝妥本地服務、模型和依賴，檢查專用路由。離線需求時避開網路研究，分享前審核診斷。預設回環地址不阻止 profile 改為遠端。
 
----
+### 復原中斷批次
 
-*Notemd 是開源軟體（MIT 授權），且可在所有平台上與 Obsidian 0.15.0+ 一起使用。[立即安裝](/docs/getting-started/installation) 或 [在 GitHub 上查看](https://github.com/Jacobinwwey/obsidian-NotEMD)。*
+等待取消／失敗收斂，閱讀報告、核對已完成和復原輸出、比較衝突，只重試預期工作。取消不等於無輸出，配套檔需先查引用再刪。
+
+## 延伸閱讀
+
+- [快速開始](./getting-started/quick-start)：首個任務。
+- [批次處理](./advanced/batch-processing)：範圍與歸屬。
+- [開發者](./developers/overview)：擴充和驗證。
+- [Agent](./agents/overview)：公開契約。

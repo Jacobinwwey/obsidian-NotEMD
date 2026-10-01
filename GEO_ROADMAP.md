@@ -1,29 +1,42 @@
-# NotEMD GEO Roadmap
+# Notemd GEO Roadmap And Historical Ledger
 
-**Created:** 2026-06-12
-**Updated:** 2026-07-07
-**Status:** Phase 1-8 shipped. The 2026-07-07 multilingual docs slice supersedes the old partial zh-CN boundary with full docs routes for every README/UI locale declared in `website/src/lib/publishedLocales.mjs`; Search Console plus AI visibility remain external post-deploy work.
-**Scope:** Documentation-site GEO for AI search visibility, language truth, GitHub Pages reliability, and answer-engine retrieval quality. This does not cover plugin runtime i18n.
+Created: 2026-06-12 · Current policy reviewed: 2026-09-14
 
----
+## English — Current Direction
 
-## Current Truth Snapshot
+The active delivery plan is the [bilingual 1.9.8 V0–V6 plan](docs/plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md). The [status register](docs/maintainer/project-plan-status.md) owns current progress. This file retains historical GEO work; earlier “shipped” labels do not close the new release's content, localization or deployment gates.
 
-The website is a Docusaurus site under `website/`, deployed by `.github/workflows/deploy-docs.yml` on pushes to `main` that touch `website/**` or the workflow file. The workflow runs `npm ci`, `npm run build`, and `npm run audit:build` from the `website` working directory before uploading the Pages artifact.
+- **Scope:** Docusaurus documentation, useful audience paths, source-backed claims, language quality and Pages delivery. Plugin UI i18n is a separate surface.
+- **Language:** 34 website locales, with 24 routes / 816 documents required for the candidate. Direct authoring covers every declared locale and the README variants; the status register records completed sets and remaining work. Route presence is not semantic review. English and zh-CN remain the only indexable languages; other locales retain `noindex,follow` and stay out of sitemap/eligible search alternates.
+- **Authoring:** Codex writes and reviews translations directly. No LM Studio, translation engine or other-model authoring call. Source/translation hashes record actual reviewed text; changing either invalidates the receipt. AI review does not establish independent native-speaker approval.
+- **Discovery:** The homepage provides newcomer, user, developer and Agent entries. The four public Agent exports remain distinct from nine maintainer operations. Model lists, local storage, diagram previews and lexical retrieval retain their documented limits.
+- **Source ownership:** `website/src/lib/releaseFacts.cjs` projects package/manifest facts. `website/plugins/documentation-map.cjs` generates `llms.txt` during the default-locale build from those facts and the existing locale/route registry. `website/src/lib/publishedLanguageScope.js` retains compatibility with the shared full route data. No independently versioned static map is maintained.
+- **Verification:** `website/scripts/audit-build.cjs`, `npm run audit:build` and navigation/accessibility checks gate delivery. Unexpected internal links are fatal. The current localized checks and generated-map build are candidate evidence, not full-site or native-host acceptance.
+- **Publication:** `.github/workflows/deploy-docs.yml` provides read-only PR checks and deploy-scoped permissions. Deployment requires the matching public stable release and all four assets. **1.9.8 is not yet published.** Release, serial chronicle refresh, explicit Pages dispatch and live revision verification remain open.
+- **Measurement:** Search Console and AI visibility are post-deploy observations, not build results. `llms.txt` is a curated map, not a ranking mechanism. Missing account access means not measured; no ranking, citation or traffic improvement is promised.
 
-The homepage is part of the GEO contract. Public GEO changes are incomplete if they only update maintainer notes, `llms.txt`, or schema without updating the visible GitHub Pages homepage.
+Use the [current bilingual publication procedure](docs/maintainer/github-pages-language-geo-workflow.md), [release procedure](docs/maintainer/release-workflow.md) and [dated measurement log](docs/maintainer/github-pages-geo-measurement-log.md). Keep visible answers, JSON-LD, canonical/hreflang, robots, sitemap and release facts consistent.
 
-The current public language surface is complete for every published documentation locale:
+## 中文 — 当前方向
 
-| Surface | Current state | Interpretation |
-|---|---|---|
-| English docs | Complete canonical docs under `website/docs/` | Primary crawl and answer source |
-| Simplified Chinese | Full docs route set under `website/i18n/zh-CN/.../current/` | Public localized docs surface, aligned one-to-one with English routes |
-| Traditional Chinese | Full docs route set under `website/i18n/zh-Hant/.../current/` | Public localized docs surface, aligned one-to-one with English routes |
-| README/UI locale matrix | Full docs route sets for `zh-CN`, `zh-Hant`, `zh-TW`, `ja`, `fr`, `de`, `es`, `ko`, `it`, `pt`, `pt-BR`, `ru`, `ar`, `fa`, `hi`, `bn`, `nl`, `sv`, `fi`, `da`, `no`, `pl`, `tr`, `he`, `th`, `el`, `cs`, `hu`, `ro`, `uk`, `vi`, `id`, and `ms` | Public localized docs surfaces, aligned one-to-one with English routes |
-| Fallback localized docs | Retired for the public docs route set | Public localized docs should not rely on English fallback pages or emit `noindex,follow` |
-| Plugin UI i18n | Separate runtime feature | Do not treat runtime language support as website documentation coverage |
-| Localized UI chrome (navbar, footer, sidebar labels, pagination) | Generated per public locale by `website/scripts/generate-localized-docs.cjs` plus Docusaurus i18n JSON | Visible docs navigation should not expose stale English category labels |
+当前交付以 [1.9.8 V0–V6 双语计划](docs/plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.zh-CN.md)为准，[状态登记](docs/maintainer/project-plan-status.zh-CN.md)负责实际进度。本文件保留历史 GEO 工作；旧“已交付”标签不能关闭新版本的内容、翻译或部署门禁。
+
+- **范围：** Docusaurus 文档、完整受众路径、源码支持的事实、语言质量和 Pages 交付。插件 UI 国际化是另一范围。
+- **语言：** 网站 34 种语言，候选要求 24 条路由／816 篇文档。直接撰写范围包含所有登记语言和 README 变体，已完成组数与剩余工作统一见状态登记。路由存在不等于语义审核。只有英文与 zh-CN 可索引，其他语言保留 `noindex,follow`，不进入 sitemap／可索引替代链接。
+- **撰写：** Codex 直接撰写和审核，不调用 LM Studio、翻译引擎或其他模型生成文字。源文／译文哈希记录实际审阅内容，任一变化均使记录失效；AI 审核不证明独立母语者批准。
+- **发现入口：** 首页提供新人、用户、开发者和 Agent 路径。四个公开 Agent 导出命令与九个维护操作保持分离，保留模型列表、本地存储、图表预览和词法检索的真实边界。
+- **事实归属：** `website/src/lib/releaseFacts.cjs` 投影 package／manifest。`website/plugins/documentation-map.cjs` 在默认语言构建中结合既有语言／路由登记生成 `llms.txt`。`website/src/lib/publishedLanguageScope.js` 保留完整范围数据的兼容消费者。不再维护独立版本静态索引。
+- **验证：** `website/scripts/audit-build.cjs`、`npm run audit:build` 和导航／可访问性检查控制交付，未解释的内部链接失败会阻断构建。当前局部语言和索引构建属于候选证据，不是全站或原生宿主验收。
+- **发布：** `.github/workflows/deploy-docs.yml` 对 PR 只读，写权限仅在部署 job。部署要求匹配的公开稳定版本及四个资产。**1.9.8 尚未发布。** Release、串行编年史刷新、显式 Pages 部署与线上 revision 验证仍开放。
+- **测量：** Search Console 和 AI visibility 是部署后观察，不是构建结果。`llms.txt` 是导航，不是排名机制。没有账号权限应记为未测量，不承诺排名、引用或流量提升。
+
+执行依据为[双语发布手册](docs/maintainer/github-pages-language-geo-workflow.zh-CN.md)、[Release 流程](docs/maintainer/release-workflow.zh-CN.md)和[日期化测量记录](docs/maintainer/github-pages-geo-measurement-log.zh-CN.md)。可见答案、JSON-LD、canonical／hreflang、robots、sitemap 与版本事实须一致。
+
+## Historical Records / 历史记录
+
+The entries below preserve their original dates, paths and judgments. They describe past work, including claims subsequently corrected by the current plan; they are not current operating instructions or proof of a new candidate. In particular, the former blanket localized-indexability rule, legacy translation generators and generic configuration-template claims are superseded.
+
+以下条目保留原日期、路径和判断，包括本轮已纠正的旧结论，不作为当前操作指令或新候选验收依据。原先所有语言均可索引、旧翻译生成流程及通用配置模板等说法均已被当前契约取代。
 
 ## 2026-07-07 Phase 8 Multilingual Docs Route Parity
 

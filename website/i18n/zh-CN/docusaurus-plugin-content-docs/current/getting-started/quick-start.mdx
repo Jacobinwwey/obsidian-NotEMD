@@ -1,181 +1,82 @@
 ---
 id: quick-start
-title: 快速入门指南
-description: 5分钟内开始使用 Notemd
+title: 快速开始
+description: 配置 provider，处理测试笔记，并在运行文件夹工作流前核对 Notemd 的实际输出。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 快速开始
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 快速入门指南
+# 快速开始
 
 <TLDR>
-**5分钟内即可开始使用 Notemd。**只需三步：(1) 添加 LLM API 密钥（或使用本地 Ollama），(2) 打开笔记并运行“处理文件（添加链接）”功能，(3) 在侧边栏中体验一键工作流。支持 36 个 provider 定义，无需编写代码，搭配 Ollama 即可离线使用。
+先准备一篇可丢弃的 Markdown 笔记和一个已能访问的 provider。处理文件夹前，先核对生成文件。云端调用会把任务内容发送给 provider；本地推理也需要已经运行的服务和下载完成的模型。
 </TLDR>
 
-## 步骤1：配置您的第一个 LLM 提供商（2分钟）
+## 第一步：配置首个 LLM Provider
 
-### 选项A：云服务提供商（OpenAI、Anthropic等）
+1. [安装并启用 Notemd](./installation)，打开**设置 → Notemd**。
+2. 选择 provider，按需填写端点和凭据，选择账户可用的模型。支持模型发现时可点击 **Get Model List（获取模型列表）**；模型出现在列表中，不等于聊天生成已通过验证。
+3. 运行 **Test Connection（测试连接）**，先解决认证、模型或端点错误。
+4. 搜索 **Concept note folder（概念笔记文件夹）**。如需生成概念文件，请选择专用文件夹，例如 `concepts`。初始值为空，`concepts/` 只是可选示例，并非预设输出目录。
 
-1. 打开**设置** → **Notemd**
-2. 在**LLM 提供商配置**下方，从下拉列表中选择一名提供商
-3. 输入您的 **API 密钥**
-4. （可选）点击“获取模型列表”以查看可用模型
-5. 为每种任务类型选择一个模型
+Ollama 需先拉取模型并填写准确的本地名称，预设端点为 `http://localhost:11434/api`。LM Studio 需先启动本地服务器，选择 `LMStudio` 预设。参见[本地模型](../providers/local)。即使摘要模型在本地，网络研究仍需联网。
 
-**热门选择：**
-- **OpenAI**：`gpt-4o-mini`（快速、价格实惠）
-- **Anthropic**：`claude-sonnet-4-6`（高质量）
-- **DeepSeek**：`deepseek-chat`（价格非常实惠）
+## 第二步：尝试首个任务
 
-### 选项 B：本地 Ollama（无需 API 密钥）
+创建 `Notemd trial.md`，写入可安全发送给所选 provider 的短文：
 
-1. 安装 [Ollama](https://ollama.com/)
-2. 下载模型：`ollama pull llama3.1`
-3. 在 Notemd 设置中，选择 **“Ollama"** 作为提供方
-4. 模型名称：`llama3.1`（或您下载的任何模型）
-
-## 第2步：尝试您的第一个任务（1分钟）
-
-### 在笔记中添加维基链接
-
-1. 打开任何包含有用内容的笔记
-2. 在编辑器中右键点击
-3. 选择**“处理文件（添加链接）”**
-4. 稍等几秒。
-5. 关键概念现在就是 `[[wiki-linked]]`！
-
-**示例：**
-
-**之前：**
-```
-Machine learning models use neural networks to process data.
+```text
+机器学习模型使用神经网络，从示例中学习规律。
 ```
 
-**之后：**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
+在 Notemd 侧边栏或命令面板执行 **Process file (add links)（处理文件：添加链接）**。默认在源目录生成独立的 `Notemd trial_processed.md`，并保留原文件。打开输出核对实际链接；模型结果可能不同，例如：
+
+```markdown
+[[机器学习]]模型使用[[神经网络]]，从示例中学习规律。
 ```
 
-## 第3步：探索功能（2分钟）
+配置的概念文件夹也可能收到概念笔记。需要审核文件与链接，不能把处理成功视为模型已完整识别所有重要概念。
+
+## 第三步：探索功能
 
 ### 提取概念笔记
 
-1. 右键点击 → **“从当前文件提取概念”**
-2. Notemd 会为每个概念创建单独的文件。
-3. 检查您配置的概念文件夹（默认路径：`concepts/`）
-4. 每份概念说明都包含指向您原始说明的回链。
+执行 **Extract concepts (current file)（提取当前文件概念）**，可在不改写源笔记的情况下提取概念，前提是已配置概念文件夹。独立提取默认创建仅含标题的笔记，不添加来源反向链接；需要时显式开启。[概念笔记](../features/concept-notes)说明其与添加链接流程的差异。
 
-### 研究与总结
+### 研究与摘要
 
-1. 在笔记中高亮显示某个主题
-2. 右键点击 → **“研究与总结”**
-3. Notemd 查询网络搜索（Tavily 或 DuckDuckGo）
-4. 摘要功能会将来源信息附加到您的笔记中
+在已打开的 Markdown 编辑器中选择主题文本，或使用笔记标题，运行 **Research & summarize（研究并总结）**。在设置中明确选择带 API key 的 Tavily，或 DuckDuckGo。摘要追加到当前笔记；引用结论前先打开并核对来源。
 
 ### 一键工作流
 
-1. 查看**左侧侧边栏**中的工作流按钮
-2. 点击任意笔记上的**“一键提取”**
-3. 它的运行流程为：添加链接 → 提取概念 → 进行研究 → 生成图表
-4. 一键搞定！
+默认 **One-Click Extract** 按钮使用以下精确定义：
 
-## 常见的初始任务
-
-### 任务1：处理论文/文章
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### 任务2：翻译笔记
+依次添加链接，为概念文件夹或所选文件夹内符合条件的笔记生成正文，再修复生成后 complete 文件夹中的 Mermaid 块。因此它也可能处理已有概念笔记。首次运行应使用专用测试文件夹；该定义不会自动添加网络研究或图表生成步骤。
 
-```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
+## 取消与输出核对
 
-### 任务3：创建知识图谱
+在进度界面选择**取消**以停止后续工作。已完成输出会保留；取消不是撤销事务，也不保证 provider 停止生成或计费。等待任务收敛后再开始下一轮，并检查报告中的输出路径和恢复冲突，不要假定取消意味着没有产物。
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## 故障排查
 
-## 定制技巧
+- 认证或模型错误：核对准确的 provider profile，并重跑连接测试。
+- 未生成概念文件：确认概念文件夹已配置且启用。
+- 链接无用：核对响应与自定义提示词；不存在保证提取有效的最小字数。
+- 限流：排查账户配额时，保持默认批量并发数 `1`。
 
-### 按任务选择模型
+## 后续阅读
 
-你可以为不同的任务使用不同的模型：
-
-| 任务 | 推荐型号 | 为什么 |
-|------|------------------|-----|
-| 添加链接 | `gpt-4o-mini`，`deepseek-chat` | 快速，大量调用 |
-| 提取概念 | `claude-sonnet-4-6`，`gpt-4o` | 质量提取 |
-| 研究 | `perplexity`，`gpt-4o` | 基于网页的 |
-| 翻译 | `gemini-flash`，`gpt-4o` | 多语言支持 |
-| 图表 | `claude-opus`，本地模型 | 复杂推理 |
-
-配置位置：**设置 → Notemd → 任务专用模型**
-
-### 自定义工作流
-
-创建你自己的按钮：
-
-1. 设置 → Notemd → 工作流
-2. 点击“添加工作流”
-3. 输入 DSL：`process-current-add-links>extract-concepts-current>research-and-summarize`
-4. 命名为：“我的研究流程”
-5. 侧边栏中出现了一个新按钮。
-
-## 故障排除
-
-### “API 密钥无效”
-- 检查键是否正确（不能有额外空格）
-- 验证账户是否有余额
-- 使用设置中的“连接测试”按钮进行测试
-
-### “未找到模型”
-- 点击“获取模型列表”即可查看可用的模型。
-- 某些提供商要求使用特定的型号名称（例如 `gpt-4o`，而非 `gpt-4`）。
-
-### 链接没有显示出来
-- 确保笔记内容足够丰富（超过50个字）。
-- 试试更强大的模型吧。
-- 检查 LLM 调用是否成功（请查看诊断面板）
-
-### 性能缓慢
-- 使用更快的模型（`gpt-4o-mini` 而非 `gpt-4o`）
-- 在设置中减小块大小
-- 为批处理任务启用并行处理
-
-## 后续步骤
-
-- 📖 [探索所有功能](../features/wiki-links)
-- ⚙️ [高级配置](./configuration)
-- 🔧 [LLM 提供商设置](../providers/overview)
-- ❓ [常见问题](../faq)
-
-## 视频教程
-
-观看3分钟的快速入门视频（中文）：
-[【完全开源且免费！NotEMD 三分钟快速入门】](https://b23.tv/lqR0RlA)
-
-## 获取帮助
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **问题**：[GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **文档**：[完整文档](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [配置](./configuration)：设置搜索、收藏、输出路径和语言。
+- [工作流](../features/workflows)：有效动作 ID 与错误策略。
+- [故障排查](../advanced/troubleshooting)：诊断与复现。
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)：附脱敏证据报告问题。

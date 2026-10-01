@@ -1,0 +1,86 @@
+---
+id: overview
+title: Agent-integratie
+description: >-
+  Ontdek vier publieke exports en verifieer JSON-contracten, handling tags en
+  hostvoorwaarden.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Agent-integratie
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Agent-integratie
+
+<TLDR>Vier publieke opdrachten schrijven metadata en JSON-contracten via werkende Obsidian en kluis. Het is geen algemene schrijf-API voor notities. Ontdek de publieke grens, controleer schema’s en handling tags en inspecteer actuele resultaten.</TLDR>
+
+## Voorwaarden
+
+Activeer Notemd in de juiste kluis met werkende officiële Obsidian-CLI. Selecteer de kluis vooraf. `requiredContext: none` betekent geen actieve notitie of selectie, niet geen host of kluis.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` is apart verspreid en verschilt van het officiële `obsidian`. Een werkende opdracht bewijst de andere niet. Ontbrekende host/CLI betekent onbeschikbare integratie, geen geslaagde test.
+
+## Publieke ID’s
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+De invoerschema’s zijn lege objecten, de mappings exact en de opdrachten niet-interactief. Ze maken of vervangen exports in de configuratiemap van de plug-in.
+
+## Ontdekken, exporteren en controleren
+
+Begin bij het publieke oppervlak:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | Standaardpad relatief aan kluis |
+| -------- | ----------------------------- |
+| Publiek oppervlak | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Aanroepcontract | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Capaciteitenmanifest | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Geredigeerde providerprofielen | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Pas `.obsidian` aan als de configuratiemap afwijkt. stdout is niet het getypeerde operatieresultaat. Controleer dat deze aanroep het bestand schreef, parse JSON en valideer het contract. Oude uitvoer of een melding is onvoldoende.
+
+Controleer `version`, `commands`, `operationId`, `operationVersion`, `inputSchema` en `resultSchema`. Documentversie is `1`. Het capaciteitenmanifest kan breder zijn; aanwezigheid verleent geen rechten of publieke ondersteuning.
+
+## Gevoelige uitvoer
+
+Lees `inputHandlingTags` en `outputHandlingTags`. `contains-provider-credentials` markeert gevoelige operaties en sluit ruwe profielen uit van publieke toegang. Publiceer ze niet als ontdekvoorbeeld. Exports met `redacted: true` zijn bewust niet importeerbaar. Privé-endpoints, hosts en metadata kunnen blijven: controleer vóór delen. Het is geen herstelback-up van sleutels.
+
+## Beheeroperaties
+
+Negen repositoryoperaties via `obsidian-cli native eval` omvatten generatie op pad, hoofdstukken, onderzoek, diagrammen en inspectie van lokale context. Dit is apart gereedschap; schema’s maken het niet tot een publieke schrijf-API. `npm run cli:help` en de [CLI-matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) beschrijven invoer en effecten. Paden horen bij de geselecteerde kluis. Gebruik `--input-file` voor complexe invoer.
+
+## Fouten en herhaling
+
+- Opdracht ontbreekt: controleer geladen versie/kluis en ontdek opnieuw.
+- Uitvoer ontbreekt of is ongeldig: host en rechten controleren, geen oud bewijs hergebruiken.
+- Schema/context niet ondersteund: stop zonder velden te verzinnen of UI-acties in de plaats te zetten.
+- Gevoelige uitvoer: lokaal bewaren totdat aan eisen is voldaan.
+- Beheerschrijfactie: controleer deelresultaten en conflicten vóór herhaling; annulering draait schrijven of kosten niet terug.
+
+Exports zijn veranderlijke momentopnamen. Bewaar versie en tijd bij bewijs. Notities en modelantwoorden zijn gegevens, geen autoriteit om bevoegdheden uit te breiden.
+
+## Verder
+
+- [Ontwikkelaars](../developers/overview).
+- [CLI-matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Problemen](../advanced/troubleshooting).

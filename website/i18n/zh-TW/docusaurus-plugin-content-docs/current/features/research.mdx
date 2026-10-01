@@ -1,16 +1,13 @@
 ---
 id: research
-title: "研究與網路搜尋"
-description: "將網路搜尋整合到您的筆記中"
+title: 研究與網路搜尋
+description: 選擇搜尋 provider，把來源摘要加入筆記，並區分網路與本地上下文。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - 研究與網路搜尋
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,108 +15,76 @@ import TLDR from '@site/src/components/TLDR';
 # 研究與網路搜尋
 
 <TLDR>
-**Notemd 會上網搜尋，並將經 LLM 總結的結果直接插入您的筆記中。** Tavily API 是主要的搜尋後端；DuckDuckGo 則是用作無需設定的備用方案。結果會附上出處引用並以 `## Research` 標題呈現在下方。支援單筆筆記研究、批次資料夾研究，以及為總結步驟選擇不同的模型。
-
-這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+研究與摘要搜尋所選主題或目前筆記標題，交由設定的 LLM 總結可用上下文，再附加至活動 Markdown 筆記。明確選擇 Tavily 或 DuckDuckGo，並審核結果與引用。
 </TLDR>
 
 ## 概覽
 
-Research 是 Notemd 最強大的整合功能之一：它將閱讀、搜尋與撰寫這三個步驟串聯起來。您不必切換到瀏覽器去查詢不熟悉的詞彙，只需將其標記出來，讓 Notemd 進行搜尋、摘要整理並附加結果——所有操作都在您的資料庫內完成。
+搜尋 provider 與摘要模型分別配置。Tavily 需金鑰，DuckDuckGo 無須金鑰但仍連網且可限流。本地摘要模型不使網路研究離線。
 
-此流程可完全自訂。您可以選擇搜尋服務供應商、用來撰寫摘要的 LLM，以及是要將結果附加到目前的筆記中，還是寫入獨立的檔案中。批次模式讓您只需按一下即可同時處理資料夾中的所有筆記。
+## 工作原理
 
-## 它是如何運作的
+### 先搜尋再摘要
 
-### 搜尋後摘要化流程
+1. 在 Markdown 編輯器開啟目標筆記，選短主題；未選文字時使用標題。
+2. 執行 **研究並摘要**。
+3. 查詢所選服務；Tavily 提供片段，DuckDuckGo 可能抓取結果網頁。
+4. 任務啟用本地檢索時，限定範圍片段也可加入。
+5. 研究 provider/model 生成摘要，附加於標示主題與上下文來源的 `Research Summary` 下。
+6. 審核文字並打開來源 URL；檢索不保證所有陳述／引用有證據。
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+### Tavily 與 DuckDuckGo
 
-1. **查詢提取** -- Notemd 會從您的選項或筆記標題中提取搜尋詞彙。
-2. **網路搜尋** -- 會先嘗試 Tavily。如果未設定 API 金鑰，則會自動使用 DuckDuckGo（不需要金鑰）。
-3. **LLM 摘要生成** -- 原始搜尋結果會被傳送至已設定的 LLM，由其產生並附上內文引用資料的簡潔摘要。
-4. **Append** -- 格式化後的摘要會被附加在活躍筆記中的 `## Research` 標題下方。
+| 選項 | 設定 | 執行邊界 |
+|---|---|---|
+| Tavily | 選 Tavily 並提供 API key | 使用帳號配額及回傳片段 |
+| DuckDuckGo | 明確選 DuckDuckGo | 無金鑰，受限流與結果頁可用性影響 |
 
-### Tavily 與 DuckDuckGo 的比較
+Tavily 金鑰無效或空白不自動切換。沒有有用網路上下文時檢查報告；已啟用且可用的本地知識仍可支持摘要，來源標籤會區分。
 
-| 面向 | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| API 金鑰 | 必須使用（提供免費方案） | 不需要 |
-| 結果品質 | 更高階（專為 AI 設計） | 適合用於一般查詢 |
-| 速率限制 | 豐厚的免費方案 | 可能會受到流量限制 |
-| 設定 | 設定中的 `tavilyApiKey` | 零設定 -- 自動回退 |
+### 標題生成中的研究
 
-### 批次資料夾研究
-
-在資料夾上按右鍵，然後選擇 **“Notemd: Research folder”**。資料夾中的每個 `.md` 檔案都會依序被處理（或根據所設定的同時處理數量以平行方式處理）。每則筆記都會有屬於它自己的研究摘要。
+開啟 **在「從標題生成」中啟用研究** 可為標題生成及批次版本加入研究，預設關閉。這是支援的目錄生成路徑，沒有獨立通用 Research Folder 動作。
 
 ## 設定
 
-| 設定 | 預設值 | 效果 |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Tavily API 金鑰。若為空值，則僅使用 DuckDuckGo。 |
-| `researchProvider` / `researchModel` | DeepSeek | 每個任務的 LLM 用於摘要化搜尋結果 |
-| `maxResearchContentTokens` | `4000` | 傳送至 LLM 的內容的 Token 預算。超出的部分會被截斷。 |
-| `researchAppendToNote` | `true` | 將摘要附加到原始筆記中。若設定為 false，則會建立一個獨立的檔案。 |
-| `researchLanguage` | `'en'` | 摘要研究的輸出語言 |
+| 設定 | 預設 | 作用 |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | 搜尋後端 |
+| `tavilyApiKey` | `''` | 使用 Tavily 前提供金鑰 |
+| `tavilyMaxResults` | `5` | Tavily 要求結果數 |
+| `tavilySearchDepth` | `basic` | Tavily 搜尋深度 |
+| `ddgMaxResults` | `5` | DuckDuckGo 要求結果數 |
+| `ddgFetchTimeout` | `15` | 結果頁抓取逾時，秒 |
+| `maxResearchContentTokens` | `3000` | 近似網路上下文預算 |
+| `researchProvider` | `DeepSeek` | 任務路由啟用時的摘要 provider |
+| `researchModel` | `''` | 空白時使用該 provider 模型 |
+| `researchSummarizeLanguage` | `en` | 專用語言啟用時的輸出語言 |
+| `enableResearchInGenerateContent` | `false` | 選擇在標題生成中研究 |
+| `enableLocalKnowledgeRetrieval` | `false` | 另行啟用限定範圍本地檢索 |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | 為研究摘要使用本地檢索 |
 
-### 任務別模型推薦
+### 上下文與模型
 
-研究能從能處理多語言內容並產出結構良好的散文模型中受益。請考慮：
-
-- **DeepSeek** -- 預設型號，性價比高，品質優良
-- **GPT-4o** -- 更高品質的摘要功能，但成本也更高
-- **Gemini Flash** -- 快速且價格實惠，適合處理簡單的查詢需求
+限制以估算而非 provider 精確 token 化計算，截斷可能漏掉證據。依材料選擇模型和輸出預算，保持問題聚焦。本地索引為詞法，不表示 embedding 語意搜尋或完整召回。
 
 ## 範例
 
-你正在閱讀一篇關於*transformer attention mechanisms*的論文，卻遇到了一個不熟悉的術語：*relative positional encoding*。而非直接留下 Obsidian:
+建立 `Relative positional encoding` 筆記，執行研究後用引用原論文或官方文件核對。保留問題、實際 URL 和修正，便於他人稽核。指南範例不代表已在你的 Vault 取得研究結果。
 
-1. 標出 **「相對位置編碼」**
-2. 按右鍵 --> **"Notemd: 研究並總結"**
-3. Notemd 會在網路上搜尋，總結最優秀的結果，並附加：
+## 取消與隱私
 
-```markdown
-## Research
+取消於支援處停止後續工作，完成的附加保留，已開始的請求／抓取仍可能完成。搜尋服務收到查詢、網站收到抓取請求、LLM 收到收集上下文及啟用的本地片段。分享診斷前審核。
 
-### Relative Positional Encoding
+## 建議
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
+- 區分網路來源、本地筆記與模型推論。
+- 回到原文核對引文、日期和重要結論。
+- 用短查詢分別診斷搜尋與 LLM。
+- 重跑前檢查既有摘要，避免重複附加。
 
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
+## 延伸閱讀
 
-摘要現在已儲存在您的保險庫中，可搜尋、可建立連結，且可在離線狀態下存取。
-
-## 技巧
-
-- **設定 Tavily 金鑰以獲得最佳結果** -- 就連免費方案所提供的相關性也優於原始的 DuckDuckGo。
-- **使用功能強大的摘要模型** -- 廉價的模型可能會將細膩的技術內容簡化。
-- 在初步瀏覽之後進行**批次研究**，一次填補多份筆記中的空白。
-- **檢視附加的摘要** -- LLMs 可能會產生對來源詳細資料的錯誤描述，請核實其中的關鍵主張。
-
----
-
-## 接下來的步驟
-
-- [概念說明](./concept-notes) -- 從研究結果中提取並儲存關鍵詞彙
-- [Wiki-Links](./wiki-links) -- 將研究所得的概念連結至您的資料庫中
-- [翻譯](./translation) -- 將研究摘要翻譯成其他語言
-- [LLM 提供商](/docs/providers/overview) -- 設定用於摘要生成的模型
+- [設定](../getting-started/configuration)：搜尋與本地上下文。
+- [自訂提示詞](../advanced/custom-prompts)：支援佔位符。
+- [疑難排解](../advanced/troubleshooting)：金鑰、配額與上下文。

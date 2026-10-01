@@ -1,142 +1,112 @@
 ---
 id: workflows
-title: "Alur Kerja"
-description: "Menggabungkan beberapa tugas menggunakan tombol satu klik"
+title: Alur kerja
+description: >-
+  Gabungkan tindakan bilah samping dengan ID sah, konteks folder jelas, dan
+  kebijakan kegagalan terukur.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Alur kerja
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Alur Kerja
+# Alur kerja
 
-<TLDR>
-**Notemd Alur kerja menggabungkan beberapa tugas menjadi satu tindakan satu klik.** Tentukan urutan seperti `add-links > extract-concepts > research > diagram` menggunakan DSL sederhana. Alur kerja muncul sebagai tombol di sidebar yang menjalankan seluruh rangkaian pada catatan atau folder saat ini. Dilengkapi dengan alur kerja bawaan; buat alur kerja khusus di pengaturan. Setiap langkah menggunakan konfigurasi model per-tugasnya sendiri.
+<TLDR>Alur menjalankan tindakan yang ada secara berurutan. Tiap tindakan dapat meminta folder atau editor aktif. Ini bukan pipa teks: masukan, keluaran, dan efek samping tetap milik tiap tindakan. Mulai dari catatan uji dan folder khusus.</TLDR>
 
-Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Gambaran umum
 
-## Gambaran Umum
+Definisi **One-Click Extract** bawaan:
 
-Sebuah alur kerja menghilangkan hambatan dalam menjalankan tugas satu per satu. Alih-alih mengklik kanan empat kali untuk menambahkan tautan, mengekstrak konsep, mencari istilah yang tidak dikenal, dan membuat diagram, Anda hanya perlu menekan satu tombol di sidebar dan seluruh rangkaian akan dieksekusi. Notemd menangani urutan eksekusi, penyebaran kesalahan, dan pelaporan kemajuan.
-
-Alur kerja didefinisikan dalam DSL ringan (bahasa khusus domain). Alur kerja tersebut berada di pengaturan, muncul sebagai tombol yang dapat diklik di sidebar Obsidian, dan dapat diterapkan pada catatan saat ini atau seluruh folder.
-
-## Cara Kerjanya
-
-### Saluran Eksekusi Alur Kerja
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Menguraikan** -- String DSL dipisahkan menggunakan `>` (atau `>`) menjadi daftar terurut dari identifikasi tugas.
-2. **Menyelesaikan** -- Setiap identifikasi dipetakan ke perintah internal (add-links, extract-concepts, research, translate, diagram, dll.).
-3. **Menjalankan** -- Langkah-langkah dijalankan secara berurutan. Setiap langkah menggunakan penyedia dan model per-tugas yang telah dikonfigurasi.
-4. **Penanganan kesalahan** -- Jika suatu langkah gagal, alur kerja akan berhenti atau melanjutkan ke langkah berikutnya, tergantung pada kebijakan kesalahan Anda.
-5. **Selesai** -- Pemberitahuan toast melaporkan keberhasilan atau mencantumkan langkah-langkah yang gagal.
+1. Tambahkan tautan ke catatan aktif; buat konsep jika foldernya telah diatur.
+2. Hasilkan isi untuk catatan yang memenuhi syarat dalam folder konsep atau folder pilihan langkah batch, termasuk catatan lama.
+3. Perbaiki blok Mermaid dalam folder complete generasi batch.
+
+Alur bawaan tidak melakukan riset web. Generasi hanya memakai riset jika pengaturan terpisahnya diaktifkan. Lihat [batch](../advanced/batch-processing).
+
+## Cara kerja
+
+### Eksekusi
+
+Langkah berjalan berurutan dan bilah samping melaporkan status/kegagalan. Pembatalan menghentikan langkah lanjutan dan diteruskan ke jalur permintaan yang didukung. Penulisan selesai tetap ada; tidak ada rollback seluruh alur.
+
+Folder konsep menjadi pilihan awal. Generasi batch merekam folder sumber dan complete; perbaikan Mermaid berikutnya memakai complete. Tindakan lain tetap memiliki syarat berkas aktif, pilihan teks, atau interaksi masing-masing.
 
 ### Format DSL
 
-Alur kerja didefinisikan sebagai urutan identifikasi tugas yang dipisahkan dengan `>`:
+Satu tombol bernama per baris. `::` memisahkan nama dan daftar tindakan; `>` memisahkan ID. Baris kosong dan baris berawalan `#` diabaikan. ID tidak dikenal ditolak.
 
+```text
+Ekstraksi dan diagram::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Identifikasi tugas yang tersedia:**
+Pilih tindakan melalui pembangun atau sunting DSL. ID stabil, label mengikuti bahasa UI. Varian folder memiliki ID sendiri, bukan aturan penggantian string umum.
 
-| Identifikasi | Aksi |
-|------------|--------|
-| `process-current-add-links` | Menambahkan tautan wiki ke catatan yang aktif |
-| `extract-concepts-current` | Mengeluarkan konsep dari catatan yang aktif |
-| `research-and-summarize` | Meneliti teks yang dipilih atau judul catatan |
-| `process-current-translate` | Menerjemahkan catatan yang aktif |
-| `summarize-to-mermaid` | Membuat diagram dari catatan yang aktif |
-| `generate-from-title` | Menghasilkan konten dari judul catatan |
-| `extract-original-text` | Mengeluarkan teks asli (untuk OCR/konten yang dipindai) |
+| ID | Tindakan / prasyarat |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Tambah tautan catatan aktif |
+| `process-folder-add-links` | Tambah tautan dalam folder pilihan |
+| `extract-concepts-current` | Ekstrak konsep catatan aktif |
+| `extract-concepts-folder` | Ekstrak konsep folder pilihan |
+| `generate-from-title` | Hasilkan isi dari judul aktif |
+| `batch-generate-from-titles` | Hasilkan isi catatan folder yang memenuhi syarat |
+| `research-and-summarize` | Riset pilihan/judul dalam editor Markdown terbuka |
+| `summarize-as-mermaid` | Ringkas masukan aktif yang didukung menjadi Mermaid |
+| `generate-diagram` | Buat artefak diagram dari masukan yang didukung |
+| `preview-diagram` | Pratinjau sumber atau artefak diagram yang didukung |
+| `translate-current-file` | Terjemahkan berkas aktif yang didukung |
+| `batch-translate-folder` | Terjemahkan folder pilihan |
+| `extract-original-text` | Ekstrak kutipan asli tertentu |
+| `batch-extract-original-text` | Ekstrak kutipan berkas folder yang memenuhi syarat |
+| `split-note-by-chapters` | Pisahkan catatan aktif menurut bab |
+| `batch-mermaid-fix` | Perbaiki blok Mermaid dalam folder |
+| `fix-formula-current` | Normalkan pembatas rumus catatan aktif |
+| `batch-fix-formula` | Normalkan pembatas rumus dalam folder |
+| `check-duplicates-current` | Periksa duplikat catatan aktif |
+| `check-remove-duplicate-concepts` | Tinjau dan hapus konsep duplikat secara interaktif |
+| `test-llm-connection` | Uji penyedia terkonfigurasi |
+| `probe-slide-export-env` | Periksa lingkungan ekspor slide lokal |
+| `export-slides` | Ekspor berkas aktif menjadi slide |
 
-**Varian tingkat folder** mengganti `current` dengan `folder` dalam nama identifikator.
+### Bawaan dan alur khusus
 
-### Alur kerja yang sudah ditentukan vs. Alur kerja kustom
-
-Notemd disertai alur kerja siap pakai untuk pola umum:
-
-| Alur kerja | Rantai | Kasus Penggunaan |
-|----------|-------|----------|
-| **Ekstrak Sekali Klik** | tambah-tautan > ekstrak-konsep > teliti | Memproses makalah penelitian dalam satu langkah |
-| **Saluran Kerja Lengkap** | add-links > extract-concepts > research > diagram | Ekstraksi pengetahuan lengkap dengan visualisasi |
-| **Menerjemahkan + Menghubungkan** | translate > add-links | Menerjemahkan lalu menghubungkan konsep dalam bahasa sasaran |
-
-**Alur kerja khusus** dibuat di pengaturan:
-
-1. Buka **Settings** --> **Notemd** --> **Workflows**
-2. Klik **"Add Workflow"**
-3. Masukkan rantai DSL (misalnya, `process-current-add-links>extract-concepts-current`)
-4. Berikan nama tampilan (misalnya, "Quick Link + Extract")
-5. Button baru akan muncul di sidebar segera
+One-Click Extract adalah bawaan. Tombol tambahan adalah definisi Anda. Cari pengaturan alur, beri nama, pilih dan urutkan tindakan, lalu periksa tooltip bilah samping sebelum menjalankan. Perbaiki kesalahan parser dahulu.
 
 ## Konfigurasi
 
-| Pengaturan | Default | Efek |
-|---------|---------|--------|
-| `workflows` | Kumpulan predefinisi | Array definisi alur kerja (nama + DSL) |
-| `workflowContinueOnError` | `true` | Lanjut ke langkah berikutnya jika langkah saat ini gagal |
-| `workflowShowProgress` | `true` | Tampilkan notifikasi progres setelah setiap langkah selesai |
+| Pengaturan | Bawaan | Efek |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Berhenti pada kegagalan langkah pertama yang dilaporkan |
+| `useMultiModelSettings` | `false` | Gunakan penyedia aktif sampai perutean per tugas diaktifkan |
+| `enableResearchInGenerateContent` | `false` | Riset judul nonaktif kecuali diaktifkan terpisah |
 
-### Model per-tugas dalam Alur Kerja
+`continue_on_error` memungkinkan langkah berikut berjalan setelah kegagalan. Gunakan hanya jika langkah itu dapat memakai masukan tersisa; melanjutkan tidak menjadikan alur parsial berhasil seluruhnya.
 
-Setiap langkah dalam alur kerja menggunakan konfigurasi model per-tugas **sendiri**. Anda tidak perlu menentukan model di dalam DSL itu sendiri. Urutan penyelesaian adalah:
+### Model per tugas
 
-1. Provider/model per-tugas jika `useMultiModelSettings` ada di sana
-2. `activeProvider` global jika tidak
-
-Ini berarti `add-links` dapat dijalankan di DeepSeek sementara `research` dijalankan di GPT-4o -- semuanya dalam satu klik alur kerja yang sama.
+Penyedia/model tetap milik tugas. Penggantian model kosong memakai konfigurasi penyedia terkait. Periksa tiap pilihan sebelum alur menangani materi privat.
 
 ## Contoh
 
-Anda baru saja mengimpor PDF dari sebuah makalah machine learning ke vault Anda dan ingin melakukan ekstraksi pengetahuan secara penuh:
+Siapkan `trial-concepts` kosong, proses satu sumber uji, lalu periksa konsep dan folder complete yang dilaporkan. Jalankan tindakan terpisah dahulu jika tujuan belum jelas. Perluas lingkup setelah memeriksa hasil.
 
-1. Buka catatan yang diimpor
-2. Klik tombol sidebar **"Full Pipeline"**
-3. Notemd dieksekusi sebagai berikut:
-   - **Langkah 1**: Tambahkan tautan wiki -- `[[attention mechanism]]`, `[[transformer]]`, dll.
-   - **Langkah 2**: Ekstrak konsep -- membuat catatan konsep di folder konsep Anda
-   - **Langkah 3**: Lakukan penelitian -- merangkum sumber web untuk istilah kunci
-   - **Langkah 4**: Buat diagram -- menghasilkan peta pikiran Mermaid dari struktur makalah tersebut
-4. Setelah sekitar 30 detik, catatan Anda akan memiliki tautan, catatan konsep sudah ada, hasil penelitian ditambahkan, dan berkas diagram disimpan
+## Saran
 
-Semuanya hanya dengan satu klik.
+- Pertahankan rantai yang mudah ditelusuri kegagalan dan kepemilikan hasilnya.
+- Hindari pembersihan/penghapusan pada alur tanpa pengawasan; konfirmasi interaktif tetap berlaku.
+- Setelah pembatalan/konflik, periksa log dan berkas sebelum retry.
+- Uji model dan folder persis; tes koneksi tidak membuktikan kuota cukup untuk batch panjang.
 
-## Tips
+## Selanjutnya
 
-- **Mulai dengan alur kerja yang sudah ditentukan** -- alur kerja ini mencakup pola-pola yang paling umum. Sesuaikan hanya bila Anda membutuhkan urutan yang berbeda.
-- **Aktifkan `workflowContinueOnError`** -- kegagalan pada langkah diagram tidak boleh menghentikan seluruh pipeline.
-- **Gunakan alur kerja folder** untuk pemrosesan massal -- klik kanan pada folder, pilih alur kerja, dan setiap catatan akan diproses.
-- **Berikan nama alur kerja yang jelas** -- ruang di sidebar terbatas. Gunakan nama yang singkat dan berorientasi tindakan seperti "Quick Extract" atau "Translate + Link".
-
----
-
-## Langkah Selanjutnya
-
-- [Research](./research) -- Pahami apa fungsi langkah penelitian sebelum menambahkannya ke alur kerja
-- [Wiki-Links](./wiki-links) -- Fitur pemberian tautan inti yang digunakan di sebagian besar alur kerja
-- [Concept Notes](./concept-notes) -- Ekstraksi konsep sebagai langkah dalam alur kerja
-- [Batch Processing](/docs/advanced/batch-processing) -- Konkurensi dan laporan kemajuan untuk alur kerja folder
+- [Konsep](./concept-notes): prasyarat dan templat.
+- [Batch](../advanced/batch-processing): lingkup dan hasil parsial.
+- [Riset](./research): jaringan dan verifikasi sumber.

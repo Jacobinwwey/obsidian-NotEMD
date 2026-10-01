@@ -1,67 +1,60 @@
 ---
 id: openai
-title: "OpenAI"
-description: "Konfigurasikan OpenAI (GPT-4, GPT-4o)"
+title: OpenAI
+description: >-
+  Sediakan titik akhir OpenAI natif untuk penghantaran Chat Completions dikongsi
+  Notemd dan sahkan akses model.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [openai, gpt-4o, provider, configuration]
-concepts: [OpenAI, GPT-4o, API Configuration]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: GPT-4
-    url: https://openai.com/gpt-4
+keywords:
+  - OpenAI
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Pembekal OpenAI
+# Penyedia OpenAI
 
-<TLDR>
-**OpenAI menggunakan pengangkutan yang serasi dengan OpenAI.** Tetapan pra‑tetap semasa adalah `gpt-4o`, `https://api.openai.com/v1`, `temperature: 0.5`, dan ujian sambungan `models-then-chat`. Gunakan halaman ini apabila anda memerlukan semantik medan yang tepat; gunakan gambaran keseluruhan [LLM Providers](/docs/providers/overview) untuk pemilihan pada tahap kategori.
+<TLDR>Pratetap OpenAI menggunakan masa jalan Chat Completions serasi OpenAI yang dikongsi. Sediakan kunci API dan model yang menerima protokol itu. Model pratetap ialah nilai permulaan, bukan jaminan akses akaun semasa atau saranan untuk setiap tugas.</TLDR>
 
-Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Persediaan
 
-## Pengaturan
+Pilih **OpenAI**, masukkan kunci dan kekalkan `https://api.openai.com/v1` bagi titik akhir rasmi. Pilih model yang tersedia untuk akaun serta serasi dengan chat completions. Model yang hanya tersedia melalui API lain tidak menjadi serasi hanya kerana muncul dalam senarai.
 
-Buat kunci OpenAI API, tambah profil penyedia `OpenAI` dalam tetapan Notemd, dan kekalkan Base URL lalai kecuali jika anda sengaja merujuk kepada gateway yang serasi dengan OpenAI. Medan model boleh kekal pada `gpt-4o` untuk kerja umum atau digantikan dengan ID model OpenAI lain yang boleh dipanggil oleh akaun anda.
+Bagi gerbang, gunakan pratetap sepadan agar titik akhir dan pengepala betul. Bagi Azure, pilih **Azure OpenAI** serta tetapkan deployment dan versi API secara berasingan.
 
-Gunakan model khusus tugas untuk kawalan kos: simpan model yang lebih kuat untuk penyelidikan, pengekstrakan konsep, dan penyusunan bentuk panjang; gunakan model yang lebih murah atau lebih cepat untuk terjemahan, cadangan pautan, dan ringkasan pendek.
+## Titik akhir dan pengesahan
 
-## Titik Hujung Dan Pengesahan
-
-| Medan | Tetapan pra‑tetap semasa |
-|-------|----------------|
-| Pengangkutan | `openai-compatible` |
+| Medan | Nilai pratetap |
+| ------- | -------------- |
+| Penghantaran | `openai-compatible` |
 | Kunci API | Diperlukan |
-| Base URL | `https://api.openai.com/v1` |
+| URL asas | `https://api.openai.com/v1` |
 | Model lalai | `gpt-4o` |
 | Suhu | `0.5` |
-| Ujian sambungan | `/models`, kemudian `/chat/completions` |
+| Ujian sambungan | `models-then-chat` |
 
-Notemd menormalkan base URL yang serasi dengan OpenAI sebelum menambah `chat/completions` atau `models`. Jangan masukkan `/chat/completions` di hujung Base URL; ia akan mencipta laluan yang berulang.
+Masa jalan menormalkan bentuk URL asas yang dikenali sebelum membina laluan senarai atau sembang. Mulakan dengan URL pratetap dan periksa laluan diselesaikan ketika diagnosis, bukannya menambah segmen berdasarkan tekaan.
 
-## Penemuan Model
+## Penemuan model
 
-OpenAI menggunakan laluan penemuan model yang serasi dengan OpenAI secara umum. Tetapan UI pertama kali bertanya kepada `/v1/models`, kemudian mengesahkan model yang dipilih dengan permintaan sembang ringan. Jika penemuan gagal tetapi sembang masih berfungsi, periksa sama ada kunci anda mempunyai kebenaran model‑list atau adakah gateway menghalang senarai model.
+**Fetch models** menyoal titik akhir pilihan. **Test connection** boleh berjaya melalui senarai tanpa mengesahkan penjanaan. Selepas sambungan diuji, proses nota ujian dengan penyedia/model tepat.
 
-Model penalaran dianggap sebagai kes tepi protokol: Notemd menggabungkan kandungan promp sistem dan pengguna untuk ID penalaran OpenAI yang menolak peranan `system` yang berasingan, dan ia hanya mendedahkan `reasoningEffort` apabila definisi penyedia menyokongnya.
+Kawalan penaakulan, pemikiran, pensampelan dan token keluaran bergantung pada pratetap serta peraturan model masa jalan. Uji gabungan tugas; model tersenarai tidak menjamin setiap parameter diterima.
 
-## Pemecahan masalah
+## Penyelesaian masalah
 
-- `401` atau `403`: sahkan kunci, akses projek, keadaan bil, dan sama ada model yang dipilih diaktifkan untuk kunci tersebut.
-- `404` pada sembang: Base URL biasanya salah atau sudah termasuk `/chat/completions`.
-- Model muncul dalam dokumen tetapi tidak dalam pemilih: akses model‑list dan akses sembang adalah titik kegagalan yang berbeza; uji ID model yang tepat secara manual dalam profil penyedia.
-- Model penalaran menolak mesej: gunakan ID model yang dilindungi oleh laluan pengendalian penalaran OpenAI atau tukar kepada model sembang bukan penalaran.
+- `401` / `403`: semak kelayakan, izin projek, akses model dan keadaan akaun.
+- `404`: semak titik akhir, ID model dan sokongan API terhadap model itu.
+- Senarai berjaya tetapi tugas gagal: baca ralat sembang sebenar serta model/tetapan diminta.
+- Hasil panjang gagal atau terpotong: semak had keluaran, saiz sumber dan respons; ujian sambungan pendek tidak menghasilkan semula semua kegagalan panjang.
 
-## Bila Perlu Digunakan
+## Bila digunakan
 
-Gunakan OpenAI apabila anda mahu laluan hos lalai yang paling boleh diramal, apabila penemuan `/v1/models` penting, atau apabila aliran kerja bergantung pada semantik model penalaran OpenAI. Pilih gateway atau penyedia tempatan apabila penghalaan, privasi, atau kawalan kos lebih penting daripada tingkah laku langsung OpenAI API.
+Gunakan bagi model OpenAI langsung yang menerima protokol Chat Completions dilaksanakan. Nilai nota perwakilan sebelum memilih untuk beban kerja. Harga dan ketersediaan boleh berubah berasingan daripada keluaran Notemd.
 
----
+## Seterusnya
 
-## Langkah Seterusnya
-
-- [LLM Providers](/docs/providers/overview) -- Konfigurasi penuh, model setiap tugas, dan logik percubaan semula
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Perbaiki ralat 401/403 dan had kelajuan
+- [Gambaran penyedia](./overview): penghalaan tugas dan keluarga protokol.
+- [Penyelesaian masalah](../advanced/troubleshooting): bukti dibersihkan dan kegagalan hasil.

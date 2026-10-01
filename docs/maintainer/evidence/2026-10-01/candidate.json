@@ -1,0 +1,44 @@
+{
+  "observedAt": "2026-10-01T05:56:02.397Z",
+  "version": "1.9.8",
+  "baseCommit": "71a1f32685962b1339744f82218c158f11502a3e",
+  "candidateState": "Uncommitted implementation verified locally; remote CI and public delivery tracked in acceptance markdown.",
+  "sourceManifestSha256": "98e597fa55c9bf0e9d33f5d44fad25745d7371d79fdf7519aaaf7f0099f17e9d",
+  "runtimeAssets": {
+    "main.js": "3cb3b066c33e3a41f223efd7e949b224d72150ff318b1131590cd1cc9139b2da",
+    "manifest.json": "1852490833b18b225471096b633067ba7d73d6274e57ce1d11e3b1654dfe3677",
+    "styles.css": "d56c6c70ecaed75dbe9f64b4dd3d394a74a68422da3dfad55f97d8e7e7ee4bec",
+    "README.md": "3d70485de56e2f7de4fa3105310ec6c3d872df793eb70a3ce6c2d37a032c293f"
+  },
+  "jest": {
+    "success": true,
+    "suitesPassed": 289,
+    "suitesFailed": 0,
+    "testsPassed": 2703,
+    "testsFailed": 0,
+    "testsPending": 1
+  },
+  "website": {
+    "node": "v24.14.0",
+    "locales": 34,
+    "scenarios": 816,
+    "failures": 0
+  },
+  "logs": {
+    "v5-scope-plugin-build.log": "98cd2bee919846362c848a09aa4644d8d4ea76f88e78248a7d0c8df9d51aa8f2",
+    "v5-scope-jest.log": "3df6e038f04a0f695458d9c6fb5388c7f7ab8500b9aa8c29b94cabc9789fe272",
+    "v5-scope-lint.log": "28ce4eec28f3c25e5db1f914db533eb92831dfc167ce9572ee551f8a064f663c",
+    "v5-scope-ui-audit.log": "dcdfb1fe0ef8870e3728ce282c3d93e849b9527b1541ad9d9ab42c8b6eb632cd",
+    "v5-scope-render-audit.log": "fb75c73154a6be257134cfd0876dc7b3c9db976ac7849edd6595e2aeb7eeaa29",
+    "v5-final-website-build.log": "0da62c59a0dbd65b5699848a23c279a08577f9f1eb7e143a24471b5bf3bbf083",
+    "v5-final-website-audit.log": "52d3fc3da578f62073b9058f8b52217bd5592468196f0e33e48a9c3d752bc60c",
+    "v5-final-website-navigation.log": "5a46e085f60363a3425cb42868e709d4027f4de592ec1f9eb5ce2fd5f979f928",
+    "v5-docs-build-cached.log": "a82b39d4da0359e7452d9346a3baa31348b110765f8369f75ee4e06025733095",
+    "v5-gallery.log": "eea1ed605f5c59722d87116bf663cd7a8204dbb472753821b2da95be894fbc9c",
+    "v5-examples.log": "988b18c64fef508de8cdf6289fd8e429c76a72094d821052a9db15ed5a7c0ced",
+    "history-native-scope-red.log": "d36cc664e1b6af2d4329dd36f19c3601c058d0845f9500c5f7efeede22ab83ef",
+    "history-native-scope-green.log": "f6f78f61057b8436f2f63afc9aaeaa5f80803ab8f65ebf92f58955509079c5b5",
+    "v5-office-export-recheck.log": "5f33501d9904de80c24bdf4b3b8102287bd3f71e944b72d40c967538f1b8310d",
+    "v5-circuitikz-orientations.log": "480e15acea415d846f48df2c1ac006db316beba57c04414a59eff0e1a117d05f"
+  }
+}

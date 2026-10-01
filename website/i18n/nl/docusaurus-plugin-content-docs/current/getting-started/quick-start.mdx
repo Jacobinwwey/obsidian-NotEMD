@@ -1,181 +1,82 @@
 ---
 id: quick-start
-title: "Snelle startgids"
-description: "Begin met Notemd in 5 minuten"
+title: Snel starten
+description: >-
+  Configureer een model, controleer de uitvoer van één notitie en breid daarna
+  uit naar een map.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Snel starten
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Snelle startgids
+# Snel starten
 
-<TLDR>
-**Begin onmiddellijk met Notemd in 5 minuten.** Drie stappen: (1) Voeg een LLM API sleutel toe (of gebruik lokale Ollama), (2) Open een notitie en voer "Process file (add links)" uit, (3) Ontdek één-klik workflows in de zijbalk. Ondersteunt meer dan 30 providers. Geen programmering vereist. Werkt offline met Ollama.
-</TLDR>
+<TLDR>Begin met één wegwerpnotitie in Markdown en een provider waartoe je al toegang hebt. Controleer het uitvoerbestand voordat je een map verwerkt. Cloudtaken versturen inhoud; een lokaal model vereist nog steeds een actieve server en voorbereid model.</TLDR>
 
-## Stap 1: Stel uw eerste LLM provider in (2 min)
+## 1. Stel het model in
 
-### Optie A: Cloudprovider (OpenAI, Anthropic, enz.)
+1. [Installeer en activeer](./installation) Notemd en open **Settings → Notemd**.
+2. Kies profiel, endpoint, vereiste sleutel en toegankelijk model. **Fetch models** vervangt geen generatietest.
+3. Gebruik **Verbinding testen** en los account-, model- of endpointfouten op.
+4. Zoek **Map-pad voor conceptnotities** en kies bijvoorbeeld `concepts` wanneer je conceptbestanden wilt. Het veld is aanvankelijk leeg; dit is een zelfgekozen voorbeeldpad.
 
-1. Open **Settings** → **Notemd**
-2. Onder **LLM Provider Configuration**, selecteer een provider uit de dropdown
-3. Voer uw **API Sleutel** in
-4. (Optioneel) Klik op **"Get Model List"** om beschikbare modellen te bekijken
-5. Selecteer een model voor elk taaktype
+Haal voor Ollama eerst het model op en gebruik de exacte naam; de begin-URL is `http://localhost:11434/api`. Start de server voor LM Studio en kies `LMStudio`. Zie [lokale modellen](../providers/local). Webonderzoek blijft netwerk gebruiken.
 
-**Populaire keuzes:**
-- **OpenAI**: `gpt-4o-mini` (snel, betaalbaar)
-- **Anthropic**: `claude-sonnet-4-6` (hoge kwaliteit)
-- **DeepSeek**: `deepseek-chat` (zeer betaalbaar)
+## 2. Voer de eerste taak uit
 
-### Optie B: Lokale Ollama (geen API sleutel nodig)
+Maak `Notemd trial.md` met tekst die je naar deze provider mag sturen:
 
-1. Installeer [Ollama](https://ollama.com/)
-2. Download een model: `ollama pull llama3.1`
-3. In de Notemd instellingen, selecteer **"Ollama"** als provider
-4. Naam van het model: `llama3.1` (of elk model dat je hebt gedownload)
-
-## Stap 2: Probeer je eerste taak (1 min)
-
-### Voeg Wiki-links toe aan een notitie
-
-1. Open elke notitie met zinvolle inhoud
-2. Rechtermuisknop in de editor
-3. Selecteer **"Bestand verwerken (links toevoegen)"**
-4. Wacht enkele seconden
-5. De belangrijkste concepten zijn nu `[[wiki-linked]]`!
-
-**Voorbeeld:**
-
-**Voorheen:**
-```
-Machine learning models use neural networks to process data.
+```text
+Machine learning gebruikt neurale netwerken om patronen uit voorbeelden te leren.
 ```
 
-**Na:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
+Kies **Bestand verwerken (links toevoegen)** in zijbalk of opdrachtenpalet. Standaard blijft de bron bestaan en verschijnt daarnaast `Notemd trial_processed.md`. Open dit bestand. Een mogelijke uitkomst:
 
-## Stap 3: Ontdek de functies (2 min)
-
-### Haal conceptnotities eruit
-
-1. Rechtermuisknop → **"Concepten uit het huidige bestand halen"**
-2. Notemd maakt aparte bestanden voor elk concept
-3. Kijk naar je gedefinieerde map voor concepten (standaard: `concepts/`)
-4. Elke conceptnotitie bevat een teruglink naar je oorspronkelijke notitie
-
-### Onderzoek en samenvatten
-
-1. Een onderwerp in je notitie markeren
-2. Rechtermuisknop → **"Onderzoek en samenvatten"**
-3. Notemd voert een webzoekopdracht uit (Tavily of DuckDuckGo)
-4. De samenvatting wordt met bronnen toegevoegd aan je notitie
-
-### Eén-klikwerkflows
-
-1. Kijk in de **linkerbalk** voor workflow-knoppen
-2. Klik op **"Eén-klik extraheren"** in elke notitie
-3. Het proces verloopt als volgt: links toevoegen → concepten extraheren → onderzoek doen → diagram genereren
-4. Alles in één klik!
-
-## Vaak voorkomende eerste taken
-
-### Taak 1: Een artikel verwerken
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```markdown
+[[Machine learning]] gebruikt [[neurale netwerken]] om patronen uit voorbeelden te leren.
 ```
 
-### Taak 2: Notities vertalen
+Een ingestelde conceptmap kan ook notities ontvangen. Controleer bestanden en koppelingen; dit bewijst niet dat het model alle belangrijke begrippen juist heeft gevonden.
 
+## 3. Andere functies
+
+### Concepten extraheren
+
+**Concepten extraheren (huidig bestand)** behoudt de bron en vereist een conceptmap. Nieuwe afzonderlijke conceptnotities hebben standaard alleen een titel en geen terugverwijzing. Schakel die bewust in. [Conceptnotities](../features/concept-notes).
+
+### Onderzoek en samenvatting
+
+Selecteer een onderwerp in de Markdown-editor of gebruik de notitietitel en kies **Onderzoeken en samenvatten**. Selecteer Tavily met sleutel of DuckDuckGo expliciet. De samenvatting wordt toegevoegd aan de actieve notitie. Open en controleer de bronnen.
+
+### Workflow met één klik
+
+De standaard **One-Click Extract** is:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
 
-### Taak 3: Een kenniskaart maken
+Voegt links toe, genereert geschikte notities in de concept- of gekozen map en herstelt Mermaid in de complete-map. Bestaande conceptnotities kunnen meedoen. Gebruik eerst een testmap. Webonderzoek of algemene diagramgeneratie wordt niet automatisch toegevoegd.
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## Annuleren en uitvoer controleren
 
-## Tips voor personalisatie
+**Annuleren** stopt ondersteund vervolgwerk. Voltooide uitvoer blijft; annuleren is geen terugdraaitransactie en garandeert niet dat de provider stopt met genereren of factureren. Wacht op afronding en controleer gemelde paden en herstelconflicten voordat je herhaalt.
 
-### Modelselectie per taak
+## Problemen
 
-Je kunt verschillende modellen gebruiken voor verschillende taken:
+- Account/model: controleer het precieze profiel en de verbinding.
+- Geen concepten: stel een niet-lege actieve map in.
+- Geen bruikbare links: bekijk antwoord en prompt; geen minimumaantal woorden garandeert extractie.
+- Limieten: houd gelijktijdigheid op `1` terwijl je quota onderzoekt.
 
-| Taak | Aanbevolen model | Waarom |
-|------|------------------|-----|
-| Links toevoegen | `gpt-4o-mini`, `deepseek-chat` | Snel, veel oproepen |
-| Concepten extraheren | `claude-sonnet-4-6`, `gpt-4o` | Kwalitatieve extractie |
-| Onderzoek | `perplexity`, `gpt-4o` | Web-gebaseerd |
-| Vertaling | `gemini-flash`, `gpt-4o` | Meertalig |
-| Diagrammen | `claude-opus`, lokaal model | Complexe redenering |
+## Verder
 
-Configureren in: **Instellingen → Notemd → Taakspecifieke modellen**
-
-### Aanpasbare workflows
-
-Uw eigen knop maken:
-
-1. Instellingen → Notemd → Workflows
-2. Klik op "Workflow toevoegen"
-3. DSL invoeren: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Geef het een naam: "Mijn Onderzoeksvloeiing"
-5. Een nieuwe knop verschijnt in de zijbalk
-
-## Probleemoplossing
-
-### "API Slechte sleutel"
-- Controleer of de sleutel correct is (geen extra ruimtes)
-- Verifieer of het account credits heeft
-- Test met de "Connection Test"-knop in de instellingen
-
-### "Model Niet Gevonden"
-- Klik op "Get Model List" om beschikbare modellen te zien
-- Sommige aanbieders vereisen specifieke modelnamen (bijv. `gpt-4o` in plaats van `gpt-4`)
-
-### Links verschijnen niet
-- Zorg dat de notitie voldoende inhoud heeft (>50 woorden)
-- Probeer een krachtiger model
-- Controleer of de LLM-aanroep is geslaagd (zie diagnostische panel)
-
-### Trage prestaties
-- Gebruik snelere modellen (`gpt-4o-mini` in plaats van `gpt-4o`)
-- Verklein de chunkgrootte in de instellingen
-- Parallel verwerking inschakelen voor batchtaken
-
-## Volgende stappen
-
-- 📖 [Alle functies bekijken](../features/wiki-links)
-- ⚙️ [Geavanceerde configuratie](./configuration)
-- 🔧 [Instellingen van LLM Provider](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## Video Tutorial
-
-Kijk de 3-minuten durende snelstartvideo (Chinees):
-[【Volledig open source en gratis! NotEMD in 3 minuten】](https://b23.tv/lqR0RlA)
-
-## Hulp krijgen
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Problemen**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Documentatie**: [Volledige documentatie](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Configuratie](./configuration).
+- [Workflows](../features/workflows).
+- [Problemen oplossen](../advanced/troubleshooting).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) met bewijs waaruit privégegevens zijn verwijderd.

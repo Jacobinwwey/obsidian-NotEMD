@@ -3,163 +3,103 @@ import Link from '@docusaurus/Link';
 import Head from '@docusaurus/Head';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import useBaseUrl from '@docusaurus/useBaseUrl';
 import {homeCopyOverrides} from '../lib/homeCopyCatalog.mjs';
+import {selectHomepageCopy} from '../lib/homepageCopy.cjs';
+import releaseFacts from '../lib/releaseFacts.cjs';
 import styles from './index.module.css';
 
 const copyByLocale = {
   en: {
     title: 'Notemd Documentation',
-    description: 'AI-powered knowledge workflows for Obsidian notes.',
-    eyebrow: 'Obsidian plugin documentation',
+    description: 'Link, research and organize Obsidian notes with the model you choose.',
+    eyebrow: 'Knowledge workflows for Obsidian',
     heading: 'Notemd',
-    lead: 'Build persistent knowledge from notes with wiki-links, concept notes, research summaries, translation, diagrams, and reusable one-click workflows.',
-    primary: 'Read the docs',
-    secondary: 'Quick start',
+    lead: 'Turn source notes into linked Markdown, concept notes, research summaries, translations and diagrams. Choose your model, inspect the output, and keep what you learn in your Vault.',
+    primary: 'Start with one note',
+    secondary: 'Release guide',
     faq: 'FAQ',
-    factHeading: 'Source-backed product facts',
-    facts: [
-      {label: 'Workflow model', value: 'Write-first Obsidian automation, not a chat transcript'},
-      {label: 'Provider surface', value: '36 cloud, gateway, China, and local LLM providers'},
-      {label: 'Vault boundary', value: 'Outputs are written back into local Markdown files'},
-      {label: 'Current release', value: 'Version 1.9.7 public docs and release assets'},
-    ],
-    retrievalHeading: 'Answer-engine source map',
-    retrievalLead:
-      'The public site now exposes the same canonical routes that llms.txt, sitemap, hreflang metadata, and JSON-LD describe. Use these pages as the source of truth for AI search and citation workflows.',
-    languageBoundary: 'Language boundary: English and Simplified Chinese are verified indexable docs surfaces; all other locale routes remain available for review and are marked machine-translated.',
-    retrievalLinks: [
-      {
-        title: 'llms.txt retrieval map',
-        body: 'Compact route map for answer engines, canonical docs, provider topics, and the current multilingual route set.',
-        href: '/llms.txt',
-        kind: 'static',
-      },
-      {
-        title: 'Provider configuration',
-        body: 'Operational setup, endpoint/auth behavior, model discovery, troubleshooting, and use-case boundaries.',
-        href: '/docs/providers/overview',
-      },
-      {
-        title: 'AI knowledge workflow',
-        body: 'The canonical pillar page for wiki-links, concept notes, research, translation, diagrams, and workflows.',
-        href: '/docs/pillar-ai-knowledge',
-      },
-    ],
+    audienceHeading: 'Choose your path',
     sections: [
-      {
-        title: 'Start safely',
-        body: 'Install the plugin, configure a local or cloud LLM provider, and run your first note-processing workflow.',
-        href: '/docs/getting-started/quick-start',
-      },
-      {
-        title: 'Choose providers',
-        body: 'Compare OpenAI-compatible, Anthropic, Google, China-focused, gateway, and local model options.',
-        href: '/docs/providers/overview',
-      },
-      {
-        title: 'Build a knowledge base',
-        body: 'Use structured wiki-linking, concept notes, research, translation, and diagram generation as a repeatable system.',
-        href: '/docs/pillar-ai-knowledge',
-      },
+      {title: 'Newcomers', body: 'Install Notemd, configure a provider and inspect your first output.', href: '/docs/getting-started/quick-start'},
+      {title: 'User workflows', body: 'Choose note and folder tasks, output paths and recovery steps.', href: '/docs/features/workflows'},
+      {title: 'Developers', body: 'Build, test and extend the existing provider and operation contracts.', href: '/docs/developers/overview'},
+      {title: 'Agents', body: 'Discover supported commands, exported schemas and host requirements.', href: '/docs/agents/overview'},
+    ],
+    exampleHeading: 'A file you can inspect',
+    sourceLabel: 'Source note',
+    outputLabel: 'Example processed note',
+    exampleSource: 'Machine learning uses neural networks to learn patterns.',
+    exampleOutput: '[[Machine learning]] uses [[neural networks]] to learn patterns.',
+    exampleNote: 'Illustrative output. Review the actual model result before reuse.',
+    factHeading: 'At a glance',
+    facts: [
+      {label: 'Outputs', value: 'Markdown notes and inspectable artifacts'},
+      {label: 'Model choice', value: 'Cloud, gateway or local server'},
+      {label: 'Control', value: 'Explicit task scope and output paths'},
+      {label: 'Release guide', value: '{version}'},
+    ],
+    releaseHeading: 'Reliability you can verify',
+    releaseBody: 'Cancellation and recovery, corrected native exports, and documentation grounded in the actual defaults and supported commands.',
+    releaseLink: 'Read the upgrade guide',
+    retrievalHeading: 'Reference and support',
+    retrievalLead: 'Find provider setup, troubleshooting and a compact reading index for automated clients.',
+    languageBoundary: 'The website has 34 locale routes; the plugin UI has 21 locales. English and Simplified Chinese are indexable. Other languages remain available with their publication status visible.',
+    retrievalLinks: [
+      {title: 'Provider setup', body: 'Match the endpoint, protocol and model to your task.', href: '/docs/providers/overview'},
+      {title: 'Troubleshooting', body: 'Reproduce a failure with a small note and sanitized evidence.', href: '/docs/advanced/troubleshooting'},
+      {title: 'Agent reading index', body: 'Canonical guides, source contracts and language boundaries in llms.txt.', href: '/llms.txt', kind: 'static'},
     ],
   },
   'zh-CN': {
     title: 'Notemd 文档',
-    description: '面向 Obsidian 笔记的 AI 知识工作流。',
-    eyebrow: 'Obsidian 插件文档',
+    description: '选择自己的模型，为 Obsidian 笔记添加链接、开展研究并整理知识。',
+    eyebrow: '面向 Obsidian 的知识工作流',
     heading: 'Notemd',
-    lead: '把笔记处理成可积累的知识资产：wiki 链接、概念笔记、研究总结、翻译、图表，以及可复用的一键工作流。',
-    primary: '阅读文档',
-    secondary: '快速开始',
+    lead: '把源笔记处理为带链接的 Markdown、概念笔记、研究摘要、译文和图表。选择模型，核对输出，将学到的内容保存在自己的 Vault 中。',
+    primary: '从一篇笔记开始',
+    secondary: '版本指南',
     faq: '常见问题',
-    factHeading: '可索引的产品事实',
-    facts: [
-      {label: '工作流模型', value: '写入优先的 Obsidian 自动化，不是聊天记录'},
-      {label: '模型提供商', value: '36 个云端、网关、中国与本地 LLM 提供商'},
-      {label: 'Vault 边界', value: '结果写回本地 Markdown 文件'},
-      {label: '当前版本', value: '1.9.7 公开文档与 release assets'},
-    ],
-    retrievalHeading: 'Answer engine 来源地图',
-    retrievalLead:
-      '项目网页现在公开展示与 llms.txt、sitemap、hreflang metadata 和 JSON-LD 一致的 canonical routes。AI search 与引用场景应以这些页面为真值来源。',
-    languageBoundary: '语言边界：英文与简体中文是已验证、可索引的文档表面；其他语言路由仍可供审阅，并明确标记为机器翻译。',
-    retrievalLinks: [
-      {
-        title: 'llms.txt 检索地图',
-        body: '面向 answer engine 的紧凑路由图，包含标准化文档、Provider 专题与当前语言边界。',
-        href: '/llms.txt',
-        kind: 'static',
-      },
-      {
-        title: 'Provider 配置',
-        body: '覆盖安装设置、端点与鉴权、模型发现、故障排除与使用场景边界。',
-        href: '/docs/providers/overview',
-      },
-      {
-        title: 'AI 知识工作流',
-        body: 'wiki 链接、概念笔记、研究、翻译、图表与工作流的标准化支柱页面。',
-        href: '/docs/pillar-ai-knowledge',
-      },
-    ],
+    audienceHeading: '选择你的入口',
     sections: [
-      {
-        title: '先跑通基础配置',
-        body: '安装插件，配置本地或云端 LLM 提供商，然后运行第一个笔记处理工作流。',
-        href: '/docs/getting-started/quick-start',
-      },
-      {
-        title: '选择模型提供商',
-        body: '对比 OpenAI 兼容、Anthropic、Google、中国模型、网关和本地模型配置。',
-        href: '/docs/providers/overview',
-      },
-      {
-        title: '构建知识库',
-        body: '把 wiki 链接、概念笔记、研究、翻译和图表生成组织成稳定的知识工作流。',
-        href: '/docs/pillar-ai-knowledge',
-      },
+      {title: '新人入门', body: '安装 Notemd、配置 provider，并检查首个任务的输出。', href: '/docs/getting-started/quick-start'},
+      {title: '用户工作流', body: '选择笔记或文件夹任务，确认输出路径与恢复步骤。', href: '/docs/features/workflows'},
+      {title: '开发者', body: '构建、测试，并扩展现有 provider 和 operation 契约。', href: '/docs/developers/overview'},
+      {title: 'Agent', body: '发现受支持命令、导出 schema 和宿主前置条件。', href: '/docs/agents/overview'},
+    ],
+    exampleHeading: '可直接检查的文件',
+    sourceLabel: '源笔记',
+    outputLabel: '处理后的笔记示例',
+    exampleSource: '机器学习使用神经网络学习数据中的规律。',
+    exampleOutput: '[[机器学习]]使用[[神经网络]]学习数据中的规律。',
+    exampleNote: '此处为示意输出，实际模型结果应在使用前核对。',
+    factHeading: '功能概览',
+    facts: [
+      {label: '输出', value: 'Markdown 笔记与可检查的产物'},
+      {label: '模型选择', value: '云端、网关或本地服务'},
+      {label: '操作控制', value: '明确的任务范围和输出路径'},
+      {label: '版本指南', value: '{version}'},
+    ],
+    releaseHeading: '有据可验的可靠性改进',
+    releaseBody: '完善取消与恢复，修正原生导出，并依据实际默认值和受支持命令校正文档。',
+    releaseLink: '阅读升级指南',
+    retrievalHeading: '参考资料与支持',
+    retrievalLead: '查阅 provider 设置、故障排查，以及供自动化客户端使用的精简阅读索引。',
+    languageBoundary: '网站提供 34 个语言路由，插件 UI 支持 21 个 locale。英文与简体中文允许索引，其他语言保留可访问入口并明确显示发布状态。',
+    retrievalLinks: [
+      {title: 'Provider 设置', body: '为任务匹配正确的端点、协议和模型。', href: '/docs/providers/overview'},
+      {title: '故障排查', body: '使用小型笔记与脱敏证据复现问题。', href: '/docs/advanced/troubleshooting'},
+      {title: 'Agent 阅读索引', body: 'llms.txt 汇总标准指南、源码契约和语言边界。', href: '/llms.txt', kind: 'static'},
     ],
   },
 };
 
 export default function Home() {
   const {siteConfig, i18n} = useDocusaurusContext();
-  const logoSrc = useBaseUrl('img/logo.svg');
-  const copy = homeCopyOverrides[i18n.currentLocale] || copyByLocale[i18n.currentLocale] || copyByLocale.en;
+  const copy = selectHomepageCopy({...copyByLocale, ...homeCopyOverrides}, i18n.currentLocale);
   const pageUrl = new URL(siteConfig.baseUrl, siteConfig.url).toString();
-  const canonicalBasePath = siteConfig.customFields?.canonicalBasePath || siteConfig.baseUrl;
-  const llmsHref = `${canonicalBasePath}llms.txt`;
-  const softwareVersion = siteConfig.customFields?.softwareVersion || '1.9.7';
-  const docLinkProps = (docPath) => ({to: docPath});
-  const sourceLinkProps = (source) => {
-    if (source.kind === 'static') {
-      return {
-        href: llmsHref,
-        autoAddBaseUrl: false,
-        'data-noBrokenLinkCheck': true,
-      };
-    }
-
-    return docLinkProps(source.href);
-  };
-
-  const aboutKeywords = i18n.currentLocale === 'zh-CN'
-    ? [
-        'Obsidian AI 插件',
-        '持久化知识工作流',
-        'wiki 链接',
-        '概念笔记',
-        'LLM 提供商配置',
-        '本地 Markdown 输出',
-      ]
-    : [
-        'Obsidian AI plugin',
-        'persistent knowledge workflows',
-        'wiki-links',
-        'concept notes',
-        'LLM provider configuration',
-        'local Markdown vault output',
-      ];
+  const canonicalBasePath = siteConfig.customFields.canonicalBasePath;
+  const canonicalSiteUrl = new URL(canonicalBasePath, siteConfig.url).toString();
+  const releaseGuide = `/docs/releases/${releaseFacts.version}`;
 
   return (
     <Layout title={copy.title} description={copy.description}>
@@ -172,19 +112,8 @@ export default function Home() {
             description: copy.description,
             url: pageUrl,
             inLanguage: i18n.currentLocale,
-            isPartOf: {
-              '@type': 'WebSite',
-              name: i18n.currentLocale === 'zh-CN' ? 'Notemd 文档' : 'Notemd Documentation',
-              url: pageUrl,
-            },
-            about: aboutKeywords,
-            mainEntity: {
-              '@type': 'SoftwareApplication',
-              name: 'Notemd',
-              softwareVersion,
-              applicationCategory: 'ProductivityApplication',
-              operatingSystem: ['Windows', 'macOS', 'Linux', 'iOS', 'Android'],
-            },
+            isPartOf: {'@type': 'WebSite', '@id': `${canonicalSiteUrl}#website`, url: canonicalSiteUrl},
+            mainEntity: {'@id': `${canonicalSiteUrl}#software`},
           })}
         </script>
       </Head>
@@ -195,43 +124,56 @@ export default function Home() {
             <h1>{copy.heading}</h1>
             <p className={styles.lead}>{copy.lead}</p>
             <div className={styles.actions}>
-              <Link className="button button--primary button--lg" {...docLinkProps('/docs/intro')}>
-                {copy.primary}
-              </Link>
-              <Link
-                className="button button--secondary button--lg"
-                {...docLinkProps('/docs/getting-started/quick-start')}
-              >
-                {copy.secondary}
-              </Link>
-              <Link className="button button--outline button--lg" {...docLinkProps('/docs/faq')}>
-                {copy.faq}
-              </Link>
+              <Link className="button button--primary button--lg" to="/docs/getting-started/quick-start">{copy.primary}</Link>
+              <Link className="button button--secondary button--lg" to={releaseGuide}>{copy.secondary} · {releaseFacts.version}</Link>
             </div>
           </div>
-          <img className={styles.logo} src={logoSrc} alt="" />
+          <figure className={styles.example}>
+            <figcaption>{copy.exampleHeading}</figcaption>
+            <span className={styles.exampleLabel}>{copy.sourceLabel}</span>
+            <pre dir="auto"><code>{copy.exampleSource}</code></pre>
+            <span className={styles.exampleLabel}>{copy.outputLabel}</span>
+            <pre className={styles.exampleOutput} dir="auto"><code>{copy.exampleOutput}</code></pre>
+            <p>{copy.exampleNote}</p>
+          </figure>
         </section>
+
+        <section className={styles.audienceSection} aria-labelledby="audience-guide-heading">
+          <h2 id="audience-guide-heading">{copy.audienceHeading}</h2>
+          <nav className={styles.sectionGrid} aria-labelledby="audience-guide-heading">
+            {copy.sections.map(section => (
+              <Link className={styles.sectionCard} key={section.href} to={section.href}>
+                <h3>{section.title}</h3>
+                <p>{section.body}</p>
+                <span className={styles.cardArrow} aria-hidden="true">→</span>
+              </Link>
+            ))}
+          </nav>
+        </section>
+
         <section className={styles.factBand} aria-labelledby="notemd-facts-heading">
           <div className={styles.factBandInner}>
             <h2 id="notemd-facts-heading">{copy.factHeading}</h2>
             <dl className={styles.factGrid}>
-              {copy.facts.map((fact) => (
+              {copy.facts.map(fact => (
                 <div className={styles.factItem} key={fact.label}>
                   <dt>{fact.label}</dt>
-                  <dd>{fact.value}</dd>
+                  <dd>{fact.value.replace('{version}', releaseFacts.version)}</dd>
                 </div>
               ))}
             </dl>
           </div>
         </section>
-        <section className={styles.sectionGrid} aria-label={copy.primary}>
-          {copy.sections.map((section) => (
-            <Link className={styles.sectionCard} key={section.href} {...docLinkProps(section.href)}>
-              <h2>{section.title}</h2>
-              <p>{section.body}</p>
-            </Link>
-          ))}
+
+        <section className={styles.releaseSection} aria-labelledby="release-guide-heading">
+          <div>
+            <p className={styles.eyebrow}>{releaseFacts.version}</p>
+            <h2 id="release-guide-heading">{copy.releaseHeading}</h2>
+            <p>{copy.releaseBody}</p>
+          </div>
+          <Link className="button button--secondary" to={releaseGuide}>{copy.releaseLink}</Link>
         </section>
+
         <section className={styles.retrievalSection} aria-labelledby="answer-engine-source-map-heading">
           <div className={styles.retrievalCopy}>
             <h2 id="answer-engine-source-map-heading">{copy.retrievalHeading}</h2>
@@ -239,8 +181,11 @@ export default function Home() {
             <p className={styles.languageBoundary}>{copy.languageBoundary}</p>
           </div>
           <div className={styles.retrievalLinks}>
-            {copy.retrievalLinks.map((source) => (
-              <Link className={styles.retrievalLink} key={source.href} {...sourceLinkProps(source)}>
+            {copy.retrievalLinks.map(source => (
+              <Link className={styles.retrievalLink} key={source.href}
+                {...(source.kind === 'static'
+                  ? {href: `${canonicalBasePath}llms.txt`, autoAddBaseUrl: false, 'data-noBrokenLinkCheck': true}
+                  : {to: source.href})}>
                 <span>{source.title}</span>
                 <small>{source.body}</small>
               </Link>

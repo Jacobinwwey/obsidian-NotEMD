@@ -1,319 +1,124 @@
 ---
 id: wiki-links
-title: "Wiki-Links"
-description: "Automatisk generering af wiki-link til vigtige koncepter"
+title: Wiki-links
+description: >-
+  Lad modellen foreslå links, og skriv et særskilt resultat med valgfrie
+  begrebsfiler.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
-concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Auto Link Plugin
-    url: https://github.com/ov7a/obsidian-auto-link
+keywords:
+  - Wiki-links
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Wiki-Links
+# Wiki-links
 
-<TLDR>
-**Notemd tilføjer automatisk `[[wiki-links]]` til de vigtige koncepter i dine notater.** LLM læser din indhold, identificerer vigtige termer i konteksten og indsætter wiki-link i Obsidian-stil ved hver optrædelse. Valgfrit kan det skabe konceptnoter med baklinker. Støder undertrykking af synonymer, link-integritet ved omnavn/affyring og ren udvinningstemper (ingen ændringer i filer). Tillægsvis til Auto Link, som kun matcher eksisterende notetitel, bruger Notemd AI til at identificere nye koncepter og skabe tilsvarende noter. Dette er en del af [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Process file (add links) beder den valgte LLM finde begreber og tilføje Obsidian-links. Som standard oprettes en separat `_processed.md`, mens kilden bevares. Begrebsfiler kræver en valgt mappe. Gennemgå resultatet før større kørsler.</TLDR>
 
-## Översikt
+## Overblik
 
-Wiki-linking er den kernfunktion for Notemd. Det transformerer ren tekst til en sammenhængende kunstighedsgraph gennem:
+Modelvalg kan variere mellem kørsler og pege på endnu ikke eksisterende begreber. Et wiki-link er en destination, ikke bevis for samme betydning eller korrekt forklaring.
 
-1. **At analysere din note** med en LLM
-2. **At identificere vigtige koncepter** (termer, personer, metoder, teorier)
-3. **At indsætte `[[wiki-links]]`** ved hver optrædelse
-4. **At skabe konceptnoter** (valgfrit) med baklinker
+## Sådan virker det
 
-## Hvordan det virker
+### Behandling
 
-### Process
-
-```mermaid
-graph LR
-    A[Your Note] --> B[LLM Analysis]
-    B --> C{Concepts Found}
-    C --> D[Insert Wiki-Links]
-    C --> E[Create Concept Notes]
-    D --> F[Updated Note]
-    E --> F
-    F --> G[Connected Knowledge Graph]
-```
+Noten opdeles, sendes til udbyder/model og samles fra svarene. Opgaven kan oprette eller opdatere begrebsfiler i den valgte mappe. Kontrollér delfejl og den faktiske outputsti.
 
 ### Eksempel
 
-**Forud:**
-```markdown
-Machine learning models use neural networks to learn patterns from data.
-The transformer architecture revolutionized natural language processing.
+Kilde:
+
+```text
+Maskinlæring bruger neurale netværk til at genkende mønstre.
 ```
 
-**Efter:**
+Muligt output:
+
 ```markdown
-[[Machine learning]] models use [[neural networks]] to learn patterns from data.
-The [[transformer architecture]] revolutionized [[natural language processing]].
+[[Maskinlæring]] bruger [[neurale netværk]] til at genkende mønstre.
 ```
+
+En illustration, ikke garanteret udvælgelse. Kilde, model og prompt bestemmer termerne.
 
 ## Brug
 
-### Basis: Tilføj link til aktuelle note
+### Aktuel note
 
-1. Åbne en note
-2. Højreklik i editor → **"Process file (add links)"**
-3. Vente nogle sekunder
-4. Koncepterne er nu koblet sammen!
+Kør **Process file (add links)** på en kopi, og gennemgå den tilstødende `_processed.md`. Egne suffikser, outputmapper og flytning af original kan ændre destinationen.
 
-### Batch: Behandle flere noter
+### Flere noter
 
-1. Højreklik på en mapp i filexploreren
-2. Vælg **"Notemd: Process mappen (tilføj links)"**
-3. Konfigurér:
-   - Konkurrenci (hvor mange filer parallelt)
-   - Skriv over eksisterende links (ja/nej)
-4. Klik på **Process**
+Vælg **Process folder (add links)**, kontrollér mappe og omfang, og begynd småt. Mappeopgaver deler ikke én overskriv/skip-kontakt. Se [batchbehandling](../advanced/batch-processing).
 
-### Selektivt: Link specifik tekst
+### Vælg selv termen
 
-1. Highlighter tekst til behandling
-2. Højreklik → **"Process selection (add links)"**
-3. Apenbarligens den highlightede del analyseres
+**Create wiki link and generate note from selection** er en særskilt handling for den valgte term. Den begrænser ikke filhandlingen til markeringen. Kontrollér begrebsnoten og eventuelt genereret indhold.
 
-## Notemd vs Auto Link
+## Vælg tilgang
 
-Obsidian har to metoder for automatisk wiki-linking:
+Modelbaserede links finder mulige begreber i indhold. Deterministisk titelmatchning passer bedre til reproducerbare links til kendte navne. Sammenlign alternativer med aktuelle vejledninger og samme daterede test.
 
-| | **Auto Link** | **Notemd** |
-|--|---------------|-------------|
-| Linkkilde | Existerende notetitel i vault | LLM-identificerede koncepter i indhold |
-| Kan lige til nye koncepte | Nej – titlen må allerede eksistere | Ja – AI identifierer koncepte og skaber notater |
-| Hantering af synonymer | Nej | Ja – undertrykking af synonymer |
-| Skabning af konceptnotater | Nej | Ja – med baklænker og duplikatkortning |
-| Batchbehandling | Nej (enkelt fil) | Ja (mappenivå) |
-| Modellrute til hver opgave | Nej | Ja |
+## Muligheder
 
-**Auto Link** matcher titler: Hvis en note med navnet "Machine Learning" eksisterer, omgiver det forekomsterne i `[[Machine Learning]]`. Hvis noten ikke eksisterer, sker ingenting.
+### Begræns synonymer
 
-**Notemd** er AI-styrret: LLM læser din indhold, forstår konteksten, identifierer koncepte som *bør* blive lige til – selvom der endnu ikke er en note – og skaber både linken og konceptnotaten.
+`replaceSynonymsDuringConceptExtraction` tilføjer en instruktion mod overlappende begreber. Det er en Boolean, fra som standard, ikke en numerisk lighedstærskel. Vurder forkortelser og nært beslægtede betydninger.
 
-## Funktioner
+### Linkintegritet
 
-### Undertrykking af synonymer
+Obsidian styrer opdateringer ved omdøbning efter sine indstillinger og den anvendte handling. Et slettet mål kan efterlade et uafklaret wiki-link; det er forskelligt fra en ikke-linket omtale. Kontrollér ens filnavne i forskellige mapper.
 
-**Problem:** "transformer", "transformers", "Transformer architecture" → 3 separate koncepter
+### Kun udtræk
 
-**Løsning:** Notemd opdager nærlige duplikater og bruger den kanoniske formen.
+**Extract concepts (current file)** udtrækker uden at omskrive kilden. Skabeloner og backlinks adskiller sig fra linktilføjelse. [Begrebsnoter](./concept-notes).
 
-**Konfiguration:**
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (0 = off, 1 = aggressive)
-```
+## Begrebsfiler
 
-### Link Integritet
+### Automatisk oprettelse
 
-**Når du endrer navn på en konceptnotat:**
-- Alle wiki-linker opdateres automatisk (Obsidian kernfunktion)
-- Backlinkerne forbliver intakte
+Med aktiveret og valgt begrebsmappe kan noter med titel og `Linked From` oprettes. Undersøgte forklaringer, relaterede begreber eller generelle frontmatter-skabeloner tilføjes ikke automatisk. Generér indhold fra titler separat.
 
-**Når du sletter en konceptnotat:**
-- Linkerne forbliver, men vises som "unlinked mentions"
-- Du kan skabe den på ny fra enhver forekomst
+### Indstillinger
 
-### Ren Extraktionstil
+Find begrebsmappe, mappe for behandlede filer, suffiks og kildeflytning. Begrebsmappen starter tom. Hold testoutput adskilt fra kilder.
 
-**Ekstraher koncepte uden at ændre det oprindelige:**
+## Avanceret
 
-1. Højreklik → **"Ekstraher koncepte (ingen linkning)"**
-2. Konceptnotater skrives
-3. Oprindelige fil forbliver óændret
+### Kontekst og prompts
 
-Brugsscenario: Behandling af read-only-inhold eller endelige udkast.
+`chunkWordCount` begrænser tekststykker omtrentligt. Fagområde og egne prompts kan styre valget. Generelle sætnings-/afsnitsvælgere, minimumsfrekvenser og begrebsskabelonvariabler er ikke dokumenterede muligheder her.
 
-## Konceptnotat Generering
+## God praksis
 
-### Automatisk Skabing
+- Sammenlign citater, formler og kode med kilden.
+- Vælg hvilke termer der fortjener en begrebsnote.
+- Test promptændringer på et fast udvalg.
+- Sikkerhedskopiér før flytning og overskrivning.
 
-**Når det er aktiveret (standard), skaber Notemd:**
+## Ydeevne
 
-```markdown
----
-tags: [concept, auto-generated]
-created: 2026-06-13
-source: [[Original Note Name]]
----
+Tid og pris afhænger af udbyder, model, input, output og nye forsøg. Ingen fast tid pr. note eller pris pr. hundrede filer. Mål eget udvalg og faktisk forbrug.
 
-# Machine Learning
+## Problemer
 
-A branch of artificial intelligence that enables computers
-to learn from data without explicit programming.
+### Ingen links
 
-## Occurrences in Your Vault
-
-- [[Original Note Name#Section]]
-- [[Another Note#Header]]
-
-## Related Concepts
-
-- [[Neural Networks]]
-- [[Deep Learning]]
-- [[Supervised Learning]]
-```
-
-### Konfiguration
-
-**Utdragsmapp:**
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Hierarkisk struktur:**
-```
-Settings → Output → Use Hierarchical Folders
-If enabled:
-  papers/my-paper.md → papers/concepts/Concept.md
-If disabled:
-  → concepts/Concept.md
-```
-
-**Mall:**
-```
-Settings → Output → Concept Template
-Customize with variables:
-  {{concept}} — Concept name
-  {{description}} — LLM-generated description
-  {{backlinks}} — List of source notes
-  {{date}} — Creation date
-```
-
-## Avancerede valg
-
-### Contextvindu
-
-**Hvor meget omgivende tekst skal sendes:**
-
-```
-Settings → Linking → Context Window
-Options: Sentence | Paragraph | Full Note
-Default: Paragraph
-```
-
-Større værdi = bedre nøjaktighed, højere kost.
-
-### Minimum antal optrædninger
-
-**Kopiere kun koncepter, der optræder flere gange:**
-
-```
-Settings → Linking → Min Occurrences
-Default: 1 (link all)
-```
-
-Still på 2 eller 3 for at fokusere på repræsenterende temaer.
-
-### Utslutte mønster
-
-**Skel visse ord:**
-
-```
-Settings → Linking → Exclude List
-Example: note, idea, example, thing
-```
-
-Forhindrer overkopiering af generiske termer.
-
-### Egen prompter
-
-**Øverstille standard LLM-instruktioner:**
-
-```
-Settings → Advanced → Custom Linking Prompt
-Default:
-  "Identify key concepts, theories, methods, and technical
-   terms in the following text. Return as a list..."
-```
-
-Anpass for domænespecifikke behov (f.eks. "Fokuser på medicinsk terminologi").
-
-## Tips og bedste praksis
-
-### ✅ Gør
-
-- **Behandle bemærkninger med >100 ord** — Korte bemærkninger gir få koncepter
-- **Brug kraftfulde modeller** for bedre identifikation af koncepter (GPT-4o, Claude)
-- **Gå gjennem før du accepterer** — Kontroller, om de foreslåede links er logiske
-- **Byg gradvist** — Behandle 5-10 bemærkninger, gå gjennem grafen, juster indstillinger
-
-### ❌ Gør ikke
-
-- **Over-link** — Ikke alle substantiver behøver en link
-- **Behandle utkast flere gange** — Koncepter kan skifte sig, vent til de er stabile
-- **Ignorer synonyme** — Aktiver suppression for at undgå "ML" vs "Machine Learning"
-
-## Prestande
-
-### Hastighed
-
-| Størrelse på bemærkning | GPT-4o-mini | Claude Sonnet | Ollama (lokalt) |
-|-----------|-------------|---------------|----------------|
-| 500 ord | 2-3 sekunder | 3-5 sekunder | 5-10 sekunder |
-| 2000 ord | 5-8 sekunder | 10-15 sekunder | 20-40 sekunder |
-| 5000+ ord | Delvist (mere anrop) | Deltaget | Deltaget |
-
-### Kostudsigt
-
-**Eksempel: 1000-ords not med GPT-4o-mini**
-- Indgang: ~1500 tokener
-- Output: ~200 tokens
-- Kostnad: ~
-
-**Batchbehandling af 100 notater:** ~
-
-## Felsøgning
-
-### Ingen links tilføjet
-
-**Kontrol:**
-1. LLM kaldet lykkes (Indstillinger → Diagnostik)
-2. Noten har tilstrekkelig indhold (>50 ord)
-3. Koncepter er tekniske/spesifikke (ikke bare pronumer)
-
-**Prøv:**
-- Brug en mere kraftig modell
-- Højst muligt kontekstvindu
-- Kontroller dig for gyldighed af API-klæden
+Kontrollér anmodning, svar, tilsigtet kilde og rapporteret resultatfil. En minimumslængde garanterer ikke nyttige links.
 
 ### For mange links
 
-**Løsninger:**
-1. Højstil minimale forekomster (2 eller 3)
-2. Tilføj algemene ord til uundtagelseslisten
-3. Brug en mindre aggressiv modell
+Afgræns prompt eller fagområde. Synonyminstruktionen guider modellen uden at håndhæve en ordliste.
 
-### Felaktige koncepter koblet
+### Links efter omdøbning
 
-**Løsninger:**
-1. Brug en tilpasset prompt for domænespecifikke behov
-2. Aktiver synonymsuppression
-3. Gennemgå manuelt og afslut forbindelser
-
-### Linker bruges ikke efter omnavn
-
-**Dette er normalt Obsidian beteende.**
-
-For at opdatere alle linker:
-1. Omnavn konceptnoten
-2. Obsidian opdaterer automatisk `[[old]]` → `[[new]]`
-
----
+Kontrollér Obsidian-indstillinger og tvetydige navne. Ret destinationen bevidst. Ny LLM-kørsel er ikke deterministisk linkreparation.
 
 ## Næste trin
 
-- 📖 [Konceptnoter](./concept-notes) — Dybdegående information om generering af konceptnoter
-- 🔍 [Forskning integration](./research) — Kombinér linkning med webforskning
-- 🎨 [Diagrammer](./diagrams) — Visualisér din knowledge graph
+- [Begrebsnoter](./concept-notes).
+- [Arbejdsgange](./workflows).
+- [Egne prompts](../advanced/custom-prompts).

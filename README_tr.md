@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Obsidian için Notemd Eklentisi
 
+> Notemd; bağlantılı Markdown, kavram notları, özetler, çeviriler ve diyagramlar için MIT lisanslı bir Obsidian eklentisidir. Dosyalar kasada kalır; bulut görevleri seçilen sağlayıcıya içerik gönderir ve web araştırması ağı kullanır.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Buradan başlayın
+
+| Okuyucu | Giriş | Amaç |
+|---|---|---|
+| Yeni başlayan | [Hızlı başlangıç](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/getting-started/quick-start) | Sağlayıcıyı yapılandırıp bir notu doğrulamak |
+| Kullanıcı | [İş akışları](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/features/workflows) | Klasörleri, çıktıları ve kurtarmayı yönetmek |
+| Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
+| Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
+
+**Sürüm:** 1.9.8
+
+- **İptal ve kurtarma:** iptal, zamanlama ve yeniden denemeler boyunca etkin kalır; araştırma ve çevirinin gecikmiş yazma işlemlerini engeller. Tamamlanan çıktılar korunur ve kurtarma çakışmaları bildirilir.
+- **Geçmiş ve dışa aktarma:** arama metni ve klavye odağı korunur. PowerPoint birleşik hücre ayırıcıları ve CircuitikZ bağlantıları/etiketleri düzeltilmiştir. Toplu yerel arama tutarlı bir anlık görüntü kullanır.
+- **Yayın ve belgeler:** temiz kaynakların kökeni ve indirilen dosyalar doğrulanır; okuyuculara özel girişler ve doğrudan yazılmış çeviriler sunulur.
+
+36 sağlayıcı ön ayarı ve çalıştırılabilir 33 diyagram türü 1.9.7 sürümünde zaten vardı. [Yükseltme kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/releases/1.9.8) · [Herkese açık sürümü doğrulayın](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Drawnix dallar arası okları yeniden düzenlemeden sonra sabit kalır. PPTX içindeki Mermaid/SVG görüntüye dönüştürülebilir. İptal, kaydedilmiş değişiklikleri geri almaz; uzak üretimi veya ücretlendirmeyi durdurmayı garanti etmez. Fiziksel mobil cihazlar ve Obsidian 0.15.0 doğrulanmamıştır.
 
 Daha fazla dilde belgeler için: [Dil Merkezi](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- Yapay Zeka Destekli Çok Dilli Bilgi Geliştirme
-==================================================
-```
-
-Kendi bilgi tabanınızı oluşturmanın kolay bir yolu.
-
-Notemd, çok dilli notlarınızı işlemek, anahtar kavramlar için otomatik wiki bağlantıları oluşturmak, ilgili kavram notları üretmek, web araştırması yapmak ve güçlü bilgi grafikleri kurmanıza yardımcı olmak için çeşitli büyük dil modelleriyle (LLM) entegre olarak Obsidian iş akışınızı geliştirir.
-
 Notemd kullanmayı seviyorsanız, lütfen [⭐ GitHub'da yıldız vermeyi](https://github.com/Jacobinwwey/obsidian-NotEMD) veya [☕️ bana kahve almayı](https://ko-fi.com/jacobinwwey) düşünün.
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## İçindekiler
 
@@ -50,13 +50,26 @@ Notemd kullanmayı seviyorsanız, lütfen [⭐ GitHub'da yıldız vermeyi](https
 
 ## Hızlı Başlangıç
 
-1. **Kur ve Etkinleştir**: Eklentiyi Obsidian Marketplace'ten yükleyin.
-2. **LLM Yapılandır**: `Settings -> Notemd` yoluna gidin, kullanmak istediğiniz LLM sağlayıcısını seçin, örneğin OpenAI veya Ollama gibi yerel bir sağlayıcı, ardından API anahtarınızı ya da URL'nizi girin.
-3. **Kenar Çubuğunu Aç**: Kenar çubuğunu açmak için sol şeritteki Notemd sihirli değnek simgesine tıklayın.
-4. **Not İşle**: Herhangi bir notu açın ve anahtar kavramlara otomatik olarak `[[wiki-links]]` eklemek için kenar çubuğundaki **"Process File (Add Links)"** düğmesine tıklayın.
-5. **Hızlı Bir İş Akışı Çalıştırın**: Varsayılan **"One-Click Extract"** düğmesini kullanarak işleme, toplu üretim ve Mermaid temizliğini tek giriş noktasından zincirleyin.
+1. **Ayarlar → Topluluk eklentileri → Göz at** yolundan **Notemd** yükleyip etkinleştirin.
+2. Tam uç nokta, kimlik bilgileri ve modeli ayarlayın. Bağlantıyı, ardından gerçek üretimi sınayın; model listesinin alınması sohbet erişimini kanıtlamaz.
+3. Boş `trial-concepts` klasörünü oluşturup kavram notu klasörü olarak seçin; başlangıç yolu boştur. `Notemd trial.md` içine sağlayıcıya gönderebileceğiniz kısa bir deneme metni koyun.
+4. **Process File (Add Links)** çalıştırın. Korunan kaynağın yanındaki `Notemd trial_processed.md` dosyasını, bağlantıları ve kavram notlarını inceleyin.
+5. Deneme kaynağını yeniden açıp bu klasörle **One-Click Extract** çalıştırın: bağlantı ekleme, uygun notları başlıklarından toplu üretme ve complete klasöründe Mermaid düzeltme. Mevcut uygun notlar da kapsama alınabilir.
 
-Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla özelliğin kilidini açmak için ayarları keşfedin.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Web araştırması ve diyagram üretimi ayrı işlemlerdir. İptalden sonra etkin görevlerin bitmesini bekleyin; yeniden çalıştırmadan önce tamamlanan çıktıları ve kurtarma dosyalarını inceleyin.
+
+<details>
+<summary>Arayüz örnekleri</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Dil Desteği
 
@@ -89,9 +102,9 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
 - **OpenAI-Compatible Kararlı Uzun İstek Zinciri Sertleştirmesi**: Kararlı modda OpenAI-compatible çağrılar artık her deneme için açık bir üç aşamalı sıra izler: önce doğrudan akışlı taşıma, sonra doğrudan akışsız taşıma, ardından gerekirse yeniden akışlı ayrıştırmaya yükseltilebilen `requestUrl` yedek yolu. Bu, sağlayıcı tamponlu yanıtları üretmiş olsa bile akış hattı kararsız olduğunda yanlış negatifleri azaltır.
 - **LLM API Yüzeyinin Tamamında Protokol Farkındalıklı Akışlı Yedek Yol**: Uzun süren yedek denemeler artık yalnızca OpenAI-compatible uç noktalarda değil, tüm yerleşik LLM yollarında protokol farkındalıklı akışlı ayrıştırma kullanır. Notemd artık OpenAI/Azure tarzı SSE, Anthropic Messages akışı, Google Gemini SSE ve Ollama NDJSON akışlarını hem masaüstü `http/https` hem de masaüstü olmayan `fetch` yollarında işler; kalan doğrudan OpenAI tarzı sağlayıcı girişleri de aynı ortak yedek yolu yeniden kullanır.
 - **Çin'e Hazır Sağlayıcı Ön Ayarları**: Yerleşik ön ayarlar artık mevcut küresel ve yerel sağlayıcıların yanında `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` ve `SiliconFlow` seçeneklerini de kapsar.
-- **Güvenilir Toplu İşleme**: Eşzamanlı işleme mantığı, hız sınırı hatalarını önlemek ve büyük toplu işlerde kararlı performans sağlamak için **zamana yayılmış API çağrıları** yaklaşımıyla iyileştirildi. Görevler artık aynı anda değil, farklı aralıklarla başlatılır.
-- **Doğru İlerleme Raporlaması**: İlerleme çubuğunun takılı kalmasına neden olabilen bir hata giderildi; böylece arayüz artık işlemin gerçek durumunu doğru yansıtır.
-- **Sağlam Paralel Toplu İşleme**: Paralel toplu işlemlerin erken durmasına yol açan bir sorun çözüldü; böylece tüm dosyalar güvenilir ve verimli biçimde işlenir.
+- **Güvenilir Toplu İşleme**: Zamana yayılan API çağrıları istek yoğunluğunu azaltır. Sağlayıcının kota ve hız sınırları geçerliliğini korur.
+- **Doğru İlerleme Raporlaması**: İlerleme tamamlanan, başarısız olan ve iptal edilen dosyaları ayırır. İşlemin bitmesi her dosyanın başarılı olduğu anlamına gelmez.
+- **Sağlam Paralel Toplu İşleme**: Özet hazırlanmadan önce etkin görevlerin bitmesi beklenir. İptal sonraki işleri durdurur, kaydedilmiş değişiklikleri geri almaz; klasör tek bir işlem bütünü olarak geri alınmaz.
 - **İlerleme Çubuğu Doğruluğu**: "Create Wiki-Link & Generate Note" komutunun ilerleme çubuğunu yüzde 95'te takılı bırakabilen hata giderildi; artık tamamlandığında doğru biçimde yüzde 100 gösterir.
 - **Geliştirilmiş API Hata Ayıklaması**: "API Error Debugging Mode" artık LLM sağlayıcıları ve Tavily/DuckDuckGo gibi arama servislerinden tam yanıt gövdelerini yakalar; ayrıca temizlenmiş istek URL'leri, süreler, yanıt başlıkları, kısmi yanıt gövdeleri, ayrıştırılmış kısmi akış içerikleri ve yığın izleriyle deneme bazlı bir taşıma zaman çizelgesi de kaydeder. Bu, OpenAI-compatible, Anthropic, Google, Azure OpenAI ve Ollama yedek yollarında sorun gidermeyi kolaylaştırır.
 - **Geliştirici Modu Paneli**: Ayarlar artık yalnızca geliştiricilere yönelik özel bir tanılama paneli içerir ve "Developer mode" etkinleştirilmedikçe gizli kalır. Seçili mod için tanılama çağrı yollarını ve tekrarlı kararlılık testlerini destekler.
@@ -105,7 +118,7 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
 - **Kavram Notu Oluşturma (İsteğe Bağlı ve Özelleştirilebilir)**: Keşfedilen kavramlar için vault içinde belirttiğiniz klasörde otomatik olarak yeni notlar oluşturur.
 - **Özelleştirilebilir Çıktı Yolları**: İşlenmiş dosyalar ile yeni oluşturulan kavram notaları için vault içinde ayrı göreli yollar yapılandırın.
 - **Özelleştirilebilir Çıktı Dosya Adları (Add Links)**: Dosyaları bağlantı eklemek için işlerken varsayılan `_processed.md` yerine isteğe bağlı olarak **orijinal dosyanın üzerine yazabilir** ya da özel bir sonek/değiştirme dizesi kullanabilirsiniz.
-- **Bağlantı Bütünlüğünü Koruma**: Vault içindeki notalar yeniden adlandırıldığında veya silindiğinde bağlantıları güncellemek için temel bir koruma sağlar.
+- **Bağlantı Bütünlüğünü Koruma**: Yeniden adlandırmada bağlantıların güncellenmesi Obsidian ve ayarlarına bağlıdır. Silme çözülmemiş bağlantılar bırakabilir; aynı adlı notları ayrıca kontrol edin.
 - **Saf Kavram Çıkarma**: Orijinal dokümanı değiştirmeden kavramları çıkarır ve onlara karşılık gelen kavram notalarını oluşturur. Bu, mevcut dokümanlardan bilgi tabanı oluştururken kaynağı bozmadan ilerlemek için idealdir. Özellik, minimal kavram notları ve geri bağlantılar için yapılandırılabilir seçenekler sunar.
 
 ### Çeviri
@@ -115,10 +128,10 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
   - **Büyük Dosya Desteği**: Büyük dosyalar, LLM'e gönderilmeden önce `Chunk word count` ayarına göre otomatik olarak daha küçük parçalara bölünür. Çevrilen parçalar daha sonra tek bir dokümanda sorunsuz biçimde birleştirilir.
   - Birden çok dil arasında çeviri yapılmasını destekler.
   - Hedef dil ayarlardan veya arayüzden özelleştirilebilir.
-  - Çevrilen metni kolay karşılaştırma için orijinal metnin sağ tarafında otomatik olarak açar.
+  - Kaydedilen çeviriyi kullanılabilir düzene göre Obsidian çalışma alanında açar.
 - **Toplu Çeviri**:
-  - Seçilen klasördeki tüm dosyaları çevirir.
-  - "Enable Batch Parallelism" açık olduğunda paralel işlemeyi destekler.
+  - Varsayılan olarak seçilen klasörün doğrudan içindeki uygun dosyaları çevirir, alt klasörleri kapsamaz. Gelişmiş dosya seçimi kapsamı değiştirebilir; mevcut hedef dosyaların üzerine yazılabilir.
+  - Çeviri, `enableBatchParallelism` ayarından bağımsız olarak doğrudan `batchConcurrency` kullanır (varsayılan 1).
   - Yapılandırılmışsa çeviri için özel istemler kullanır.
   - Dosya gezgininin bağlam menüsüne "Batch translate this folder" seçeneğini ekler.
 - **Otomatik çeviriyi devre dışı bırak**: Bu seçenek etkin olduğunda, Translate dışındaki görevler artık çıktıyı belirli bir dile zorlamaz ve kaynak dil bağlamını korur. Açık "Translate" görevi ise yapılandırıldığı şekilde çeviriyi sürdürür.
@@ -134,7 +147,7 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
 - **Başlıktan İçerik Üretimi**:
   - LLM aracılığıyla başlangıç içeriği üretmek için nota başlığını kullanır ve mevcut içeriği bununla değiştirir.
   - **İsteğe Bağlı Araştırma**: Seçilen sağlayıcıyla web araştırması yapılıp yapılmayacağını yapılandırarak üretim için bağlamsal bilgi sağlayın.
-- **Başlıklardan Toplu İçerik Üretimi**: Seçilen klasördeki tüm notalar için başlıklarına göre içerik üretir ve isteğe bağlı araştırma ayarına uyar. Başarıyla işlenen dosyalar, yeniden işlenmemeleri için **yapılandırılabilir bir "complete" alt klasörüne** taşınır, örneğin `[foldername]_complete` veya özel bir ad.
+- **Başlıklardan Toplu İçerik Üretimi**: Uygun `.md` dosyalarının içeriğini araştırma ayarına göre üretir ve değiştirir. `_processed.md` ile belirlenen complete hedef klasör ağacı kapsam dışıdır. Üretimden sonra complete klasörüne taşıma denenir. Dolu hedef taşımayı engeller, önceden kaydedilen üretimi değil; üretilen ve taşınan dosyalar ayrı sayılır.
 - **Mermaid Auto-Fix Bağlantısı**: Mermaid auto-fix etkin olduğunda, Mermaid ile ilgili iş akışları artık işlem sonrası üretilen dosyaları veya çıktı klasörlerini otomatik olarak onarır. Bu kapsama Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid ve Translate akışları dahildir.
 
 ### Yardımcı Özellikler
@@ -289,8 +302,8 @@ Eklenti ayarlarına erişim:
 
 #### Kavram Notu Çıktısı
 - **Customize Concept Note Path**:
-  - **Devre Dışı (Varsayılan)**: `[[linked concepts]]` için otomatik not oluşturma devre dışıdır.
-  - **Etkin**: Yeni kavram notalarının oluşturulacağı klasörü belirtmenizi sağlar.
+  - **Kapalı**: Bağlantılı kavramlar için otomatik not oluşturmaz.
+  - **Varsayılan olarak açık**: Başlangıçta klasör yolu boştur. Kavram notu oluşturmadan önce kasa içinde geçerli bir göreli yol girin.
 - **Concept Note Folder Path**: Yalnızca yukarıdaki seçenek açıkken görünür. Yeni kavram notalarının kaydedileceği vault içindeki *göreli yolu* girin, örneğin `Concepts` veya `Generated/Topics`. Klasörler yoksa otomatik oluşturulur. **Özelleştirme açıksa doldurulması zorunludur.** **Mutlak yollar veya geçersiz karakterler kullanmayın.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -337,8 +350,8 @@ Eklenti ayarlarına erişim:
 
 #### Toplu Mermaid Düzeltmesi
 - **Enable Mermaid Error Detection**:
-  - **Kapalı (Varsayılan)**: İşlem sonrası hata tespiti atlanır.
-  - **Açık**: İşlenmiş dosyaları kalan Mermaid söz dizimi hataları için tarar ve `mermaid_error_{foldername}.md` raporu üretir.
+  - **Kapalı**: İşlem sonrası hata tespitini atlar.
+  - **Varsayılan olarak açık**: Kalan Mermaid hatalarını arar ve `mermaid_error_{foldername}.md` raporunu oluşturur.
 - **Move files with Mermaid errors to specified folder**:
   - **Kapalı**: Hatalı dosyalar yerinde kalır.
   - **Açık**: Düzeltme girişiminden sonra hâlâ Mermaid söz dizimi hatası içeren dosyaları manuel inceleme için özel bir klasöre taşır.
@@ -354,7 +367,7 @@ Eklenti ayarlarına erişim:
 - **API Call Interval (ms)**: Her bir LLM API çağrısından *önce ve sonra* uygulanacak minimum gecikme (milisaniye). Düşük oran limitli API'lerde veya 429 hatalarını önlemek için önemlidir. Yapay gecikme istemiyorsanız 0 girin. Varsayılan: 500 ms.
 - **Chunk Word Count**: LLM'e gönderilecek parça başına maksimum kelime sayısıdır. Büyük dosyalar için API çağrısı sayısını etkiler. Varsayılan: 3000.
 - **Enable Duplicate Detection**: İşlenmiş içerikte yinelenen sözcükler için temel denetimi açıp kapatır. Sonuçlar konsola yazılır. Varsayılan: Etkin.
-- **Max Tokens**: LLM'in yanıt parçası başına üretebileceği maksimum token sayısıdır. Maliyeti ve ayrıntı düzeyini etkiler. Varsayılan: 4096.
+- **Max Tokens**: LLM'in yanıt parçası başına üretebileceği maksimum token sayısıdır. Maliyeti ve ayrıntı düzeyini etkiler. Varsayılan: 8192. Sağlayıcıya özel çıktı sınırı bu değeri geçersiz kılabilir; modele göre varsayılan değerler de bulunur.
 <img width="795" height="274" alt="İşleme parametreleri   Dil ayarları" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Çeviri
@@ -382,7 +395,7 @@ Eklenti ayarlarına erişim:
   - **Change Prompt Word**: Belirli bir görev için prompt sözcüğünü değiştirmenize olanak tanır.
   - **Custom Prompt Word**: İlgili görev için kendi prompt sözcüğünüzü girin.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Devre Dışı (Varsayılan)**: Başarıyla oluşturulan dosyalar, orijinal klasörün üst dizinine göre `[OriginalFolderName]_complete` adlı alt klasöre, orijinal klasör kökse `Vault_complete` klasörüne taşınır.
+  - **Devre Dışı (Varsayılan)**: Hedef, özgün klasörle aynı düzeydeki `[foldername]_complete` klasörüdür; kasa kökü için `Vault_complete` kullanılır. Seçeneği açmak özel ad belirlemeyi sağlar.
   - **Etkin**: Tamamlanan dosyaların taşınacağı alt klasör için özel bir ad belirlemenizi sağlar.
 - **Custom Output Folder Name**: Yalnızca yukarıdaki seçenek açıkken görünür. Alt klasör için istediğiniz adı girin, örneğin `Generated Content` veya `_complete`. Geçersiz karakterlere izin verilmez. Boş bırakılırsa `_complete` kullanılır. Klasör, orijinal klasörün üst dizinine göre oluşturulur.
 
@@ -486,11 +499,11 @@ Bu, kavramları tanımlamaya ve `[[wiki-links]]` eklemeye odaklanan temel işlev
    - `Notemd: Translate Note/Selection` komutunu çalıştırın (komut paleti veya kenar çubuğu düğmesiyle).
    - **Target Language** değerini onaylayabileceğiniz veya değiştirebileceğiniz bir modal açılır; varsayılan değer Yapılandırma bölümündeki ayardan gelir.
    - Eklenti çeviriyi yapmak için Multi-Model ayarlarına göre yapılandırılmış **LLM Provider**'ı kullanır.
-   - Çevrilen içerik, yapılandırılmış **Translation Save Path** içine uygun son ekle kaydedilir ve kolay karşılaştırma için **orijinal içeriğin sağında yeni bir bölmede** açılır.
+   - Çeviriyi yapılandırılmış yol ve son ekle kaydeder, ardından kaydedilen dosyayı Obsidian çalışma alanında açar.
    - Bu görev kenar çubuğu düğmesi veya modal iptal düğmesi ile iptal edilebilir.
 3. **Toplu Çeviri**:
    - Komut paletinden `Notemd: Batch Translate Folder` komutunu çalıştırıp bir klasör seçin veya dosya gezgininde bir klasöre sağ tıklayıp "Batch translate this folder" seçeneğini kullanın.
-   - Eklenti seçilen klasördeki tüm Markdown dosyalarını çevirir.
+   - Varsayılan olarak seçilen klasörün doğrudan içindeki uygun dosyaları çevirir, alt klasörleri kapsamaz. Gelişmiş dosya seçimi kapsamı değiştirebilir; mevcut hedef dosyaların üzerine yazılabilir.
    - Çevrilen dosyalar yapılandırılmış çeviri yoluna kaydedilir, ancak otomatik olarak açılmaz.
    - Bu süreç ilerleme modalinden iptal edilebilir.
 
@@ -517,7 +530,7 @@ Bu, kavramları tanımlamaya ve `[[wiki-links]]` eklemeye odaklanan temel işlev
    - `Notemd: Batch Generate Content from Titles` komutunu çalıştırın (komut paleti veya kenar çubuğu düğmesiyle).
    - İşlemek istediğiniz notaları içeren klasörü seçin.
    - Eklenti, klasördeki her `.md` dosyasını (`_processed.md` dosyaları ve belirlenen "complete" klasöründekiler hariç) başlığa göre içerik üreterek işler ve mevcut içeriği değiştirir. Dosyalar editörde açılmadan arka planda işlenir.
-   - Başarıyla işlenen dosyalar yapılandırılmış "complete" klasörüne taşınır.
+   - Üretimden sonra complete klasörüne taşıma denenir. Dolu hedef taşımayı engeller, önceden kaydedilen üretimi değil; üretilen ve taşınan dosyalar ayrı sayılır.
    - Bu komut, işlenen her not için **"Enable Research in 'Generate from Title'"** ayarına uyar.
    - Bu görev kenar çubuğu düğmesi veya modal iptal düğmesi ile iptal edilebilir.
    - İlerleme ve sonuçlar (değiştirilen dosya sayısı, hatalar) kenar çubuğu veya modal günlüğünde gösterilir.
@@ -569,6 +582,8 @@ Bu, kavramları tanımlamaya ve `[[wiki-links]]` eklemeye odaklanan temel işlev
    - İsterseniz bu problemli dosyaları inceleme için ayrı bir klasöre taşımaya da yapılandırabilirsiniz.
 
 ## Desteklenen LLM Sağlayıcıları
+
+Tablo seçilmiş örnekleri gösterir. Ön ayarlar ve gereksinimler için [36 sağlayıcı kılavuzuna](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/providers/overview) bakın.
 
 | Sağlayıcı | Tür | API Anahtarı Gerekli | Notlar |
 |--------------------|---------|------------------------|-----------------------------------------------------------------------|
@@ -638,7 +653,7 @@ Notemd, Obsidian içinde yerel olarak çalışır; ancak bazı özellikler dış
 ### Yaygın Sorunlar
 - **Eklenti Yüklenmiyor**: `manifest.json`, `main.js` ve `styles.css` dosyalarının doğru klasörde (`<Vault>/.obsidian/plugins/notemd/`) bulunduğundan emin olun ve Obsidian'ı yeniden başlatın. Açılışta hata olup olmadığını görmek için Developer Console'u (`Ctrl+Shift+I` veya `Cmd+Option+I`) kontrol edin.
 - **İşleme Hataları / API Hataları**:
-  1. **Dosya Biçimini Kontrol Edin**: İşlemek veya denetlemek istediğiniz dosyanın `.md` ya da `.txt` uzantılı olduğundan emin olun. Notemd şu anda yalnızca bu metin tabanlı biçimleri destekler.
+  1. **Biçimi kontrol edin**: Varsayılan biçimler göreve bağlıdır (`.md` veya `.md`/`.txt`). Genişletilmiş girdiler açıkken geliştirici modu, çeviri ve kavram çıkarma gibi kaynağı koruyan bazı görevlerde diğer metinleri ve PDF'yi kabul eder. Bağlantı ekleme `.md`/`.txt` ile sınırlı kalır.
   2. Etkin sağlayıcının ayarlarını doğrulamak için "Test LLM Connection" komutunu veya düğmesini kullanın.
   3. API Key, Base URL, Model Name ve API Version (Azure için) değerlerini tekrar kontrol edin. API anahtarının doğru olduğundan ve yeterli kredi/yetkiye sahip olduğundan emin olun.
   4. Yerel LLM sunucunuzun (LMStudio veya Ollama) çalıştığından ve Base URL'nin doğru olduğundan emin olun; örneğin LMStudio için `http://localhost:1234/v1`.
@@ -699,7 +714,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.7 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.8 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->

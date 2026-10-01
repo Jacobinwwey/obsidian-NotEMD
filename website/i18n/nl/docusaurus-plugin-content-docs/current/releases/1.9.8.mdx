@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Bijwerken naar Notemd 1.9.8
+description: >-
+  Beoordeel betrouwbaarheid, native export en documentatie sinds 1.9.7 en
+  controleer een beheerste upgrade.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Bijwerken naar Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Bijwerken naar Notemd 1.9.8
+
+<TLDR>1.9.8 richt zich op annulering, eigendom van uitvoer, consistente batchcontext, native export en juiste documentatie. Controleer beschikbaarheid op GitHub en gebruik onderdelen uit dezelfde release. Provider- en diagramaantallen waren al bestaande mogelijkheden.</TLDR>
+
+## Sinds 1.9.7
+
+| Onderdeel | Effect |
+| ------ | ------------- |
+| Annulering | Gedeelde status in planning, transport en herhalingen; late antwoorden vervolgen geen beschermde schrijfacties |
+| Opslag | Eigendom bij overlappende opslag/herstel, gelijke namen en gedeelde bijlagen |
+| Lokaal ophalen | Consistente snapshot voor batchtitels; vast corpus en geheugenmetingen |
+| Native uitvoer | PowerPoint-scheiding onder samengevoegde cellen en CircuitikZ-bedrading/labels hersteld |
+| Verificatie | Linux/Windows-CI, lint per diagnose, proces- en native bewijs |
+| Documentatie | Werkelijke beginwaarden, vier doelgroepen, directe vertalingen en gecontroleerde publicatie |
+
+Geschiedeniszoeken behoudt opeenvolgende invoer en cursor bij asynchrone vernieuwing. De lade houdt Tab intern, ontvangt focus tijdens laden en voorkomt dat Escape ook het hoofdvoorbeeld sluit. Herhaling en verouderde antwoorden hebben browserregressies.
+
+Onderzoek en vertaling controleren annulering opnieuw na laatste bronlezing of mapvoorbereiding, vóór toevoegen, maken of overschrijven. Door Vault geaccepteerde schrijfacties blijven voltooid geteld. Maakt een andere taak de vertaalmap tijdens wachten, dan wordt die hergebruikt zonder de creatie toe te eigenen. Een conflicterend bestand of nog ontbrekende map behoudt de foutmelding en bronmapfallback.
+
+De 36 profielen en 33 uitvoerbare diagramitems bestonden al in 1.9.7. Runtimewerk, documenten en merges worden niet dubbel geteld.
+
+## Veilig bijwerken
+
+1. Stop taken en maak een back-up van kluis/instellingen.
+2. Werk bij via Community plugins of neem `main.js`, `manifest.json`, `styles.css` uit dezelfde [publieke 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Vervang handmatig alleen runtimebestanden, behoud instellingen en resultaten.
+4. Herlaad en controleer de versie.
+5. Test een wegwerpnotitie en kleine map vóór grote batches.
+
+Opdracht-ID’s en instellingen blijven behouden. One-Click Extract blijft links, batchtitels en Mermaid-herstel. Documentcorrecties voegen geen onderzoek aan de standaardketen toe.
+
+## Annulering en herstel
+
+Annuleren is geen terugdraaitransactie. Voltooide bestanden blijven, geaccepteerde aanvragen/schrijfacties kunnen afronden en externe facturering is providerbeleid. Wacht en inspecteer uitvoer. Vergelijk zichtbare conflicten met herstelbestanden vóór verwijderen; behoud bijmappen die oudere artefacten nog gebruiken.
+
+## Export- en compatibiliteitsgrenzen
+
+- PowerPoint-tabellen hebben gerichte native checks; een algemene afbeeldingsscore miste het defect.
+- Mermaid/SVG in PPTX kunnen afbeeldingen blijven.
+- Statische Drawnix-verbindingen garanderen geen bevestiging na herschikken.
+- CircuitikZ-preview en TeX-compilatie zijn aparte controles.
+- Fysiek mobiel en Obsidian 0.15.0 blijven ongetest.
+- Vaste lexicale meetresultaten bewijzen geen semantische zoekkwaliteit of universele snelheid.
+
+## Release-integriteit
+
+De publisher controleert versies en lokale/remote tags, bouwt schone getagde bron, uploadt een draft en verifieert gedownloade hashes. Vereiste bestanden zijn `main.js`, `manifest.json`, `styles.css`, `README.md`. Herhalen vervangt geen publieke bytes door ongerelateerde uitvoer.
+
+Pages volgt na verificatie van de publieke Release. Codex schrijft en beoordeelt deze vertalingen zonder LM Studio of vertaalengine. Dit is geen onafhankelijke beoordeling door moedertaalsprekers.
+
+## Verder
+
+- [Release en tweetalige notes](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Snel starten](../getting-started/quick-start).
+- [Batches](../advanced/batch-processing).
+- [Ontwikkelaars](../developers/overview) en [agents](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) met versies en opgeschoond bewijs.

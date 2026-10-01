@@ -1,14 +1,13 @@
 ---
 id: configuration
 title: 設定
-description: Notemdの設定と環境設定を構成する
+description: Notemd の設定を検索し、プロバイダー、出力先、言語、タスク別モデルとワークフローを指定します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 設定
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,431 +15,102 @@ import TLDR from '@site/src/components/TLDR';
 # 設定
 
 <TLDR>
-**Notemdの設定は6つの主要な領域をカバーしています：** (1) LLMプロバイダとAPIキー、(2)タスクごとのモデル選択、(3)出力パスとテンプレート、(4)UI言語と出力言語、(5)検索サービス(Tavily/DuckDuckGo)、(6)カスタムワークフロー。すべての設定は ObsidianのSettings → Notemdにあります。変更は即時に適用されます。
+**設定 → Notemd** の検索から項目を探します。処理前にプロバイダーと出力先を指定してください。変更はノート一つで確認してからフォルダーに適用します。実行中のタスクは開始時の設定を保持する場合があります。
 </TLDR>
 
 ## 設定の概要
 
-アクセス方法：**Obsidian 設定 (⚙️) → Notemd**
-
-### メインセクション
-
-1. **プロバイダ設定** — APIキー、ベースURLs、モデル
-2. **タスク設定** — タスクごとのモデル選択
-3. **出力設定** — 生成されたファイルを保存する場所
-4. **言語設定** — UI および出力言語
-5. **検索連携** — Tavily/DuckDuckGoの設定
-6. **ワークフロー** — カスタムボタンチェーン
-7. **Advanced** — 診断、バッチ処理、チャンキング
+初期プロバイダーは DeepSeek、認証情報は空です。プリセット選択はアカウント作成、モデル導入、クラウドへの権限付与を行いません。[プロバイダー設定](../providers/overview)でプロトコルとモデル一覧を確認できます。
 
 <!-- notemd-settings-favorites-guide -->
-## Notemd 設定の検索とお気に入り機能
+## 設定の検索とお気に入り
 
-設定ページは、一度だけの構成ではなく繰り返し利用することを想定して設計されています：
+- 設定検索は名前、説明、別名、表示カテゴリーに一致し、対象へ移動します。
+- **★ Favorites** は保存した項目の説明、分類、移動先を示します。Vault ごとに保存され、再起動後も維持し、無効な ID は除外します。
+- 矢印でツールバーを折り畳み、再度開くと検索語を復元します。
+- お気に入り一覧と、お気に入りだけを検索するフィルターは別の操作です。
 
-- 名前、説明、別名、または表示カテゴリーから設定を検索するには、項目情報を認識する**Search settings**入力欄を使用してください。結果は信頼度順に並び替えられ、直接該当する設定へ移動できます。
-- 頻繁に調整する設定を現在のVault内に保持したい場合は**★ Favorites**を使用してください。これをクリックすると、設定名、説明、カテゴリー、および直接ナビゲート先が記載された専用の一覧が表示されます。設定ページから離れることなく、この一覧からお気に入りを削除できます。
-- 検索ツールバーはデフォルトで展開状態です。より多くの垂直スペースが必要な場合は、矢印ボタンを使って右上に浮かぶコントロールとして折りたたむことができます。再展開すると、現在入力されている検索クエリは保持されます。
-- お気に入り一覧は、「お気に入りのみ」フィルターとは独立しています。お気に入り設定は安定したIDを使用するため、Obsidianの再起動後もその状態が維持され、設定がなくなった場合でも古いIDは安全に削除されます。
+図プレビューの出力解像度は既定 **300 PPI**、範囲 **72–600**。PNG のラスター化に影響し、対応する SVG／PDF はベクトルを保持します。**Also export complete Mermaid visuals** は付属ファイルの設定であり、Drawnix 内の Mermaid 表示を切り替えるものではありません。
 
-**Diagram preview export PPI**設定のデフォルト値は**300 PPI**で、**72～600**までの値を受け付けます。この設定はPNGのラスタライゼーションのみを制御し、SVGおよびPDFではベクタージオメトリが保持されます。**Also export complete Mermaid visuals**設定は、任意の外部Mermaidコンテンツのエクスポートを制御するもので、Drawnixのプレビュー内でのMermaidの表示状態には影響しません。
----
+## 1. プロバイダー設定
 
-## 1. プロバイダ設定
+必要な認証情報、プロトコルに合う URL、利用できるモデルを指定します。対応するモデル一覧を取得し、接続をテストします。一覧取得と生成成功は別の確認です。
 
-### プロバイダの追加
+ローカルには起動済みサーバーとモデルが必要です。クラウド／ゲートウェイにはタスク内容が渡ります。非公開資料ではタスク別プロバイダーも調べます。
 
-1. ドロップダウンから**プロバイダを選択してください**（30種類以上利用可能）
-2. **APIキーを入力してください**
-3. **オプション**: カスタムのベース URL を設定する（プロキシ/ゲートウェイ用）
-4. 接続を確認するには、「Model Listを取得する」をクリックしてください。
-5. **デフォルトモデルを選択する**
+## 2. タスク別モデル
 
-### 一般的なプロバイダー
+`useMultiModelSettings` でリンク、タイトル生成、調査、翻訳、概念抽出、原文抽出、Mermaid 要約を個別設定できます。空のモデル上書きは選択プロバイダーのモデルを使い、未有効時は active provider を使います。
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
-
-#### Anthropic (Claude)
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
-
-#### Ollama (ローカル)
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
-```
-
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
-
-### 複数のプロバイダー
-
-複数のプロバイダを設定し、タスクごとに切り替えることができます：
-- **メインプロバイダー**: フォールバックとして使用されます
-- **タスク固有のプロバイダー**: 特定のタスクに対して上書きする
-
----
-
-## 2. タスク専用モデル
-
-コストと品質の最適化のため、異なるタスクに合わせて別々のモデルを設定します：
-
-### タスクの種類
-
-| タスク | デフォルトモデル | 目的 |
-|------|--------------|---------|
-| **リンク設定** | メインプロバイダー | wikiリンク用のコンセプトを特定する |
-| **コンセプト生成** | メインプロバイダー | 概念を抽出し、説明する |
-| **研究** | メインプロバイダー | ウェブ検索結果の要約を行う |
-| **翻訳** | メインプロバイダー | テキストを翻訳してください |
-| **図の生成** | メインプロバイダー | Mermaid/Canvasの図を生成する |
-
-### 例：コスト最適化されたセットアップ
-
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### 設定方法
-
-1. **設定 → Notemd → タスク設定**
-2. 各タスクについて、次のうち1つを選んでください：
-   - ✅ **メインプロバイダを使用する**（デフォルト）
-   - 🔄 **カスタムプロバイダの使用** → プロバイダとモデルを選択
-
----
+代表ノートで正確性、時間、実際の料金を比較します。ここではモデルの順位や継続的な提供を保証しません。
 
 ## 3. 出力設定
 
-### コンセプトノート出力
+| タスク | 既定の出力 |
+| ------ | ------------------------- |
+| リンク追加 | 原文の隣に `_processed.md` を作成。原文移動は無効 |
+| 単独の概念抽出 | 指定概念フォルダーが必要。タイトルのみ、バックリンクなし |
+| 翻訳 | 原文の隣に `_<language>.md`。既存出力を上書きし得る |
+| 調査 | アクティブな Markdown に要約を追記 |
+| タイトルから一括生成 | 対象ノートに生成し、移動可能なら同階層の `<folder>_complete` へ |
+| 図のプレビュー／出力 | 対応形式を選択し、タスクが報告する出力先を確認 |
 
-**新しいコンセプトノートが保存される場所：**
+概念フォルダーは初期状態で空です。`concepts` は任意の例。単独概念テンプレートは最小／完全形式のみで、汎用テンプレート変数エンジンはありません。[概念ノート](../features/concept-notes)を参照してください。
 
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**テンプレート:**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### フォルダ構成オプション
-
-**オプション1：フラット（すべてのコンセプトを1つのフォルダにまとめる）**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**オプション2：階層型（ソースフォルダ別）**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-設定：**Settings → Output → Use Hierarchical Folders**
-
-### 図の出力
-
-**図面の保存先：**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**形式:**
-- `.mmd` (Mermaid ソース)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
+リンク処理の接尾辞、処理後フォルダー、翻訳接尾辞と保存先は別設定です。再実行前に既存出力を調べ、復旧や競合の表示に従います。キャンセルは完了済みの書き込みを戻しません。
 
 ## 4. 言語設定
 
-### UI 言語
+プラグイン UI は **21 ロケール**、サイトは **34 言語ルート**。`uiLocale: auto` は対応する UI 言語を選び、未対応なら英語になります。
 
-**インターフェース言語**（ボタン、メニュー、ダイアログ）：
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-対応言語：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Русский、العربيةなど。
-
-### 出力言語
-
-**生成コンテンツの言語**（コンセプトノート、研究要約）：
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**使用例:** 中国語のUIを使用し、英語で出力することで二言語の研究を行う。
-
-### 翻訳対象
-
-翻訳タスクの**デフォルト対象言語**：
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
+生成言語は独立しており既定は英語です。リンク、タイトル生成、調査、概念抽出、Mermaid 要約はタスク別言語を設定できます。翻訳は選択した `language` を使います。モデルの言語能力は UI／サイトの数とは別です。
 
 ## 5. 検索連携
 
-### Tavily（推奨）
+API key を設定した **Tavily** または **DuckDuckGo** を明示的に選びます。空の Tavily キーでは自動切替しません。両者とも通信し、DuckDuckGo は検索先ページも取得する場合があります。
 
-**AI最適化検索サービス：**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-キーを取得する: [tavily.com](https://tavily.com/)
-
-**機能:**
-- 高品質な結果
-- AI最適化された要約
-- 出典の引用
-
-### DuckDuckGo (実験的)
-
-**APIキーは必要ありません：**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**注意:** 品質が低く、カスタマイズは不可です。
-
----
+タイトル生成は既定で調査しません。必要な場合だけ `enableResearchInGenerateContent` を有効にします。ローカル検索も既定で無効で、範囲とタスクを別設定します。ローカルに索引を作っても、プロンプトに使うノート断片は LLM に送信します。
 
 ## 6. ワークフロー設定
 
-### カスタムワークフローの作成
+ビルダーを使うか、1行に名前付き DSL を記述します。既定は：
 
-**ワークフローは複数のタスクを1つのボタンにまとめます。**
-
-1. **設定 → ワークフロー → ワークフローの追加**
-2. **名前**: "Paper Analysis Flow"
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **保存**
-
-左側のサイドバーに新しいボタンが表示されます。
-
-### DSL構文
-
-**形式:** `action1>action2>action3`
-
-**利用可能なアクション:**
-- `process-current-add-links` — 現在のノートにウィキリンクを追加する
-- `extract-concepts-current` — コンセプトノートの作成
-- `research-and-summarize` — ウェブ調査＋要約
-- `translate-current` — 現在のメモを翻訳する
-- `summarize-as-mermaid` — Mermaid図を生成する
-- `process-folder-add-links` — フォルダのバッチ処理
-
-**例のワークフロー:**
-
-**クイックコンセプト抽出：**
-```
-process-current-add-links>extract-concepts-current
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-**深層調査：**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**多言語分析：**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
+`::` は名前とアクション列、`>` は ID の区切りです。既定では報告されたステップ失敗で停止します。[ワークフロー](../features/workflows)で ID、フォルダー文脈、エラー後の続行を確認できます。
 
 ## 7. 詳細設定
 
-### バッチ処理
+| 設定 | 既定値 | 意味 |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | タスク別指定がない場合のプロバイダー |
+| `useMultiModelSettings` | `false` | タスク別モデルを有効化 |
+| `useCustomConceptNoteFolder` | `true` | フォルダー指定後に概念出力を許可 |
+| `conceptNoteFolder` | `''` | 初期概念フォルダーは未指定 |
+| `extractConceptsMinimalTemplate` | `true` | 単独抽出をタイトルのみで作成 |
+| `extractConceptsAddBacklink` | `false` | 単独抽出のバックリンクを明示的に許可 |
+| `moveOriginalFileOnProcess` | `false` | リンク追加時に原文を保持 |
+| `chunkWordCount` | `3000` | 概算の語数。プロバイダーの token 上限ではない |
+| `batchConcurrency` | `1` | 既定のバッチ並行数 |
+| `enableBatchParallelism` | `false` | このスイッチを使う経路で並行化 |
+| `enableStableApiCall` | `false` | 明示的な安定リクエストモード |
+| `customWorkflowErrorStrategy` | `stop_on_error` | 報告エラーでワークフロー停止 |
 
-**複数のファイルを並行して処理する：**
-
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
-
-高速になるほど処理速度は上がりますが、API呼び出しが増えます。
-
-### スマートチャンキング
-
-**長いメモの場合は、複数のチャンクに分割してください：**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-トークン制限によるエラーを防ぎます。
-
-### 診断パネル
-
-**詳細なログを表示する:**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-表示内容：
-- API リクエスト/レスポンス
-- トークンの使用量
-- 処理時間
-- エラー
-
-### 重複コンセプト検出
-
-**類似したコンセプトの重複を避ける：**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-値が高いほど、マージの積極性が高くなります。
-
----
+分割サイズと出力 token 予算は異なります。小さい分割でも文脈上限を保証しません。並行数を下げてもすべての 429 を防げるわけではありません。
 
 ## 設定プロファイル
 
-### 設定のエクスポート/インポート
+設定は Vault のプラグインデータです。変更前にバックアップします。プロバイダープロファイルのマスキング済み出力は完全な Vault バックアップではありません。URL 等のメタデータも確認し、未加工の設定や機密ノート入り診断を公開しないでください。
 
-**デバイス間で設定を共有する：**
+## 設定の問題を調べる
 
-1. **設定 → 詳細設定 → 構成のエクスポート**
-2. `notemd-config.json`を保存します
-3. 新しいデバイスで：**設定のインポート**
+正確なプロバイダー／モデルで接続テストと短いノートを試します。項目が見つからない場合は検索、カテゴリー、開発者モードの表示条件、対象 Vault を確認します。報告にはバージョンと機密情報を除いた設定を添えます。
 
-**含まれているもの:**
-- プロバイダー API キー（任意）
-- モデルの選択
-- 出力パス
-- カスタムワークフロー
+## 次に読む
 
----
-
-## 推奨設定
-
-### 学生の方へ
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### 研究者の方へ
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### プライバシーを重視するユーザーのために
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### バイリンガルワーク用
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## 設定のトラブルシューティング
-
-### 設定が保存されませんでした。
-- `.obsidian/plugins/notemd/`のファイル権限を確認します
-- 試してみて：プラグインを無効にする → 再び有効にする
-
-### API キーが無効です
-- 余分なスペースはありません
-- 有効期限を確認する
-- プロバイダーダッシュボードでクレジットを確認する
-
-### モデルが読み込まれていません。
-- 「モデルリストを取得」をクリックして更新してください
-- ネットワーク接続状況を確認します
-- 異なるプロバイダを試してみてください
-
----
-
-## 次のステップ
-
-- 📖 [機能を探る](../features/wiki-links)
-- 🔌 [プロバイダ設定ガイド](../providers/overview)
-- ❓ [FAQ](../faq)
+- [クイックスタート](./quick-start)：初回出力。
+- [バッチ処理](../advanced/batch-processing)：範囲と並行性。
+- [カスタムプロンプト](../advanced/custom-prompts)：置換と出力契約。
+- [トラブルシューティング](../advanced/troubleshooting)：診断。

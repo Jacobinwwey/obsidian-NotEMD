@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Notemd-plugin voor Obsidian
 
+> Notemd is een Obsidian-plugin onder de MIT-licentie voor gekoppelde Markdown, conceptnotities, samenvattingen, vertalingen en diagrammen. Bestanden blijven in de kluis; cloudtaken sturen inhoud naar de gekozen aanbieder en webonderzoek gebruikt het netwerk.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Begin hier
+
+| Lezer | Ingang | Doel |
+|---|---|---|
+| Beginner | [Snelstart](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/getting-started/quick-start) | Een aanbieder instellen en één notitie controleren |
+| Gebruiker | [Werkstromen](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/features/workflows) | Mappen, uitvoer en herstel beheren |
+| Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
+| Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
+
+**Versie:** 1.9.8
+
+- **Annulering en herstel:** annulering blijft actief tijdens planning en herhaalde pogingen en blokkeert late schrijfacties bij onderzoek en vertaling. Voltooide uitvoer blijft bewaard en herstelconflicten worden gemeld.
+- **Geschiedenis en export:** zoektekst en toetsenbordfocus blijven behouden. Scheidingslijnen bij samengevoegde PowerPoint-cellen en CircuitikZ-verbindingen en labels zijn hersteld. Lokaal zoeken in batches gebruikt één consistente momentopname.
+- **Publicatie en documentatie:** herkomst van schone broncode en gedownloade bestanden worden gecontroleerd; elke doelgroep krijgt een ingang en rechtstreeks geschreven vertalingen.
+
+De 36 aanbiedervoorinstellingen en 33 uitvoerbare diagramtypen bestonden al in 1.9.7. [Upgradegids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/releases/1.9.8) · [Openbare release controleren](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Drawnix-pijlen tussen takken blijven statisch na herschikking. Mermaid/SVG in PPTX kan op een afbeelding terugvallen. Annuleren draait opgeslagen wijzigingen niet terug en garandeert geen stop van externe generatie of facturering. Fysieke mobiele apparaten en Obsidian 0.15.0 zijn niet geverifieerd.
 
 Lees de documentatie in meer talen: [Taalhub](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- AI-aangedreven meertalige kennisverrijking
-==================================================
-```
-
-Een eenvoudige manier om je eigen kennisbank op te bouwen!
-
-Notemd verbetert je Obsidian-workflow door te integreren met verschillende Large Language Models (LLM's) om je meertalige notities te verwerken, automatisch wiki-links voor kernconcepten te genereren, bijbehorende conceptnotities te maken, webonderzoek uit te voeren en je te helpen krachtige kennisgrafieken op te bouwen.
-
 Als je Notemd graag gebruikt, overweeg dan [⭐ een ster te geven op GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) of [☕️ koop een koffie voor mij](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Inhoudsopgave
 
@@ -50,13 +50,26 @@ Als je Notemd graag gebruikt, overweeg dan [⭐ een ster te geven op GitHub](htt
 
 ## Snelstart
 
-1. **Installeren en inschakelen**: Haal de plugin uit de Obsidian Marketplace.
-2. **LLM configureren**: Ga naar `Settings -> Notemd`, selecteer je LLM-provider (zoals OpenAI of een lokale provider zoals Ollama) en voer je API-sleutel/URL in.
-3. **Zijbalk openen**: Klik op het Notemd-toverstafpictogram in het linkerlint om de zijbalk te openen.
-4. **Een notitie verwerken**: Open een willekeurige notitie en klik in de zijbalk op **"Process File (Add Links)"** om automatisch `[[wiki-links]]` toe te voegen aan kernconcepten.
-5. **Een snelle workflow uitvoeren**: Gebruik de standaardknop **"One-Click Extract"** om verwerking, batchgeneratie en Mermaid-opruiming vanuit één ingang te koppelen.
+1. Installeer en activeer **Notemd** via **Instellingen → Communityplugins → Bladeren**.
+2. Stel het exacte eindpunt, de aanmeldgegevens en het model in. Test de verbinding en vervolgens echte generatie; een modellenlijst bewijst geen toegang tot chat.
+3. Maak de lege map `trial-concepts` en kies die als conceptnotitiemap; het aanvankelijke pad is leeg. Maak `Notemd trial.md` met een korte testtekst die je naar de aanbieder mag sturen.
+4. Voer **Process File (Add Links)** uit. Controleer `Notemd trial_processed.md` naast de bewaarde bron, de links en de conceptnotities.
+5. Open de testbron opnieuw en start **One-Click Extract** met die map: links toevoegen, geschikte notities op basis van hun titels vullen en Mermaid in de complete-map herstellen. Bestaande geschikte notities kunnen worden meegenomen.
 
-Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals webonderzoek, vertaling en contentgeneratie.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Webonderzoek en diagramgeneratie zijn aparte acties. Wacht na annulering tot actieve taken zijn afgehandeld en controleer voltooide uitvoer en herstelbestanden voordat je opnieuw begint.
+
+<details>
+<summary>Voorbeelden van de interface</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Taalondersteuning
 
@@ -89,9 +102,9 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 - **Versterkte stabiele long-request-keten voor OpenAI-compatibele providers**: In stabiele modus gebruiken OpenAI-compatibele calls nu expliciet een 3-fasenvolgorde per poging: primaire directe streaming-transport, daarna direct non-stream-transport, daarna `requestUrl`-fallback (die nog steeds kan upgraden naar stream-parsing indien nodig). Dat vermindert fout-negatieven wanneer providers wel buffered responses afronden maar streaming-pijplijnen instabiel zijn.
 - **Protocolbewuste streamingfallback over LLM-API's heen**: Langlopende fallbackpogingen upgraden nu naar protocolbewuste stream-parsing over elk ingebouwd LLM-pad, niet alleen voor OpenAI-compatibele eindpunten. Notemd verwerkt nu OpenAI/Azure-stijl SSE, Anthropic Messages streaming, Google Gemini SSE-responses en Ollama NDJSON-streams op zowel desktop `http/https` als niet-desktop `fetch`, en de resterende directe OpenAI-stijl providerpaden hergebruiken hetzelfde gedeelde fallbackpad.
 - **China-ready provider-presets**: Ingebouwde presets dekken nu `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` en `SiliconFlow`, naast de bestaande globale en lokale providers.
-- **Betrouwbare batchverwerking**: Verbeterde gelijktijdige verwerkingslogica met **gespreide API-calls** om rate limiting te voorkomen en stabiele prestaties tijdens grote batchjobs te garanderen. De nieuwe implementatie zorgt ervoor dat taken met intervallen starten in plaats van allemaal tegelijk.
-- **Nauwkeurige voortgangsrapportage**: Een bug opgelost waardoor de voortgangsbalk kon vastlopen, zodat de UI nu altijd de werkelijke status van de bewerking toont.
-- **Robuuste parallelle batchverwerking**: Een probleem opgelost waarbij parallelle batchbewerkingen voortijdig stilvielen, zodat nu alle bestanden betrouwbaar en efficiënt worden verwerkt.
+- **Betrouwbare batchverwerking**: Gespreide API-aanroepen verminderen aanvraagpieken. De quota en snelheidslimieten van de aanbieder blijven gelden.
+- **Nauwkeurige voortgangsrapportage**: De voortgang onderscheidt voltooide, mislukte en geannuleerde bestanden. Een afgeronde uitvoering betekent niet dat elk bestand is geslaagd.
+- **Robuuste parallelle batchverwerking**: Actieve taken eindigen voordat het overzicht wordt samengesteld. Annuleren stopt vervolgwerk, maar draait opgeslagen wijzigingen niet terug; de map is geen gezamenlijke transactie.
 - **Nauwkeurigheid van de voortgangsbalk**: Een bug opgelost waarbij de voortgangsbalk voor de opdracht "Create Wiki-Link & Generate Note" op 95% kon blijven hangen; deze toont nu correct 100% bij voltooiing.
 - **Verbeterde API-debugging**: De modus "API Error Debugging Mode" legt nu volledige response bodies van LLM-providers en zoekdiensten (Tavily/DuckDuckGo) vast en registreert ook per poging een transporttijdlijn met geschoonde request-URL's, verstreken duur, response-headers, gedeeltelijke response-bodies, geparseerde gedeeltelijke streaminhoud en stack traces voor betere troubleshooting over OpenAI-compatibele, Anthropic-, Google-, Azure OpenAI- en Ollama-fallbacks heen.
 - **Developer Mode-paneel**: De instellingen bevatten nu een apart diagnostisch paneel voor developers dat verborgen blijft totdat "Developer mode" is ingeschakeld. Het ondersteunt het selecteren van diagnostische call-paden en het uitvoeren van herhaalde stabiliteitsprobes voor de geselecteerde modus.
@@ -105,7 +118,7 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 - **Conceptnotities aanmaken (optioneel en aanpasbaar)**: Maakt automatisch nieuwe notities aan voor ontdekte concepten in een opgegeven map in je vault.
 - **Aanpasbare uitvoerpaden**: Configureer aparte relatieve paden binnen je vault voor het opslaan van verwerkte bestanden en nieuw aangemaakte conceptnotities.
 - **Aanpasbare uitvoerbestandsnamen (Add Links)**: Kies optioneel om **het originele bestand te overschrijven** of gebruik een aangepaste suffix/vervangingsstring in plaats van de standaard `_processed.md` bij het verwerken van bestanden voor links.
-- **Behoud van linkintegriteit**: Basisafhandeling voor het bijwerken van links wanneer notities binnen de vault worden hernoemd of verwijderd.
+- **Behoud van linkintegriteit**: Het bijwerken van links na een naamswijziging hangt af van Obsidian en zijn instellingen. Verwijderen kan onopgeloste links achterlaten; controleer notities met dezelfde naam.
 - **Pure conceptextractie**: Extraheer concepten en maak bijbehorende conceptnotities zonder het oorspronkelijke document te wijzigen. Dit is ideaal om een kennisbank te vullen op basis van bestaande documenten zonder ze aan te passen. Deze functie heeft configureerbare opties voor minimale conceptnotities en backlinks.
 
 ### Vertaling
@@ -115,10 +128,10 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
   - **Ondersteuning voor grote bestanden**: Splitst grote bestanden automatisch op in kleinere chunks op basis van de instelling `Chunk word count` voordat ze naar de LLM worden gestuurd. De vertaalde chunks worden daarna naadloos weer samengevoegd tot één document.
   - Ondersteunt vertalingen tussen meerdere talen.
   - Aanpasbare doeltaal in instellingen of UI.
-  - Opent de vertaalde tekst automatisch rechts van de oorspronkelijke tekst voor eenvoudig vergelijken en lezen.
+  - Opent de opgeslagen vertaling in de Obsidian-werkruimte volgens de beschikbare indeling.
 - **Batchvertaling**:
-  - Vertaal alle bestanden in een geselecteerde map.
-  - Ondersteunt parallelle verwerking wanneer "Enable Batch Parallelism" is ingeschakeld.
+  - Vertaalt standaard geschikte bestanden direct in de gekozen map, zonder submappen. Geavanceerde bestandsselectie kan dit bereik wijzigen; bestaande doelbestanden kunnen worden overschreven.
+  - Vertalen gebruikt `batchConcurrency` rechtstreeks (standaard 1), onafhankelijk van `enableBatchParallelism`.
   - Gebruikt aangepaste prompts voor vertaling wanneer geconfigureerd.
   - Voegt een optie "Batch translate this folder" toe aan het contextmenu van de bestandsverkenner.
 - **Automatische vertaling uitschakelen**: Wanneer deze optie is ingeschakeld, dwingen niet-Translate-taken geen output meer af in een specifieke taal, zodat de oorspronkelijke taalcontext behouden blijft. De expliciete taak "Translate" voert vertaling nog steeds uit zoals geconfigureerd.
@@ -134,7 +147,7 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 - **Content genereren op basis van titel**:
   - Gebruik de titel van de notitie om via de LLM initiële inhoud te genereren, waarbij bestaande inhoud wordt vervangen.
   - **Optioneel onderzoek**: Configureer of eerst webonderzoek moet worden uitgevoerd (via de geselecteerde provider) om context voor de generatie te leveren.
-- **Batch contentgeneratie vanuit titels**: Genereer content voor alle notities binnen een geselecteerde map op basis van hun titels (respecteert de optionele onderzoeksinstelling). Succesvol verwerkte bestanden worden verplaatst naar een **configureerbare "complete"-submap** (bijv. `[foldername]_complete` of een aangepaste naam) om herverwerking te voorkomen.
+- **Batch contentgeneratie vanuit titels**: Genereert en vervangt de inhoud van geschikte `.md`-bestanden volgens de onderzoeksinstelling, met uitzondering van `_processed.md` en de aangewezen complete-map met onderliggende mappen. Na het genereren wordt geprobeerd het bestand naar de complete-map te verplaatsen. Een bezet doel blokkeert de verplaatsing, maar niet de al opgeslagen generatie; gegenereerde en verplaatste bestanden worden afzonderlijk geteld.
 - **Koppeling met Mermaid auto-fix**: Wanneer Mermaid auto-fix is ingeschakeld, repareren Mermaid-gerelateerde workflows na verwerking automatisch gegenereerde bestanden of uitvoermappen. Dat geldt voor Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid en Translate.
 
 ### Hulpfuncties
@@ -289,8 +302,8 @@ Toegang tot de plugininstellingen via:
 
 #### Uitvoer van conceptnotitie
 - **Customize Concept Note Path**:
-  - **Uitgeschakeld (standaard)**: Automatisch aanmaken van notities voor `[[linked concepts]]` is uitgeschakeld.
-  - **Ingeschakeld**: Laat je een map opgeven waarin nieuwe conceptnotities worden aangemaakt.
+  - **Uitgeschakeld**: Maakt niet automatisch notities voor gekoppelde concepten.
+  - **Standaard ingeschakeld**: Het pad is aanvankelijk leeg. Geef vóór het maken van conceptnotities een geldig pad binnen de kluis op.
 - **Concept Note Folder Path**: (Alleen zichtbaar wanneer hierboven ingeschakeld) Voer een **relatief pad** binnen je vault in (bijv. `Concepts` of `Generated/Topics`) waar nieuwe conceptnotities moeten worden opgeslagen. Mappen worden aangemaakt als ze niet bestaan. **Moet ingevuld zijn als aanpassing is ingeschakeld.** **Gebruik geen absolute paden of ongeldige tekens.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -337,8 +350,8 @@ Toegang tot de plugininstellingen via:
 
 #### Batchgewijze Mermaid-correctie
 - **Enable Mermaid Error Detection**:
-  - **Off (Default)**: Foutdetectie wordt na verwerking overgeslagen.
-  - **On**: Scant verwerkte bestanden op overgebleven Mermaid-syntaxfouten en genereert een rapport `mermaid_error_{foldername}.md`.
+  - **Uitgeschakeld**: Slaat foutdetectie na verwerking over.
+  - **Standaard ingeschakeld**: Zoekt resterende Mermaid-fouten en maakt `mermaid_error_{foldername}.md`.
 - **Move files with Mermaid errors to specified folder**:
   - **Off**: Bestanden met fouten blijven staan waar ze zijn.
   - **On**: Verplaatst bestanden die na de fixpoging nog Mermaid-syntaxfouten bevatten naar een aparte map voor handmatige review.
@@ -354,7 +367,7 @@ Toegang tot de plugininstellingen via:
 - **API Call Interval (ms)**: Minimale vertraging in milliseconden **voor en na** elke individuele LLM API-call. Cruciaal voor API's met een lage rate of om 429-fouten te voorkomen. Stel in op 0 voor geen kunstmatige vertraging. (Standaard: 500 ms)
 - **Chunk Word Count**: Maximaal aantal woorden per chunk dat naar de LLM wordt gestuurd. Beinvloedt het aantal API-calls voor grote bestanden. (Standaard: 3000)
 - **Enable Duplicate Detection**: Zet de basiscontrole op dubbele woorden in verwerkte inhoud aan of uit (resultaten in console). (Standaard: ingeschakeld)
-- **Max Tokens**: Maximum aantal tokens dat de LLM per responsechunk mag genereren. Beinvloedt kosten en detailniveau. (Standaard: 4096)
+- **Max Tokens**: Maximum aantal tokens dat de LLM per responsechunk mag genereren. Beinvloedt kosten en detailniveau. (Standaard: 8192) Een uitvoerlimiet per aanbieder kan deze waarde overschrijven; er zijn ook standaardwaarden per model.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Vertaling
@@ -382,7 +395,7 @@ Toegang tot de plugininstellingen via:
   - **Change Prompt Word**: Hiermee kun je het promptwoord voor een specifieke taak wijzigen.
   - **Custom Prompt Word**: Voer je aangepaste promptwoord voor de taak in.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Uitgeschakeld (standaard)**: Succesvol gegenereerde bestanden worden verplaatst naar een submap met de naam `[OriginalFolderName]_complete` ten opzichte van de bovenliggende map van de oorspronkelijke map (of `Vault_complete` als de oorspronkelijke map de root was).
+  - **Uitgeschakeld (standaard)**: Het doel is de naastgelegen map `[foldername]_complete`, of `Vault_complete` voor de kluiswortel. Met de ingeschakelde optie kunt u een eigen naam opgeven.
   - **Ingeschakeld**: Laat je een aangepaste naam opgeven voor de submap waar voltooide bestanden naartoe worden verplaatst.
 - **Custom Output Folder Name**: (Alleen zichtbaar wanneer hierboven ingeschakeld) Voer de gewenste naam in voor de submap (bijv. `Generated Content`, `_complete`). Ongeldige tekens zijn niet toegestaan. Standaard `_complete` wanneer leeg. Deze map wordt aangemaakt ten opzichte van de bovenliggende map van de oorspronkelijke map.
 
@@ -486,11 +499,11 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
    - Voer de opdracht `Notemd: Translate Note/Selection` uit (via het command palette of de zijbalkknop).
    - Er verschijnt een venster waarin je de **Target Language** kunt bevestigen of wijzigen (standaard de taal uit de configuratie).
    - De plugin gebruikt de geconfigureerde **LLM Provider** (op basis van de Multi-Model-instellingen) om de vertaling uit te voeren.
-   - De vertaalde inhoud wordt opgeslagen in de geconfigureerde **Translation Save Path** met de juiste suffix, en geopend in een **nieuw paneel rechts** van de oorspronkelijke inhoud voor eenvoudig vergelijken.
+   - Slaat de vertaling op met het ingestelde pad en achtervoegsel en opent het opgeslagen bestand in de Obsidian-werkruimte.
    - Je kunt deze taak annuleren via de zijbalkknop of de annuleerknop in het venster.
 3. **Batchvertaling**:
    - Voer de opdracht `Notemd: Batch Translate Folder` uit via het command palette en selecteer een map, of klik met rechts op een map in de bestandsverkenner en kies "Batch translate this folder".
-   - De plugin vertaalt alle Markdown-bestanden in de geselecteerde map.
+   - Vertaalt standaard geschikte bestanden direct in de gekozen map, zonder submappen. Geavanceerde bestandsselectie kan dit bereik wijzigen; bestaande doelbestanden kunnen worden overschreven.
    - Vertaalde bestanden worden opgeslagen op het geconfigureerde vertaalpad maar niet automatisch geopend.
    - Dit proces kan worden geannuleerd via het voortgangsvenster.
 
@@ -517,7 +530,7 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
    - Voer de opdracht `Notemd: Batch Generate Content from Titles` uit (via het command palette of de zijbalkknop).
    - Selecteer de map met de notities die je wilt verwerken.
    - De plugin doorloopt elk `.md`-bestand in de map (met uitzondering van `_processed.md`-bestanden en bestanden in de aangewezen "complete"-map), genereert inhoud op basis van de titel van de notitie en vervangt bestaande inhoud. Bestanden worden op de achtergrond verwerkt zonder in de editor te worden geopend.
-   - Succesvol verwerkte bestanden worden verplaatst naar de geconfigureerde "complete"-map.
+   - Na het genereren wordt geprobeerd het bestand naar de complete-map te verplaatsen. Een bezet doel blokkeert de verplaatsing, maar niet de al opgeslagen generatie; gegenereerde en verplaatste bestanden worden afzonderlijk geteld.
    - Deze opdracht respecteert de instelling **"Enable Research in 'Generate from Title'"** voor elke verwerkte notitie.
    - Je kunt deze taak annuleren via de zijbalkknop of de annuleerknop in het venster.
    - Voortgang en resultaten (aantal gewijzigde bestanden, fouten) worden getoond in het log van de zijbalk/het venster.
@@ -569,6 +582,8 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
     - Configureer optioneel dat de plugin deze problematische bestanden naar een aparte map verplaatst voor controle.
 
 ## Ondersteunde LLM-aanbieders
+
+De tabel toont geselecteerde voorbeelden. Zie de [gids voor 36 aanbieders](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/providers/overview) voor alle voorinstellingen en voorwaarden.
 
 | Provider           | Type    | API-sleutel vereist    | Opmerkingen                                                           |
 |--------------------|---------|------------------------|------------------------------------------------------------------------|
@@ -638,7 +653,7 @@ Notemd draait lokaal in Obsidian, maar sommige functies versturen uitgaande requ
 ### Veelvoorkomende problemen
 - **Plugin laadt niet**: Controleer of `manifest.json`, `main.js` en `styles.css` in de juiste map staan (`<Vault>/.obsidian/plugins/notemd/`) en start Obsidian opnieuw. Controleer de Developer Console (`Ctrl+Shift+I` of `Cmd+Option+I`) op fouten bij het opstarten.
 - **Verwerkingsfouten / API-fouten**:
-  1. **Controleer het bestandsformaat**: Zorg ervoor dat het bestand dat je wilt verwerken of controleren een extensie `.md` of `.txt` heeft. Notemd ondersteunt momenteel alleen deze tekstgebaseerde formaten.
+  1. **Controleer het formaat**: De standaardformaten hangen af van de taak (`.md` of `.md`/`.txt`). De ontwikkelaarsmodus met uitgebreide invoer staat andere tekstformaten en PDF toe voor bepaalde bronbehoudende taken, zoals vertalen en conceptextractie. Links toevoegen blijft beperkt tot `.md`/`.txt`.
   2. Gebruik de opdracht/knop "Test LLM Connection" om de instellingen van de actieve provider te verifiëren.
   3. Controleer API Key, Base URL, Model Name en API Version (voor Azure) opnieuw. Zorg dat de API-sleutel correct is en voldoende credits/rechten heeft.
   4. Zorg ervoor dat je lokale LLM-server (LMStudio, Ollama) actief is en dat de Base URL correct is (bijv. `http://localhost:1234/v1` voor LMStudio).
@@ -699,7 +714,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.7 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.8 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 

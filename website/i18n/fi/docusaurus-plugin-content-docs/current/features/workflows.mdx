@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "Työprosessit"
-description: "Yhdistä useita tehtäviä yhdellä klikkaamisella painikkeella"
+title: Työnkulut
+description: >-
+  Ketjuta nykyiset toiminnot kelvollisilla tunnisteilla, kansiokontekstilla ja
+  harkitulla virhekäytännöllä.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Työnkulut
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Työprosessit
+# Työnkulut
 
-<TLDR>
-**Notemd Työprosessit yhdistävät useita tehtäviä yhteen yhdellä klikkaamisella toimintoon.** Määritä järjestelmät kuten `add-links > extract-concepts > research > diagram` käyttäen yksinkertoa DSL:aa. Työprosessit ilmuvat puolekaluun painikkeina, jotka käyttävät koko ketjun nykyisessä tiedostossa tai kaustassa. Asennuksessa on olemassa etukäteen määriteltyt työprosessit; luodaan omat asetuksissa. Jokainen vaihe käyttää omaa tehtävälle specificoidutta mallikonfigurointia.
+<TLDR>Työnkulku suorittaa sivupaneelin toimintoja peräkkäin. Vaihe voi vaatia kansion valinnan tai aktiivisen editorin. Tämä ei ole tekstiputki: jokainen vaihe säilyttää omat syötteensä, tuloksensa ja sivuvaikutuksensa. Aloita testimuistiinpanosta ja erillisestä kansiosta.</TLDR>
 
-Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
-</TLDR>
+## Yleiskuva
 
-## Yleenvaate
+Mukana tuleva **One-Click Extract**:
 
-Työprosessi poistaa vaikeuudet tehtävien yksittäisen käyttöön. Sijaan siitä, että pitäisi oikeasta klikkaa neliä kertaa linkkien lisäämiseen, käsitteiden poistamiseen, tuntumattomien termien tutkimiseen ja diagrammin luomiseen, painaat yhdellä puolekalun painikkeella ja koko ketju käytetään. Notemd hallitsee järjestelmän, virheiden levymisen ja edenpidon raportoinnin.
-
-Työprosessit määritetään kerrokselta DSL:lla (alueellisella kielenä). Ne asuvat asetuksissa, ilmuvat Obsidian puolekalun klikattavina painikkeina ja ne voivat soveltaa jaksoon nykyiseen tiedostoon tai koko kaustaan.
-
-## Kuidas se toimii
-
-### Työprosessin käyttöketju
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Tulkita** -- DSL-teksti jakataan `>` (tai `>`) perusteella järjestykselliseen tehtävien tunnistajien listaksi.
-2. **Tarkistaa** -- Jokainen tunnistaja siirtyy sisäisen komentoon (add-links, extract-concepts, research, translate, diagram jne.).
-3. **Käyttää** -- Vaiheet käytetään järjestyksellisesti. Jokainen vaihe käyttää konfiguroituja tehtävälle specificoituja tarjoajia ja mallia.
-4. **Virhehallinta** -- Jos vaihe ehtyy, työprosessi tai poistaa tai jatkaa seuraavaan vaiheeseen, riippuen sinun virhepolitiikastasi.
-5. **Valmis** -- Ilmoitus raportoi edun tai listoi kaikki ehtyneet vaiheet.
+1. Lisää linkit aktiiviseen muistiinpanoon ja luo käsitteet, jos kansio on asetettu.
+2. Generoi sisältö sopiville käsite-/valitun kansion muistiinpanoille, myös olemassa oleville.
+3. Korjaa Mermaid generoinnin complete-kansiossa.
 
-### DSL-muoto
+Oletusketju ei tee verkkotutkimusta. Otsikkogenerointi voi lisätä sen erillisellä asetuksella. Katso [eräajo](../advanced/batch-processing).
 
-Työprosessit määritetään `>`-erottuina tehtävien tunnistajien järjestelmänä:
+## Toiminta
 
+### Suoritus
+
+Vaiheet suoritetaan järjestyksessä, sivupaneeli näyttää tilan ja virheet. Peruutus pysäyttää seuraavat vaiheet ja välittyy tuettuihin pyyntöihin. Valmiit tiedostot säilyvät; ketju ei ole transaktio. Käsitekansio on ensisijainen kansiovalinta. Erägenerointi tallentaa lähde- ja complete-kansion, Mermaid käyttää complete-kansiota. Muut toiminnot säilyttävät tiedosto-, valinta- ja vuorovaikutusvaatimuksensa.
+
+### DSL
+
+Yksi nimetty painike riville. `::` erottaa nimen toiminnoista, `>` erottaa toimintotunnisteet. Tyhjät ja `#`-alkuiset rivit ohitetaan; tuntemattomat tunnisteet hylätään.
+
+```text
+Poimi ja piirrä::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Saadaolevat tehtävien tunnistajat:**
+Käytä työnkulkurakentajaa tai muokkaa DSL:ää. Tunnisteet pysyvät, nimet seuraavat käyttöliittymän kieltä. Kansiovariantit käyttävät omia tunnisteitaan; niitä ei johdeta mielivaltaisella tekstikorvauksella.
 
-| Tunnistaja | Toimenpide |
-|------------|--------|
-| `process-current-add-links` | Lisää wiki-linkkejä aktiiviseen tiedonnotkoon |
-| `extract-concepts-current` | Eritä käsiteltyistä tiedonnotkosta käsitelmälliset ajatukset |
-| `research-and-summarize` | Tutka valittu teksti tai tiedonnotkan nimi |
-| `process-current-translate` | Kääntä aktiivinen tiedonnotka |
-| `summarize-to-mermaid` | Luo diagramma aktiivisestä tiedonnotkasta |
-| `generate-from-title` | Luo sisältö tiedonnotkan nimestä |
-| `extract-original-text` | Eritä alkuperäinen teksti (OCR-/skannattuun sisältöön) |
+| Tunniste | Toiminto / vaatimus |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Linkit aktiiviseen muistiinpanoon |
+| `process-folder-add-links` | Linkit valittuun kansioon |
+| `extract-concepts-current` | Käsitteet aktiivisesta muistiinpanosta |
+| `extract-concepts-folder` | Käsitteet valitusta kansiosta |
+| `generate-from-title` | Sisältö aktiivisesta otsikosta |
+| `batch-generate-from-titles` | Sisältö sopiville kansiomuistiinpanoille |
+| `research-and-summarize` | Tutki valintaa/otsikkoa avoimessa Markdown-editorissa |
+| `summarize-as-mermaid` | Tiivistä tuettu aktiivinen syöte Mermaidiksi |
+| `generate-diagram` | Kaavio tuetusta syötteestä |
+| `preview-diagram` | Tuetun lähteen tai kaavion esikatselu |
+| `translate-current-file` | Käännä aktiivinen tuettu tiedosto |
+| `batch-translate-folder` | Käännä valittu kansio |
+| `extract-original-text` | Poimi pyydetyt alkuperäiskatkelmat |
+| `batch-extract-original-text` | Katkelmat sopivista kansiotiedostoista |
+| `split-note-by-chapters` | Jaa aktiivinen muistiinpano lukuihin |
+| `batch-mermaid-fix` | Korjaa Mermaid-koodilohkot valitussa kansiossa |
+| `fix-formula-current` | Normalisoi aktiivisen muistiinpanon kaavaerottimet |
+| `batch-fix-formula` | Normalisoi kansion kaavaerottimet |
+| `check-duplicates-current` | Tarkista aktiivisen muistiinpanon kaksoiskappaleet |
+| `check-remove-duplicate-concepts` | Tarkista ja poista käsiteduplikaatit vuorovaikutteisesti |
+| `test-llm-connection` | Testaa asetettu tarjoaja |
+| `probe-slide-export-env` | Tarkista paikallinen diavientiympäristö |
+| `export-slides` | Vie aktiivinen tiedosto dioiksi |
 
-**Kataloogitasolla olevat variantit** asettaavat `current`:n `folder`:ksi tunnistusnimen kanssa.
+### Oletus tai oma ketju
 
-### Eelmäntunnustetut vs. käsiteltävät työprosessit
+One-Click Extract on valmiiksi määritetty. Määritä muut painikkeet itse: nimi, järjestys ja asetukset. Tarkista sivupaneelin työkaluvihje ja korjaa jäsennysvirheet ennen ajoa.
 
-Notemd sisältää valmiita työprosesseja yleisille mallille:
+## Asetukset
 
-| Työprosessi | Ahelma | Käytöskenttä |
-|----------|-------|----------|
-| **Yhden painutuksen päälle erittäminen** | add-links > extract-concepts > research | Tehokkaasti töidä tutkimusartikkelia yhdellä kerralla |
-| **Koko tuotantopiste** | add-links > extract-conceptit > tutkimus > diagrammi | Täydellinen tietojen poistaminen visualisoinnin kanssa |
-| **Kääntä + Linkkaa** | kääntä > add-links | Kääntä ja linkkaa konseptit siirtymäkielille |
+| Asetus | Alkuarvo | Vaikutus |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Pysähdy ensimmäiseen raportoituun vaihevirheeseen |
+| `useMultiModelSettings` | `false` | Aktiivinen tarjoaja ennen tehtäväreitityksen käyttöönottoa |
+| `enableResearchInGenerateContent` | `false` | Otsikkogeneroinnin tutkimus pois ennen käyttöönottoa |
 
-**Omakustoidut työprosessit** luodaan asetuksissa:
+`continue_on_error` sallii jatkon virheen jälkeen. Käytä vain, jos myöhemmät vaiheet selviävät jäljellä olevasta syötteestä. Jatkaminen ei muuta osittaista työnkulkua onnistuneeksi.
 
-1. Avaa **Asetukset** --> **Notemd** --> **Työprosessit**
-2. Painaa **"Lisää työprosessi"**
-3. Sisesta DSL-ahelma (esim. `process-current-add-links>extract-concepts-current`)
-4. Anna sille näytönime (esim. "Nopea linkka + Poistaminen")
-5. Uusi painikko ilmuu välitaulukossa heti
+### Malli vaiheittain
 
-## Konfigurointi
-
-| Asetus | Omistusasetus | Vaikutus |
-|---------|---------|--------|
-| `workflows` | Eelmästä määritetty joukko | Työprosessien definitsiojen array (nimi + DSL) |
-| `workflowContinueOnError` | `true` | Jatka seuraavaan vaiheeseen, jos nykyinen vaihe ehtyy |
-| `workflowShowProgress` | `true` | Näytä edistymistietoja jokaisen vaiheen valmistumisen jälkeen |
-
-### Työprosessissa olevat tehtäökohdan mallit
-
-Jokainen toimenpideen vaihe käyttää omaa taskatyyppillistä mallikonfigurointia. Ei ole tarpea määritellä mallia DSL:ssä itse. Ratkaisun järjekordi on:
-
-1. Taskatyyppinen tarjoaja/malli, jos `useMultiModelSettings` on käytössä
-2. Yleinen `activeProvider` muuten
-
-Tämä tarkoittaa, että `add-links` voi toimia DeepSeek-llä samalla kun `research` toimii GPT-4o -llä – kaikki samassa toimenpideen klikissa.
+Mallivalinta kuuluu tehtävälle. Tyhjä ohitus käyttää valitun tarjoajan asetettua mallia. Tarkista kaikki reitit ennen yksityistä sisältöä.
 
 ## Esimerkki
 
-Olet just impordinnut yhtä PDF-a masinoppimisartikkelista omaan avaruksesiin ja haluat täysän tietojen poistamisen:
-
-1. Avaa impordattu tiedosto
-2. Klikkaa **"Full Pipeline"** -painiketta sijainnivalikossa
-3. Notemd käynnistyy:
-   - **Toimenpide 1**: Lisää wiki-linkkejä – `[[attention mechanism]]`, `[[transformer]]` jne.
-   - **Toimenpide 2**: Poista käsiteltyjä aineita – luodaan aineetiedot sinun aineetokiossi
-   - **Toimenpide 3**: Tutkinta – yhteenvetottavat verkkolähteet keskeisiin termiin
-   - **Toimenpide 4**: Diagramma – luodetaan Mermaid-malli artikkelin rakenteesta
-4. Laukkuun noin 30 sekuntia myöhemmin on tiedostossa linkkit, aineetiedot ovat olemassa, tutkimustulokset on lisätty ja diagrammatoimi on salattu
-
-Kaikki yhden klikin kautta.
+Määritä tyhjä `trial-concepts` ja käytä kertakäyttöistä lähdettä. Tarkista käsitteet ja raportoitu complete-kansio. Suorita vaiheet erikseen, jos kohde on epäselvä. Laajenna tarkistuksen jälkeen.
 
 ## Vinkit
 
-- **Alka etukäteen määriteltyiltä toimenpiteiltä** – ne kattavat useimmat yleiset mallit. Kohandaa vain siis, kun tarvitset erilistä järjestystä.
-- **Aktivoi `workflowContinueOnError`** – epäonnistunut diagrammatoimenpide ei tohisi estää koko toimenpideen toimintaa.
-- **Käytä kansiojen työprosesseja** massitööhöntekoon – oikeasta paina kansiolle, valitse työprosessi, ja kaikki tiedot töidetään.
-- **Nimeä työprosessit selkeästi** – puolekaluun on rajoitettu tilaa. Käytä lyhkiä, toimintoorihtisiä nimesiä kuten "Quick Extract" tai "Translate + Link".
+- Pidä ketjut ymmärrettävinä, jotta virheet ja tulosten alkuperä selviävät.
+- Poistot säilyttävät vuorovaikutteisen vahvistuksen; vältä niitä valvomattomissa ketjuissa.
+- Tarkista loki ja tiedostot peruutuksen tai palautusristiriidan jälkeen.
+- Testaa sama malli ja kansio; yhteystesti ei todista pitkän eräajon kiintiöitä.
 
----
+## Seuraavaksi
 
-## Järguvät toimet
-
-- [Research](./research) -- Ymmärkää, mitä tutkimusvaihe tekee, ennen kuin lisätät sen työprosesseihin
-- [Wiki-Links](./wiki-links) -- Päälinkitysteknologia, jota käytetään useimmissa työprosesseissa
-- [Concept Notes](./concept-notes) -- Ajattelun poistaminen työprosessivaiheena
-- [Batch Processing](/docs/advanced/batch-processing) -- Samaa aikaa toiminta ja edenemismäärän raportointi kansiojen työprosesseissa
+- [Käsitteet](./concept-notes).
+- [Eräajo](../advanced/batch-processing).
+- [Tutkimus](./research).

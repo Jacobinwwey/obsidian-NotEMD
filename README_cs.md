@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Notemd doplněk pro Obsidian
 
+> Notemd je doplněk Obsidianu s licencí MIT pro propojený Markdown, poznámky k pojmům, shrnutí, překlady a diagramy. Soubory zůstávají v trezoru; cloudové úlohy odesílají obsah vybranému poskytovateli a webový průzkum používá síť.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Začněte zde
+
+| Čtenář | Vstup | Cíl |
+|---|---|---|
+| Začátečník | [Rychlý start](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/getting-started/quick-start) | Nastavit poskytovatele a ověřit jednu poznámku |
+| Uživatel | [Pracovní postupy](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/features/workflows) | Řídit složky, výstupy a obnovu |
+| Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
+| Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
+
+**Verze:** 1.9.8
+
+- **Zrušení a obnova:** zrušení zůstává účinné při plánování i opakování a blokuje pozdní zápisy průzkumu a překladu. Dokončené výstupy se zachovají a konflikty obnovy se oznámí.
+- **Historie a export:** zachovává se vyhledávací text i zaměření klávesnice. Opraveny oddělovače sloučených buněk PowerPointu a spoje/popisky CircuitikZ. Dávkové místní vyhledávání používá konzistentní snímek.
+- **Vydání a dokumentace:** ověřuje se původ čistých zdrojů a stažené soubory; přibyly vstupy pro různé čtenáře a přímo napsané překlady.
+
+36 předvoleb poskytovatelů a 33 spustitelných typů diagramů existovalo už v 1.9.7. [Průvodce aktualizací](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/releases/1.9.8) · [Ověřit veřejné vydání](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Šipky Drawnix mezi větvemi zůstávají po přeskupení statické. Mermaid/SVG v PPTX může použít náhradní obrázek. Zrušení nevrací uložené změny a nezaručuje zastavení vzdáleného generování ani účtování. Fyzická mobilní zařízení a Obsidian 0.15.0 nejsou ověřeny.
 
 Přečtěte si dokumentaci v dalších jazycích: [Jazykové centrum](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- AI-poháněné vícejazyčné rozšiřování znalostí
-==================================================
-```
-
-Snadný způsob, jak si vytvořit vlastní znalostní bázi.
-
-Notemd vylepšuje váš pracovní postup v Obsidianu integrací s různými velkými jazykovými modely, LLM, aby zpracovával vaše vícejazyčné poznámky, automaticky vytvářel wiki-links pro klíčové koncepty, generoval odpovídající concept notes, prováděl webový průzkum a pomáhal vám budovat silné grafy znalostí a další.
-
 Pokud rádi používáte Notemd, zvažte prosím [⭐ dát hvězdu na GitHubu](https://github.com/Jacobinwwey/obsidian-NotEMD) nebo [☕️ koupit mi kávu](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Obsah
 
@@ -50,13 +50,26 @@ Pokud rádi používáte Notemd, zvažte prosím [⭐ dát hvězdu na GitHubu](h
 
 ## Rychlý start
 
-1. **Nainstalujte a povolte**: získejte doplněk z Obsidian Marketplace.
-2. **Nakonfigurujte LLM**: přejděte do `Settings -> Notemd`, vyberte poskytovatele LLM, kterého chcete používat, například OpenAI nebo lokálního poskytovatele jako Ollama, a zadejte API klíč nebo URL.
-3. **Otevřete sidebar**: klikněte na ikonu kouzelné hůlky Notemd v levém ribbonu a otevřete sidebar.
-4. **Zpracujte poznámku**: otevřete libovolnou poznámku a klikněte na **"Process File (Add Links)"** v sidebaru, aby se automaticky přidaly `[[wiki-links]]` ke klíčovým konceptům.
-5. **Spusťte rychlý workflow**: použijte výchozí tlačítko **"One-Click Extract"**, které z jednoho místa zřetězí zpracování, dávkové generování a Mermaid cleanup.
+1. Nainstalujte a povolte **Notemd** přes **Nastavení → Komunitní doplňky → Procházet**.
+2. Nastavte přesný koncový bod, přihlašovací údaje a model. Otestujte připojení a pak skutečné generování; seznam modelů neprokazuje přístup k chatu.
+3. Vytvořte prázdnou složku `trial-concepts` a vyberte ji pro poznámky k pojmům; počáteční cesta je prázdná. Do testovací `Notemd trial.md` vložte krátký text, který smíte odeslat poskytovateli.
+4. Spusťte **Process File (Add Links)**. Zkontrolujte `Notemd trial_processed.md` vedle zachovaného zdroje, odkazy a poznámky k pojmům.
+5. Znovu otevřete testovací zdroj a spusťte **One-Click Extract** s testovací složkou: přidání odkazů, generování způsobilých poznámek z názvů a oprava Mermaid ve složce complete. Mohou se zahrnout i již existující způsobilé poznámky.
 
-To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový průzkum, překlad a generování obsahu.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Webový průzkum a tvorba diagramů jsou samostatné akce. Po zrušení počkejte na dokončení aktivních úloh a před opakováním zkontrolujte hotové výstupy i soubory obnovy.
+
+<details>
+<summary>Ukázky rozhraní</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Jazyková podpora
 
@@ -89,9 +102,9 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
 - **Zpevnění stable long-request chain pro OpenAI-compatible**: ve stable mode používají OpenAI-compatible volání nyní explicitní tříkrokové pořadí pro každý pokus: primární direct streaming transport, potom direct non-stream transport a poté `requestUrl` fallback, který se může v případě potřeby ještě povýšit na streamed parsing. To snižuje falešně negativní selhání, když poskytovatel dokončí buffered response, ale streaming pipe je nestabilní.
 - **Protocol-aware streaming fallback napříč LLM API**: dlouhé fallback pokusy nyní přecházejí na protocol-aware streamed parsing ve všech vestavěných LLM cestách, nejen na OpenAI-compatible endpoint. Notemd nyní zvládá OpenAI/Azure-style SSE, Anthropic Messages streaming, Google Gemini SSE responses a Ollama NDJSON streamy jak na desktop `http/https`, tak na non-desktop `fetch`, a zbývající direct OpenAI-style provider entrypoint používají stejnou sdílenou fallback path.
 - **Presety poskytovatelů připravené pro Čínu**: vestavěné presety nyní pokrývají `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` a `SiliconFlow` vedle existujících globálních a lokálních poskytovatelů.
-- **Spolehlivé dávkové zpracování**: vylepšená logika souběžného zpracování s **časově rozloženými API voláními** pomáhá předcházet rate-limit chybám a zajišťuje stabilní výkon při velkých batch jobech. Nová implementace zajišťuje, že úlohy startují v různých intervalech, ne všechny naráz.
-- **Přesné hlášení průběhu**: byla opravena chyba, kvůli níž mohl progress bar zamrznout, takže UI nyní vždy odráží skutečný stav operace.
-- **Odolné paralelní dávkové zpracování**: byl vyřešen problém, kdy se paralelní dávkové operace zastavovaly příliš brzy, takže nyní jsou všechny soubory zpracovány spolehlivě a efektivně.
+- **Spolehlivé dávkové zpracování**: Časově rozložená volání API snižují špičky požadavků. Kvóty a rychlostní limity poskytovatele zůstávají v platnosti.
+- **Přesné hlášení průběhu**: Průběh rozlišuje dokončené, neúspěšné a zrušené soubory. Ukončení běhu neznamená úspěch každého souboru.
+- **Odolné paralelní dávkové zpracování**: Aktivní úlohy se dokončí před souhrnem. Zrušení zastaví další práci, ale nevrací uložené změny; složka není jedinou transakcí.
 - **Přesnost progress baru**: byla opravena chyba, kvůli níž se progress bar příkazu "Create Wiki-Link & Generate Note" mohl zastavit na 95 %, a nyní po dokončení správně zobrazuje 100 %.
 - **Rozšířené ladění API**: režim "API Error Debugging Mode" nyní zachytává celé response body od poskytovatelů LLM a vyhledávacích služeb, jako jsou Tavily a DuckDuckGo, a navíc zaznamenává časovou osu přenosu pro každý pokus se sanitizovanými request URL, dobou trvání, response headers, částečnými response body, částečně parsovaným stream výstupem a trasováním zásobníku pro lepší řešení problémů napříč fallback cestami OpenAI-compatible, Anthropic, Google, Azure OpenAI a Ollama.
 - **Panel Developer Mode**: settings nyní obsahují vyhrazený panel diagnostiky pouze pro vývojáře, který zůstává skrytý, dokud není povolen "Developer mode". Podporuje výběr diagnostic call path a opakované stability probe pro zvolený režim.
@@ -105,7 +118,7 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
 - **Vytváření concept notes, volitelné a konfigurovatelné**: automaticky vytváří nové poznámky pro zjištěné koncepty ve zvolené složce vaultu.
 - **Konfigurovatelné výstupní cesty**: nastavte samostatné relativní cesty ve vaultu pro ukládání zpracovaných souborů a nově vytvářených concept notes.
 - **Konfigurovatelné názvy výstupních souborů pro Add Links**: můžete volitelně **přepsat původní soubor** nebo použít vlastní suffix či replacement string místo výchozího `_processed.md`, když jsou soubory zpracovávány pro přidání odkazů.
-- **Zachování integrity odkazů**: základní podpora aktualizace odkazů, když jsou poznámky ve vaultu přejmenovány nebo odstraněny.
+- **Zachování integrity odkazů**: Aktualizace odkazů při přejmenování závisí na Obsidianu a jeho nastavení. Smazání může zanechat nevyřešené odkazy; poznámky se stejným názvem je třeba zkontrolovat.
 - **Čistá extrakce konceptů**: extrahujte koncepty a vytvářejte odpovídající concept notes bez úpravy zdrojového dokumentu. Je to vhodné pro rychlé budování znalostní báze z existujících dokumentů bez jejich změny. Funkce má konfigurovatelné volby pro minimální concept notes a backlinky.
 
 ### Překlad
@@ -115,10 +128,10 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
   - **Podpora velkých souborů**: velké soubory jsou automaticky rozděleny na menší části podle nastavení `Chunk word count` před odesláním do LLM. Přeložené části jsou pak plynule spojeny zpět do jednoho dokumentu.
   - Podporuje překlad mezi mnoha jazyky.
   - Konfigurovatelný cílový jazyk v settings nebo UI.
-  - Automaticky otevírá přeložený text vpravo od originálu pro pohodlnější čtení.
+  - Otevře uložený překlad v pracovním prostoru Obsidianu podle dostupného rozložení.
 - **Dávkový překlad**:
-  - Přeložte všechny soubory ve vybrané složce.
-  - Podporuje paralelní zpracování, pokud je povoleno "Enable Batch Parallelism".
+  - Ve výchozím stavu překládá vhodné soubory přímo ve vybrané složce, bez podsložek. Pokročilý výběr souborů může rozsah změnit; existující cílové soubory mohou být přepsány.
+  - Překlad přímo používá `batchConcurrency` (výchozí 1), nezávisle na `enableBatchParallelism`.
   - Používá vlastní prompt pro překlad, pokud jste je nastavili.
   - Přidává volbu "Batch translate this folder" do kontextové nabídky file exploreru.
 - **Zakázat automatický překlad**: pokud je tato volba zapnuta, úlohy mimo Translate již nevynucují konkrétní jazyk výstupu a zachovávají kontext zdrojového jazyka. Explicitní úloha "Translate" stále provede překlad podle konfigurace.
@@ -134,7 +147,7 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
 - **Generování obsahu z názvu**:
   - Použijte název poznámky k vygenerování počátečního obsahu přes LLM, který nahradí stávající obsah.
   - **Volitelný průzkum**: nastavte, zda se má provádět webový průzkum pomocí zvoleného poskytovatele, aby poskytl kontext pro generování.
-- **Dávkové generování obsahu z názvů**: generujte obsah pro všechny poznámky ve vybrané složce podle jejich názvů s respektováním volitelného nastavení průzkumu. Úspěšně zpracované soubory jsou přesunuty do **konfigurovatelné pod-složky "complete"**, například `[foldername]_complete` nebo pod vlastní název, aby se zabránilo opětovnému zpracování.
+- **Dávkové generování obsahu z názvů**: Vytváří a nahrazuje obsah vhodných `.md` podle nastavení průzkumu. Vynechává `_processed.md` a celý strom určené cílové složky complete. Po generování se pokusí soubor přesunout do složky complete. Obsazený cíl brání přesunu, nikoli již uloženému generování; vytvořené a přesunuté soubory se počítají zvlášť.
 - **Mermaid auto-fix coupling**: když je povolen Mermaid auto-fix, Mermaid-related workflow nyní po zpracování automaticky opravují vygenerované soubory nebo výstupní složky. To pokrývá Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid a Translate.
 
 ### Užitkové funkce
@@ -289,8 +302,8 @@ Přístup ke settings pluginu:
 
 #### Výstup konceptuální poznámky
 - **Customize Concept Note Path**:
-  - **Vypnuto (výchozí)**: automatické vytváření poznámek pro `[[linked concepts]]` je vypnuté.
-  - **Zapnuto**: umožňuje určit složku, ve které budou vytvářeny nové concept notes.
+  - **Vypnuto**: Nevytváří automaticky poznámky pro propojené pojmy.
+  - **Ve výchozím stavu zapnuto**: Cesta je zpočátku prázdná. Před vytvořením poznámek pojmů zadejte platnou cestu relativní k úložišti.
 - **Concept Note Folder Path**: viditelné pouze při zapnutí předchozí volby. Zadejte *relativní cestu* uvnitř vaultu, například `Concepts` nebo `Generated/Topics`, kam se budou ukládat nové concept notes. Složky budou vytvořeny, pokud neexistují. **Musí být vyplněno, pokud je přizpůsobení zapnuté.** **Nepoužívejte absolutní cesty ani neplatné znaky.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -337,8 +350,8 @@ Přístup ke settings pluginu:
 
 #### Dávková oprava Mermaid
 - **Enable Mermaid Error Detection**:
-  - **Off (Default)**: detekce chyb se po zpracování přeskočí.
-  - **On**: skenuje zpracované soubory na zbývající Mermaid syntax errors a generuje report `mermaid_error_{foldername}.md`.
+  - **Vypnuto**: Přeskočí detekci chyb po zpracování.
+  - **Ve výchozím stavu zapnuto**: Hledá zbývající chyby Mermaid a vytváří `mermaid_error_{foldername}.md`.
 - **Move files with Mermaid errors to specified folder**:
   - **Off**: soubory s chybami zůstávají na místě.
   - **On**: přesune všechny soubory, které i po pokusu o opravu stále obsahují Mermaid syntax errors, do vyhrazené složky pro ruční kontrolu.
@@ -354,7 +367,7 @@ Přístup ke settings pluginu:
 - **API Call Interval (ms)**: minimální prodleva v milisekundách *před a po* každém jednotlivém volání LLM API. Zásadní pro low-rate API nebo pro prevenci chyb 429. Nastavte 0, pokud nechcete žádnou umělou prodlevu. Výchozí: 500 ms.
 - **Chunk Word Count**: maximální počet slov na chunk odeslaný do LLM. Ovlivňuje počet API volání u velkých souborů. Výchozí: 3000.
 - **Enable Duplicate Detection**: přepínač základní kontroly duplicitních slov ve zpracovaném obsahu, výsledky se zapisují do console. Výchozí: zapnuto.
-- **Max Tokens**: maximální počet tokenů, které má LLM vygenerovat pro jeden response chunk. Ovlivňuje cenu i míru detailu. Výchozí: 4096.
+- **Max Tokens**: maximální počet tokenů, které má LLM vygenerovat pro jeden response chunk. Ovlivňuje cenu i míru detailu. Výchozí: 8192. Limit výstupu konkrétního poskytovatele může tuto hodnotu přepsat; existují také výchozí hodnoty podle modelu.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Překlad
@@ -382,7 +395,7 @@ Přístup ke settings pluginu:
   - **Change Prompt Word**: umožňuje změnit prompt word pro konkrétní úlohu.
   - **Custom Prompt Word**: zadejte vlastní prompt word pro danou úlohu.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Vypnuto (výchozí)**: úspěšně vygenerované soubory jsou přesunuty do podsložky pojmenované `[OriginalFolderName]_complete` relativně k rodičovské složce původní složky, případně `Vault_complete`, pokud původní složka byla root.
+  - **Vypnuto (výchozí)**: Cílem je sousední složka `[foldername]_complete`, pro kořen úložiště `Vault_complete`. Zapnutí volby umožňuje vlastní název.
   - **Zapnuto**: umožňuje zadat vlastní název podsložky, do které budou přesunuty dokončené soubory.
 - **Custom Output Folder Name**: viditelné jen při zapnutí předchozí volby. Zadejte požadovaný název podsložky, například `Generated Content` nebo `_complete`. Neplatné znaky nejsou povoleny. Pokud pole zůstane prázdné, použije se `_complete`. Tato složka se vytváří relativně k rodičovské složce původní složky.
 
@@ -486,11 +499,11 @@ Toto je základní funkcionalita zaměřená na identifikaci konceptů a přidá
    - Spusťte příkaz `Notemd: Translate Note/Selection` přes paletu příkazů nebo tlačítko v sidebaru.
    - Zobrazí se modal, ve kterém můžete potvrdit nebo změnit **Target Language**, výchozí hodnota vychází z nastavení v Configuration.
    - Plugin používá nakonfigurovaného **LLM Provider**, podle Multi-Model settings, k provedení překladu.
-   - Přeložený obsah se uloží do nastavené **Translation Save Path** s odpovídajícím suffixem a otevře se v **novém panelu vpravo** od původního obsahu pro snadné porovnání.
+   - Uloží překlad na nastavenou cestu s určenou příponou názvu a otevře uložený soubor v pracovním prostoru Obsidianu.
    - Tuto úlohu lze zrušit tlačítkem v sidebaru nebo tlačítkem cancel v modal okně.
 3. **Dávkový překlad**:
    - Spusťte příkaz `Notemd: Batch Translate Folder` z palety příkazů a vyberte složku, nebo klikněte pravým tlačítkem na složku v průzkumníku souborů a zvolte "Batch translate this folder".
-   - Plugin přeloží všechny Markdown soubory ve vybrané složce.
+   - Ve výchozím stavu překládá vhodné soubory přímo ve vybrané složce, bez podsložek. Pokročilý výběr souborů může rozsah změnit; existující cílové soubory mohou být přepsány.
    - Přeložené soubory se ukládají do nastavené translation path, ale automaticky se neotevírají.
    - Tento proces lze zrušit přes progress modal.
 
@@ -517,7 +530,7 @@ Toto je základní funkcionalita zaměřená na identifikaci konceptů a přidá
    - Spusťte příkaz `Notemd: Batch Generate Content from Titles` přes paletu příkazů nebo tlačítko v sidebaru.
    - Vyberte složku obsahující poznámky, které chcete zpracovat.
    - Plugin projde každý `.md` soubor ve složce, vyjma `_processed.md` souborů a souborů v určené složce "complete", vygeneruje obsah podle názvu poznámky a nahradí stávající obsah. Soubory se zpracovávají na pozadí, aniž by se otevíraly v editoru.
-   - Úspěšně zpracované soubory jsou přesunuty do nakonfigurované složky "complete".
+   - Po generování se pokusí soubor přesunout do složky complete. Obsazený cíl brání přesunu, nikoli již uloženému generování; vytvořené a přesunuté soubory se počítají zvlášť.
    - Tento příkaz respektuje nastavení **"Enable Research in 'Generate from Title'"** pro každou zpracovávanou poznámku.
    - Tuto úlohu lze zrušit tlačítkem v sidebaru nebo tlačítkem cancel v modal okně.
    - Průběh a výsledky, například počet upravených souborů a chyby, se zobrazují v logu sidebaru nebo modal okna.
@@ -569,6 +582,8 @@ Toto je základní funkcionalita zaměřená na identifikaci konceptů a přidá
     - Volitelně můžete plugin nastavit tak, aby tyto problematické soubory přesouval do samostatné složky pro review.
 
 ## Podporovaní poskytovatelé LLM
+
+Tabulka uvádí vybrané příklady. Předvolby a požadavky najdete v [průvodci 36 poskytovateli](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/providers/overview).
 
 | Poskytovatel      | Typ      | Vyžadován API klíč     | Poznámky                                                              |
 |-------------------|----------|------------------------|-----------------------------------------------------------------------|
@@ -638,7 +653,7 @@ Notemd běží lokálně uvnitř Obsidianu, ale některé funkce odesílají odc
 ### Běžné potíže
 - **Plugin se nenačítá**: ujistěte se, že `manifest.json`, `main.js` a `styles.css` jsou ve správné složce, tedy `<Vault>/.obsidian/plugins/notemd/`, a restartujte Obsidian. Zkontrolujte Developer Console pomocí `Ctrl+Shift+I` nebo `Cmd+Option+I`, zda při startu nevznikají chyby.
 - **Selhání zpracování / API errors**:
-  1. **Zkontrolujte formát souboru**: ujistěte se, že soubor, který chcete zpracovat nebo zkontrolovat, má příponu `.md` nebo `.txt`. Notemd aktuálně podporuje pouze tyto textové formáty.
+  1. **Zkontrolujte formát**: Výchozí formáty závisí na úloze (`.md` nebo `.md`/`.txt`). Vývojářský režim s rozšířenými vstupy povoluje další textové formáty a PDF pro některé úlohy zachovávající zdroj, například překlad a extrakci pojmů. Přidávání odkazů zůstává omezeno na `.md`/`.txt`.
   2. Použijte příkaz nebo tlačítko "Test LLM Connection" pro ověření settings aktivního poskytovatele.
   3. Znovu zkontrolujte API Key, Base URL, Model Name a API Version, u Azure. Ujistěte se, že API klíč je správný a má dostatek kreditů nebo oprávnění.
   4. Ujistěte se, že váš lokální LLM server, LMStudio nebo Ollama, běží a Base URL je správné, například `http://localhost:1234/v1` pro LMStudio.
@@ -699,7 +714,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.7 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.8 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 

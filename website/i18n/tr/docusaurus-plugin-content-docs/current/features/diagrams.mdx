@@ -1,102 +1,99 @@
 ---
 id: diagrams
-title: "Şemalar"
-description: "Öncelikle tanım dosyalarını kullanan bir mimari aracılığıyla notlarınızdan Mermaid, JSON Canvas, Vega-Lite, HTML, düzenlenebilir şekil dosyaları, Draw.io, Drawnix ve sınırlı circuitikz diyagramları oluşturur."
+title: Diyagramlar
+description: >-
+  Diyagram üretin, Drawnix/Mermaid panellerini inceleyin; kaynağı veya SVG, PNG
+  ve PDF çıktısını saklayın.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, circuitikz, TikZJax, Intent Detection, Spec-First Architecture]
-citations:
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Diyagramlar
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Diyagramlar
 
-<TLDR>
-İhtiyacınız olan **diyagram türünü** seçin, ardından onun **düzenlenebilir kaynak formatını** belirleyin. Obsidian içinde tam sonucu önizleyin; burada bir Drawnix tahtası ve içine yerleştirilmiş Mermaid görselleri de bulunur. Her bir paneli SVG, PNG veya PDF olarak dışa aktarın.
-</TLDR>
+<TLDR>Önce diyagram türünü, sonra düzenlenebilir kaynak biçimini seçin. Drawnix ve gömülü Mermaid panelleri dahil bütün sonucu Obsidian’da inceleyin. Her paneli SVG, PNG veya PDF olarak dışa aktarın.</TLDR>
 
-## Üç seçeneği anlama
+## Üç ayrı seçim
 
-| Seçenek | Neyi kontrol eder | Örnekler |
-|---|---|---|
-| Diyagram türü | Diyagramın ne anlama geldiğini | Akış şeması, sıralama diyagramı, devre diyagramı, veri grafiği |
-| Kaynak formatı | Notemd tarafından oluşturulan düzenlenebilir veya yeniden kullanılabilir dosya | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Dışa aktarım formatı | Paylaşım için kullanılacak görüntü veya belge | SVG, PNG, PDF |
+| Seçim | Belirlediği | Örnekler |
+| --- | --- | --- |
+| Diyagram türü | Diyagramın anlamı | Akış, sıralama, devre, grafik |
+| Kaynak biçimi | Düzenlenebilir veya tekrar kullanılabilir dosya | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Çıktı biçimi | Paylaşılacak resim veya belge | SVG, PNG, PDF |
 
-Draw.io ve Drawnix **kaynak formatlarıdır**, diyagram türleri değildir. CircuitikZ ise devre diyagramları için tasarlanmış bir kaynak formatıdır. Aynı önizleme birden fazla görsel formata dönüştürülebilir; bu yüzden CircuitikZ seçimi sizi yalnızca SVG kullanmaya zorlamaz.
+Draw.io ve Drawnix kaynak biçimidir, diyagram türü değildir. CircuitikZ devre kaynak biçimidir; görsel çıktıyı SVG ile sınırlamaz.
 
-## Bir kaynak formatı seçin
+## Kaynak seçimi
 
-| Format | En uygun olduğu durumlar | Kaynak dosyası |
-|---|---|---|
-| Mermaid | Markdown içinde doğrudan tutulan diyagramlar | Mermaid kod bloğu |
-| JSON Canvas | Obsidian’ın yerel canvas iş akışları | `.canvas` |
-| Draw.io | Daha sonra diagrams.net veya uyumlu araçlarda düzenleme | `.drawio` |
-| Drawnix | El ile çizim veya tahtaya benzer düzenlemeler | `.drawnix` |
+| Biçim | Uygun kullanım | Kaynak dosya |
+| --- | --- | --- |
+| Mermaid | Markdown içindeki diyagramlar | Mermaid kod bloğu |
+| JSON Canvas | Obsidian’ın kendi canvas çalışması | `.canvas` |
+| Draw.io | diagrams.net veya uyumlu araçlarda düzenleme | `.drawio` |
+| Drawnix | El çizimi/beyaz tahta düzenleme | `.drawnix` |
 | CircuitikZ | Yapılandırılmış elektrik ve transistör devreleri | `.tex` |
 
-Belirli bir editöre ihtiyacınız yoksa **Tercih edilen kaynak formatı** ayarını **Otomatik** olarak bırakın. Notemd, seçilen diyagram türüne uygun bir format seçer.
+Belirli editör gerekmiyorsa **Preferred source format** ayarını **Auto** bırakın. Notemd uyumlu kaynak seçer.
 
-## Bir diyagram oluşturun ve dışa aktarın
+## Üretim ve dışa aktarma
 
-1. Notunuza erişin veya görselleştirmek istediğiniz metni seçin.
-2. Notemd kenar çubuğundan veya komut paletinden **Diyagram oluştur** seçeneğini tıklayın.
-3. Bir **diyagram türü** seçin veya ayarı **Otomatik algılama** olarak bırakın.
-4. Bir **kaynak formatı** seçin veya ayarı **Otomatik** olarak bırakın. Düzenlenebilir düğümler ve içine yerleştirilmiş Mermaid görselleri içeren bir bilgi haritası istiyorsanız **Drawnix** seçeneğini kullanın.
-5. Önizlemeyi inceleyin. Çok panelli sonuçlarda Drawnix tahtası ve her bir Mermaid paneli, kaynak sırasına göre tek bir dikey olarak kaydırılabilir önizleme alanında yer alır; Mermaid panelleri kırpılmadan renderlenmiş yüksekliklerini kullanır.
-6. Bir görüntü için belirli bir panelin **SVG dışa aktar**, **PNG dışa aktar** veya **PDF dışa aktar** seçeneklerinden birini seçin; tüm paneller için üst düzey bir görüntü dışa aktarımı da yapılabilir. Birden fazla panel varsa kaynak klasörünü veya Vault’a göre özel bir klasör belirtin; Notemd her panel için tekil ve tahmin edilebilir bir dosya oluşturur ve herhangi bir hata durumunda işlemine devam eder.
-7. Düzenlenebilir dosyaya da ihtiyacınız varsa **Kaynak dosyasını kaydet** seçeneğini kullanın.
+1. Desteklenen kaynak notu açın. Parçaları ayrı nota koyun; seçim dosya görevini daraltmaz.
+2. Tür veya **Auto-detect** seçin.
+3. Kaynak veya **Auto** seçin. Drawnix düzenlenebilir düğümlü bilgi haritalarını ve Mermaid’i destekler.
+4. **Diyagram olustur** çalıştırın.
+5. Tahtayı ve Mermaid panellerini kaynak sırasıyla, gerçek panel yüksekliklerini kullanan tek dikey kaydırılabilir önizlemede kontrol edin.
+6. Panel başına **SVG dışa aktar**, **PNG dışa aktar**, **Export PDF** seçin veya üstten hepsini aktarın. Kaynak ya da özel kasa göreli klasör seçin. Adlar panel bazında deterministiktir; bir panelin hatası diğerlerini durdurmaz.
+7. Düzenlenebilir dosyayı **Kaynak dosyayı kaydet** ile saklayın.
 
-Dışa aktarım menüsü, mevcut görsel önizleme için **SVG dışa aktar**, **PNG dışa aktar** ve **PDF dışa aktar** seçeneklerini sunar. Her panel başlığı da tek bir Mermaid veya Drawnix görseli için aynı işlemleri sağlar; bu sayede büyük önizlemeler tek bir opak görüntü olarak dışa aktarılmak zorunda kalmaz.
+Dışa aktarma menüsü ve panel başlıkları aynı üç işlemi sunar. **History** önizlemeyi gizlemeden arama, filtre, yeniden açma ve kaydedilmiş dosyalara erişim sağlar. Geçmiş, etkin not olmadan palet/yan panelden de açılır.
 
-Önizlemede **Geçmiş** seçeneğini tıklayarak diyagramı gizlemeden Vault geçmişi çekmecesini açın. Tamamlanmış diyagramları arayabilir, filtreleyebilir, bir önizlemeyi yeniden açabilir veya kaydedilen dosyaları görüntüleyebilirsiniz. Diyagram geçmişi, herhangi bir not aktif olmasa bile doğrudan komut paletinden ve Notemd kenar çubuğundan da erişilebilir.
+SVG/PDF vektör geometrisinden üretilir. PDF her şeyi bitmap’e çevirmek yerine SVG yerleşimini ve metin ölçülerini korur. PPI yalnız PNG için geçerlidir: 72–600, varsayılan 300.
 
-SVG ve PDF, vektör geometrisinden üretilir; PDF ise tüm önizlemeyi rasterleştirmek yerine aynı SVG düzenini ve metin ölçümlerini kullanır. Notemd ayarlarındaki görüntü dışa aktarım PPI değeri yalnızca PNG’nin rasterleştirilmesini kontrol eder (72–600 PPI, varsayılan 300).
+## Yoğun diyagramların okunabilirliği
 
-## Yoğun diyagramlar için okunabilir önizlemeler
+Düzenlenebilir HTML/SVG şerit ızgaraları özeti başlık ve satır başlıklarından önce ölçüp sarar. Hücreler bağlantı/etiketlerden önce çizilir; dik açılı yollar dolu hücreleri atlayıp metin alanı ayırır.
 
-Düzenlenebilir HTML/SVG lane-grid diyagramları, başlık ve lane başlığı yerleştirilmeden önce özeti ölçüp satırlara böler. Başlık korunan özet alanının altına taşınır ve hücreler bağlayıcılar ile kenar etiketlerinden önce çizilir. Lane'ler arası kenarlar çakışma farkındalığı olan ortogonal ızgara yolları kullanır; lane etiketleri ve dolu hücreler için alan ayırır. Böylece uzun açıklamalar metni gizlemez ve yatay kaydırma gerekmez.
+`quadrantChart`, akış diyagramının tırnak/şekil düzeltmeleri uygulanmadan özel normalleştirme alır. Kopyalanmış açılış parantezi yalnız nokta etiketinin sonunda eşleşmemişse kaldırılır. Başlık, eksen ve çeyreklerdeki amaçlı parantezler korunur.
 
-Mermaid quadrant diyagramları family'e özgü normalizasyondan geçer. `quadrantChart` için yalnızca flowchart'a özel tırnak ve şekil düzeltmeleri atlanır; başlıklarda, eksenlerde ve quadrant adlarında kasıtlı köşeli parantezler korunur. Provider tarafından kopyalanan açılış parantezi, yalnızca nokta etiketinin eşleşmeyen son karakteriyse kaldırılır.
+[Örnek katalog](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) iki dilli girdi, SVG/PNG ve manifest saklar. `passed` kaydedilmiş çalıştırma/pakete aittir; sonraki sürümlerde her türün yeniden test edildiği anlamına gelmez. 33 çalıştırılabilir satır, 21 UI dili ve 34 site dili vardır. Beş kesin referans grameri, düzeni ayrıca kanıtlanana kadar seçici dışında tutulur.
 
-Depo, çalıştırılabilir her diyagram türü için gerçek bir Vault'tan öğrenme ve kanıt kümesi tutar. İki dilli giriş notları, oluşturulan SVG/PNG sonuçları ve makine tarafından okunabilir durum manifesti için [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) adresine bakın. `passed` girdileri yüklenmiş plugin bundle üzerinden yapılan çalıştırmaları gösterir; statik screenshot fixture değildir.
+## Gömülü Mermaid ile Drawnix
 
-## İçinde Mermaid görselleri bulunan Drawnix önizlemeleri
+Notemd SVG’yi temizler, Mermaid kaynağını `.drawnix` üstverisinde saklar. Önizleme Drawnix/Plait çalışma ortamı olmadan çalışır. Varsayılan çıktı `.assets` olmadan bağımsızdır. **Also export complete Mermaid visuals** kaynak, SVG ve manifest eşlikçi dosyalarını oluşturur. Eski `.assets` desteklenir; eksik SVG saklanan kaynaktan yeniden üretilebilir.
 
-Bir Drawnix dosyasında Mermaid görselleri yer aldığında, Notemd renderlenmiş SVG’yi temizler ve Mermaid kaynağını `.drawnix` meta verileri içinde saklar. Böylece önizleme, Drawnix bilgi haritasının içinde Mermaid görüntüsünü gösterebilir; bu işlem için Drawnix veya Plait çalışma zamanına gerek yoktur. Güvenli bir şekilde yerleştirilen yalnızca Mermaid içeren görseller ayrı bir `.assets` klasörü oluşturmaz; harici ikili medya veya çözülmemiş görseller ise veri kaybını önlemek amacıyla eşlik eden bir dosya tutar.
+Mümkünse resimler gömülü verili önizleme alır. Öncelik sırası gömülü veri, eski eşlikçi dosya, mevcut kaynak metnidir. Hâlâ başvurulan dosyaları saklayın: yeni bağımsız çıktı, eski ortak klasörün gereksizliğini kanıtlamaz.
 
-Önizleme kasıtlı olarak tek bir kaydırılabilir alan şeklindedir: Önce ana Drawnix canvas’ı görünür, ardından kaynak sırasına göre her bir yerleştirilmiş Mermaid paneli gelir. Kaydedilen bir geçmiş girişini kapatıp tekrar açmak, aynı panel listesini, boyutları ve dışa aktarım seçeneklerini yeniden oluşturur.
+Kaydırılabilir görünüm önce Drawnix’i, sonra kaynak sırasındaki Mermaid’i gösterir. Geçmiş panel, ölçü ve dışa aktarma eylemlerini geri kurar. Başlık, özet ve ilişkiler için alan ayrılır; desteklenmeyen okunabilir yerleşim biçim hatası verir. Dallar arası oklar statiktir; mevcut kanıt yeniden düzenleme sonrası Drawnix’te bağlı kalmayı doğrulamaz. Hedef editörü test edin.
 
-## Devre diyagramları
+## Hedef uygulamaya aktarım sınırları
 
-Desteklenen devre istekleri için **Devre diyagramı** seçeneğini ve **CircuitikZ kaynak dosyasını** kullanın. Notemd önce yapılandırılmış bir devre açıklaması oluşturur, ardından CircuitikZ kaynağını yazar. Bu yöntem, modelden sınırsız LaTeX yazdırmasını istemekten daha güvenilirdir.
+Kaynak ve görsel çıktı ayrı teslimlerdir. Temsil edici dosyayı hedefte test edin. PowerPoint, birleşik hücre altındaki düzeltilmiş ayraçlar dahil desteklenen düzenlenebilir tabloları korur; Mermaid/SVG resim olarak gömülebilir. Önizleme veya tam slayt görüntü puanı gerçek uygulama kontrolünün yerini tutmaz.
 
-Mevcut CircuitikZ desteği kasıtlı olarak sınırlıdır. Yaygın kaynaklardan elde edilen NMOS amplifikatörler ve desteklenen CMOS yapı blokları en iyi sonuçları verir. Teknik veya yayın çalışmalarında oluşturulan devreleri kullanmadan önce her zaman önizlemeyi ve kaynağı inceleyin.
+## Devreler
 
-SVG önizlemesi, Notemd tarafından üretilen bir gözden geçirme aracıdır. Bu dosya, yerel LaTeX veya TikZJax kurulumunuzun `.tex` dosyasını başarıyla derlediğinin kanıtı değildir.
+**Circuit diagram** ve **CircuitikZ source file** seçin. Notemd önce yapılandırılmış tanım, sonra kaynak üretir; bu rastgele LaTeX’i sınırlar. Destek özellikle ortak kaynak NMOS ve desteklenen CMOS bloklarıyla bilinçli sınırlıdır. Teknik kullanım veya yayım öncesi kaynak ve önizlemeyi inceleyin.
 
-**İsteğe bağlı yerel derleme.** Eklenti içindeki önizleme, SVG, PNG ve önizleme PDF dışa aktarımı için LaTeX’e ihtiyacınız yoktur. Masaüstünde, derleme hakkında bilgi almak veya yerel LaTeX PDF’si elde etmek istediğinizde diyagram ayarlarından veya komut paletinden **CircuitikZ yerel derleme ortamı**nı açın. Notemd, sistemdeki `tectonic` veya `pdflatex` araçlarını yeniden kullanabilir, özel bir çalıştırılabilir dosya kullanabilir veya **Yükle** seçeneğini belirterek sabitlenmiş yönetilen Tectonic çalışma zamanını kurabilir. Ortam paneli ilerlemeyi ve hataları doğrudan gösterir ve daha sonra yönetilen çalışma zamanını kaldırmanıza olanak tanır.
+SVG önizlemesi kontrol yardımıdır, yerel LaTeX/TikZJax derleme kanıtı değildir. Önizleme, SVG/PNG ve önizleme PDF’si LaTeX istemez. Masaüstünde tanılama veya gerçek derlenmiş PDF için **CircuitikZ native compile environment** açın: sistem `tectonic`/`pdflatex`, özel çalıştırılabilir dosya veya açık **Install** sonrası sürümü kilitli yönetilen Tectonic. Panel ilerleme/hataları gösterir ve yönetilen ortamı kaldırabilir.
 
-## Sorun giderme
+## Sorunlar
 
-### Sonuç yanlış diyagram türünde çıkıyor
+### Yanlış diyagram türü
 
-Otomatik algılama yerine diyagram türünü doğrudan seçin. Bir devre için **Devre diyagramı** seçeneğini kullanın ve eski **Mermaid diyagramına özetle** komutu yerine **Diyagram oluştur** komutunu uygulayın.
+Türü açıkça seçin. Devreler için eski **Mermaid diyagramı olarak özetle** yerine **Circuit diagram** ve **Diyagram olustur** kullanın.
 
-### Bir kaynak formatı uygun değil
+### Uygun olmayan kaynak
 
-Kaynak formatını tekrar **Otomatik** olarak ayarlayın veya söz konusu diyagram türü için uygun bir format seçin. CircuitikZ yalnızca devre diyagramları için uygundur; Draw.io ve Drawnix ise desteklenen yapılandırılmış diyagramlar için tasarlanmıştır.
+**Auto** seçimine dönün veya türe uygun biçim seçin. CircuitikZ devreler, Draw.io/Drawnix desteklenen yapılar içindir.
 
-### Dışa aktarım menüsü gözükmüyor
+### Dışa aktarma menüsü yok
 
-SVG, PNG ve PDF için bir görsel önizlemeye ihtiyaç vardır. Yalnızca kaynak metni mevcutsa, kaynak dosyasını kaydedin ve uygun harici aracı kullanarak açın.
+SVG/PNG/PDF görsel önizleme gerektirir. Yalnız metin varsa kaynağı saklayıp uygun dış programda açın.
 
-### CircuitikZ dosyası dışarıdan derlenemiyor
+### CircuitikZ derlenmiyor
 
-**CircuitikZ yerel derleme ortamı**nı açın ve ortam kontrolünü çalıştırın. Yönetilen çalışma zamanını düzeltin veya özel/sistem derleyicinizin `circuitikz` paketini alabildiğinden emin olun. Notemd, eklenti dosyasının içine tam bir TeX dağıtımı eklememektedir.
+**CircuitikZ native compile environment** kontrol edin. Yönetilen ortamı onarın veya özel/sistem derleyicisinin `circuitikz` paketini alabildiğini doğrulayın. Eklenti paketi tam TeX dağıtımı içermez.

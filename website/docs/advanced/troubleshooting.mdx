@@ -1,16 +1,10 @@
 ---
 id: troubleshooting
 title: Troubleshooting
-description: Common issues and solutions
+description: Diagnose Notemd provider, output, batch and export failures with a small reproducible task and sanitized evidence.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [troubleshooting, errors, diagnostics, connection test]
-concepts: [Troubleshooting, Error Handling, Diagnostics]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords: [Notemd troubleshooting, connection test, cancellation, recovery, API errors]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,144 +12,72 @@ import TLDR from '@site/src/components/TLDR';
 # Troubleshooting
 
 <TLDR>
-**Most Notemd issues fall into four categories: API key problems, network connectivity, authentication errors (401/403), and rate limits (429).** The built-in connection test and diagnostics panel identify the root cause quickly. This page covers every common error message, its cause, and the fix. For issues not listed here, report them on GitHub Issues with the diagnostics output.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+Reproduce a problem on one disposable note with the exact provider, model and task settings. Inspect the progress log and reported output path. Separate authentication, generation, parsing and file-writing failures; a successful connection test does not verify the whole workflow.
 </TLDR>
 
 ## Overview
 
-Notemd depends on external services -- LLM providers and search APIs -- so most problems originate outside the plugin itself. The diagnostics panel in settings provides a structured view of the last API call, including the request URL, response status, and error body. Always check it first before investigating further.
+Record the Notemd and Obsidian versions, operating system, action name, provider protocol, model and a minimal reproduction. Avoid starting another task while cancellation is still settling. Preserve existing outputs and recovery files until you understand which operation produced them.
 
 ## How It Works: Diagnostics
 
 ### Connection Test
 
-Every provider configuration section has a **"Test Connection"** button. Clicking it sends a minimal API request (typically a model list or a short completion) and reports success or the specific HTTP error. This is the fastest way to verify that your API key and base URL are correct.
+Use **Test connection** in the provider settings. Some presets test a model-list endpoint first and can succeed without a chat request; others perform a small chat request. Follow it with a small real task to verify the selected model and output contract.
 
-### Diagnostics Panel
+### Progress And Developer Diagnostics
 
-**Settings --> Notemd --> Diagnostics** shows:
+The progress surface reports task state, errors and output destinations. API activity can help distinguish a pending request from a completed or failed attempt. Enable API error debugging only when needed. Developer provider diagnostics exercise longer requests and can consume quota; use them deliberately when a short test succeeds but a real task fails.
 
-| Field | Content |
-|-------|---------|
-| Last provider | Which provider was last called |
-| Last model | Which model was last called |
-| Last status | HTTP status code or transport error |
-| Last error | Raw error message from the API |
-| Last request URL | Full URL of the last request (redacted API key) |
-| Last response body | Truncated response body (first 500 chars) |
-
-Copy the full diagnostics output when reporting issues on GitHub.
+Diagnostic bodies can contain note text, partial model output, endpoint details or credentials. Review and redact them locally before sharing. A redacted provider-profile export still needs a metadata review.
 
 ## Common Errors
 
 ### API Key Invalid or Missing
 
-**Symptom:** HTTP 401 or "Incorrect API key provided"
-
-**Cause:** The API key is missing, contains whitespace, or belongs to a different provider.
-
-**Fix:**
-1. Verify the key has no leading/trailing spaces
-2. Confirm the key matches the selected provider (an OpenAI key will not work with Anthropic)
-3. Check that your account has credits or an active subscription
-4. Click **"Test Connection"** to verify
+For HTTP 401, confirm that the key belongs to the selected provider/endpoint and has no accidental whitespace. For HTTP 403, inspect account permissions, project restrictions, model entitlement and billing state. Repeated retries will not repair invalid credentials.
 
 ### Network / Connection Errors
 
-**Symptom:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
-
-**Cause:** The API endpoint is unreachable from your machine.
-
-**Fix:**
-1. Check your internet connection
-2. If behind a proxy or firewall, verify the API domain is not blocked
-3. For Ollama: confirm `ollama serve` is running (`ollama list` should return models)
-4. For LMStudio: confirm the server is running on `localhost:1234`
-5. Try a different transport -- mobile users should ensure the `requestUrl` transport is active
-6. Enable `enableStableApiCall` for automatic retry on transient errors
-
-### 403 Forbidden
-
-**Symptom:** HTTP 403
-
-**Cause:** Your API key is valid but does not have permission for the requested resource.
-
-**Fix:**
-1. Some models require special access (e.g., GPT-4 via Azure requires a deployment name)
-2. Some providers restrict models by plan tier -- check your account
-3. Regional restrictions may apply (some China providers block international IPs and vice versa)
-4. Verify the model name is spelled correctly (e.g., `gpt-4o` not `gpt-4o-mini` when the mini model is all your plan allows)
+Check endpoint host, port, protocol and the route from the Obsidian device. For Ollama or LM Studio, verify the server is running and the model is available. `localhost` refers to the device running Obsidian, not another computer. Use the correct provider preset; runtime fallback selection is automatic rather than a user-facing transport switch.
 
 ### Rate Limit (429)
 
-**Symptom:** HTTP 429 or "Rate limit exceeded"
-
-**Cause:** Too many requests in a short time window.
-
-**Fix:**
-1. Reduce `batchConcurrency` to `1` or `2`
-2. Wait a few minutes before retrying
-3. Check your provider's rate limit documentation for your plan tier
-4. Enable `enableStableApiCall` for automatic retry with backoff
-5. Consider switching to a provider with higher limits (DeepSeek, Ollama)
+Reduce batch concurrency, inspect the provider's request/token quotas, and account for other clients using the same key. Retry settings can recover from some transient errors but cannot guarantee that every quota-related failure will succeed.
 
 ### Model Not Found
 
-**Symptom:** "Model not found" or HTTP 404
-
-**Cause:** The model name does not exist on the selected provider.
-
-**Fix:**
-1. Click **"Get Model List"** to see all available models for your provider
-2. Some model names change over time -- verify the current name in the provider's documentation
-3. For Ollama: run `ollama list` to see pulled models; only downloaded models are available
+Use **Fetch models** when available or enter a model/deployment known to your account. Check the API version and region. Preset defaults may be historical; their presence in settings does not prove the upstream model is still available. Azure OpenAI needs a deployment name, while an Ark deployment may require its endpoint ID.
 
 ### No Links / No Concepts Generated
 
-**Symptom:** The command runs but produces no output
+Inspect the actual processed output file. Check that the note contains useful source material, the selected model returned the required format, and a nonempty concept folder is enabled. Standalone extraction defaults to title-only notes with backlinks off. Restore the built-in prompt for a controlled comparison if a custom prompt removed required markers.
 
-**Cause:** The LLM returned an empty or unparseable response.
+### Output Missing Or In An Unexpected Folder
 
-**Fix:**
-1. Check the diagnostics panel for the actual LLM response
-2. Try a more capable model (some small models struggle with structured output)
-3. Ensure the note has sufficient content (>50 words)
-4. Review your custom prompt for conflicting instructions
-5. Disable synonym suppression temporarily to see if it is filtering too aggressively
+Read the destination reported by the task. Add-links normally creates a `_processed.md` sibling; translation normally creates a `_<language>.md` file; title-generation batches report a complete folder. A custom translation folder can fall back to the source folder if creation fails. Check destination collisions and file permissions before rerunning.
 
-### Doubao Endpoint ID Missing
+### Cancelled Task Left Files
 
-**Symptom:** Error when using ByteDance Doubao provider
+Cancellation stops further work where supported; completed writes are retained and are not automatically undone. A remote request or write already accepted may finish. Inspect per-file results and recovery/conflict paths before deleting anything or rerunning the whole folder.
 
-**Cause:** Doubao requires an Ark endpoint ID (format: `ep-xxxxxxxx-xxxx-xxxx`) instead of a model name.
+### Diagram Or Native Export Failed
 
-**Fix:** Replace the default placeholder model with your actual endpoint ID from the Volcengine console.
-
-## Configuration
-
-| Diagnostic Setting | Location | Purpose |
-|--------------------|----------|---------|
-| **Test Connection** | Settings --> Provider section | Verify API key and connectivity |
-| **Get Model List** | Settings --> Provider section | Confirm which models are accessible |
-| `enableStableApiCall` | Settings --> Advanced | Enable retry with backoff |
-| `batchConcurrency` | Settings --> Batch | Control parallelism to avoid rate limits |
+Choose a diagram/source combination supported by the selector. A preview is not native-consumer verification. Run the relevant slide or CircuitikZ environment check for desktop exports, then inspect its errors. If only source text is available, save it and use the matching external tool. See [diagrams](../features/diagrams) for explicit format limits.
 
 ## How to Report Issues
 
-If your issue is not covered above:
+1. Reproduce with a small synthetic note and a dedicated folder.
+2. Record exact versions, action, model, settings needed to reproduce, expected behavior and actual outcome.
+3. Attach sanitized progress/error details and the smallest artifact demonstrating the problem. Remove secrets, private content and unnecessary endpoint metadata.
+4. State whether it reproduces with a single file and default prompts.
+5. Open [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).
 
-1. Open **Settings --> Notemd --> Diagnostics**
-2. Copy the full diagnostics output
-3. Open a GitHub Issue at [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-4. Include: Obsidian version, Notemd version, provider, model, diagnostics output, and steps to reproduce
-5. Redact your API key from any shared logs
-
----
+A screenshot alone rarely proves a file-format or cancellation issue. Include the source/output pair or a minimal reproducible sequence when possible.
 
 ## Next Steps
 
-- [LLM Providers](/docs/providers/overview) -- Full provider configuration reference
-- [Batch Processing](/docs/advanced/batch-processing) -- Concurrency and retry settings for large operations
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Fix unexpected LLM behavior by adjusting prompts
+- [Provider setup](../providers/overview): protocol and connection-test boundaries.
+- [Batch processing](./batch-processing): scope and partial completion.
+- [Custom prompts](./custom-prompts): task-specific input/output contracts.
+- [Configuration](../getting-started/configuration): actual defaults and output destinations.

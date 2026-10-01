@@ -1,184 +1,119 @@
 ---
 id: concept-notes
-title: Notes de concept
-description: Générer et gérer des notes de concept — des notes indépendantes pour les concepts clés extraits de votre coffre-fort
+title: Notes de concepts
+description: >-
+  Extrayez les concepts dans un dossier choisi, contrôlez les modèles de note et
+  relisez les doublons avant suppression.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - Notes de concepts
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Notes de concept
+# Notes de concepts
 
 <TLDR>
-**Notemd extrait les concepts clés de vos notes et crée des fichiers de note de concept indépendants.** Le LLM identifie les termes essentiels, génère un fichier `.md` par concept dans un dossier configurable, et ajoute éventuellement des liens vers la note source. Il prend en charge la suppression des synonymes, le choix d’un modèle par tâche, la purification des noms de fichiers, ainsi qu’un moteur de déduplication en 4 étapes. Cela fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
+L’extraction autonome lit une source et crée des fichiers Markdown de concepts dans un dossier choisi, initialement vide dans les réglages. Les nouvelles notes contiennent seulement un titre par défaut, sans backlink. L’ajout de liens utilise un autre modèle de note.
 </TLDR>
 
-## Aperçu général
+## Vue d’ensemble
 
-Les notes conceptuelles constituent les éléments de base d’une base de connaissances interconnectée. Lorsque vous traitez une note, Notemd :
+Configurez **Chemin du dossier des notes de concept**. Un dossier dédié facilite le contrôle des résultats, des doublons et de la génération ultérieure. Extraire ne remplit pas automatiquement chaque note d’une explication recherchée.
 
-1. **Envoie votre texte à un LLM** avec une demande d’extraction structurée
-2. **Analyse les lignes `CONCEPT:`** de la réponse LLM
-3. **Crée un fichier `.md` par concept** dans un dossier désigné
-4. **Ajoute des backlinks** à la note source (lorsque c’est activé)
+## Fonctionnement
 
-## Comment ça marche
+### Chaîne d’extraction
 
-### Pipeline d’extraction
+Le contenu est envoyé au LLM ; les entrées `CONCEPT:` sont analysées, les noms dédupliqués dans l’opération et les fichiers créés ou actualisés. Les notes longues sont découpées. Consultez le rapport : une réponse n’est pas un inventaire exhaustif.
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### Prompt d’extraction
 
-### Le prompt d’extraction
+Le prompt intégré demande des concepts précis liés au sujet. Apprentissage ciblé et réduction des synonymes influencent le modèle sans garantir une terminologie canonique. Un prompt personnalisé doit conserver `CONCEPT: Term`. Voir les [prompts](../advanced/custom-prompts).
 
-Le LLM reçoit une instruction qui lui demande de :
+### Découpage
 
-- Extraire les **noms ou groupes de noms** centraux pour le sujet du document
-- **Privilégiez la spécificité** — « Relâchement diélectrique » plutôt que « Relâchement ».
-- **Normaliser au singulier** — « models » devient « model »
-- **Supprimer les sous-concepts** — si « relaxation diélectrique » apparaît, ne pas extraire également « relaxation »
-- **Ignorer** les sections de références/bibliographie, les noms communs, les noms d’entreprise/produits
-- Affichez un concept par ligne sous la forme `CONCEPT: Term Name`
+`chunkWordCount` vaut 3000 par défaut, en mots approximatifs et non en tokens du fournisseur. Le contexte entre fragments est limité ; contrôlez concepts proches et noms ambigus.
 
-**Suppression des synonymes** (optionnel) : ajoute en préfixe au prompt « Éviter d’extraire des synonymes, des concepts de base sémantiquement similaires ou des mots-clés chaque fois que c’est possible ».
+## Création des notes
 
-**Domaine d’apprentissage ciblé** (facultatif) : ajoute `Relevant Fields: [domain]` en préfixe pour limiter l’extraction à une discipline.
+### Noms de fichiers
 
-**Remplacement de langue** (facultatif) : ajoute « Les concepts de sortie DOIVENT être en [langue]. »
-
-### Échelonnage
-
-Les notes longues sont divisées par `settings.chunkWordCount`. Chaque partie est envoyée indépendamment. Les concepts provenant de toutes les parties sont accumulés dans un `Set` — les doublons entre les parties sont supprimés silencieusement. Les erreurs LLM sur des parties individuelles n’interrompent pas l’opération.
-
-## Création d’une note de concept
-
-### Règles de nommage des fichiers
-
-| Règle | Comportement |
-|------|----------|
-| Guillemets/minuscules | Remplacé par des espaces |
-| Caractères spéciaux | Déstripté : barre oblique en arrière, barre oblique en avant, deux-points, astérisque, point d’interrogation, guillemets, crochets angulaires, pipe, hash, caret, parenthèses |
-| Espace blanc | Collapsé et élagué |
-| Longueur maximale | 100 caractères (tronqué + retrimé) |
-| Résultat vide/tous-points | Ignoré en silence |
-
-Exemple : `A-B: Key*Term` devient `A B KeyTerm.md`
+Les caractères de chemin non admis sont supprimés, les espaces normalisés et les noms longs tronqués. Un nom vide est ignoré. Plusieurs expressions peuvent donc aboutir au même fichier : examinez les noms avant une extraction massive.
 
 ### Modèles
 
-**Modèle complet** (liens renvoyants activés, modèle minimal désactivé) :
+Par défaut, une nouvelle note autonome contient :
 
 ```markdown
-# Concept Name
+# Nom du concept
+```
+
+Pour un backlink dans une nouvelle note autonome, activez **Add "Linked From" backlink** et désactivez **Create minimal concept notes**. Forme complète :
+
+```markdown
+# Nom du concept
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Note source]]
 ```
 
-**Modèle minimal** (lors de `extractConceptsMinimalTemplate: true`) :
+L’ajout de liens crée la forme complète avec backlink quand la sortie de concepts est activée. Les options d’extraction autonome ne modifient pas ce comportement.
 
-```markdown
-# Concept Name
-```
+### Notes existantes
 
-### Mettre à jour des notes existantes
-
-Lorsqu’un fichier de concept existe déjà :
-
-1. Si les liens inversés sont activés et que la note de source n’est pas encore listée, ajoutez un lien inverse.
-2. Si une section `## Linked From` existe, insérez-la avant le prochain en-tête `##`
-3. Si aucun `## Linked From` n’existe, ajoutez une section à la fin
-4. Les liens inversés dupliqués sont vérifiés et ignorés
+Avec les backlinks activés, un lien source manquant peut être ajouté sous `## Linked From`, sans remplacer le corps ni répéter le lien. La référence utilise le basename source ; vérifiez les sources homonymes.
 
 ### Configuration
 
-| Configuration | Par défaut | Appliquer |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | Onglet Maître. Désactivé = aucune note créée |
-| `conceptNoteFolder` | `''` (désactivé) | Chemin du dossier pour les notes de concept |
-| `extractConceptsMinimalTemplate` | `true` | Notes uniquement avec titre (pas de lien externe) |
-| `extractConceptsAddBacklink` | `false` | Ajouter des backlinks lors de l’extraction indépendante |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | LLM par tâche pour l’extraction de concepts |
-| `extractConceptsLanguage` | `'en'` | Langue de sortie pour les noms de concepts |
-| `replaceSynonymsDuringConceptExtraction` | `false` | Activer la suppression des synonymes dans le prompt |
-| `generateConceptLogFile` | `false` | Écrivez une liste `.log` des concepts créés |
-
-**Important :** Les paramètres `extractConceptsAddBacklink` et `extractConceptsMinimalTemplate` n’affectent que la **commande d’extraction dédiée**. La commande « Ajouter des liens » crée toujours des notes au format complet avec des liens renvoyants.
+| Paramètre | Défaut | Effet |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | Autoriser les concepts une fois le dossier choisi |
+| `conceptNoteFolder` | `''` | Aucun dossier initial |
+| `extractConceptsMinimalTemplate` | `true` | Notes autonomes limitées au titre |
+| `extractConceptsAddBacklink` | `false` | Activer les backlinks autonomes |
+| `extractConceptsProvider` | `DeepSeek` | Fournisseur lorsque le routage par tâche est actif |
+| `extractConceptsModel` | `''` | Reprendre le modèle du fournisseur si vide |
+| `extractConceptsLanguage` | `en` | Langue lorsque les langues par tâche sont actives |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Ajouter une consigne contre les synonymes |
+| `generateConceptLogFile` | `false` | Créer un journal de concepts sur demande |
 
 ## Déduplication
 
-La commande dedup (`Notemd: Check & remove duplicate concept notes`) effectue une analyse en 5 étapes :
+Le contrôle utilise des heuristiques de noms : casse, pluriels, symboles normalisés et inclusion d’un mot selon le périmètre. Il ne prouve pas l’équivalence sémantique ; pluriels irréguliers et sens techniques distincts nécessitent une relecture.
 
-### Étape 1 : Correspondance exacte du nom de fichier
+Dans **Vérifier et supprimer les doublons**, examinez les candidats et confirmez uniquement les suppressions voulues. Les éléments approuvés passent par la corbeille d’Obsidian. Ce dossier n’est pas un cache jetable : sauvegardez-le avant nettoyage.
 
-Comparaison insensible à la casse du nom de fichier dans toute la portée configurée.
+### Périmètres
 
-### Étape 2 : Détection de la forme plurielle
-
-Supprime les suffixes : `-ies` à `-y`, `-es` supprimé, `-s` supprimé. Compare la forme singulière avec les fichiers de contexte. Ne gère pas les pluriels irréguliers (children/child).
-
-### Étape 3 : Normalisation des symboles
-
-S’applique à : `toLowerCase()`, remplace les traits d’union/les underscores par des espaces, supprime les caractères non alphanumériques, fusionne les espaces blancs. Les éléments qui se normalisent de la même manière sont marqués.
-
-### Étape 4 : Contention à un seul mot
-
-Les notes de concept à un seul mot sont vérifiées par rapport aux noms de fichiers de portée à plusieurs mots. Ne sont pas exécutées lorsque la portée est `concept_folder_only`.
-
-### Étape 5 : Confirmation et suppression
-
-Tous les candidats sont affichés dans une boîte de dialogue de confirmation. Les éléments approuvés sont déplacés dans la corbeille du système. L’opération peut être annulée entre chaque suppression.
-
-### Modes de portée
-
-| Mode | Comparé à |
-|------|-------------------|
-| `vault` (par défaut) | Tous les fichiers du coffre-fort `.md` à l’exception du dossier concept |
-| `concept_folder_only` | Autres notes de concept dans le dossier |
-| `include` | Fichiers dans les dossiers spécifiques listés |
-| `exclude` | Tous les fichiers du coffre-fort à l’exception du dossier concept + des dossiers listés |
+La comparaison peut viser le coffre, le dossier de concepts, des dossiers inclus ou un périmètre avec exclusions. Vérifiez ce choix avant confirmation ; il change les candidats, pas la définition d’un doublon.
 
 ## Utilisation
 
-### Extraction de concepts (indépendant)
+### Extraction autonome
 
-1. Ouvrir une note
-2. Exécutez **"Notemd: Extraire les concepts"** depuis la palette de commandes
-3. Les notes de concept sont créées dans le dossier configuré
+Ouvrez une note Markdown, confirmez le dossier et lancez **Extraire les concepts (fichier actuel)**. La source reste inchangée. Vérifiez noms, couverture et backlinks éventuels.
 
-### Extraire + Générer du contenu
+### Extraction puis contenu
 
-**"Notemd : Extraire les concepts et générer des titres"** — extrait les concepts, puis exécute l’opération "Générer à partir du titre" sur chaque note dans le dossier des concepts. Cela génère du contenu pour **toutes** les notes de concept du dossier, et non seulement pour celles qui viennent d’être créées.
+**Génération par lot à partir des titres** enrichit le dossier de concepts. Des notes admissibles antérieures peuvent aussi être traitées. Examinez le dossier avant exécution et la destination complete annoncée après celle-ci.
 
-### Créer un lien Wiki à partir de la sélection
+### Lien depuis une sélection
 
-1. Surligner du texte dans l’éditeur
-2. Exécutez **"Notemd: Créer un lien wiki à partir de la sélection"**
-3. Le texte est encadré par `[[...]]` et une note de concept est créée
+L’action de sélection peut entourer le terme choisi d’un lien et créer la note si sa destination est configurée. Elle permet de choisir le terme sans demander au modèle d’extraire toute la note.
 
 ## Conseils
 
-- **Définissez d’abord le dossier du concept** — sans lui, aucune note ne sera créée. Un modal d’avertissement apparaît si ce dossier n’est pas défini.
-- **Utiliser des modèles par tâche** — l’extraction de concepts se prête bien à des modèles moins coûteux (GPT-4o-mini, DeepSeek). Réservez les modèles chers pour la recherche ou la traduction.
-- **Activer la suppression des synonymes** pour les domaines techniques où plusieurs termes désignent le même concept.
-- **Déduplication régulière** — exécutez la commande de déduplication après le traitement par lots pour détecter les doublons quasi identiques.
-- **Le fichier de journal est écrasé** à chaque exécution, et non ajouté. Copiez-le si vous avez besoin des résultats précédents.
+- Commencez avec une petite source et un dossier dédié.
+- Choisissez la langue avant une grande collection.
+- Relisez séparément synonymes et doublons.
+- Conservez les journaux utiles avant une exécution qui pourrait les remplacer.
 
----
+## Pour continuer
 
-## Prochaines étapes
-
-- [Liens-Wiki](./wiki-links) — Comment les concepts sont liés en ligne
-- [Diagrammes](./diagrams) — Visualiser les relations entre concepts
-- [Workflows](./workflows) — Extraction en chaîne avec d’autres tâches
+- [Liens wiki](./wiki-links).
+- [Workflows](./workflows).
+- [Lots](../advanced/batch-processing).

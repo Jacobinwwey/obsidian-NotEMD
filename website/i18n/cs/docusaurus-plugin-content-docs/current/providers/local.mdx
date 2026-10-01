@@ -1,63 +1,55 @@
 ---
 id: local
-title: "Lokální modely"
-description: "Nastavte Ollama a lokální LLMs"
+title: Lokální modely
+description: >-
+  Připravte Ollama, LM Studio nebo OVMS a prověřte protokol, oprávnění a síťové
+  hranice.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Lokální modely
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Lokální modely
 
-<TLDR>
-**Lokální poskytovatelé uchovávají obsah poznámek mimo hostované APIs.** Aktuální lokální cesta pokrývá Ollama pomocí nativního transportu `ollama` a LMStudio prostřednictvím transportu kompatibilního s OpenAI. Pro žádnou z těchto cest není potřeba klíč API, ale lokální server a model musí již běžet.
+<TLDR>Běžící modelový server může provádět úlohy na vašem zařízení. Nejprve připravte model a protokol. Webová rešerše, vzdálené endpointy, instalace závislostí a samostatně směrované cloudové úlohy se tím nestávají offline.</TLDR>
 
-Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
-</TLDR>
+## Příprava
 
-## Nastavení
+Nainstalujte server/model pro [Ollama](https://ollama.com/) nebo načtěte model a zapněte API v [LM Studio](https://lmstudio.ai/). Nasazení OVMS připravte zvlášť. Notemd modely neinstaluje ani tyto servery nespouští. Zvolte přesný název/profil a otestujte spojení i úlohu.
 
-Pro Ollama nainstalujte Ollama, stáhněte si požadovaný model, spusťte server a přidejte profil poskytovatele `Ollama` v Notemd. Pro LMStudio načtěte model do lokálního serveru LM Studio a přidejte profil poskytovatele `LMStudio`.
+## Endpoint a autentizace
 
-Lokální modely jsou provozní závislosti, ne jen nastavení. Notemd může volat pouze to, co lokalní proces nabízí, proto před laděním doplňku ověřte lokální model mimo Obsidian.
+| Profil | Základní URL | Příklad modelu | Protokol / přístup |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Nativní Ollama; klíč není vyžadován |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI-compatible; volitelný klíč, výchozí `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI-compatible; model a přístup určuje nasazení |
 
-## Koncový bod a autentizace
+`localhost` je zařízení s Obsidianem. Telefon tím neosloví server na počítači. LAN endpoint vyžaduje skutečnou adresu a odpovídající ochranu. Nezveřejňujte nechráněný server do nedůvěryhodné sítě.
 
-| Poskytovatel | Základní URL | Výchozí model | Klíč API | Poznámky |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Nepožadováno | Přenos NDJSON; objevování modelů prostřednictvím `/api/tags` |
-| LMStudio | `localhost:1234/v1` | `local-model` | Nepožadováno | Odesílá `"EMPTY"` jako token nositele; kompatibilní s OpenAI |
+## Modely
 
-Ollama používá nativní cestu `/chat` pod svým základním URL. LMStudio následuje trasu `chat/completions` kompatibilní s OpenAI a očekává model načtený v lokálním serveru.
+Ollama vypisuje tagy přes `/api/tags`, LM Studio může poskytovat `/v1/models`, OVMS se řídí nasazením. Seznam nedokládá dostatek paměti ani správný výstupní formát. Vyzkoušejte skutečný požadavek.
 
-## Objevování modelů
+## Potíže
 
-Ollama používá režim objevování `ollama-tags` a uvádí lokálně stažené tagy. LMStudio používá objevování modelů kompatibilní s OpenAI, když jeho server nabízí `/v1/models`.
+- Odmítnuté spojení: server, naslouchací adresa a port.
+- Chybějící model: stažení/načtení a přesný alias.
+- Autentizace: skutečný token tam, kde je vyžadován, nikoli slepě `EMPTY`.
+- Pomalá či neúplná odpověď: paměť, kontext a rozpočet; začněte jedním požadavkem.
+- Chybný formát: před laděním dávky ověřte protokol, prompt a model.
 
-Pokud objevování nic nevrátí, obvykle jde o problém stavu lokálního serveru: model nebyl stažen, nenainstalován nebo je server připojen k jinému hostiteli/portu než profil určuje.
+## Vhodné použití
 
-## Řešení problémů
+Pokud odpovídají datové hranice, přístup a naměřené výsledky. Před odpojením připravte závislosti. Zkontrolujte všechna směrování; místní úryvky mohou odejít cloudovému LLM. Tavily/DuckDuckGo zůstávají síťové a export může potřebovat další nástroje.
 
-- Odmítnutí spojení: spusťte Ollama nebo LM Studio a ověřte nakonfigurovaný port.
-- Model nenalezen: stáhněte si tag Ollama nebo načtěte model LM Studio před testováním.
-- Pomalý výstup: snižte velikost kontextu, použijte menší lokální model nebo směřujte náročné úlohy k hostovanému poskytovateli.
-- Prázdné nebo chybné odpovědi: ujistěte se, že vybraný profil poskytovatele odpovídá protokolu lokálního serveru; Ollama a LMStudio nelze zaměňovat.
+## Dále
 
-## Kdy použít
-
-Pro soukromé trezory, práci offline nebo levné opakované úlohy použijte místní poskytovatele. Nepředpokládejte, že místní řešení je automaticky lepší pro výzkumnou syntézu nebo dlouhodobé uvažování; kvalita modelu a omezení hardwaru představují kompromis.
-
----
-
-## Další kroky
-
-- [LLM Poskytovatelé](/docs/providers/overview) -- Kompletní konfigurace a nastavení modelu pro jednotlivé úlohy
-- [Řešení problémů](/docs/advanced/troubleshooting) -- Náprava chyb connection-refused, když místní server není spuštěn
+- [Poskytovatelé](./overview).
+- [Nastavení](../getting-started/configuration).
+- [Řešení potíží](../advanced/troubleshooting).

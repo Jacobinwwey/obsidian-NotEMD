@@ -4,6 +4,13 @@
 
 此目录保存仓库级文档，面向维护者与贡献者。
 
+| 受众 | 入口 |
+|------|------|
+| 新人 | [安装并核对首个任务](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start) |
+| 用户 | [工作流与输出边界](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/features/workflows) |
+| 开发者 | [构建、测试与贡献](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/developers/overview) |
+| Agent | [发现公开命令契约](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/agents/overview) |
+
 ## 当前真值与布局入口
 
 - [1.9.8 发布、文档与可发现性实施方案（执行中）](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.zh-CN.md)
@@ -34,6 +41,7 @@
 - [circuitikz UI、导出与文档同步方案](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.zh-CN.md)
 - [章节拆分 + TOC 提取](./chapter-split-toc.zh-CN.md)
 - [发布流程](./maintainer/release-workflow.zh-CN.md)
+- [1.9.8 发布说明（候选）](./releases/1.9.8.zh-CN.md)
 - [1.9.7 发布说明](./releases/1.9.7.zh-CN.md)
 - [1.9.6 发布说明](./releases/1.9.6.zh-CN.md)
 - [1.9.5 发布说明](./releases/1.9.5.zh-CN.md)

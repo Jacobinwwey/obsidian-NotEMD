@@ -1,0 +1,109 @@
+---
+id: overview
+title: Guide développeur
+description: >-
+  Construisez, testez et étendez Notemd à partir des contrats existants de
+  fournisseur, opération, rendu et documentation.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Guide développeur
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Guide développeur
+
+<TLDR>
+Créez une branche, installez les dépendances verrouillées et les deux révisions de navigateur, puis lancez build et Jest complet. Étendez le module propriétaire du contrat. Alignez docs, tests fournisseurs et preuves natives sur le changement.
+</TLDR>
+
+## Préparer le dépôt
+
+Clonez le [dépôt](https://github.com/Jacobinwwey/obsidian-NotEMD), lisez [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) et créez une branche. CI du plugin : Node 20 sur Linux/Windows. Site : Node 24, dépendances séparées à la racine et dans `website/`.
+
+Depuis la racine :
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Les deux paquets Playwright peuvent fixer des Chromium différents ; un seul ne suffit pas en environnement propre. `main.js` est généré et ignoré par Git : un ancien bundle ne valide pas le nouveau commit.
+
+## Trouver le module responsable
+
+| Responsabilité | Source principale |
+| ---------------- | ---------------- |
+| Cycle de vie, commandes et routage hôte | `src/main.ts` |
+| Préréglages, protocoles et validation | `src/llmProviders.ts` |
+| Requêtes, transports, reprises et flux | `src/llmUtils.ts` |
+| Opérations, schémas et sélection CLI publique | `src/operations/`, `src/cliContracts.ts` |
+| Tâches de fichiers, recherche et traduction | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Actions et composition de la barre latérale | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Spécifications et rendu des diagrammes | `src/diagram/`, `src/rendering/` |
+| Chaînes et langues d’interface | `src/i18n/` |
+| Guides publics et traductions | `website/docs/`, `website/i18n/` |
+| Procédures et preuves datées | `docs/maintainer/` |
+
+Le bundle de production est autonome, avec l’hôte de prévisualisation intégré. Le candidat render-host séparé n’est pas un contrat d’asset livré. Son activation exigerait une modification cohérente du packaging, des assets, audits et docs.
+
+## Limiter le changement
+
+1. Reproduire et écrire un test ciblé rouge avant le changement.
+2. Modifier le propriétaire de l’invariant, valider les entrées externes à la frontière et éviter les connaissances dupliquées chez les appelants.
+3. Relancer ciblé puis complet ; couvrir annulation, erreurs et persistance pour les écritures.
+4. Mettre à jour source anglaise et langues touchées. Plans, tâches et walkthroughs ont des versions anglaise et chinoise complètes séparées dans `docs/`.
+5. Vérifier le consommateur réel pour rendu/export : XML, capture ou build vert seuls ne prouvent ni édition native ni attachement des liens.
+
+Un fournisseur se déclare dans `llmProviders.ts` et réutilise le transport compatible. Actualisez `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README et tests de connexion ; conservez streaming et diagnostics d’interruption.
+
+Avant d’exposer une opération, définissez schémas entrée/résultat, contexte, effets et handling tags. Le registre ne rend pas automatiquement publique une API Agent. Voir les [Agents](../agents/overview).
+
+## Vérifier
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Le lint compare chaque diagnostic au socle : dette existante et baisse du total n’excusent pas une nouvelle régression. Pour la recherche locale, `npm run benchmark:local-kb` mesure le corpus figé ; indiquez corpus et environnement, sans vitesse universelle.
+
+Site sous Node 24 :
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Pour ce programme 1.9.8, Codex rédige et relit directement les traductions. N’exécutez pas d’ancien script de traduction ni d’appel LM Studio/API de traduction. Les outils peuvent formater, vérifier et rendre le texte rédigé.
+
+## Vérifier dans les applications
+
+Utilisez un coffre jetable marqué `.notemd-host-verification`. Les scripts vérifient ce marqueur et le bundle copié. Gardez les coffres utilisateurs séparés. Essayez `obsidian help` et `obsidian-cli help` pour l’intégration CLI ; notez les absences au lieu de compter un stub comme validation.
+
+PowerPoint, CircuitikZ et diapositives ont leurs prérequis et artefacts. Suivez les [preuves datées](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) et la [procédure de release](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md), en conservant les limites mobile/version minimale.
+
+## Contribuer et publier
+
+Décrivez problème, résultat, tests et limites dans la PR. Les [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) accueillent les reproductions. Ne versionnez ni secrets, ni coffre privé, ni sorties sans rapport.
+
+Le publisher et la procédure possèdent la publication : métadonnées synchronisées, tag numérique, source propre, notes bilingues, assets de brouillon vérifiés, puis publication et déploiement Pages explicite. Ne déplacez jamais un tag public. `.trellis/` est local et ne doit pas devenir une dépendance CI.
+
+## Pour continuer
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [État des plans](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agents](../agents/overview).
+- [1.9.8](../releases/1.9.8).

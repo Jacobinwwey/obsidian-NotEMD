@@ -2,153 +2,91 @@
 
 Language: **English** | [简体中文](./github-pages-language-geo-workflow.zh-CN.md)
 
-This workflow records the public documentation-site gate for `website/`. It is separate from runtime plugin i18n and from Slidev export acceptance.
+This is the current publication procedure for `website/`, reviewed on 2026-09-14. Plugin UI localization and native export acceptance have separate contracts. The [1.9.8 plan](../plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md) records implementation status; this procedure does not assert that a candidate is already published.
 
-## Current Contract
+## Publication Contract
 
-The website now separates route availability from the publication quality claim. It publishes one canonical source surface and a complete localized documentation route set for every README/UI locale declared in `website/src/lib/publishedLocales.mjs`, but only verified locales are indexable:
+- English is the canonical complete source at `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`.
+- Every locale declared in `website/src/lib/publishedLocales.mjs` must expose the full docs route set. The 1.9.8 candidate has 24 canonical routes, so admission requires 816 documents across 34 locales.
+- The localized matrix is `zh-CN`, `zh-Hant`, `zh-TW`, `ja`, `fr`, `de`, `es`, `ko`, `it`, `pt`, `pt-BR`, `ru`, `ar`, `fa`, `hi`, `bn`, `nl`, `sv`, `fi`, `da`, `no`, `pl`, `tr`, `he`, `th`, `el`, `cs`, `hu`, `ro`, `uk`, `vi`, `id`, `ms`. Adding a locale or source route requires all counterparts in the same change.
+- Only English and zh-CN are currently indexable. Other languages remain accessible with an explicit publication label and `noindex,follow`; omit them from sitemap and eligible search alternates until independently qualified. Direct AI authoring is not native-human review and does not automatically promote indexing.
+- Newcomers, users, developers and Agents must each reach a complete task guide. A navigation label or placeholder is insufficient.
+- A candidate version may be built and reviewed locally. Pages must not promote it as a downloadable stable release until the matching public, non-prerelease GitHub Release and all four required assets exist.
 
-1. English remains the canonical complete documentation surface under `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`.
-2. The route-complete localized docs matrix is `zh-CN`, `zh-Hant`, `zh-TW`, `ja`, `fr`, `de`, `es`, `ko`, `it`, `pt`, `pt-BR`, `ru`, `ar`, `fa`, `hi`, `bn`, `nl`, `sv`, `fi`, `da`, `no`, `pl`, `tr`, `he`, `th`, `el`, `cs`, `hu`, `ro`, `uk`, `vi`, `id`, and `ms`; each locale must expose the same docs route set as `website/docs`.
-3. A locale must not be added to `publishedLocales.mjs` unless every source page under `website/docs/` has a localized counterpart under `website/i18n/<locale>/docusaurus-plugin-content-docs/current/`.
-4. `en` and `zh-CN` are the current verified/indexable locales. Other route-complete locales are explicitly machine-translated, remain reachable for review, emit `noindex,follow`, and are intentionally omitted from sitemap output.
-5. `llms.txt`, sitemap output, hreflang metadata, the homepage language boundary, and build-audit expectations must describe the same verified-vs-machine-translated contract.
-6. Public GEO/product-positioning changes must update the visible GitHub Pages homepage, homepage JSON-LD, `llms.txt`, and build-audit expectations in the same change. Updating only maintainer notes is not enough.
+## Direct Authoring And Review
 
-## Implemented Gate
+Codex writes and reviews translations directly under the current policy. Do not invoke LM Studio, translation APIs, another model or the legacy translation-writing scripts (`generate-localized-docs.cjs`, `translate-site-core.cjs`, `translate-*.cjs --write`) to author or validate them. This restriction does not remove LM Studio as a supported plugin provider.
 
-The blocking gate is:
+1. Check the English guide against source defaults, commands, data handling and output behavior before translating.
+2. Translate the complete affected guide and its title, description, summaries, examples and visible navigation. Keep each language independently readable. Translate instructional prose even inside code fences, while preserving executable syntax, identifiers, URLs and exact output markers.
+3. Check the translation against the same source revision. Read through task prerequisites, mutations, cancellation, retry and expected output. Structural parity is necessary but does not establish semantic accuracy.
+4. Record normalized source and authored-file SHA-256 values in `website/i18n/source-review.json`. A changed source or translation invalidates the receipt. Update it only after reviewing that change; never approve drift by blindly recomputing hashes.
+5. Preserve honest authorship metadata. An independent native-speaker review is a separate event and must not be inferred from AI proofreading or a successful build.
+6. Keep homepage, navbar, footer, FAQ metadata and README summaries aligned. English fallback merged into an incomplete localized homepage is a release blocker.
 
-```bash
-cd website
-npm run build
-npm run audit:build
-```
-
-`npm run audit:build` executes `website/scripts/audit-build.cjs`. The script checks built output and source contract points:
-
-1. root pages exist for English and every published locale;
-2. root pages have the expected `lang`, canonical URL, and WebPage JSON-LD URL where applicable;
-3. every English source doc has a matching localized source doc for every locale declared in `publishedLocales.mjs`;
-4. `publishedLanguageScopeData.mjs` declares the full docs route set for zh-CN compatibility gates;
-5. localized docs build for every route locale; verified locales do not emit `noindex,follow`, while machine-translated locales do;
-6. sitemap output includes canonical English and verified zh-CN docs only; machine-translated locale sitemaps are intentionally absent;
-7. `llms.txt` records the route-complete multilingual matrix and the verified-vs-machine-translated boundary;
-8. provider docs contain setup, endpoint/auth, model discovery, troubleshooting, and use-case sections;
-9. `GEO_ROADMAP.md` and the measurement logs mention baseline evidence, homepage sync evidence, Search Console, AI visibility, and sitemap evidence;
-10. the homepage exposes source-backed product facts, an answer-engine source map, the `llms.txt` link, the current release version, and the verified-vs-machine-translated language boundary.
-
-The GitHub Pages workflow runs this audit before uploading the Pages artifact:
-
-```text
-.github/workflows/deploy-docs.yml
-  -> npm run build
-  -> npm run audit:build
-  -> upload-pages-artifact
-```
-
-As of 2026-07-05, the workflow is pinned to Node 24 compatible action major versions: `actions/checkout@v7`, `actions/setup-node@v6` with `node-version: 24`, `actions/upload-pages-artifact@v5`, and `actions/deploy-pages@v5`. The deploy job retries the official `actions/deploy-pages@v5` step up to three times with short waits between attempts. This retry only covers GitHub Pages service-side deployment failures and does not mask checkout, install, build, audit, or artifact upload failures.
+Tools may enumerate, format, hash and render already-authored text. They may copy exact identifiers and URLs from source tables. They must not generate translations through an external service.
 
 ## Source Ownership
 
-The full zh-CN compatibility scope lives in:
+| Contract | Owner |
+|---|---|
+| Current software facts | `website/src/lib/releaseFacts.cjs`, derived from repository package/manifest metadata |
+| Locale availability / indexing | `website/src/lib/publishedLocales.mjs`, `website/src/lib/localePublication.mjs` |
+| Canonical guides / translations | `website/docs/`, `website/i18n/<locale>/docusaurus-plugin-content-docs/current/` |
+| Source-review receipts | `website/i18n/source-review.json` |
+| Shared route scope | `website/src/lib/publishedLanguageScopeData.mjs`, `website/src/lib/publishedLanguageScope.js`, `website/src/lib/languageRoutePolicy.js` |
+| Localized home / chrome | `website/src/lib/homeCopyCatalog.mjs`, `website/src/lib/siteLocaleCatalog.cjs`, locale JSON messages |
+| Search metadata | `website/src/theme/SiteMetadata/index.js` |
+| Locale navigation | `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` |
+| Sidebar / paginator compatibility | `website/src/theme/DocRoot/Layout/Sidebar/index.js`, `website/src/theme/DocItem/Paginator/index.js` |
+| Machine-readable guide map | `website/plugins/documentation-map.cjs`, generating canonical `website/build/llms.txt` from release and route owners |
+| Build / navigation / release admission | `website/scripts/audit-build.cjs`, `website/scripts/audit-navigation.cjs`, `website/scripts/verify-published-release.cjs` |
 
-```text
-website/src/lib/publishedLanguageScopeData.mjs
+The complete route set is derived from `website/docs/`. Important entries include `/docs/intro`, `/docs/getting-started/quick-start`, `/docs/providers/overview`, `/docs/faq`, `/docs/developers/overview`, `/docs/agents/overview` and `/docs/releases/1.9.8`. Keep existing public routes and useful anchors stable.
+
+## Local Verification
+
+Use Node 24 and install dependencies under `website/`. Run from that directory:
+
+```bash
+npm ci
+node node_modules/playwright/cli.js install --with-deps chromium
+npm run build
+npm run audit:build
+node scripts/audit-navigation.cjs
 ```
 
-The public locale matrix lives in:
+Check the package lock and CI workflow for the installed browser package before preparing a new environment. Plugin tests separately require both root Playwright browser revisions.
 
-```text
-website/src/lib/publishedLocales.mjs
+The build audit checks route/heading/frontmatter parity, authored-source receipts, localized summaries across all guides, visible FAQ/metadata agreement, homepage audience/release links, version consistency, canonical URLs, `lang`, JSON-LD, robots, sitemap and language policy. Unexpected internal link failures must block delivery. Do not replace these checks with required marketing slogans or relax them to admit incomplete translations.
+
+The browser audit exercises the four audience paths, the current upgrade guide, footer FAQ and dark provider page at 390/768/1440 px: 24 page scenarios per locale. It checks keyboard access, overflow, console/page errors, serious/critical accessibility findings, transparent table-header text and actual glyph order in inline paths. Resolve every gate failure. Inspect representative CJK and RTL screenshots and focus order manually; an automated report does not replace that review.
+
+For a focused production-layout check, pass repeated locale flags:
+
+```bash
+node node_modules/@docusaurus/core/bin/docusaurus.mjs build --locale en --locale fr
+node scripts/audit-navigation.cjs --locales en,fr --report-dir .cache/french-navigation
 ```
 
-Runtime helpers live in:
+A build with exactly one `--locale` disables automatic locale URL prefixes in the installed Docusaurus CLI. Changing only `--out-dir` does not repair the asset base URL and can cause hydration failures. Space-separated locale values after one flag can be interpreted as the site directory. Focused evidence does not replace the final all-locale build.
 
-```text
-website/src/lib/publishedLanguageScope.js
-website/src/lib/languageRoutePolicy.js
-```
+## CI And Deployment
 
-Localized docs are generated and patched by:
+`.github/workflows/deploy-docs.yml` verifies pull requests with read-only permissions, the pinned browser, build/content gates, navigation checks and retained evidence. Pages write/id-token permissions belong only to the mainline deployment job. A green PR build does not publish.
 
-```text
-website/scripts/generate-localized-docs.cjs
-```
+Before deploying, `verify-published-release.cjs` checks the advertised tag, public stable state and uploaded nonempty `main.js`, `manifest.json`, `styles.css`, `README.md`. Lookup, authentication and network errors fail closed. This availability gate does not replace the publisher's downloaded-hash verification.
 
-Site chrome, FAQ metadata, homepage copy, and incremental homepage-boundary translation are generated by:
+Publish through one release owner, refresh the chronicle serially, then explicitly dispatch Pages. Events created by `GITHUB_TOKEN` do not guarantee another workflow run. Record the accepted revision, release/tag identity, deployment run and served source revision. Verify live version, localized/audience routes, canonical/hreflang, robots, sitemap, llms and support/install links before closing the plan. Repository About should link to the canonical Pages URL.
 
-```text
-website/scripts/translate-site-core.cjs
-website/src/lib/siteLocaleCatalog.cjs
-website/src/lib/homeCopyCatalog.mjs
-```
+## Discoverability And Evidence
 
-The LM Studio pipeline uses the OpenAI-compatible endpoint at `http://100.80.17.113:301/v1/chat/completions` with `hy-mt2-7b` by default. A batch contains at most eight locales and keeps its estimated total below 30,000 tokens; the model window is treated as 32,000 tokens. Stable request identity, protected technical tokens, exact structure validation, retries, and atomic writes are mandatory. `home-boundary` is the incremental mode for one changed homepage field.
+Public wording, JSON-LD and `llms.txt` must describe the same implementation, current version and language boundaries. Prefer useful task answers, inspectable examples, explicit prerequisites, stable links and dated evidence. Do not claim fabricated rankings, ratings, testimonials or competitor superiority.
 
-The currently published localized docs route set is the complete set under `website/docs/`, including:
+`llms.txt` is a curated navigation aid, not a ranking mechanism. Google AI features do not require special AI files or schema. Canonical, indexability, internal links and truthful visible content remain the technical work under project control.
 
-```text
-/docs/intro
-/docs/getting-started/installation
-/docs/getting-started/quick-start
-/docs/getting-started/configuration
-/docs/features/wiki-links
-/docs/features/concept-notes
-/docs/features/research
-/docs/features/translation
-/docs/features/diagrams
-/docs/features/workflows
-/docs/providers/overview
-/docs/providers/openai
-/docs/providers/anthropic
-/docs/providers/google
-/docs/providers/local
-/docs/providers/china
-/docs/advanced/custom-prompts
-/docs/advanced/batch-processing
-/docs/advanced/troubleshooting
-/docs/pillar-ai-knowledge
-/docs/faq
-```
+Record Search Console and AI visibility observations in the [measurement log](./github-pages-geo-measurement-log.md), with date, URL/language, tool and limitations. Bing citation counts do not prove ranking within an answer. Missing account access means **not measured**, not zero traffic. External search/citation outcomes are post-deploy observations and do not become established facts because a local build passes.
 
-This scope is consumed by:
+## Maintenance Tradeoff
 
-1. `website/src/theme/DocItem/Layout/index.js` for legacy zh-CN fallback `noindex,follow` fencing. With full-route localization this should be a no-op for public docs.
-2. `website/src/theme/SiteMetadata/index.js` for hreflang and Open Graph locale alternates.
-3. `website/src/theme/NavbarItem/LocaleDropdownNavbarItem/index.js` for locale-switch targets.
-4. `website/src/theme/DocRoot/Layout/Sidebar/index.js` for zh-CN sidebar filtering compatibility.
-5. `website/src/theme/DocItem/Paginator/index.js` for zh-CN previous/next filtering compatibility.
-6. `website/src/pages/index.js`, `website/docusaurus.config.js`, and `website/static/llms.txt` for public entry points, homepage JSON-LD, release version, and the answer-engine source map.
-
-The important rule is no longer "promote a zh-CN page from fallback." The current rule is "keep every public locale complete." If a source doc is added or removed, update every locale and rerun the generator and audit in the same change.
-
-The parallel homepage rule is similar: do not change public GEO facts in only one place. If the answer-engine framing, provider count, language scope, release version, or canonical source routes change, update the homepage copy, JSON-LD, `llms.txt`, and `audit-build.cjs` together.
-
-## Locale Update Checklist
-
-When adding or changing a docs page:
-
-1. Update the English source under `website/docs/...`.
-2. Run or update `website/scripts/generate-localized-docs.cjs` so every supported locale receives the page.
-3. Review `zh-CN` first for visible title, heading, and body drift. Product tokens such as `Notemd`, `LLM`, `Provider`, CLI flags, config keys, file extensions, and code identifiers may remain in English when they are runtime contracts.
-4. Run the full locale heading/frontmatter/placeholder audit for every route locale, then manually inspect zh-CN plus representative non-Latin and RTL locales (`ar`, `fa`, `he`) for visible stale English headings, incorrect machine output, or broken direction-sensitive layout.
-5. Update `website/src/lib/publishedLanguageScopeData.mjs` if the docs route set changed.
-6. Update `website/static/llms.txt` if the page changes the public AI retrieval map.
-7. Update `website/src/pages/index.js` if the page changes the homepage source map or visible language boundary.
-8. Run `npm --prefix website run build && npm --prefix website run audit:build`; only promote a machine-translated locale to `indexablePublishedLocaleCodes` after this gate and human review pass.
-9. After deploy, update `docs/maintainer/github-pages-geo-measurement-log.md` with Search Console and AI visibility observations.
-
-## Why This Shape
-
-The previous partial zh-CN model was safer than letting Docusaurus publish English fallback content under Chinese URLs, but it became the wrong abstraction once the public requirement changed to full multilingual docs. Keeping fallback fencing as the main policy would now hide real localized pages, complicate sitemap truth, and make locale expansion look unfinished even when source files exist.
-
-The stricter route-complete model has a maintenance cost: every docs change touches all localized source trees and build proof. Separating route availability from indexability keeps that cost honest: users can review machine translations without search engines treating them as quality-approved, and sitemap/robots/alternates/UI navigation/AI retrieval all tell the same truth.
-
-## Current Best Direction
-
-1. Keep English canonical and complete.
-2. Keep every route locale complete before deploy, but advertise indexability only for verified locales.
-3. Use `generate-localized-docs.cjs` and the bounded LM Studio pipeline for repeatability, then review visible zh-CN text and representative RTL/non-Latin output before promotion.
-4. Treat Search Console and AI visibility as post-deploy measurement, not local build proof.
-5. Avoid new generic wrappers around Docusaurus theme components. Existing theme overrides are acceptable only because they own concrete policy: alternates, locale switching, sidebar filtering, and paginator filtering.
+Full locale parity has a real review cost. Keep canonical pages focused and reuse authoritative source references; do not multiply competing manuals. Route availability, authoring review and search indexability remain separate decisions. Preserve existing policy-owning Docusaurus overrides, and add no generic theme layer merely to rename a check.

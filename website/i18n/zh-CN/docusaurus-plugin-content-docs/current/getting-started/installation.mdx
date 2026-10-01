@@ -1,14 +1,13 @@
 ---
 id: installation
 title: 安装
-description: 如何在 Obsidian 中安装 Notemd
+description: 从 Obsidian 社区插件或经过核验的 GitHub Release 安装 Notemd，配置 provider 并验证首次输出。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 安装
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,118 +15,64 @@ import TLDR from '@site/src/components/TLDR';
 # 安装
 
 <TLDR>
-**只需2分钟即可安装 Notemd。** 提供两种方式：(1) 使用 Obsidian 社区插件（推荐，一键安装），或 (2) 通过 GitHub Releases 进行手动安装。需要 Obsidian 0.15.0+ 版本。支持 Windows、macOS、Linux、iOS 和 Android 系统，无外部依赖。已有4000多次下载，采用 MIT 许可证。
+从 Obsidian 社区插件安装 **Notemd**，或把同一个 GitHub Release 的三个插件文件复制到 Vault。启用后配置 provider，再用一篇可丢弃的笔记试运行。模型服务与可选原生导出工具有各自的前置条件。
 </TLDR>
 
-## 方法1：社区插件（推荐）
+## 方法一：社区插件（推荐）
 
-1. 打开**Obsidian 设置**（齿轮图标或 `Ctrl/Cmd + ,`）
-2. 导航至**社区插件**
-3. 点击**浏览**
-4. 搜索 **“Notemd"**
-5. 点击**安装**
-6. 点击**启用**
+1. 在目标 Vault 打开 **设置 → 第三方插件**。
+2. 按需启用第三方插件，选择**浏览**。
+3. 搜索 **Notemd**，确认仓库为 `Jacobinwwey/obsidian-NotEMD`，然后**安装**。
+4. **启用**插件，通过侧栏图标或命令面板打开 Notemd。
 
-**完成！** 您会在左侧侧边栏中看到 Notemd 图标。
+[在 Obsidian 中打开 Notemd](obsidian://show-plugin?id=notemd)。浏览器无法打开该链接时，按上述步骤操作；阅读本指南不需要自定义协议处理程序。
 
-## 方法2：手动安装
+## 方法二：手动安装
 
-### 先决条件
-- Obsidian 0.15.0 或更高版本
-- Git（可选，用于克隆）
+### 前置条件
 
-### 步骤
+准备已安装的 Obsidian 和能够备份的 Vault。manifest 声明最低版本为 `0.15.0`，这不代表当前候选版本已经在该旧版本上验证。
 
-1. 从 [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) **下载文件**：
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+### 操作步骤
 
-2. **找到您的保险库插件文件夹：**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+1. 打开 [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest)，从同一个版本下载 **`main.js`**、**`manifest.json`** 和 **`styles.css`**。发布包还附带 `README.md`，供查阅，无须安装到运行目录。
+2. 创建 `<vault>/.obsidian/plugins/notemd/` 并复制这三个文件。`.obsidian` 是默认配置目录；若 Vault 使用了其他配置目录，应采用实际路径。
+3. 重载 Obsidian，在第三方插件设置中启用 Notemd。
+4. 核对显示的插件版本，再配置 provider。不要混用新 manifest 和旧 bundle。
 
-如果 `plugins` 文件夹不存在，请创建它。
+## 可选方案：通过 BRAT 安装
 
-3. **创建 Notemd 文件夹：**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
-
-4. 将这三个文件复制到 `notemd` 文件夹中。
-
-5. **重新加载 Obsidian：**
-   - 按下 `Ctrl/Cmd + R`，或
-   - 重启 Obsidian
-
-6. **启用插件：**
-   - 设置 → 社区插件
-   - 在列表中查找“Notemd”
-   - 打开它。
-
-## 备选方案：通过 BRAT 安装
-
-如果您使用 [BRAT 插件](https://github.com/TfTHacker/obsidian42-brat)：
-
-1. 打开 BRAT 设置
-2. 点击“添加测试版插件”
-3. 输入：`Jacobinwwey/obsidian-NotEMD`
-4. 点击“添加插件”
-5. 在社区插件中启用 Notemd
+已有 [BRAT](https://github.com/TfTHacker/obsidian42-brat) 的用户可通过其测试插件流程添加 `Jacobinwwey/obsidian-NotEMD`。复现问题时明确指定版本。BRAT 是可选外部工具，不是常规安装的依赖。
 
 ## 验证
 
-安装完成后，验证 Notemd 是否正常工作：
-
-1. 打开任意笔记
-2. 在编辑器中右键点击
-3. 你应该会看到类似 Notemd 的命令：
-   - “处理文件（添加链接）”
-   - “提取概念”
-   - “进行研究并总结”
-
-## 后续步骤
-
-- **配置 LLM 提供商：** [快速开始 →](./quick-start)
-- **故障排除：** [常见问题 →](../advanced/troubleshooting)
+在 Notemd 设置中选择可访问的 provider/model，运行 **Test Connection（测试连接）**，再按[快速开始](./quick-start)处理笔记副本。有些连接测试只能证明模型列表端点可用；实际任务才能验证生成与文件输出。
 
 ## 系统要求
 
-| 平台 | 版本 | 状态 |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | 必需 |
-| **Windows** | 7+ | ✅ 已支持 |
-| **macOS** | 10.15+ | ✅ 已支持 |
-| **Linux** | 任意 | ✅ 已支持 |
-| **iOS** | 15+ | ✅ 已支持 |
-| **Android** | 5+ | ✅ 已支持 |
+| 范围 | 边界 |
+|---|---|
+| 插件 manifest | 最低 Obsidian 版本声明为 `0.15.0`；`isDesktopOnly` 为 false |
+| 验证证据 | 查阅当前版本的带日期验收记录；尚未验证实体移动设备和 Obsidian 0.15.0 |
+| 托管 LLM | 网络、有效账户或密钥、可用模型 |
+| 本地 LLM | 单独安装并运行的服务，以及已下载或加载的模型 |
+| 原生幻灯片／电路导出 | 桌面工具和格式特定依赖；运行前检查导出环境 |
+
+不存在覆盖所有可选导出器的统一操作系统版本保证。插件内电路预览不等于原生 TeX 编译成功，桌面验证也不能证明移动端行为。
 
 ## 卸载
 
-要删除 Notemd：
+在第三方插件中停用或卸载 Notemd。生成的笔记和产物仍是普通 Vault 文件，删除前应逐一核对。如需重装，先备份插件设置。卸载不会回滚已经完成的笔记修改。
 
-1. 设置 → 社区插件
-2. 查找“Notemd”
-3. 点击 ❌ 图标
-4. 如需，可删除插件文件夹：`<vault>/.obsidian/plugins/notemd/`
+## 更新
 
-您的数据（笔记、概念说明等）将保持原样，不会被修改。
+在第三方插件中检查更新并升级。手动更新前停止活动任务，备份 Vault 与设置，用同一版本的三个运行文件替换旧文件，然后重载。阅读版本说明，完成小规模试运行后再恢复批量处理。
 
-## 正在更新
+不要用 Release 附件替换 Vault 设置文件。需要回退时，保留备份并明确选择已知兼容版本，同时保留需要的输出。
 
-### 自动更新（推荐）
-Obsidian 会自动检查插件更新。当有新版本可用时：
-1. 设置 → 社区插件
-2. 点击“检查更新”
-3. 点击 Notemd 旁边的“更新”按钮
+## 后续阅读
 
-### 手动更新
-下载最新版本，然后替换插件文件夹中的三个文件。
-
-## 获取帮助
-
-- 📖 [快速入门指南](./quick-start)
-- ❓ [常见问题](../faq)
-- 💬 [Discord 社区](https://discord.gg/qnGgsQ9W)
-- 🐛 [报告问题](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [快速开始](./quick-start)：配置并核对首次任务。
+- [配置](./configuration)：provider、语言和输出。
+- [故障排查](../advanced/troubleshooting)：启动、连接和导出失败。
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)：提交可复现的安装问题。

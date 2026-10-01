@@ -1,16 +1,15 @@
 ---
 id: workflows
 title: Workflows
-description: Mehrere Aufgaben mit Klick-Buttons verknüpfen
+description: >-
+  Verkette Notemd-Aktionen mit gültigen IDs, eindeutigem Ordnerkontext und
+  festgelegtem Fehlerverhalten.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Workflows
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,125 +17,98 @@ import TLDR from '@site/src/components/TLDR';
 # Workflows
 
 <TLDR>
-**Notemd Workflows verknüpfen mehrere Aufgaben zu einer einzigen Aktion mit einem Klick.** Definieren Sie Sequenzen wie `add-links > extract-concepts > research > diagram` mithilfe einer einfachen DSL. Workflows erscheinen als Schaltflächen im Seitenbereich, die die gesamte Kette in der aktuellen Notiz oder dem Ordner ausführen. Es werden vorgefertigte Workflows mitgeliefert; erstellen Sie eigene in den Einstellungen. Jeder Schritt verwendet seine eigene, pro-Aufgabe angepasste Konfiguration.
-
-Dies ist ein Teil des [Obsidian AI-Know-how-Management-Leitfadens](/docs/pillar-ai-knowledge).
+Workflows führen bestehende Aktionen nacheinander aus. Sie können einen Ordnerdialog oder aktiven Editor verlangen. Es handelt sich nicht um eine Text-Pipeline: Eingaben, Ausgaben und Nebenwirkungen bleiben aufgabenspezifisch. Beginne mit Testnotiz und eigenem Ordner.
 </TLDR>
 
 ## Überblick
 
-Ein Workflow beseitigt die Hindernisse, die entstehen, wenn Aufgaben nacheinander ausgeführt werden müssen. Anstatt viermal mit der rechten Maustaste zu klicken, um Links hinzuzufügen, Konzepte zu extrahieren, unbekannte Begriffe zu recherchieren und ein Diagramm zu erstellen, genügt es, einen Knopf in der Seitenleiste zu drücken – dann wird die gesamte Abfolge ausgeführt. Notemd kümmert sich um die Sequenzierung, die Fehlerverbreitung sowie den Fortschrittsbericht.
+Ausgelieferte **One-Click Extract**-Definition:
 
-Workflows werden in einer leichten DSL (domain-spezifischen Sprache) definiert. Sie befinden sich in den Einstellungen, erscheinen als klickbare Schaltflächen im Obsidian-Bereich und können entweder auf die aktuelle Notiz oder auf einen ganzen Ordner angewendet werden.
-
-## Wie es funktioniert
-
-### Workflow-Ausführungspipeline
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Parse** – Der DSL-String wird an `>` (oder `>`) in eine geordnete Liste von Task-Identifikatoren aufgeteilt.
-2. **Resolve** -- Jeder Identifikator wird auf einen internen Befehl abgebildet (add-links, extract-concepts, research, translate, diagram usw.).
-3. **Ausführen** -- Die Schritte werden nacheinander ausgeführt. Jeder Schritt verwendet seinen konfigurierten Provider und Modell pro Aufgabe.
-4. **Fehlerbehandlung** – Wenn ein Schritt fehlschlägt, wird der Workflow entweder abgebrochen oder geht zum nächsten Schritt über, je nach Ihrer Fehlerpolitik.
-5. **Erledigt** -- Eine Toast-Benachrichtigung meldet den Erfolg oder listet alle fehlgeschlagenen Schritte auf.
+1. Aktive Notiz verlinken und bei konfiguriertem Konzeptordner Konzepte anlegen.
+2. Geeignete vorhandene und neue Notizen im Konzept- oder ausgewählten Ordner aus Titeln ergänzen.
+3. Mermaid im complete-Ordner dieses Stapels reparieren.
 
-### DSL-Format
+Die Standardkette enthält keine Webrecherche. Titelgenerierung recherchiert nur bei separat aktivierter Option. Siehe [Stapelverarbeitung](../advanced/batch-processing).
 
-Workflows werden als eine durch `>` getrennte Abfolge von Aufgabenerkennern definiert:
+## Ablauf
 
+### Ausführung
+
+Schritte laufen sequenziell, mit Status und Fehlern in der Seitenleiste. Abbruch stoppt weitere Schritte und unterstützte Anfragen. Fertige Schreibvorgänge bleiben; es gibt kein Alles-oder-nichts-Rollback.
+
+Anfangs wird der konfigurierte Konzeptordner bevorzugt. Stapelgenerierung hält Quell- und complete-Ordner fest; die folgende Mermaid-Reparatur nutzt complete. Andere Aktionen behalten ihre Datei-, Auswahl- und Dialogvoraussetzungen.
+
+### DSL
+
+Eine benannte Schaltfläche je Zeile: `::` trennt Name und Aktionen, `>` die IDs. Leerzeilen und Zeilen ab `#` werden ignoriert, unbekannte IDs abgelehnt.
+
+```text
+Extrahieren und darstellen::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Verfügbare Aufgabenerkennungscodes:**
+Builder oder direkte DSL-Eingabe nutzen. IDs bleiben stabil, UI-Bezeichnungen folgen der Sprache. Ordneraktionen haben eigene IDs, keine allgemeine Umbenennungsregel.
 
-| Identifikator | Aktion |
-|------------|--------|
-| `process-current-add-links` | Füge Wiki-Links zur aktiven Notiz hinzu |
-| `extract-concepts-current` | Konzepte aus der aktiven Notiz extrahieren |
-| `research-and-summarize` | Forschen Sie den ausgewählten Text oder die Notizüberschrift. |
-| `process-current-translate` | Übersetze die aktive Notiz |
-| `summarize-to-mermaid` | Erstelle ein Diagramm aus der aktiven Notiz |
-| `generate-from-title` | Erstelle Inhalte aus dem Titel der Notiz |
-| `extract-original-text` | Ursprünglicher Text extrahieren (für OCR/gescannte Inhalte) |
+| ID | Aktion / Voraussetzung |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Aktive Notiz verlinken |
+| `process-folder-add-links` | Notizen eines Ordners verlinken |
+| `extract-concepts-current` | Konzepte aus aktiver Notiz |
+| `extract-concepts-folder` | Konzepte aus gewähltem Ordner |
+| `generate-from-title` | Inhalt aus aktivem Titel |
+| `batch-generate-from-titles` | Geeignete Ordnernotizen aus Titeln ergänzen |
+| `research-and-summarize` | Auswahl oder Titel im Markdown-Editor recherchieren |
+| `summarize-as-mermaid` | Unterstützte aktive Eingabe als Mermaid zusammenfassen |
+| `generate-diagram` | Diagramm aus unterstützter Eingabe erzeugen |
+| `preview-diagram` | Unterstützte Diagrammquelle oder Artefakt öffnen |
+| `translate-current-file` | Aktive unterstützte Datei übersetzen |
+| `batch-translate-folder` | Gewählten Ordner übersetzen |
+| `extract-original-text` | Gewünschte Originalpassagen extrahieren |
+| `batch-extract-original-text` | Passagen aus geeigneten Ordnerdateien extrahieren |
+| `split-note-by-chapters` | Aktive Notiz nach Kapiteln teilen |
+| `batch-mermaid-fix` | Mermaid-Blöcke eines Ordners reparieren |
+| `fix-formula-current` | Formelbegrenzer der aktiven Notiz normalisieren |
+| `batch-fix-formula` | Formelbegrenzer im Ordner normalisieren |
+| `check-duplicates-current` | Aktive Notiz auf Dubletten prüfen |
+| `check-remove-duplicate-concepts` | Konzeptdubletten interaktiv prüfen und entfernen |
+| `test-llm-connection` | Anbieter testen |
+| `probe-slide-export-env` | Lokale Folienexportumgebung prüfen |
+| `export-slides` | Aktive Datei als Folien exportieren |
 
-**Varianten auf Ordnerebene** ersetzen `current` durch `folder` im Identifikationsnamen.
+### Standard und eigene Schaltflächen
 
-### Vordefinierte versus benutzerdefinierte Workflows
+One-Click Extract wird mitgeliefert; weitere Definitionen stammen von dir. Benenne die Schaltfläche in den Einstellungen, ordne Aktionen und prüfe ihren Tooltip. Parserfehler vor dem Lauf korrigieren.
 
-Notemd wird mit vorgefertigten Workflows für gängige Muster geliefert:
+## Einstellungen
 
-| Workflow | Kette | Anwendungsfall |
-|----------|-------|----------|
-| **Einzuklick-Extrahieren** | add-links > extract-concepts > Forschung | Ein Forschungspapier in einem Durchlauf verarbeiten |
-| **Vollständiger Pipeline** | add-links > extract-concepts > research > Diagramm | Vollständige Wissensextraktion mit Visualisierung |
-| **Übersetzen + Link** | Übersetzen > Links hinzufügen | Übersetzen Sie dann die Konzepte des Links in der Zielsprache |
+| Einstellung | Standard | Wirkung |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Beim ersten gemeldeten Schrittfehler stoppen |
+| `useMultiModelSettings` | `false` | Aktiven Anbieter nutzen, bis Aufgabenrouting aktiviert wird |
+| `enableResearchInGenerateContent` | `false` | Recherche in Titelgenerierung nur nach Aktivierung |
 
-**Benutzerdefinierte Workflows** werden in den Einstellungen erstellt:
+`continue_on_error` führt spätere Schritte trotz Fehler aus. Nur einsetzen, wenn die verbleibenden Eingaben ausreichen; Teilabschluss wird dadurch nicht zum Gesamterfolg.
 
-1. Öffnen Sie **Einstellungen** --> **Notemd** --> **Workflows**
-2. Klicken Sie auf **„Workflow hinzufügen“**
-3. Geben Sie die DSL-Kette ein (z. B. `process-current-add-links>extract-concepts-current`)
-4. Geben Sie einem einen Anzeigennamen (z. B. „Schneller Link + Extrahieren“).
-5. Die neue Schaltfläche erscheint sofort im Seitenbereich.
+### Aufgabenmodelle
 
-## Konfiguration
-
-| Einstellungen | Standard | Effekt |
-|---------|---------|--------|
-| `workflows` | Vordefinierter Satz | Array von Workflow-Definitionen (Name + DSL) |
-| `workflowContinueOnError` | `true` | Gehen Sie zum nächsten Schritt über, wenn der aktuelle Schritt fehlschlägt |
-| `workflowShowProgress` | `true` | Zeige eine Fortschrittsbenachrichtigung nach Abschluss jeder Schritt. |
-
-### Per-Aufgabe-Modelle in Workflows
-
-Jeder Schritt in einem Workflow verwendet seine **eigene** Modellkonfiguration pro Aufgabe. Sie müssen die Modelle nicht direkt im DSL angeben. Die Auflösungsreihenfolge ist:
-
-1. Provider/Modell pro Aufgabe, falls `useMultiModelSettings` aktiv ist
-2. Global `activeProvider` ansonsten
-
-Das bedeutet, dass `add-links` auf DeepSeek laufen kann, während `research` auf GPT-4o läuft – alles innerhalb derselben Workflow-Klickaktion.
+Jede Aktion behält ihre Modellwahl. Leere Überschreibungen übernehmen das Modell des gewählten Anbieters. Vor privaten Inhalten jede Route prüfen.
 
 ## Beispiel
 
-Sie haben gerade einen PDF eines Machine-Learning-Papiers in Ihren Tresor importiert und möchten eine vollständige Wissensextraktion.
-
-1. Öffnen Sie die importierte Notiz
-2. Klicken Sie auf die Schaltfläche „Full Pipeline“ im Seitenbereich.
-3. Notemd führt aus:
-   - **Schritt 1**: Fügen Sie Wiki-Links hinzu -- `[[attention mechanism]]`, `[[transformer]]` usw.
-   - **Schritt 2**: Konzepte extrahieren – erstellt Konzeptnotizen in Ihrer Konzeptordner
-   - **Schritt 3**: Recherche – fasst Webquellen zu Schlüsselbegriffen zusammen
-   - **Schritt 4**: Diagramm – erzeugt eine Mermaid-Mindmap der Struktur des Papers
-4. Nach etwa 30 Sekunden enthält Ihre Notiz Links, es gibt Konzeptnotizen, die Forschungsergebnisse werden hinzugefügt und eine Diagrammdatei wird gespeichert
-
-Alles mit nur einem Klick.
+Lege `trial-concepts` leer an und starte mit einer Testnotiz. Prüfe Konzepte und gemeldeten complete-Ordner. Führe bei unklaren Zielen zunächst Einzelaktionen aus, bevor du den Umfang erweiterst.
 
 ## Tipps
 
-- **Beginnen Sie mit vorgefertigten Workflows** – sie umfassen die häufigsten Muster. Passen Sie sie nur an, wenn Sie eine andere Abfolge benötigen.
-- **Aktiviere `workflowContinueOnError`** – ein fehlgeschlagener Diagramm-Schritt sollte den gesamten Pipeline-Prozess nicht abbrechen.
-- **Verwenden Sie Ordner-Arbeitsabläufe** für die Massenverarbeitung – klicken Sie mit der rechten Maustaste auf einen Ordner, wählen Sie einen Arbeitsablauf aus, und jede Notiz wird verarbeitet.
-- **Benennen Sie Workflows klar** – der Platz im Seitenbereich ist begrenzt. Verwenden Sie kurze, handlungsorientierte Namen wie „Schnelles Extrahieren“ oder „Übersetzen + Link“.
+- Kurze, nachvollziehbare Ketten bevorzugen.
+- Interaktive Lösch-/Bereinigungsaktionen nicht unbeaufsichtigt einplanen.
+- Nach Abbruch oder Konflikt Dateien und Protokoll prüfen.
+- Exakten Anbieter und Umfang testen; Verbindungserfolg garantiert keine Quoten für lange Stapel.
 
----
+## Weitere Schritte
 
-## Nächste Schritte
-
-- [Forschung](./research) -- Erkennen Sie, was der Forschungsschritt leistet, bevor Sie ihn in Workflows einfügen
-- [Wiki-Links](./wiki-links) -- Kernfunktion zur Verlinkung, die in den meisten Workflows verwendet wird
-- [Concept Notes](./concept-notes) -- Konzeptextraktion als Arbeitsablaufschritt
-- [Batch Processing](/docs/advanced/batch-processing) -- Konkurrenzverarbeitung und Fortschrittsberichterstattung für Ordnerarbeitsabläufe
+- [Konzepte](./concept-notes).
+- [Stapelverarbeitung](../advanced/batch-processing).
+- [Recherche](./research).

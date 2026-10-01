@@ -1,67 +1,56 @@
 ---
 id: anthropic
 title: Anthropic
-description: Configura Anthropic Claude
+description: Configura Claude usando el protocolo Messages nativo de Anthropic.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [anthropic, claude, provider, configuration]
-concepts: [Anthropic, Claude, API Configuration]
-citations:
-  - title: Anthropic API
-    url: https://docs.anthropic.com
-  - title: Claude
-    url: https://www.anthropic.com/claude
+keywords:
+  - Anthropic
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic Proveedor
+# Proveedor Anthropic
 
 <TLDR>
-**Anthropic utiliza el transporte nativo de Mensajes API, y no el transporte compatible con OpenAI.** La configuración predeterminada actual es `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` y `temperature: 0.5`. Trátelo como una capa de protocolo separada al depurar.
-
-Esto forma parte de la [Obsidian Guía de Gestión del Conocimiento de IA](/docs/pillar-ai-knowledge).
+Usa este perfil para Messages nativo. Claude servido por una pasarela compatible OpenAI utiliza el perfil de esa pasarela. Comprueba un modelo disponible; el valor histórico puede necesitar sustitución.
 </TLDR>
 
 ## Configuración
 
-Cree una clave Anthropic API, agregue un perfil de proveedor `Anthropic` y deje el URL base en el endpoint nativo, a menos que esté enrutando a través de un perfil de gateway dedicado. Elija el ID del modelo Claude que desee utilizar en el campo de modelo; la opción predeterminada mantiene estable la línea base del producto existente.
+Selecciona **Anthropic**, introduce clave y modelo accesible. Conserva endpoint nativo salvo despliegue que exponga el mismo protocolo. Prueba conexión y tarea en una nota desechable.
 
-Anthropic es un buen candidato para la resumen de alta calidad, la síntesis de investigaciones y la extracción de conceptos. Si lo combina con proveedores más económicos, úselo solo en las tareas que se benefician de la calidad de sus resultados.
+## Endpoint y autenticación
 
-## Punto de extremo y autenticación
-
-| Campo | Preajuste actual |
-|-------|----------------|
+| Campo | Valor inicial |
+| ------- | -------------- |
 | Transporte | `anthropic` |
-| Clave API | Requerido |
-| Base URL | `https://api.anthropic.com` |
-| Modelo predeterminado | `claude-3-5-sonnet-20240620` |
+| Clave API | Obligatoria |
+| URL base | `https://api.anthropic.com` |
+| Modelo | `claude-3-5-sonnet-20240620` |
 | Temperatura | `0.5` |
-| Prueba de conexión | Solo chat |
+| Prueba de conexión | `chat-only` |
 
-El tiempo de ejecución envía solicitudes a `/v1/messages` con `x-api-key` y `anthropic-version: 2023-06-01`. No configure un endpoint de estilo OpenAI de tipo `/v1/chat/completions` bajo este preset; utilice en su lugar un preset de gateway compatible con OpenAI.
+Se usa `/v1/messages` con encabezados nativos de clave y versión. No introduzcas una ruta OpenAI chat. El modelo predeterminado refleja el repositorio, no disponibilidad actual garantizada.
 
-## Descubrimiento de modelos
+## Modelos
 
-Anthropic utiliza el modo de descubrimiento `anthropic-models` en el registro de proveedores. Si su clave o cuenta no puede listar modelos, mantenga un ID de modelo conocido en el perfil y valide mediante la prueba de conexión.
+Descubrimiento mediante ruta nativa cuando está disponible. Si la lista está restringida, introduce ID autorizado y usa la prueba chat. Valida por separado tareas largas y estructuradas.
 
-El transporte no es intercambiable con proveedores compatibles con OpenAI. Un modelo de Claude enrutado a través de OpenRouter, LiteLLM u otro gateway pertenece al perfil de ese gateway, y no al perfil nativo Anthropic.
+## Problemas
 
-## Solución de problemas
-
-- `401` o `403`: verificar el alcance de la clave, el acceso al espacio de trabajo, la facturación y si la clave pertenece al espacio de trabajo Anthropic esperado.
-- `404`: La base URL está incorrecta o el ID del modelo seleccionado no está disponible para la cuenta.
-- Fallan los IDs de modelo Claude de tipo Gateway: mueva el perfil al proveedor de gateway correspondiente porque Anthropic nativo espera nombres de modelo nativos.
-- Las solicitudes largas fallan tarde: reduce el tamaño de salida del modelo por tarea o utiliza un modelo con un límite superior de tokens de salida más alto.
+- `401`/`403`: clave, espacio/proyecto, facturación y derechos.
+- `404`: endpoint y disponibilidad actual.
+- ID de pasarela rechazado: usar su perfil y formato.
+- Fallos largos: revisar límites y errores antes de más reintentos.
 
 ## Cuándo usarlo
 
-Utilice Anthropic cuando la calidad en la síntesis, las notas de investigación o la redacción estructurada sea más importante que el costo bruto. No lo utilice como solución genérica compatible con OpenAI; el transporte separado es lo esencial, y mezclar los protocolos dificulta el diagnóstico.
+Para endpoints Anthropic Messages. Compara resultados con tus fuentes, sin tratar proveedores como clasificación universal. Las rutas por tarea permiten uso específico.
 
----
+## Siguientes pasos
 
-## Próximos pasos
-
-- [LLM Proveedores](/docs/providers/overview) -- Configuración completa, modelos por tarea y lógica de reintentos
-- [Solución de problemas](/docs/advanced/troubleshooting) -- Solucionar errores 401/403 y de conexión
+- [Proveedores](./overview).
+- [Problemas](../advanced/troubleshooting).

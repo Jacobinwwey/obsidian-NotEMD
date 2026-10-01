@@ -1,97 +1,97 @@
 ---
 id: diagrams
-title: 다이어그램
-description: 노트에서 다이어그램을 생성하고, 편집 가능한 소스 형식을 선택한 후 SVG, PNG 또는 PDF로 내보낼 수 있습니다.
+title: 도표
+description: 도표를 생성하고 Drawnix·Mermaid 패널을 검토한 뒤 원본 또는 SVG·PNG·PDF를 저장합니다.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, drawio, drawnix, circuitikz, svg, png, pdf]
-concepts: [Diagram Types, Source Formats, Diagram Export]
+keywords:
+  - 도표
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 다이어그램
+# 도표
 
-<TLDR>
-원하는 **다이어그램 유형**을 선택한 뒤, 해당 형식의 **편집 가능한 소스 포맷**을 골라주세요. Obsidian 내에서 Drawnix 보드와 그 안에 포함된 Mermaid 시각 자료를 포함한 최종 결과물을 미리 볼 수 있으며, 각 패널을 SVG, PNG 또는 PDF 형태로 내보낼 수도 있습니다.
-</TLDR>
+<TLDR>먼저 필요한 도표 종류, 다음에 편집 가능한 원본 형식을 선택하세요. Obsidian에서 Drawnix 보드와 포함된 Mermaid를 함께 검토하고 각 패널을 SVG·PNG·PDF로 내보냅니다.</TLDR>
 
-## 세 가지 선택 옵션 이해하기
+## 세 가지 선택
 
-| 선택 항목 | 제어하는 내용 | 예시 |
-|---|---|---|
-| 다이어그램 유형 | 다이어그램의 의미 | 흐름도, 시퀀스 다이어그램, 회로도, 데이터 차트 |
-| 소스 포맷 | Notemd가 생성하는 편집 가능하거나 재사용 가능한 파일 | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| 내보내기 포맷 | 공유에 사용되는 이미지 또는 문서 형식 | SVG, PNG, PDF |
+| 선택 | 결정하는 것 | 예시 |
+| --- | --- | --- |
+| 도표 종류 | 도표의 의미 | 흐름·시퀀스·회로·데이터 차트 |
+| 원본 형식 | 편집/재사용할 파일 | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| 내보내기 형식 | 공유할 이미지나 문서 | SVG, PNG, PDF |
 
-Draw.io와 Drawnix는 다이어그램 유형이 아닌 **소스 포맷**입니다. CircuitikZ는 회로도를 위해 설계된 소스 포맷입니다. 동일한 미리 보기 결과물을 여러 가지 시각적 형식으로 내보낼 수 있으므로 CircuitikZ를 선택하더라도 반드시 SVG만 사용해야 하는 것은 아닙니다.
+Draw.io/Drawnix는 종류가 아니라 원본 형식입니다. CircuitikZ는 회로용 source이며 선택했다고 시각 export가 SVG로만 제한되지는 않습니다.
 
-## 소스 포맷 선택하기
+## 원본 형식
 
-| 포맷 | 적합한 경우 | 소스 파일 |
-|---|---|---|
-| Mermaid | Markdown 내에 직접 저장되는 다이어그램 | Mermaid 코드 블록 |
-| JSON Canvas | Obsidian의 기본 canvas 작업 흐름 | `.canvas` |
-| Draw.io | diagrams.net이나 호환 가능한 도구에서 후속 편집 | `.drawio` |
-| Drawnix | 손으로 그리거나 화이트보드 스타일로 편집하는 경우 | `.drawnix` |
-| CircuitikZ | 구조화된 전기 회로 및 트랜지스터 회로 | `.tex` |
+| 형식 | 용도 | 원본 파일 |
+| --- | --- | --- |
+| Mermaid | Markdown 안의 도표 | Mermaid 코드 블록 |
+| JSON Canvas | Obsidian 네이티브 canvas | `.canvas` |
+| Draw.io | diagrams.net 또는 호환 editor에서 편집 | `.drawio` |
+| Drawnix | 손그림/화이트보드 방식 편집 | `.drawnix` |
+| CircuitikZ | 구조화된 전기·트랜지스터 회로 | `.tex` |
 
-특정 편집기를 사용할 필요가 없다면 **Preferred source format**을 **Auto** 상태로 두세요. Notemd는 선택한 다이어그램 유형에 맞는 호환 가능한 포맷을 자동으로 선택합니다.
+특정 editor가 필요 없으면 **Preferred source format: Auto**를 유지해 종류에 맞는 형식을 사용하세요.
 
-## 다이어그램 생성 및 내보내기
+## 생성과 내보내기
 
-1. 노트를 열거나 시각화하고자 하는 텍스트를 선택하세요.
-2. Notemd 사이드바나 커맨드 팔레트에서 **Generate diagram**을 클릭하세요.
-3. **다이어그램 유형**을 선택하거나 **Auto-detect** 상태로 두세요.
-4. **소스 포맷**을 선택하거나 **Auto** 상태로 둡니다. 편집 가능한 노드와 내장된 Mermaid 시각 자료가 포함된 지식 맵을 원할 경우 **Drawnix**를 선택하세요.
-5. 미리 보기를 확인하세요. 여러 패널로 구성된 결과물의 경우, Drawnix 보드와 각 Mermaid 패널이 소스 순서대로 하나의 수직 스크롤 가능한 미리 보기 창 안에 표시됩니다. Mermaid 패널은 클립되지 않고 실제 렌더링된 높이 그대로 표시됩니다.
-6. 하나의 시각 자료를 원할 경우 각 패널에서 **Export SVG**, **Export PNG**, **Export PDF** 중 원하는 옵션을 선택하거나, 모든 패널에 대해 상위 수준의 이미지 내보내기 기능을 사용하세요. 여러 패널이 있는 경우 소스 폴더나 Vault 기반의 맞춤형 폴더를 지정할 수 있으며, Notemd는 각 패널마다 일관된 파일명으로 저장하고 특정 파일 생성에 실패해도 계속 처리를 진행합니다.
-7. 편집 가능한 원본 파일도 함께 필요할 경우 **Save source file**을 사용하세요.
+1. 지원되는 원문 노트를 엽니다. 한 구절은 별도 노트로 만드세요. 선택 영역은 파일 동작을 제한하지 않습니다.
+2. 종류 또는 **Auto-detect**를 선택합니다.
+3. 원본 형식 또는 **Auto**를 선택합니다. Drawnix는 편집 노드와 Mermaid 포함 지식 맵을 지원합니다.
+4. **다이어그램 생성**을 실행합니다.
+5. 하나의 세로 scroll shell에서 보드와 source 순서의 Mermaid 패널을 검토합니다. 패널은 실제 렌더 높이를 사용합니다.
+6. 패널별 **SVG 내보내기**, **PNG 내보내기**, **Export PDF** 또는 상단 전체 export를 선택합니다. 여러 패널은 원문 폴더/사용자 Vault 상대 폴더에 결정적 이름으로 각각 저장하며 개별 실패 후 계속합니다.
+7. 편집 원본이 필요하면 **소스 파일 저장**을 사용합니다.
 
-내보내기 메뉴에서는 현재 미리 보이는 시각 자료에 대해 **Export SVG**, **Export PNG**, **Export PDF** 기능을 제공합니다. 각 패널 헤더에서도 단일 Mermaid나 Drawnix 시각 자료에 대해 동일한 내보내기 옵션을 사용할 수 있으므로, 큰 미리 보기 결과물을 하나의 불투명한 이미지로 내보낼 필요가 없습니다.
+Export 메뉴와 패널 머리글에서 같은 세 형식을 제공합니다. **History** drawer로 미리보기를 유지한 채 검색·필터·재열기·저장 파일 열기가 가능합니다. 활성 노트 없이도 팔레트/사이드바에서 히스토리를 엽니다.
 
-미리 보기 화면에서 **History**를 선택하면 다이어그램을 숨기지 않고 Vault의 이력 목록 창을 열 수 있습니다. 완료된 다이어그램을 검색하거나 필터링하고, 미리 보기를 다시 열거나 저장된 파일을 열 수도 있습니다. 노트가 활성화되어 있지 않은 경우에도 커맨드 팔레트와 Notemd 사이드바에서 바로 다이어그램 이력을 확인할 수 있습니다.
+SVG/PDF는 벡터 기하를 사용하며 PDF는 SVG 배치/문자 치수를 재사용합니다. PNG PPI는 72–600, 기본 300이고 벡터 출력에는 영향을 주지 않습니다.
 
-SVG와 PDF는 벡터 기하학을 기반으로 생성됩니다. PDF의 경우 전체 미리 보기를 래스터화하는 대신 동일한 SVG 레이아웃과 텍스트 측정값을 사용합니다. Notemd 설정에 있는 이미지 내보내기 PPI는 PNG의 래스터화 수준만 제어하며, 기본값은 300이고 범위는 72~600 PPI입니다.
+## 밀도 높은 도표
 
-## 복잡한 다이어그램을 위한 읽기 쉬운 미리 보기
+HTML/SVG lane-grid는 요약을 먼저 측정하고 줄바꿈하여 title/header 공간을 확보합니다. 셀 후 connector/label을 그리며 직교 경로가 차지한 셀과 label 영역을 피해 텍스트가 가려지지 않게 합니다.
 
-편집 가능한 HTML/SVG lane-grid 다이어그램은 제목과 lane 헤더를 배치하기 전에 요약을 측정하고 줄바꿈합니다. 헤더는 보호된 요약 영역 아래로 이동하며, 셀은 연결선과 edge label보다 먼저 그려집니다. lane을 가로지르는 edge는 충돌을 인식하는 직교 그리드 경로를 사용하고 lane label과 점유된 셀을 위한 공간을 예약하므로, 긴 설명이 텍스트를 가리거나 사용자가 가로로 이동해야 할 필요가 없습니다.
+`quadrantChart`는 전용 정규화를 사용해 flowchart용 따옴표/shape 복구를 건너뜁니다. 점 label 끝의 대응 없는 복사 괄호만 제거하며 제목·축·분면의 의도된 괄호는 유지합니다.
 
-Mermaid quadrant chart에는 family별 정규화 단계가 적용됩니다. `quadrantChart`에서는 flowchart 전용 따옴표 및 도형 수리를 건너뛰고, 제목·축·사분면 이름에 의도적으로 넣은 대괄호는 유지합니다. provider가 복사한 여는 대괄호는 점 라벨의 일치하지 않는 마지막 문자일 때만 제거됩니다.
+[예제 집합](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples)은 영어/중국어 입력, SVG/PNG와 manifest를 보관합니다. `passed`는 기록된 실행/bundle에 대한 것이지 후속 릴리스의 모든 종류를 새로 시험한 결과가 아닙니다. 실행 목록 33개, UI locale 21개와 웹 34개는 별개입니다. 다섯 정확한 참조 문법은 독립 배치 증거 전까지 선택기에 없습니다.
 
-저장소는 실행 가능한 모든 다이어그램 유형에 대해 실제 Vault 학습 및 증거 세트를 제공합니다. 이중 언어 입력 노트, 생성된 SVG/PNG 결과, machine-readable 상태 manifest는 [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples)에서 확인할 수 있습니다. `passed` 항목은 로드된 plugin bundle을 통한 실제 실행을 뜻하며 정적 screenshot fixture가 아닙니다.
+## Mermaid를 포함한 Drawnix
 
-## Mermaid가 내장된 Drawnix 미리 보기
+렌더 SVG를 정제하고 Mermaid 원문을 `.drawnix` 메타데이터에 보관하여 Drawnix/Plait runtime 없이 표시합니다. 기본은 자체 완결형으로 `.assets`를 만들지 않습니다. **Also export complete Mermaid visuals**를 켜면 source·SVG·manifest companion을 추가합니다. 이전 `.assets`도 지원하며 없는 SVG는 보관된 source로 복구할 수 있습니다.
 
-Drawnix 파일에 Mermaid 시각 자료가 포함된 경우, Notemd는 렌더링된 SVG를 정제한 뒤 해당 Mermaid 소스 코드를 `.drawnix` 메타데이터 안에 함께 저장합니다. 따라서 Drawnix 지식 맵 내부에서도 Mermaid 이미지를 표시할 수 있으며, Drawnix나 Plait 런타임이 반드시 필요하지 않습니다. 안전하게 내장된 순수 Mermaid 시각 자료의 경우 별도의 `.assets` 디렉터리가 생성되지 않습니다. 반면 외부 바이너리 미디어나 해결되지 않은 시각 자료는 데이터 손실을 방지하기 위해 보조 파일이 함께 저장됩니다.
+가능하면 image embed에 data-backed SVG를 사용합니다. embedded data, 이전 companion, source 재생성 순으로 로드합니다. 참조 중인 기존 파일은 보존하세요. 새 자체 완결형 export는 공유된 예전 폴더가 불필요함을 증명하지 않습니다.
 
-미리 보기 화면은 의도적으로 단일 스크롤 가능한 영역으로 구성됩니다. 먼저 주요 Drawnix 캔버스가 표시되고, 그 다음 소스 순서대로 각 내장된 Mermaid 패널이 차례로 나타납니다. 저장된 이력 항목을 닫았다가 다시 열면 동일한 패널 목록, 크기 및 내보내기 옵션이 그대로 복원됩니다.
+하나의 scroll surface에서 보드 다음 Mermaid 패널을 원본 순으로 배치하며 히스토리 재열기도 같은 목록·치수·동작을 복원합니다. 제목·요약·관계 label 공간을 예약하고 지원되는 읽기 쉬운 배치가 불가능하면 형식 오류를 보고합니다. 가지 간 화살표는 정적 관계로 저장되며 Drawnix 재배치 후 부착은 지원 증거가 없습니다. 실제 editor에서 확인하세요.
 
-## 회로도
+## 네이티브 export 경계
 
-지원되는 회로 관련 요청의 경우 **Circuit diagram**을 선택하고 **CircuitikZ source file**을 사용하세요. Notemd는 먼저 구조화된 회로 설명을 생성한 다음 CircuitikZ 소스 코드를 작성합니다. 이 방식은 모델에게 제한 없이 LaTeX 코드를 작성하도록 요청하는 것보다 훨씬 안정적입니다.
+원본과 시각 export는 별도 결과입니다. 배포 전 대상 앱에서 표본을 시험하세요. PowerPoint는 지원되는 편집 표 구조와 병합 아래 교정 구분선을 보존하지만 Mermaid/SVG는 이미지일 수 있습니다. preview나 전체 페이지 screenshot 점수는 native 검증을 대신하지 않습니다.
 
-현재의 CircuitikZ 지원 기능은 의도적으로 제한된 수준으로 제공됩니다. 일반적인 소스 구조를 가진 NMOS 증폭기와 지원되는 CMOS 구성 요소들이 가장 잘 작동합니다. 기술 문서나 출판물에 생성된 회로도를 사용하기 전에 반드시 미리 보기와 소스 코드를 꼼꼼히 확인해 주세요.
+## 회로
 
-SVG 형태의 미리 보기는 Notemd가 자동으로 생성하는 검토용 보조 파일입니다. 이 파일은 로컬에 설치된 LaTeX나 TikZJax 환경에서 `.tex` 파일을 성공적으로 컴파일했다는 증거가 아닙니다.
+**Circuit diagram**과 **CircuitikZ source file**을 고르면 구조 설명부터 만든 뒤 source로 출력합니다. 무제한 LaTeX 요청보다 범위가 분명합니다. 지원은 제한적이며 common-source NMOS와 지원 CMOS 블록을 중심으로 합니다. 기술/출판용 사용 전 source와 preview를 검토하세요.
 
-**선택 사항인 네이티브 컴파일 기능.** 플러그인 내 미리 보기나 SVG, PNG, 미리 보기용 PDF를 생성할 때 LaTeX가 반드시 필요한 것은 아닙니다. 데스크톱 환경에서는 컴파일 관련 진단 정보나 네이티브 LaTeX PDF를 원할 경우 다이어그램 설정이나 커맨드 팔레트를 통해 **CircuitikZ native compile environment**을 열 수 있습니다. Notemd는 시스템에 설치된 `tectonic` 또는 `pdflatex` 도구를 재사용하거나, 사용자가 직접 지정한 실행 파일을 사용할 수도 있으며, **Install** 옵션을 선택하면 관리형 Tectonic 런타임이 자동으로 설치됩니다. 환경 설정 패널에서는 처리 진행 상황과 오류가 실시간으로 표시되며, 필요에 따라 나중에 관리형 런타임을 제거할 수도 있습니다.
+SVG는 검토 보조물이며 로컬 LaTeX/TikZJax 컴파일 성공의 증거가 아닙니다. preview·SVG·PNG·preview PDF에는 LaTeX가 필요 없습니다. desktop에서 native PDF/진단이 필요하면 **CircuitikZ native compile environment**를 엽니다. 시스템 `tectonic`/`pdflatex`, 사용자 실행 파일 또는 명시적 **Install** 후 고정된 관리형 Tectonic을 사용합니다. 패널에 진행/오류와 관리형 제거 기능이 있습니다.
 
 ## 문제 해결
 
-### 결과물의 다이어그램 유형이 잘못된 경우
+### 도표 종류가 틀림
 
-Auto-detect 기능 대신 명시적으로 원하는 다이어그램 유형을 선택하세요. 회로도의 경우 **Circuit diagram**을 선택하고, 구버전의 **Summarise as Mermaid diagram** 명령 대신 **Generate diagram** 명령을 사용해 주세요.
+자동 감지 대신 종류를 정하세요. 회로에는 **Circuit diagram**과 **다이어그램 생성**을 사용하며 예전 **Mermaid 다이어그램으로 요약**과 구분합니다.
 
-### 소스 포맷이 적합하지 않은 경우
+### 원본 형식이 부적합
 
-소스 포맷을 다시 **Auto** 상태로 설정하거나, 해당 다이어그램 유형에 맞는 포맷을 선택하세요. CircuitikZ는 회로도용으로만 사용되며, Draw.io와 Drawnix는 지원되는 구조화된 다이어그램용으로 설계되었습니다.
+**Auto**로 돌아가거나 종류에 맞는 형식을 고르세요. CircuitikZ는 회로, Draw.io/Drawnix는 지원 구조에 사용합니다.
 
-### 내보내기 메뉴가 보이지 않는 경우
+### Export 메뉴가 없음
 
-SVG, PNG, PDF를 내보내려면 미리 보이는 시각 자료가 반드시 필요합니다. 소스 텍스트만 있는 경우에는 소스 파일을 저장한 뒤 해당 파일을 외부 도구에서 열어 주세요.
+시각 preview가 있어야 SVG/PNG/PDF가 가능합니다. 텍스트만 있으면 source를 저장하고 맞는 외부 도구로 엽니다.
 
-### CircuitikZ 파일이 외부에서 컴파일되지 않는 경우
+### CircuitikZ 컴파일 실패
 
-**CircuitikZ native compile environment**을 열고 환경 검사를 실행해 보세요. 관리형 런타임에 문제가 있는지 확인하거나, 사용자가 직접 설치한/시스템에 설치된 컴파일러가 `circuitikz` 패키지를 정상적으로 가져올 수 있는지 점검해 주세요. Notemd는 플러그인 파일 내부에 완전한 TeX 배포판을 포함하고 있지 않습니다.
+환경 panel에서 검사하고 관리형 runtime을 복구하거나 시스템/사용자 compiler가 `circuitikz`를 가져올 수 있는지 확인하세요. 플러그인은 전체 TeX 배포판을 내장하지 않습니다.

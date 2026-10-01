@@ -1,0 +1,107 @@
+---
+id: overview
+title: 開発者ガイド
+description: 既存のプロバイダー、operation、描画、文書の契約に従って Notemd をビルド・検証・拡張します。
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - 開発者ガイド
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 開発者ガイド
+
+<TLDR>
+機能ブランチで固定された依存関係と二つのブラウザー版を導入し、ビルドと全 Jest を実行します。変更する契約の既存所有モジュールを拡張し、文書、モデルテスト、ネイティブアプリの証拠を揃えます。
+</TLDR>
+
+## 作業用チェックアウト
+
+[リポジトリ](https://github.com/Jacobinwwey/obsidian-NotEMD)を clone し、[AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) を読み、機能ブランチを作ります。プラグイン CI は Linux／Windows の Node 20、サイト検証は Node 24。ルートと `website/` には別々に依存を入れます。
+
+ルートから：
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+二つの Playwright パッケージは異なる Chromium を固定し得るため、片方だけではクリーン環境の検証に不足します。`main.js` は生成・gitignore 対象で、古いファイルは新コミットの証拠になりません。
+
+## 変更前に所有箇所を確認
+
+| 責務 | 主なソース |
+| ---------------- | ---------------- |
+| ライフサイクル、コマンド、ホストへの振り分け | `src/main.ts` |
+| モデルのプリセット、プロトコル、検証 | `src/llmProviders.ts` |
+| リクエスト、通信、再試行、ストリーム | `src/llmUtils.ts` |
+| operation、schema、公開 CLI 選択 | `src/operations/`, `src/cliContracts.ts` |
+| ファイル、調査、翻訳のタスク | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| ワークフローとサイドバー | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| 図仕様と描画 | `src/diagram/`, `src/rendering/` |
+| UI 文字列と対応ロケール | `src/i18n/` |
+| 公開ガイドと翻訳 | `website/docs/`, `website/i18n/` |
+| 保守手順と日時付き証拠 | `docs/maintainer/` |
+
+本番 bundle はプレビュー用ホストも含む自己完結型です。独立 render-host 案は出荷契約ではありません。有効化するならパッケージ、資産、監査、文書を同時に更新します。
+
+## 範囲を限定して実装
+
+1. 行動変更前に再現し、失敗する焦点を絞ったテストを追加。
+2. 不変条件を所有するモジュールで修正し、外部入力は境界で検証。呼び出し側に契約知識を複製しない。
+3. 対象テストから全体へ進み、書き込みではキャンセル、失敗、保存を確認。
+4. 英語ガイドと影響ロケールを更新。計画、タスク、walkthrough は `docs/` に独立した完全な英中版を置く。
+5. 視覚／ネイティブ出力は実アプリで検証。XML、画像、ビルド成功だけで編集性や線の接続を証明しない。
+
+新プロバイダーは `llmProviders.ts` に登録し、互換なら既存通信を使います。`llmProviders.test.ts`、`llmUtilsProviderSupport.test.ts`、README、接続テストを更新し、ストリームと中断時診断を維持します。
+
+operation の公開前に入力／結果 schema、文脈、副作用、handling tag を定義します。登録だけで公開 Agent API になるわけではありません。[Agent ガイド](../agents/overview)を参照してください。
+
+## 変更を検証
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint は個々の診断を基準と比較します。既存負債や合計減少で新しい回帰を正当化しません。検索変更時は `npm run benchmark:local-kb` を用い、コーパスと環境を明記します。
+
+サイトは Node 24：
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+1.9.8 文書の翻訳は Codex が直接執筆・確認します。旧翻訳書き込みスクリプト、LM Studio、翻訳 API は使用しません。ツールは執筆済みテキストの整形、検査、描画に使えます。
+
+## Obsidian とネイティブアプリで確認
+
+破棄可能な Vault を使います。検証スクリプトは `.notemd-host-verification` マーカーとコピーした bundle を確認します。利用中の Vault と分離し、CLI 確認では `obsidian help` と `obsidian-cli help` を試します。ツール不在を記録し、スタブを実ホスト検証に数えません。
+
+PowerPoint、CircuitikZ、スライド出力には固有の前提と証拠があります。[信頼性の検証記録](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md)と[リリース手順](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md)に従い、モバイル／最低版の未検証を維持します。
+
+## 貢献とリリース
+
+PR に問題、変更後動作、テスト、制限を書き、[Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) に再現可能な報告を出します。認証情報、非公開 Vault、無関係な生成物を commit しません。
+
+公開はリポジトリの publisher と手順書が所有します。版数、数値 tag、クリーンなソース、英中ノート、検証済み下書き資産を揃え、公開後に明示的に Pages を配信します。公開 tag を動かして差し替えないでください。`.trellis/` はローカル状態で、CI 依存にしません。
+
+## 次に読む
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)：実行とレビュー。
+- [計画の状態](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md)：進捗と証拠。
+- [Agent ガイド](../agents/overview)：機能／呼び出し契約。
+- [1.9.8](../releases/1.9.8)：利用者への影響と更新。

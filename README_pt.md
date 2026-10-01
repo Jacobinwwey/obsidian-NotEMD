@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Plugin Notemd para Obsidian
 
+> O Notemd é um plugin Obsidian com licença MIT para Markdown com links, notas de conceitos, resumos, traduções e diagramas. Os arquivos permanecem no cofre; tarefas na nuvem enviam conteúdo ao provedor escolhido e a pesquisa web utiliza a rede.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Comece aqui
+
+| Leitor | Entrada | Objetivo |
+|---|---|---|
+| Iniciante | [Início rápido](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/getting-started/quick-start) | Configurar um provedor e verificar uma nota |
+| Usuário | [Fluxos de trabalho](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/features/workflows) | Controlar pastas, resultados e recuperação |
+| Desenvolvedor | [Guia de desenvolvimento](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/developers/overview) | Compilar, testar e ampliar os contratos existentes |
+| Agente | [Guia de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/agents/overview) | Encontrar os quatro comandos de exportação suportados |
+
+**Versão:** 1.9.8
+
+- **Cancelamento e recuperação:** o cancelamento permanece ativo no agendamento e nas tentativas, bloqueando gravações tardias de pesquisa e tradução. Resultados concluídos são preservados e conflitos de recuperação são informados.
+- **Histórico e exportação nativa:** a pesquisa mantém o texto e o foco do teclado. Corrigidos separadores de células mescladas PowerPoint e conexões/rótulos CircuitikZ. A consulta local em lote usa um retrato consistente.
+- **Publicação e documentação:** verifica a origem do código limpo e os arquivos baixados, com entradas por público e traduções redigidas diretamente.
+
+Os 36 presets de provedores e 33 tipos executáveis de diagramas já existiam em 1.9.7. [Guia de atualização](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/releases/1.9.8) · [Verificar o lançamento público](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Setas Drawnix entre ramos continuam estáticas após reorganização. Mermaid/SVG em PPTX pode usar uma imagem de reserva. Cancelar não desfaz alterações salvas nem garante interromper geração ou cobrança remota. Dispositivos móveis físicos e Obsidian 0.15.0 continuam sem verificação.
 
 Leia a documentação em outros idiomas: [Centro de Idiomas](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- Melhoria do Conhecimento Multilíngue com IA
-==================================================
-```
-
-Uma maneira fácil de criar sua própria base de conhecimento!
-
-O Notemd aprimora seu fluxo de trabalho no Obsidian integrando-se a vários Modelos de Linguagem de Grande Porte (LLM) para processar suas notas multilíngues, gerar automaticamente links wiki para conceitos-chave, criar notas de conceitos correspondentes, realizar pesquisas na web e ajudá-lo a construir grafos de conhecimento poderosos.
-
 Se adora usar o Notemd, por favor considere [⭐ dar uma estrela no GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) ou [☕️ comprar-me um café](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Índice
 
@@ -50,13 +50,26 @@ Se adora usar o Notemd, por favor considere [⭐ dar uma estrela no GitHub](http
 
 ## Início Rápido
 
-1.  **Instalar e Ativar**: Obtenha o plugin na loja da comunidade do Obsidian.
-2.  **Configurar LLM**: Vá em `Configurações -> Notemd`, selecione seu provedor de LLM (como OpenAI ou um local como Ollama) e insira sua chave API/URL.
-3.  **Abrir Barra Lateral**: Clique no ícone da varinha mágica do Notemd na barra lateral esquerda para abrir a visualização.
-4.  **Processar uma Nota**: Abra qualquer nota e clique em **"Processar arquivo (Adicionar links)"** na barra lateral para adicionar automaticamente `[[wiki-links]]` aos conceitos-chave.
-5.  **Executar Fluxo de Trabalho Rápido**: Use o botão padrão **"One-Click Extract"** para encadear processamento, geração em lote e limpeza Mermaid a partir de um único ponto de entrada.
+1. Instale e ative **Notemd** em **Configurações → Plugins da comunidade → Explorar**.
+2. Configure o endpoint, as credenciais e o modelo exatos. Teste a conexão e depois uma geração real; obter a lista de modelos não comprova acesso ao chat.
+3. Crie a pasta vazia `trial-concepts` e selecione-a para notas de conceitos; o caminho inicial está vazio. Prepare `Notemd trial.md` com um parágrafo de teste que possa enviar ao provedor.
+4. Execute **Processar arquivo (Adicionar links)**. Confira `Notemd trial_processed.md` ao lado da fonte preservada, seus links e as notas de conceitos.
+5. Reabra a nota fonte de teste e execute **One-Click Extract** com essa pasta: adicionar links, gerar conteúdo pelos títulos das notas elegíveis e corrigir Mermaid na pasta complete. Notas elegíveis já existentes podem ser incluídas.
 
-Isso é tudo! Explore as configurações para desbloquear mais recursos como pesquisa na web, tradução e geração de conteúdo.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Pesquisa web e geração de diagramas são ações separadas. Após cancelar, aguarde as tarefas ativas terminarem e confira resultados concluídos e arquivos de recuperação antes de repetir.
+
+<details>
+<summary>Exemplos da interface</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Suporte a Idiomas
 
@@ -89,9 +102,9 @@ Isso é tudo! Explore as configurações para desbloquear mais recursos como pes
 - **Reforço da Cadeia de Solicitação Longa Estável compatível com OpenAI**: No modo estável, chamadas compatíveis com OpenAI agora usam uma ordem explícita de 3 estágios para cada tentativa: transporte de streaming direto primário, depois transporte direto não-streaming, seguido por reserva `requestUrl` (que ainda pode ser atualizada para parsing em streaming quando necessário). Isso reduz falsos negativos onde provedores completam respostas em buffer mas os canais de streaming são instáveis.
 - **Reserva de Streaming Sensível ao Protocolo em todas as APIs de LLM**: Tentativas de reserva de longa duração agora são atualizadas para um parsing em streaming sensível ao protocolo em cada caminho de LLM integrado, não apenas nos endpoints compatíveis com OpenAI. O Notemd agora lida com SSE estilo OpenAI/Azure, streaming de mensagens Anthropic, respostas SSE Google Gemini e streams NDJSON Ollama tanto em desktop `http/https` quanto em `fetch` não-desktop, e os pontos de entrada diretos restantes estilo OpenAI reutilizam o mesmo caminho de reserva compartilhado.
 - **Presets Prontos para a China**: Os presets integrados agora cobrem `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` e `SiliconFlow`, além dos provedores globais e locais existentes.
-- **Processamento em Lote Confiável**: Lógica de processamento simultâneo aprimorada com **chamadas de API escalonadas** para evitar erros de limite de taxa e garantir desempenho estável durante grandes trabalhos em lote. A nova implementação garante que as tarefas sejam iniciadas em intervalos diferentes em vez de todas ao mesmo tempo.
-- **Relatórios de Progresso Precisos**: Corrigido um erro onde a barra de progresso podia travar, garantindo que a interface do usuário sempre reflita o status real da operação.
-- **Processamento em Lote Paralelo Robusto**: Resolvido um problema onde as operações em lote paralelas paravam prematuramente, garantindo que todos os arquivos sejam processados de forma confiável e eficiente.
+- **Processamento em Lote Confiável**: As chamadas API escalonadas reduzem picos de solicitações; as cotas e os limites do provedor continuam válidos.
+- **Relatórios de Progresso Precisos**: O acompanhamento distingue arquivos concluídos, com falha e cancelados. Encerrar a operação não significa que todos tiveram sucesso.
+- **Processamento em Lote Paralelo Robusto**: As tarefas ativas terminam antes do resumo final. Cancelar interrompe o trabalho seguinte, mas não desfaz alterações salvas; a pasta não forma uma única transação.
 - **Precisão da Barra de Progresso**: Corrigido um erro onde a barra de progresso para o comando "Criar link Wiki e Gerar nota" ficava travada em 95%, garantindo que agora mostre 100% corretamente na conclusão.
 - **Depuração de API Aprimorada**: O "Modo de Depuração de Erros de API" agora captura corpos de resposta completos de provedores de LLM e serviços de pesquisa (Tavily/DuckDuckGo) e também registra uma linha do tempo de transporte por tentativa com URLs de solicitação saneadas, duração decorrida, cabeçalhos de resposta, corpos de resposta parciais, conteúdo de stream parcial analisado e rastreamentos de pilha para melhor solução de problemas em reservas OpenAI, Anthropic, Google, Azure OpenAI e Ollama.
 - **Painel do Modo Desenvolvedor**: As configurações agora incluem um painel de diagnóstico dedicado apenas para desenvolvedores que permanece oculto, a menos que o "Modo desenvolvedor" seja ativado. Suporta a seleção de caminhos de chamada de diagnóstico e a execução de sondas de estabilidade repetidas para o modo selecionado.
@@ -106,7 +119,7 @@ Isso é tudo! Explore as configurações para desbloquear mais recursos como pes
 - **Criação de Notas de Conceito (Opcional e Personalizável)**: Cria automaticamente novas notas para os conceitos descobertos em uma pasta específica do vault.
 - **Percursos de Saída Personalizáveis**: Configure percursos relativos separados dentro do seu vault para salvar arquivos processados e notas de conceito recém-criadas.
 - **Nomes de Arquivos de Saída Personalizáveis (Adicionar Links)**: Sobrescreva opcionalmente o **arquivo original** ou use um sufixo/string de substituição personalizado em vez do padrão `_processed.md` ao processar arquivos para links.
-- **Manutenção da Integridade dos Links**: Manuseio básico para atualizar links quando notas são renomeadas ou excluídas dentro do vault.
+- **Manutenção da Integridade dos Links**: A atualização dos links ao renomear depende do Obsidian e de suas configurações. Excluir notas pode deixar links não resolvidos; verifique notas com nomes iguais.
 - **Extração de Conceito Pura**: Extrai conceitos e cria as notas de conceito correspondentes sem modificar o documento original. Ideal para popular uma base de conhecimento a partir de documentos existentes sem alterá-los. Este recurso possui opções configuráveis para criar notas de conceito mínimas e adicionar backlinks.
 
 
@@ -117,10 +130,10 @@ Isso é tudo! Explore as configurações para desbloquear mais recursos como pes
     - **Suporte a Arquivos Grandes**: Divide automaticamente arquivos grandes em pedaços menores baseando-se na configuração de `Contagem de palavras por pedaço` antes de enviá-los ao LLM. Os pedaços traduzidos são então combinados perfeitamente em um único documento.
     - Suporta tradução entre vários idiomas.
     - Idioma de destino personalizável nas configurações ou na interface do usuário.
-    - Abre automaticamente o texto traduzido à direita do texto original para facilitar a leitura.
+    - Abre a tradução salva no espaço de trabalho do Obsidian, conforme a disposição disponível.
 - **Tradução em Lote**:
-    - Traduz todos os arquivos dentro de uma pasta selecionada.
-    - Suporta processamento paralelo quando o "Parallelismo em Lote" está ativado.
+    - Por padrão, traduz os arquivos elegíveis diretamente na pasta selecionada, sem subpastas. A seleção avançada pode mudar o escopo; destinos existentes podem ser sobrescritos.
+    - A tradução usa `batchConcurrency` diretamente (padrão: 1), independentemente de `enableBatchParallelism`.
     - Usa prompts personalizados para tradução, se configurado.
 	- Adiciona uma opção "Traduzir esta pasta em lote" ao menu de contexto do explorador de arquivos.
 - **Desativar tradução automática**: Quando ativado, tarefas que não são de tradução não forçarão mais as saídas para um idioma específico, preservando o contexto do idioma original. A tarefa explícita "Traduzir" ainda executará a tradução conforme configurado.
@@ -137,7 +150,7 @@ Isso é tudo! Explore as configurações para desbloquear mais recursos como pes
 - **Geração de Conteúdo a partir do Título**:
     - Use o título da nota para gerar conteúdo inicial via LLM, substituindo o conteúdo existente.
     - **Pesquisa Opcional**: Configure se deseja realizar uma pesquisa na web (usando o provedor selecionado) para fornecer contexto para a geração.
-- **Geração de Conteúdo em Lote a partir de Títulos**: Gera conteúdo para todas as notas dentro de uma pasta selecionada baseando-se em seus títulos (respeita a configuração de pesquisa opcional). Arquivos processados com sucesso são movidos para uma **subpasta "concluída" configurável** (ex: `[nome_da_pasta]_complete` ou um nome personalizado) para evitar o reprocessamento.
+- **Geração de Conteúdo em Lote a partir de Títulos**: Gera e substitui o conteúdo dos `.md` elegíveis, excluindo `_processed.md` e a árvore da pasta complete designada, respeitando a configuração de pesquisa. Após gerar, tenta mover o arquivo para a pasta complete. Um destino ocupado impede a movimentação, mas não a geração já salva; arquivos gerados e movidos são contados separadamente.
 - **Acoplamento de Correção Automática Mermaid**: Quando o Mermaid Auto-Fix está ativado, fluxos de trabalho relacionados ao Mermaid agora reparam automaticamente arquivos gerados ou pastas de saída após o processamento. Isso cobre os fluxos de Processar, Gerar a partir do título, Geração em lote a partir de títulos, Pesquisa e Resumo, Resumir como Mermaid e Traduzir.
 
 
@@ -294,8 +307,8 @@ Acesse as configurações do plugin através de:
 
 #### Saída de Notas de Conceito
 -   **Personalizar Caminho de Notas de Conceito**:
-    *   **Desactivado (Padrão)**: A criação automática de notas para `[[conceitos vinculados]]` está desativada.
-    *   **Ativado**: Permite especificar uma pasta onde as novas notas de conceito serão criadas.
+    *   **Desativado**: Não cria automaticamente notas para conceitos vinculados.
+    *   **Ativado por padrão**: O caminho começa vazio. Antes de criar notas de conceitos, informe um caminho válido relativo ao cofre.
 -   **Caminho da Pasta de Notas de Conceito**: (Visível apenas se ativado acima) Insira um *caminho relativo* dentro do seu vault (ex: `Conceitos` ou `Gerado/Topicos`) onde as novas notas de conceito devem ser salvas. As pastas serão criadas se não existirem. **Deve ser preenchido se a personalização estiver ativada.** **Não use caminhos absolutos ou caracteres inválidos.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -342,8 +355,8 @@ Acesse as configurações do plugin através de:
 
 #### Correção Mermaid em Lote
 -   **Ativar Detecção de Erros Mermaid**:
-    *   **Desativado (Padrão)**: A detecção de erros é ignorada após o processamento.
-    *   **Ativado**: Verifica arquivos processados em busca de erros de sintaxe Mermaid remanescentes e gera um relatório `mermaid_error_{nome_da_pasta}.md`.
+    *   **Desativado**: Ignora a detecção de erros após o processamento.
+    *   **Ativado por padrão**: Procura erros Mermaid restantes e gera `mermaid_error_{foldername}.md`.
 -   **Mover arquivos com erros Mermaid para a pasta especificada**:
     *   **Desativado**: Arquivos com erros permanecem no lugar.
     *   **Ativado**: Move qualquer arquivo que ainda contenha erros de sintaxe Mermaid após a tentativa de correção para uma pasta dedicada para revisão manual.
@@ -359,7 +372,7 @@ Acesse as configurações do plugin através de:
 -   **Intervalo de Chamada de API (ms)**: Atraso mínimo em milissegundos *antes e depois* de cada chamada de API de LLM individual. Crucial para APIs de baixa taxa ou para evitar erros 429. Defina como 0 para nenhum atraso artificial. (Padrão: 500ms)
 -   **Contagem de Palavras por Pedaço**: Máximo de palavras por pedaço enviado ao LLM. Afeta o número de chamadas de API para arquivos grandes. (Padrão: 3000)
 -   **Ativar Detecção de Duplicatas**: Alterna a verificação básica de palavras duplicadas dentro do conteúdo processado (resultados no console). (Padrão: Ativado)
--   **Máximo de Tokens**: Máximo de tokens que o LLM deve gerar por pedaço de resposta. Afeta o custo e o detalhamento. (Padrão: 4096)
+-   **Máximo de Tokens**: Máximo de tokens que o LLM deve gerar por pedaço de resposta. Afeta o custo e o detalhamento. (Padrão: 8192) Um limite de saída específico do provedor pode substituir esse valor; também existem padrões ajustados ao modelo.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets%2F74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Tradução
@@ -387,7 +400,7 @@ Acesse as configurações do plugin através de:
     *   **Alterar Palavra do Prompt**: Permite alterar a palavra do prompt para uma tarefa específica.
     *   **Palavra do Prompt Personalizada**: Insira sua palavra de prompt personalizada para a tarefa.
 -   **Usar Pasta de Saída Personalizada para 'Gerar a partir do Título'**:
-    *   **Desactivado (Padrão)**: Arquivos gerados com sucesso são movidos para uma subpasta chamada `[NomeDaPastaOriginal]_complete` relativa ao pai da pasta original (ou `Vault_complete` se a pasta original for a raiz).
+    *   **Desactivado (Padrão)**: O destino é a pasta irmã `[foldername]_complete`, ou `Vault_complete` para a raiz do cofre. Ao ativar a opção, é possível definir outro nome.
     *   **Ativado**: Permite especificar um nome personalizado para a subpasta onde os arquivos concluídos são movidos.
 -   **Nome da Pasta de Saída Personalizada**: (Visível apenas se ativado acima) Insira o nome desejado para a subpasta (ex: `Conteudo Gerado`, `_complete`). Caracteres inválidos não são permitidos. O padrão é `_complete` se deixado vazio. Esta pasta é criada em relação ao diretório pai da pasta original.
 
@@ -492,11 +505,11 @@ Esta é a funcionalidade principal focada em identificar conceitos e adicionar `
     *   Execute o comando `Notemd: Translate Note/Selection` (via paleta de comandos ou botão da barra lateral).
     *   Um modal aparecerá permitindo que você confirme ou altere o **Idioma de Destino** (padrão conforme a configuração especificada).
     *   O plugin usa o **Provedor de LLM** configurado (baseado nas configurações Multi-Modelo) para realizar a tradução.
-    *   O conteúdo traduzido é salvo no **Caminho de Salvamento de Traduções** configurado com o sufixo apropriado e aberto em um **novo painel à direita** do conteúdo original para facilitar a comparação.
+    *   Salva a tradução no caminho configurado com o sufixo definido e abre o arquivo salvo no espaço de trabalho do Obsidian.
     *   Você pode cancelar esta tarefa através do botão da barra lateral ou do botão de cancelamento do modal.
 3.  **Tradução em Lote**:
     *   Execute o comando `Notemd: Batch Translate Folder` na paleta de comandos e selecione uma pasta, ou clique com o botão direito em uma pasta no explorador de arquivos e escolha "Traduzir esta pasta em lote".
-    *   O plugin traduzirá todos os arquivos Markdown na pasta selecionada.
+    *   Por padrão, traduz os arquivos elegíveis diretamente na pasta selecionada, sem subpastas. A seleção avançada pode mudar o escopo; destinos existentes podem ser sobrescritos.
     *   Os arquivos traduzidos são salvos no caminho de tradução configurado, mas não são abertos automaticamente.
     *   Este processo pode ser cancelado através do modal de progresso.
 
@@ -523,7 +536,7 @@ Esta é a funcionalidade principal focada em identificar conceitos e adicionar `
     *   Execute o comando `Notemd: Batch Generate Content from Titles` (via paleta de comandos ou botão da barra lateral).
     *   Selecione a pasta que contém as notas que deseja processar.
     *   O plugin iterará por cada arquivo `.md` na pasta (excluindo os arquivos `_processed.md` e arquivos na pasta "complete" designada), gerando conteúdo baseado no título da nota e substituindo o conteúdo existente. Os arquivos são processados em segundo plano sem serem abertos no editor.
-    *   Arquivos processados com sucesso são movidos para a pasta "complete" configurada.
+    *   Após gerar, tenta mover o arquivo para a pasta complete. Um destino ocupado impede a movimentação, mas não a geração já salva; arquivos gerados e movidos são contados separadamente.
     *   Este comando respeita a configuração **"Ativar Pesquisa em 'Gerar a partir do Título'"** para cada nota processada.
     *   Você pode cancelar esta tarefa através do botão da barra lateral ou do botão de cancelamento do modal.
     *   O progresso e os resultados (número de arquivos modificados, erros) são mostrados na barra lateral/log do modal.
@@ -575,6 +588,8 @@ Esta é a funcionalidade principal focada em identificar conceitos e adicionar `
     *   Opcionalmente, configure o plugin para mover esses arquivos problemáticos para uma pasta separada para revisão.
 
 ## Provedores de LLM Suportados
+
+A tabela mostra exemplos selecionados. Consulte o [guia dos 36 provedores](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/providers/overview) para os presets e seus requisitos.
 
 | Provedor           | Tipo    | Chave API Necessária   | Notas                                                                 |
 |--------------------|---------|------------------------|-----------------------------------------------------------------------|
@@ -644,7 +659,7 @@ O Notemd é executado localmente dentro do Obsidian, mas alguns recursos enviam 
 ### Problemas Comuns
 -   **O plugin não carrega**: Certifique-se de que `manifest.json`, `main.js`, `styles.css` estejam na pasta correta (`<Vault>/.obsidian/plugins/notemd/`) e reinicie o Obsidian. Verifique o Console do Desenvolvedor (`Ctrl+Shift+I` ou `Cmd+Option+I`) para erros na inicialização.
 -   **Falhas de Processamento / Erros de API**:
-    1.  **Verifique o Formato do Arquivo**: Certifique-se de que o arquivo que você está tentando processar ou verificar tenha uma extensão `.md` ou `.txt`. O Notemd atualmente suporta apenas esses formatos baseados em texto.
+    1.  **Verifique o formato**: Os padrões dependem da tarefa (`.md` ou `.md`/`.txt`). O modo de desenvolvedor com entradas ampliadas aceita outros textos e PDF em algumas tarefas que preservam a fonte, como tradução e extração de conceitos. Adicionar links continua limitado a `.md`/`.txt`.
     2.  Use o comando/botão "Testar conexão de LLM" para verificar as configurações do provedor ativo.
     3.  Verifique duas vezes a Chave API, a URL Base, o Nome do Modelo e a Versão da API (para Azure). Certifique-se de que a chave API esteja correta e tenha créditos/permissões suficientes.
     4.  Certifique-se de que seu servidor de LLM local (LMStudio, Ollama) esteja em execução e a URL Base esteja correta (ex: `http://localhost:1234/v1` para o LMStudio).
@@ -705,7 +720,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.7 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.8 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 

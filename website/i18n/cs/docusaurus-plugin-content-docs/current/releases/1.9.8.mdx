@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Upgrade na Notemd 1.9.8
+description: >-
+  Projděte změny spolehlivosti, exportů a dokumentace od 1.9.7 a proveďte
+  ověřitelný upgrade.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Upgrade na Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Upgrade na Notemd 1.9.8
+
+<TLDR>1.9.8 se zaměřuje na zrušení úloh, vlastnictví výstupů, konzistentní retrieval v dávce, exporty a přesnou dokumentaci. Dostupnost ověřte ve veřejném GitHub Release a použijte soubory jedné verze. Počty poskytovatelů a diagramů popisují již existující možnosti.</TLDR>
+
+## Od verze 1.9.7
+
+| Oblast | Změna |
+| ------ | ------------- |
+| Zrušení | Společný stav plánování, transportů a opakování; pozdní odpověď nespustí chráněný zápis |
+| Odolnost souborů | Vlastnictví zdrojů stejného názvu a sdílených doprovodných souborů při překrývajícím ukládání/obnově |
+| Lokální retrieval | Jeden snímek pro dávku názvů; pevný korpus a měření paměti |
+| Export do aplikací | Opravené oddělovače PowerPointu pod sloučenými buňkami a zapojení/popisky CircuitikZ |
+| Ověření | Linux/Windows CI, lint podle jednotlivých diagnostik, procesové a aplikační doklady |
+| Dokumentace | Skutečné výchozí hodnoty, čtyři čtenářské cesty, přímo psané překlady a řízené publikování |
+
+Hledání historie zachovává plynulé psaní a kurzor během asynchronní aktualizace. Zásuvka drží Tab uvnitř, při načítání přebírá fokus a Escape ji zavře bez zavření hlavního náhledu. Opakování a zastaralé odpovědi pokrývají testy v prohlížeči.
+
+Rešerše a překlad kontrolují zrušení po posledním čtení či přípravě složky a před připojením/vytvořením/přepsáním. Zápisy přijaté trezorem zůstávají dokončené. Překlad použije složku vytvořenou mezitím jinou úlohou, aniž by si přisvojil její vytvoření. Konflikt se souborem nebo stále chybějící složka zachovají hlášenou chybu a fallback ke zdroji.
+
+36 profilů a 33 spustitelných diagramových položek existovalo již v 1.9.7. Změny kódu, dokumentace a merge commity se účtují odděleně.
+
+## Kontrolovaný upgrade
+
+1. Zastavte úlohy a zálohujte trezor/nastavení.
+2. Aktualizujte přes Community plugins nebo stáhněte `main.js`, `manifest.json`, `styles.css` ze stejné [veřejné 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Ručně nahraďte jen soubory pro běh, ponechte nastavení a výstupy.
+4. Znovu načtěte a ověřte verzi.
+5. Před velkou sadou vyzkoušejte dočasnou poznámku a malou složku.
+
+ID příkazů a nastavení se zachovávají. One-Click Extract zůstává přidáním odkazů, generováním podle názvů a opravou Mermaid. Oprava dokumentace do výchozího řetězce nepřidává rešerši.
+
+## Zrušení a obnova
+
+Zrušení není zpětná transakce. Hotové soubory zůstanou, přijaté požadavky/zápisy mohou doběhnout a účtování řídí poskytovatel. Vyčkejte a prověřte výstupy. Před úklidem porovnejte viditelné konflikty a soubory obnovy. Zachovejte doprovodné složky používané staršími artefakty.
+
+## Hranice exportu a kompatibility
+
+- PowerPoint má cílené kontroly uvnitř aplikace; dřívější celkové skóre obrázku vadu přehlédlo.
+- Mermaid/SVG v PPTX mohou být obrázky.
+- Připojení statických šipek Drawnix mezi větvemi po přesunu není ověřeno.
+- Náhled CircuitikZ a kompilace TeXu se ověřují samostatně.
+- Fyzická mobilní zařízení a Obsidian 0.15.0 zůstávají neověřeny.
+- Lexikální retrieval na pevném korpusu neprokazuje sémantické hledání ani výkon každého trezoru.
+
+## Integrita vydání
+
+Publisher ověří verzi a identitu lokálního/vzdáleného tagu, sestaví čistý zdroj na tagu, nahraje draft soubory a před zveřejněním porovná stažené hashe. Povinné jsou `main.js`, `manifest.json`, `styles.css`, `README.md`. Opakování nesmí veřejné bajty nahradit nesouvisejícím výstupem.
+
+Pages se zveřejní po ověření veřejného vydání. Codex píše a kontroluje překlady přímo, bez LM Studio či překladového enginu. Nejde o tvrzení o nezávislé kontrole rodilým mluvčím.
+
+## Dále
+
+- [Vydání s anglickými/čínskými poznámkami](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Rychlý start](../getting-started/quick-start).
+- [Dávky](../advanced/batch-processing).
+- [Vývojáři](../developers/overview), [Agent](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) s verzemi a očištěnými doklady.

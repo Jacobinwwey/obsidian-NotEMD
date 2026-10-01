@@ -1,0 +1,71 @@
+---
+id: 1.9.8
+title: Aktualizacja do Notemd 1.9.8
+description: 'Poznaj zmiany od 1.9.7 w niezawodności, natywnym eksporcie i dokumentacji.'
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Aktualizacja do Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Aktualizacja do Notemd 1.9.8
+
+<TLDR>1.9.8 skupia się na anulowaniu, własności wyników, spójnym pobieraniu wsadowym, natywnym eksporcie i poprawnej dokumentacji. Sprawdź publiczne wydanie GitHub i pobierz pliki jednego wydania. Liczby dostawców/diagramów opisują wcześniejsze możliwości.</TLDR>
+
+## Od wersji 1.9.7
+
+| Obszar | Wpływ |
+| ------ | ------------- |
+| Anulowanie | Wspólny stan planowania, transportów i ponowień; późna odpowiedź nie rozpoczyna chronionego zapisu |
+| Trwałość artefaktów | Własność źródeł o tej samej nazwie i wspólnych załączników przy nakładającym się zapisie/odzyskiwaniu |
+| Lokalne pobieranie | Jedna migawka partii tytułów; stały korpus i pomiary pamięci |
+| Natywny wynik | Poprawione separatory pod scalonymi komórkami PowerPoint oraz przewody/etykiety CircuitikZ |
+| Weryfikacja | Linux/Windows CI, lint pojedynczych diagnoz, testy procesów i dowody natywne |
+| Dokumentacja | Rzeczywiste wartości domyślne, cztery wejścia, bezpośrednie tłumaczenia i kontrolowana publikacja |
+
+Wyszukiwanie historii zachowuje ciągłe wpisywanie i kursor przy asynchronicznym odświeżaniu. Szuflada zatrzymuje Tab wewnątrz, otrzymuje fokus podczas ładowania, a Escape zamyka ją bez zamknięcia podglądu nadrzędnego. Ponowienia i stare odpowiedzi obejmują regresje przeglądarkowe.
+
+Badanie/tłumaczenie sprawdza anulowanie po końcowym odczycie lub przygotowaniu folderu, przed dopisaniem/utworzeniem/nadpisaniem. Zapisy przyjęte przez skarbiec nadal liczą się jako ukończone. Folder tłumaczeń utworzony w międzyczasie przez inne zadanie jest ponownie używany bez przypisywania sobie jego utworzenia. Konflikt z plikiem lub nadal brakujący katalog zachowuje zgłoszony błąd i powrót do folderu źródła.
+
+36 profili i 33 wykonywalne pozycje diagramów były już w 1.9.7. Kod wykonawczy, dokumentacja i merge commity są rozliczane osobno.
+
+## Kontrolowana aktualizacja
+
+1. Zatrzymaj zadania i skopiuj skarbiec/ustawienia.
+2. Zaktualizuj przez Community plugins albo pobierz `main.js`, `manifest.json`, `styles.css` z tego samego [publicznego 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Ręcznie wymień tylko pliki wykonawcze; zachowaj ustawienia i wyniki.
+4. Przeładuj i sprawdź wersję.
+5. Przetestuj jednorazową notatkę i mały folder przed dużą partią.
+
+ID poleceń i ustawienia pozostają. One-Click Extract nadal wykonuje linki, partię tytułów i naprawę Mermaid. Korekta dokumentacji nie dopisuje badania do domyślnego łańcucha.
+
+## Anulowanie i odzyskiwanie
+
+Anulowanie nie jest transakcją odwracającą. Gotowe pliki pozostają, przyjęte żądania/zapisy mogą się zakończyć, a dostawca zarządza rozliczeniem. Poczekaj i sprawdź wyniki. Porównaj widoczne konflikty i pliki odzyskiwania przed sprzątaniem. Zachowaj foldery towarzyszące używane przez starsze artefakty.
+
+## Granice eksportu i zgodności
+
+- PowerPoint ma celowane asercje natywne; wcześniejsza miara całego slajdu nie wykryła usterki.
+- Mermaid/SVG w PPTX może być obrazem.
+- Statyczne strzałki Drawnix między gałęziami nie mają potwierdzonego zaczepienia po zmianie układu.
+- Podgląd CircuitikZ i kompilacja TeX to osobne testy.
+- Fizyczne urządzenia mobilne i Obsidian 0.15.0 pozostają niezweryfikowane.
+- Stały korpus leksykalny nie dowodzi wyszukiwania semantycznego ani wydajności dowolnego skarbca.
+
+## Integralność wydania
+
+Skrypt publikujący sprawdza wersję i tożsamość lokalnego/zdalnego tagu, buduje czyste otagowane źródło, przesyła zasoby draftu i porównuje pobrane hashe przed publikacją. Wymagane są `main.js`, `manifest.json`, `styles.css`, `README.md`. Ponowienie nie może zastąpić publicznych bajtów niepowiązanymi wynikami.
+
+Pages wdraża się po weryfikacji publicznego wydania. Codex pisze i przegląda bezpośrednio bez LM Studio lub silnika tłumaczeń. Nie oznacza to niezależnej korekty przez rodzimego użytkownika danego języka.
+
+## Dalej
+
+- [Wydanie z informacjami angielskimi/chińskimi](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Szybki start](../getting-started/quick-start).
+- [Przetwarzanie wsadowe](../advanced/batch-processing).
+- [Deweloperzy](../developers/overview), [agenci](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): wersje i oczyszczone dowody.

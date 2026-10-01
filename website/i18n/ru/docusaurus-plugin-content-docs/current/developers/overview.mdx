@@ -1,0 +1,99 @@
+---
+id: overview
+title: Разработчикам
+description: >-
+  Собирайте, проверяйте и расширяйте существующие контракты провайдеров,
+  операций, рендеринга и документации.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Разработчикам
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Разработчикам
+
+<TLDR>Создайте отдельную ветку, установите зависимости по lockfile и обе версии браузера, соберите плагин и выполните полный Jest. Расширяйте владельца существующего контракта; согласуйте документацию, тесты и проверку нативного потребителя.</TLDR>
+
+## Рабочая копия
+
+Клонируйте [репозиторий](https://github.com/Jacobinwwey/obsidian-NotEMD), прочтите [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md), создайте ветку. CI плагина — Node 20 Linux/Windows, сайт — Node 24. Зависимости корня и `website/` устанавливаются отдельно.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Пакеты Playwright могут требовать разные Chromium: одного недостаточно для чистой среды. `main.js` генерируется и игнорируется Git; старый bundle не подтверждает новый commit.
+
+## Найдите владельца
+
+| Ответственность | Основной код |
+| ---------------- | ---------------- |
+| Жизненный цикл, команды, host-маршруты | `src/main.ts` |
+| Профили, протоколы и валидация | `src/llmProviders.ts` |
+| Формы запросов, транспорт, повторы, stream | `src/llmUtils.ts` |
+| Операции, схемы, выбор публичной CLI | `src/operations/`, `src/cliContracts.ts` |
+| Файловые задачи, исследование, перевод | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Сценарии и боковая панель | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Спецификации и рендеринг диаграмм | `src/diagram/`, `src/rendering/` |
+| Строки UI и локали | `src/i18n/` |
+| Публичные руководства и переводы | `website/docs/`, `website/i18n/` |
+| Инструкции сопровождения и датированные проверки | `docs/maintainer/` |
+
+Рабочий bundle самодостаточен и включает inline preview host. Кандидат отдельного host не является контрактом поставляемых активов. Его включение требует совместно обновить упаковку, assets, audits и документы.
+
+## Ограниченная реализация
+
+1. Воспроизведите поведение и добавьте падающий целевой тест.
+2. Меняйте владельца инварианта; проверяйте внешние входы на границе, не дублируйте знания профилей/операций.
+3. Выполните целевые и полные тесты, включая отмену, ошибки и запись.
+4. Обновите английский источник и локали; планы, задачи и walkthrough требуют самостоятельных английской/китайской версий в `docs/`.
+5. Для визуального/нативного вывода проверьте реальное приложение: XML или снимок не доказывают редактируемость и прикрепление связей.
+
+Новый провайдер добавляется в `llmProviders.ts`, совместимый транспорт используется повторно. Обновите `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README и соединение, сохраняя stream и прерванные ответы. Операция требует схем входа/выхода, контекста, эффектов и handling tags до раскрытия. Реестр не делает её публичной. [Agent](../agents/overview).
+
+## Проверки
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint сравнивает отдельные диагностики: уменьшенный общий счёт не оправдывает новую ошибку. При изменении поиска используйте `npm run benchmark:local-kb` и указывайте корпус/среду. Сайт проверяйте с Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Для программы 1.9.8 Codex пишет и проверяет переводы непосредственно. Не вызывайте старые переводящие скрипты, LM Studio или переводческий endpoint. Инструменты могут форматировать, проверять и отображать готовый текст.
+
+## Obsidian и нативные приложения
+
+Используйте одноразовое хранилище с `.notemd-host-verification`; скрипты проверяют скопированный bundle. Отделяйте пользовательские данные. При CLI-проверке попробуйте `obsidian help` и `obsidian-cli help`, записывая отсутствующие инструменты как недоступные, а не успешные.
+
+PowerPoint, CircuitikZ и слайды имеют отдельные зависимости и результаты. Следуйте [датированному отчёту](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) и [процедуре релиза](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Не скрывайте непроверенные mobile/минимальную версию.
+
+## Участие и выпуск
+
+PR описывает проблему, итоговое поведение, тесты и ограничения. [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) принимает воспроизведения. Не коммитьте ключи, частные заметки и посторонние артефакты. Publisher владеет согласованными версиями, числовым tag, чистым исходником, двуязычными notes, проверенным draft, публикацией и явным Pages deploy. Публичный tag не перемещается. `.trellis/` — локальное состояние, не зависимость CI.
+
+## Далее
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Статус планов](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

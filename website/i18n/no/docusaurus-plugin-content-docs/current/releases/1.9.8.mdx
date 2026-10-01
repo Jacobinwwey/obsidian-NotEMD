@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Oppgrader til Notemd 1.9.8
+description: >-
+  Gjennomgå forbedringer siden 1.9.7 i pålitelighet, native eksport og
+  dokumentasjon.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Oppgrader til Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Oppgrader til Notemd 1.9.8
+
+<TLDR>1.9.8 prioriterer avbrudd, resultateierskap, konsistente batchoppslag, native eksport og riktige veiledninger. Se tilgjengelighet på offentlig GitHub-utgivelse og bruk filer fra samme utgivelse. Leverandør-/diagramantall er eksisterende kapasitet.</TLDR>
+
+## Etter 1.9.7
+
+| Område | Forbedring |
+| ------ | ------------- |
+| Avbrudd | Felles tilstand gjennom planlegging, transporter og nye forsøk; sene svar starter ikke beskyttet skriving |
+| Artefaktpersistens | Eierskap for samme kildenavn og delte vedlegg ved overlappende lagring/gjenoppretting |
+| Lokal henting | Ett snapshot for batchtitler; fast korpus og minnemåling |
+| Native resultater | PowerPoint-skillelinjer under sammenslåtte celler og CircuitikZ-ledninger/etiketter rettet |
+| Verifisering | Linux/Windows CI, diagnosebasert lint, prosesstester og native bevis |
+| Dokumentasjon | Faktiske standarder, fire målgruppeinnganger, direkte oversettelser og styrt publisering |
+
+Historiesøket bevarer fortløpende skriving og markør under asynkron oppdatering. Skuffen holder Tab inne, tar fokus under lasting og lar Escape lukke den uten å lukke overordnet forhåndsvisning. Nye forsøk og gamle svar inngår i nettleserregresjonene.
+
+Undersøkelser/oversettelse sjekker avbrudd etter siste lesing eller mappeklargjøring før tillegg/oppretting/overskriving. Aksepterte hvelvskrivninger telles fortsatt som fullført. Oppretter en annen oppgave oversettelsesmappen under venting, gjenbrukes den uten å hevde eget opprettelseseierskap. Konfliktfil eller fortsatt manglende mappe gir rapportert feil og fallback til kildemappen.
+
+36 profiler og 33 kjørbare diagramoppføringer fantes allerede i 1.9.7. Runtime, dokumentasjon og merge-commits telles separat.
+
+## Kontrollert oppgradering
+
+1. Stopp oppgaver og sikkerhetskopier hvelv/innstillinger.
+2. Oppdater via Community plugins eller hent `main.js`, `manifest.json`, `styles.css` fra samme [offentlige 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Erstatt bare programfiler manuelt; bevar innstillinger/resultater.
+4. Last på nytt og sjekk versjon.
+5. Test engangsnotat og liten mappe før store kjøringer.
+
+Kommando-ID-er og innstillinger bevares. One-Click Extract er fortsatt lenker, batchtitler og Mermaid-reparasjon. Korrigert dokumentasjon legger ikke undersøkelser til standardkjeden.
+
+## Avbrudd og gjenoppretting
+
+Avbrudd er ingen omvendt transaksjon. Ferdige filer beholdes, aksepterte kall/skrivninger kan fullføres og leverandøren styrer fakturering. Vent og se resultatene. Sammenlign synlige konflikter og gjenopprettingsfiler før rydding. Behold følgemapper som eldre artefakter bruker.
+
+## Eksport- og kompatibilitetsgrenser
+
+- PowerPoint har målrettede native kontroller; tidligere helbildescore overså defekten.
+- Mermaid/SVG kan ende som bilder i PPTX.
+- Statiske Drawnix-piler mellom grener er ikke bevist festet etter ny layout.
+- CircuitikZ-forhåndsvisning og TeX-kompilering er separate tester.
+- Fysiske mobilenheter og Obsidian 0.15.0 er fortsatt uverifisert.
+- Fast leksikalt testgrunnlag beviser ikke semantisk søk eller ytelse i alle hvelv.
+
+## Utgivelsesintegritet
+
+Publisereren kontrollerer versjon og lokal/fjerntagg-identitet, bygger ren tagget kilde, laster opp utkastfiler og sjekker nedlastede hasher før publisering. `main.js`, `manifest.json`, `styles.css`, `README.md` er påkrevd. Gjentakelse kan ikke erstatte offentlige byte med uvedkommende resultater.
+
+Pages distribueres etter verifisert offentlig utgivelse. Codex skriver og gjennomgår direkte uten LM Studio eller oversettelsesmotor. Dette hevder ikke uavhengig morsmålskontroll.
+
+## Neste trinn
+
+- [Utgivelse med engelske/kinesiske notater](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Hurtigstart](../getting-started/quick-start).
+- [Batcher](../advanced/batch-processing).
+- [Utviklere](../developers/overview), [agenter](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) med versjoner og renset dokumentasjon.

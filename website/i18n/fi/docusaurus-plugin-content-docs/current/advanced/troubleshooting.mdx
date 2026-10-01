@@ -1,161 +1,84 @@
 ---
 id: troubleshooting
-title: "Virheiden ratkaiseminen"
-description: "Yleisimmät ongelmat ja niiden ratkaisut"
+title: Vianmääritys
+description: >-
+  Rajaa tarjoaja-, tulos-, eräajo- ja vientivirheet pienellä toistolla sekä
+  puhdistetulla näytöllä.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [troubleshooting, errors, diagnostics, connection test]
-concepts: [Troubleshooting, Error Handling, Diagnostics]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Vianmääritys
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Virheiden ratkaiseminen
+# Vianmääritys
 
-<TLDR>
-**Enimmäiset Notemd ongelmat kuuluvat neljään kategorioon: API pääongelmat, verkon yhteyshäiriöt, tunnistusvirheet (401/403) sekä käyttömääräpiirteet (429).** Sisäistöinen yhteystesti ja diagnostiikkapaneeli tunnistavat perustasan nopeasti. Tämä sivu kattaa kaikki yleisimmät virheilmoitukset, niiden syyn ja ratkaisun. Ongelmille, jotka ei ole tähän listattu, raportoi ne GitHub Issues -sivustolla diagnostiikkatulostuksen kanssa.
+<TLDR>Toista ongelma yhdellä testimuistiinpanolla samoilla tarjoaja-, malli- ja tehtäväasetuksilla. Tarkista tila ja tulospolku. Erota tunnistautuminen, generointi, jäsennys ja kirjoitus; yhteystesti ei varmista koko työnkulkua.</TLDR>
 
-Tämä kuuluu [Obsidian AI-tietojen hallintasuunnitelmaan](/docs/pillar-ai-knowledge).
-</TLDR>
+## Yleiskuva
 
-## Yleenvaate
+Kirjaa Notemd-/Obsidian-versiot, käyttöjärjestelmä, toiminto, protokolla, malli ja minimivaiheet. Älä aloita uudestaan, kun peruutus on kesken. Säilytä tuotokset ja palautustiedostot, kunnes niiden alkuperä selviää.
 
-Notemd riippuu ulkopuolisista palveluista – LLM tarjoajista ja hakukoneista API – mikä tarkoittaa, että enintään ongelmat syntyvät pluginin itsestä ulkopuolella. Asetuksissa oleva diagnostiikkapaneeli tarjoaa strukturoituksen viimeisestä API kutsusta, mukaan lukien päätös URL, vastausstatus ja virhekehys. Tarkista se alati ennen lisäksi tutkimista.
-
-## Kuidas se toimii: Diagnostiikka
+## Diagnostiikka
 
 ### Yhteystesti
 
-Jokaisessa tarjoajan konfigurointiosassa on **"Testaa yhteyttä"** -painikka. Sen painamisella lähetetään minimiisti API päätös (yleensä mallilista tai lyhyt täyttö) ja ilmoitetaan onnistuminen tai konkreettinen HTTP virhe. Tämä on nopein tapa vahvistaa, että sinun API avainsi ja perus URL ovat oikeita.
+**Test connection** voi tarkistaa vain mallilistan tai lyhyen generoinnin. Suorita sen jälkeen pieni oikea tehtävä valitulla mallilla ja tarvittavalla tulosmuodolla.
 
-### Diagnostiikkapaneeli
+### Edistyminen ja kehittäjädiagnostiikka
 
-**Asetukset --> Notemd --> Diagnostiikka** näyttää:
+Raportointi näyttää tilan, virheet ja sijainnit; API-näkymä erottaa odottavat ja valmistuneet pyynnöt. Käytä debugia tarpeeseen. Pitkä diagnostiikka voi kuluttaa kiintiötä. Raporteissa voi olla muistiinpanoja, osavastauksia, osoitetietoja ja avaimia. Tarkista ja peitä paikallisesti ennen jakamista; myös peitetty profiili vaatii metadatan tarkistusta.
 
-| Poliivi | Sisältö |
-|-------|---------|
-| Viimainen tarjoaja | Millainen tarjoaja kutsuti viimeisin |
-| Viimainen malli | Millainen malli kutsuti viimeisin |
-| Viimeinen tila | HTTP-tilastokoodi tai transpordivirhe |
-| Viimainen vika | Kerrottompi virheilmoitus API-ltä |
-| Viimeinen pyytös URL | Viimeisen pyytön täysin URL (poistettu API-avain) |
-| Viimeisen vastauksen sisu | Kortennettu vastauskehys (esim. 500 merkkiä) |
+## Tavalliset virheet
 
-Kopioi koko diagnostiikan tulostus, kun raportoi ongelmista GitHubissa.
+### Puuttuva tai väärä avain
 
-## Yleisimmät virheet
+401: oikea tarjoaja/osoite, ei ylimääräisiä välilyöntejä. 403: tili, projekti, mallioikeudet ja laskutus. Uusintayritys ei korjaa vääriä tunnistetietoja.
 
-### API Avain on väärä tai puuttuu
+### Verkko
 
-**Symptomi:** HTTP 401 tai “Vääri API-avain annettu”
+Tarkista isäntä, portti, protokolla ja reitti Obsidian-laitteelta. Ollaman/LM Studion on oltava käynnissä mallin kanssa. `localhost` on nykyinen laite, ei toinen kone. Valitse oikea profiili; fallback valitaan automaattisesti, ei siirtoprotokollapainikkeella.
 
-**Syy:** API-avain puuttuu, sisältää tyhjiä tiloja tai kuuluu toiseen tarjoajaan.
+### Rajoitus 429
 
-**Parannus:**
-1. Värittele, onko avainilla edessä tai sisällä tilaa.
-2. Väliaikaisesti vahvista, että avain sopii valituun palveluntarjoajalle (OpenAI-avain ei toimi Anthropic- kanssa).
-3. Tarkista, että sinun kontollesi on krediteja tai aktiivinen tila
-4. Klikkaa **"Test Connection"**, jotta voit vahvistaa
+Vähennä rinnakkaisuutta ja tarkista pyyntö-/tokenkiintiöt sekä avaimen muu käyttö. Uusinnat auttavat vain joihinkin tilapäisiin virheisiin.
 
-### Verkon / yhteyden virheet
+### Mallia ei löydy
 
-**Oireet:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+Käytä **Fetch models** tai tunnettua malli-/deployment-tunnistetta. Tarkista API-versio ja alue. Esimerkit voivat vanhentua; Azure vaatii deploymentin ja Ark voi vaatia endpoint-ID:n.
 
-**Syy:** API-palautteepiste ei ole käytettävissä sinun laitteestasi.
+### Ei linkkejä tai käsitteitä
 
-**Palautteet:**
-1. Tarkista oma internet-yhteyshäiriöt
-2. Jos olet proxy- tai tulevyrjyn takana, vahvistaa, että API-domaani ei ole estetty
-3. Ollama-tilanteessa: vahvista, että `ollama serve` käy (`ollama list` pitää palauttaamaan mallit)
-4. LMStudio-tilanteessa: vahvista, että serveri käy `localhost:1234`-palvelussa
-5. Yritä toisen transportin – mobiilikäyttäjät pitävät varmistamaan, että `requestUrl`-transportti on aktiivinen
-6. Aktivoi `enableStableApiCall` automaattisten uudellepyyntien suorittamiseen ajutettavissa virheissä
+Tarkista oikea tulostiedosto, hyödyllinen lähde, vastausmuoto ja valittu aktiivinen käsitekansio. Erillinen poiminta alkaa vain otsikoista ilman paluulinkkejä. Vertaa oletuskehotteeseen, jos merkit on poistettu.
 
-### 403 Kielletty
+### Tulos puuttuu tai on muualla
 
-**Oireet:** HTTP 403
+Lue raportoitu `_processed.md`, `_<language>.md` tai complete-polku. Käännöskansion luontivirhe voi käyttää lähdekansiota. Tarkista törmäykset ja oikeudet ennen uusintaa.
 
-**Syy:** Sinun API-avainesi on voimassa, mutta seillä ei ole oikeuksia pyytämään resurssille.
+### Tiedostot peruutuksen jälkeen
 
-**Palautteet:**
-1. Mõned mudelid nõuavad erilist juurdepääsu (nt GPT-4 Azure kaudu nõuab paigaldusnime)
-2. Mõned pakkujad piiravad mudeleid paketi taseme järgi – kontrollige oma kontot
-3. Võivad kehtida piirkondlikud piirangud (mõned Hiina pakkujad blokeerivad rahvusvahelised IP-id ning vastupidi)
-4. Kontrollige, kas mudeli nimi on õigesti kirjutatud (nt `gpt-4o` mitte `gpt-4o-mini`, kui mini-mudel on kõik, mida teie pakett lubab)
+Valmiit kirjoitukset säilyvät ja hyväksytyt pyynnöt voivat valmistua. Tarkista tiedostot ja palautusristiriidat ennen poistamista tai koko kansion uusintaa.
 
-### Sageduspiirang (429)
+### Kaavio tai natiivivienti
 
-**Sümptom:** HTTP 429 või „Sageduspiirang ületatud“
+Valitse tuettu tyyppi/lähde ja tarkista dia-/CircuitikZ-ympäristö. Esikatselu ei ole natiivitesti. Tallenna tekstilähde oikeaan ulkoiseen työkaluun, jos visuaalista esikatselua ei ole. [Kaaviot](../features/diagrams).
 
-**Põhjus:** Liiga palju päringuid lühikese aja jooksul.
+## Virheen ilmoittaminen
 
-**Lahendus:**
-1. Vähendage `batchConcurrency` väärtust `1` või `2` peale
-2. Oodake mõni minut enne uuesti proovimist
-3. Vaadake oma paketi taseme kohta pakkuja sageduspiirangute dokumentatsiooni
-4. Lülitage sisse `enableStableApiCall` automaatseks korduskatseteks koos tagasilöögiga
-5. Kaaluge ülemiste piirangutega pakkuja kasutamist (DeepSeek, Ollama)
+1. Toista synteettisellä muistiinpanolla testikansiossa.
+2. Anna versiot, toiminto, malli, välttämättömät asetukset ja odotettu/todellinen tulos.
+3. Liitä pienimmät tuotokset/lokit ilman avaimia, yksityistä sisältöä tai turhaa osoitemetadataa.
+4. Kerro tapahtuuko virhe yhdellä tiedostolla oletuskehotteilla.
+5. Avaa [GitHub Issue](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).
 
-### Mudel ei leitud
+Pelkkä kuvakaappaus todistaa harvoin muoto- tai peruutusvirheen. Anna lähde/tulos tai lyhyt toistettava vaiheketju, jos mahdollista.
 
-**Sümptom:** „Mudel ei leitud“ või HTTP 404
+## Seuraavaksi
 
-**Põhjus:** Mudeli nimi ei eksisteeri valitud pakkuja juures.
-
-**Parannus:**
-1. Klikkaa **"Get Model List"**, jotta näet kaikki saatavilla olevat mallit sinun tarjoajasi jaoks
-2. Mõned mallin nimet muuttuvat ajan myötä – kontrolloi aktuaalista nimeä tarjoajan dokumentaatiosta
-3. Ollama: käynnita `ollama list`, jotta näet pullattuja mallia; vain ladattuudet mallit ovat saatavilla
-
-### Ei linkkejä / Ei konsepteja luodut
-
-**Oire:** Komento käynnistyy mutta ei tuoda väljontaa
-
-**Syy:** LLM lähetti tühjan tai analysoitamattoman vastauksen.
-
-**Parannus:**
-1. Tarkista diagnostikan paneeli aktuaisen LLM vastauksen osalta
-2. Proovi suurempia mahdollisuuksia omavia mallia (mõned väikeset mallid kävelevät rakennyttyn väljontin kanssa)
-3. Veendu, että märkintössä on piisavasti sisältöä (>50 sanaa)
-4. Tarkista omaan kohandettua käyttäjäkysymyksää vastuoluisien ohjeiden osalta
-5. Poista ajutisesti samasanojen tukkiminen, jotta näet, onko se liian aggressiivisesti filtreerivä
-
-### Doubao-palvelun ID puuttuu
-
-**Oire:** Vika ByteDance Doubao-tarjoajan käyttössä
-
-**Syy:** Doubao vaatii Ark-palvelun ID-d (muoto: `ep-xxxxxxxx-xxxx-xxxx`) mallin nimen sijaan.
-
-**Fix:** Asenna vaihtoehtoisen mallin sijaan sinun todellinen päätuspisteiden ID Volcengine-konsolista.
-
-## Konfigurointi
-
-| Diagnostiikasätteet | Sijainti | Tarkoitus |
-|--------------------|----------|---------|
-| **Testa yhteyttä** | Sättimet --> Tarjoajan osa | Väliaikaisesti kontrolloi API-avain ja yhteyden toiminta |
-| **Saada mallien lista** | Sättimet --> Tarjoajan osa | Varmista, millat mallit ovat käytettävissä |
-| `enableStableApiCall` | Sättimet --> Edistyneet sättimet | Aktivoi uudelleenpyynnöt taustapäivittämisen kanssa |
-| `batchConcurrency` | Sättimet --> Paketit | Kontrolloi parallellisuutta, jotta ei syntyy kiirustaksoja |
-
-## Kuidas raportoida ongelmia
-
-Jos sinun ongelman ei ole ylälä mainittu:
-
-1. Avaa **Asetukset --> Notemd --> Diagnostiikka**
-2. Kopioi koko diagnostiikan tulostus
-3. Avaa GitHub Issue-sivu [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-4. Sisällyttä: Obsidian versio, Notemd versio, tarjoaja, malli, diagnostiikan tulostus sekä toistamiseen tarvittavat toimet
-5. Poista oma API-avain yhdistetyistä logista
-
----
-
-## Järguvät toimet
-
-- [LLM Tarjoajat](/docs/providers/overview) -- Täysin tarjoajien konfigurointitietot
-- [Pakkettyyn töihin](/docs/advanced/batch-processing) -- Suurten toimintojen samalla aikana suorittaminen ja uudelleenkokeutusasetukset
-- [Omakohdat](/docs/advanced/custom-prompts) -- Vastaanottamattoman LLM-toiminnon korjaaminen ohjeiden muuttamisen avulla
+- [Tarjoajat](../providers/overview).
+- [Eräajo](./batch-processing).
+- [Omat kehotteet](./custom-prompts).
+- [Asetukset](../getting-started/configuration).

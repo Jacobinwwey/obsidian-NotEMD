@@ -1,14 +1,13 @@
 ---
 id: installation
 title: 安裝
-description: 如何在 Obsidian 中安裝 Notemd
+description: 從 Obsidian 社群外掛或已核驗的 GitHub Release 安裝 Notemd，設定 provider 並驗證輸出。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 安裝
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,118 +15,64 @@ import TLDR from '@site/src/components/TLDR';
 # 安裝
 
 <TLDR>
-**在 2 分鐘內安裝 Notemd。** 兩種方式：(1) Obsidian 社群插件（建議使用，一鍵安裝），或 (2) 透過 GitHub Releases 手動安裝。需要 Obsidian 0.15.0+ 版本。適用於 Windows、macOS、Linux、iOS 與 Android，無外部依賴項。已有 4k 次以上下載，採用 MIT 授權。
+從 Obsidian 社群外掛安裝 **Notemd**，或將同一個 GitHub Release 的三個外掛檔案複製至 Vault。啟用後設定 provider，再以可捨棄筆記試跑。模型伺服器與選用原生匯出工具各有先決條件。
 </TLDR>
 
-## 方法 1：社群插件（建議使用）
+## 方法一：社群外掛（建議）
 
-1. 開啟 **Obsidian 設定**（⚙️ 圖示或 `Ctrl/Cmd + ,`）
-2. 前往 **Community plugins**
-3. 點擊 **Browse**
-4. 搜尋 **"Notemd"**
-5. 點擊 **Install**
-6. 點擊 **Enable**
+1. 在目標 Vault 開啟**設定 → 社群外掛**。
+2. 視需要啟用社群外掛，選擇**瀏覽**。
+3. 搜尋 **Notemd**，確認儲存庫為 `Jacobinwwey/obsidian-NotEMD`，按下**安裝**。
+4. **啟用**後，透過側邊圖示或命令面板開啟 Notemd。
 
-**完成！**您會在左側邊欄看到 Notemd 圖示。
+[在 Obsidian 開啟 Notemd](obsidian://show-plugin?id=notemd)。瀏覽器無法開啟連結時，採用上述手動步驟；閱讀本指南不需要自訂通訊協定處理程式。
 
 ## 方法二：手動安裝
 
 ### 先決條件
-- Obsidian 0.15.0 或更高版本
-- Git（可選，用於克隆）
+
+準備已安裝的 Obsidian，以及可備份的 Vault。manifest 宣告最低版本 `0.15.0`，不表示最新候選版本已在該舊版本測試。
 
 ### 步驟
 
-1. 從 [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) **下載檔案**：
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. 從同一份 [GitHub Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) 下載 `main.js`、`manifest.json`、`styles.css`。附帶的 `README.md` 供查閱，不是執行所需檔案。
+2. 建立 `<vault>/.obsidian/plugins/notemd/` 並複製三個檔案；若 Vault 使用其他設定目錄，請改用實際路徑。
+3. 重新載入 Obsidian，從社群外掛啟用 Notemd。
+4. 核對顯示版本後再設定 provider，勿混用新 manifest 與舊 bundle。
 
-2. **找出您保險庫的插件資料夾：**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## 其他方式：BRAT
 
-如果 `plugins` 資料夾不存在，請建立它。
-
-3. **建立 Notemd 資料夾：**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
-
-4. 將這三個檔案**複製**到 `notemd` 資料夾中。
-
-5. **重新載入 Obsidian：**
-   - 按下 `Ctrl/Cmd + R`，或
-   - 重新啟動 Obsidian
-
-6. **啟用外掛程式：**
-   - 設定 → 社群外掛程式
-   - 在清單中尋找“Notemd”
-   - 將其開啟
-
-## 替代方案：透過 BRAT 安裝
-
-如果您使用 [BRAT 插件](https://github.com/TfTHacker/obsidian42-brat)：
-
-1. 打開 BRAT 設定
-2. 點擊「新增 Beta 外掛」
-3. 輸入：`Jacobinwwey/obsidian-NotEMD`
-4. 點擊「新增外掛」
-5. 在 Community 外掛中啟用 Notemd
+已使用 [BRAT](https://github.com/TfTHacker/obsidian42-brat) 時，可透過其測試外掛流程加入 `Jacobinwwey/obsidian-NotEMD`。重現問題時指定明確版本。BRAT 是選用外部工具，不是一般安裝的相依項目。
 
 ## 驗證
 
-安裝完成後，請驗證 Notemd 是否正常運作：
-
-1. 打開任意筆記
-2. 在編輯器中按右鍵
-3. 您應該會看到類似 Notemd 的指令：
-   - 「處理檔案（新增連結）」
-   - 「提取概念」
-   - 「研究並總結」
-
-## 接下來的步驟
-
-- **設定 LLM 提供者：** [快速開始 →](./quick-start)
-- **故障排除：** [常見問題 →](../advanced/troubleshooting)
+選擇可存取的 provider/model，執行 **測試連線**，再依[快速開始](./quick-start)處理筆記副本。有些連線測試只證明模型清單端點可達；實際任務才能驗證生成與檔案輸出。
 
 ## 系統需求
 
-| 平台 | 版本 | 狀態 |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | 必填項目 |
-| **Windows** | 7+ | ✅ 已支援 |
-| **macOS** | 10.15+ | ✅ 已支援 |
-| **Linux** | 任何 | ✅ 已支援 |
-| **iOS** | 15+ | ✅ 已支援 |
-| **Android** | 5+ | ✅ 已支援 |
+| 範圍 | 邊界 |
+|---|---|
+| 外掛 manifest | 宣告最低 Obsidian `0.15.0`；`isDesktopOnly` 為 false |
+| 驗證證據 | 參考當前版本的具日期驗收紀錄；實體行動裝置與 Obsidian 0.15.0 尚未驗證 |
+| 雲端 LLM | 網路、有效帳號／金鑰和受支援模型 |
+| 本地 LLM | 另行安裝並執行的伺服器，以及已下載／載入模型 |
+| 原生投影片／電路匯出 | 桌面工具與格式專用相依項目；執行前檢查環境 |
+
+沒有涵蓋所有選用匯出器的統一作業系統版本保證。外掛電路預覽不等於原生 TeX 編譯成功，桌面測試也不能證明行動端行為。
 
 ## 解除安裝
 
-要移除 Notemd：
+在社群外掛停用或解除安裝。生成的筆記與產物仍是一般 Vault 檔案，刪除前請核對。如需重裝，先備份設定；解除安裝不會回復已完成的筆記修改。
 
-1. 設定 → 社群外掛程式
-2. 尋找 "Notemd"
-3. 點擊 ❌ 圖示
-4. 可選地，刪除插件資料夾：`<vault>/.obsidian/plugins/notemd/`
+## 更新
 
-您的資料（筆記、概念說明等）將保持原樣，不受影響。
+透過社群外掛檢查更新。手動升級先停止任務、備份 Vault 與設定，再以同一版本的三個執行檔案替換並重新載入。閱讀版本說明，先小規模試跑再恢復批次工作。
 
-## 正在更新
+勿以 Release 附件替換 Vault 設定檔。回退時保留備份，明確安裝已知相容版本，並保留需要的生成輸出。
 
-### 自動更新（建議）
-Obsidian 會自動檢查外掛程式的更新。當有新版本可用時：
-1. 設定 → 社群外掛程式
-2. 點擊「檢查更新」
-3. 點擊 Notemd 旁邊的「更新」
+## 延伸閱讀
 
-### 手動更新
-下載最新版本，並替換您插件資料夾中的三個檔案。
-
-## 尋求協助
-
-- 📖 [快速入門指南](./quick-start)
-- ❓ [常見問題](../faq)
-- 💬 [Discord 社群](https://discord.gg/qnGgsQ9W)
-- 🐛 [回報問題](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [快速開始](./quick-start)：設定與首次驗證。
+- [設定](./configuration)：provider、語言與輸出。
+- [疑難排解](../advanced/troubleshooting)：啟動、連線與匯出。
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)：回報可重現安裝問題。

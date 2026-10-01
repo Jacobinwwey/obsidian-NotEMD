@@ -1,125 +1,90 @@
 ---
 id: research
-title: "Nghiên cứu và Tìm kiếm web"
-description: "Tích hợp tìm kiếm web vào ghi chú của bạn"
+title: Nghiên cứu và tìm kiếm web
+description: >-
+  Chọn công cụ tìm kiếm, tóm tắt nguồn vào ghi chú và phân biệt nguồn web với
+  ngữ cảnh kiến thức cục bộ.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - Nghiên cứu và tìm kiếm web
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Nghiên cứu và Tìm kiếm web
+# Nghiên cứu và tìm kiếm web
 
-<TLDR>
-**Notemd sẽ tìm kiếm trên web và chèn trực tiếp các kết quả được LLM tóm tắt vào ghi chú của bạn.** Tavily API là backend tìm kiếm chính; DuckDuckGo đóng vai trò là giải pháp dự phòng không cần cấu hình. Các kết quả được tóm tắt kèm theo nguồn trích dẫn và được thêm vào dưới tiêu đề `## Research`. Hỗ trợ nghiên cứu trong một ghi chú, nghiên cứu theo danh mục hàng loạt, và lựa chọn mô hình cho từng nhiệm vụ trong bước tóm tắt.
-
-Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Research & summarize tìm theo chủ đề đã chọn hoặc tiêu đề ghi chú, nhờ mô hình tóm tắt ngữ cảnh thu được rồi thêm vào ghi chú Markdown hiện tại. Chủ động chọn Tavily hoặc DuckDuckGo. Kết quả tìm kiếm và trích dẫn do mô hình tạo cần được kiểm tra.</TLDR>
 
 ## Tổng quan
 
-Nghiên cứu là một trong những tích hợp mạnh mẽ nhất của Notemd: nó kết nối các hoạt động đọc, tìm kiếm và viết lại với nhau. Thay vì chuyển sang trình duyệt để tìm kiếm một thuật ngữ chưa quen, bạn chỉ cần đánh dấu nó và để Notemd thực hiện việc tìm kiếm, tóm tắt và thêm kết quả vào – tất cả đều diễn ra trong kho lưu trữ của bạn.
+Cấu hình công cụ tìm kiếm riêng với mô hình viết tóm tắt. Tavily cần khóa. DuckDuckGo không cần khóa nhưng vẫn dùng mạng và có thể bị hạn chế tốc độ. Mô hình tóm tắt cục bộ không biến nghiên cứu web thành hoạt động ngoại tuyến.
 
-Quy trình này hoàn toàn có thể được cấu hình. Bạn có thể chọn nhà cung cấp dịch vụ tìm kiếm, LLM sẽ viết bản tóm tắt, và quyết định xem kết quả sẽ được thêm vào ghi chú đang mở hay được lưu vào các tệp riêng biệt. Chế độ hàng loạt cho phép bạn nghiên cứu tất cả các ghi chú trong một thư mục chỉ với một cú nhấp.
+## Cách hoạt động
 
-## Cách thức hoạt động
+### Tìm kiếm rồi tóm tắt
 
-### Quy trình Tìm kiếm rồi Tóm tắt
+1. Mở ghi chú đích trong trình soạn thảo Markdown. Chọn chủ đề ngắn, hoặc để trống phần chọn để dùng tiêu đề.
+2. Chạy **Nghiên cứu và tóm tắt** từ thanh bên hoặc bảng lệnh.
+3. Notemd truy vấn công cụ đã cấu hình. Tavily cung cấp trích đoạn; kết quả DuckDuckGo có thể dẫn đến tải nội dung trang.
+4. Nếu bật truy xuất kiến thức cục bộ cho tác vụ này, trích đoạn trong phạm vi đã chọn cũng có thể đi vào lời nhắc.
+5. Nhà cung cấp/mô hình nghiên cứu viết tóm tắt. Notemd thêm vào dưới tiêu đề `Research Summary`, ghi rõ chủ đề và nguồn ngữ cảnh.
+6. Kiểm tra nội dung vừa thêm và mở URL liên quan. Truy xuất không chứng minh mọi nhận định hay trích dẫn đều có bằng chứng.
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+### Tavily và DuckDuckGo
 
-1. **Trích xuất truy vấn** -- Notemd sẽ trích xuất các từ khóa tìm kiếm từ phần được chọn hoặc tiêu đề ghi chú.
-2. **Tìm kiếm web** -- Trước tiên sẽ thử sử dụng Tavily. Nếu không cấu hình khóa API nào, DuckDuckGo sẽ được sử dụng tự động (không cần khóa).
-3. **Tóm tắt bằng LLM** -- Các kết quả tìm kiếm thô sẽ được gửi đến LLM đã được cấu hình, nơi này sẽ tạo ra một bản tóm tắt ngắn gọn kèm theo nguồn trích dẫn ngay trong văn bản.
-4. **Thêm vào** -- Bản tóm tắt đã được định dạng sẽ được thêm vào dưới tiêu đề `## Research` trong ghi chú đang mở.
+| Lựa chọn | Thiết lập | Giới hạn vận hành |
+| -------- | ------- | ---------------------- |
+| Tavily | Chọn Tavily và nhập khóa API | Dùng hạn mức tìm kiếm tài khoản và trích đoạn trả về |
+| DuckDuckGo | Chọn DuckDuckGo rõ ràng | Không cần khóa; phụ thuộc giới hạn tìm kiếm và khả năng tải trang kết quả |
 
-### Tavily so với DuckDuckGo
+Khóa Tavily trống hoặc sai không tự chuyển sang DuckDuckGo. Nếu không có ngữ cảnh hữu ích, xem báo cáo. Khi đã bật và có dữ liệu, ngữ cảnh cục bộ vẫn có thể hỗ trợ tóm tắt; nhãn nguồn phân biệt kết quả đó với nghiên cứu dựa trên web.
 
-| Khía cạnh | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| Khóa API | Cần thiết (có gói miễn phí) | Không cần thiết |
-| Chất lượng kết quả | Cao hơn (được thiết kế riêng cho AI) | Đủ tốt cho các truy vấn thông thường |
-| Giới hạn tần suất | Gói miễn phí rộng lớn | Bị giới hạn tốc độ |
-| Cấu hình | `tavilyApiKey` trong cài đặt | Không cần cấu hình -- tự động chuyển sang phương án dự phòng |
+### Nghiên cứu khi sinh theo tiêu đề
 
-### Nghiên cứu thư mục theo nhóm
-
-Nhấp chuột phải vào thư mục và chọn **"Notemd: Thư mục nghiên cứu"**. Mỗi tệp `.md` trong thư mục sẽ được xử lý theo thứ tự (hoặc song song tùy theo mức độ đồng thời đã cấu hình). Mỗi ghi chú sẽ nhận được bản tóm tắt nghiên cứu riêng.
+Bật **Enable research in "Generate from title"** để thêm nghiên cứu vào sinh theo tiêu đề, kể cả xử lý hàng loạt. Mặc định tắt. Đây là đường sinh nội dung cho thư mục được hỗ trợ; không có hành động Research Folder tổng quát độc lập.
 
 ## Cấu hình
 
-| Thiết lập | Mặc định | Tác động |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Khóa Tavily API. Khi trống, chỉ sử dụng DuckDuckGo. |
-| `researchProvider` / `researchModel` | DeepSeek | LLM mỗi nhiệm vụ để tóm tắt kết quả tìm kiếm |
-| `maxResearchContentTokens` | `4000` | Ngân sách token cho nội dung được gửi đến LLM. Phần dư sẽ bị cắt bỏ. |
-| `researchAppendToNote` | `true` | Thêm bản tóm tắt vào ghi chú nguồn. Nếu giá trị là false, sẽ tạo một tệp riêng. |
-| `researchLanguage` | `'en'` | Ngôn ngữ đầu ra cho bản tóm tắt nghiên cứu |
+| Cài đặt | Mặc định | Tác dụng |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Chọn công cụ tìm kiếm |
+| `tavilyApiKey` | `''` | Cung cấp khóa trước khi dùng Tavily |
+| `tavilyMaxResults` | `5` | Số kết quả Tavily yêu cầu |
+| `tavilySearchDepth` | `basic` | Độ sâu tìm kiếm Tavily |
+| `ddgMaxResults` | `5` | Số kết quả DuckDuckGo yêu cầu |
+| `ddgFetchTimeout` | `15` | Thời gian chờ tải trang, tính bằng giây |
+| `maxResearchContentTokens` | `3000` | Ngân sách ngữ cảnh web xấp xỉ |
+| `researchProvider` | `DeepSeek` | Nhà cung cấp tóm tắt khi bật định tuyến theo tác vụ |
+| `researchModel` | `''` | Để trống để dùng mô hình đã cấu hình của nhà cung cấp |
+| `researchSummarizeLanguage` | `en` | Ngôn ngữ đầu ra khi bật theo tác vụ |
+| `enableResearchInGenerateContent` | `false` | Bật nghiên cứu trong sinh theo tiêu đề |
+| `enableLocalKnowledgeRetrieval` | `false` | Bật riêng truy xuất cục bộ theo phạm vi |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Dùng truy xuất cục bộ cho tác vụ này |
 
-### Khuyến nghị mô hình mỗi nhiệm vụ
+### Ngữ cảnh và lựa chọn mô hình
 
-Nghiên cứu được hưởng lợi từ một mô hình có thể xử lý nội dung đa ngôn ngữ và tạo ra văn bản có cấu trúc rõ ràng. Hãy xem xét:
-
-- **DeepSeek** -- mặc định, giá cả phải chăng, chất lượng tốt
-- **GPT-4o** -- khả năng tóm tắt chất lượng cao hơn, chi phí cao hơn
-- **Gemini Flash** -- nhanh và rẻ, phù hợp cho các truy vấn đơn giản
+Giới hạn ngữ cảnh dựa trên ước lượng, không dùng bộ đếm token chính xác của từng nhà cung cấp. Cắt bớt ngữ cảnh có thể làm mất bằng chứng. Chọn mô hình và ngân sách đầu ra phù hợp, giữ câu hỏi tập trung. Chỉ mục cục bộ là từ vựng; không có nghĩa tìm kiếm ngữ nghĩa bằng embedding hay truy xuất đầy đủ.
 
 ## Ví dụ
 
-Bạn đang đọc một bài báo về *cơ chế chú ý transformer* và gặp một thuật ngữ chưa quen: *relative positional encoding*. Thay vì để Obsidian:
+Tạo ghi chú có tiêu đề `Relative positional encoding`. Chạy nghiên cứu rồi đối chiếu giải thích với bài báo gốc hoặc tài liệu chính thức được liên kết. Giữ câu hỏi, URL nguồn thực tế và các sửa chữa trong ghi chú để người khác kiểm tra kết luận. Ví dụ trong hướng dẫn không phải kết quả nghiên cứu đã chạy trên kho của bạn.
 
-1. Đánh dấu **"relative positional encoding"**
-2. Nhấp chuột phải --> **"Notemd: Nghiên cứu và tóm tắt"**
-3. Notemd tìm kiếm trên web, tóm tắt các kết quả hàng đầu và thêm vào:
+## Hủy và quyền riêng tư
 
-```markdown
-## Research
+Hủy dừng phần việc tiếp theo ở nơi có hỗ trợ; phần đã thêm vào ghi chú vẫn còn. Yêu cầu nhà cung cấp hoặc tải trang đang diễn ra có thể hoàn tất. Công cụ tìm kiếm nhận truy vấn, website nhận yêu cầu tải, mô hình nhận ngữ cảnh thu thập được, gồm cả trích đoạn cục bộ khi bật. Kiểm tra báo cáo chẩn đoán trước khi chia sẻ.
 
-### Relative Positional Encoding
+## Gợi ý
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
+- Phân biệt nguồn web, ghi chú cục bộ và suy luận của mô hình.
+- Đối chiếu trích dẫn, ngày tháng và nhận định quan trọng với tài liệu gốc.
+- Dùng truy vấn nhỏ để chẩn đoán riêng lỗi tìm kiếm và lỗi mô hình.
+- Xem tóm tắt cũ trước khi chạy lại để tránh thêm nội dung trùng.
 
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
+## Tiếp theo
 
-Bản tóm tắt giờ đây đã trở thành một phần của kho lưu trữ của bạn, có thể tìm kiếm, liên kết và truy cập ngoại tuyến.
-
-## Mẹo
-
-- **Đặt một khóa Tavily để có kết quả tốt nhất** -- ngay cả gói miễn phí cũng mang lại độ liên quan tốt hơn so với DuckDuckGo nguyên bản.
-- **Sử dụng mô hình tóm tắt mạnh mẽ** -- các mô hình rẻ tiền có thể làm mất đi chi tiết kỹ thuật tinh tế.
-- **Nghiên cứu theo nhóm** sau khi đọc sơ bộ để lấp đầy các khoảng trống trong nhiều ghi chú cùng lúc.
-- **Kiểm tra các bản tóm tắt được thêm vào** -- LLM có thể tạo ra thông tin nguồn sai lệch. Hãy xác minh các khẳng định quan trọng.
-
----
-
-## Các bước tiếp theo
-
-- [Concept Notes](./concept-notes) -- Trích xuất và lưu giữ các thuật ngữ chính từ kết quả nghiên cứu
-- [Wiki-Links](./wiki-links) -- Liên kết các khái niệm có được từ nghiên cứu trong kho lưu trữ của bạn
-- [Translation](./translation) -- Dịch các bản tóm tắt nghiên cứu sang ngôn ngữ khác
-- [LLM Các nhà cung cấp](/docs/providers/overview) -- Cấu hình mô hình dùng để tóm tắt
+- [Cấu hình](../getting-started/configuration): tìm kiếm và ngữ cảnh cục bộ.
+- [Lời nhắc tùy chỉnh](../advanced/custom-prompts): biến nghiên cứu được hỗ trợ.
+- [Khắc phục sự cố](../advanced/troubleshooting): khóa, hạn mức và thiếu ngữ cảnh.

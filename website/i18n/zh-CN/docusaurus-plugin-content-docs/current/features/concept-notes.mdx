@@ -1,184 +1,117 @@
 ---
 id: concept-notes
-title: 概念说明
-description: 生成并管理概念笔记——从您的知识库中提取的关键概念的独立笔记
+title: 概念笔记
+description: 将概念提取到指定目录，选择受支持模板，并在删除重复文件前审核候选项。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - 概念笔记
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 概念说明
+# 概念笔记
 
 <TLDR>
-**Notemd** 能从您的笔记中提取关键概念，并生成独立的概念笔记文件。**LLM** 会识别核心术语，在可配置的文件夹中为每个概念生成一个 `.md` 文件，同时可选择性地添加指向原始笔记的回链。它支持同义词过滤、按任务选择模型、文件名规范化处理以及四步去重引擎。该功能属于 [Obsidian AI知识管理指南](/docs/pillar-ai-knowledge) 的内容。
+独立概念提取读取源笔记，在指定目录创建概念 Markdown 文件。目录设置初始为空，新笔记默认仅含标题，来源反向链接默认关闭。添加链接流程使用不同的概念笔记模板。
 </TLDR>
 
 ## 概览
 
-概念笔记是构建互联知识库的基础要素。当您处理某条笔记时，Notemd：
+先配置 **Concept note folder（概念笔记文件夹）**。专用目录便于检查结果、重复项和后续标题生成范围。提取只创建概念文件，不会自动为每个概念补充研究解释。
 
-1. **将您的文本发送到 LLM**，并附带结构化的提取提示
-2. **解析 LLM 响应中的 `CONCEPT:` 行**
-3. 在指定文件夹中为每个概念创建一个 `.md` 文件。
-4. （如已启用）为源笔记**添加反向链接**
+## 工作原理
 
-## 它是如何工作的？
+### 提取管线
 
-### 提取流程
-
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+任务将内容发送给 LLM，解析 `CONCEPT:` 条目，在操作内去重，然后创建或更新概念文件。长笔记会分块；检查失败块和不完整输出。模型响应不等于完整概念清单。
 
 ### 提取提示词
 
-LLM 收到一条指令，要求其执行以下操作：
+内置提示词要求与主题相关的具体概念。聚焦学习和同义词抑制可影响模型，但不保证规范词表。自定义提示词必须保留 `CONCEPT: Term` 输出契约，详见[自定义提示词](../advanced/custom-prompts)。
 
-- 提取与文档主题相关的**名词或名词短语**
-- **优先考虑具体性**——选择“介电松弛”而非“松弛”。
-- **转换为单数形式** — “models”将变为“model”
-- **抑制子概念** —— 如果出现“介电松弛”，则不要同时提取“松弛”这一概念。
-- **跳过**参考文献/书目部分、普通名词以及公司/产品名称
-- 每行输出一个概念，格式为 `CONCEPT: Term Name`
+### 分块
 
-**同义词抑制**（可选）：在提示语前添加“尽可能避免提取同义词、语义相似的核心概念或关键词”。
+`chunkWordCount` 默认 `3000`，是按词估计的切分大小，不是 provider token 预算。跨块上下文有限，处理后应核对相关概念和歧义名称。
 
-**专注学习领域**（可选）：在开头添加 `Relevant Fields: [domain]` 以将提取内容限制在特定学科范围内。
-
-**语言覆盖**（可选）：会在后面添加“输出内容必须使用[语言]。”
-
-### 分块处理
-
-较长的笔记会通过 `settings.chunkWordCount` 进行分割。每个片段会单独发送。所有片段中的概念会被汇总到 `Set` 中——不同片段中的重复内容会被自动删除。单个片段出现 LLM 错误也不会导致整个操作中止。
-
-## 概念说明文档的创建
+## 创建概念笔记
 
 ### 文件名规则
 
-| 规则 | 行为 |
-|------|----------|
-| 连字符/下划线 | 已替换为空格 |
-| 特殊字符 | 已移除的内容：反斜杠、正斜杠、冒号、星号、问号、引号、尖括号、竖线、井号、插入符、方括号 |
-| 空白字符 | 已折叠并修剪 |
-| 最大长度 | 100个字符（已截断并重新修剪） |
-| 空结果/全点结果 | 已静默跳过 |
-
-示例：`A-B: Key*Term` 变为 `A B KeyTerm.md`
+名称会清理不支持的路径字符、规范空白并截断过长部分；空结果跳过。不同短语可能映射到同一文件名，大规模生成前先检查命名。
 
 ### 模板
 
-**完整模板**（启用外部链接，禁用简化模板）：
+新独立概念笔记默认使用最小模板：
+
+```markdown
+# Concept Name
+```
+
+新笔记需要反向链接时，开启 **添加 “Linked From” 回链** 并关闭 **创建最简概念笔记**。支持的完整形式为：
 
 ```markdown
 # Concept Name
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Source Note]]
 ```
 
-**最小模板**（当 `extractConceptsMinimalTemplate: true` 时）：
+添加链接流程启用概念输出后创建带反向链接的完整笔记；独立提取开关不会改变这一行为。
 
-```markdown
-# Concept Name
-```
+### 更新已有笔记
 
-### 正在更新现有笔记
-
-当概念文件已存在时：
-
-1. 如果已启用反向链接且来源备注尚未列出，则添加一条反向链接。
-2. 如果存在 `## Linked From` 部分，则在下一个 `##` 标题之前插入。
-3. 如果不存在 `## Linked From`，则在末尾追加该部分。
-4. 会检查重复的反向链接并跳过它们。
+启用反向链接后，可在已有概念笔记的 `## Linked From` 下补充缺失来源链接，保留正文且不重复追加相同链接。来源使用笔记 basename，Vault 有同名来源时需检查歧义。
 
 ### 配置
 
-| 设置 | 默认值 | 效果 |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | 主开关。关闭 = 不创建笔记 |
-| `conceptNoteFolder` | `''`（已禁用） | 概念笔记的文件夹路径 |
-| `extractConceptsMinimalTemplate` | `true` | 仅标题备注（无关联链接） |
-| `extractConceptsAddBacklink` | `false` | 在独立提取过程中添加反向链接 |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | 用于概念提取的每任务 LLM |
-| `extractConceptsLanguage` | `'en'` | 概念名称的输出语言 |
-| `replaceSynonymsDuringConceptExtraction` | `false` | 在提示词中启用同义词抑制功能 |
-| `generateConceptLogFile` | `false` | 编写一个 `.log` 列表，列出已创建的概念 |
-
-**重要提示：** `extractConceptsAddBacklink` 和 `extractConceptsMinimalTemplate` 这两个设置仅会影响**专用提取命令**。而“添加链接”命令始终会生成包含反向链接的完整模板笔记。
+| 设置 | 默认值 | 作用 |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | 配置目录后启用概念输出 |
+| `conceptNoteFolder` | `''` | 初始未选择目录 |
+| `extractConceptsMinimalTemplate` | `true` | 独立提取创建仅标题笔记 |
+| `extractConceptsAddBacklink` | `false` | 为独立提取启用反向链接 |
+| `extractConceptsProvider` | `DeepSeek` | 任务专用路由启用时的 provider |
+| `extractConceptsModel` | `''` | 为空时使用所选 provider 的模型 |
+| `extractConceptsLanguage` | `en` | 任务专用输出语言启用时的语言 |
+| `replaceSynonymsDuringConceptExtraction` | `false` | 添加同义词抑制指令 |
+| `generateConceptLogFile` | `false` | 按需生成概念日志 |
 
 ## 去重
 
-dedup命令（`Notemd: Check & remove duplicate concept notes`）会执行5步分析：
+重复检测使用文件名启发式，包括不区分大小写、复数形式、符号规范化，以及所选范围允许的单词包含关系。它们不是语义等价证明，不规则复数与不同技术含义需人工核对。
 
-### 步骤1：精确匹配文件名
+选择 **检查并移除重复项**，检查候选列表，只确认需要删除的文件。批准项通过 Obsidian 垃圾箱操作处理。概念目录不是可随意丢弃的缓存，批量清理前备份。
 
-在配置的范围内进行不区分大小写的基名比较。
+### 范围模式
 
-### 第2步：复数形式检测
+可与整个 Vault、概念目录、指定包含目录或排除部分目录后的范围比较。批准删除前核对范围；范围改变候选集合，不改变“重复”的含义。
 
-移除后缀：从 `-ies` 到 `-y`，`-es` 被移除，`-s` 也被移除。将单数形式与范围文件进行比较。不支持不规则复数形式（如 children/child）。
+## 使用方式
 
-### 步骤3：符号规范化
+### 独立提取概念
 
-适用范围：`toLowerCase()`，将连字符/下划线替换为空格，去除非字母数字字符，合并空白字符。所有经过相同规范化处理的匹配项都会被标记出来。
+打开 Markdown 笔记，确认概念目录，执行 **提取概念（当前文件）**。源笔记不变；核对文件名、概念覆盖和可选反向链接。
 
-### 第4步：单词隔离
+### 提取并生成正文
 
-单字概念笔记会与多字范围文件名进行比对。当范围为 `concept_folder_only` 时不会执行。
+对概念目录运行 **从标题批量生成** 补充解释。可能处理目录内已有的符合条件笔记，不限于最近提取的文件。先审核目录，再核对报告中的 complete 目标目录。
 
-### 第5步：确认与删除
+### 从选区创建 Wiki 链接
 
-所有候选项都会显示在确认弹窗中。已通过审核的项会被移至系统回收站。在每次删除操作之间都可以取消该操作。
+选区动作可将指定术语包装为 wiki 链接，并在目标配置完成时创建概念笔记。适合由你选词，而不是让模型从整篇笔记选择概念。
 
-### 作用域模式
+## 建议
 
-| 模式 | 与……相比 |
-|------|-------------------|
-| `vault`（默认） | 除概念文件夹外的所有 vault `.md` 文件 |
-| `concept_folder_only` | 文件夹中的其他概念说明文档 |
-| `include` | 特定列表文件夹中的文件 |
-| `exclude` | 除概念文件夹和已列出的文件夹之外的所有保险库文件 |
+- 从短源文和专用目录开始。
+- 大量创建前确定输出语言。
+- 分别审核同义词建议与重复候选。
+- 后续运行覆盖日志前，保留仍需使用的日志。
 
-## 使用方法
+## 后续阅读
 
-### 提取概念（独立版）
-
-1. 打开一个笔记
-2. 从命令面板中运行**“Notemd: Extract concepts”**
-3. 概念文档会在配置好的文件夹中生成。
-
-### 提取并生成内容
-
-**“Notemd：提取概念并生成标题”**——首先提取概念，然后对该概念文件夹中的每条笔记执行“根据标题生成”操作。这样可以为文件夹中的**所有**概念笔记生成内容，而不仅仅是新创建的那些。
-
-### 从所选内容创建维基链接
-
-1. 在编辑器中高亮文本
-2. 运行**“Notemd：从所选内容创建维基链接”**
-3. 文本被包裹在 `[[...]]` 中，随后生成了一份概念说明。
-
-## 技巧
-
-- **先设置概念文件夹**——没有它就无法创建任何笔记。如果未设置，会弹出警告对话框。
-- **使用任务专用模型**——概念提取任务适合使用成本较低的模型（如 GPT-4o-mini、DeepSeek）。将昂贵的模型留作研究或翻译任务使用。
-- 为那些存在多个术语指代同一概念的技术领域**启用同义词抑制功能**。
-- **定期去重**——在批量处理完成后运行去重命令，以发现近乎重复的项。
-- 每次运行时，日志文件都会被覆盖，而不会追加内容。如果需要之前的记录，请将其复制下来。
-
----
-
-## 后续步骤
-
-- [Wiki-Links](./wiki-links) — 概念如何实现内联链接
-- [图表](./diagrams) — 可视化概念之间的关系
-- [工作流](./workflows) — 与其他任务串联执行
+- [Wiki 链接](./wiki-links)：处理后输出与关联概念文件。
+- [工作流](./workflows)：准确的一键提取顺序。
+- [批量处理](../advanced/batch-processing)：文件夹生成与部分完成。

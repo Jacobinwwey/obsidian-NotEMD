@@ -1,134 +1,88 @@
 ---
 id: custom-prompts
-title: "Egen prompter"
-description: "Anpass til dine behov ved at anpasse LLM prompterne"
+title: Egne prompts
+description: >-
+  Erstat understøttede opgaveinstruktioner uden at miste nødvendige
+  outputformater og variabler.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [custom prompts, prompts, focused learning, domain]
-concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: LLM Prompt Engineering
-    url: https://platform.openai.com/docs/guides/prompt-engineering
+keywords:
+  - Egne prompts
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Egen prompter
+# Egne prompts
 
-<TLDR>
-**Notemd giver dig mulighed for at overskrive den standard LLM prompt for hver typ af opgave.** Egen prompter giver dig kontrol over, hvad modellen prioriterer: du kan begrænse konceptudhulling til en specifik disciplin, ændre linkningsstilen eller rette oversættelsestonen. Promptvariabler som `{{content}}` og `{{concept}}` er erstattet ved kørsel. Funktionen for fokuseret læring domæne tilføjer automatisk din studierom til at begrænse udhullingsresultaterne.
+<TLDR>En ikke-tom egen prompt erstatter standarden, når både global og opgavespecifik kontakt er slået til. Bevar outputkontrakten: skabelonsystemet genindsætter ikke automatisk udeladte formatinstruktioner.</TLDR>
 
-Dette er en del af [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+## Overblik
 
-## Översikt
+Prøv standarden på en repræsentativ note først. Fagområde- eller synonyminstruktion kan være nok. Tilpas struktur, politik eller oversættelsesstil efter behov, og sammenlign før batch.
 
-De ibyggede prompterne for Notemd er skrevet til almen brug i videnskabelig arbejdsstyring. De virker godt over forskellige domæner, men de giver også plads til domænespecifik forbedringer. Egen prompter lar dig sige til LLM præcist, hvordan det skal opføre sig i din brugssituation – hvilket kan betyde at kun udhulle medicinsk terminologi, kun linke navngivne entiteter eller oversætte i en formel stil.
+## Sådan virker det
 
-Egen prompter er ikke en ersatz for hele systemprompten. De overskriver eller tilbyder yderligere information til den **opgavespecifikke instruktionssektion**, mens de bevarer den strukturelle udgangsformat (f.eks. `CONCEPT:`-linjer, wiki-link-syntax), som Notemd bruger for at parse.
+### Sammensætning
 
-## Hvordan det virker
+Notemd vælger standard/egen prompt, tilføjer relevante fagområde-/sproginstruktioner og indsætter opgavens variabler. Notetekst kan være en separat besked. Variabler er ikke universelle. En erstatning kan udelade `CONCEPT:` eller researchkontekst; gyldig anmodning beviser ikke parsebart eller underbygget output.
 
-### Promptarkitektur
+### Variabler
 
-Hver Notemd-opgave følger samme promptstruktur:
+Brug præcis versalisering og enkelte klammer:
 
-```
-[System role: You are a helpful assistant...]
-[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
-[Custom task prompt]                                <-- your override (optional)
-[Output format instructions]                        <-- always preserved
-[Content: {{content}}]                              <-- runtime substitution
-```
+| Opgave | Tilgængelige variabler |
+| ------ | ----------------------- |
+| Titelgenerering | `{TITLE}`, `{RESEARCH_CONTEXT_SECTION}` |
+| Researchopsummering | `{TOPIC}`, `{LANGUAGE}`, `{SEARCH_RESULTS_CONTEXT}` |
+| Oversættelse | `{LANGUAGE}`, `{TEXT}` |
+| Originalpassager | `{REFERENCE_CONTENT}`, `{USER_INPUT}` |
 
-1. **Base system prompt** -- Stiller assistentens persona. Uoverskriveligt.
-2. **Fokuseret læring domæne** -- Tilføjer `Relevant Fields: [medicine / law / computer science / ...]` for at begrænse omfang. Dette er en indstillingstoggles, ikke en ren prompt.
-3. **Egen opgavesprompt** -- Erstatser de standardopgavesinstruktioner (f.eks. hvilke koncepter der skal udhulles, hvor aggressivt der skal linkses).
-4. **Udgangsformat** -- Strukturelle regler (`CONCEPT:`-linjer, wiki-link-format). Alltid tilføjet af Notemd for at sikre parsebarhed.
-5. **Indhold** -- Den faktiske teksten, erstattet ved kørsel via `{{content}}`.
+`{LANGUAGE}` følger opgavens sprogpolitik. Links og selvstændigt begrebsudtræk sender tekst som opgaveindhold; opfind ikke flere pladsholdere. Ukendte navne udfyldes ikke. Dette er promptvariabler, ikke begrebsfilskabeloner.
 
-### Promptvariabler
+### Afgrænset fagområde
 
-Variabler er erstattet ved udførelse. Tilgængelige variabler varierer afhængigt af opgaven:
+Aktivér fokuseret læring og angiv eksempelvis `elektroteknik`. `Relevant Fields` guider opmærksomheden uden hårdt filter eller garanti for udelukkelse.
 
-| Variable | Opgaver | Erstatset med |
-|----------|-------|---------------|
-| `{{content}}` | Alle | Noten eller valgt tekst |
-| `{{concept}}` | Mall for konceptnoter | Utdrænet konceptnavn |
-| `{{description}}` | Mall for konceptnoter | Beskrivelse af koncept genereret af LLM |
-| `{{backlinks}}` | Mall for konceptnoter | Liste over kilde-noter med links |
-| `{{date}}` | Mall for konceptnoter | Aktuel dato (YYYY-MM-DD) |
-| `{{language}}` | Oversætning | Mål-sprog for udgangstekst |
-| `{{source}}` | Mall for konceptnoter | Basnavn til kilde-noten |
+## Indstillinger
 
-### Fokuseret læringdomæne
+| Opgave | Kontakt | Promptfelt |
+| ------ | --------------- | -------------- |
+| Links | `useCustomPromptForAddLinks` | `customPromptAddLinks` |
+| Titler | `useCustomPromptForGenerateTitle` | `customPromptGenerateTitle` |
+| Research | `useCustomPromptForResearchSummarize` | `customPromptResearchSummarize` |
+| Mermaid-opsummering | `useCustomPromptForSummarizeToMermaid` | `customPromptSummarizeToMermaid` |
+| Begreber | `useCustomPromptForExtractConcepts` | `customPromptExtractConcepts` |
+| Oversættelse | `useCustomPromptForTranslate` | `translatePrompt` |
+| Originaltekst | `useCustomPromptForExtractOriginalText` | `customPromptExtractOriginalText` |
 
-Fokuserede læringsegenskaberne er en gennemgang til domænespecifikation. I stedet for at skrive en eksklusiv prompt, der nævner din bransche, sætter du `focusedLearningDomain` i indstillingerne:
-
-```
-Settings → Advanced → Focused Learning Domain
-Example: "medicine" or "computer science" or "Chinese philosophy"
-```
-
-Dette fører `Relevant Fields: [medicine]` foran extraktionsprompten, hvilket får LLM til at prioritere domænespecifikke koncepte og undertrykke generiske. Det er lettere end en fuld eksklusiv prompt og virker i alle extraktionsopgaver.
-
-## Konfiguration
-
-| Indstilling | Standard | Effekt |
-|---------|---------|--------|
-| `customAddLinksPrompt` | `''` | Overrulle den standardmæssige add-links-opgaveprompt |
-| `customExtractConceptsPrompt` | `''` | Overrulle den standardmæssige konceptextraktionsprompt |
-| `customResearchPrompt` | `''` | Overrulle den standardmæssige forsknings- og sammanfattingsprompt |
-| `customTranslatePrompt` | `''` | Overrulle den standardmæssige oversætelsesprompt |
-| `customDiagramPrompt` | `''` | Overrulle den standardmæssige diagramgenerationsprompt |
-| `focusedLearningDomain` | `''` | Førstil disciplinkontekst til extraktions- og linkingsprompter |
-| `extractConceptsMinimalTemplate` | `true` | Brug kun titel-baseret konceptnotemall (hvorfor `{{concept}}`-mallens omfang påvirkes) |
-| `customConceptNoteTemplate` | `''` | Overrulle konceptnotemallen med fuld variabelstøtte |
-
-**Hvis et eksklusiv prompt-felt er tom, bruges den ibyggede standardprompten.**
+Alle kræver `enableGlobalCustomPrompts`. Tom tekst bruger standarden. Sammenlagt originaltekstudtræk har sin egen faste form, hvor almindelig override ikke gælder. Diagramgenerering kræver typet output; Mermaid-prompten er ikke universel.
 
 ## Eksempel
 
-Du er en medicinsk forsker, der extraherer koncepte fra kliniske prøvenotater. Den standardmæssige prompten extraherer generiske substantiver sammen med medicinske termer, hvilket forvirrer din konceptmappe.
+Aktivér global og begrebsspecifik kontakt, og bevar parsermarkøren:
 
-**Løsning:** Sæt en fokuseret læringdomæne og en eksklusiv extraktionsprompt.
-
-1. Sæt `focusedLearningDomain` til `medicine`
-2. Sæt `customExtractConceptsPrompt` til:
-
-```
-Extract only clinically relevant concepts: diseases, drug names,
-anatomical terms, measurement endpoints, and statistical methods.
-Ignore generic English nouns, brand names, and institutional names.
-Prioritize MeSH terminology where applicable.
+```text
+Udtræk notens vigtigste elektrotekniske begreber.
+Prioritér konkrete komponenter og fysiske mekanismer frem for generelle navneord.
+Skriv ét begreb pr. linje i præcis denne form:
+CONCEPT: Begrebets navn
+Tilføj ingen forklaringer eller omsluttende kodeblok.
 ```
 
-Når du kører "Extract concepts" på en klinisk noter, genererer LLM:
-
-```
-CONCEPT: Randomized Controlled Trial
-CONCEPT: Double-Blind Method
-CONCEPT: Myocardial Infarction
-CONCEPT: Creatine Kinase-MB
-CONCEPT: Kaplan-Meier Estimate
-```
-
-I stedet for den standardopførsel, der også kan extrahere uønskede generiske terme som "hospital" eller "month".
+Sammenlign linjer, filnavne og manglende begreber med standarden på en kopi. Gem den forrige prompt, så du kan vende tilbage.
 
 ## Tips
 
-- **Start med den fokuserede læringdomænen** før du skriver en fuld custom prompt. Det dekker 80% af brugscasene med en enkelt indstilling.
-- **Bevar udgangsformatet** -- Fjern aldrig formatinstruktioner som "one per line" eller "CONCEPT: prefix" fra custom prompts. Notemd's parser er afhængig af dem.
-- **Prøv med en enkelt not først** -- Custom prompts kan have uforutsette effekter på extraktionens bredde. Verificer på en not før batch processing.
-- **Håndhold promptsene kort** -- Overmodigt lange custom prompts bruger tokens og kan forsvage modellenes fokus.
-
----
+- Test én opgave før større batcher.
+- Bevar researchkilder og præcise citater.
+- Oversæt instruktioner med uændrede ID’er og markører.
+- Test efter modelskift; instruktioner er ingen valideringsgaranti.
 
 ## Næste trin
 
-- [Wiki-Links](/docs/features/wiki-links) -- Hvad, der lignes til, når du anpasser add-links prompten
-- [Concept Notes](/docs/features/concept-notes) -- Konceptnoter-mallere og `{{concept}}`-variabelen
-- [Batch Processing](/docs/advanced/batch-processing) -- Anvend custom prompts på hele mappeler
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Løs problemer, hvor custom prompts genererer uforutsett udgang
+- [Begreber](../features/concept-notes).
+- [Research](../features/research).
+- [Oversættelse](../features/translation).
+- [Fejlfinding](./troubleshooting).

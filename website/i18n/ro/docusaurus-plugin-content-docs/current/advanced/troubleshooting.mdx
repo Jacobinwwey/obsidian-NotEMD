@@ -1,161 +1,84 @@
 ---
 id: troubleshooting
-title: "Dezvoltarea de soluții"
-description: "Probleme comune și soluții"
+title: Depanare
+description: >-
+  Izolați problemele furnizorilor, scrierii, loturilor și exportului cu o
+  reproducere mică și dovezi curățate.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [troubleshooting, errors, diagnostics, connection test]
-concepts: [Troubleshooting, Error Handling, Diagnostics]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Depanare
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Dezvoltarea de soluții
+# Depanare
 
-<TLDR>
-**Majoritatea Notemd problemelor se încadrează în patru categorii: probleme majore API, conectivitatea la rețea, erori de autentificare (401/403) și limite de rată (429).** Testul de conectare integrat și panoul de diagnostic identifică rapid cauza fundamentală. Această pagină acoperă fiecare mesaj de eroare comun, cauza sa și soluția. Pentru probleme care nu sunt listate aici, raportați-le pe GitHub Issues împreună cu rezultatul de diagnostic.
+<TLDR>Reproduceți pe o notă de test cu același furnizor, model și setări. Citiți progresul și calea rezultatului. Separați autentificarea, generarea, parsarea și scrierea; testul conexiunii nu verifică întregul flux.</TLDR>
 
-Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Prezentare
 
-## Prezentare generală
+Notați versiunile Notemd/Obsidian, sistemul, acțiunea, protocolul, modelul și pașii minimi. Nu reporniți cât anularea se încheie. Păstrați rezultatele și recuperările până le înțelegeți proveniența.
 
-Notemd depinde de servicii externe – furnizori LLM și motoare de căutare API – astfel că majoritatea problemelor provin din afara propriu-zisului plugin. Panoul de diagnostic din setările oferă o vizualizare structurată a ultimei API apeluri, inclusiv cererea URL, statutul răspunsului și corpul erorii. Verificați-l întotdeauna în primul rând înainte de a investiga mai departe.
+## Diagnostice
 
-## Cum funcționează: Diagnostic
+### Testul conexiunii
 
-### Testul de conectare
+**Test connection** poate verifica doar lista modelelor sau o generare scurtă. Apoi rulați o sarcină mică reală cu modelul și formatul dorit.
 
-Fiecare secțiune de configurare a furnizorului are un buton **"Testa conexiunea"**. Apăsând pe el se trimit o cerere minimă API (de obicei o listă de modele sau o completare scurtă) și se raportează succesul sau eroarea specifică HTTP. Acesta este cel mai rapid mod de a verifica dacă cheia API și baza URL sunt corecte.
+### Progres și diagnostic de dezvoltator
 
-### Panoul de diagnostic
+Progresul arată starea, erorile și căile; activitatea API distinge așteptarea de finalizare. Activați debug numai când este nevoie. O cerere diagnostică lungă poate consuma cotă. Rapoartele pot conține note, răspunsuri parțiale, endpoint-uri și chei. Verificați și eliminați local datele sensibile înainte de partajare, inclusiv metadatele profilurilor curățate.
 
-**Setări --> Notemd --> Diagnostic** afișează:
+## Erori frecvente
 
-| Câmp | Conținut |
-|-------|---------|
-| Ultimul furnizor | Care furnizor a fost apelat ultim |
-| Ultimul model | Care model a fost apelat ultim |
-| Starea ultimă | Codul de stare HTTP sau eroare de transport |
-| Eroarea ultimă | Mesajul brut de eroare din API |
-| Cererea ultimă URL | Contenutul complet URL al cererii ultime (cuvintele cheie API redactate) |
-| Corpul răspunsului ultim | Corpul răspunsului trunchiat (primele 500 de caractere) |
+### Cheie invalidă sau absentă
 
-Copiați întregul output al diagnosticurilor atunci când raportați probleme pe GitHub.
+401: profilul, endpoint-ul și spațiile accidentale. 403: contul, proiectul, drepturile modelului și facturarea. Reîncercările nu repară autentificarea greșită.
 
-## Eroare comune
+### Rețea
 
-### Cuvântul cheie API invalid sau lipsit
+De pe dispozitivul Obsidian, verificați serverul, portul, protocolul și calea. Ollama/LM Studio trebuie să ruleze cu un model disponibil. `localhost` este acest dispozitiv, nu alt calculator. Alegeți profilul potrivit; fallbackul este automat, nu controlat de un comutator general de transport.
 
-**Simptom:** HTTP 401 sau „Cuvântul cheie API furnizat este incorect”
+### Limită 429
 
-**Cauză:** Cuvântul cheie API este lipsit, conține spații sau aparține unui furnizor diferit.
+Reduceți cererile simultane și verificați cotele de apeluri/tokenuri și alte utilizări ale cheii. Reîncercările rezolvă doar unele erori tranzitorii.
 
-**Soluție:**
-1. Verificați că cuvântul cheie nu are spații la început/sfârșit
-2. Confirmați că cuvântul cheie corespunde furnizorului selectat (un cuvânt cheie OpenAI nu va funcționa cu Anthropic)
-3. Verificați dacă contul dumneavoastră are credite sau o abonare activă
-4. Faceți clic pe **"Test Connection"** pentru a verifica
+### Model negăsit
 
-### Erori de rețea / conexiune
+Folosiți **Fetch models** sau un ID cunoscut de model/deployment. Verificați API-ul și regiunea. Exemplele pot expira; Azure cere deployment, iar Ark poate cere endpoint-ID.
 
-**Simptom:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+### Lipsesc linkuri sau concepte
 
-**Cauză:** Endpointul API nu este accesibil din mașina dumneavoastră.
+Verificați fișierul real, sursa utilă, formatul răspunsului și folderul de concepte activ și ales. Extragerea independentă începe cu titluri fără backlinkuri. Comparați promptul implicit dacă lipsesc marcaje.
 
-**Soluție:**
-1. Verificați conexiunea cu internet
-2. Dacă sunteți în spatele unui proxy sau firewall, verificați că domeniul API nu este blocat
-3. Pentru Ollama: confirmați că `ollama serve` rulează (`ollama list` ar trebui să returneze modele)
-4. Pentru LMStudio: confirmați că serverul rulează pe `localhost:1234`
-5. Încercați un transport diferit – utilizatorii mobile ar trebui să se asigure că transportul `requestUrl` este activ
-6. Activeazați `enableStableApiCall` pentru repetări automatice în cazul erorilor temporare
+### Rezultat absent sau în alt loc
 
-### 403 Forbidden
+Citiți calea raportată `_processed.md`, `_<language>.md` sau complete. O eroare a folderului de traducere poate folosi folderul sursei. Verificați coliziunile și drepturile înainte de repetare.
 
-**Simptom:** HTTP 403
+### Fișiere după anulare
 
-**Cauză:** Cheia API dumneavoastră este validă, dar nu are permisiuni pentru resursa solicitată.
+Scrierile finalizate rămân și cererile acceptate pot termina. Verificați fișierele și conflictele de recuperare înainte de ștergere sau reluarea întregului folder.
 
-**Soluție:**
-1. Unele modele necesită acces special (de exemplu, GPT-4 prin Azure necesită un nume de implementare)
-2. Unii furnizori restricționează modelele în funcție de nivelul planului – verificați contul dumneavoastră
-3. Pot exista restricții regionale (unii furnizori din China blochează IP-urile internaționale și invers)
-4. Verificați dacă numele modelului este scris corect (de exemplu, `gpt-4o` nu `gpt-4o-mini` atunci când modelul mini este tot ceea ce permite planul dumneavoastră)
+### Diagramă sau export în aplicație
 
-### Limita de rate (429)
+Folosiți tip/sursă suportată și verificați mediul prezentărilor/CircuitikZ. Previzualizarea nu este test al aplicației țintă. Fără previzualizare vizuală, păstrați textul sursă pentru instrumentul extern potrivit. [Diagrame](../features/diagrams).
 
-**Simptom:** HTTP 429 sau „Limita de rate a fost depășită“
+## Raportarea problemei
 
-**Cauză:** Prea multe cereri într-o perioadă scurtă de timp.
+1. Reproduceți cu o notă sintetică și folder de test.
+2. Dați versiunile, acțiunea, modelul, setările necesare și rezultatul așteptat/real.
+3. Atașați fișiere/jurnale minime fără chei, conținut privat ori metadate inutile de endpoint.
+4. Precizați dacă apare cu un singur fișier și prompturi implicite.
+5. Deschideți un [GitHub Issue](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).
 
-**Soluție:**
-1. Reduceți `batchConcurrency` la `1` sau `2`
-2. Așteptați câteva minute înainte de a încerca din nou
-3. Verificați documentația furnizorului dumneavoastră privind limita de rate pentru nivelul planului
-4. Activeazăți `enableStableApiCall` pentru repetări automatice cu backoff
-5. Luați în considerare trecerea la un furnizor cu limite mai mari (DeepSeek, Ollama)
+O captură singură rareori dovedește o eroare de format sau anulare. Oferiți sursa/rezultatul ori pași minimi când este posibil.
 
-### Modelul nu a fost găsit
+## În continuare
 
-**Simptom:** „Modelul nu a fost găsit“ sau HTTP 404
-
-**Cauză:** Numele modelului nu există la furnizorul selectat.
-
-**Rezolvare:**
-1. Faceți clic pe **"Obține lista modelurilor"** pentru a vedea toate modelele disponibile pentru furnizorul dumneavoastră
-2. Unele nume de modele se schimbă cu timpul -- verificați numele actual în documentația furnizorului
-3. Pentru Ollama: rulați `ollama list` pentru a vedea modelele extrase; doar modelele descărcate sunt disponibile
-
-### Fără legături / Fără concepte generate
-
-**Simptom:** Comanda se execută dar nu produce nicio ieșire
-
-**Cauză:** LLM a returnat o răspunsă golă sau necompilabilă.
-
-**Rezolvare:**
-1. Verificați panoul de diagnostic pentru răspunsul real de la LLM
-2. Încercați un model mai puternic (unele modele mici au dificultăți cu ieșirea structurată)
-3. Asigurați-vă că nota conține suficient conținut (>50 de cuvinte)
-4. Revizuiți promptul personal pentru instrucțiuni conflictuale
-5. Desactiveazăți temporar suprimarea sinonimelor pentru a vedea dacă aceasta filtrează prea agresiv
-
-### ID-ul endpointului Doubao lipsește
-
-**Simptom:** Erroare la utilizarea furnizorului ByteDance Doubao
-
-**Cauză:** Doubao necesită un ID de endpoint Ark (format: `ep-xxxxxxxx-xxxx-xxxx`) în loc de un nume de model.
-
-**Rezolvare:** Înlocuiți modelul placeholder implicit cu ID-ul real al endpointului dumneavoastră din consola Volcengine.
-
-## Configurație
-
-| Setarea de diagnostic | Locație | Scop |
-|--------------------|----------|---------|
-| **Testare a conexiunii** | Secțiunea Settings --> Provider | Verificați cheia API și conectivitatea |
-| **Obținerea listei de modele** | Secțiunea Settings --> Provider | Confirmați care modele sunt accesibile |
-| `enableStableApiCall` | Settings --> Avansate | Activeazăți repetări cu backoff |
-| `batchConcurrency` | Settings --> Batch | Controlați paralelismul pentru a evita limitele de rată |
-
-## Cum să raportați probleme
-
-Dacă problema dumneavoastră nu este acoperită mai sus:
-
-1. Deschideți **Setări --> Notemd --> Diagnostic**
-2. Copiați întregul rezultat al diagnosticului
-3. Deschideți o problemă pe GitHub la [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-4. Includeți: versiunea Obsidian, versiunea Notemd, furnizorul, modelul, rezultatul diagnosticului și pașii pentru a reproduce problema
-5. Redactați cheia API din orice jurnale partajate
-
----
-
-## Următoarele pași
-
-- [LLM Furnizori](/docs/providers/overview) -- Referință completă de configurare a furnizorilor
-- [Procesare în lot](/docs/advanced/batch-processing) -- Setări de concurență și reîncercare pentru operații mari
-- [Prompturi personalizate](/docs/advanced/custom-prompts) -- Corectați comportamentul neașteptat al LLM prin ajustarea prompturilor
+- [Furnizori](../providers/overview).
+- [Loturi](./batch-processing).
+- [Prompturi](./custom-prompts).
+- [Configurare](../getting-started/configuration).

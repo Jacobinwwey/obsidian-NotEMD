@@ -1,67 +1,54 @@
 ---
 id: anthropic
-title: "Anthropic"
-description: "Cấu hình Anthropic Claude"
+title: Anthropic
+description: Cấu hình Claude qua giao thức Anthropic Messages gốc mà Notemd sử dụng.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [anthropic, claude, provider, configuration]
-concepts: [Anthropic, Claude, API Configuration]
-citations:
-  - title: Anthropic API
-    url: https://docs.anthropic.com
-  - title: Claude
-    url: https://www.anthropic.com/claude
+keywords:
+  - Anthropic
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Nhà cung cấp Anthropic
 
-<TLDR>
-**Anthropic sử dụng giao thức truyền tin Messages API bản gốc, chứ không phải giao thức tương thích OpenAI.** Cài đặt mặc định hiện tại là `claude-3-5-sonnet-20240620`, `https://api.anthropic.com` và `temperature: 0.5`. Hãy coi nó như một giao diện giao thức riêng biệt khi gỡ lỗi.
+<TLDR>Dùng hồ sơ Anthropic cho Messages API gốc. Claude qua cổng tương thích OpenAI dùng hồ sơ cổng đó. Xác nhận quyền truy cập hiện tại trước khi chạy; giá trị mô hình lịch sử có thể cần đổi.</TLDR>
 
-Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Thiết lập
 
-## Cài đặt
+Chọn **Anthropic**, nhập khóa Anthropic và giữ điểm cuối gốc trừ khi triển khai của bạn cung cấp đúng cùng giao thức. Nhập ID Claude hiện có, chạy **Kiểm tra kết nối** rồi thử ghi chú với tác vụ dự định.
 
-Tạo một khóa Anthropic API, thêm hồ sơ nhà cung cấp `Anthropic`, và để Base URL ở endpoint bản gốc trừ khi bạn đang định tuyến qua một hồ sơ gateway chuyên dụng. Chọn ID mô hình Claude mà bạn muốn sử dụng trong trường model; giá trị mặc định sẽ giữ nguyên mức cơ sở của sản phẩm hiện tại.
+## Điểm cuối và xác thực
 
-Anthropic là lựa chọn tốt cho việc tóm tắt chất lượng cao, tổng hợp nghiên cứu và trích xuất khái niệm. Nếu bạn kết hợp nó với các nhà cung cấp rẻ hơn, hãy chỉ sử dụng nó cho những nhiệm vụ mà chất lượng đầu ra của nó mang lại lợi ích.
-
-## Endpoint Và Xác thực
-
-| Trường | Cài đặt mặc định |
-|-------|----------------|
-| Giao thức truyền tin | `anthropic` |
-| Khóa API | Yêu cầu |
-| Base URL | `https://api.anthropic.com` |
+| Trường | Giá trị đặt sẵn |
+| ------- | -------------- |
+| Giao vận | `anthropic` |
+| Khóa API | Bắt buộc |
+| URL cơ sở | `https://api.anthropic.com` |
 | Mô hình mặc định | `claude-3-5-sonnet-20240620` |
 | Temperature | `0.5` |
-| Kiểm tra kết nối | Chỉ chat |
+| Thử kết nối | `chat-only` |
 
-Thời gian chạy sẽ gửi yêu cầu đến `/v1/messages` với `x-api-key` và `anthropic-version: 2023-06-01`. Đừng cấu hình endpoint `/v1/chat/completions` theo kiểu OpenAI dưới cài đặt mặc định này; hãy sử dụng cài đặt gateway tương thích OpenAI thay vào đó.
+Chương trình dùng `/v1/messages` với header khóa và phiên bản API gốc. Không nhập tuyến chat kiểu OpenAI vào hồ sơ này. Mô hình mặc định phản ánh cài đặt kho mã, không tuyên bố dịch vụ vẫn cung cấp nó.
 
-## Khám phá mô hình
+## Tìm mô hình
 
-Anthropic sử dụng chế độ khám phá `anthropic-models` trong danh bạ nhà cung cấp. Nếu khóa hoặc tài khoản của bạn không thể liệt kê các mô hình, hãy giữ một ID mô hình đã biết trong hồ sơ và xác thực thông qua bài kiểm tra kết nối.
-
-Phương thức truyền dữ liệu này không thể thay thế cho các nhà cung cấp tương thích OpenAI. Một mô hình Claude được định tuyến qua OpenRouter, LiteLLM hoặc một cổng khác phải nằm trong hồ sơ của cổng đó, chứ không phải trong hồ sơ Anthropic gốc.
+Dùng tuyến danh sách Anthropic gốc khi khả dụng. Nếu quyền liệt kê bị hạn chế, nhập ID truy cập được và thử kết nối bằng chat. Xác minh riêng tác vụ dài hoặc có cấu trúc.
 
 ## Khắc phục sự cố
 
-- `401` hoặc `403`: kiểm tra phạm vi khóa, quyền truy cập workspace, việc thanh toán và xem khóa có thuộc workspace Anthropic mong muốn hay không.
-- `404`: Base URL bị sai hoặc ID mô hình được chọn không có sẵn cho tài khoản.
-- ID mô hình Claude kiểu cổng thất bại: di chuyển hồ sơ sang nhà cung cấp cổng tương ứng vì Anthropic gốc yêu cầu tên mô hình gốc.
-- Các yêu cầu dài thất bại ở giai đoạn cuối: giảm kích thước đầu ra mô hình mỗi nhiệm vụ hoặc sử dụng mô hình có giới hạn token đầu ra lớn hơn.
+- `401`/`403`: kiểm tra khóa, quyền workspace/dự án, thanh toán và mô hình.
+- `404`: kiểm tra điểm cuối và mô hình hiện có.
+- ID của cổng không hoạt động: dùng hồ sơ cổng cùng định danh nó yêu cầu.
+- Phản hồi dài thất bại: xem giới hạn đầu ra và lỗi nhà cung cấp trước khi tăng lần thử.
 
-## Khi nào nên sử dụng
+## Khi nên dùng
 
-Hãy dùng Anthropic khi chất lượng tổng hợp, ghi chú nghiên cứu hoặc viết có cấu trúc quan trọng hơn chi phí thô. Đừng dùng nó như một giải pháp thay thế tổng quát tương thích OpenAI; điểm mạnh của phương thức truyền dữ liệu riêng biệt chính là ở đó, và việc kết hợp các giao thức sẽ khiến việc chẩn đoán trở nên khó khăn hơn.
+Chọn khi điểm cuối cung cấp Anthropic Messages. So đầu ra trên nguồn của bạn, không coi lựa chọn nhà cung cấp là xếp hạng chất lượng chung. Định tuyến theo tác vụ cho phép chỉ dùng nơi đáp ứng yêu cầu.
 
----
+## Tiếp theo
 
-## Các bước tiếp theo
-
-- [LLM Providers](/docs/providers/overview) -- Cấu hình đầy đủ, mô hình mỗi nhiệm vụ và logic thử lại
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Sửa lỗi 401/403 và lỗi kết nối
+- [Tổng quan](./overview): định tuyến, thử lại và giao thức khác.
+- [Khắc phục sự cố](../advanced/troubleshooting): tách lỗi kết nối khỏi lỗi tác vụ.

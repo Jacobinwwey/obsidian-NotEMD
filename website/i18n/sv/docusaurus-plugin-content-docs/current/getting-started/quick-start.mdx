@@ -1,181 +1,82 @@
 ---
 id: quick-start
-title: "Snabbstartguide"
-description: "Börja använda Notemd på 5 minuter"
+title: Snabbstart
+description: >-
+  Förbered modellen, granska resultatet från en anteckning och utöka sedan till
+  mappar.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Snabbstart
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Snabbstartguide
+# Snabbstart
 
-<TLDR>
-**Börja använda Notemd på 5 minuter.** Tre steg: (1) Lägg till en LLM API-nyckel (eller använd lokalt Ollama), (2) Öppna en anteckning och kör “Processera fil (lägg till länkar)”, (3) Utforska enkla arbetsflöden i sidofältet. Stöder över 30 leverantörer. Ingen kodning nödvändig. Fungerar offline med Ollama.
-</TLDR>
+<TLDR>Börja med en testanteckning i Markdown och en leverantör du har tillgång till. Granska resultatfilen innan du kör en hel mapp. Molnuppgifter skickar innehåll; lokala modeller kräver en aktiv server och en förberedd modell.</TLDR>
 
-## Steg 1: Konfigurera din första LLM-leverantör (2 min)
+## 1. Konfigurera modellen
 
-### Alternativ A: Molnleverantör (OpenAI, Anthropic osv.)
+1. [Installera och aktivera](./installation), öppna **Settings → Notemd**.
+2. Välj profil, endpoint, nödvändiga autentiseringsuppgifter och tillgänglig modell. **Fetch models** ersätter inte ett genereringstest.
+3. Kör **Test connection** och åtgärda konto-, modell- eller adressfel.
+4. Sök efter **Concept note folder path** och välj en separat mapp, exempelvis `concepts`. Standardvärdet är tomt; namnet är ditt val.
 
-1. Öppna **Inställningar** → **Notemd**
-2. Under **LLM-leverantörskonfiguration** välj en leverantör från rullgardinen
-3. Ange din **API-nyckel**
-4. (Valfritt) Klicka på **“Få modelllista”** för att se tillgängliga modeller
-5. Välj en modell för varje typ av uppgift
+Hämta först Ollama-modellen och använd dess exakta namn; standardadressen är `http://localhost:11434/api`. Starta LM Studios server och välj `LMStudio`. Se [lokala modeller](../providers/local). Webbforskning kräver nätverk även med lokal sammanfattningsmodell.
 
-**Populära val:**
-- **OpenAI**: `gpt-4o-mini` (snabb, prisvärt)
-- **Anthropic**: `claude-sonnet-4-6` (hög kvalitet)
-- **DeepSeek**: `deepseek-chat` (mycket prisvärt)
+## 2. Första uppgiften
 
-### Alternativ B: Lokalt Ollama (inget API-nyckel nödvändigt)
+Skriv en kort text som får skickas till leverantören i `Notemd trial.md`:
 
-1. Installera [Ollama](https://ollama.com/)
-2. Ladda ner en modell: `ollama pull llama3.1`
-3. I Notemd inställningar, välj **"Ollama"** som leverantör
-4. Modellnamn: `llama3.1` (eller vilken modell du som helst har laddat ner)
-
-## Steg 2: Prova din första uppgift (1 min)
-
-### Lägg till Wiki-länkar i en anteckning
-
-1. Öppna en vilken anteckning som helst med meningsfull innehåll
-2. Klicka med höger mus i redigeraren
-3. Välj **"Processera fil (lägg till länkar)"**
-4. Vänta några sekunder
-5. Nyckelkoncepten är nu `[[wiki-linked]]`!
-
-**Exempel:**
-
-**Förut:**
-```
-Machine learning models use neural networks to process data.
+```text
+Maskininlärning använder neurala nätverk för att lära sig mönster.
 ```
 
-**Efter:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
+Kör **Process file (add links)** från sidopanelen eller paletten. Som standard bevaras originalet och `Notemd trial_processed.md` skapas intill. Öppna resultatet. Ett möjligt exempel:
 
-## Steg 3: Utforska funktionerna (2 min)
-
-### Extrahera konceptanteckningar
-
-1. Högerklicka → **"Extrahera koncept från aktuell fil"**
-2. Notemd skapar separata filer för varje koncept
-3. Kontrollera din konfigurerade konceptmapp (standard: `concepts/`)
-4. Varje konceptanteckning har en baklänk till din ursprungliga anteckning
-
-### Forskning och sammanfattning
-
-1. Highlightera ett ämne i din anteckning
-2. Högerklicka → **"Forskning och sammanfattning"**
-3. Notemd söker i webben (Tavily eller DuckDuckGo)
-4. Sammanfattningen läggs till i din anteckning tillsammans med källor
-
-### En-klicks-arbetsflöden
-
-1. Kolla **vänstra sidofältet** efter arbetsflödesknappar
-2. Klicka på **"En-klicks-extrahera"** i vilken anteckning som helst
-3. Det körs: lägg till länkar → extrahera koncept → forskning → generera diagram
-4. Allt i en klick!
-
-## Vanliga första uppgifter
-
-### Uppgift 1: Bearbeta en artikel/papper
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```markdown
+[[Maskininlärning]] använder [[neurala nätverk]] för att lära sig mönster.
 ```
 
-### Uppgift 2: Översätta anteckningar
+Anteckningar kan också skapas i den valda begreppsmappen. Kontrollera filer och länkar; modellen garanterar inte en fullständig eller korrekt begreppslista.
 
+## 3. Andra funktioner
+
+### Extrahera begrepp
+
+**Extract concepts (current file)** ändrar inte källan och kräver en begreppsmapp. Nya fristående anteckningar får initialt bara en titel, utan bakåtlänk. Aktivera den uttryckligen vid behov. [Begreppsanteckningar](../features/concept-notes).
+
+### Undersök och sammanfatta
+
+Välj ämne i Markdown-redigeraren eller använd titeln och kör **Research & summarize**. Välj uttryckligen Tavily med nyckel eller DuckDuckGo. Sammanfattningen läggs till i aktuell anteckning. Öppna källorna och kontrollera påståendena.
+
+### Arbetsflöde med ett klick
+
+Standardflödet **One-Click Extract**:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
 
-### Uppgift 3: Skapa en kunskapskarta
+Det lägger till länkar, fyller lämpliga anteckningar i begreppsmappen/vald mapp från titlar och reparerar Mermaid i complete-mappen. Befintliga anteckningar kan ingå. Börja i en testmapp. Webbforskning och generell diagramgenerering ingår inte automatiskt.
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## Avbryt och granska
 
-## Tips för anpassning
+**Cancel** stoppar efterföljande arbete där det stöds. Färdiga resultat ligger kvar; det är ingen återställningstransaktion och garanterar inte stoppad fjärrgenerering eller debitering. Vänta på avslut och kontrollera sökvägar och återställningskonflikter före omkörning.
 
-### Modellval per uppgift
+## Problem
 
-Du kan använda olika modeller för olika uppgifter:
-
-| Uppgift | Rekommenderad modell | Anledning |
-|------|------------------|-----|
-| Lägg till länkar | `gpt-4o-mini`, `deepseek-chat` | Snabb, många anrop |
-| Extrahera koncept | `claude-sonnet-4-6`, `gpt-4o` | Kvalitetsfull extraktion |
-| Forskning | `perplexity`, `gpt-4o` | Webbbaserat |
-| Översättning | `gemini-flash`, `gpt-4o` | Flerspråkigt |
-| Diagram | `claude-opus`, lokalt modell | Komplex resonemang |
-
-Konfigurera i: **Inställningar → Notemd → Task-specifika modeller**
-
-### Anpassade arbetsflöden
-
-Skapa din egen knapp:
-
-1. Inställningar → Notemd → Arbetsflöden
-2. Klicka på "Lägg till arbetsflöde"
-3. Ange DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Namnge det: "Min forskningsflöde"
-5. En ny knapp visas i sidofältet
-
-## Felaktighetsfelsökning
-
-### "API Nyckel ogiltig"
-- Kontrollera om nyckeln är korrekt (inga extra rum)
-- Kontrollera om kontot har krediter
-- Testa med "Connection Test"-knappen i inställningarna
-
-### "Modell inte hittad"
-- Klicka på "Get Model List" för att se tillgängliga modeller
-- Vissa leverantörer kräver specifika modellnamn (t.ex. `gpt-4o` istället för `gpt-4`)
-
-### Länkar visas inte
-- Se till att notan har tillräckligt med innehåll (>50 ord)
-- Prova en mer kraftig modell
-- Kontrollera om LLM-anropet lyckades (se diagnostikpanelen)
-
-### Långsam prestanda
-- Använd snabbare modeller (`gpt-4o-mini` istället för `gpt-4o`)
-- Minsk chunk-storleken i inställningarna
-- Aktivera parallell bearbetning för batchuppgifter
+- Konto/modell: kontrollera profil och anslutning.
+- Inga begrepp: ange en aktiverad, icke-tom mappsökväg.
+- Inga användbara länkar: granska svar och prompt; ingen minsta textlängd garanterar resultat.
+- Begränsningar: behåll samtidighet `1` medan du undersöker kvoter.
 
 ## Nästa steg
 
-- 📖 [Utforska alla funktioner](../features/wiki-links)
-- ⚙️ [Avancerad konfiguration](./configuration)
-- 🔧 [LLM Provider-inställning](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## Videotutorial
-
-Titta på den 3-minutersa snabbstartvideon (kinesisk):
-[【Fullständigt öppen källkod, gratis! NotEMD 3 minuter i snabbt gång】](https://b23.tv/lqR0RlA)
-
-## Få hjälp
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Problemer**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Dokumentation**: [Fullständig dokumentation](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Konfiguration](./configuration).
+- [Arbetsflöden](../features/workflows).
+- [Felsökning](../advanced/troubleshooting).
+- Rapportera med avidentifierat underlag i [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

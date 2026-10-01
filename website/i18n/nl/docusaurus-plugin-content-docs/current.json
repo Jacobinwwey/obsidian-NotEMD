@@ -1,18 +1,18 @@
 {
   "version.label": {
-    "message": "Volgende",
-    "description": "The label for version current"
+    "message": "Actuele documentatie",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Eerste stappen",
+    "message": "Aan de slag",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Core functies",
+    "message": "Kernfuncties",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM-providers",
+    "message": "LLM-aanbieders",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

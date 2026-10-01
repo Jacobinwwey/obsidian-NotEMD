@@ -1,14 +1,13 @@
 ---
 id: installation
 title: インストール
-description: ObsidianでNotemdをインストールする方法
+description: Obsidian のコミュニティプラグインまたは検証済み GitHub Release から Notemd を導入し、モデル接続と出力を確認します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - インストール
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,118 +15,64 @@ import TLDR from '@site/src/components/TLDR';
 # インストール
 
 <TLDR>
-**2分以内にNotemdをインストールできます。** 2つの方法があります：(1) Obsidianコミュニティプラグイン（おすすめ、ワンクリックインストール）、または(2)GitHub Releases経由の手動インストールです。Obsidian 0.15.0+が必要です。Windows、macOS、Linux、iOS、Androidで動作します。外部依存関係はありません。4k回以上ダウンロードされており、MITライセンスが適用されています。
+Obsidian のコミュニティプラグインから **Notemd** を導入するか、同じ GitHub Release のプラグインファイル三つを Vault に配置します。有効化してプロバイダーを設定し、破棄できるノートで確認してください。モデルサーバーと任意のネイティブ出力には別途準備が必要です。
 </TLDR>
 
 ## 方法1：コミュニティプラグイン（推奨）
 
-1. **Obsidian 設定**を開く（⚙️アイコンまたは`Ctrl/Cmd + ,`）
-2. **Community plugins**に移動します
-3. **Browse**をクリックしてください
-4. **"Notemd"**を検索する
-5. **インストール**をクリックしてください
-6. **Enable**をクリックしてください
+1. 対象 Vault の**設定 → コミュニティプラグイン**を開きます。
+2. 必要ならコミュニティプラグインを許可し、**閲覧**を選びます。
+3. **Notemd** を検索し、リポジトリが `Jacobinwwey/obsidian-NotEMD` であることを確認してインストールします。
+4. 有効化し、リボンアイコンまたはコマンドパレットからサイドバーを開きます。
 
-**完了しました！** 左側のサイドバーにNotemdアイコンが表示されます。
+[Obsidian で Notemd を開く](obsidian://show-plugin?id=notemd)。リンクを開けない場合は上記の手順を使ってください。このガイドを読むために専用のプロトコルハンドラーは不要です。
 
 ## 方法2：手動インストール
 
 ### 前提条件
-- Obsidian 0.15.0以上
-- Git（クローン用、任意）
+
+Obsidian と、バックアップ可能な Vault を用意します。manifest の最低バージョンは `0.15.0` ですが、現在の候補版をその古いバージョンでテストしたという意味ではありません。
 
 ### 手順
 
-1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest)から**ファイルをダウンロード**します：
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. 同じ [GitHub Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) から `main.js`、`manifest.json`、`styles.css` を取得します。`README.md` も付属しますが、実行に必要なファイルではありません。
+2. `<vault>/.obsidian/plugins/notemd/` を作り、三つのファイルを置きます。設定ディレクトリを変更した Vault では実際のパスを使用します。
+3. Obsidian を再読み込みし、プラグインを有効化します。
+4. 表示バージョンを確認してからモデル設定に進みます。新しい manifest と古い bundle を混在させないでください。
 
-2. **お使いのヴォルトのプラグインフォルダを探すには：**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## 別の方法：BRAT
 
-`plugins`フォルダが存在しない場合は、作成してください。
+[BRAT](https://github.com/TfTHacker/obsidian42-brat) を利用中なら、ベータプラグインの手順で `Jacobinwwey/obsidian-NotEMD` を追加できます。不具合再現時はバージョンを明記します。BRAT は任意の外部ツールで、通常の導入には不要です。
 
-3. **Notemd フォルダを作成する:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
+## 動作確認
 
-4. **3つのファイルを** `notemd` フォルダにコピーしてください。
+利用可能なプロバイダーとモデルで **接続をテスト** を実行し、[クイックスタート](./quick-start)に従ってノートのコピーを処理します。接続テストによってはモデル一覧の到達性だけを確認します。生成とファイル出力は実際のタスクで検証します。
 
-5. **Obsidianを再読み込みします:**
-   - `Ctrl/Cmd + R`を押すか、または
-   - Obsidianを再起動してください
+## 動作条件
 
-6. **プラグインを有効にする：**
-   - 設定 → コミュニティプラグイン
-   - リスト内の“Notemd”を探してください
-   - オンに切り替えてください。
+| 対象 | 条件と限界 |
+|---|---|
+| manifest | 最低 Obsidian `0.15.0`、`isDesktopOnly` は false |
+| 検証範囲 | リリースの日時付き検証記録を参照。実機モバイルと Obsidian 0.15.0 は未検証 |
+| クラウド LLM | ネットワーク、権限のあるアカウント／キー、対応モデル |
+| ローカル LLM | 別途導入して起動したサーバーと、取得／読み込み済みモデル |
+| ネイティブなスライド／回路出力 | デスクトップツールと形式別依存関係。実行前に環境を確認 |
 
-## 代替案：BRATを通じてインストールする
-
-[BRAT プラグイン](https://github.com/TfTHacker/obsidian42-brat)を使用する場合：
-
-1. BRATの設定を開く
-2. 「Betaプラグインを追加」をクリックしてください。
-3. 入力してください：`Jacobinwwey/obsidian-NotEMD`
-4. 「プラグインを追加」をクリックしてください。
-5. CommunityプラグインでNotemdを有効にする
-
-## 検証
-
-インストール後、Notemdが正常に動作しているか確認してください：
-
-1. 任意のノートを開く
-2. エディタで右クリックします
-3. Notemdのコマンドは次のように表示されるはずです：
-   - ファイルを処理する（リンクを追加）
-   - 「概念を抽出する」
-   - 「調査して要約する」
-
-## 次のステップ
-
-- **LLMプロバイダの設定:** [クイックスタート →](./quick-start)
-- **トラブルシューティング:** [よくある問題 →](../advanced/troubleshooting)
-
-## システム要件
-
-| プラットフォーム | バージョン | ステータス |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | 必要です |
-| **Windows** | 7+ | ✅ サポート済み |
-| **macOS** | 10.15+ | ✅ サポート済み |
-| **Linux** | 何でも | ✅ サポート済み |
-| **iOS** | 15+ | ✅ サポート済み |
-| **Android** | 5+ | ✅ サポート済み |
+任意の出力機能すべてに適用できる OS バージョン保証はありません。プラグイン内の回路プレビューは TeX コンパイルの証明ではなく、デスクトップ検証からモバイルの動作も推定できません。
 
 ## アンインストール
 
-Notemdを削除するには：
+コミュニティプラグインから無効化または削除します。生成ノートや成果物は Vault の通常ファイルとして残るため、削除前に確認してください。再導入するなら設定を保存します。アンインストールは完了済みの編集を取り消しません。
 
-1. 設定 → コミュニティプラグイン
-2. Notemdを探す
-3. ❌アイコンをクリックしてください
-4. 必要に応じて、プラグインフォルダを削除してください：`<vault>/.obsidian/plugins/notemd/`
+## 更新
 
-お客様のデータ（メモ、コンセプトノートなど）はそのまま変更されません。
+コミュニティプラグインの更新確認を使います。手動更新ではタスクを停止し、Vault と設定をバックアップしてから、同じリリースの三つの実行ファイルに置き換えて再読み込みします。リリースノートを読み、小規模な試行後にバッチを再開します。
 
-## 更新中
+Vault の設定ファイルをリリース添付で置き換えないでください。戻す場合はバックアップを保ち、互換性が確認されたバージョンを明示的に選び、必要な生成物を残します。
 
-### 自動更新（推奨）
-Obsidianは自動的にプラグインの更新をチェックします。新しいバージョンが利用可能な場合：
-1. 設定 → コミュニティプラグイン
-2. 「アップデートの確認」をクリックしてください。
-3. Notemdの横にある「更新」をクリックしてください。
+## 次に読む
 
-### 手動でのアップデート
-最新版をダウンロードし、プラグインフォルダ内の3つのファイルを置き換えてください。
-
-## ヘルプの取得
-
-- 📖 [クイックスタートガイド](./quick-start)
-- ❓ [FAQ](../faq)
-- 💬 [Discordコミュニティ](https://discord.gg/qnGgsQ9W)
-- 🐛 [問題を報告する](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [クイックスタート](./quick-start)：最初のタスク。
+- [設定](./configuration)：モデル、言語、出力先。
+- [トラブルシューティング](../advanced/troubleshooting)：起動、接続、出力の失敗。
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)：再現可能な問題の報告。

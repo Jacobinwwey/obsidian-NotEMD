@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Notemd 1.9.8-এ উন্নীত হওয়া
+description: >-
+  1.9.7-এর পর reliability, native export ও documentation পরিবর্তন দেখে
+  নিয়ন্ত্রিত upgrade করুন।
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Notemd 1.9.8-এ উন্নীত হওয়া
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.8-এ উন্নীত হওয়া
+
+<TLDR>1.9.8 cancellation, output ownership, consistent batch retrieval, native export ও সঠিক documentation-এ জোর দেয়। Public GitHub Release-এ availability দেখুন এবং একই release-এর files নিন। Provider/diagram সংখ্যা আগে থেকেই থাকা ক্ষমতা।</TLDR>
+
+## 1.9.7-এর পরে
+
+| ক্ষেত্র | প্রভাব |
+| ------ | ------------- |
+| Cancellation | Scheduling, transports ও retries-তে shared status; late response guarded writes চালায় না |
+| Artifact persistence | Overlapping saves/recovery-তে same-name sources ও shared attachments ownership |
+| Local retrieval | Batch titles-এ এক snapshot; fixed corpus ও memory measurement |
+| Native output | Merged cells-এর নিচে PowerPoint separators ও CircuitikZ wires/labels ঠিক |
+| Verification | Linux/Windows CI, diagnostic-level lint, process tests ও native evidence |
+| Documentation | Actual defaults, চার audience path, direct translations ও controlled publication |
+
+History search asynchronous refresh-এ consecutive typing ও caret রাখে। Drawer Tab ভেতরে ধরে, loading-এ focus নেয় এবং Escape-এ parent preview বন্ধ করে না। Retry ও stale responses browser regression-এ আছে।
+
+Research/translation final read বা folder preparation-এর পরে append/create/overwrite-এর আগে cancellation দেখে। Vault-accepted writes completed results থাকে। অন্য task অপেক্ষার মধ্যে translation folder বানালে reuse হয়, নিজের creation হিসেবে নয়। Conflicting file বা এখনও missing directory-তে error এবং source-folder fallback থাকে।
+
+36 profiles ও 33 executable diagram entries 1.9.7-এ ছিল। Runtime, docs ও merges আলাদা গণনা করা হয়।
+
+## নিরাপদ upgrade
+
+1. Tasks থামিয়ে vault/settings backup নিন।
+2. Community plugins দিয়ে update বা একই [public 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8)-এর `main.js`, `manifest.json`, `styles.css` নিন।
+3. হাতে শুধু runtime বদলান; settings/results রাখুন।
+4. Reload করে version দেখুন।
+5. বড় batch-এর আগে disposable note ও ছোট folder পরীক্ষা করুন।
+
+Command IDs ও settings অপরিবর্তিত। One-Click Extract এখনও links, batch titles ও Mermaid repair। Documentation correction default chain-এ research যোগ করে না।
+
+## Cancel ও recovery
+
+Cancel reverse transaction নয়। Completed files থাকে, accepted requests/writes শেষ হতে পারে, remote billing provider নিয়ন্ত্রণ করে। অপেক্ষা করে outputs দেখুন। Conflicts দৃশ্যমান: current note ও recovery তুলনা করে সরান। পুরোনো artifacts যে companion folders ব্যবহার করে সেগুলো রাখুন।
+
+## Export ও compatibility সীমা
+
+- PowerPoint-এর targeted native assertions আছে; whole-slide score আগে defect ধরেনি।
+- Mermaid/SVG in PPTX image fallback হতে পারে।
+- Static Drawnix cross-branch সম্পর্ক reflow-এর পরে attachment প্রমাণ করে না।
+- CircuitikZ preview ও TeX compile আলাদা tests।
+- Physical mobile ও Obsidian 0.15.0 এখনও unverified।
+- Frozen lexical evidence semantic search বা যেকোনো vault-এর performance প্রমাণ নয়।
+
+## Release অখণ্ডতা
+
+Publisher version ও local/remote tag identity যাচাই, clean tagged source rebuild, draft upload ও downloaded hash check করে public করে। `main.js`, `manifest.json`, `styles.css`, `README.md` দরকার। Retry public bytes unrelated output দিয়ে বদলাতে পারে না।
+
+Public Release যাচাইয়ের পরে Pages deploy হয়। Codex LM Studio বা translation engine ছাড়া সরাসরি লেখে ও review করে। এটি independent native-speaker review-এর দাবি নয়।
+
+## পরবর্তী ধাপ
+
+- [Release ও English/Chinese notes](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8)।
+- [দ্রুত শুরু](../getting-started/quick-start)।
+- [Batch](../advanced/batch-processing)।
+- [Developers](../developers/overview), [Agent](../agents/overview)।
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)-এ versions ও sanitized evidence দিন।

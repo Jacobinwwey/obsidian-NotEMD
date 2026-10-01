@@ -1,189 +1,140 @@
 ---
 id: overview
-title: "Παρόχοι LLM"
-description: "Ρυθμίστε 36 παρόχους LLM — σύνδεση στο cloud, γέιτγουέι και τοπικά — με επιλογή μοντέλου ανά εργασία"
+title: Πάροχοι LLM
+description: >-
+  Ρυθμίστε 36 προφίλ σε πέντε οικογένειες πρωτοκόλλων και ελέγξτε το μοντέλο
+  κάθε εργασίας.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
-concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: Anthropic API
-    url: https://docs.anthropic.com
+keywords:
+  - Πάροχοι LLM
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Παρόχοι LLM
+# Πάροχοι LLM
 
-<TLDR>
-**Notemd υποστηρίζει 36 παρόχους LLM σε 4 τύπους μεταφοράς.** Όλες οι κλήσεις API χρησιμοποιούν ακατέργαστο HTTP (χωρίς SDKs) με αυτόματη επανεπιχείρηση, εναλλακτική μεταφορά και αποθήκευση απαντήσεων για 5 λεπτά. Η επιλογή μοντέλου ανά εργασία σας επιτρέπει να χρησιμοποιήσετε φθηνά μοντέλα για εξαγωγή έννοιων και ισχυρά μοντέλα για έρευνα. Δεν απαιτείται κλειδί API για τοπικούς παρόχους (Ollama, LMStudio).
-</TLDR>
+<TLDR>Υπάρχουν 36 προφίλ σε πέντε οικογένειες: OpenAI-compatible, Anthropic, Google, Azure OpenAI και Ollama. Επιλέξτε το πρωτόκολλο του endpoint, επιτρεπόμενα δεδομένα και διαθέσιμο μοντέλο. Οι αρχικές τιμές είναι παραδείγματα που αλλάζουν, όχι εγγύηση σημερινής διαθεσιμότητας.</TLDR>
 
-Αυτό αποτελεί μέρος του [Obsidian Οδηγού Διαχείρισης Γνώσης AI](/docs/pillar-ai-knowledge).
+## Κατηγορίες
 
-## Κατηγορίες Παρόχων
+Οι πίνακες προέρχονται από το μητρώο. Διατηρήστε σχήμα URL και πλήρη διαδρομή· αντικαταστήστε παραδείγματα με την πραγματική σας εγκατάσταση. Δικαιώματα, τιμές και απόσυρση μοντέλων ορίζονται από τον πάροχο.
 
-### Παρόχοι Cloud
+### Cloud
 
-| Παρόχος | Βασικό URL προεπιλογή | Προεπιλεγμένο μοντέλο | Θερμοκρασία |
-|----------|-----------------|---------------|-------------|
-| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
-| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
-| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
-| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
-| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
-| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
-| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
-| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
-| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+| Πάροχος | Αρχικό μοντέλο | Βασική διεύθυνση |
+| ---------- | -------------- | ----------------- |
+| **DeepSeek** | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| **Qwen** | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Qwen Code** | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Doubao** | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| **Moonshot** | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| **Xiaomi MiMo** | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| **Z AI** | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| **Baidu Qianfan** | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| **SiliconFlow** | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| **Huawei Cloud MaaS** | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
+| **OpenAI** | `gpt-4o` | `https://api.openai.com/v1` |
+| **Anthropic** | `claude-3-5-sonnet-20240620` | `https://api.anthropic.com` |
+| **Google** | `gemini-2.0-flash-exp` | `https://generativelanguage.googleapis.com/v1` |
+| **Mistral** | `mistral-large-latest` | `https://api.mistral.ai/v1` |
+| **Azure OpenAI** | `gpt-4o` | Ορίστε το endpoint του πόρου Azure |
+| **xAI** | `grok-4` | `https://api.x.ai/v1` |
+| **Groq** | `moonshotai/kimi-k2-instruct-0905` | `https://api.groq.com/openai/v1` |
+| **Together** | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | `https://api.together.xyz/v1` |
+| **Fireworks** | `accounts/fireworks/models/kimi-k2p5` | `https://api.fireworks.ai/inference/v1` |
+| **Nebius** | `openai/gpt-oss-120b` | `https://api.studio.nebius.com/v1` |
+| **Cerebras** | `gpt-oss-120b` | `https://api.cerebras.ai/v1` |
 
-### Παρόχοι Γέιτγουέι / Proxy
+### Πύλες και proxy
 
-| Παρόχος | Βασικό URL προεπιλογή | Προεπιλεγμένο μοντέλο | Σημειώσεις |
-|----------|-----------------|---------------|-------|
-| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | Προσθέτει τα επικεφάλαια `HTTP-Referer` + `X-Title` |
-| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | Προσθέτει το επικεφάλαιο `X-GitHub-Api-Version` |
-| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | Προσθέτει το επικεφάλαιο `APP-Code` |
-| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
-| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
-| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
-| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
-| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
-| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | Επιλεκτικό κλειδί API |
-| **Νέο API** | `localhost:3000/v1` | `gpt-4.1` | Επιλεκτικό κλειδί API |
-| **OpenAI Compatible** | (user-configured) | `your-model-id` | Προσαρμοσμένο σημείο άκρου |
+| Πάροχος | Αρχικό μοντέλο | Βασική διεύθυνση |
+| ---------- | -------------- | ----------------- |
+| **OpenRouter** | `anthropic/claude-3.7-sonnet` | `https://openrouter.ai/api/v1` |
+| **AIHubMix** | `gpt-4o-mini` | `https://aihubmix.com/v1` |
+| **GitHub Models** | `gpt-4o-mini` | `https://models.github.ai/inference` |
+| **PPIO** | `qwen/qwen3-32b` | `https://api.ppinfra.com/v3/openai` |
+| **New API** | `gpt-4.1` | `http://localhost:3000/v1` |
+| **LiteLLM** | `your-proxy-model` | `http://localhost:4000/v1` |
+| **Hugging Face** | `openai/gpt-oss-120b` | `https://router.huggingface.co/v1` |
+| **Vercel AI Gateway** | `anthropic/claude-sonnet-4.5` | `https://ai-gateway.vercel.sh/v1` |
+| **Requesty** | `anthropic/claude-3-7-sonnet-latest` | `https://router.requesty.ai/v1` |
+| **OpenAI Compatible** | `your-model-id` | `https://your-openai-compatible-endpoint/v1` |
 
-### Κινεζικοί παρόχοι
+### Τοπικά
 
-| Παρόχος | Default Base URL | Προεπιλεγμένο μοντέλο | Σημειώσεις |
-|----------|-----------------|---------------|-------|
-| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | Alibaba DashScope |
-| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | Με επικέντρωση στον προγραμματισμό |
-| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | (απαιτείται ID σημείου πρόσβασης) | ByteDance Volcengine |
-| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
-| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
-| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | Σημείο άκρου Zhipu, Κίνα |
-| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Σημείο άκρου Zhipu, διεθνές |
-| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
-| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
-| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | Πλατφόρμα φιλοξενίας μοντέλων |
-| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+| Πάροχος | Αρχικό μοντέλο | Βασική διεύθυνση |
+| ---------- | -------------- | ----------------- |
+| **OVMS** | `openvino-model` | `http://localhost:8000/v3` |
+| **LMStudio** | `local-model` | `http://localhost:1234/v1` |
+| **Ollama** | `llama3` | `http://localhost:11434/api` |
 
-**Doubao απαιτεί ID σημείου άκρου Ark** (μορφή: `ep-xxxxxxxx-xxxx-xxxx`). Ο προεπιλεγμένος χώρος αντικατάστασης πρέπει να αντικατασταθεί.
+### Κινεζικοί πάροχοι
 
-### Τοπικοί πάροχοι
+Δείτε [περιφερειακή διαμόρφωση](./china). Η κατηγορία δεν εγγυάται γεωγραφική διαθεσιμότητα ή ποιότητα κινεζικών. Συνδυάστε σωστά περιοχή λογαριασμού, endpoint και πρόσβαση μοντέλου.
 
-| Παρόχος | Default Base URL | Προεπιλεγμένο μοντέλο | Σημειώσεις |
-|----------|-----------------|---------------|-------|
-| **Ollama** | `localhost:11434/api` | `llama3` | Δεν υπάρχει κλειδί API. Στριμινγκ NDJSON. Ανακάλυψη μοντέλων μέσω `/api/tags` |
-| **LMStudio** | `localhost:1234/v1` | `local-model` | Αποστέλλει `"EMPTY"` ως τοκέν προσωπικοποίησης. Ανακάλυψη συμβατή με OpenAI |
-| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO Model Server |
-| **Azure OpenAI** | (χρησιμοποιητής-διαμόρφωτο) | `gpt-4o` | Όνομα ανάπτυξης στο URL. `api-key` επίκεφαλο |
+## Επιλογή ανά εργασία
 
-## Επιλογή μοντέλου ανά εργασία
+Το `useMultiModelSettings` ενεργοποιεί ξεχωριστούς παρόχους/μοντέλα· αλλιώς ισχύει `activeProvider`. Κενό μοντέλο χρησιμοποιεί του παρόχου. Μη έγκυρες αποθηκευμένες επιλογές παρόχων προσαρμόζονται στον ενεργό κατά τη φόρτωση.
 
-Το Notemd υποστηρίζει ανεξάρτητους πάροχους και μοντέλα για κάθε εργασία. Ενεργοποιήστε με `useMultiModelSettings: true`.
+| Εργασία | Ρύθμιση παρόχου | Πεδίο μοντέλου |
+| ------ | ------------------ | ---------------- |
+| Σύνδεσμοι | `addLinksProvider` | `addLinksModel` |
+| Παραγωγή τίτλων | `generateTitleProvider` | `generateTitleModel` |
+| Σύνοψη έρευνας | `researchProvider` | `researchModel` |
+| Μετάφραση | `translateProvider` | `translateModel` |
+| Έννοιες | `extractConceptsProvider` | `extractConceptsModel` |
+| Σύνοψη Mermaid | `summarizeToMermaidProvider` | `summarizeToMermaidModel` |
+| Πρωτότυπο κείμενο | `extractOriginalTextProvider` | `extractOriginalTextModel` |
 
-### Διαθέσιμες εργασίες
+Ο ενεργός και οι αποθηκευμένοι πάροχοι εργασιών αρχίζουν ως DeepSeek. Αλλαγή μόνο του ενεργού δεν αντικαθιστά τις ενεργοποιημένες διαδρομές εργασιών. Ελέγξτε πριν από ιδιωτικό υλικό.
 
-| Εργασία | Κλειδί ρυθμίσεων | Προεπιλεγμένος πάροχος |
-|------|-------------|-----------------|
-| Προσθήκη συνδέσμων (εισαγωγή wiki-link) | `addLinksProvider` / `addLinksModel` | DeepSeek |
-| Έρευνα (αναζήτηση στο Διαδίκτυο + σύνοψη) | `researchProvider` / `researchModel` | DeepSeek |
-| Δημιουργία από τίτλο | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
-| Μετάφραση | `translateProvider` / `translateModel` | DeepSeek |
-| Δημιουργία διαγράμματος | `summarizeToMermaidProvider` / `Model` | DeepSeek |
-| Ανάκτηση έννοιας | `extractConceptsProvider` / `Model` | DeepSeek |
-| Ανάκτηση αυθεντικού κειμένου | `extractOriginalTextProvider` / `Model` | DeepSeek |
+## Αρχιτεκτονική αιτημάτων
 
-### Τάξη επίλυσης
+### Επίπεδα μεταφοράς
 
-1. Αν το `useMultiModelSettings` είναι ενεργό → χρησιμοποιήστε τον πάροχο και το μοντέλο που αφορούν τη συγκεκριμένη εργασία
-2. Αν η υπερκατάσταση μοντέλου της εργασίας είναι κενή → επιστρέψτε στο προεπιλεγμένο μοντέλο του πάροχου
-3. Αν ο πάροχος της εργασίας είναι μη έγκυρος → επιστρέψτε στο παγκόσμιο `activeProvider`
-4. Αν το `useMultiModelSettings` είναι απενεργοποιημένο → όλες οι εργασίες χρησιμοποιούν το παγκόσμιο `activeProvider`
+Το Notemd χρησιμοποιεί αιτήματα Obsidian και fallback που γνωρίζει το πρωτόκολλο. Στον υπολογιστή μπορεί να χρησιμοποιήσει ροές Node HTTP, αλλού fetch. Claude μέσω πύλης OpenAI-compatible χρησιμοποιεί το προφίλ πύλης, όχι το εγγενές API Anthropic.
 
-### Συνιστώμενες διαμόρφωσεις
+### Επαναλήψεις
 
-```
-# Researcher: power for research, cheap for everything else
-activeProvider: DeepSeek
-extractConceptsProvider: DeepSeek
-researchProvider: OpenAI        # GPT-4o for better research quality
-summarizeToMermaidProvider: DeepSeek
+Η σταθερή λειτουργία είναι ανενεργή· σχετικές αρχικές τιμές είναι τρεις επαναλήψεις ανά πέντε δευτερόλεπτα. Προσωρινά λάθη μπορούν να περάσουν από κοινό fallback/επανάληψη. Διορθώστε ξεχωριστά πρόσβαση και ρύθμιση μοντέλου. Μεγάλα αιτήματα μπορούν ακόμη να λήξουν ή να υπερβούν όρια χρήσης.
 
-# Privacy-first: local only
-activeProvider: Ollama
-addLinksProvider: Ollama
-extractConceptsProvider: Ollama
+### Προσωρινή μνήμη απαντήσεων
 
-# Budget bilingual
-activeProvider: DeepSeek
-translateProvider: Google      # Gemini Flash for translation
-researchProvider: SiliconFlow  # Cheaper China-based routing
-```
+Περιορισμένη cache μνήμης μπορεί να επαναχρησιμοποιήσει επιτυχείς απαντήσεις. Endpoint, μοντέλο, παράμετροι παραγωγής, οδηγία και περιεχόμενο καθορίζουν την ταυτότητα. Δεν είναι μόνιμη αποθήκευση ή μετρητής κόστους και δεν εγγυάται δωρεάν επανάληψη.
 
-## Αρχιτεκτονική κλήσης API
+### Μοντέλα συλλογισμού
 
-### Στρώματα μεταφοράς
+Reasoning/thinking ακολουθούν κανόνες προφίλ και μοντέλου. Μη μεταφέρετε ειδικές παραμέτρους πρωτοκόλλου μεταξύ υπηρεσιών. Δοκιμάστε πραγματική εργασία· μοντέλα μπορεί να απορρίπτουν ρυθμίσεις tokens, δειγματοληψίας ή συλλογισμού.
 
-1. **Obsidian `requestUrl`** — πρωταρχικό (ενσωματωμένο, λειτουργεί σε όλες τις πλατφόρμες)
-2. **Desktop HTTP** — μόντουλα Node.js `http`/`https` (στριμινγκ + μακρά αιτήματα)
-3. **Web `fetch`** — εναλλακτική λύση όταν τα μόντουλα Node.js δεν είναι διαθέσιμα
+### Εκτίμηση tokens
 
-Το πρόσθετο μεταβάλλεται αυτόματα μεταξύ των στρωμάτων μεταφοράς σε προσωρινές σφάλματα δικτύου.
+Μήκος κειμένου και όρια εξόδου δεν είναι ακριβής μέτρηση tokens παρόχου. Υπολογίστε χρέωση με πραγματική κατανάλωση. Δεν υπάρχει γενική εγγύηση εκτίμησης κόστους.
 
-### Λογική επαναπροσπάθειας
+## Εύρεση μοντέλων
 
-- **Φυσιολογικός λειτουργικός τρόπος** (`enableStableApiCall: false`): Μία προσπάθεια. Σε προσωρινή αποτυχία, γίνεται αυτόματη εξέλιξη σε σταθερή επαναπροσπάθεια.
-- **Λειτουργικός τρόπος σταθερής επαναπροσπάθειας** (`enableStableApiCall: true`): Μέχρι 4 προσπάθειες (1 + 3 επαναπροσπάθειες) με διαστήματα 5 σεκόνδων.
-- **Προσωρινά σφάλματα που πυροδοτούν επαναπροσπάθεια**: `err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
-- **Μη επαναπροσπαθήσιμα**: HTTP 400, 401, 403, 404
+Το **Fetch models** λειτουργεί όπου υποστηρίζεται. Ορισμένα deployments θέλουν χειροκίνητο ID. Δικαιώματα λίστας και παραγωγής είναι ανεξάρτητα. Το **Test connection** μπορεί να περάσει μόνο από λίστα στο `models-then-chat`, ενώ `chat-only` παράγει σύντομα. Ελέγξτε την πραγματική εργασία και μορφή εξόδου.
 
-### Κεμπάδωση απαντήσεων
+- Anthropic και Google χρησιμοποιούν το δικό τους API εύρεσης.
+- Ollama δείχνει ληφθέντα tags, LM Studio μοντέλα διακομιστή.
+- Azure απαιτεί deployment και έκδοση API.
+- Πύλες μπορούν να περιορίζουν λίστες αλλά να επιτρέπουν κλήση με ρητό ID.
 
-5 λεπτά κεμπάδωση LRU σε μνήμη, βασισμένη σε πάροχο + μοντέλο + θερμοκρασία + πρόταση + περιεχόμενο. Συνεχής ίδιες αιτήσεις εντός 5 λεπτών επιστρέφουν αμέσως τα κεμπαδωμένα αποτελέσματα.
+## Έναρξη
 
-### Μεταχείριση μοντέλων σκέψης
+1. Επιλέξτε σωστό προφίλ στο **Settings → Notemd**.
+2. Δώστε endpoint, κλειδί και διαθέσιμο μοντέλο/deployment.
+3. Δοκιμάστε σύνδεση και προσωρινή σημείωση.
+4. Ελέγξτε αποτέλεσμα/αναφορά πριν από παρτίδες ή δρομολόγηση εργασιών.
 
-Τα μοντέλα που δεν υποστηρίζουν τον ρόλο `system` (DeepSeek R1, OpenAI o1/o3/o4/gpt-5) έχουν αυτόματα τις προτάσεις σύστηματος + χρήστη συνδυασμένες σε μία μόνο πρόταση χρήστη.
+Τοπικά πρέπει να είναι έτοιμος ο διακομιστής και το μοντέλο. Το Ollama δεν απαιτεί κλειδί· το LM Studio το δέχεται προαιρετικά, αρχικά `EMPTY`. Χρησιμοποιήστε πραγματικό token όπου απαιτείται. Τοπικό LLM δεν κάνει την αναζήτηση ιστού offline.
 
-DeepSeek-specific: `thinkingEnabled` προσθέτει `{ thinking: { type: 'enabled' } }` στην αίτηση. `reasoningEffort` (low/medium/high) μεταδίδεται ως `reasoning_effort`. Επαληθεύει ότι τα μέγιστα τόκεν εξόδου ≥ 8000 όταν η λειτουργία thinking είναι ενεργή.
+## Συνέχεια
 
-### Token Estimation
-
-`estimateTokens(text)`: `Math.ceil(text.length / 4)` — αλγόριθμος heuristic 4 χαρακτήρες ανά τόκεν. Χρησιμοποιείται για να επιβληθεί `maxResearchContentTokens` πριν από την αποστολή στο LLM.
-
-Δεν υπάρχει υλοποίηση παρακολούθησης κόστους.
-
-## Ανακάλυψη μοντέλων
-
-| Μοδός | Providers | Endpoint |
-|------|-----------|----------|
-| `ollama-tags` | Ollama | `/api/tags` |
-| `google-models` | Google | Κατάλογος μοντέλων API |
-| `anthropic-models` | Anthropic | Κατάλογος μονδέλων API |
-| `openai-compatible-models` | DeepSeek, Qwen, Mistral, κ.λπ. | `/v1/models` |
-| `openrouter-models` | OpenRouter | Κατάλογος μοντέλων API |
-| `github-models` | GitHub Models | Inference API |
-| `none` | Azure OpenAI | Απενεργοποιημένο (απαιτεί όνομα ανάπτυξης) |
-
-## Quick Start
-
-1. **Επιλέξτε έναν πάροχο** — DeepSeek (Κίνα), OpenAI (Διεθνής), ή Ollama (Τοπικό/Μη χρεώσιμο)
-2. **Εισάγετε τον κλειδί API** — Settings → Notemd → Provider → API Key
-3. **Δοκιμάστε σύνδεση** — Κάντε κλικ στο κουμπί δοκιμής
-4. **Προαιρετικά: Μοντέλα ανά εργασία** — Ενεργοποιήστε `useMultiModelSettings` και ρυθμίστε τα ξεχωριστά
-
-Για Ollama: δεν χρειάζεται το κλειδί API. Απλώς βεβαιωθείτε ότι το `ollama serve` λειτουργεί.
-
----
-
-## Επόμενα βήματα
-
-- 📝 [Σημειώσεις Συνέπειας](/docs/features/concept-notes) — Χρησιμοποιεί μοντέλο εξαγωγής ανά εργασία
-- 🎨 [Διαγράμματα](/docs/features/diagrams) — Χρησιμοποιεί μοντέλο διαγράμματος ανά εργασία
-- 🔍 [Έρευνα](/docs/features/research) — Χρησιμοποιεί μοντέλο ειδικό για έρευνα
-- ⚙️ [Ρύθμιση](/docs/getting-started/configuration) — Πλήρης αναφορά ρυθμίσεων
+- [OpenAI](./openai), [Anthropic](./anthropic), [Google](./google), [κινεζικοί πάροχοι](./china), [τοπικά μοντέλα](./local).
+- [Ρυθμίσεις](../getting-started/configuration).
+- [Αντιμετώπιση προβλημάτων](../advanced/troubleshooting).

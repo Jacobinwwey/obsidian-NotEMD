@@ -1,181 +1,80 @@
 ---
 id: quick-start
-title: "Rácsoló felhasználói útmutató"
-description: "5 perc alatt kezdjük el a használatot Notemd-vel"
+title: Gyors kezdés
+description: 'Készítse elő a modellt, ellenőrizzen egy jegyzetet, majd térjen át mappákra.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Gyors kezdés
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Rácsolási útmutató
+# Gyors kezdés
 
-<TLDR>
-**5 perc alatt kezdje használatát a Notemd-vel.** Három lépés: (1) Hozzáfűzzön egy LLM API kulcsot (vagy használja a helyi Ollama-t), (2) Nyitja egy jegyet és futtassa el a „Process file (add links)” parancsot, (3) Az oldalsávon keresse fel az egyszer kattintással futtató munkafolyamatokat. Támogatja 30+ szolgáltatót. Nincs programozás szüksége. Működik offline-ban is a Ollama segítségével.
-</TLDR>
+<TLDR>Kezdjen egy próba Markdown-jegyzettel és elérhető szolgáltatóval. Teljes mappa előtt ellenőrizze a kimeneti fájlt. A felhőfeladatok tartalmat küldenek; a helyi modellekhez is futó kiszolgáló és előkészített modell szükséges.</TLDR>
 
-## 1. lépés: Konfigurálja a első LLM fornítóját (2 perc)
+## 1. A modell beállítása
 
-### Opció A: Felhőszolgáltató (OpenAI, Anthropic stb.)
+1. [Telepítés és engedélyezés](./installation) után nyissa meg a **Settings → Notemd** oldalt.
+2. Válasszon profilt, végpontot, szükséges hitelesítő adatokat és elérhető modellt. A **Fetch models** nem helyettesíti a generálási próbát.
+3. Futtassa a **Test connection** műveletet, és javítsa a fiók-, modell- vagy címhibákat.
+4. A **Concept note folder path** mezőben válasszon külön mappát, például `concepts`. Alapból üres; a név az Ön választása.
 
-1. Nyisd meg a **Beállításokat** → **Notemd**
-2. **LLM Feltőltő konfigurációja** alatt válassza ki egy feltőltőt a lehulló menüből
-3. Írd be a **API kulcsodat**
-4. (Vagy) Kattints a **"Get Model List"** gombra, hogy lásd a létrehozható modelleket
-5. Válassza ki egy modellt minden munkaterület számára
+Ollamánál előbb töltse le a modellt, majd adja meg pontos nevét; az alapcím `http://localhost:11434/api`. LM Studiónál indítsa el a szervert, és válassza a `LMStudio` profilt. Lásd [helyi modellek](../providers/local). A webes kutatás helyi összefoglaló modell mellett is hálózatot használ.
 
-**Populáris választások:**
-- **OpenAI**: `gpt-4o-mini` (gyors, olcsó)
-- **Anthropic**: `claude-sonnet-4-6` (magas minőség)
-- **DeepSeek**: `deepseek-chat` (kiválóan olcsó)
+## 2. Az első feladat
 
-### Opcion B: Lokális Ollama (Nem szükséges API kulcs)
+A `Notemd trial.md` fájlba írjon rövid, a szolgáltatónak elküldhető szöveget:
 
-1. Telepítsük a [Ollama](https://ollama.com/)-t
-2. Letöltse egy modellt: `ollama pull llama3.1`
-3. A Notemd beállításainál válassza ki **"Ollama"**-t a fornalmaként
-4. Modellneve: `llama3.1` (vagy bármely más letöltött modell)
-
-## 2. lépés: Próbálja el az első munkát (1 perc)
-
-### Hozzáadja Wiki-hivatkozásokat egy jegyhez
-
-1. Nyitja bármilyen jelentős tartalmú jegyet
-2. Kattints jobb kattintással a szerkesztőben
-3. Válassza ki **"Fájlt kezelje (hivatkozások hozzáadása)"**
-4. Várjon néhány másodpercet
-5. A kulcsfontosságú konceptek most `[[wiki-linked]]`!
-
-**Példa:**
-
-**Előtt:**
-```
-Machine learning models use neural networks to process data.
+```text
+A gépi tanulás neurális hálózatokat használ mintázatok felismerésére.
 ```
 
-**Után:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
+Indítsa el a **Process file (add links)** műveletet az oldalsávból vagy a parancspalettáról. Alapból megmarad az eredeti, és mellette létrejön a `Notemd trial_processed.md`. Nyissa meg. Példa:
 
-## 3. lépés: Felismerje a funkciókat (2 perc)
-
-### Kiemelje a konceptjelölt jegyeket
-
-1. Kattintson jobb kattintással → **"Kiemelje a koncepteket a jelen fájlból"**
-2. Notemd készít el külön fájlokat minden koncept számára
-3. Ellenőrizze a beállított konceptmappát (alapértelmezett: `concepts/`)
-4. Minden konceptjelölt jegynek van hivatkozása a következő, eredeti jegyeire
-
-### Tudományos kutatás és összefoglalás
-
-1. A jegyzetében egy témát felhívjuk a figyelmet
-2. Jobb kattintás → **"Tudományos kutatás és összefoglalás"**
-3. Notemd kérel a webes keresést (Tavily vagy DuckDuckGo)
-4. A összefoglalás a forrásokkal együtt kerül hozzá a jegyzetedhez
-
-### Egy kattintással működő munkafolyamatok
-
-1. A munkafolyamatárgyútó gombokért nézd meg a **bal oldalt**
-2. Bármely jegyzeten kattints **"Egy kattintással kihozás"**-ra
-3. Ez elindítja: hivatkozások hozzáadása → konceptek kihozása → kutatás → diagram készítése
-4. Mind ezt egy kattintással!
-
-## Általános első munkák
-
-### Munka 1: Irodalmi munkát/irányítványt kezelés
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```markdown
+A [[gépi tanulás]] [[neurális hálózatok]] segítségével ismer fel mintázatokat.
 ```
 
-### Munka 2: Jegyzetek fordítása
+A fogalommappában további jegyzetek is létrejöhetnek. Ellenőrizze a fájlokat és hivatkozásokat; a modell nem garantál teljes vagy helyes fogalomlistát.
 
+## 3. További feladatok
+
+### Fogalomkinyerés
+
+Az **Extract concepts (current file)** nem módosítja a forrást, és fogalommappát igényel. Az új önálló jegyzetek kezdetben csak címet tartalmaznak, visszahivatkozás nélkül. Ezt külön engedélyezze. [Fogalomjegyzetek](../features/concept-notes).
+
+### Kutatás és összefoglalás
+
+Jelöljön ki témát a Markdown-szerkesztőben, vagy használja a címet, és indítsa el a **Research & summarize** műveletet. Válasszon kifejezetten Tavilyt kulccsal vagy DuckDuckGót. Az összefoglaló az aktív jegyzethez kerül. Nyissa meg a forrásokat, és ellenőrizze az állításokat.
+
+### Egykattintásos folyamat
+
+Az alapértelmezett **One-Click Extract**:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
 
-### Munka 3: Ismeretek térképének készítése
+Hivatkozásokat ad hozzá, a fogalom- vagy kiválasztott mappa alkalmas jegyzeteit cím alapján kitölti, majd a complete mappa Mermaid-blokkjait javítja. Régebbi jegyzeteket is bevonhat. Használjon próbamappát. Webes kutatás és általános diagramgenerálás nem kerül automatikusan a láncba.
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## Megszakítás és ellenőrzés
 
-## Szabályozási tippek
+A **Cancel** a támogatott további munkát állítja le. A kész kimenetek megmaradnak; ez nem visszagörgetés és nem garancia a távoli generálás vagy számlázás leállítására. Várja meg a feladat lezárását, majd újrapróbálás előtt vizsgálja meg az útvonalakat és helyreállítási ütközéseket.
 
-### Munkaalapú modell választása
+## Problémák
 
-Különböző munkákhoz használhatsz különböző modelleket:
+- Fiók/modell: ellenőrizze a profilt és kapcsolatot.
+- Nincsenek fogalmak: legyen engedélyezett, nem üres célmappa.
+- Haszontalan hivatkozások: nézze meg a választ és promptot; nincs eredményt garantáló minimális hossz.
+- Korlátok: a kvóták vizsgálatakor maradjon `1` a párhuzamosság.
 
-| Munka | Tajározott modell | Miért |
-|------|------------------|-----|
-| Hivatkozások hozzáadása | `gpt-4o-mini`, `deepseek-chat` | Gyors, több kérések |
-| Konceptek kihozása | `claude-sonnet-4-6`, `gpt-4o` | Magas minőségű kihozás |
-| Tudományos kutatás | `perplexity`, `gpt-4o` | Web-re alapuló |
-| Übersetzung | `gemini-flash`, `gpt-4o` | Köznyelvi |
-| Diagramok | `claude-opus`, helyi modell | Komplexes gondolkodás |
+## Tovább
 
-Beállítások: **Beállítások → Notemd → Feladatspecifikus modellek**
-
-### Szerkesztett munkafolyamok
-
-Sa próp gombot létrehozása:
-
-1. Beállítások → Notemd → Munkafolyamok
-2. Kattintsz a "Munkafolyam hozzáadása" gombra
-3. Írd be a DSL-t: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Ne nevezze meg: "My Research Flow"
-5. Új gomb jelentkezik meg a sávoldalban
-
-## Hibaelhárítás
-
-### "API Key Invalid"
-- Ellenőrizze, hogy a kulcs helyes-e (nem legyen extra tér)
-- Ellenőrizze, hogy a fióknak krediteje van
-- Próbálja az "Connection Test" gombot a beállításokban
-
-### "Model Not Found"
-- Kattintson a "Get Model List" gombra, hogy lássa a létrehozható modelleket
-- Neki adókhoz speciális modellnevek szükségesek (pl. `gpt-4o`, nem `gpt-4`)
-
-### Hivatkozások nem jelennek meg
-- Biztosítsa, hogy a figyelemhez elég tartalom van (>50 szó)
-- Próbálja egy erősebb modellt
-- Ellenőrizze, hogy a LLM kérések sikerültek-e (lássza a diagnostikai panelt)
-
-### Lentes teljesítmény
-- Használja gyorsabb modelleket (`gpt-4o-mini` helyett `gpt-4o`)
-- Kecselni a blokk méretét a beállításokban
-- Paralel feldolgozást engedélyez a batch munkáknak
-
-## További lépések
-
-- 📖 [Mindent megtekinteni](../features/wiki-links)
-- ⚙️ [Fejlesztett beállítások](./configuration)
-- 🔧 [LLM Társító beállítása](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## Videótanulmány
-
-Megtekintse a 3 percös gyorsindulási videót (kínai nyelvben):
-[【Teljesen nyílt forráskódú, ingyenes! NotEMD 3 percös tanulmány】](https://b23.tv/lqR0RlA)
-
-## Segítség kérés
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Problémák**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Documéntációk**: [Teljes dokumentáció](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Beállítások](./configuration).
+- [Munkafolyamatok](../features/workflows).
+- [Hibaelhárítás](../advanced/troubleshooting).
+- Titkoktól megtisztított reprodukció: [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

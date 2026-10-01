@@ -1,161 +1,88 @@
 ---
 id: troubleshooting
-title: Résolution de problèmes
-description: Problèmes courants et solutions
+title: Dépannage
+description: >-
+  Isolez les échecs de fournisseur, lot, écriture et export avec une tâche
+  minimale et des preuves sans données privées.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [troubleshooting, errors, diagnostics, connection test]
-concepts: [Troubleshooting, Error Handling, Diagnostics]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Dépannage
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Résolution de problèmes
+# Dépannage
 
 <TLDR>
-**La plupart des problèmes Notemd se répartissent en quatre catégories : les problèmes majeurs de API, la connectivité réseau, les erreurs d’authentification (401/403) et les limites de fréquence (429).** Le test de connexion intégré ainsi que le panneau de diagnostic permettent d’identifier rapidement la cause racine. Cette page couvre chaque message d’erreur courant, sa cause et la solution correspondante. Pour les problèmes non listés ici, signalez-les sur GitHub Issues en joignant les résultats des diagnostics.
-
-Ceci fait partie du [Obsidian Guide de gestion des connaissances IA](/docs/pillar-ai-knowledge).
+Reproduisez sur une note jetable avec le même fournisseur, modèle et réglages. Consultez progression et chemin annoncé. Distinguez authentification, génération, parsing et écriture : une connexion réussie ne valide pas tout le workflow.
 </TLDR>
 
-## Aperçu général
+## Vue d’ensemble
 
-Notemd dépend de services externes -- des fournisseurs LLM et des moteurs de recherche API -- donc la plupart des problèmes proviennent en dehors du plugin lui-même. Le panneau de diagnostic dans les paramètres offre une vue structurée de la dernière appel API, y compris la requête URL, l’état de réponse et le corps de l’erreur. Vérifiez-le toujours en premier avant d’enquêter davantage.
+Notez versions Notemd/Obsidian, OS, action, protocole, modèle et reproduction minimale. Attendez la stabilisation de l’annulation avant une autre tâche. Conservez sorties et récupération jusqu’à identification de leur opération d’origine.
 
-## Comment ça marche : Diagnostic
+## Diagnostics
 
-### Test de connexion
+### Connexion
 
-Chaque section de configuration du fournisseur dispose d’un bouton **« Tester la connexion »**. En le cliquant, une requête minimale API est envoyée (généralement une liste de modèles ou une complétion courte) et un rapport indique si l’opération a réussi ou si une erreur spécifique HTTP est survenue. C’est le moyen le plus rapide de vérifier que votre clé API ainsi que la base URL sont correctes.
+**Tester la connexion** peut tester seulement la liste ou un petit dialogue selon le profil. Une vraie petite tâche vérifie le modèle et le format de sortie.
 
-### Panneau de diagnostic
+### Progression et diagnostics développeur
 
-**Paramètres --> Notemd --> Diagnostic** affiche :
+La progression indique états, erreurs et destinations. L’activité API distingue attente, réussite et échec. Activez le débogage API seulement au besoin ; les diagnostics de requêtes longues consomment potentiellement le quota.
 
-| Champ | Contenu |
-|-------|---------|
-| Dernier fournisseur | Quel fournisseur a été appelé en dernier |
-| Dernier modèle | Quel modèle a été appelé en dernier |
-| Dernier état | Code d'état HTTP ou erreur de transport |
-| Dernière erreur | Message d’erreur brut provenant de API |
-| Dernière demande URL | Total URL de la dernière demande (clé API supprimée) |
-| Dernier corps de réponse | Corps de réponse tronqué (premiers 500 caractères) |
+Corps de diagnostic, réponses partielles, adresses et identifiants peuvent révéler des données privées. Relisez et expurgez localement. Même un profil expurgé exige un contrôle des métadonnées.
 
-Copiez la sortie complète des diagnostics lors de la signalement de problèmes sur GitHub.
+## Erreurs fréquentes
 
-## Erreurs courantes
+### Clé absente ou invalide
 
-### API Clé invalide ou manquante
+`401` : clé correspondant au fournisseur/adresse, sans espaces involontaires. `403` : permissions du compte/projet, accès au modèle et facturation. Les tentatives répétées ne réparent pas une clé invalide.
 
-**Symptôme :** HTTP 401 ou « Clé API incorrecte fournie »
+### Connexion réseau
 
-**Cause :** La clé API est manquante, contient des espaces blancs, ou appartient à un fournisseur différent.
+Vérifiez hôte, port, protocole et route depuis l’appareil Obsidian. Pour Ollama/LM Studio, serveur actif et modèle disponible. `localhost` vise cet appareil. Choisissez le bon profil ; les replis de transport sont automatiques, sans interrupteur utilisateur.
 
-**Correction :**
-1. Vérifier que la clé ne contient pas d’espaces en début ou en fin.
-2. Veuillez confirmer que la clé correspond au fournisseur sélectionné (une clé OpenAI ne fonctionnera pas avec Anthropic).
-3. Vérifiez que votre compte dispose de crédits ou d’une abonnement activé
-4. Cliquez sur **"Test Connection"** pour vérifier
+### Quota 429
 
-### Erreurs de réseau / de connexion
+Réduisez concurrence, contrôlez quotas requêtes/tokens et autres clients de la clé. Les retries peuvent absorber des incidents transitoires, pas garantir tous les appels.
 
-**Symptôme :** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+### Modèle absent
 
-**Cause :** L’endpoint API n’est pas accessible depuis votre machine.
+Utilisez **Fetch models** ou un déploiement connu du compte. Vérifiez région et version API ; un défaut historique peut être retiré en amont. Azure attend un nom de déploiement ; Ark peut demander son endpoint ID.
 
-**Correction :**
-1. Vérifiez votre connexion Internet.
-2. Si vous êtes derrière un proxy ou un pare-feu, vérifiez que le domaine API n’est pas bloqué
-3. Pour Ollama : confirmer que `ollama serve` est en cours d’exécution (`ollama list` doit retourner les modèles)
-4. Pour LMStudio : confirmer que le serveur est en cours d’exécution sur `localhost:1234`
-5. Essayez un transport différent – les utilisateurs mobiles doivent s’assurer que le transport `requestUrl` est actif
-6. Activer `enableStableApiCall` pour une tentative automatique en cas d’erreurs temporaires
+### Aucun lien ou concept
 
-### 403 Interdit
+Ouvrez la sortie réelle, contrôlez source utile, format renvoyé et dossier de concepts non vide activé. L’extraction autonome produit des titres sans backlink par défaut. Revenez au prompt intégré si un remplacement a supprimé les marqueurs.
 
-**Symptôme :** HTTP 403
+### Sortie absente ou déplacée
 
-**Cause :** Votre clé API est valide, mais elle n’a pas les permissions nécessaires pour accéder au ressource demandée.
+Consultez le chemin annoncé : `_processed.md` pour les liens, `_<language>.md` pour la traduction, dossier complete pour les titres. Si la création du dossier de traduction échoue, le dossier source peut servir de repli. Vérifiez collisions et permissions.
 
-**Correction :**
-1. Certains modèles nécessitent un accès spécial (par exemple, GPT-4 via Azure requiert un nom de déploiement).
-2. Certains fournisseurs restreignent les modèles en fonction du niveau de plan – vérifiez votre compte
-3. Des restrictions régionales peuvent s’appliquer (certains fournisseurs en Chine bloquent les adresses IP internationales et inversement).
-4. Vérifiez que le nom du modèle est orthographié correctement (par exemple, `gpt-4o` et non `gpt-4o-mini` lorsque le mini-modèle correspond à tout ce que votre forfait autorise).
+### Fichiers après annulation
 
-### Limite de débit (429)
+Les écritures terminées restent et les opérations déjà acceptées peuvent finir. Inspectez résultats par fichier et conflits de récupération avant suppression ou relance globale.
 
-**Symptôme :** HTTP 429 ou « Limite de vitesse dépassée »
+### Diagramme ou export natif en échec
 
-**Cause :** Trop de requêtes dans une courte période de temps.
+Choisissez une combinaison type/source compatible. Lancez le contrôle de l’environnement de diapositives ou CircuitikZ et lisez les erreurs. Si seul le texte existe, utilisez l’outil externe approprié. Voir les [diagrammes](../features/diagrams).
 
-**Correction :**
-1. Réduire `batchConcurrency` en `1` ou `2`
-2. Attendez quelques minutes avant de réessayer.
-3. Vérifiez la documentation sur les limites de débit de votre fournisseur pour votre niveau de forfait
-4. Activer `enableStableApiCall` pour une tentative automatique avec retards progressifs
-5. Envisagez de passer à un fournisseur offrant des limites plus élevées (DeepSeek, Ollama).
+## Signaler un problème
 
-### Modèle non trouvé
+1. Reproduisez avec une note synthétique et un dossier dédié.
+2. Notez versions exactes, action, modèle, réglages, résultat attendu et observé.
+3. Joignez le minimum de progression, erreurs et artefacts expurgés ; retirez secrets, contenu privé et métadonnées inutiles.
+4. Précisez si une note et les prompts par défaut reproduisent le problème.
+5. Ouvrez [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).
 
-**Symptôme :** « Modèle non trouvé » ou HTTP 404
+Une capture seule suffit rarement pour un défaut de format ou d’annulation. Ajoutez source/sortie ou séquence minimale lorsque possible.
 
-**Cause :** Le nom du modèle n’existe pas chez le fournisseur sélectionné.
+## Pour continuer
 
-**Correction :**
-1. Cliquez sur **"Obtenir la liste des modèles"** pour voir tous les modèles disponibles pour votre fournisseur
-2. Certains noms de modèles changent avec le temps – vérifiez le nom actuel dans la documentation du fournisseur
-3. Pour Ollama : exécutez `ollama list` pour voir les modèles téléchargés ; seuls les modèles téléchargés sont disponibles
-
-### Aucun lien / Aucun concept généré
-
-**Symptôme :** La commande s’exécute mais ne produit aucun résultat
-
-**Cause :** Le LLM a renvoyé une réponse vide ou indéchiffrable.
-
-**Correction :**
-1. Vérifiez le panneau de diagnostic pour obtenir la réponse réelle LLM
-2. Essayez un modèle plus performant (certains petits modèles ont du mal avec les sorties structurées)
-3. Assurez-vous que la note contient suffisamment de contenu (plus de 50 mots).
-4. Vérifiez votre prompt personnalisé pour détecter d’éventuelles instructions contradictoires
-5. Désactivez temporairement la suppression des synonymes pour voir si elle filtre de manière trop agressive
-
-### Doubao Identifiant de l’endpoint manquant
-
-**Symptôme :** Erreur lors de l’utilisation du fournisseur ByteDance Doubao
-
-**Cause :** Doubao nécessite un identifiant d’endpoint Ark (format : `ep-xxxxxxxx-xxxx-xxxx`) plutôt qu’un nom de modèle.
-
-**Correction :** Remplacez le modèle de placeholder par défaut par votre véritable ID d’endpoint provenant de la console de Volcengine.
-
-## Configuration
-
-| Paramètres de diagnostic | Location | But |
-|--------------------|----------|---------|
-| **Tester la connexion** | Paramètres --> Section Fournisseur | Vérifier la clé API et la connectivité |
-| **Obtenir la liste des modèles** | Paramètres --> Section Fournisseur | Confirmer quels modèles sont accessibles |
-| `enableStableApiCall` | Paramètres --> Avancé | Activer la tentative de réessai avec un délai d’attente |
-| `batchConcurrency` | Paramètres --> Groupe | Contrôler le parallélisme pour éviter les limites de débit |
-
-## Comment signaler des problèmes
-
-Si votre problème n’est pas couvert ci-dessus :
-
-1. Ouvrez **Paramètres --> Notemd --> Diagnostic**
-2. Copiez la sortie complète des diagnostics
-3. Ouvrez un problème GitHub à [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-4. Inclure : version Obsidian, version Notemd, fournisseur, modèle, sortie des diagnostics, et étapes pour reproduire le problème
-5. Rédigez votre clé API à partir de tout journal partagé
-
----
-
-## Prochaines étapes
-
-- [LLM Fournisseurs](/docs/providers/overview) -- Référence complète de la configuration des fournisseurs
-- [Traitement par lots](/docs/advanced/batch-processing) -- Paramètres de concurrence et de réessai pour les opérations volumineuses
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Corriger le comportement inattendu de LLM en ajustant les prompts
+- [Fournisseurs](../providers/overview).
+- [Lots](./batch-processing).
+- [Prompts](./custom-prompts).
+- [Configuration](../getting-started/configuration).

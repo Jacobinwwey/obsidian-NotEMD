@@ -1,0 +1,99 @@
+---
+id: overview
+title: Ontwikkelaarsgids
+description: >-
+  Bouw, test en breid bestaande contracten voor providers, operaties, rendering
+  en documentatie uit.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Ontwikkelaarsgids
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Ontwikkelaarsgids
+
+<TLDR>Begin op een aparte branch, installeer vergrendelde afhankelijkheden en beide browserrevisies, bouw en voer de volledige Jest-suite uit. Wijzig de eigenaar van het contract en houd documentatie, providertests en native bewijs in overeenstemming.</TLDR>
+
+## Werkende checkout
+
+Clone de [repository](https://github.com/Jacobinwwey/obsidian-NotEMD), lees [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) en maak een featurebranch. Plug-in-CI gebruikt Node 20 op Linux/Windows; de site Node 24. Installeer afhankelijkheden apart in root en `website/`.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+De twee Playwright-pakketten kunnen verschillende Chromium-revisies gebruiken. Eén installatie is onvoldoende voor een schone omgeving. `main.js` wordt gegenereerd en niet gevolgd door Git; een oude bundel bewijst geen nieuwe commit.
+
+## Zoek de eigenaar
+
+| Verantwoordelijkheid | Primaire bron |
+| ---------------- | ---------------- |
+| Levenscyclus, opdrachten en hostroutering | `src/main.ts` |
+| Providerprofielen, protocollen en validatie | `src/llmProviders.ts` |
+| Aanvragen, transport, herhalingen en streams | `src/llmUtils.ts` |
+| Operaties, schema’s en publieke CLI-selectie | `src/operations/`, `src/cliContracts.ts` |
+| Bestandstaken, onderzoek en vertaling | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Workflowacties en zijbalk | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Diagramspecificaties en rendering | `src/diagram/`, `src/rendering/` |
+| UI-strings en ondersteunde talen | `src/i18n/` |
+| Publieke gidsen en vertalingen | `website/docs/`, `website/i18n/` |
+| Beheerprocedures en gedateerd bewijs | `docs/maintainer/` |
+
+De productiebundel is zelfstandig en bevat de inline previewhost. Een kandidaatpad voor een afzonderlijke host is geen geleverd assetcontract. Activeren vereist gelijktijdige aanpassing van verpakking, assets, audits en documentatie.
+
+## Begrensde wijziging
+
+1. Reproduceer en schrijf eerst een gerichte falende test.
+2. Wijzig de module die de invariant bezit; valideer externe invoer aan de grens.
+3. Draai gerichte en volledige tests, met annulering, fouten en persistentie waar relevant.
+4. Werk Engelse bron en geraakte locales bij. Plannen, taken en walkthroughs vereisen afzonderlijke volledige Engelse/Chinese documenten in `docs/`.
+5. Test visuele/native wijzigingen in de echte consument; XML, screenshot of build bewijst geen bewerkbaarheid of connectorbevestiging.
+
+Voeg providers toe aan `llmProviders.ts`, hergebruik compatibel transport en actualiseer `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README en verbindingstests. Behoud streaming en onderbroken antwoorden. Definieer voor operaties schema’s, context, effecten en handling tags vóór publicatie; een registeritem wordt niet vanzelf een publieke Agent-API. [Agent-gids](../agents/overview).
+
+## Verifiëren
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint vergelijkt individuele meldingen. Een lager totaal rechtvaardigt geen nieuwe fout. Gebruik `npm run benchmark:local-kb` bij wijzigingen in ophalen en vermeld corpus en omgeving. Voor de site, met Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Codex schrijft en beoordeelt vertalingen direct voor het 1.9.8-programma. Gebruik geen oude vertaalschrijfscripts of LM Studio-/vertaalendpoints. Gereedschap mag de geschreven tekst formatteren, valideren en renderen.
+
+## Obsidian en native toepassingen
+
+Gebruik een wegwerpkluis met `.notemd-host-verification`; de scripts verifiëren de gekopieerde bundel. Houd echte gebruikerskluizen apart. Probeer `obsidian help` en `obsidian-cli help` voor CLI-controle en registreer ontbrekende tools als niet beschikbaar.
+
+PowerPoint, CircuitikZ en dia-export hebben eigen voorwaarden en bestanden. Volg het [gedateerde verslag](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) en de [releaseprocedure](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Houd ongeteste mobiele/minimumversies expliciet.
+
+## Bijdragen en uitgeven
+
+Een PR benoemt probleem, uiteindelijke werking, tests en beperkingen. Gebruik [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) voor reproduceerbare meldingen. Commit geen sleutels, privénotities of ongerelateerde uitvoer. De publisher beheert versiecoherentie, numerieke tag, schone bron, tweetalige notes, gecontroleerde draftassets, publicatie en expliciete Pages-deploy. Verplaats geen publieke tag. `.trellis/` is lokale werkstatus, geen CI-afhankelijkheid.
+
+## Verder
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Projectstatus](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agents](../agents/overview).
+- [1.9.8](../releases/1.9.8).

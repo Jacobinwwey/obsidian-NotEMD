@@ -1,0 +1,107 @@
+---
+id: overview
+title: Panduan pembangun
+description: >-
+  Bina, uji dan perluas Notemd melalui kontrak penyedia, operasi, paparan dan
+  dokumentasi sedia ada.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Panduan pembangun
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Panduan pembangun
+
+<TLDR>Mulakan pada cabang ciri, pasang kebergantungan terkunci dan kedua-dua versi pelayar, kemudian bina serta jalankan semua ujian Jest. Perluas modul pemilik kontrak sedia ada. Selaraskan dokumentasi, ujian penyedia dan bukti aplikasi natif dengan perubahan tingkah laku.</TLDR>
+
+## Sediakan salinan kerja
+
+Klon [repositori](https://github.com/Jacobinwwey/obsidian-NotEMD), baca [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) dan cipta cabang ciri. CI pemalam menggunakan Node 20 pada Linux/Windows. Laman awam disahkan dengan Node 24; pasang kebergantungan secara berasingan pada akar dan `website/`.
+
+Dari akar repositori:
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Dua pakej Playwright boleh menggunakan revisi Chromium berbeza. Memasang satu sahaja tidak mencukupi untuk persekitaran bersih. `main.js` dijana dan diabaikan Git; bundle setempat lama bukan bukti komit baharu.
+
+## Kenal pasti pemilik sebelum menyunting
+
+| Tanggungjawab | Sumber utama |
+| ---------------- | ---------------- |
+| Kitar hayat pemalam, arahan dan penghalaan hos | `src/main.ts` |
+| Pratetap penyedia, metadata protokol dan pengesahan | `src/llmProviders.ts` |
+| Bentuk permintaan, penghantaran, ulangan dan penstriman | `src/llmUtils.ts` |
+| Definisi operasi, skema dan pemilihan CLI awam | `src/operations/`, `src/cliContracts.ts` |
+| Tugas fail, penyelidikan dan terjemahan | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Tindakan aliran dan susunan bar sisi | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Spesifikasi serta pemaparan rajah | `src/diagram/`, `src/rendering/` |
+| Rentetan UI dan bahasa UI disokong | `src/i18n/` |
+| Panduan awam dan terjemahan | `website/docs/`, `website/i18n/` |
+| Panduan penyelenggara serta bukti bertarikh | `docs/maintainer/` |
+
+Bundle pengeluaran semasa serba lengkap, termasuk hos pratonton sebaris. Laluan calon hos paparan kendiri bukan kontrak aset yang dihantar. Jangan aktifkan tanpa menyelaraskan pembungkusan, aset keluaran, audit dan dokumentasi.
+
+## Laksanakan perubahan berskop
+
+1. Hasilkan semula tingkah laku dan tambah ujian terfokus yang gagal sebelum perubahan tingkah laku.
+2. Ubah modul pemilik invarian. Sahkan input luaran di sempadannya; elakkan pengetahuan penyedia/operasi berulang pada pemanggil.
+3. Ulang ujian terfokus kemudian seluruh suite. Sertakan pembatalan, ralat dan ketekalan simpanan apabila operasi menulis fail.
+4. Kemas kini sumber panduan Inggeris dan bahasa terjejas. Dokumen perancangan, tugas dan walkthrough memerlukan versi Inggeris serta Cina lengkap dan berasingan di `docs/`.
+5. Periksa aplikasi pengguna sebenar apabila mengubah visual atau eksport natif. XML, tangkapan skrin atau binaan lulus sahaja tidak membuktikan kebolehsuntingan natif atau keterikatan penyambung.
+
+Bagi penyedia baharu, tambah pratetap dalam `llmProviders.ts`, gunakan penghantaran sedia ada jika serasi, dan kemas kini `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README serta ujian sambungan. Kekalkan penstriman dan pengendalian respons terganggu.
+
+Bagi operasi, tentukan skema input/hasil, konteks, kesan sampingan serta tag pengendalian sebelum mendedahkannya. Entri daftar tidak terus menjadi titik akhir Agent awam. Lihat [panduan Agent](../agents/overview).
+
+## Sahkan perubahan
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Pintu lint membandingkan diagnostik individu dengan garis dasar. Hutang sedia ada tidak membenarkan ralat baharu; jumlah keseluruhan lebih rendah tidak menghalalkan regresi. Gunakan `npm run benchmark:local-kb` bagi perubahan dapatan setempat; laporkan korpus dan persekitaran, bukan janji kelajuan sejagat.
+
+Untuk laman awam, gunakan Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Program dokumentasi 1.9.8 menggunakan terjemahan yang ditulis dan disemak terus oleh Codex. Jangan jalankan skrip penulisan terjemahan lama atau memanggil titik akhir LM Studio/terjemahan untuk menyediakannya. Alat boleh memformat, mengesahkan dan memaparkan teks yang ditulis.
+
+## Uji dalam Obsidian dan aplikasi natif
+
+Gunakan Vault ujian. Skrip hos memerlukan penanda `.notemd-host-verification` dan mengesahkan bundle disalin. Asingkan Vault pengguna sebenar. Cuba kedua-dua `obsidian help` dan `obsidian-cli help` untuk integrasi CLI; rekod alat tiada, jangan anggap stub arahan sebagai ujian hos berjaya.
+
+Pemeriksaan PowerPoint, CircuitikZ dan eksport slaid natif mempunyai prasyarat serta artifak sendiri. Ikut [rekod penerimaan kebolehpercayaan bertarikh](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) dan [panduan keluaran](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Nyatakan batas mudah alih dan versi minimum yang belum disahkan.
+
+## Sumbangan dan keluaran
+
+PR perlu menerangkan masalah, tingkah laku hasil, ujian dan batas berkaitan. Gunakan [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) untuk laporan boleh ulang. Jangan komit kelayakan API, bahan Vault peribadi atau hasil terjana tidak berkaitan.
+
+Penerbitan dimiliki penerbit dan panduan dalam repositori: metadata selaras, tag angka, sumber bertag bersih, nota dwibahasa, aset draf disahkan, kemudian penerbitan serta deployment Pages yang jelas. Jangan alihkan tag awam untuk mengganti binari. `.trellis/` ialah keadaan aliran setempat dan tidak boleh menjadi kebergantungan CI.
+
+## Seterusnya
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): peraturan pelaksanaan dan semakan.
+- [Status projek semasa](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md): kemajuan dan bukti.
+- [Panduan Agent](../agents/overview): kontrak keupayaan/panggilan dieksport.
+- [Keluaran 1.9.8](../releases/1.9.8): kesan dan batas naik taraf.

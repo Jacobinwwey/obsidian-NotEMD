@@ -1,133 +1,76 @@
 ---
 id: installation
-title: "Installation"
-description: "Så här installerar du Notemd i Obsidian"
+title: Installation
+description: >-
+  Installera Notemd från Obsidian eller en sammanhållen GitHub Release och
+  verifiera en riktig uppgift.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Installation
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Installation
 
-<TLDR>
-**Installera Notemd på under 2 minuter.** Två metoder: (1) Obsidian Community Plugins (rekommenderat, en-klicksinstallation), eller (2) Manuell installation via GitHub Releases. Krävs Obsidian 0.15.0+. Fungerar på Windows, macOS, Linux, iOS och Android. Inga externa beroenden. 4k+ nedladdningar, licensierat enligt MIT.
-</TLDR>
+<TLDR>Installera Notemd via Community plugins eller lägg de tre körningsfilerna från samma GitHub Release i valvet. Aktivera tillägget, välj leverantör och testa en anteckning. Modellservrar och valfria inbyggda exportverktyg förbereds separat.</TLDR>
 
-## Metod 1: Community Plugins (Rekommenderat)
+## Metod 1: Community plugins, rekommenderad
 
-1. Öppna **Obsidian Settings** (⚙️-ikonen eller `Ctrl/Cmd + ,`)
-2. Gå till **Community plugins**
-3. Klicka på **Browse**
-4. Sök efter **"Notemd"**
-5. Klicka på **Install**
-6. Klicka på **Enable**
+1. Öppna **Settings → Community plugins** i avsett valv.
+2. Tillåt community-tillägg vid behov och välj **Browse**.
+3. Sök efter **Notemd**, kontrollera `Jacobinwwey/obsidian-NotEMD` och välj **Install**.
+4. Välj **Enable** och öppna sidopanelen via verktygsfältet eller kommandopaletten.
 
-**Klart!** Du kommer att se Notemd-ikonen i din vänstra sidofält.
+[Öppna Notemd i Obsidian](obsidian://show-plugin?id=notemd). Använd menyn ovan om webbläsaren inte kan öppna länken; dokumentationen kräver ingen protokollhanterare.
 
 ## Metod 2: Manuell installation
 
 ### Förutsättningar
-- Obsidian 0.15.0 eller nyare
-- Git (valfritt, för klonning)
+
+Du behöver Obsidian och ett valv som kan säkerhetskopieras. Manifestets minimiversion `0.15.0` är en deklaration, inte bevis på färsk verifiering på den versionen.
 
 ### Steg
 
-1. **Ladda ner filer** från [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. Hämta `main.js`, `manifest.json` och `styles.css` från samma [GitHub Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest). `README.md` är referensmaterial, ingen obligatorisk körningsfil.
+2. Lägg filerna i `<vault>/.obsidian/plugins/notemd/`; anpassa sökvägen om konfigurationsmappen har ändrats.
+3. Ladda om Obsidian och aktivera tillägget.
+4. Kontrollera versionen. Blanda inte ett nytt manifest med en gammal bundle.
 
-2. **Hitta pluginsmappan för din skåp:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## Alternativ: BRAT
 
-Om `plugins`-mappen inte existerar, skapa den.
+Använder du redan [BRAT](https://github.com/TfTHacker/obsidian42-brat), lägg till projektet genom dess flöde för betatillägg. Använd en bestämd release vid felsökning. BRAT är ett valfritt externt verktyg.
 
-3. **Skapa Notemd-mappen:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
+## Verifiering
 
-4. **Kopiera de tre filerna** in i `notemd`-mappen.
+Konfigurera en tillgänglig modell, kör **Test connection** och sedan [snabbstarten](./quick-start). En modellförteckning bevisar inte rätt att generera med en viss modell; granska faktisk utdata.
 
-5. **Ladda om Obsidian:**
-   - Tryck på `Ctrl/Cmd + R`, eller
-   - Starta om Obsidian
+## Systemgränser
 
-6. **Aktivera pluginet:**
-   - Inställningar → Community-plugins
-   - Hitta "Notemd" i listan
-   - Slå på det
+| Del | Gräns |
+| --------- | ---------- |
+| Manifest | Minst Obsidian `0.15.0`; `isDesktopOnly` är false |
+| Verifiering | Se daterade rapporter; fysiska mobiler och 0.15.0 är inte verifierade i den aktuella acceptansen |
+| Molnmodell | Nätverk, behörigt konto/nyckel och tillgänglig modell |
+| Lokal modell | Separat installerad, aktiv server och hämtad/laddad modell |
+| Inbyggd bildspels- eller kretsexport | Skrivbordsverktyg och formatberoenden; kontrollera miljön först |
 
-## Alternativ: Installera via BRAT
+Det finns ingen gemensam OS-garanti för alla valfria exportörer. En kretsförhandsvisning bevisar inte TeX-kompilering; skrivbordstester bevisar inte mobilbeteende.
 
-Om du använder [BRAT pluginet](https://github.com/TfTHacker/obsidian42-brat):
+## Avinstallera
 
-1. Öppna BRAT-inställningarna
-2. Klicka på "Lägg till Beta-plugin"
-3. Skriv in: `Jacobinwwey/obsidian-NotEMD`
-4. Klicka på "Lägg till Plugin"
-5. Aktivera Notemd i Community-plugins
+Inaktivera eller avinstallera via Community plugins. Skapade anteckningar och artefakter ligger kvar som vanliga valvfiler. Granska dem före borttagning och spara inställningarna vid behov. Avinstallation återställer inte tidigare ändringar.
 
-## Verifikation
+## Uppdatera
 
-Efter installationen, verifiera att Notemd fungerar:
-
-1. Öppna en vilken anteckning som helst
-2. Klicka med höger mus i redigeraren
-3. Du bör se Notemd-kommandon som:
-   - "Processera fil (lägg till länkar)"
-   - "Extrahera koncept"
-   - "Undersöka och sammanfatta"
+Använd **Check for updates**. Vid manuell uppdatering: stoppa uppgifter, säkerhetskopiera valv och inställningar, ersätt de tre körningsfilerna från samma release och ladda om. Testa smått före batcher. Ersätt inte inställningsfilen med releasefiler. Återgång kräver en avsiktligt vald kompatibel version och säkerhetskopia.
 
 ## Nästa steg
 
-- **Konfigurera LLM-leverantören:** [Snabbstart →](./quick-start)
-- **Felaktighetsfelsökning:** [Vanliga problem →](../advanced/troubleshooting)
-
-## Systemkrav
-
-| Plattform | Version | Status |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | Required |
-| **Windows** | 7+ | ✅ Stöds |
-| **macOS** | 10.15+ | ✅ Stöds |
-| **Linux** | Allt | ✅ Stöds |
-| **iOS** | 15+ | ✅ Stöds |
-| **Android** | 5+ | ✅ Stöds |
-
-## Avinstallering
-
-För att ta bort Notemd:
-
-1. Inställningar → Gemenskapsplugins
-2. Hitta "Notemd"
-3. Klicka på ❌-ikonen
-4. Vill du kan du ta bort pluginsmappen: `<vault>/.obsidian/plugins/notemd/`
-
-Dina data (anteckningar, konceptanteckningar osv.) förblir oförändrade.
-
-## Uppdatering
-
-### Automatisk uppdatering (rekommenderas)
-Obsidian kontrollerar automatiskt efter pluginsuppdateringar. När en ny version finns tillgänglig:
-1. Inställningar → Gemenskapsplugins
-2. Klicka på "Kolla efter uppdateringar"
-3. Klicka på "Uppdatera" bredvid Notemd
-
-### Manuell uppdatering
-Ladda ner den senaste versionen och byt ut de tre filerna i din pluginsmappa.
-
-## Få hjälp
-
-- 📖 [Snabbstartguide](./quick-start)
-- ❓ [FAQ](../faq)
-- 💬 [Discord-gemenskapen](https://discord.gg/qnGgsQ9W)
-- 🐛 [Rapportera problem](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [Snabbstart](./quick-start).
+- [Konfiguration](./configuration).
+- [Felsökning](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

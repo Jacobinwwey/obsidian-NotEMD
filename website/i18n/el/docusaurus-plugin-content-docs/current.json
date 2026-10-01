@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "Επόμενο",
-    "description": "The label for version current"
+    "message": "Τρέχουσα τεκμηρίωση",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Ξεκίνηση",
+    "message": "Πρώτα βήματα",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Ωςυναρτησίες",
+    "message": "Βασικές λειτουργίες",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
@@ -16,7 +16,7 @@
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Προχωρημένο",
+    "message": "Για προχωρημένους",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

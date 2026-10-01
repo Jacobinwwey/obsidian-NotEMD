@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Actualizare la Notemd 1.9.8
+description: >-
+  Examinați îmbunătățirile de fiabilitate, export și documentație de la 1.9.7 și
+  actualizați controlat.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Actualizare la Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Actualizare la Notemd 1.9.8
+
+<TLDR>1.9.8 îmbunătățește anularea, proprietatea rezultatelor, consistența căutării contextului într-un lot, exportul și documentația. Confirmați disponibilitatea în GitHub Release public și luați fișierele aceleiași versiuni. Numărul furnizorilor și diagramelor reprezintă funcții existente.</TLDR>
+
+## De la 1.9.7
+
+| Domeniu | Schimbare |
+| ------ | ------------- |
+| Anulare | Stare comună în planificare, transporturi și reîncercări; răspunsul târziu nu începe o scriere protejată |
+| Durabilitatea fișierelor | Proprietatea surselor cu nume identice și a fișierelor însoțitoare comune la salvare/recuperare suprapusă |
+| Căutare locală | Un instantaneu per lot de titluri; corpus fix și măsurare de memorie |
+| Export în aplicații | Separatoare PowerPoint corectate sub celule îmbinate și conexiuni/etichete CircuitikZ |
+| Verificare | CI Linux/Windows, lint per diagnostic, teste de proces și dovezi din aplicații |
+| Documentație | Valori implicite reale, patru intrări pentru cititori, traduceri directe și publicare verificată |
+
+Căutarea istoricului păstrează tastarea și cursorul la actualizare asincronă. Sertarul reține Tab în interior, primește focus la încărcare și se închide cu Escape fără a închide previzualizarea principală. Reîncercările și răspunsurile depășite sunt acoperite de teste în browser.
+
+Cercetarea/traducerea verifică anularea după ultima citire sau pregătire de folder și înainte de adăugare/creare/suprascriere. Scrierile acceptate de vault rămân finalizate. Folderul de traducere creat între timp de altă sarcină este refolosit fără revendicarea creării. Conflictul cu un fișier sau folderul încă absent păstrează eroarea raportată și revenirea la folderul sursei.
+
+Cele 36 de profiluri și 33 de intrări executabile existau în 1.9.7. Modificările de cod, documentație și commiturile merge sunt contabilizate separat.
+
+## Actualizare controlată
+
+1. Opriți sarcinile și salvați vault-ul/setările.
+2. Actualizați prin Community plugins sau descărcați `main.js`, `manifest.json`, `styles.css` din aceeași [versiune publică 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Manual, schimbați doar fișierele de execuție; păstrați setările/rezultatele.
+4. Reîncărcați și verificați versiunea.
+5. Testați o notă temporară și un folder mic înaintea loturilor mari.
+
+ID-urile și setările se păstrează. One-Click Extract rămâne linkuri, generare din titluri și reparare Mermaid. Corectarea documentației nu adaugă cercetare lanțului implicit.
+
+## Anulare și recuperare
+
+Anularea nu este tranzacție inversă. Fișierele finalizate rămân, cererile/scrierile acceptate pot termina, iar furnizorul controlează facturarea. Așteptați și examinați. Comparați conflictele vizibile și recuperările înainte de curățare. Păstrați folderele însoțitoare folosite de artefacte mai vechi.
+
+## Limite de export și compatibilitate
+
+- PowerPoint are verificări țintite în aplicație; vechiul scor global al imaginii a ratat defectul.
+- Mermaid/SVG în PPTX pot rămâne imagini.
+- Atașarea săgeților statice Drawnix dintre ramuri după rearanjare nu este verificată.
+- Previzualizarea CircuitikZ și compilarea TeX se verifică separat.
+- Dispozitivele mobile fizice și Obsidian 0.15.0 rămân neverificate.
+- Recuperarea lexicală pe corpus fix nu dovedește căutare semantică sau performanță în orice vault.
+
+## Integritatea publicării
+
+Publisherul verifică versiunea și identitatea tagului local/remote, construiește sursa curată de la tag, încarcă fișiere draft și compară hashurile descărcate înainte de publicare. Sunt obligatorii `main.js`, `manifest.json`, `styles.css`, `README.md`. Repetarea nu poate substitui octeții publici cu rezultate fără proveniență identică.
+
+Pages este publicat după verificarea versiunii publice. Codex scrie și verifică direct, fără LM Studio sau motor de traducere. Nu se pretinde o verificare independentă de către vorbitor nativ.
+
+## În continuare
+
+- [Versiune cu note în engleză/chineză](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Primii pași](../getting-started/quick-start).
+- [Loturi](../advanced/batch-processing).
+- [Dezvoltatori](../developers/overview), [Agent](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) cu versiuni și dovezi curățate.

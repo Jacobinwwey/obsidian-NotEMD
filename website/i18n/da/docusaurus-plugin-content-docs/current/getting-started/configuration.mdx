@@ -1,446 +1,101 @@
 ---
 id: configuration
-title: "Konfiguration"
-description: "Konfigurér Notemd-indstillinger og preferencer"
+title: Konfiguration
+description: 'Find indstillinger for udbydere, outputstier, sprog og arbejdsgange.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Konfiguration
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Konfiguration
 
-<TLDR>
-**Notemd-konfigurationen omfatter 6 hovedområder:** (1) LLM-udbydere og API-nyckler, (2) Valg af modell per opgave, (3) Udskriftspfade og maller, (4) UI-sprog og udskriftssprog, (5) Søgtilbud (Tavily/DuckDuckGo), (6) Egen arbejdsmæssige processer. Alle indstillinger findes i Obsidian Settings → Notemd. Endringer trer i kraft umiddelbart.
-</TLDR>
+<TLDR>Åbn Settings → Notemd, og søg efter feltet. Vælg udbyder og outputplacering før opgaven. Afprøv ændringer på én note; en kørende opgave kan beholde indstillingerne fra start.</TLDR>
 
-## Oversigt over indstillinger
+## Overblik
 
-Adgang: **Obsidian Settings (⚙️) → Notemd**
-
-### Hovedsektioner
-
-1. **Udbyderkonfiguration** — API-nyckler, base URLs, modeller
-2. **Opgavesindstillinger** — Valg af modell per opgave
-3. **Udskriftskonfiguration** — Hvor genererede filer skal gemmes
-4. **Sprogindstillinger** — UI- og udskriftssprog
-5. **Søgintegration** — Tavily/DuckDuckGo-indstilling
-6. **Arbejdsmæssige processer** — Egen knapskeder
-7. **Avanceret** — Diagnostik, batchbehandling, chunking
+Standardudbyderen er DeepSeek uden legitimationsoplysninger. En profil opretter ingen konto, installerer ingen model og giver ingen rettigheder. Se [udbyderguiden](../providers/overview).
 
 <!-- notemd-settings-favorites-guide -->
-## DISCOVERY OG FAVORITER FOR Notemd INSTILLINGER
+## Søgning og favoritter
 
-Instillings siden er designet til gennemgående brug fremfor enkelt konfiguration:
+**Search settings** søger i navne, beskrivelser, aliaser og synlige kategorier og fører til feltet. **★ Favorites** viser gemte indstillinger med beskrivelse, kategori og destination. De gemmes pr. vault, overlever genstart og fjerner gamle ID’er. Søgningen bevares, når værktøjslinjen foldes sammen. Favoritlisten er forskellig fra søgefilteret for kun favoritter.
 
-- Brug feltorienteret indtastningsfelt **Search settings** for at finde en instilling efter dens navn, beskrivelse, alias eller synlig kategori. Resultaterne rangeres efter relevans og fører direkte til den specifikke instilling.
-- Brug **★ Favorites** for at gemme instillinger, der justeres ofte, i den aktuelle Vault. Ved at klikke på det åbnes en speciel liste med instillingsnavn, beskrivelse, kategori og en direkte navigeringsadresse. Fjern en favorit fra listen uden at leave instillings siden.
-- Discovery-verktøjslinjen er afspændt som standard. Brug chevron-knappen for at folde den til en flydende kontroll i øverst højre hjørne, når du behøver mere vertikal plads; den aktuelle søgning gemmes og genoprettes ved at afspande den igen.
-- Favoritlisten er uafhængig fra filteret kun for favoriter. Favoriter bruger stabile instillings-ID:er, overlever restarts af Obsidian, og usikre ID:er fjernes sikrt, når en instilling ikke länger eksisterer.
+**Diagram preview export PPI** er oprindeligt 300, interval 72–600, og påvirker kun PNG. SVG/PDF bevarer understøttet vektorgeometri. **Also export complete Mermaid visuals** styrer ledsagefiler, ikke om Mermaid vises i Drawnix-preview.
 
-Instillingen **Diagram preview export PPI** har som standard verdi **300 PPI** og accepterer værdier mellem **72-600**. Den kontrollerer kun rasterisering af PNG; SVG og PDF bevarer vektorgeometrien. Instillingen **Also export complete Mermaid visuals** styrer valgfrie eksterne Mermaid-elementer og har ingen indflydelse på Mermaid-synlighed i Drawnix-forhandsvisninger.
----
+## 1. Udbyder
 
-## 1. Udbyderkonfiguration
+Angiv endpoint til korrekt protokol, krævet nøgle og tilgængelig model. Modelliste og generering er separate kontroller. Lokal server/model skal være klar; cloud/gateway modtager indhold. Kontrollér også opgavespecifikke ruter før privat materiale.
 
-### At tilføje en udbyder
+## 2. Model pr. opgave
 
-1. **Vælg udbyder** fra dropdown (30+ tilgængelige)
-2. **Indtast API-nyckel**
-3. **Valgfrit**: Stil din egen base URL (for proxyer/gateways)
-4. **Klik på "Få modellliste"** for at overholde forbindelsen
-5. **Vælg standardmodell**
+`useMultiModelSettings` giver særskilte udbydere/modeller til links, titler, research, oversættelse, begreber, originaltekst og Mermaid. Tom override bruger udbyderens model; deaktiveret bruger den aktive udbyder. Sammenlign præcision, ventetid og faktiske omkostninger på samme note.
 
-### Almindelige leverandører
+## 3. Output
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
+| Opgave | Standardresultat |
+| ------ | ------------------------- |
+| Links | Separat `_processed.md` ved kilden; flytning af original er fra |
+| Selvstændigt begrebsudtræk | Valgt begrebsmappe; kun titel, backlinks fra |
+| Oversættelse | Ved siden af som `_<language>.md`; eksisterende mål kan overskrives |
+| Research | Opsummering føjes til aktiv Markdown |
+| Batchgenerering fra titler | Skriver egnede kilder og flytter til tilstødende `<folder>_complete`, hvis målet tillader det |
+| Diagram-preview/eksport | Vælg understøttet kilde eller visuel eksport og kontrollér rapporteret sti |
 
-#### Anthropic (Claude)
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
+Begrebsmappen starter tom; `concepts` er et eksempel. Selvstændige noter har minimal/fuld form, ingen generel skabelonmotor. [Begreber](../features/concept-notes). Behandling og oversættelse har hver deres suffikser/mapper. Kontrollér mål og genoprettelseskonflikter; annullering ruller ikke færdige skrivninger tilbage.
 
-#### Ollama (Local)
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
+## 4. Sprog
+
+UI har 21 sprogversioner, webstedet 34 sprogruter. `uiLocale: auto` vælger understøttet mapping, ellers engelsk. Genereret sprog er særskilt og starter som engelsk. Understøttede opgaver kan have eget sprog; oversættelse bruger `language`. Antallene beviser ikke modellernes sprogevner.
+
+## 5. Søgning
+
+Vælg Tavily med nøgle eller DuckDuckGo eksplicit. Tom Tavily-nøgle skifter ikke tjeneste. Begge bruger netværk; DuckDuckGo kan hente resultatsider. Research ved titelgenerering er fra: `enableResearchInGenerateContent`. Lokal hentning er også fra med egne mappe-/opgavegrænser. Lokale uddrag i konteksten sendes til valgt LLM.
+
+## 6. Arbejdsgange
+
+Brug byggeren eller én navngiven DSL-linje pr. knap:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
-
-### Mere end én leverandør
-
-Du kan konfigurere flere leverandører og skifte mellem dem for hver opgave:
-- **Hovedleverandør**: Bruges som fallback
-- **Opgavespecifikke leverandører**: Overskrives for specifikke opgaver
-
----
-
-## 2. Opgavespecifikke modeller
-
-Konfigurér forskellige modeller for forskellige opgaver for at optimere kost/niveau:
-
-### Opgavetyper
-
-| Opgave | Standardmodell | Formål |
-|------|--------------|---------|
-| **Forbindelse** | Hovedleverandør | Identificer koncepter for wiki-linker |
-| **Konceptgenerering** | Hovedudbyder | Udtræk og beskriv koncepter |
-| **Forskning** | Hovedudbyder | Sammanfatt resultater fra websearch |
-| **Oversættelse** | Hovedudbyder | Oversæt tekst |
-| **Diagramgenerering** | Hovedudbyder | Generer Mermaid/Canvas-diagrammer |
-
-### Eksempel: Kostoptimeret indstilling
-
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### Hvad man gør for at konfigurere
-
-1. **Indstillinger → Notemd → Opgaveindstillinger**
-2. For hver opgave vælg:
-   - ✅ **Brug hovedudbyder** (standard)
-   - 🔄 **Brug egen udbyder** → vælg udbyder + modell
-
----
-
-## 3. Udgangskonfiguration
-
-### Udgivelse af konceptnoter
-
-**Hvor nye konceptnoter gemmes:**
-
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Mall:**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### Muligheder for mappstruktur
-
-**Valg 1: Flad (alle koncepter i en mapp)**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**Valg 2: Hierarkisk (afhængigt af kildemapp)**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-Konfigurér: **Indstillinger → Udskrift → Brug hierarkiske mapper**
-
-### Udskrift af diagrammer
-
-**Hvor diagrammer gemmes:**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**Format:**
-- `.mmd` (Mermaid kilde)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
-
-## 4. Sprogindstillinger
-
-### UI Sprog
-
-**Indstillinger for grænsefladen** (knapper, menuer, dialoger):
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-Støttet: Engelsk, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, og flere.
-
-### Udskriftssprog
-
-**Genereret indholdssprog** (konceptnoter, forskningsopsummeringer):
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**Brugsmål:** Kinesisk UI + engelsk output for bilingual forskning.
-
-### Sprogmål for oversætning
-
-**Standardmæssigt sprogmål** for oversætningstasker:
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
-
-## 5. Søgintegration
-
-### Tavily (Anbefales)
-
-**AI-optimiseret søgestjerneste:**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-Hent nøgle: [tavily.com](https://tavily.com/)
-
-**Egenskaber:**
-- Højkvalitetsresultater
-- AI-optimiserede opsummeringer
-- Kilderreferencer
-
-### DuckDuckGo (Experimental)
-
-**Der er ikke behov for API-nøgle:**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**Opmerkning:** Lavere kvalitet, ingen personalisering.
-
----
-
-## 6. Arbejdsmarkedskonfiguration
-
-### Skabe egne arbejdsmarkeder
-
-**Arbejdsmuligheder forbinder flere opgaver til en enkelt knap.**
-
-1. **Indstillinger → Arbejdsmuligheder → Tilføj arbejdsmulighed**
-2. **Navn**: "Paper Analysis Flow"
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **Spara**
-
-En ny knap vises i den venstre sidebark.
-
-### DSL-syntax
-
-**Format:** `action1>action2>action3`
-
-**Tilgængelige handlinger:**
-- `process-current-add-links` — Tilføj wiki-linker til den aktuelle note
-- `extract-concepts-current` — Generer konceptnoter
-- `research-and-summarize` — Veb-research + sammanfattelse
-- `translate-current` — Oversæt den aktuelle note
-- `summarize-as-mermaid` — Generer Mermaid-diagram
-- `process-folder-add-links` — Batch-process mappen
-
-**Eksempler på arbejdsmuligheder:**
-
-**Snabb konceptudhulling:**
-```
-process-current-add-links>extract-concepts-current
-```
-
-**Dybtgående forskning:**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**Flerspråkig analyse:**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
+`::` adskiller navn og handlinger, `>` adskiller handlings-ID’er. Standardpolitikken stopper ved rapporteret fejl. Se [arbejdsgange](../features/workflows) for omfang og fortsættelse efter fejl.
 
 ## 7. Avancerede indstillinger
 
-### Batchbehandling
+| Indstilling | Startværdi | Virkning |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | Udbyder uden separat opgaverute |
+| `useMultiModelSettings` | `false` | Udbyder/model pr. opgave |
+| `useCustomConceptNoteFolder` | `true` | Tillad begrebsoutput efter valg af mappe |
+| `conceptNoteFolder` | `''` | Ingen begrebsmappe fra start |
+| `extractConceptsMinimalTemplate` | `true` | Kun titel i selvstændige begreber |
+| `extractConceptsAddBacklink` | `false` | Backlinks ved selvstændigt udtræk |
+| `moveOriginalFileOnProcess` | `false` | Bevar original ved linktilføjelse |
+| `chunkWordCount` | `3000` | Omtrentlige tekststykker, ikke tokengrænse |
+| `batchConcurrency` | `1` | Standard for batchsamtidighed |
+| `enableBatchParallelism` | `false` | Parallel planlægning på ruter, der bruger kontakten |
+| `enableStableApiCall` | `false` | Eksplicit stabil anmodningstilstand |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Stop arbejdsgang ved rapporteret fejl |
 
-**Behandle flere filer parallelt:**
+Størrelsen af tekststykker og outputbudgettet i tokens er forskellige. Mindre stykker løser ikke alle kontekstgrænser, og lav samtidighed forhindrer ikke alle 429-fejl.
 
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
+## Indstillingsprofiler
 
-Højere = hurtigere men flere API anrop.
+Indstillinger er plugin-data i din vault. Sikkerhedskopiér før ændring. Udbydereksport har egen maskeringskontrakt, ikke en fuld vault-backup. Kontrollér endpoints og metadata, også i maskeret output. Offentliggør ikke rå indstillinger eller diagnostik med private noter.
 
-### Smart deling i deler
+## Konfigurationsproblemer
 
-**For lange notater, del dem i deler:**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-Forhindrer fejl på grund af tokenlimiter.
-
-### Diagnostikpanelen
-
-**Vis detaljerede logger:**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-Viser:
-- API anmodninger/svar
-- Tokenbrug
-- Behandlingstid
-- Fejl
-
-### Detektering af duplikate koncepter
-
-**Undgå nærliggende duplikate koncepter:**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-Højere = mere aggressiv fusions.
-
----
-
-## Konfigurationsprofiler
-
-### Eksport/Import af indstillinger
-
-**Del konfigurationer mellem enheder:**
-
-1. **Indstillinger → Avanceret → Eksportér konfiguration**
-2. Sparer `notemd-config.json`
-3. På ny enhed: **Importér konfiguration**
-
-**Hva som er inkluderet:**
-- Provider API-nyckler (valgfrit)
-- Modellvalg
-- Utdragsveje
-- Kostomiserede arbejdsmetoder
-
----
-
-## Anbefalede konfigurationer
-
-### For studenter
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### For forskere
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### For brugere, der gør digt om privatlivet
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### For bilingvale arbejde
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## Løsning af konfigurationsproblemer
-
-### Indstillinger gemmes ikke
-- Kontroller filadgangsrigheder i `.obsidian/plugins/notemd/`
-- Prøv: Afaktiver plugin → Aktiver igen
-
-### API-koden er ugyldig
-- Ingen ekstra mellemrum
-- Kontroller udløbstid
-- Kontroller kreditter i leverandørens dashboard
-
-### Modeller lades ikke
-- Klik på "Få modellliste" for at opdatere
-- Kontroller nettverksforbindelse
-- Prøv en ander leverandør
-
----
+Test præcis udbyder/model med en lille note. Mangler et felt, kontrollér søgning, kategori, udviklertilstand og vault. Rapportér version og minimale indstillinger uden hemmeligheder.
 
 ## Næste trin
 
-- 📖 [Udforsk funktioner](../features/wiki-links)
-- 🔌 [Leverandørssætningssikter](../providers/overview)
-- ❓ [FAQ](../faq)
+- [Hurtigstart](./quick-start).
+- [Batcher](../advanced/batch-processing).
+- [Egne prompts](../advanced/custom-prompts).
+- [Fejlfinding](../advanced/troubleshooting).

@@ -1,133 +1,76 @@
 ---
 id: installation
-title: "Instalacja"
-description: "Jak zainstalować Notemd w Obsidian"
+title: Instalacja
+description: >-
+  Zainstaluj Notemd z katalogu Obsidiana lub plików jednego wydania GitHub i
+  sprawdź rzeczywiste zadanie.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Instalacja
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Instalacja
 
-<TLDR>
-**Zainstaluj Notemd w mniej niż 2 minuty.** Dwa sposoby: (1) plugini społecznościowe Obsidian (zalecane, instalacja jednym kliknięciem) lub (2) instalacja ręczna przez GitHub Releases. Wymaga wersji Obsidian 0.15.0+ lub nowszej. Działa na Windows, macOS, Linux, iOS i Android. Brak zależności zewnętrznych. Ponad 4k pobierania, licencja MIT.
-</TLDR>
+<TLDR>Zainstaluj Notemd przez Community plugins albo umieść trzy pliki wykonawcze z tego samego wydania GitHub w skarbcu (vault). Włącz wtyczkę, wybierz dostawcę i przetestuj notatkę. Serwery modeli oraz opcjonalne narzędzia eksportu natywnego przygotowuje się osobno.</TLDR>
 
-## Metoda 1: Wtyczki społecznościowe (zalecane)
+## Metoda 1: Community plugins, zalecana
 
-1. Otwórz **Obsidian Ustawienia** (ikonka ⚙️ lub `Ctrl/Cmd + ,`)
-2. Przejdź do **Community plugins**
-3. Kliknij **Przeglądaj**
-4. Szukaj **"Notemd"**
-5. Kliknij **Install**
-6. Kliknij **Włącz**
+1. W docelowym skarbcu otwórz **Settings → Community plugins**.
+2. W razie potrzeby zezwól na wtyczki społeczności i wybierz **Browse**.
+3. Wyszukaj **Notemd**, sprawdź `Jacobinwwey/obsidian-NotEMD` i wybierz **Install**.
+4. Wybierz **Enable** i otwórz panel boczny z paska narzędzi lub palety poleceń.
 
-**Gotowe!** Zobaczysz ikonę Notemd w lewej kolumnie bocznej.
+[Otwórz Notemd w Obsidianie](obsidian://show-plugin?id=notemd). Jeśli przeglądarka nie obsługuje odnośnika, użyj powyższego menu. Czytanie dokumentacji nie wymaga obsługi tego protokołu.
 
-## Metoda 2: Ręczna instalacja
+## Metoda 2: Instalacja ręczna
 
-### Wymagania wstępne
-- Obsidian 0.15.0 lub nowsza wersja
-- Git (opcjonalnie, do klonowania)
+### Wymagania
+
+Potrzebujesz Obsidiana i skarbca, którego kopię zapasową możesz wykonać. Minimum `0.15.0` w manifeście jest deklaracją, a nie dowodem świeżych testów na tej wersji.
 
 ### Kroki
 
-1. **Pobierz pliki** z [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. Pobierz `main.js`, `manifest.json` i `styles.css` z tego samego [wydania GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest). `README.md` jest instrukcją, nie wymaganym plikiem wykonawczym.
+2. Umieść trzy pliki w `<vault>/.obsidian/plugins/notemd/`. Uwzględnij rzeczywisty katalog konfiguracji, jeżeli go zmieniono.
+3. Uruchom ponownie Obsidiana i włącz wtyczkę.
+4. Sprawdź wersję; nie łącz nowego manifestu ze starym pakietem.
 
-2. **Znajdź folder z pluginkami swojego sejfu:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## Alternatywa: BRAT
 
-Jeśli folder `plugins` nie istnieje, utwórz go.
-
-3. **Utwórz folder Notemd:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
-
-4. **Skopiuj trzy pliki** do foldera `notemd`.
-
-5. **Przeładowaj Obsidian:**
-   - Naciśnij `Ctrl/Cmd + R` lub
-   - Uruchom ponownie Obsidian
-
-6. **Włącz plugina:**
-   - Ustawienia → Pluginy społecznościowe
-   - Znajdź „Notemd” na liście
-   - Włącz go
-
-## Alternatywa: Zainstaluj przez BRAT
-
-Jeśli używasz [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat):
-
-1. Otwórz ustawienia BRAT
-2. Kliknij "Dodaj wtyczkę beta"
-3. Wpisz: `Jacobinwwey/obsidian-NotEMD`
-4. Kliknij "Dodaj wtyczkę"
-5. Włącz Notemd w wtyczkach społecznościowych
+Jeśli używasz już [BRAT](https://github.com/TfTHacker/obsidian42-brat), dodaj repozytorium jego procedurą instalacji wtyczek beta. Do odtwarzania błędów wybierz konkretne wydanie. BRAT jest opcjonalnym narzędziem zewnętrznym.
 
 ## Weryfikacja
 
-Po zainstalowaniu sprawdź, czy Notemd działa:
+Skonfiguruj dostępny model, uruchom **Testuj połączenie**, a potem [szybki start](./quick-start). Lista modeli nie dowodzi uprawnień do generowania; sprawdź rzeczywisty plik wynikowy.
 
-1. Otwórz dowolną notatkę
-2. Kliknij prawym przyciskiem myszy w edytorze
-3. Powinieneś zobaczyć polecenia Notemd takie jak:
-   - "Przetworz plik (dodaj linki)"
-   - "Wyodrębnij koncepcje"
-   - "Przeprowadź badania i stwórz podsumowanie"
+## Granice systemowe
 
-## Kolejne kroki
+| Element | Granica |
+| --------- | ---------- |
+| Manifest | Minimum Obsidian `0.15.0`; `isDesktopOnly` ma wartość false |
+| Dowody testowe | Patrz datowane raporty; fizyczne urządzenia mobilne i 0.15.0 nie mają aktualnej weryfikacji |
+| Model chmurowy | Sieć, uprawnione konto/klucz i dostępny model |
+| Model lokalny | Osobno zainstalowany aktywny serwer oraz pobrany/załadowany model |
+| Natywny eksport slajdów lub obwodów | Narzędzia desktopowe i zależności formatu; najpierw sprawdź środowisko |
 
-- **Skonfiguruj dostawcę LLM:** [Szybki start →](./quick-start)
-- **Rozwiązywanie problemów:** [Częste problemy →](../advanced/troubleshooting)
+Nie ma wspólnej gwarancji wersji systemu dla wszystkich eksporterów. Podgląd obwodu nie dowodzi kompilacji TeX, a test desktopowy nie potwierdza działania na telefonie.
 
-## Wymagania systemowe
+## Odinstalowanie
 
-| Platforma | Wersja | Status |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | Wymagane |
-| **Windows** | 7+ | ✅ Obsługiwane |
-| **macOS** | 10.15+ | ✅ Obsługiwane |
-| **Linux** | Jakiekolwiek | ✅ Obsługiwane |
-| **iOS** | 15+ | ✅ Obsługiwane |
-| **Android** | 5+ | ✅ Obsługiwane |
-
-## Usuwanie
-
-Aby usunąć Notemd:
-
-1. Ustawienia → Wtyczki społecznościowe
-2. Znajdź "Notemd"
-3. Kliknij ikonę ❌
-4. Opcjonalnie usuń folder z wtyczką: `<vault>/.obsidian/plugins/notemd/`
-
-Twoje dane (notatki, notatki koncepcyjne itp.) pozostają nietknięte.
+Wyłącz lub odinstaluj przez Community plugins. Utworzone notatki i artefakty pozostają zwykłymi plikami skarbca. Przejrzyj je przed usunięciem i zachowaj ustawienia, jeśli będą potrzebne. Odinstalowanie nie cofa wykonanych zmian.
 
 ## Aktualizacja
 
-### Automatyczna aktualizacja (zalecane)
-Obsidian automatycznie sprawdza dostępne aktualizacje wtyczek. Gdy pojawi się nowa wersja:
-1. Ustawienia → Wtyczki społecznościowe
-2. Kliknij "Sprawdź aktualizacje"
-3. Kliknij "Zaktualizuj" obok Notemd
+Użyj **Check for updates**. Ręcznie: zatrzymaj zadania, wykonaj kopię skarbca i ustawień, wymień trzy pliki wykonawcze z jednego wydania i przeładuj aplikację. Przeczytaj opis wydania i wykonaj mały test przed pracą wsadową. Nie zastępuj pliku ustawień zasobem wydania. Powrót wymaga świadomie wybranej zgodnej wersji i kopii zapasowej.
 
-### Ręczna aktualizacja
-Pobierz najnowszą wersję i zastąp trzy pliki w folderze z wtyczką.
+## Dalej
 
-## Pomoc
-
-- 📖 [Przewodnik szybkiego rozpoczęcia](./quick-start)
-- ❓ [FAQ](../faq)
-- 💬 [Społeczność Discord](https://discord.gg/qnGgsQ9W)
-- 🐛 [Zgłoś problemy](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [Szybki start](./quick-start).
+- [Konfiguracja](./configuration).
+- [Rozwiązywanie problemów](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

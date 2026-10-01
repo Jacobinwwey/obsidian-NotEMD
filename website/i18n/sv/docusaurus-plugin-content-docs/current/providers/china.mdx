@@ -1,75 +1,61 @@
 ---
 id: china
-title: "Kinesiska leverantörer"
-description: "Konfigurera Qwen, DeepSeek, GLM, osv."
+title: Kinesiska leverantörer
+description: 'Matcha kontoregion, endpoint och modell- eller deployment-ID med rätt profil.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords:
+  - Kinesiska leverantörer
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Kinesiska leverantörer
 
-<TLDR>
-**Notemd stöder leverantörer i Kina och med ursprung i Kina genom främst OpenAI-kompatibla slutpunkter.** Den nuvarande uppsättningen inkluderar DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS och Z AI. Värdet är regional tillgänglighet och kostkontroll; risken är leverantörsspecifika modellnamn och kontokontroller.
+<TLDR>Välj profil för kontot och deploymenten. Även med gemensamt OpenAI-kompatibelt protokoll är regioner, sökvägar, modeller och rättigheter inte utbytbara. Verifiera en liten uppgift.</TLDR>
 
-Detta ingår i [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+## Förberedelse
 
-## Inställning
-
-Skapa leverantörskontot, generera en API-nyckel, och välj sedan den motsvarande Notemd-presettet istället för att använda ett generiskt OpenAI-profil. Presetet innehåller standarden Base URL, modell, API-testläge, modellupptäcktsbeteende samt alla leverantörsspecifika UI-fält.
-
-Använd aggressiv modellval för varje uppgift här. Till exempel håll DeepSeek eller GLM vid arbetsflöden med mycket resonemang, använd Qwen eller Moonshot för breda kinesiska språkuppgifter, och dirigera kodningstasker till Qwen Code när det kontot exponerar kodermodeller.
+Ordna konto/nyckel, välj profil och kontrollera region och modellåtkomst. Standarder garanterar inte aktuell tillgänglighet. Testa både anslutning och anteckning.
 
 ## Endpoint och autentisering
 
-| Leverantör | Standardmodell | Base URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (krävs slutpunkts-ID) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+| Profil | Standardmodell | Bas-URL |
+| -------- | --------------- | ------------------ |
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-**Obs!** Doubao kräver ett Ark-slutpunkts-ID (format: `ep-xxxxxxxx-xxxx-xxxx`) istället för en standardmodellnamn.
+Ersätt Doubao-exemplet med verkligt Ark-endpoint-ID eller stödd modell. GLM och Z AI är separata regionala profiler. En annan regions eller abonnemangstyps nyckel kan vara oanvändbar. Följ kontots instruktioner, inte bara din fysiska plats.
 
-De flesta av dessa leverantörer använder den delade OpenAI-kompatibla körmiljön, men deras konto- och modellsemantik skiljer sig. Håll den presettspecifika Base URL om du inte har verifierat kontotets alternativa slutpunkt.
+## Modeller
 
-## Modellupptäckt
+Använd listor där de tillåts. Huawei Cloud MaaS kräver deploymentkunskap; övriga använder stödd OpenAI-kompatibel upptäckt. Saknad listrätt utesluter inte alltid generering med exakt ID. DeepSeek kan klara anslutningstest på lista; flera regionala profiler genererar kort. Verifiera faktisk uppgift.
 
-DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan och SiliconFlow använder OpenAI-kompatibell modellupptäckt när leverantören stöder listning. Huawei Cloud MaaS använder `huaweicloud-modelarts-models`-läget eftersom ModelArts-deployeringsmetadatan inte är identisk med en generisk `/v1/models`-lista.
+## Problem
 
-Behandla misslyckanden vid upptäckt inte som bevis på att chatt är omöjlig. Flera leverantörer tillåter chatt samtidigt som de begränsar rättigheterna till modelllistor. I så fall håll en explicit modell-ID i profilen och validera med anslutningstestet.
+- Nyckel godtas men generering nekas: modellrätt, deployment och region.
+- Ark-ID nekas: krävs endpoint-ID eller modell-ID?
+- Resonemang kapas: budget och modellspecifik thinking.
+- Nätverk: kontrollera adress från Obsidian och läs transportfelet.
 
-## Felaktighetsfelsökning
+## När profilen passar
 
-- Autentiseringen lyckas men chatten misslyckas: modellnamnet kan ligga utanför kontotets rättigheter eller region.
-- Doubao misslyckas med en vanlig modellnamn: använd Ark-slutpunkts-ID:t i modellfältet när din deployment kräver det.
-- Resonemangsresponser är avklippta: kontrollera leverantörsspecifika maximala utdata-token samt Notemd-s modellmedvetna maximala-tokeninställningar.
-- Regional nätverk skiljer sig: använd leverantörens Kina-regionslutpunkt när vault-maskinen finns i Kina; använd den internationella slutpunkten endast när både kontot och nätverksvägen är giltiga.
-
-## När att använda
-
-Använd kinesiska leverantörer när regional latens, betalnings-/kontoåtkomst, kinesisk språkkvalitet eller kostnad är den huvudsakliga begränsningen. Välj direkta OpenAI, Anthropic, Google eller lokala leverantörer om du behöver en enklare protokollgräns eller starkare enhetlighet vid felsökning mellan olika leverantörer.
-
----
+När kontoåtkomst, tillgänglighet och datavillkor passar. Geografi bevisar inte språkkvalitet eller låga priser. Jämför samma exempel och dokumentera inställningarna.
 
 ## Nästa steg
 
-- [LLM Leverantörer](/docs/providers/overview) -- Full konfiguration, modeller per uppgift och återförsöklogik
-- [Felsökning](/docs/advanced/troubleshooting) -- Lägg till räddning på regionala anslutnings- och autentiseringsfel
+- [Leverantörer](./overview).
+- [Konfiguration](../getting-started/configuration).
+- [Felsökning](../advanced/troubleshooting).

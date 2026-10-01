@@ -1,133 +1,76 @@
 ---
 id: installation
-title: "Asentaminen"
-description: "Kuidas asentaa Notemd käyttäen Obsidian"
+title: Asennus
+description: >-
+  Asenna Notemd Obsidianin luettelosta tai yhden GitHub-julkaisun tiedostoista
+  ja varmista toiminta.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Asennus
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Asentaminen
+# Asennus
 
-<TLDR>
-**Asenna Notemd vähemmän kuin 2 minuutissa.** Kaksi metoodia: (1) Obsidian Community Plugins (soovitatavasti, yhden klikkinolla asentaminen), tai (2) Käyttäjäasentaminen GitHub Releasesin kautta. Tarvitaan Obsidian 0.15.0+. Toimii Windowsissa, macOS:ssa, Linuxissä, iOS:ssa ja Androidissä. Ei ulkopuolisia riippuvuuksia. 4k+ ladattuja, MIT-litsentsoilla.
-</TLDR>
+<TLDR>Asenna Notemd Community plugins -valikosta tai kopioi saman GitHub-julkaisun kolme ajonaikaista tiedostoa holviin. Ota lisäosa käyttöön, valitse palveluntarjoaja ja kokeile muistiinpanoa. Mallipalvelimet ja valinnaiset natiivivientityökalut valmistellaan erikseen.</TLDR>
 
-## Metoodi 1: Community Plugins (soovitatavasti)
+## Tapa 1: Community plugins, suositus
 
-1. Avaa **Obsidian Settings** (⚙️-ikoni tai `Ctrl/Cmd + ,`)
-2. Mene **Community plugins**-ihin
-3. Klikkaa **Browse**
-4. Otsi **"Notemd"**
-5. Klikkaa **Install**
-6. Klikkaa **Enable**
+1. Avaa halutussa holvissa **Settings → Community plugins**.
+2. Salli yhteisön lisäosat tarvittaessa ja valitse **Browse**.
+3. Etsi **Notemd**, varmista `Jacobinwwey/obsidian-NotEMD` ja valitse **Install**.
+4. Valitse **Enable** ja avaa sivupaneeli työkaluriviltä tai komentopaletista.
 
-**Valmis!** Näet Notemd-ikoneen vasemmassa sivupuoleessa.
+[Avaa Notemd Obsidianissa](obsidian://show-plugin?id=notemd). Käytä yllä olevaa valikkoa, jos selain ei avaa linkkiä. Oppaan lukeminen ei edellytä protokollakäsittelijää.
 
-## Metoodi 2: Käyttäjäasentaminen
+## Tapa 2: Käsin asentaminen
 
-### Eeltingimukset
-- Obsidian 0.15.0 tai uudempi
-- Git (valinta, klonoimiseen)
+### Edellytykset
+
+Tarvitset Obsidianin ja varmuuskopioitavan holvin. Manifestin vähimmäisversio `0.15.0` on määritys, ei osoitus tuoreesta testauksesta kyseisellä versiolla.
 
 ### Vaiheet
 
-1. **Lae tiedostot** [GitHub Releases]-ista(https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+1. Lataa `main.js`, `manifest.json` ja `styles.css` samasta [GitHub-julkaisusta](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest). `README.md` on ohje, ei pakollinen ajonaikainen tiedosto.
+2. Kopioi kolme tiedostoa hakemistoon `<vault>/.obsidian/plugins/notemd/`. Käytä todellista asetushakemistoa, jos olet muuttanut sen.
+3. Lataa Obsidian uudelleen ja ota lisäosa käyttöön.
+4. Tarkista versio; älä yhdistä uutta manifestia vanhaan ohjelmapakettiin.
 
-2. **Otsi sinun vaultin pluginin kausta:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+## Vaihtoehto: BRAT
 
-Jos `plugins`-kausta ei ole olemassa, luo se.
+Jos käytät jo [BRATia](https://github.com/TfTHacker/obsidian42-brat), lisää repositorio sen beetalisäosien menettelyllä. Käytä tiettyä julkaisua virheen toistamiseen. BRAT on valinnainen ulkoinen työkalu.
 
-3. **Luo Notemd-kausta:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
+## Varmennus
 
-4. **Kopioi kolme tiedostoa** `notemd`-kaustaan.
+Määritä käytettävissä oleva malli, suorita **Test connection** ja [pika-aloitus](./quick-start). Malliluettelo ei todista generointioikeutta; tarkista oikea tulostiedosto.
 
-5. **Uudelleenlaadita Obsidian:**
-   - Vaihta `Ctrl/Cmd + R`-painikkeella tai
-   - Alkaa uudelleen Obsidian
+## Järjestelmän rajat
 
-6. **Aktivoi plugini:**
-   - Asetukset → Yhteisöpluginit
-   - Otsi „Notemd“ listasta
-   - Aktivoi se
+| Osa | Raja |
+| --------- | ---------- |
+| Manifesti | Vähintään Obsidian `0.15.0`; `isDesktopOnly` on false |
+| Testausnäyttö | Katso päivätyt raportit; fyysisiä mobiililaitteita ja 0.15.0:aa ei ole tässä hyväksynnässä varmennettu |
+| Pilvimalli | Verkko, valtuutettu tili/avain ja käytettävä malli |
+| Paikallinen malli | Erikseen asennettu käynnissä oleva palvelin ja ladattu malli |
+| Natiivi dia- tai piirivienti | Työpöytätyökalut ja muotokohtaiset riippuvuudet; tarkista ympäristö ensin |
 
-## Valinta: Asenna BRAT-kautta
+Kaikille vientityökaluille ei ole yhteistä käyttöjärjestelmäversiotakuuta. Piirin esikatselu ei osoita TeX-käännöksen onnistumista; työpöytätesti ei todista mobiilitoimintaa.
 
-Jos käytät [BRAT pluginia](https://github.com/TfTHacker/obsidian42-brat):
+## Poistaminen
 
-1. Avaa BRAT-asetukset
-2. Klikkaa "Lisää Beta-plugini"
-3. Sisesta: `Jacobinwwey/obsidian-NotEMD`
-4. Klikkaa "Lisää plugini"
-5. Aktivoi Notemd yhteisöpluginissä
+Poista käytöstä tai asennuksesta Community plugins -valikossa. Luodut muistiinpanot ja tuotokset jäävät tavallisiksi holvitiedostoiksi. Tarkista ne ennen poistamista ja säilytä asetuskopio tarvittaessa. Lisäosan poistaminen ei peru aiempia muokkauksia.
 
-## Veroittaminen
+## Päivittäminen
 
-Toisen paikan päätteessä verokaa, että Notemd toimii:
+Käytä **Check for updates**. Käsin päivitettäessä pysäytä tehtävät, varmuuskopioi holvi/asetukset, korvaa kolme ajonaikaista tiedostoa yhdestä julkaisusta ja lataa uudelleen. Tarkista julkaisutiedot ja kokeile pienesti ennen eräajoa. Älä korvaa asetustiedostoa julkaisun tiedostolla. Paluu edellyttää tarkoituksella valittua yhteensopivaa versiota ja varmuuskopiota.
 
-1. Avoa mistä tahansa tiedosto
-2. Klikkaa oikealla painikella muokkikossa
-3. Sinun pitää näkyä Notemd-komentoja kuten:
-   - "Tulkita tiedosto (lisää linkkejä)"
-   - "Eritä konseptit"
-   - "Tutkita ja yhteenvetä"
+## Seuraavaksi
 
-## Järguvät toimet
-
-- **Konfiguroi LLM-palveluntarjoaja:** [Nopea käyttö →](./quick-start)
-- **Virheentekijätyö:** [Yleiset ongelmat →](../advanced/troubleshooting)
-
-## Systeemin vaatimukset
-
-| Plattformi | Versio | Tilastot |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | Tarvittava |
-| **Windows** | 7+ | ✅ Tuettu |
-| **macOS** | 10.15+ | ✅ Tuettu |
-| **Linux** | Mitään | ✅ Tuettu |
-| **iOS** | 15+ | ✅ Tuettu |
-| **Android** | 5+ | ✅ Tuettu |
-
-## Poistaus
-
-Notemd poistamiseen:
-
-1. Asetukset → Yhteisön lisäsovellukset
-2. Otsi "Notemd"
-3. Painaa ❌-ikoni
-4. Valitettavasti poista lisäsovelluksen kansio: `<vault>/.obsidian/plugins/notemd/`
-
-Sinun tiedot (merkintöt, konseptimerkintöt jne.) jäävät muutomattomiksi.
-
-## Uppdatero
-
-### Automaattinen uppdatero (suositeltu)
-Obsidian tarkistaa automaattisesti lisäsovelluksien uusimmat versiot. Kun uusi versio on saatavilla:
-1. Asetukset → Yhteisön lisäsovellukset
-2. Painaa "Tarkista uusimmat versiot"
-3. Painaa "Uppdate" Notemd-nin kohdalla
-
-### Käsittelyinen uppdatero
-Lae uusin versio ja aseta kolme tiedostoa sinun lisäsovelluksen kansioon.
-
-## Apua
-
-- 📖 [Nopea käyttöohje](./quick-start)
-- ❓ [Kysymyksiä ja vastauksia](../faq)
-- 💬 [Discord-yhteisö](https://discord.gg/qnGgsQ9W)
-- 🐛 [Tilanneiden raportointi](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [Pika-aloitus](./quick-start).
+- [Asetukset](./configuration).
+- [Vianmääritys](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

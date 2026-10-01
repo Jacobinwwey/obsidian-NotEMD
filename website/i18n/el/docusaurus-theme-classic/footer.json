@@ -1,6 +1,6 @@
 {
   "link.title.Docs": {
-    "message": "Δελτία",
+    "message": "Τεκμηρίωση",
     "description": "The title of the footer links column with title=Docs in the footer"
   },
   "link.title.Community": {
@@ -12,31 +12,31 @@
     "description": "The title of the footer links column with title=More in the footer"
   },
   "link.item.label.Getting Started": {
-    "message": "Ξεκίνηση",
+    "message": "Πρώτα βήματα",
     "description": "The label of footer link with label=Getting Started linking to /docs/intro"
   },
   "link.item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Συχνές ερωτήσεις",
     "description": "The label of footer link with label=FAQ linking to /docs/faq"
   },
   "link.item.label.Discord": {
     "message": "Discord",
     "description": "The label of footer link with label=Discord linking to https://discord.gg/qnGgsQ9W"
   },
-  "link.item.label.GitHub Discussions": {
-    "message": "GitHub Discussions",
-    "description": "The label of footer link with label=GitHub Discussions linking to https://github.com/Jacobinwwey/obsidian-NotEMD/discussions"
-  },
   "link.item.label.GitHub": {
     "message": "GitHub",
     "description": "The label of footer link with label=GitHub linking to https://github.com/Jacobinwwey/obsidian-NotEMD"
   },
   "link.item.label.Sponsor": {
-    "message": "Επιχείρηση υποστήριξης",
+    "message": "Υποστήριξη",
     "description": "The label of footer link with label=Sponsor linking to https://github.com/sponsors/Jacobinwwey"
   },
   "copyright": {
-    "message": "Copyright © 2026 Notemd. Δημιουργήθηκε με Docusaurus. | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">Ψηφιακή άδεια MIT</a>",
+    "message": "Copyright © 2026 Notemd. Δημιουργήθηκε με το Docusaurus. | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">Άδεια MIT</a>",
     "description": "The footer copyright"
+  },
+  "link.item.label.GitHub Issues": {
+    "message": "Αναφορά προβλημάτων",
+    "description": "Repository issue tracker"
   }
 }

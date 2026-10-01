@@ -1,0 +1,107 @@
+---
+id: overview
+title: Panduan pengembang
+description: >-
+  Build, uji, dan perluas Notemd melalui kontrak penyedia, operasi, rendering,
+  serta dokumentasi yang ada.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Panduan pengembang
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Panduan pengembang
+
+<TLDR>Mulai dari cabang fitur, pasang dependensi terkunci dan kedua revisi browser, lalu build serta jalankan Jest lengkap. Perluas pemilik kontrak yang ada. Selaraskan dokumentasi, tes penyedia, dan bukti aplikasi native dengan perilaku yang diubah.</TLDR>
+
+## Siapkan checkout kerja
+
+Klon [repositori](https://github.com/Jacobinwwey/obsidian-NotEMD), baca [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md), dan buat cabang fitur. CI plugin memakai Node 20 Linux/Windows; situs memakai Node 24. Dependensi root dan `website/` dipasang terpisah.
+
+Dari root:
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Dua paket Playwright dapat membutuhkan revisi Chromium berbeda. Satu saja tidak cukup untuk lingkungan bersih. `main.js` dihasilkan dan diabaikan Git; bundle lama bukan bukti commit baru.
+
+## Temukan pemilik sebelum menyunting
+
+| Tanggung jawab | Sumber utama |
+| ---------------- | ---------------- |
+| Siklus plugin, perintah, routing host | `src/main.ts` |
+| Preset, metadata protokol, validasi penyedia | `src/llmProviders.ts` |
+| Pembentukan permintaan, transport, retry, streaming | `src/llmUtils.ts` |
+| Definisi operasi, schema, pilihan CLI publik | `src/operations/`, `src/cliContracts.ts` |
+| Tugas berkas, riset, terjemahan | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Tindakan alur dan bilah samping | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Spesifikasi diagram dan rendering | `src/diagram/`, `src/rendering/` |
+| String UI dan bahasa didukung | `src/i18n/` |
+| Panduan publik dan terjemahan | `website/docs/`, `website/i18n/` |
+| Runbook serta bukti bertanggal | `docs/maintainer/` |
+
+Bundle produksi mandiri, termasuk host pratinjau inline. Kandidat render-host terpisah bukan kontrak aset rilis. Jangan aktifkan tanpa menyelaraskan pengemasan, aset, audit, dan dokumentasi.
+
+## Terapkan perubahan terbatas
+
+1. Reproduksi dan buat tes fokus gagal sebelum perubahan perilaku.
+2. Ubah pemilik invariant, validasi masukan eksternal di batasnya, jangan gandakan pengetahuan penyedia/operasi pada pemanggil.
+3. Ulangi tes fokus lalu lengkap; sertakan pembatalan, error, dan persistensi untuk operasi penulisan.
+4. Perbarui sumber Inggris dan bahasa terdampak. Rencana/tugas/walkthrough perlu versi Inggris dan Mandarin lengkap terpisah di `docs/`.
+5. Periksa aplikasi tujuan untuk visual/ekspor native. XML, screenshot, atau build hijau tidak membuktikan editabilitas/kelekatan konektor.
+
+Penyedia baru: tambahkan preset di `llmProviders.ts`, gunakan transport yang ada bila kompatibel, perbarui `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README, dan tes koneksi. Pertahankan streaming dan respons terputus.
+
+Operasi perlu schema masukan/hasil, konteks, efek samping, handling tags sebelum diekspos. Entri registry tidak otomatis publik. Lihat [Agent](../agents/overview).
+
+## Verifikasi
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint membandingkan diagnostik individual dengan baseline. Utang lama tidak mengizinkan regresi baru meskipun total turun. Gunakan `npm run benchmark:local-kb` saat jalur pengambilan berubah; laporkan corpus/lingkungan, bukan klaim kecepatan universal.
+
+Untuk situs gunakan Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Terjemahan program 1.9.8 ditulis/ditinjau langsung oleh Codex. Jangan menjalankan skrip penerjemahan lama atau endpoint LM Studio/mesin terjemahan. Alat boleh memformat, memvalidasi, dan merender teks yang ditulis.
+
+## Uji host dan aplikasi native
+
+Gunakan Vault uji yang dapat dibuang. Skrip host membutuhkan `.notemd-host-verification` dan memeriksa bundle salinan. Pisahkan Vault pengguna. Coba `obsidian help` dan `obsidian-cli help` saat integrasi CLI; catat alat hilang, bukan menganggap stub sebagai uji host sukses.
+
+PowerPoint, CircuitikZ, dan slide punya prasyarat/artefak sendiri. Ikuti [penerimaan reliabilitas](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) serta [runbook rilis](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Pertahankan batas seluler/versi minimum yang belum diuji.
+
+## Kontribusi dan rilis
+
+PR menjelaskan masalah, perilaku akhir, tes, dan batas. Gunakan [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) untuk reproduksi. Jangan commit kredensial, isi Vault privat, atau keluaran tak terkait.
+
+Publisher/runbook memiliki operasi rilis lengkap: metadata sinkron, tag numerik, sumber tag bersih, catatan bilingual, aset draft terverifikasi, publikasi lalu Pages eksplisit. Jangan pindah tag publik untuk mengganti binernya. `.trellis/` adalah status lokal, bukan dependensi CI.
+
+## Selanjutnya
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): aturan eksekusi/review.
+- [Status proyek](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md): progres/bukti.
+- [Agent](../agents/overview): kontrak ekspor.
+- [1.9.8](../releases/1.9.8): dampak dan peningkatan.

@@ -79,9 +79,12 @@ async function resolveTranslationOutputFolder(
                 await app.vault.createFolder(outputFolderPath);
                 outputFolderCreated = true;
             } catch (error) {
-                console.error(`Error creating translation folder at ${outputFolderPath}:`, error);
-                outputFolderPath = fallbackOutputFolderPath;
-                usedFallbackOutputFolder = true;
+                // Another task can create the directory while this creation is pending.
+                if (!(app.vault.getAbstractFileByPath(outputFolderPath) instanceof TFolder)) {
+                    console.error(`Error creating translation folder at ${outputFolderPath}:`, error);
+                    outputFolderPath = fallbackOutputFolderPath;
+                    usedFallbackOutputFolder = true;
+                }
             }
         }
     }
@@ -173,6 +176,7 @@ export async function translateFile(
     signal?: AbortSignal
 ): Promise<TranslateFileResult | null> {
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
+    const abortSignal = signal ?? progressReporter.abortController?.signal;
     const fileContent = await readSupportedInputFile(app, file, settings);
     if (!fileContent) {
         throw new Error(i18n.notices.fileEmpty);
@@ -197,8 +201,10 @@ export async function translateFile(
         let translatedChunks: string[] = [];
 
         for (let i = 0; i < totalChunks; i++) {
-            if (signal?.aborted) {
-                throw new Error('Translation cancelled by user.');
+            if (progressReporter.cancelled || abortSignal?.aborted) {
+                const cancellationError = new Error('Translation cancelled by user.');
+                cancellationError.name = 'AbortError';
+                throw cancellationError;
             }
 
             const chunk = chunks[i];
@@ -213,7 +219,7 @@ export async function translateFile(
             );
             progressReporter.log(`Translating chunk ${i + 1}/${totalChunks}...`);
 
-            const translatedChunk = await callLLM(provider, prompt, chunk, settings, progressReporter, model, signal);
+            const translatedChunk = await callLLM(provider, prompt, chunk, settings, progressReporter, model, abortSignal);
             translatedChunks.push(translatedChunk);
         }
 
@@ -230,6 +236,13 @@ export async function translateFile(
         const existingFile = app.vault.getAbstractFileByPath(fullPath);
         const overwritten = Boolean(existingFile);
         const created = !existingFile;
+        // Folder preparation can yield after the LLM's cancellation check.
+        // Once Vault accepts the write, its completion must remain accounted for.
+        if (progressReporter.cancelled || abortSignal?.aborted) {
+            const cancellationError = new Error('Translation cancelled by user.');
+            cancellationError.name = 'AbortError';
+            throw cancellationError;
+        }
         if (existingFile) {
             await app.vault.modify(existingFile as TFile, translatedText);
         } else {

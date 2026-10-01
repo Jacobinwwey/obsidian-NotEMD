@@ -1,16 +1,13 @@
 ---
 id: workflows
 title: ワークフロー
-description: ワンクリックボタンで複数のタスクを連携させる
+description: 有効なアクション ID とフォルダー範囲を指定し、失敗時の挙動を理解して連続処理を構成します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - ワークフロー
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,125 +15,98 @@ import TLDR from '@site/src/components/TLDR';
 # ワークフロー
 
 <TLDR>
-**Notemdワークフロー**は、複数のタスクを1回のクリックで実行できる単一のアクションにまとめます。簡単なDSLを使って`add-links > extract-concepts > research > diagram`のようなシーケンスを定義できます。ワークフローはサイドバーのボタンとして表示され、現在のノートやフォルダで全体的な処理が実行されます。事前定義されたワークフローが搭載されており、設定からカスタムのワークフローを作成できます。各ステップは、そのタスク専用のモデル設定を使用します。
-
-これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
+既存のサイドバーアクションを順に実行します。フォルダー選択やアクティブエディターを要する場合があります。各アクションは入力、出力、副作用を保持するため、単純なテキストパイプではありません。専用テスト領域から始めます。
 </TLDR>
 
 ## 概要
 
-ワークフローにより、タスクを一つずつ実行する際の手間がなくなります。リンクの追加、概念の抽出、見慣れない用語の調査、図の作成といった作業を行うために4回右クリックする代わりに、サイドバーのボタンを1回押すだけで一連の処理が自動的に実行されます。Notemdが順序の管理、エラーの伝播、進捗状況の報告を担当します。
+付属する **One-Click Extract**：
 
-ワークフローは軽量なDSL（ドメイン特化言語）で定義されます。これらは設定に格納され、Obsidianサイドバーにあるクリック可能なボタンとして表示され、現在のノートまたはフォルダ全体に適用することができます。
-
-## 動作の仕組み
-
-### ワークフロー実行パイプライン
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Parse** -- DSL文字列は`>`（または`>`）で区切られ、タスク識別子の順序付きリストに変換されます。
-2. **Resolve** -- 各識別子は内部コマンド（add-links、extract-concepts、research、translate、diagramなど）に対応しています。
-3. **Execute** -- ステップは順番に実行されます。各ステップでは、タスクごとに設定されたプロバイダーとモデルが使用されます。
-4. **エラー処理** – ステップが失敗した場合、エラーポリシーに応じてワークフローは中止されるか、次のステップに進み続けます。
-5. **完了** – トースト通知によって成功が報告されるか、失敗したステップが一覧表示されます。
+1. アクティブノートにリンクを追加し、設定済みなら概念を作成。
+2. 概念またはバッチで選んだフォルダーの対象ノートに本文を生成。既存ファイルを含み得ます。
+3. 生成後の complete フォルダーの Mermaid を修復。
 
-### DSL形式
+既定には Web 調査がありません。本文生成の独立設定を有効にした場合だけ調査を使用します。[バッチ処理](../advanced/batch-processing)で範囲と出力を確認します。
 
-ワークフローとは、`>`で区切られたタスク識別子の連なりとして定義されます。
+## 仕組み
 
+### 実行の流れ
+
+順番に動き、進行ステップと失敗を報告します。キャンセルは後続と対応する要求に伝わりますが、完了書き込みは残り、全体の原子的ロールバックはありません。
+
+概念フォルダーを初期候補にし、本文生成が原フォルダーと complete を記録し、次の Mermaid 修復に渡します。他のアクションはそれぞれのノート、選択、対話条件を維持します。
+
+### DSL
+
+1行にボタン名を定義し、`::` で名前とアクション、`>` で ID を区切ります。空行と `#` 開始行は無視し、未知 ID は拒否します。
+
+```text
+抽出と図::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**利用可能なタスク識別子:**
+ビルダーでも直接編集でも設定できます。ID は安定しており、表示名は UI 言語に従います。フォルダー版は独自 ID で、一般的な文字列置換規則ではありません。
 
-| 識別子 | アクション |
-|------------|--------|
-| `process-current-add-links` | アクティブなノートにウィキリンクを追加する |
-| `extract-concepts-current` | アクティブなノートから概念を抽出する |
-| `research-and-summarize` | 選択したテキストやメモのタイトルについて調査してください |
-| `process-current-translate` | アクティブなノートを翻訳する |
-| `summarize-to-mermaid` | アクティブなノートから図を生成する |
-| `generate-from-title` | メモのタイトルからコンテンツを生成する |
-| `extract-original-text` | 元のテキストを抽出する（OCRやスキャンされたコンテンツ用） |
+| ID | 動作／前提 |
+| ------------ | ----------------------- |
+| `process-current-add-links` | アクティブノートにリンク追加 |
+| `process-folder-add-links` | 指定フォルダーにリンク追加 |
+| `extract-concepts-current` | 現在のノートから概念抽出 |
+| `extract-concepts-folder` | 指定フォルダーから概念抽出 |
+| `generate-from-title` | 現在のタイトルから本文生成 |
+| `batch-generate-from-titles` | フォルダー内の対象ノートに生成 |
+| `research-and-summarize` | Markdown エディターの選択またはタイトルを調査 |
+| `summarize-as-mermaid` | 対応するアクティブ入力を Mermaid 要約 |
+| `generate-diagram` | 対応入力から図の成果物を生成 |
+| `preview-diagram` | 対応する図ソース／成果物をプレビュー |
+| `translate-current-file` | アクティブな対応ファイルを翻訳 |
+| `batch-translate-folder` | 選択フォルダーを翻訳 |
+| `extract-original-text` | 指定した原文を抽出 |
+| `batch-extract-original-text` | フォルダーの対象ファイルから原文抽出 |
+| `split-note-by-chapters` | 現在のノートを章別に分割 |
+| `batch-mermaid-fix` | フォルダー内の Mermaid ブロックを修復 |
+| `fix-formula-current` | 現在の数式区切りを正規化 |
+| `batch-fix-formula` | フォルダーの数式区切りを正規化 |
+| `check-duplicates-current` | 現在のノートで重複確認 |
+| `check-remove-duplicate-concepts` | 対話的に重複概念を確認・削除 |
+| `test-llm-connection` | プロバイダー接続テスト |
+| `probe-slide-export-env` | ローカルのスライド出力環境確認 |
+| `export-slides` | 現在のファイルをスライドに出力 |
 
-**フォルダレベルのバリアント**では、識別子名内の`current`が`folder`に置き換えられます。
+### 既定とカスタム
 
-### 事前定義済みワークフローとカスタムワークフロー
-
-Notemdには、よくあるパターン用の既成のワークフローが同梱されています：
-
-| ワークフロー | チェーン | ユースケース |
-|----------|-------|----------|
-| **ワンクリック抽出** | add-links > extract-concepts > research | 一度の処理で研究論文を処理する |
-| **フルパイプライン** | add-links > extract-concepts > research > diagram | 可視化を伴う完全な知識抽出 |
-| **翻訳 + リンク** | 翻訳 > リンクの追加 | 翻訳してから、対象言語での概念をリンクします |
-
-**カスタムワークフロー**は設定で作成されます：
-
-1. **設定**を開き、**Notemd**、次に**ワークフロー**へ進みます。
-2. **「ワークフローを追加」**をクリックしてください。
-3. DSLチェーンを入力してください（例：`process-current-add-links>extract-concepts-current`）
-4. 表示名を設定してください（例：「クイックリンク + 抽出」）。
-5. 新しいボタンがすぐにサイドバーに表示されます。
+One-Click Extract が付属する既定です。追加ボタンは自分で定義します。名前と順番を設定し、サイドバーのツールチップを確認してください。解析エラーを修正してから実行を頼ります。
 
 ## 設定
 
-| 設定 | デフォルト | エフェクト |
-|---------|---------|--------|
-| `workflows` | 事前定義されたセット | ワークフロー定義の配列（名前 + DSL） |
-| `workflowContinueOnError` | `true` | 現在のステップで失敗した場合は、次のステップに進んでください。 |
-| `workflowShowProgress` | `true` | 各ステップが完了するたびに進捗のトーストを表示します |
+| 設定 | 既定値 | 意味 |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | 最初の報告失敗で停止 |
+| `useMultiModelSettings` | `false` | 個別指定を有効にするまでは active provider |
+| `enableResearchInGenerateContent` | `false` | タイトル生成での調査は既定で無効 |
 
-### ワークフローにおけるタスク単位モデル
+`continue_on_error` は失敗後も次を実行できます。残り入力で後続が動ける場合だけ選びます。続行しても部分失敗が成功にはなりません。
 
-ワークフローの各ステップでは、タスクごとに**独自の**モデル設定が使用されます。DSL自体でモデルを指定する必要はありません。解決順序は次の通りです：
+### タスク別モデル
 
-1. `useMultiModelSettings`が有効な場合のタスクごとのプロバイダー/モデル
-2. グローバル `activeProvider` でなければ
-
-つまり、`add-links`はDeepSeek上で実行でき、`research`はGPT-4o上で実行される――すべて同じワークフローのクリック内で行われます。
+各タスクがモデルを選択します。個別モデルの空上書きは指定プロバイダーのモデルを利用します。非公開資料では各ステップの配信先を確認してください。
 
 ## 例
 
-あなたはちょうど機械学習の論文のPDFをバンクにインポートし、完全な知識抽出を行いたいと思っています。
-
-1. インポートされたノートを開く
-2. **「Full Pipeline」**サイドバーのボタンをクリックしてください
-3. Notemd が実行されます：
-   - **ステップ1**: wikiリンクを追加する -- `[[attention mechanism]]`、`[[transformer]]`など。
-   - **ステップ2**: コンセプトの抽出 – コンセプトフォルダにコンセプトノートを作成します
-   - **ステップ3**: 調査 -- キーワードに関するウェブソースを要約する
-   - **ステップ4**: ダイアグラム – 論文の構成を示すMermaidマインドマップを生成する
-4. 約30秒後、メモにはリンクが追加され、コンセプトノートが作成され、調査結果が付加され、図表ファイルが保存されます
-
-ワンクリックで全てが可能です。
+空の `trial-concepts` とノート一つで実行し、概念と complete フォルダーを調べます。位置を理解する必要があればアクションを個別に試し、確認してから範囲を増やします。
 
 ## ヒント
 
-- **事前定義されたワークフローから始めましょう** – これらは最も一般的なパターンをカバーしています。異なる順序が必要な場合のみカスタマイズしてください。
-- **`workflowContinueOnError`を有効にする** – ダイアグラムのステップが失敗しても、パイプライン全体が中断されるべきではありません。
-- 一括処理には**Use folder workflows**を利用してください。フォルダを右クリックし、ワークフローを選択すると、すべてのノートが処理されます。
-- **ワークフローの名前を明確に** – サイドバーのスペースは限られています。「Quick Extract」や「Translate + Link」のような短くて具体的な名前を使用してください。
+- 失敗と出力の所有関係を追える短い列にする。
+- 無人連続処理に整理／削除を入れない。確認要件は残ります。
+- キャンセルや復旧競合後はログとファイルを読む。
+- 実モデルとフォルダーで試す。短い接続成功は長いバッチの配額を保証しません。
 
----
+## 次に読む
 
-## 次のステップ
-
-- [Research](./research) -- ワークフローに追加する前に、リサーチステップが何を行うのかを理解する
-- [Wiki-Links](./wiki-links) – ほとんどのワークフローで使用されるコアなリンク機能
-- [Concept Notes](./concept-notes) – ワークフローステップとしての概念抽出
-- [バッチ処理](/docs/advanced/batch-processing) – フォルダワークフローにおける並行処理と進捗報告
+- [概念ノート](./concept-notes)：前提とテンプレート。
+- [バッチ処理](../advanced/batch-processing)：選択、並行性、部分完了。
+- [調査](./research)：通信と出典。

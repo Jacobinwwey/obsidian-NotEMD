@@ -1,181 +1,84 @@
 ---
 id: quick-start
-title: Leitfaden für eine schnelle Einrichtung
-description: Einführung in Notemd in 5 Minuten
+title: Schnellstart
+description: >-
+  Richte einen Anbieter ein, bearbeite eine Testnotiz und prüfe die Ausgabe vor
+  einem Ordnerdurchlauf.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Schnellstart
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Leitfaden für eine schnelle Einrichtung
+# Schnellstart
 
 <TLDR>
-**Beginnen Sie bereits in 5 Minuten mit der Verwendung von Notemd.** Drei Schritte: (1) Fügen Sie eine LLM API-Schlüssel hinzu (oder verwenden Sie einen lokalen Ollama), (2) Öffnen Sie eine Notiz und führen Sie „Datei verarbeiten (Verlinkungen hinzufügen)“ aus, (3) Entdecken Sie One-Click-Arbeitsabläufe im Seitenbereich. Unterstützt mehr als 30 Anbieter. Keine Programmierkenntnisse erforderlich. Funktioniert auch offline mit Ollama.
+Beginne mit einer entbehrlichen Markdown-Notiz und einem bereits verfügbaren Anbieter. Prüfe die erzeugte Datei, bevor du einen Ordner bearbeitest. Cloud-Aufrufe übertragen Aufgabeninhalte; lokale Modelle benötigen einen laufenden Server und vorbereitete Modelldateien.
 </TLDR>
 
-## Schritt 1: Konfigurieren Sie Ihren ersten LLM-Anbieter (2 Min.)
+## Schritt 1: Anbieter einrichten
 
-### Option A: Cloud-Anbieter (OpenAI, Anthropic, usw.)
+1. [Installiere und aktiviere Notemd](./installation), dann **Settings → Notemd**.
+2. Wähle Anbieter, Adresse, erforderliche Zugangsdaten und ein berechtigtes Modell. **Fetch models** findet unterstützte Modelle; ein Listeneintrag garantiert keine Generierung.
+3. Führe **Verbindung testen** aus und behebe Authentifizierungs-, Modell- oder Adressfehler.
+4. Suche **Ordnerpfad für Konzeptnotizen** und wähle etwa `concepts`. Der anfängliche Pfad ist leer; `concepts/` ist ein Beispiel, kein voreingestellter Ordner.
 
-1. Öffnen Sie **Einstellungen** → **Notemd**
-2. Unter **LLM Provider-Konfiguration** wählen Sie einen Anbieter aus dem Dropdown-Menü aus
-3. Geben Sie Ihren **API Schlüssel** ein
-4. (Optional) Klicken Sie auf **„Modellliste anfordern“**, um die verfügbaren Modelle anzusehen
-5. Wählen Sie ein Modell für jede Aufgabentyp.
+Für Ollama zuerst ein Modell herunterladen und seinen exakten Namen setzen; Standardadresse: `http://localhost:11434/api`. Für LM Studio den Server starten und `LMStudio` wählen. Siehe [lokale Modelle](../providers/local). Webrecherche benötigt weiterhin Netzwerk.
 
-**Beliebte Auswahl:**
-- **OpenAI**: `gpt-4o-mini` (schnell, günstig)
-- **Anthropic**: `claude-sonnet-4-6` (hohe Qualität)
-- **DeepSeek**: `deepseek-chat` (sehr günstig)
+## Schritt 2: Erste Aufgabe
 
-### Option B: Lokal Ollama (Kein API Schlüssel erforderlich)
+Erstelle `Notemd trial.md` mit einem Absatz, den du dem Anbieter senden darfst:
 
-1. Installieren Sie [Ollama](https://ollama.com/)
-2. Modell herunterladen: `ollama pull llama3.1`
-3. Wählen Sie in den Einstellungen von Notemd **„Ollama"** als Anbieter aus
-4. Modellname: `llama3.1` (oder jedes andere heruntergeladene Modell)
-
-## Schritt 2: Versuchen Sie Ihre erste Aufgabe (1 Min.)
-
-### Wiki-Links zu einer Notiz hinzufügen
-
-1. Öffnen Sie jede Notiz mit sinnvollem Inhalt
-2. Rechtsklick im Editor
-3. Wählen Sie **„Datei verarbeiten (Verknüpfungen hinzufügen)“** aus
-4. Warten Sie ein paar Sekunden.
-5. Die Schlüsselkonzepte sind jetzt `[[wiki-linked]]`!
-
-**Beispiel:**
-
-**Vorher:**
-```
-Machine learning models use neural networks to process data.
+```text
+Modelle des maschinellen Lernens nutzen neuronale Netze, um Muster aus Beispielen zu lernen.
 ```
 
-**Nach:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
+Starte **Datei verarbeiten (Links hinzufügen)**. Standardmäßig entsteht daneben `Notemd trial_processed.md`, die Quelle bleibt erhalten. Prüfe die tatsächlichen Links. Mögliches Ergebnis:
+
+```markdown
+Modelle des [[maschinellen Lernens]] nutzen [[neuronale Netze]], um Muster aus Beispielen zu lernen.
 ```
 
-## Schritt 3: Funktionen erkunden (2 Min.)
+Ein gewählter Konzeptordner kann zusätzliche Notizen erhalten. Dateien und Verknüpfungen müssen geprüft werden; das Modell liefert kein garantiert vollständiges Konzeptinventar.
+
+## Schritt 3: Funktionen erkunden
 
 ### Konzeptnotizen extrahieren
 
-1. Rechtsklick → **„Konzepte aus der aktuellen Datei extrahieren“**
-2. Notemd erstellt separate Dateien für jedes Konzept
-3. Überprüfen Sie Ihren konfigurierten Konzeptordner (Standard: `concepts/`)
-4. Jede Konzeptnotiz enthält einen Backlink zu Ihrer ursprünglichen Notiz
+**Konzepte extrahieren (aktuelle Datei)** verändert die Quelle nicht und benötigt einen Konzeptordner. Neue eigenständige Konzeptnotizen enthalten standardmäßig nur den Titel, ohne Quellenrücklink. Aktiviere Rücklinks ausdrücklich. Siehe [Konzeptnotizen](../features/concept-notes).
 
-### Forschung und Zusammenfassung
+### Recherchieren und zusammenfassen
 
-1. Heben Sie ein Thema in Ihrer Notiz hervor
-2. Rechtsklick → **„Forschung und Zusammenfassung“**
-3. Notemd führt eine Websuche durch (Tavily oder DuckDuckGo)
-4. Zusammenfassung fügt Ihrer Notiz zusammen mit Quellen hinzu
+Markiere im Markdown-Editor ein Thema oder verwende den Notiztitel, dann **Recherchieren & zusammenfassen**. Wähle Tavily mit Schlüssel oder DuckDuckGo ausdrücklich. Die Zusammenfassung wird angehängt; prüfe die Originalquellen.
 
-### Einst-Klick-Abläufe
+### Aufgaben verketten
 
-1. Überprüfen Sie die **linke Seitenleiste** auf Schaltflächen für den Workflow
-2. Klicken Sie auf **„One-Click Extract“** in jeder Notiz
-3. Es läuft wie folgt: Links hinzufügen → Konzepte extrahieren → Recherche durchführen → Diagramm erstellen
-4. Alles mit einem Klick!
+**One-Click Extract** nutzt genau diese Definition:
 
-## Häufige Erstaufgaben
-
-### Aufgabe 1: Ein Papier/Artikel verarbeiten
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### Aufgabe 2: Notizen übersetzen
+Die Kette ergänzt Links, erzeugt Inhalte für geeignete Notizen im Konzept- oder ausgewählten Ordner und repariert Mermaid im complete-Ordner. Auch bestehende Konzeptnotizen können betroffen sein. Beginne in einem eigenen Testordner. Webrecherche und Diagrammgenerierung gehören nicht automatisch zur Standardkette.
 
-```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
+## Abbruch und Ausgabekontrolle
 
-### Aufgabe 3: Erstellen Sie eine Wissenskarte
-
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
-
-## Tipps zur Anpassung
-
-### Modellauswahl pro Aufgabe
-
-Sie können unterschiedliche Modelle für verschiedene Aufgaben verwenden:
-
-| Aufgabe | Empfohlenes Modell | Warum |
-|------|------------------|-----|
-| Links hinzufügen | `gpt-4o-mini`, `deepseek-chat` | Schnell, viele Anrufe |
-| Konzepte extrahieren | `claude-sonnet-4-6`, `gpt-4o` | Qualitätsextraktion |
-| Forschung | `perplexity`, `gpt-4o` | webbasiert |
-| Übersetzung | `gemini-flash`, `gpt-4o` | Mehrsprachig |
-| Diagramme | `claude-opus`, lokales Modell | Komplexe Logik |
-
-Konfigurieren in: **Einstellungen → Notemd → modell-spezifische Aufgaben**
-
-### Benutzerdefinierte Workflows
-
-Erstellen Sie Ihre eigene Schaltfläche:
-
-1. Einstellungen → Notemd → Arbeitsabläufe
-2. Klicken Sie auf „Workflow hinzufügen“.
-3. Geben Sie den DSL ein: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Nennen Sie es: „Mein Forschungsfluss“
-5. Ein neuer Button erscheint im Seitenbereich
+**Abbrechen** stoppt weitere Arbeit. Fertige Ausgaben bleiben; Abbruch ist keine Rückabwicklung und garantiert weder Ende der entfernten Generierung noch Kostenstopp. Warte auf das Ende der Abbruchverarbeitung und prüfe Pfade sowie Wiederherstellungskonflikte vor dem nächsten Lauf.
 
 ## Fehlerbehebung
 
-### "API Schlüssel ungültig"
-- Überprüfen, ob der Schlüssel korrekt ist (keine zusätzlichen Leerzeichen)
-- Überprüfen, ob das Konto Überziehungskredite hat
-- Testen Sie mit der Schaltfläche „Verbindungsprüfung“ in den Einstellungen
+- Authentifizierung/Modell: exaktes Profil prüfen und Verbindung erneut testen.
+- Keine Konzepte: gewählten, aktivierten Konzeptordner prüfen.
+- Unbrauchbare Links: Antwort und Prompt untersuchen; keine Mindestwortzahl garantiert Erfolg.
+- Quoten: beim Untersuchen `batchConcurrency: 1` beibehalten.
 
-### „Modell nicht gefunden“
-- Klicken Sie auf „Modellliste anfordern“, um die verfügbaren Modelle anzusehen.
-- Einige Anbieter verlangen bestimmte Modellnamen (z. B. `gpt-4o` und nicht `gpt-4`).
+## Weitere Schritte
 
-### Links erscheinen nicht.
-- Stellen Sie sicher, dass die Notiz ausreichend Inhalt enthält (>50 Wörter).
-- Probieren Sie ein leistungsstärkeres Modell aus.
-- Überprüfen, ob der Aufruf von LLM erfolgreich war (siehe Diagnosepanel).
-
-### Langsame Leistung
-- Verwenden Sie schnellere Modelle (`gpt-4o-mini` anstelle von `gpt-4o`)
-- Größe des Chunk in den Einstellungen verringern
-- Parallelverarbeitung für Batch-Aufgaben aktivieren
-
-## Nächste Schritte
-
-- 📖 [Alle Funktionen entdecken](../features/wiki-links)
-- ⚙️ [Erweiterte Konfiguration](./configuration)
-- 🔧 [LLM Anbieter-Einrichtung](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## Video-Tutorial
-
-Schauen Sie sich das 3-minütige Einführungsvideo (Chinesisch) an:
-[【Vollständig open source und kostenlos! Schnelle Einführung in NotEMD in drei Minuten】](https://b23.tv/lqR0RlA)
-
-## Hilfe holen
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Probleme**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Dokumentation**: [Vollständige Dokumentation](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Konfiguration](./configuration).
+- [Workflows](../features/workflows).
+- [Fehlerbehebung](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) mit bereinigten Nachweisen.

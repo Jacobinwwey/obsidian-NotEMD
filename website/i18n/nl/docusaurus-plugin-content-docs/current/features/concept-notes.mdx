@@ -1,184 +1,115 @@
 ---
 id: concept-notes
-title: "Conceptnotities"
-description: "Conceptnotities genereren en beheren — zelfstandige notities voor belangrijke concepten die uit uw vault zijn gehaald"
+title: Conceptnotities
+description: >-
+  Extraheer begrippen naar een gekozen map en controleer sjablonen, teruglinks
+  en duplicaten.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - Conceptnotities
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Conceptnotities
 
-<TLDR>
-**Notemd haalt de belangrijkste concepten uit uw notities en maakt zelfstandige conceptnotitiefailen aan.** LLM identificeert de kerntermen, genereert één `.md` bestand per concept in een instelbare map en voegt optioneel backlinks naar de oorspronkelijke notitie toe. Het ondersteunt het weghalen van synoniemen, selectie van een model per taak, zuivering van bestandsnamen en een 4-stappen-deduplicatieengine. Dit maakt deel uit van de [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Afzonderlijke extractie leest de bron en maakt Markdown-concepten in een gekozen map. Aanvankelijk is geen map ingesteld. Nieuwe notities bevatten alleen een titel en geen teruglink. Links toevoegen gebruikt een andere conceptvorm.</TLDR>
 
 ## Overzicht
 
-Conceptnotities vormen de bouwstenen van een verbonden kennisbase. Wanneer je een notitie verwerkt, Notemd:
+Stel eerst **Map-pad voor conceptnotities** in. Een aparte map maakt uitvoer, duplicaten en latere titelgeneratie controleerbaar. Extractie maakt bestanden maar vult die niet automatisch met onderzochte uitleg.
 
-1. **Stuurt je tekst naar een LLM** met een gestructureerd extractieopdracht
-2. **Pareert `CONCEPT:` regels** uit het LLM-antwoord
-3. **Maakt één `.md` bestand per concept** aan in een aangewezen map
-4. **Voegt backlinks toe** aan de bronnotitie (wanneer geactiveerd)
+## Werking
 
-## Hoe het werkt
+### Extractie
 
-### Extractiepijplijn
+De gekozen LLM ontvangt tekst; de taak leest `CONCEPT:`-regels, verwijdert herhaalde namen binnen de bewerking en maakt of actualiseert bestanden. Lange notities worden verdeeld. Controleer mislukte delen; een modelantwoord is geen volledige begrippeninventaris.
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### Extractieprompt
 
-### De extractieprompt
+De standaard vraagt concrete, relevante begrippen. Domein- en synonieminstructies garanderen geen canonieke woordenschat. Eigen prompts moeten `CONCEPT: Term` behouden. Zie [prompts](../advanced/custom-prompts).
 
-De LLM ontvangt een opdracht die hem instrueert om:
+### Fragmenten
 
-- Haal de **zelfstandige naamwoorden of zelfstandig naamwoordelijke zinsdelen** die centraal staan voor het onderwerp van het document.
-- **Geef voorkeur aan specificiteit** — "Dielectrische relaxatie" in plaats van "Relaxatie"
-- **Normaliseren naar enkelvoud** — "models" wordt "model"
-- **Subconcepten onderdrukken** — als “dielektrische relaxatie” voorkomt, moet “relaxatie” niet ook worden geëxtraheerd
-- **Sla** referenties/bibliografie‑secties, algemene zelfstandige naamwoorden en bedrijfs/productnamen over
-- Geef één concept per regel weer als `CONCEPT: Term Name`
+`chunkWordCount` begint op 3000 woorden bij benadering en is geen providertokenbudget. Context over fragmentgrenzen is beperkt; controleer relaties en dubbelzinnige namen.
 
-**Suppressie van synoniemen** (optioneel): voeg "Vermeed het extraheren van synoniemen, semantisch vergelijkbare kernconcepten of sleutelwoorden wanneer mogelijk" toe aan de prompt.
+## Bestanden maken
 
-**Gefocust leergebied** (optioneel): voeg `Relevant Fields: [domain]` toe om de extractie te beperken tot een specifieke discipline.
+### Naamregels
 
-**Taaloverstijging** (optioneel): voeg "De uitvoerconcepten MOETEN in [taal] zijn." toe.
+Ongeldige padtekens worden verwijderd, witruimte genormaliseerd en lange namen ingekort; lege uitkomsten worden overgeslagen. Verschillende termen kunnen daardoor hetzelfde pad krijgen. Controleer namen voor grote verzamelingen.
 
-### Chunking
+### Sjablonen
 
-Lange notities worden opgedeeld door `settings.chunkWordCount`. Elke chunk wordt apart verstuurd. Concepten uit alle chunks worden verzameld in een `Set` — duplicaten tussen chunks worden stilzwijgend verwijderd. LLM fouten in individuele chunks stoppen de operatie niet.
-
-## Concept Note Creation
-
-### Regels voor bestandsnamen
-
-| Regel | Gedrag |
-|------|----------|
-| Kleuren/onderstrepingen | Vervangen door spaties |
-| Speciale tekens | Verwijderd: backslash, forward slash, kolon, sterretje, vraagteken, aanhalingstekens, hoekige haken, pijp, hash, caret, haken |
-| Lege ruimte | Gecomprimeerd en afgesneden |
-| Maximale lengte | 100 tekens (afgesneden + opnieuw bijgesneden) |
-| Leeg/alles-punten resultaat | Stilweg overgeslagen |
-
-Voorbeeld: `A-B: Key*Term` wordt `A B KeyTerm.md`
-
-### Templates
-
-**Volledige template** (backlinks geactiveerd, minimale template uit):
+De minimale nieuwe vorm:
 
 ```markdown
-# Concept Name
+# Conceptnaam
+```
+
+Voor een teruglink in een nieuwe afzonderlijke notitie schakel je **Add "Linked From" backlink** in en **Create minimal concept notes** uit:
+
+```markdown
+# Conceptnaam
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Bronnotitie]]
 ```
 
-**Minimale template** (wanneer `extractConceptsMinimalTemplate: true`):
+Links toevoegen maakt de volledige vorm met terugverwijzing wanneer conceptuitvoer aanstaat. De schakelaars voor afzonderlijke extractie wijzigen dat pad niet.
 
-```markdown
-# Concept Name
-```
+### Bestaande notities
 
-### Bestaande notities bijwerken
+Met teruglinks aan kan een ontbrekende bronverwijzing onder `## Linked From` worden toegevoegd. De bestaande tekst blijft en dezelfde backlink wordt niet dubbel toegevoegd. De bron-basename kan dubbelzinnig zijn als meerdere mappen gelijknamige notities bevatten.
 
-Wanneer er al een conceptbestand bestaat:
+### Instellingen
 
-1. Als backlinks zijn geactiveerd en de bronnotitie nog niet is opgenomen, voeg dan een backlink toe
-2. Als er een `## Linked From`-sectie bestaat, voeg deze in vóór de volgende `##`-kop
-3. Als er geen `## Linked From` bestaat, voeg de sectie aan het einde toe
-4. Dubbele backlinks worden gecontroleerd en overgeslagen
+| Instelling | Beginwaarde | Effect |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | Conceptuitvoer nadat een map is gekozen |
+| `conceptNoteFolder` | `''` | Nog geen map ingesteld |
+| `extractConceptsMinimalTemplate` | `true` | Afzonderlijke concepten met alleen titel |
+| `extractConceptsAddBacklink` | `false` | Teruglinks bij afzonderlijke extractie |
+| `extractConceptsProvider` | `DeepSeek` | Provider bij taakroutering |
+| `extractConceptsModel` | `''` | Leeg gebruikt het model van die provider |
+| `extractConceptsLanguage` | `en` | Taal bij taakgebonden taalinstellingen |
+| `replaceSynonymsDuringConceptExtraction` | `false` | Instructie om synoniemen te beperken |
+| `generateConceptLogFile` | `false` | Optioneel conceptlog genereren |
 
-### Configuratie
+## Duplicaten
 
-| Instelling | Standaard | Effect |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | Master-schakelaar. Uit = geen notities gemaakt |
-| `conceptNoteFolder` | `''` (uitgeschakeld) | Pad naar map voor conceptnotities |
-| `extractConceptsMinimalTemplate` | `true` | Notities alleen met titel (geen Linked From) |
-| `extractConceptsAddBacklink` | `false` | Backlinks toevoegen tijdens standaardextractie |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | Per taak LLM voor conceptextractie |
-| `extractConceptsLanguage` | `'en'` | Uitvoerstaal voor conceptnamen |
-| `replaceSynonymsDuringConceptExtraction` | `false` | Synoniemsuppressie in de prompt inschakelen |
-| `generateConceptLogFile` | `false` | Een `.log`-lijst met gecreëerde concepten schrijven |
+De controle gebruikt bestandsnaamheuristiek: hoofdletters, meervoud, symboolnormalisatie en waar toegestaan een enkel woord dat in een andere naam zit. Dat bewijst geen betekenisgelijkheid; controleer onregelmatige vormen en technische verschillen. Bekijk **Duplicaten controleren en verwijderen** en bevestig alleen bedoelde verwijderingen. Obsidian verwerkt de prullenbakactie. De conceptmap is geen wegwerpcache: maak eerst een back-up.
 
-**Belangrijk:** De `extractConceptsAddBacklink` en `extractConceptsMinimalTemplate` instellingen beïnvloeden alleen de **speciale extractiecommando’s**. Het commando "Add Links" maakt altijd notities volgens het volledige template met backlinks.
+### Vergelijkingsbereik
 
-## Deduplicatie
-
-Het dedup-commando (`Notemd: Check & remove duplicate concept notes`) voert een 5-stappenanalyse uit:
-
-### Stap 1: Exacte bestandsnaamovereenkomst
-
-Vergelijking van de bestandsnaam zonder rekening te houden met hoofdletters binnen het gedefinieerde bereik.
-
-### Stap 2: Detectie van meervoudsvormen
-
-Suffixen verwijderen: `-ies` tot `-y`, `-es` verwijderd, `-s` verwijderd. Vergelijking van de enkelvoudsvorm met bestanden uit het bereik. Onregelmatige meervoudsvormen (children/child) worden niet verwerkt.
-
-### Stap 3: Normalisatie van symbolen
-
-Geldt voor: `toLowerCase()`, vervang hyphens/underscores door een ruimte, verwijder niet-alfanumerieke tekens, samenvoeg witruimte. Elementen die op dezelfde manier worden genormaliseerd, krijgen een label.
-
-### Stap 4: Enkelvoudig woord
-
-Enkelvoudige conceptnotities worden vergeleken met bestandsnamen uit de meervoudige scope-bestanden. Wordt niet uitgevoerd wanneer de scope `concept_folder_only` is.
-
-### Stap 5: Bevestiging en verwijdering
-
-Alle kandidaten worden weergegeven in een bevestigingsmodal. Goedgekeurde items worden naar de systeemprullenbak verplaatst. De operatie kan tussen elke verwijdering worden geannuleerd.
-
-### Scope-modi
-
-| Modus | Vergeleken met |
-|------|-------------------|
-| `vault` (standaard) | Alle `.md`-bestanden in de kluis, exclusief de conceptmap |
-| `concept_folder_only` | Andere conceptnotities binnen de map |
-| `include` | Bestanden in specifiek opgenoemde mappen |
-| `exclude` | Alle `.md`-bestanden in de kluis, exclusief de conceptmap + opgenoemde mappen |
+Vergelijk met de kluis, de conceptmap zelf, inbegrepen mappen of een bereik met uitgesloten mappen. De gekozen scope verandert kandidaten, niet de betekenis van een duplicaat.
 
 ## Gebruik
 
-### Concepten extraheren (standaard)
+### Afzonderlijk extraheren
 
-1. Een notitie openen
-2. Voer **"Notemd: Concepten extraheren"** in uit het commandopalette
-3. Conceptnotities worden gecreëerd in de gedefinieerde map
+Open Markdown, controleer de map en kies **Concepten extraheren (huidig bestand)**. De bron blijft gelijk. Controleer namen, dekking en eventuele teruglinks.
 
-### Inhoud extraheren en genereren
+### Extractie en inhoud
 
-**"Notemd: Concepten extraheren en titels genereren"** — het extrahiert concepten en voert vervolgens "Genereren vanuit titel" uit op elke notitie in de conceptmap. Hierdoor wordt inhoud gegenereerd voor **alle** conceptnotities in de map, niet alleen voor de nieuw gemaakte.
+**Batch genereren vanuit titels** vult concepten aan, maar kan bestaande geschikte notities meenemen. Bekijk de map vooraf en controleer daarna de gemelde complete-map.
 
-### Wiki-link maken van geselecteerde tekst
+### Link vanuit selectie
 
-1. Tekst markeren in de editor
-2. Voer **"Notemd: Wiki-link maken van geselecteerde tekst"** uit
-3. De tekst wordt omhuld door `[[...]]` en er wordt een conceptnotitie gemaakt
+De selectieactie maakt een wiki-link van je gekozen term en kan een conceptbestand maken als de bestemming is ingesteld. Zo kies je de term zelf.
 
 ## Tips
 
-- **Stel eerst de conceptmap in** — zonder deze worden geen notities gemaakt. Er verschijnt een waarschuwing als deze niet is ingesteld.
-- **Gebruik modellen per taak** — conceptextractie werkt goed met goedkopere modellen (GPT-4o-mini, DeepSeek). Gebruik dure modellen alleen voor onderzoek of vertaling.
-- **Schakel synoniemsuppressie in** voor technische gebieden waar meerdere termen naar hetzelfde concept verwijzen.
-- **Dedupliceer regelmatig** — voer de dedupliceringscommando uit na batchverwerking om bijna-identieke elementen op te sporen.
-- **Het logbestand wordt bij elke uitvoering overgeschreven**, niet toegevoegd. Maak een kopie als je eerdere resultaten nodig hebt.
+- Kleine bron en aparte conceptmap.
+- Kies taal vóór massaal aanmaken.
+- Beoordeel synoniemen en duplicaten afzonderlijk.
+- Bewaar benodigde logs voordat een volgende uitvoering ze vervangt.
 
----
+## Verder
 
-## Volgende stappen
-
-- [Wiki-Links](./wiki-links) — Hoe concepten inline worden gelinkt
-- [Diagrams](./diagrams) — Conceptrelaties visualiseren
-- [Workflows](./workflows) — Extractie combineren met andere taken
+- [Wiki-links](./wiki-links).
+- [Workflows](./workflows).
+- [Batchverwerking](../advanced/batch-processing).

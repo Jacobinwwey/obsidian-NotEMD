@@ -1,181 +1,82 @@
 ---
 id: quick-start
-title: クイックスタートガイド
-description: 5分でNotemdの使い方を始めよう
+title: クイックスタート
+description: プロバイダーを設定し、テストノートの出力を確認してからフォルダーワークフローに進みます。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - クイックスタート
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# クイックスタートガイド
+# クイックスタート
 
 <TLDR>
-**5分でNotemdの利用を開始しましょう。** 手順は3つです：(1) LLM APIキーを追加するか、ローカルのOllamaを使用する、(2) メモを開いて「ファイル処理（リンクの追加）」を実行する、(3) サイドバーでワンクリックワークフローを探す。30社以上のプロバイダに対応。コーディングは不要。Ollamaを使えばオフラインでも動作します。
+破棄できる Markdown ノートと、利用可能なプロバイダーから始めます。フォルダー全体を処理する前に生成ファイルを確認してください。クラウド呼び出しはタスク内容を送信します。ローカルモデルにも起動済みサーバーと取得済みモデルが必要です。
 </TLDR>
 
-## ステップ1：最初のLLMプロバイダーを設定する（2分）
+## 手順1：最初の LLM プロバイダーを設定
 
-### オプションA：クラウドプロバイダー（OpenAI、Anthropicなど）
+1. [導入して有効化](./installation)し、**設定 → Notemd** を開きます。
+2. プロバイダー、必要なエンドポイント／認証情報、利用可能なモデルを指定します。対応する場合は **Fetch models** を使えますが、一覧にあるモデルでも生成の確認が必要です。
+3. **接続をテスト** を実行し、認証、モデル、URL の問題を先に解決します。
+4. **概念ノートのフォルダーパス** を検索します。概念ファイルが必要なら `concepts` など専用フォルダーを指定します。初期値は空で、`concepts/` は自分で選ぶ例です。
 
-1. **設定**を開く → **Notemd**
-2. **LLM Provider Configuration**の下で、ドロップダウンからプロバイダを選択してください
-3. **APIキー**を入力してください。
-4. （オプション）利用可能なモデルを確認するには、**「Model Listを取得する」**をクリックしてください
-5. 各タスクタイプに適したモデルを選択してください
+Ollama はモデルを先に pull し、正確な名前を指定します。プリセット URL は `http://localhost:11434/api`。LM Studio はサーバーを起動して `LMStudio` を選びます。[ローカルモデル](../providers/local)を参照してください。要約モデルがローカルでも Web 調査には通信が必要です。
 
-**人気のある選択肢：**
-- **OpenAI**: `gpt-4o-mini`（高速で手頃な価格）
-- **Anthropic**: `claude-sonnet-4-6`（高品質）
-- **DeepSeek**: `deepseek-chat`（非常に手頃な価格）
+## 手順2：最初のタスクを試す
 
-### オプションB：ローカル Ollama（APIキーは不要）
+`Notemd trial.md` を作り、送信してよい短文を書きます。
 
-1. [Ollama](https://ollama.com/)をインストールしてください。
-2. モデルのダウンロード：`ollama pull llama3.1`
-3. Notemdの設定で、プロバイダとして**"Ollama"**を選択してください
-4. モデル名：`llama3.1`（またはダウンロードした任意のモデル）
-
-## ステップ2：最初のタスクを試してみましょう（1分）
-
-### ノートにWikiリンクを追加する
-
-1. 意味のある内容が含まれているノートを開きます
-2. エディタで右クリックします
-3. **「ファイルを処理する（リンクを追加）」**を選択してください
-4. 数秒待ってください。
-5. キーコンセプトは今や`[[wiki-linked]]`です！
-
-**例:**
-
-**以前:**
-```
-Machine learning models use neural networks to process data.
+```text
+機械学習モデルはニューラルネットワークを使い、例からパターンを学習します。
 ```
 
-**後:**
+サイドバーまたはパレットから **ファイルを処理（リンク追加）** を実行します。既定では同じフォルダーに `Notemd trial_processed.md` を作り、原文を残します。結果を確認してください。例えば次のような出力になりますが、モデルによって異なります。
+
+```markdown
+[[機械学習]]モデルは[[ニューラルネットワーク]]を使い、例からパターンを学習します。
 ```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
 
-## ステップ3：機能の確認（2分）
+指定した概念フォルダーにもノートが作られる場合があります。リンクとファイルを確認し、重要な概念をすべて正しく抽出したとはみなさないでください。
 
-### コンセプトノートを抽出する
+## 手順3：機能を試す
 
-1. 右クリック → **「現在のファイルから概念を抽出する」**
-2. Notemdは各コンセプトごとに別々のファイルを作成します。
-3. 設定されているコンセプトフォルダ（デフォルト：`concepts/`）を確認してください。
-4. 各コンセプトノートには、元のノートへのバックリンクがあります。
+### 概念ノートの抽出
+
+**概念を抽出（現在のファイル）** は原文を書き換えずに概念を抽出します。概念フォルダーの指定が必要です。単独抽出はタイトルのみ、出典へのバックリンクなしが既定です。必要なら明示的に有効化します。[概念ノート](../features/concept-notes)でリンク追加との違いを確認できます。
 
 ### 調査と要約
 
-1. メモ内のトピックをハイライトしてください
-2. 右クリック → **「調査して要約する」**
-3. Notemdはウェブ検索を実行します（TavilyまたはDuckDuckGo）。
-4. 要約機能は、出典情報を含めてメモに追記します
+開いた Markdown エディターで主題を選択するかノートタイトルを使い、**調査して要約** を実行します。設定でキー付き Tavily または DuckDuckGo を明示的に選びます。要約は現在のノートに追記されます。結論を採用する前に出典を開いて確認します。
 
 ### ワンクリックワークフロー
 
-1. ワークフローボタンは**左サイドバー**にありますので、確認してください。
-2. 任意のノートで**「ワンクリック抽出」**をクリックしてください
-3. 実行手順は次の通りです：リンクの追加 → コンセプトの抽出 → 調査 → ダイアグラムの生成
-4. ワンクリックで全て完了！
+既定の **One-Click Extract** は次の定義です。
 
-## よくある最初のタスク
-
-### タスク1：論文や記事の処理
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### タスク2：メモの翻訳
+リンク追加、概念または選択フォルダーの対象ノートへの本文生成、生成後の complete フォルダー内 Mermaid 修復を順に行います。既存の概念ノートも対象になり得るため、最初は専用テストフォルダーを使います。調査や図生成のステップは自動では加わりません。
 
-```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
+## キャンセルと出力確認
 
-### タスク3：ナレッジマップの作成
-
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
-
-## カスタマイズのヒント
-
-### タスクごとのモデル選択
-
-異なるタスクには異なるモデルを使用できます：
-
-| タスク | おすすめモデル | なぜですか？ |
-|------|------------------|-----|
-| リンクを追加する | `gpt-4o-mini`、`deepseek-chat` | 高速で、多数の呼び出しが可能 |
-| 概念の抽出 | `claude-sonnet-4-6`、`gpt-4o` | 品質抽出 |
-| 調査 | `perplexity`、`gpt-4o` | ウェブグラウンデッド |
-| 翻訳 | `gemini-flash`、`gpt-4o` | 多言語対応 |
-| 図表 | `claude-opus`、ローカルモデル | 複雑な推論 |
-
-設定場所：**Settings → Notemd → Task-Specific Models**
-
-### カスタムワークフロー
-
-自分だけのボタンを作成しましょう：
-
-1. 設定 → Notemd → ワークフロー
-2. 「ワークフローを追加」をクリックしてください。
-3. DSLを入力してください：`process-current-add-links>extract-concepts-current>research-and-summarize`
-4. 名前を「My Research Flow」としてください。
-5. サイドバーに新しいボタンが表示されます。
+進捗画面の **キャンセル** で後続処理を停止します。完了した出力は残り、キャンセルはロールバックではありません。プロバイダー側の生成や課金停止も保証しません。終了処理が落ち着くまで待ち、出力先と復旧競合を確認してから次を実行します。
 
 ## トラブルシューティング
 
-### "APIキーが無効です"
-- キーが正しいか確認します（余分なスペースなし）
-- アカウントにクレジットがあるか確認します
-- 設定の「Connection Test」ボタンを使ってテストしてください
+- 認証／モデル：正確なプロファイルを確認し接続を再テスト。
+- 概念ファイルがない：フォルダーの指定と有効化を確認。
+- リンクが役立たない：応答とプロンプトを確認。有用な抽出を保証する最小語数はありません。
+- レート制限：割当量の調査中は既定の並行数 `1` を維持。
 
-### 「モデルが見つかりません」
-- 「モデル一覧を取得」をクリックして、利用可能なモデルを確認してください。
-- 一部のプロバイダーでは、特定のモデル名が必要となります（例：`gpt-4o`であり、`gpt-4`ではありません）。
+## 次に読む
 
-### リンクが表示されない
-- メモに十分な内容が含まれていることを確認してください（50語以上）。
-- より強力なモデルを試してみてください。
-- LLMの呼び出しが成功したか確認してください（診断パネルを参照）。
-
-### パフォーマンスが遅い
-- より高速なモデルを使用してください（`gpt-4o`の代わりに`gpt-4o-mini`を使用）。
-- 設定でチャンクサイズを小さくする
-- バッチタスクの並列処理を有効にする
-
-## 次のステップ
-
-- 📖 [すべての機能を見る](../features/wiki-links)
-- ⚙️ [高度な設定](./configuration)
-- 🔧 [LLM プロバイダ設定](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## ビデオチュートリアル
-
-3分間のクイックスタート動画（中国語）をご覧ください：
-【完全オープンソースで無料！NotEMD 3分でマスター】(https://b23.tv/lqR0RlA)
-
-## ヘルプの取得
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **問題**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **ドキュメント**: [完全なドキュメント](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [設定](./configuration)：検索、お気に入り、出力先、言語。
+- [ワークフロー](../features/workflows)：有効な ID とエラー方針。
+- [トラブルシューティング](../advanced/troubleshooting)：診断と再現。
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)：機密情報を除いた報告。

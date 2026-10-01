@@ -1,18 +1,18 @@
 {
   "version.label": {
-    "message": "Tiếp theo",
-    "description": "The label for version current"
+    "message": "Tài liệu hiện tại",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Bắt đầu sử dụng",
+    "message": "Bắt đầu",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Tính năng cốt lõi",
+    "message": "Tính năng chính",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "Các nhà cung cấp LLM",
+    "message": "Nhà cung cấp LLM",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

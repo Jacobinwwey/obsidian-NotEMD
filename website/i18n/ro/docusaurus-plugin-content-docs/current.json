@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "Următor",
-    "description": "The label for version current"
+    "message": "Documentație actuală",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Introducere",
+    "message": "Primii pași",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Funcționalități principale",
+    "message": "Funcții principale",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {

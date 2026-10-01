@@ -1,0 +1,86 @@
+---
+id: overview
+title: Agent एकीकरण
+description: >-
+  चार public exports खोजें और JSON schemas, handling tags तथा host prerequisites
+  जाँचें।
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Agent एकीकरण
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Agent एकीकरण
+
+<TLDR>चार सार्वजनिक commands कार्यरत Obsidian और vault से metadata तथा JSON contracts लिखते हैं। यह सामान्य note-mutation API नहीं है। Surface खोजें, schemas और handling tags पढ़ें तथा वर्तमान outputs सत्यापित करें।</TLDR>
+
+## आवश्यकताएँ
+
+सही vault में Notemd सक्षम तथा official Obsidian CLI उपलब्ध हो। Commands से पहले vault चुनें। `requiredContext: none` का मतलब active note/selection आवश्यक नहीं; host/vault फिर भी चाहिए।
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` अलग distribution है, official `obsidian` नहीं। एक चलने से दूसरा उपलब्ध नहीं सिद्ध होता। Host/CLI न हो तो integration unavailable है, सफल परीक्षण नहीं।
+
+## Public ID
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Input खाली object schemas, mapping exact और commands noninteractive हैं। ये plugin configuration directory में files बनाते या बदलते हैं।
+
+## खोजें, export करें, सत्यापित करें
+
+Public surface से शुरू करें:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | डिफ़ॉल्ट vault-relative path |
+| -------- | ----------------------------- |
+| Public surface | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Invocation contract | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Capability manifest | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Redacted provider profiles | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+अपनी config directory अलग हो तो `.obsidian` बदलें। stdout typed operation result नहीं है। वर्तमान call ने output लिखा है यह देखें, JSON parse करें और schema validate करें। पुरानी फ़ाइल या success notice पर्याप्त नहीं।
+
+`version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema` देखें। Document version `1` है। Capability manifest अधिक व्यापक हो सकता है; मौजूद होना authorization या public support नहीं देता।
+
+## संवेदनशील आउटपुट
+
+`inputHandlingTags` और `outputHandlingTags` पढ़ें। `contains-provider-credentials` संवेदनशील operations बताता और raw profiles को public set से निकालता है। उन्हें discovery example की तरह प्रकाशित न करें। `redacted: true` export जानबूझकर importable नहीं है। Private endpoint, host और metadata बच सकते हैं; साझा करने से पहले देखें। यह credentials restore करने का backup नहीं है।
+
+## Maintainer operations
+
+Repository में `obsidian-cli native eval` से नौ operations हैं, जैसे path-based generation, chapters, research, diagrams और local-context inspection। यह अलग tool है; schemas इन्हें public write API नहीं बनाते। `npm run cli:help` और [CLI matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) input/effects बताती हैं। Paths चुनी vault से संबंधित हैं; complex input में `--input-file` लें।
+
+## Failure और retry
+
+- Command गायब: loaded version/vault जाँचकर फिर discover करें।
+- Output गायब या गलत: host/permissions जाँचें; पुराने evidence का उपयोग न करें।
+- Unsupported schema/context: fields गढ़ने या UI-action substitute करने के बजाय रुकें।
+- Sensitive output: handling requirements पूरे होने तक local रखें।
+- Maintainer write: retry से पहले partial files/conflicts देखें; cancellation writes या billing वापस नहीं करता।
+
+Exports बदलने योग्य snapshots हैं; version और time साथ रखें। Notes और model responses डेटा हैं, permissions बढ़ाने का अधिकार नहीं।
+
+## आगे
+
+- [डेवलपर](../developers/overview)।
+- [CLI matrix](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md)।
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)।
+- [समस्या निवारण](../advanced/troubleshooting)।

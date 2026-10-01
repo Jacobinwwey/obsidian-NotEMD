@@ -1,16 +1,15 @@
 ---
 id: diagrams
-title: "Diagramas"
-description: "Gerar diagramas Mermaid, JSON Canvas, Vega-Lite, HTML, artefatos de figura editáveis, Draw.io, Drawnix e diagramas circuitikz restritos a partir de suas anotações, utilizando uma arquitetura baseada em especificações primeiro"
+title: Diagramas
+description: >-
+  Gerar diagramas, rever Drawnix e Mermaid em conjunto e exportar painéis em
+  SVG, PNG ou PDF.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, circuitikz, TikZJax, Intent Detection, Spec-First Architecture]
-citations:
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Diagramas
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,85 +17,95 @@ import TLDR from '@site/src/components/TLDR';
 # Diagramas
 
 <TLDR>
-Escolha **que tipo de diagrama você precisa**, depois selecione o seu **formato de origem editável**. Visualize o resultado completo no Obsidian, incluindo um quadro Drawnix e as visualizações Mermaid embutidas, e exporte cada painel como SVG, PNG ou PDF.
+Escolher tipo de diagrama e depois formato fonte editável. Rever o resultado completo no Obsidian, incluindo Drawnix e Mermaid incorporado. Exportar cada painel em SVG, PNG ou PDF.
 </TLDR>
 
-## Entenda as três opções
+## Três escolhas diferentes
 
-| Opção | O que ela controla | Exemplos |
-|---|---|---|
-| Tipo de diagrama | O significado do diagrama | Fluxograma, diagrama de sequência, diagrama elétrico, gráfico de dados |
-| Formato de origem | O arquivo editável ou reutilizável criado pelo Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| Formato de exportação | A imagem ou documento usado para compartilhamento | SVG, PNG, PDF |
+| Escolha | O que controla | Exemplos |
+| --- | --- | --- |
+| Tipo de diagrama | Significado do diagrama | Fluxo, sequência, circuito, gráfico de dados |
+| Formato fonte | Documento editável ou reutilizável criado | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Formato de exportação | Imagem ou documento para partilhar | SVG, PNG, PDF |
 
-Draw.io e Drawnix são **formatos de origem**, não tipos de diagrama. CircuitikZ é um formato de origem projetado especificamente para diagramas elétricos. A mesma visualização preliminar pode ser exportada em vários formatos visuais, portanto escolher CircuitikZ não limita você ao SVG.
+Draw.io e Drawnix são **formatos fonte**, não tipos de diagrama. CircuitikZ serve circuitos e não limita exportação visual a SVG.
 
-## Escolha um formato de origem
+## Escolher fonte
 
-| Formato | Melhor para | Arquivo de origem |
-|---|---|---|
-| Mermaid | Diagramas mantidos diretamente no Markdown | Bloco de código Mermaid |
-| JSON Canvas | Fluxos de trabalho nativos do Obsidian com canvas | `.canvas` |
-| Draw.io | Edição posterior em diagrams.net ou ferramentas compatíveis | `.drawio` |
-| Drawnix | Edição à mão ou no estilo de quadro branco | `.drawnix` |
-| CircuitikZ | Circuitos elétricos e de transistores estruturados | `.tex` |
+| Formato | Uso | Documento fonte |
+| --- | --- | --- |
+| Mermaid | Diagramas em Markdown | Bloco de código Mermaid |
+| JSON Canvas | Canvas nativo do Obsidian | `.canvas` |
+| Draw.io | Edição em diagrams.net ou ferramentas compatíveis | `.drawio` |
+| Drawnix | Estilo de quadro branco ou desenho manual | `.drawnix` |
+| CircuitikZ | Circuitos elétricos e de transístores estruturados | `.tex` |
 
-Deixe **Formato de origem preferido** em **Auto** se você não precisar de um editor específico. O Notemd escolherá um formato compatível com o tipo de diagrama selecionado.
+Manter **Preferred source format: Auto** se não for necessário um editor específico; Notemd escolhe formato compatível.
 
-## Gere e exporte um diagrama
+## Gerar e exportar
 
-1. Abra a nota ou selecione o texto que deseja visualizar.
-2. Escolha **Gerar diagrama** na barra lateral do Notemd ou na paleta de comandos.
-3. Selecione um **tipo de diagrama**, ou deixe em **Detectar automaticamente**.
-4. Escolha um **formato de origem**, ou deixe em **Auto**. Escolha **Drawnix** quando desejar um mapa de conhecimento com nós editáveis e visualizações Mermaid embutidas.
-5. Revise a visualização preliminar. Um resultado com vários painéis mantém o quadro Drawnix e cada painel Mermaid na ordem original dentro de uma única janela de visualização verticalmente rolável; os painéis Mermaid utilizam sua altura renderizada em vez de serem recortados.
-6. Escolha a ação **Exportar SVG**, **Exportar PNG** ou **Exportar PDF** para um único visual, ou use uma exportação de imagem de nível superior para todos os painéis. Para vários painéis, escolha a pasta de origem ou uma pasta personalizada relativa ao Vault; o Notemd cria um arquivo determinístico para cada painel e continua após falhas individuais.
-7. Use **Salvar arquivo de origem** quando também precisar do artefato editável.
+1. Abrir nota suportada. Para um trecho, usar nota separada; seleção não limita ação de documento.
+2. Escolher tipo ou **Auto-detect**.
+3. Escolher fonte ou **Auto**; Drawnix para mapas suportados com nós editáveis e Mermaid.
+4. Executar **Gerar diagrama**.
+5. Rever painéis na ordem da fonte, num único espaço vertical; Mermaid usa a altura renderizada sem corte.
+6. Usar **Exportar SVG**, **Exportar PNG** ou **Export PDF** por painel, ou exportação superior para todos. Escolher pasta da origem ou destino relativo ao cofre. Cada painel recebe nome determinista e falha individual não impede os restantes.
+7. **Guardar ficheiro fonte** preserva a fonte editável.
 
-O menu de Exportação oferece as ações **Exportar SVG**, **Exportar PNG** e **Exportar PDF** para a visualização atual. Cada cabeçalho de painel exibe as mesmas ações para um único visual Mermaid ou Drawnix, portanto não é necessário exportar uma grande visualização preliminar como uma única imagem opaca.
+Menu e cabeçalho de cada painel permitem exportar uma vista, sem obrigar uma imagem única opaca para resultados grandes.
 
-Escolha **Histórico** na visualização preliminar para abrir o painel de histórico do Vault sem ocultar o diagrama. Você pode buscar e filtrar diagramas concluídos, reabrir uma visualização ou abrir artefatos salvos. O histórico dos diagramas também está disponível diretamente na paleta de comandos e na barra lateral do Notemd, mesmo quando nenhuma nota está ativa.
+**History** abre o painel de histórico sem ocultar o diagrama. Pesquisar, filtrar e abrir vistas ou resultados guardados. Também está na paleta e barra lateral sem nota ativa.
 
-SVG e PDF são gerados a partir de geometria vetorial; o PDF utiliza a mesma disposição SVG e métricas de texto em vez de rasterizar toda a visualização preliminar. A resolução PPI da exportação de imagem nas configurações do Notemd controla apenas a rasterização PNG (72–600 PPI, 300 por padrão).
+SVG/PDF usam geometria vetorial; PDF preserva disposição e métricas SVG. PPI afeta apenas PNG: 72–600, padrão 300.
 
-## Pré-visualizações legíveis para diagramas densos
+## Diagramas densos legíveis
 
-Os diagramas lane-grid HTML/SVG editáveis medem e quebram o resumo antes de posicionar o título e o cabeçalho da lane. O cabeçalho é movido para baixo da região protegida do resumo, e as células são desenhadas antes dos conectores e rótulos de aresta. As arestas entre lanes usam rotas ortogonais de grade conscientes de colisões e reservam as áreas dos rótulos de lane e das células ocupadas; descrições longas não escondem texto nem exigem deslocamento horizontal.
+Grelhas HTML/SVG medem e ajustam o resumo antes de título e cabeçalho. Células são desenhadas antes de conectores e rótulos. Rotas ortogonais respeitam áreas ocupadas e legendas.
 
-Os diagramas de quadrantes do Mermaid recebem normalização específica da family. Em `quadrantChart`, são ignoradas apenas as correções de aspas e formas exclusivas de flowchart; colchetes intencionais em títulos, eixos e nomes de quadrantes continuam visíveis. Um colchete inicial copiado pelo provider só é removido quando é o caractere final sem correspondência de um rótulo de ponto.
+`quadrantChart` tem normalização específica, sem reparações exclusivas de flowchart. Remove-se apenas um colchete de abertura final não emparelhado copiado para o rótulo de um ponto. Colchetes intencionais em títulos, eixos e quadrantes permanecem.
 
-O repositório mantém um conjunto de aprendizagem e evidências de um Vault real para cada tipo de diagrama executável. Consulte [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) para notas de entrada bilíngues, resultados SVG/PNG gerados e o manifest de estado legível por máquina. Entradas `passed` representam uma execução pelo plugin bundle carregado, não um screenshot fixture estático.
+Os [exemplos do repositório](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) incluem entradas bilingues, SVG/PNG e manifesto. `passed` refere-se à execução e bundle registados, não a novo teste de qualquer versão posterior.
 
-## Visualizações Drawnix com Mermaid embutido
+O catálogo executável contém 33 entradas, a UI 21 idiomas e o site 34 rotas. Cinco gramáticas exatas de referência ficam fora do seletor até haver prova independente das regras de disposição.
 
-Quando um artefato Drawnix contém visualizações Mermaid, o Notemd sanitiza o SVG renderizado e mantém a fonte Mermaid ao lado dela nos metadados do arquivo `.drawnix`. Assim, a visualização preliminar pode exibir a imagem Mermaid dentro do mapa de conhecimento Drawnix sem necessidade do ambiente runtime Drawnix ou Plait. Visualizações Mermaid isoladas que são incorporadas com segurança não criam um diretório separado `.assets`; mídias binárias externas ou visualizações não resolvidas mantêm um arquivo complementar para evitar perda de dados.
+## Drawnix com Mermaid
 
-A visualização preliminar é intencionalmente uma única superfície rolável: primeiro aparece o canvas principal do Drawnix, seguido por cada painel Mermaid embutido na ordem original. Fechar e reabrir uma entrada de histórico salva reconstrói a mesma lista de painéis, dimensões e ações de exportação.
+Notemd limpa o SVG Mermaid e guarda a fonte nos metadados `.drawnix`. A vista não precisa dos runtimes Drawnix/Plait. O padrão é autónomo, sem `.assets`. **Also export complete Mermaid visuals** acrescenta fonte, SVG e manifesto acompanhantes para edição externa. `.assets` antigos continuam suportados; SVG ausente pode ser refeito a partir do texto conservado.
 
-## Diagramas elétricos
+Imagens resolvidas usam SVG com dados incorporados quando possível. Ordem: dados internos, acompanhantes antigos, reconstrução textual. Conservar pastas referenciadas; uma saída nova autónoma não prova que uma pasta antiga partilhada está sem uso.
 
-Escolha **Diagrama elétrico** com **Arquivo de origem CircuitikZ** para solicitações de diagramas elétricos suportadas. O Notemd gera primeiro uma descrição estruturada do circuito e, em seguida, escreve o código-fonte CircuitikZ. Isso é mais confiável do que pedir ao modelo que gere um LaTeX sem restrições.
+O quadro principal precede painéis Mermaid pela ordem da fonte. Reabrir histórico reconstrói painéis, dimensões e ações.
 
-O suporte atual ao CircuitikZ é intencionalmente limitado. Amplificadores NMOS de fonte comum e blocos CMOS suportados funcionam melhor. Sempre verifique a visualização preliminar e o código-fonte antes de usar um circuito gerado em trabalhos técnicos ou publicações.
+A disposição reserva títulos, resumos e rótulos e encaminha ligações estáticas em redor dos nós. Se não houver disposição legível suportada, a geração informa erro de formato. Setas entre ramos são estáticas; não há prova de ligação persistente após reorganizar no Drawnix. Testar o editor destino.
 
-A visualização SVG é uma ferramenta auxiliar de revisão gerada pelo Notemd. Ela não serve como prova de que uma instalação local de LaTeX ou TikZJax compilou com sucesso o arquivo `.tex`.
+## Limites de exportação nativa
 
-**Compilação nativa opcional.** Você não precisa do LaTeX para a visualização preliminar dentro do plugin, nem para as exportações em SVG, PNG e PDF de visualização. No ambiente desktop, abra **Ambiente de compilação nativo CircuitikZ** nas configurações do diagrama ou na paleta de comandos quando precisar de diagnósticos de compilação ou de um PDF LaTeX nativo. O Notemd pode reutilizar o `tectonic` ou `pdflatex` do sistema, usar um executável personalizado ou instalar o ambiente Tectonic gerenciado após você escolher explicitamente **Instalar**. A área de status do ambiente exibe o progresso e os erros em tempo real e permite que você remova o ambiente gerenciado posteriormente.
+Fonte e imagem são entregas distintas. Testar a aplicação destino. Tabelas PowerPoint preservam estrutura editável suportada e separadores corrigidos sob células unidas; Mermaid/SVG podem ser imagens. Pré-visualização ou pontuação global de imagem não substituem teste nativo.
 
-## Solução de problemas
+## Circuitos
 
-### O resultado é do tipo de diagrama errado
+**Circuit diagram** com **CircuitikZ source file** gera primeiro descrição estruturada e depois TeX, limitando geração LaTeX livre.
 
-Selecione explicitamente o tipo de diagrama em vez de usar a opção Detectar automaticamente. Para um circuito, escolha **Diagrama elétrico** e use o comando **Gerar diagrama**, e não o comando antigo **Resumir como diagrama Mermaid**.
+CircuitikZ é deliberadamente restrito, sobretudo a amplificadores NMOS de fonte comum e blocos CMOS suportados. Rever fonte e vista antes de uso técnico ou publicação.
 
-### Um formato de origem é inadequado
+O SVG é uma vista de revisão do Notemd, não prova de compilação LaTeX ou TikZJax.
 
-Volte o formato de origem para **Auto**, ou escolha um formato adequado para aquele tipo de diagrama. CircuitikZ é destinado a diagramas elétricos; Draw.io e Drawnix são voltados para diagramas estruturados suportados.
+LaTeX não é necessário para vista ou SVG/PNG/PDF de pré-visualização. No desktop, **CircuitikZ native compile environment** permite diagnósticos e PDF nativo com `tectonic`, `pdflatex`, programa próprio ou Tectonic gerido fixado após escolher **Install**. Mostra progresso e falhas e permite remoção posterior.
 
-### O menu de Exportação está ausente
+## Problemas
 
-SVG, PNG e PDF exigem uma visualização preliminar. Se houver apenas texto de origem disponível, salve o arquivo de origem e abra-o na ferramenta externa correspondente.
+### Tipo incorreto
 
-### Um arquivo CircuitikZ não compila externamente
+Selecionar explicitamente o tipo. Para circuitos usar **Circuit diagram** e **Gerar diagrama**, não o resumo Mermaid antigo.
 
-Abra **Ambiente de compilação nativo CircuitikZ** e execute a verificação do ambiente. Corrija o ambiente gerenciado ou confirme se seu compilador personalizado/sistema consegue obter o pacote `circuitikz`. O Notemd não inclui uma distribuição completa de TeX dentro do arquivo do plugin.
+### Fonte inadequada
+
+Voltar a **Auto** ou escolher formato destinado ao tipo. CircuitikZ para circuitos, Draw.io/Drawnix para estruturas suportadas.
+
+### Falta o menu Export
+
+SVG/PNG/PDF exigem vista visual. Se só existir texto fonte, guardar e abrir na ferramenta externa correspondente.
+
+### CircuitikZ não compila
+
+Verificar ambiente nativo e reparar runtime gerido ou acesso ao pacote `circuitikz` do compilador. O plugin não inclui uma distribuição TeX completa.

@@ -1,16 +1,13 @@
 ---
 id: google
 title: Google
-description: Google Geminiを設定する
+description: Gemini Generative Language API のネイティブ通信とモデルを設定します。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords:
+  - Google
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,50 +15,43 @@ import TLDR from '@site/src/components/TLDR';
 # Google プロバイダー
 
 <TLDR>
-**GoogleはネイティブのGemini Generative Language APIトランスポートを使用しています。** 現在のプリセットはデフォルトで`gemini-2.0-flash-exp`、`https://generativelanguage.googleapis.com/v1`、`temperature: 0.5`が選択されています。これはOpenAIと互換性のあるプロファイルではありません。
-
-これは[Obsidian AI知識管理ガイド](/docs/pillar-ai-knowledge)の一部です。
+Google プリセットはネイティブ Gemini Generative Language API を使います。対応する権限のキーと現在利用できるモデルを指定します。OpenAI-compatible で Gemini を配信する場合はゲートウェイのプリセットを使います。
 </TLDR>
 
-## セットアップ
+## 導入
 
-Geminiアクセス機能を持つGoogle AI StudioまたはGoogleのクラウドAPIキーを作成し、`Google`プロバイダープロファイルを追加して、ネイティブのGenerative Language Base URLはそのまま保持します。高速な翻訳や幅広いノート作業にはデフォルトのGemini Flashプロファイルを使用し、より大規模で高性能なGeminiモデルが必要な場合はタスクごとにモデルを上書きします。
-
-OpenAI互換のAPIを通じてGeminiを公開するゲートウェイを明示的に使用していない限り、OpenAI互換のプロファイルにGeminiモデルIDを配置しないでください。
+**Google** を選び、キー、Generative Language の URL、その API version が提供するモデルを設定します。接続テスト後にノート処理や翻訳を試します。任意の Google Cloud／Vertex 配備を自動設定するものではありません。
 
 ## エンドポイントと認証
 
-| フィールド | 現在のプリセット |
-|-------|----------------|
-| 転送 | `google` |
-| APIキー | 必要です |
-| ベース URL | `https://generativelanguage.googleapis.com/v1` |
-| デフォルトモデル | `gemini-2.0-flash-exp` |
-| 温度 | `0.5` |
-| 接続テスト | チャットのみ |
+| 項目 | プリセット値 |
+| ------- | -------------- |
+| 通信プロトコル | `google` |
+| API key | 必須 |
+| 基本 URL | `https://generativelanguage.googleapis.com/v1` |
+| 既定モデル | `gemini-2.0-flash-exp` |
+| Temperature | `0.5` |
+| 接続テスト | `chat-only` |
 
-実行時に`/models/{model}:generateContent?key={apiKey}`が呼び出されます。プラグイン内でネイティブなGeminiエンドポイントが接続されている方式上、キーはクエリパラメータとして渡されます。
+API key 認証を使うモデルの `generateContent` リクエストを作成します。履歴上のモデル ID は現在の保証ではありません。リクエスト詳細には認証情報が含まれ得るため、診断共有前に URL を確認します。
 
-## モデル検出
+## モデルの発見
 
-Googleは`google-models`のディスカバリーモードを使用しています。ディスカバリーにより、APIキーで利用可能なGeminiモデルが返されるはずです。セレクタが空の場合は、同じBase URLでそのキーをテストし、そのアカウントでモデルファミリーが有効になっているかを確認してください。
-
-プロバイダーレジストリでは、既知の出力トークンの上限はモデルに依存しています。長文の翻訳や図解の説明が切り捨てられた場合は、より大きな出力上限を持つGeminiモデルを選択するか、要求される出力サイズを小さくしてください。
+対応するネイティブ一覧機能を使い、モデルが選択 API version で生成可能か確認します。空の一覧は権限、URL、提供状況の問題かもしれません。無作為なプロトコル変更ではなく実設定をテストします。
 
 ## トラブルシューティング
 
-- `400`: モデルIDは通常、ネイティブなGeminiルートと一致しないか、リクエストがモデルがサポートする形状を超えています。
-- `401` または `403`: キーの制限、プロジェクト/API の有効化、およびそのキーが Gemini にアクセスできるかどうかを確認します。
-- `404`: 構成されているAPIバージョンでは、モデルIDは利用できません。
-- このプロファイルではゲートウェイの例が動作しません。ネイティブのGoogleプロバイダの代わりにゲートウェイのプリセットを使用してください。
+- `400`：モデル、パラメーター、token／出力制限を確認。
+- `401`／`403`：キーの制限、API 有効化、モデル権限を確認。
+- `404`：モデルがその API version に存在するか確認。
+- ゲートウェイ例が失敗：対応 OpenAI-compatible プリセットを使用。
 
-## いつ使用するか
+## 選ぶ場面
 
-迅速な翻訳や大量のメモの整理、Geminiのコストとパフォーマンスのバランスが直接のOpenAIやAnthropicを使用するよりも優れているワークフローにはGoogleを利用してください。OpenAI互換の推論モデルを扱う必要があるワークフローでは、別のプロバイダを選んだ方が良いでしょう。
+ネイティブ Gemini API 向けです。翻訳、調査、図生成を代表サンプルで評価します。相対的な速度、費用、翻訳品質は保証しません。
 
----
+## 次に読む
 
-## 次のステップ
-
-- [LLM プロバイダー](/docs/providers/overview) -- 完全な設定、タスクごとのモデル、および再試行ロジック
-- [翻訳](/docs/features/translation) – 大量の翻訳作業にはGemini Flashが推奨されます
+- [プロバイダー概要](./overview)：ルーティングとプロトコル。
+- [トラブルシューティング](../advanced/troubleshooting)：接続とタスクの切り分け。
+- [翻訳](../features/translation)：出力、言語、確認。

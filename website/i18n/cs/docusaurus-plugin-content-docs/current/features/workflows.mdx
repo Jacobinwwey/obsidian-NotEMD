@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "Pracovní postupy"
-description: "Řetězíte více úloh pomocí tlačítek na jedno kliknutí"
+title: Pracovní postupy
+description: >-
+  Řetězte existující akce pomocí platných ID s jasným kontextem složek a
+  chováním při chybách.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Pracovní postupy
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Pracovní postupy
 
-<TLDR>
-**Notemd pracovní postupy řetězí více úloh do jediné akce na jedno kliknutí.** Definujte sekvence jako `add-links > extract-concepts > research > diagram` pomocí jednoduchého DSL. Pracovní postupy se zobrazují jako tlačítka v postranním panelu, která spustí celý řetězec v aktuální poznámce nebo složce. Je dodáván s předdefinovanými pracovními postupy; v nastaveních můžete vytvořit vlastní. Každý krok využívá vlastní konfiguraci modelu pro danou úlohu.
-
-Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Postup spouští akce panelu postupně. Každá může vyžadovat výběr složky nebo aktivní editor. Není to textová roura: kroky mají vlastní vstupy, výstupy a vedlejší účinky. Začněte testovací poznámkou a oddělenou složkou.</TLDR>
 
 ## Přehled
 
-Pracovní postup odstraňuje potíže spojené s prováděním úloh jednu po druhé. Místo toho, abyste čtyřikrát klikli pravým tlačítkem pro přidání odkazů, extrakci konceptů, vyhledávání neznámých termínů a vytvoření diagramu, stisknete jedno tlačítko v postranním panelu a celý řetězec se spustí. Notemd se stará o sekvenování, šíření chyb a hlášení pokroku.
+Výchozí **One-Click Extract**:
 
-Pracovní postupy jsou definovány pomocí lehkého DSL (jazyka specifického pro danou oblast). Nacházejí se v nastaveních, zobrazují se jako kliknutelná tlačítka v postranním panelu Obsidian a lze je aplikovat buď na aktuální poznámku, nebo na celou složku.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+1. Přidá odkazy do aktivní poznámky a při nastavené složce vytváří pojmy.
+2. Generuje obsah podle názvů způsobilých poznámek ve složce pojmů nebo zvolené složce, včetně existujících.
+3. Opraví Mermaid ve složce complete z tohoto generování.
+
+Výchozí řetězec neprovádí webovou rešerši. Tu lze zapnout zvlášť pro generování podle názvů. [Dávky](../advanced/batch-processing).
 
 ## Jak to funguje
 
-### Řetězec provádění pracovních postupů
+### Spuštění
 
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+Kroky běží postupně se stavem a chybami v panelu. Zrušení zastaví další kroky a dosáhne na podporované požadavky. Dokončené soubory zůstávají; není zde celková transakce. Přednost má složka pojmů. Dávkové generování si pamatuje zdrojovou a complete složku; oprava Mermaid použije complete. Ostatní akce si ponechávají požadavky na soubor, výběr a interakci.
+
+### DSL
+
+Jeden pojmenovaný postup na řádek. `::` odděluje název a akce, `>` jejich ID. Prázdné řádky a řádky začínající `#` se ignorují; neznámá ID se odmítnou.
+
+```text
+Pojmy a diagram::extract-concepts-current>summarize-as-mermaid
 ```
 
-1. **Analýza** -- Řetězec DSL je rozdělen na `>` (nebo `>`) na uspořádaný seznam identifikátorů úloh.
-2. **Vyřešení** -- Každý identifikátor se mapuje na vnitřní příkaz (add-links, extract-concepts, research, translate, diagram atd.).
-3. **Provedení** -- Kroky se spouštějí postupně. Každý krok využívá konfigurovaného poskytovatele a modelu pro danou úlohu.
-4. **Zpracování chyb** -- Pokud selže nějaký krok, pracovní postup buď ukončí, nebo pokračuje k dalšímu kroku v závislosti na vaší politice zpracování chyb.
-5. **Ukončení** -- Oznámení typu toast hlásí úspěch nebo uvádí seznam selhavých kroků.
+Použijte sestavovač nebo upravte DSL. ID jsou stabilní, popisky se řídí UI. Akce složek mají vlastní ID; neodvozujte je libovolným nahrazováním názvů.
 
-### Formát DSL
+| ID | Akce / požadavek |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Odkazy v aktivní poznámce |
+| `process-folder-add-links` | Odkazy ve vybrané složce |
+| `extract-concepts-current` | Pojmy z aktivní poznámky |
+| `extract-concepts-folder` | Pojmy z vybrané složky |
+| `generate-from-title` | Obsah podle aktivního názvu |
+| `batch-generate-from-titles` | Obsah způsobilých poznámek složky |
+| `research-and-summarize` | Rešerše výběru/názvu v otevřeném editoru Markdown |
+| `summarize-as-mermaid` | Shrnutí podporovaného aktivního vstupu do Mermaid |
+| `generate-diagram` | Diagram z podporovaného vstupu |
+| `preview-diagram` | Náhled podporovaného zdroje nebo diagramu |
+| `translate-current-file` | Překlad aktivního podporovaného souboru |
+| `batch-translate-folder` | Překlad vybrané složky |
+| `extract-original-text` | Vyhledání požadovaných původních pasáží |
+| `batch-extract-original-text` | Pasáže ze způsobilých souborů složky |
+| `split-note-by-chapters` | Rozdělení aktivní poznámky na kapitoly |
+| `batch-mermaid-fix` | Oprava bloků Mermaid ve vybrané složce |
+| `fix-formula-current` | Normalizace oddělovačů vzorců v aktivní poznámce |
+| `batch-fix-formula` | Normalizace oddělovačů vzorců ve složce |
+| `check-duplicates-current` | Kontrola duplicit aktivní poznámky |
+| `check-remove-duplicate-concepts` | Interaktivní kontrola a odstranění duplicitních pojmů |
+| `test-llm-connection` | Test nastaveného poskytovatele |
+| `probe-slide-export-env` | Kontrola lokálního prostředí exportu snímků |
+| `export-slides` | Export aktivního souboru do snímků |
 
-Pracovní postupy jsou definovány jako sekvence identifikátorů úloh oddělených `>`:
+### Výchozí a vlastní řetězce
 
-```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
+One-Click Extract je přednastavený. Další tlačítka definujte názvem a pořadím a ověřte jejich popis v panelu. Před použitím opravte chyby parseru.
 
-**Dostupné identifikátory úloh:**
+## Nastavení
 
-| Identifikátor | Akce |
-|------------|--------|
-| `process-current-add-links` | Přidat odkazy na wiki do aktuální poznámky |
-| `extract-concepts-current` | Vytáhnout koncepty z aktuální poznámky |
-| `research-and-summarize` | Prozkoumat vybraný text nebo název poznámky |
-| `process-current-translate` | Přeložit aktuální poznámku |
-| `summarize-to-mermaid` | Vytvořit diagram z aktuální poznámky |
-| `generate-from-title` | Vytvořit obsah na základě názvu poznámky |
-| `extract-original-text` | Vytáhnout původní text (pro OCR / skenovaný obsah) |
+| Nastavení | Výchozí hodnota | Účinek |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Zastavení na první hlášené chybě kroku |
+| `useMultiModelSettings` | `false` | Aktivní poskytovatel, dokud není zapnuto směrování úloh |
+| `enableResearchInGenerateContent` | `false` | Bez rešerše při generování podle názvů, dokud ji nepovolíte |
 
-**Varianty na úrovni složky** nahradí `current` v názvu identifikátoru za `folder`.
+`continue_on_error` dovolí pokračovat po chybě. Použijte jej jen tehdy, mohou-li další kroky pracovat se zbývajícími vstupy. Pokračování nezmění částečný postup na úspěšný.
 
-### Předdefinované vs. vlastní pracovní postupy
+### Model každého kroku
 
-Notemd dodává hotové pracovní postupy pro běžné vzory:
-
-| Pracovní postup | Řetězec | Použití |
-|----------|-------|----------|
-| **Jedno-klikové vytahování** | add-links > extract-concepts > research | Zpracovat výzkumnou práci v jednom kroku |
-| **Kompletní pipeline** | add-links > extract-concepty > research > diagram | Úplné extrahování znalostí s vizualizací |
-| **Přeložit + Odkázat** | translate > add-links | Přeložit a poté odkázat koncepty v cílovém jazyce |
-
-**Vlastní pracovní postupy** se vytvářejí v nastaveních:
-
-1. Otevřete **Nastavení** --> **Notemd** --> **Pracovní postupy**
-2. Klikněte na **"Přidat pracovní postup"**
-3. Zadejte řetězec DSL (např. `process-current-add-links>extract-concepts-current`)
-4. Dejte mu název pro zobrazení (např. "Rychlý odkaz + extrakce")
-5. Nové tlačítko se okamžitě objeví v bočním panelu
-
-## Konfigurace
-
-| Nastavení | Výchozí | Účinek |
-|---------|---------|--------|
-| `workflows` | Předdefinovaná sada | Sada definic pracovních postupů (název + DSL) |
-| `workflowContinueOnError` | `true` | Pokračujte k dalšímu kroku, pokud aktuální krok selže |
-| `workflowShowProgress` | `true` | Zobrazte toast s informací o pokroku po dokončení každého kroku |
-
-### Modely na úrovni úkolu v pracovních postupech
-
-Každý krok v pracovním postupu využívá svou **vlastní** konfiguraci modelu pro jednotlivé úkoly. Není nutné specifikovat modely přímo v DSL. Pořadí řešení je následující:
-
-1. Poskytovatel/model pro konkrétní úkol, pokud je `useMultiModelSettings` aktivní
-2. Globální `activeProvider` v opačném případě
-
-To znamená, že `add-links` může běžet na DeepSeek zatímco `research` běží na GPT-4o – vše uvnitř stejného pracovního postupu.
+Model patří úloze. Prázdné pole přebírá model jejího poskytovatele. Před soukromým materiálem ověřte všechna směrování.
 
 ## Příklad
 
-Právě jste do svého úložiště importovali PDF z článku o strojovém učení a chcete plné extrakce znalostí:
+Zvolte prázdnou `trial-concepts` a testovací zdroj. Zkontrolujte pojmy i hlášenou complete složku. Pokud je cíl nejasný, spusťte kroky jednotlivě. Rozsah zvyšujte až po kontrole.
 
-1. Otevřete importovanou poznámku
-2. Klikněte na tlačítko v bočním panelu **"Plný pipeline"**
-3. Notemd spustí následující kroky:
-   - **Krok 1**: Přidání odkazů na wiki – `[[attention mechanism]]`, `[[transformer]]` atd.
-   - **Krok 2**: Extrakce konceptů – vytvoří poznámky s koncepty ve vaší složce s koncepty
-   - **Krok 3**: Výzkum – shrne webové zdroje pro klíčové termíny
-   - **Krok 4**: Diagram – vytvoří Mermaid myšlenkovou mapu struktury článku
-4. Po přibližně 30 sekundách má vaše poznámka odkazy, existují poznámky s koncepty, je přidán výzkum a je uložen soubor s diagramem
+## Doporučení
 
-Vše za jediné kliknutí.
+- Udržujte řetězce srozumitelné pro diagnostiku a dohledání původu souborů.
+- Mazací akce si zachovávají interaktivní potvrzení; nepatří do bezobslužného běhu.
+- Po zrušení nebo konfliktu čtěte záznamy i soubory.
+- Ověřte přesný model/složku; test spojení neprokazuje kapacitu pro velkou dávku.
 
-## Tipy
+## Dále
 
-- **Začněte s předdefinovanými pracovními postupy** – pokrývají nejběžnější vzory. Upravujte je pouze tehdy, když potřebujete jiné pořadí.
-- **Povolte `workflowContinueOnError`** – selhání kroku s diagramem by nemělo zastavit celý pipeline.
-- **Použijte pracovní postupy pro složky** k hromadnému zpracování – klikněte pravým tlačítkem na složku, vyberte pracovní postup a všechny poznámky budou zpracovány.
-- **Jmenujte pracovní postupy jasně** – prostor na boční liště je omezený. Používejte krátké, orientované názvy jako „Rychlé extrahování“ nebo „Přeložit + Odkázat".
-
----
-
-## Další kroky
-
-- [Výzkum](./research) – Pochopte, co krok výzkumu dělá, než ho přidáte do pracovních postupů
-- [Wiki-odkazy](./wiki-links) – Základní funkce odkazování používaná ve většině pracovních postupů
-- [Konceptuální poznámky](./concept-notes) – Extrakce konceptů jako krok v pracovním postupu
-- [Hromadné zpracování](/docs/advanced/batch-processing) – Souběžnost a hlášení pokroku pro pracovní postupy složek
+- [Pojmy](./concept-notes).
+- [Dávky](../advanced/batch-processing).
+- [Rešerše](./research).

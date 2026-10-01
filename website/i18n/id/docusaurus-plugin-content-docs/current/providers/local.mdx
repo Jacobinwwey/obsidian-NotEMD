@@ -1,63 +1,59 @@
 ---
 id: local
-title: "Model Lokal"
-description: "Konfigurasi Ollama dan LLM lokal"
+title: Model lokal
+description: >-
+  Siapkan Ollama, LM Studio, atau OVMS dengan server berjalan dan batas jaringan
+  eksplisit.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Model lokal
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Model Lokal
+# Model lokal
 
-<TLDR>
-**Pemasok lokal menyimpan konten catatan di luar API yang terhosting.** Jalur lokal saat ini mencakup Ollama menggunakan transportasi bawaan `ollama` dan LMStudio melalui transportasi yang kompatibel dengan OpenAI. Tidak diperlukan kunci API untuk kedua jalur tersebut, tetapi server lokal dan model harus sudah berjalan terlebih dahulu.
-
-Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Penyedia lokal memungkinkan server model pada perangkat memproses isi tugas. Pasang/muat model dahulu, lalu pilih protokol sesuai. Pilihan lokal tidak membuat riset web, endpoint remote, pemasangan dependensi, atau tugas cloud menjadi offline.</TLDR>
 
 ## Pengaturan
 
-Untuk Ollama, instal Ollama, unduh model yang diinginkan, mulai server, lalu tambahkan profil pemasok `Ollama` di Notemd. Untuk LMStudio, muat model di server lokal LM Studio dan tambahkan profil pemasok `LMStudio`.
+Untuk [Ollama](https://ollama.com/), pasang server dan unduh model. Untuk [LM Studio](https://lmstudio.ai/), muat model dan mulai API lokal. Untuk OVMS, siapkan deployment sebelum menambahkan profil Notemd.
 
-Model lokal merupakan ketergantungan operasional, bukan sekadar pengaturan. Notemd hanya dapat memanggil fungsi yang ditawarkan oleh proses lokal, jadi periksa model lokal di luar Obsidian sebelum mendebag plugin.
+Pilih preset, masukkan nama yang disediakan server persis, jalankan **Uji koneksi**, lalu proses catatan uji. Notemd tidak memasang model atau memulai server tersebut untuk Anda.
 
-## Endpoint dan Autentikasi
+## Endpoint dan autentikasi
 
-| Penyedia | Base URL | Model Default | Kunci API | Catatan |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Tidak diperlukan | Streaming NDJSON; penemuan model melalui `/api/tags` |
-| LMStudio | `localhost:1234/v1` | `local-model` | Tidak diperlukan | Mengirim `"EMPTY"` sebagai token pembawa; kompatibel dengan OpenAI |
+| Preset | URL dasar bawaan | Placeholder model | Protokol / autentikasi |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Ollama native; kunci API tidak wajib |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | Kompatibel OpenAI; kunci opsional, preset `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | Kompatibel OpenAI; atur model dan akses sesuai deployment |
 
-Ollama menggunakan jalur bawaan `/chat` di bawah Base URL-nya. LMStudio mengikuti rute `chat/completions` yang kompatibel dengan OpenAI dan mengharuskan model yang sudah dimuat di server lokal.
+`localhost` berarti mesin Obsidian. Ponsel tidak mengakses model komputer lewat loopback ponsel sendiri. Endpoint LAN adalah layanan jaringan: gunakan alamat/autentikasi tepat, jangan membuka server tanpa autentikasi ke jaringan tak dipercaya.
 
-## Penemuan Model
+## Penemuan model
 
-Ollama menggunakan mode penemuan `ollama-tags` dan menampilkan tag yang diunduh secara lokal. LMStudio menggunakan penemuan model yang kompatibel dengan OpenAI ketika servernya menawarkan `/v1/models`.
+Ollama mendaftar tag unduhan melalui `/api/tags`; LM Studio dapat menyediakan `/v1/models`. OVMS mempunyai aturan sesuai deployment. Daftar tidak menjamin model muat memori atau mampu mengerjakan keluaran terstruktur; verifikasi permintaan nyata.
 
-Jika penemuan tidak menghasilkan apa pun, biasanya itu merupakan masalah kondisi server lokal: model belum diunduh, belum dimuat, atau server terhubung ke host/port yang berbeda dari profilnya.
+## Pemecahan masalah
 
-## Pemecahan Masalah
+- Koneksi ditolak: periksa server, alamat listen, port.
+- Model hilang: unduh/muat dan gunakan nama/alias endpoint persis.
+- Autentikasi ditolak: isi token server, jangan menganggap `EMPTY` diterima.
+- Lambat/tidak lengkap: periksa memori, konteks, batas hasil; mulai satu permintaan.
+- Format salah: pastikan protokol, prompt, dan kemampuan model sebelum mengubah batch.
 
-- Connection refused: mulai Ollama atau LM Studio dan pastikan port yang dikonfigurasi sudah benar.
-- Model tidak ditemukan: unduh tag Ollama atau muat model LM Studio sebelum menguji.
-- Keluaran lambat: kurangi ukuran konteks, gunakan model lokal yang lebih kecil, atau arahkan tugas berat ke pemasok yang terhosting.
-- Respons kosong atau tidak valid: pastikan profil pemasok yang dipilih sesuai dengan protokol server lokal; Ollama dan LMStudio tidak dapat saling digantikan.
+## Kapan digunakan
 
-## Kapan Digunakan
+Pilih inferensi lokal bila batas privasi, ketersediaan, dan hasil memenuhi kebutuhan. Siapkan model/dependensi sebelum memutus jaringan. Periksa semua penyedia per tugas dan pengambilan lokal: kutipan dikirim ke LLM pilihan yang masih bisa berupa cloud.
 
-Gunakan penyedia lokal untuk vault pribadi, pekerjaan offline, atau tugas berulang yang murah. Jangan berasumsi bahwa penggunaan lokal secara otomatis lebih baik untuk sintesis penelitian atau penalaran jangka panjang; kualitas model dan batasan perangkat keras merupakan faktor yang harus dipertimbangkan.
+Riset Tavily/DuckDuckGo tetap online. Ekspor native mungkin memerlukan alat terpisah. Penyedia lokal hanya satu bagian alur offline, bukan jaminan seluruh fitur.
 
----
+## Selanjutnya
 
-## Langkah Selanjutnya
-
-- [LLM Penyedia](/docs/providers/overview) -- Konfigurasi lengkap dan pengaturan model per tugas
-- [Pemecahan masalah](/docs/advanced/troubleshooting) -- Perbaiki kesalahan connection-refused ketika server lokal tidak berjalan
+- [Ikhtisar](./overview): perutean dan preset.
+- [Konfigurasi](../getting-started/configuration): penyedia tugas/bahasa.
+- [Pemecahan masalah](../advanced/troubleshooting): server dan tugas.

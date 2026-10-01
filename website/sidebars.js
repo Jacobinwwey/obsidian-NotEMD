@@ -48,6 +48,9 @@ const sidebars = {
     },
     'pillar-ai-knowledge',
     'faq',
+    'developers/overview',
+    'agents/overview',
+    'releases/1.9.8',
   ],
 };
 

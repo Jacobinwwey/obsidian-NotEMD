@@ -1,16 +1,13 @@
 ---
 id: local
-title: "本地模型"
-description: "設定 Ollama 與本地的 LLMs"
+title: 本地模型
+description: 設定 Ollama、LM Studio、OVMS，並確認本地推理的網路邊界。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - 本地模型
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,46 +15,45 @@ import TLDR from '@site/src/components/TLDR';
 # 本地模型
 
 <TLDR>
-**本地供應商會將內容儲存在非託管於 API 的位置。** 目前的本地路徑會使用原生的 `ollama` 傳輸方式來處理 Ollama，並透過與 OpenAI 相容的傳輸方式來處理 LMStudio。無論哪種路徑都不需要 API 金鑰，但本地伺服器與模型必須已經在運作中。
-
-這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+本地 provider 可讓裝置上執行的模型伺服器處理任務。先安裝或載入模型，再匹配協定。本地 LLM 不會使網路研究、遠端端點、依賴安裝或雲端路由任務離線。
 </TLDR>
 
-## 安裝
+## 設定
 
-對於 Ollama，請安裝 Ollama，下載您想要的模型，啟動伺服器，並在 Notemd 中新增一個 `Ollama` 提供者設定檔。對於 LMStudio，則要在 LM Studio 的本機伺服器中載入模型，並新增一個 `LMStudio` 提供者設定檔。
+[Ollama](https://ollama.com/) 需安裝伺服器並拉取模型；[LM Studio](https://lmstudio.ai/) 需載入模型並啟動 API 伺服器；OVMS 先配置部署。
 
-本地模型是運作上的依賴項目，而非僅僅是設定。Notemd 只能呼叫本地程序所公開的功能，因此在除錯外掛程式之前，請先在 Obsidian 外部驗證本地模型。
+選對應預設，填服務暴露的精確名稱，測試連線並處理可捨棄筆記。Notemd 不安裝模型或啟動這些服務。
 
 ## 端點與認證
 
-| 供應商 | 基底 URL | 預設模型 | API 金鑰 | 備註 |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | 不需要 | NDJSON串流；透過`/api/tags`進行模型探索 |
-| LMStudio | `localhost:1234/v1` | `local-model` | 不需要 | 傳送 `"EMPTY"` 作為承載令牌；相容於 OpenAI |
+| 預設 | 基礎 URL | 模型佔位值 | 協定／認證 |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | 原生 Ollama；不需 API key |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI-compatible；金鑰可選，預設 `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI-compatible；按部署配置模型與存取要求 |
 
-Ollama 會在其 Base URL 下方使用本地的 `/chat` 路徑。LMStudio 則遵循與 OpenAI 相容的 `chat/completions` 路由，並期望使用在本地伺服器上載入的模型。
+`localhost` 是執行 Obsidian 的裝置，手機不能透過自身回環地址存取電腦模型。區網端點是網路服務，需正確地址與認證，勿向不可信網路開放未認證服務。
 
 ## 模型探索
 
-Ollama 使用 `ollama-tags` 的探索模式，並列出本機取得的標籤。當其伺服器提供 `/v1/models` 時，LMStudio 會使用與 OpenAI 相容的模型探索功能。
+Ollama 經 `/api/tags` 列出已拉取標籤，LM Studio 可提供 `/v1/models`，OVMS 有部署感知規則。列出模型不保證記憶體足夠或特定結構化任務可用，請測實際請求。
 
-如果探索功能沒有返回任何結果，那通常是本地伺服器狀態的問題：模型未被下載、未載入，或是伺服器的連接主機/端口與設定檔中的不同。
+## 疑難排解
 
-## 故障排除
+- 拒絕連線：檢查服務、監聽地址與連接埠。
+- 模型不可用：下載／載入模型，核對名稱或別名。
+- 認證拒絕：填伺服器要求的 token，不假定接受 `EMPTY`。
+- 慢或不完整：檢查記憶體、上下文與輸出限制，先單請求。
+- 格式錯誤：更動批次前檢查協定、提示詞與模型能力。
 
-- 連線被拒：請啟動 Ollama 或 LM Studio，並確認所設定的連接埠。
-- 未找到模型：請在測試前拉取 Ollama 標籤或載入 LM Studio 模型。
-- 輸出速度慢：請降低上下文大小、使用較小的本地模型，或將繁重的任務交給託管服務供應商處理。
-- 空值或格式錯誤的回應：請確認所選的供應商設定檔符合本機伺服器協定；Ollama 與 LMStudio 無法互相替換。
+## 適用情境
 
-## 何時使用
+在隱私邊界、可用性和實測結果符合需求時使用。斷網前準備模型和匯出依賴，檢查各任務 provider 與檢索設定；本地片段會傳給所選 LLM，可能仍是雲端。
 
-對於私人金庫、離線工作或廉價的重複性任務，可使用本地供應商。請勿認為本地方案在研究綜合或長時間推理方面就一定更優；模型品質與硬體限制才是需要權衡的因素。
+Tavily／DuckDuckGo 研究仍需網路，原生匯出可能需另裝工具。本地 provider 只是離線流程的一部分，不是全部功能保證。
 
----
+## 延伸閱讀
 
-## 接下來的步驟
-
-- [LLM 提供商](/docs/providers/overview) -- 完整的設定與每個任務的模型配置
-- [故障排除](/docs/advanced/troubleshooting) -- 解決當本機伺服器未運作時出現的 connection-refused 錯誤
+- [Provider 概覽](./overview)：路由與預設。
+- [設定](../getting-started/configuration)：任務和語言。
+- [疑難排解](../advanced/troubleshooting)：區分伺服器與任務問題。

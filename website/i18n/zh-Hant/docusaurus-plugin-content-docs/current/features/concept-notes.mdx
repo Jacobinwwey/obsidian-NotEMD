@@ -1,184 +1,117 @@
 ---
 id: concept-notes
-title: 概念說明
-description: 產生並管理概念筆記——從您的資料庫中提取之關鍵概念的獨立筆記
+title: 概念筆記
+description: 將概念擷取至指定目錄，選擇支援模板，並在刪除重複檔前審核。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [concept notes, knowledge extraction, concept folder, deduplication, backlinks]
-concepts: [Concept Notes, Knowledge Graph, LLM Extraction, Deduplication, Backlinks]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Zettelkasten Method
-    url: https://zettelkasten.de
+keywords:
+  - 概念筆記
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 概念說明
+# 概念筆記
 
 <TLDR>
-**Notemd** 可從您的筆記中提取關鍵概念，並建立獨立的概念筆記檔案。**LLM** 會辨別核心詞彙，於可設定的資料夾中為每個概念生成一個 `.md` 檔案，並可選擇性添加回源筆記的連結。它支援同義詞過濾、依任務選擇模型、檔名清理，以及四步驟的重複資料去除機制。此功能屬於 [Obsidian AI知識管理指南](/docs/pillar-ai-knowledge) 的一部分。
+獨立概念擷取讀取源筆記，在指定資料夾建立 Markdown 概念檔。目錄設定初始空白，新筆記預設只含標題且無來源反向連結。添加連結流程採不同模板。
 </TLDR>
 
 ## 概覽
 
-概念筆記是構建連結式知識庫的基礎。當您處理一則筆記時，Notemd：
+執行前設定 **概念筆記資料夾路徑**。專用資料夾方便核對產物、重複項與後續標題生成範圍。擷取只建立概念檔，不自動填入有研究依據的說明。
 
-1. **將您的文字傳送至 LLM**，並附上結構化的提取提示
-2. **解析 LLM 回應中的 `CONCEPT:` 行**
-3. **在指定的資料夾中，為每個概念建立一個 `.md` 檔案**
-4. （開啟時）在原始筆記中**新增反向連結**
+## 工作原理
 
-## 它的運作原理是什麼
+### 擷取管線
 
-### 提取流程管線
+內容傳給所選 LLM，解析 `CONCEPT:` 條目，在操作內去重並建立／更新檔案。長筆記分塊處理，檢查失敗區塊與不完整輸出；模型回應不等於完整概念清單。
 
-```
-Source Note → Split into Chunks → LLM per Chunk → Parse CONCEPT: Lines
-    → Deduplicate via Set → Create .md Files → Add Backlinks
-    → (Optional: Generate Log)
-```
+### 擷取提示詞
 
-### 提取提示詞
+內置提示詞要求具體且相關的概念；聚焦學習及同義詞抑制不保證標準詞彙。自訂擷取需保留 `CONCEPT: Term` 格式，見[提示詞指南](../advanced/custom-prompts)。
 
-LLM 會收到一個指示它執行以下動作的提示：
+### 分塊
 
-- 提取文件主題中核心的**名詞或名詞片語**
-- **優先考慮具體性** — 選用「介電弛豫」而非「弛豫」
-- **轉換為單數形式** — 「models」會變成「model」
-- **壓制子概念** — 若出現「介電弛豫」，則不要同時提取「弛豫」
-- **跳過**參考文獻/參考資料章節、普通名詞、公司/產品名稱
-- 每行輸出一個概念，格式為 `CONCEPT: Term Name`
+`chunkWordCount` 預設 `3000`，是按詞近似切分，不是 provider token 預算。跨塊上下文有限，完成後檢查關聯概念和歧義名稱。
 
-**同義詞抑制**（選用）：在提示語前加上「盡可能避免提取同義詞、語意上相似的核心概念或關鍵字」。
-
-**專注學習領域**（選用）：在前面加上 `Relevant Fields: [domain]` 以將抽取內容限制在特定學科。
-
-**語言覆寫**（選用）：會在後面加上「輸出的概念必須使用 [language] 語言。」
-
-### 分塊處理
-
-長篇筆記會以 `settings.chunkWordCount` 作為分隔點。每個區段會分別傳送。所有區段中的概念都會被累積在 `Set` 中——不同區段中的重複內容會被靜默移除。單個區段出現的 LLM 錯誤不會導致整個操作中斷。
-
-## 概念說明書的撰寫
+## 建立概念筆記
 
 ### 檔名規則
 
-| 規則 | 行為模式 |
-|------|----------|
-| 連字符/下劃線 | 已替換為空格 |
-| 特殊字元 | 已移除的符號：反斜線、正斜線、冒號、星號、問號、引號、尖括號、管道符、井號、上標符、方括號 |
-| 空白字元 | 已收縮並修剪 |
-| 最大長度 | 100個字元（已截斷並重新修剪） |
-| 空白/全點結果 | 靜默跳過 |
+清除不支援的路徑字元、正規化空白並截短過長名稱，略過空結果。因此不同片語可能對應同一檔名，大規模生成前核對。
 
-範例：`A-B: Key*Term` 會變成 `A B KeyTerm.md`
+### 模板
 
-### 範本
+獨立新筆記預設使用最小模板：
 
-**完整模板**（已啟用反向連結，最小化模板關閉）：
+```markdown
+# Concept Name
+```
+
+新筆記需反向連結時啟用 **加入「Linked From」回鏈**，並關閉 **建立最小化概念筆記**。完整形式：
 
 ```markdown
 # Concept Name
 
 ## Linked From
-- [[SourceNoteBasename]]
+- [[Source Note]]
 ```
 
-**最小化範本**（當 `extractConceptsMinimalTemplate: true` 時）：
+添加連結在概念輸出啟用時產生完整形式與來源連結，獨立擷取的開關不會改變該行為。
 
-```markdown
-# Concept Name
-```
+### 更新既有筆記
 
-### 更新現有筆記
-
-當概念檔案已存在時：
-
-1. 如果已啟用反向連結且來源備註尚未列出，請追加一個反向連結
-2. 如果存在 `## Linked From` 區段，請在下一個 `##` 標頭之前插入。
-3. 如果沒有 `## Linked From`，就在最後新增一個章節。
-4. 會檢查重複的反向連結並跳過它們
+啟用反向連結後，可在既有 `## Linked From` 補入缺少來源。保留正文且不重複追加相同連結。來源使用 basename，同名源筆記需檢查歧義。
 
 ### 設定
 
-| 設定 | 預設值 | 效果 |
-|---------|---------|--------|
-| `useCustomConceptNoteFolder` | `true` | 主開關。關閉 = 不建立筆記 |
-| `conceptNoteFolder` | `''`（已停用） | 概念備忘錄的資料夾路徑 |
-| `extractConceptsMinimalTemplate` | `true` | 僅標題備註（無連結來源） |
-| `extractConceptsAddBacklink` | `false` | 在獨立提取時新增反向連結 |
-| `extractConceptsProvider` / `extractConceptsModel` | DeepSeek | 每個任務的 LLM 用於概念抽取 |
-| `extractConceptsLanguage` | `'en'` | 概念名稱的輸出語言 |
-| `replaceSynonymsDuringConceptExtraction` | `false` | 在提示詞中啟用同義詞抑制功能 |
-| `generateConceptLogFile` | `false` | 撰寫一個 `.log` 列表，列出已創建的概念 |
+| 設定 | 預設 | 作用 |
+| --------- | --------- | -------- |
+| `useCustomConceptNoteFolder` | `true` | 指定目錄後啟用概念檔輸出 |
+| `conceptNoteFolder` | `''` | 初始未指定目錄 |
+| `extractConceptsMinimalTemplate` | `true` | 獨立擷取建立僅標題筆記 |
+| `extractConceptsAddBacklink` | `false` | 啟用獨立擷取反向連結 |
+| `extractConceptsProvider` | `DeepSeek` | 專用路由啟用時的 provider |
+| `extractConceptsModel` | `''` | 空白時使用所選 provider 模型 |
+| `extractConceptsLanguage` | `en` | 專用輸出語言啟用時的語言 |
+| `replaceSynonymsDuringConceptExtraction` | `false` | 加入同義詞抑制指令 |
+| `generateConceptLogFile` | `false` | 選擇產生概念日誌 |
 
-**重要提示：** `extractConceptsAddBacklink` 與 `extractConceptsMinimalTemplate` 的設定僅會影響 **專用的提取指令**。而「新增連結」指令則總是會建立包含回鏈的完整模板筆記。
+## 重複項審核
 
-## 去重
+檢查使用檔名啟發式，包括忽略大小寫、複數形式、符號正規化和範圍允許的單詞包含關係。它們不是語意等價證明，不規則複數和不同技術含義仍需審核。
 
-dedup 命令（`Notemd: Check & remove duplicate concept notes`）會執行 5 步的分析流程：
-
-### 步驟 1：精確的檔名匹配
-
-在所配置的範圍內進行不區分大小寫的基名比對。
-
-### 步驟 2：複數形態檢測
-
-移除後綴：從 `-ies` 到 `-y`， `-es` 被移除， `-s` 也被移除。將單數形式與範圍檔案進行比對。無法處理不規則的複數形式（如 children/child）。
-
-### 步驟 3：符號標準化
-
-適用於：`toLowerCase()`，將連字符/下劃線替換為空格，移除非數字字母字符，合併空白。規範化後完全相同的項目會被標記出來。
-
-### 步驟 4：單字封裝
-
-單字概念筆記會與多字範圍檔案的名稱進行比對。當範圍為 `concept_folder_only` 時不會執行。
-
-### 步驟 5：確認與刪除
-
-所有候選項都會顯示在確認對話框中。已通過審核的項目會被移至系統垃圾桶。在每次刪除之間都可以取消該操作。
+選 **檢查並移除重複項**，核對候選並只批准要移除的檔案。批准項透過 Obsidian 垃圾桶操作處理。概念資料夾不是快取，批次清理前備份。
 
 ### 範圍模式
 
-| 模式 | 與之相比 |
-|------|-------------------|
-| `vault`（預設值） | 所有除 concept 資料夾外的 vault `.md` 檔案 |
-| `concept_folder_only` | 資料夾中的其他概念說明 |
-| `include` | 特定列出資料夾中的檔案 |
-| `exclude` | 除 concept 資料夾及列出的資料夾外，所有保險庫檔案 |
+可與整個 Vault、概念目錄、指定包含目錄或排除特定目錄後的範圍比較。移除前核對選項；範圍影響候選集合，不改變重複的含義。
 
 ## 使用方式
 
-### 提取概念（獨立版）
+### 獨立擷取概念
 
-1. 打開筆記
-2. 從命令選單執行 **"Notemd: Extract concepts"**
-3. 概念說明文件會建立在已設定的資料夾中。
+開啟 Markdown 筆記，確認目錄後執行 **擷取概念（目前檔案）**。源文不變，檢查檔名、概念涵蓋及選用來源連結。
 
-### 提取 + 生成內容
+### 擷取後生成正文
 
-**"Notemd: 提取概念並生成標題"** — 會先提取概念，接著對該概念資料夾中的每個筆記執行「從標題生成」的功能。如此一來，就能為資料夾中**所有**的概念筆記產生內容，而不只是新建立的那些。
+對概念目錄執行 **從標題批次生成**。它也可能處理既有合格筆記，不限本次擷取。事先審核目錄，事後檢查 complete 移動目標。
 
-### 從選取內容建立維基連結
+### 從選取文字建立連結
 
-1. 在編輯器中標出文字
-2. 執行 **"Notemd: 從選取內容建立維基連結"**
-3. 文字被包在 `[[...]]` 中，並生成了概念說明文件
+選取動作可將術語包成 wiki 連結，在目標已配置時建立概念筆記。適合自行選詞，不必讓模型從整篇源文判斷。
 
-## 技巧
+## 建議
 
-- **先設定概念資料夾**——若沒有它，就無法建立筆記。若未設定，會出現警告對話框。
-- **使用每任務模型**——概念抽取工作可透過較便宜的模型（GPT-4o-mini、DeepSeek）有效完成。將昂貴的模型留作研究或翻譯之用。
-- 在有多個術語指代同一概念的技術領域中，**啟用同義詞抑制**功能。
-- **定期去重** — 在批次處理之後執行去重指令，以找出幾乎重複的資料。
-- 每次執行時都會**覆寫日誌檔**，而非追加。若需要之前的結果，請將其複製下來。
+- 從小源文和專用目錄開始。
+- 大量建立前先決定輸出語言。
+- 分別審核同義詞建議與重複候選。
+- 下次覆寫前保留需要的日誌。
 
----
+## 延伸閱讀
 
-## 接下來的步驟
-
-- [Wiki-Links](./wiki-links) — 概念如何以內聯方式相互連結
-- [圖表](./diagrams) — 可視化概念之間的關係
-- [工作流程](./workflows) — 與其他任務串聯提取
+- [Wiki 連結](./wiki-links)：處理後筆記與概念檔。
+- [工作流程](./workflows)：精確一鍵順序。
+- [批次處理](../advanced/batch-processing)：資料夾生成和部分完成。

@@ -4,7 +4,7 @@
     "description": "The title in the navbar"
   },
   "logo.alt": {
-    "message": "لوگوی Notemd",
+    "message": "نشان Notemd",
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
@@ -12,11 +12,31 @@
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "سوالات متداول",
+    "message": "پرسش‌های متداول",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "از اینجا شروع کنید",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "تازه‌واردان",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "کار روزانه",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "توسعه‌دهنده",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

@@ -1,16 +1,10 @@
 ---
 id: translation
 title: Translation
-description: Translate notes and selections
+description: Translate a file or folder with a chosen LLM and inspect output filenames, language settings, and overwrite behavior.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [translation, languages, i18n, batch translation]
-concepts: [Translation, Multi-Language, Batch Processing]
-citations:
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
-  - title: Google Translate API
-    url: https://cloud.google.com/translate
+keywords: [Notemd translation, Markdown, output language, folder translation]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,106 +12,72 @@ import TLDR from '@site/src/components/TLDR';
 # Translation
 
 <TLDR>
-**Notemd translates text between 21 plugin UI languages using LLM-powered translation.** Supports single-selection translation, full-note translation, and batch folder translation. Each translation task can use a dedicated provider and model via per-task settings. Output language is independently configurable from the UI language. Results are appended or written to a new file depending on your preference.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+Notemd translates the active file or eligible files in a folder using your configured LLM. By default, it writes a separate file with a language suffix. Language coverage and translation quality depend on the model; the 21 UI locales and 34 website locales are not limits or guarantees for translation.
 </TLDR>
 
 ## Overview
 
-Translation in Notemd is not a dictionary lookup -- it is LLM-powered, context-aware translation. The model sees the full paragraph or note, preserving tone, domain terminology, and sentence structure. This produces higher-quality results than phrase-by-phrase services, especially for technical, academic, and creative writing.
+Choose the output language and translation provider before running the task. Use a copied test note containing representative terminology, links and code. This feature uses your selected LLM, not a dedicated Google Translate integration.
 
-The feature supports three scopes: selection, active note, and entire folder. Combined with per-task model selection, you can use a fast model (Gemini Flash) for casual translation and a powerful model (Claude Sonnet) for nuance-sensitive content -- without changing your global provider.
+The registered translation actions operate on files and folders. To translate only a passage, copy it into a temporary note first. Selecting text in the editor does not narrow the **Translate current file** action to that selection.
 
 ## How It Works
 
 ### The Translate Command
 
-```mermaid
-graph LR
-    A[User selects text or note] --> B[Determine source language]
-    B --> C[Build translation prompt]
-    C --> D[LLM translates with context]
-    D --> E[Parse translated text]
-    E --> F{Append or new file?}
-    F -->|Append| G[Insert after selection]
-    F -->|New file| H[Write translated .md]
-```
+1. Choose the target output language in Notemd's language control; it defaults to English and is separate from the UI language.
+2. Open the source note and run **Translate current file**.
+3. Notemd chunks long content, sends it to the translation provider/model, and joins the returned chunks.
+4. Open the reported output path and review meaning, terminology, citations, Markdown links and code before using the result.
 
-1. **Source detection** -- The LLM infers the source language from the content. You do not need to specify it manually.
-2. **Prompt construction** -- Notemd builds a prompt that includes the target language, optional domain hint, and the content to translate.
-3. **LLM translation** -- The configured `translateProvider` / `translateModel` processes the request. The model preserves markdown formatting, wiki-links, and code blocks.
-4. **Output** -- The translated text is either appended below the original or written to a new file in the vault.
+With default settings, `Example.md` translated to French becomes `Example_fr.md` beside the source. The original file is retained. A matching existing output is overwritten; there is no default append-to-source mode or guaranteed `Translation` heading.
 
 ### Language Pairs
 
-Notemd supports any language pair that the underlying LLM supports. Common pairs include:
-
-| Source | Target | Typical Quality |
-|--------|--------|----------------|
-| English | Chinese (Simplified) | Excellent |
-| Chinese | English | Excellent |
-| English | Japanese | Very good |
-| English | German / French / Spanish | Very good |
-| Any supported | Any supported | Model-dependent |
-
-The `translateLanguage` setting controls the **output language**. The source language is auto-detected.
+The model infers the source language. Target-language availability in a menu does not establish accuracy for a language pair. Evaluate terminology and mixed-language passages in a sample. Long notes are chunked and may lose cross-chunk context.
 
 ### Per-Task Model Selection
 
-Translation quality varies significantly by model. Notemd lets you assign a dedicated model just for translation:
+Enable task-specific model settings to use `translateProvider` and `translateModel`. Otherwise translation uses the active provider. A local model requires a running server and downloaded model; a cloud provider receives the translation prompt and content.
 
-| Model | Speed | Quality | Cost | Best For |
-|-------|-------|--------|------|----------|
-| `gemini-2.0-flash-exp` | Fast | Good | Low | Casual, high-volume |
-| `gpt-4o-mini` | Fast | Good | Low | Quick lookups |
-| `deepseek-chat` | Medium | Good | Very low | Budget multilingual |
-| `claude-3-5-sonnet` | Medium | Excellent | Medium | Technical / academic |
-| `gpt-4o` | Medium | Excellent | Medium | Nuance-sensitive prose |
+Avoid choosing a model solely from a generic speed or quality ranking. Use a small domain-specific sample and verify its output against the source.
 
 ### Batch Folder Translation
 
-Right-click a folder and select **"Notemd: Translate folder"** to translate every note in that folder. Each file is processed independently. The concurrency setting controls how many files translate in parallel.
+Run **Batch translate folder**, select the intended folder and inspect the scope. The default selection includes direct child files only; advanced selection profiles can change that behavior. Each output uses its source basename and the chosen language suffix, so two same-named source files directed into one custom output folder can collide. Choose destinations deliberately and review existing translated files before rerunning.
 
 ## Configuration
 
 | Setting | Default | Effect |
 |---------|---------|--------|
-| `translateProvider` / `translateModel` | DeepSeek | Dedicated provider for translation tasks |
-| `translateLanguage` | `'en'` | Target output language |
-| `translationAppendToNote` | `true` | Append translated text below the original. If false, creates a new file. |
-| `batchConcurrency` | `3` | Number of files processed in parallel during batch translation |
+| `language` | `en` | Selected target output language |
+| `translateProvider` | `DeepSeek` | Translation provider when task-specific routing is enabled |
+| `translateModel` | `''` | Use that provider's model when empty |
+| `useCustomTranslationSuffix` | `false` | Use the language-code suffix by default |
+| `translationCustomSuffix` | `_translated` | Suffix used when the custom suffix is enabled |
+| `useCustomTranslationSavePath` | `false` | Save beside the source by default |
+| `translationSavePath` | `''` | Custom Vault-relative output folder |
+| `batchConcurrency` | `1` | Requested folder translation concurrency |
+
+If a requested custom folder cannot be created, the runtime can fall back to the source folder and reports the actual output path. Inspect that path instead of assuming the requested destination was used. An empty custom suffix can target the source filename; use a distinct suffix for a separate translation.
 
 ## Example
 
-You are reading a Chinese research note and want an English version:
+Set the output language to English, copy a short Chinese note into a test folder, and run the file translation action. Inspect the resulting `_en.md` file side by side with the source. Check that technical terms, numbers, equations and links remain correct before translating the full folder.
 
-1. Open the note
-2. Right-click --> **"Notemd: Translate current file"**
-3. Notemd detects Chinese, translates to your configured target language (English), and appends:
+## Cancellation And Review
 
-```markdown
-## Translation (English)
-
-The experimental results show that the proposed method achieves
-a 12% improvement in F1 score compared to the baseline, primarily
-due to the enhanced feature extraction module described in Section 3.
-```
-
-The original Chinese text is untouched above the translation. The `## Translation` heading keeps both versions in the same file for easy reference.
+Cancel stops further task work where supported; it does not undo already written translations or guarantee cancellation of provider billing. Review the task report and output files after cancellation. Model instructions to preserve Markdown are a request, not a parser-level guarantee of semantic equivalence.
 
 ## Tips
 
-- **Use Gemini Flash for volume** -- it is the fastest and cheapest option for batch translation of large folders.
-- **Preserve wiki-links** -- Notemd's prompt instructs the LLM to keep `[[wiki-links]]` intact in the translation. Verify after translation, as some models occasionally unwrap them.
-- **Set output language explicitly** -- auto-detection works for source, but always configure `translateLanguage` to avoid ambiguity about the target.
-- **Batch-translate concept notes** -- if your concept folder is in one language and you need it in another, folder-level translation handles it in one step.
-
----
+- Keep a source backup and check for output-name collisions.
+- Configure a distinct output suffix and folder when experimenting.
+- Verify code identifiers, mathematical notation, source URLs and proper nouns manually.
+- Review diagnostic output for private content before sharing it.
 
 ## Next Steps
 
-- [Research](./research) -- Search and summarize in any language, then translate results
-- [Workflows](./workflows) -- Chain translation with wiki-linking or concept extraction
-- [Batch Processing](/docs/advanced/batch-processing) -- Concurrency and overwrite behavior for folder operations
-- [LLM Providers](/docs/providers/overview) -- Choose the best model for your language pair
+- [Batch processing](../advanced/batch-processing): scope, concurrency and partial completion.
+- [Custom prompts](../advanced/custom-prompts): translation prompt substitutions.
+- [Provider setup](../providers/overview): endpoints, model discovery and connection tests.

@@ -1,0 +1,90 @@
+---
+id: overview
+title: Tích hợp Agent
+description: >-
+  Tìm bốn lệnh xuất công khai, kiểm tra hợp đồng JSON và phân biệt thao tác chỉ
+  dành cho bảo trì.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Tích hợp Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Tích hợp Agent
+
+<TLDR>Notemd cung cấp bốn lệnh xuất có giới hạn qua host Obsidian và kho đang khả dụng. Chúng ghi siêu dữ liệu và hợp đồng JSON, không phải API công khai tổng quát để sửa ghi chú. Tìm bề mặt công khai trước, đọc schema/nhãn xử lý rồi kiểm tra tệp được tạo.</TLDR>
+
+## Điều kiện cần
+
+Cài và bật Notemd trong đúng kho, có Obsidian và CLI chính thức. Chọn kho trước khi gọi. `requiredContext: none` nghĩa là không cần ghi chú hoặc phần chọn hiện tại; ứng dụng và kho vẫn bắt buộc.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` phân phối riêng khác chương trình `obsidian` chính thức. Một công cụ chạy không chứng minh công cụ kia tồn tại. Thiếu host/CLI là tích hợp không khả dụng, không phải dry-run thành công.
+
+## ID lệnh công khai
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Các lệnh có schema đầu vào đối tượng rỗng, ánh xạ thao tác chính xác và liên kết lệnh không tương tác. Chúng ghi hoặc thay tệp xuất trong thư mục cấu hình tiện ích.
+
+## Tìm, xuất và xác minh
+
+Bắt đầu với bề mặt công khai, rồi xuất hợp đồng chi tiết cần dùng:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Bản xuất | Tệp mặc định tương đối với kho |
+| -------- | ----------------------------- |
+| Bề mặt lệnh công khai | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Hợp đồng gọi | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifest khả năng | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Hồ sơ nhà cung cấp đã lọc bí mật | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Thay `.obsidian` bằng thư mục cấu hình thực tế nếu khác. Stdout của lệnh kích hoạt không phải kết quả thao tác có kiểu. Xác nhận tệp được lần gọi hiện tại ghi, đọc JSON và kiểm tra hợp đồng; không chỉ dựa vào tệp cũ hoặc thông báo thành công.
+
+Kiểm tra `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Phiên bản tài liệu hiện tại là `1`. Manifest khả năng có thể rộng hơn tập công khai; có tên trong đó không có nghĩa được cấp quyền hoặc hỗ trợ công khai.
+
+## Kết quả nhạy cảm
+
+Đọc `inputHandlingTags` và `outputHandlingTags`. `contains-provider-credentials` đánh dấu thao tác nhạy cảm và loại xuất hồ sơ thô khỏi tập công khai. Không đăng cài đặt thô làm ví dụ tìm API.
+
+Hồ sơ đã lọc có `redacted: true` và chủ ý không cho nhập lại. Che khóa không xóa mọi endpoint riêng, hostname hoặc siêu dữ liệu. Xem trước khi chia sẻ. Đây không phải sao lưu có thể khôi phục khóa thật.
+
+## Thao tác chỉ dành cho bảo trì
+
+Công cụ kho mã có chín thao tác qua `obsidian-cli native eval`, gồm sinh theo đường dẫn, tách chương, nghiên cứu, sơ đồ và xem truy xuất cục bộ. Đây là công cụ bảo trì riêng; có schema không biến chúng thành API ghi ghi chú công khai.
+
+Từ checkout, `npm run cli:help` mô tả thao tác và đầu vào JSON/tệp. Xem [ma trận CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) về điều kiện và tác động. Đường dẫn tương đối với kho chọn, không nhất thiết gốc repo. Dùng `--input-file` cho nội dung phức tạp để tránh lỗi trích dẫn shell.
+
+## Lỗi và thử lại
+
+- Thiếu lệnh: xác nhận phiên bản đang nạp và kho, rồi xuất lại thông tin khám phá.
+- Thiếu hoặc sai kết quả: xem lỗi host và quyền; không dùng tệp cũ làm bằng chứng.
+- Schema/ngữ cảnh không hỗ trợ: dừng đường tích hợp đó, không đoán trường hoặc thay bằng lệnh UI tệp hiện tại.
+- Đầu ra nhạy cảm: giữ cục bộ đến khi đáp ứng quy tắc xử lý.
+- Tác vụ bảo trì ghi ghi chú: kiểm tra phần hoàn thành và xung đột trước khi thử lại; hủy không hoàn tác ghi hay phí.
+
+Có thể xuất lại để làm mới siêu dữ liệu, nhưng tệp là ảnh chụp trạng thái có thể thay đổi. Ghi phiên bản và thời gian cùng bằng chứng. Nội dung ghi chú/phản hồi mô hình là dữ liệu, không phải quyền mở rộng thao tác.
+
+## Tiếp theo
+
+- [Nhà phát triển](../developers/overview): build, test và mở rộng.
+- [Ma trận CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md): phạm vi công khai/bảo trì.
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): quy tắc repo.
+- [Khắc phục sự cố](../advanced/troubleshooting): lỗi tái hiện và báo cáo đã lọc.

@@ -1,161 +1,86 @@
 ---
 id: troubleshooting
-title: "Khắc phục sự cố"
-description: "Các vấn đề thường gặp và giải pháp"
+title: Khắc phục sự cố
+description: >-
+  Chẩn đoán lỗi nhà cung cấp, đầu ra, xử lý hàng loạt và xuất bằng tác vụ nhỏ
+  cùng bằng chứng đã loại bỏ bí mật.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [troubleshooting, errors, diagnostics, connection test]
-concepts: [Troubleshooting, Error Handling, Diagnostics]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Khắc phục sự cố
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Khắc phục sự cố
 
-<TLDR>
-**Hầu hết Notemd các sự cố thuộc về bốn nhóm: các vấn đề chính API, kết nối mạng, lỗi xác thực (401/403), và giới hạn tần suất (429).** Bộ kiểm tra kết nối tích hợp và bảng chẩn đoán giúp xác định nguyên nhân gốc rễ một cách nhanh chóng. Trang này trình bày mọi thông báo lỗi phổ biến, nguyên nhân và cách sửa chữa. Đối với các sự cố không được liệt kê ở đây, hãy báo cáo chúng trên GitHub Issues kèm theo kết quả chẩn đoán.
-
-Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Tái hiện trên một ghi chú thử với đúng nhà cung cấp, mô hình và cài đặt. Xem nhật ký và đường dẫn kết quả. Phân biệt lỗi xác thực, sinh nội dung, phân tích và ghi tệp; thử kết nối thành công không xác minh toàn bộ quy trình.</TLDR>
 
 ## Tổng quan
 
-Notemd phụ thuộc vào các dịch vụ bên ngoài -- các nhà cung cấp LLM và công cụ tìm kiếm API -- vì vậy hầu hết các vấn đề xuất phát từ bên ngoài chính plugin. Bảng chẩn đoán trong phần cài đặt cung cấp cái nhìn có cấu trúc về cuộc gọi API gần nhất, bao gồm yêu cầu URL, trạng thái phản hồi và nội dung lỗi. Hãy kiểm tra nó trước mỗi khi tiếp tục điều tra.
+Ghi phiên bản Notemd/Obsidian, hệ điều hành, hành động, giao thức, mô hình và các bước tối thiểu. Không bắt đầu tác vụ khác khi việc hủy chưa kết thúc. Giữ kết quả hiện có và tệp khôi phục đến khi biết tác vụ nào đã tạo chúng.
 
-## Cách hoạt động: Chẩn đoán
+## Công cụ chẩn đoán
 
-### Kiểm tra kết nối
+### Thử kết nối
 
-Mỗi mục cấu hình nhà cung cấp đều có nút **“Kiểm tra kết nối”**. Khi nhấp vào nó sẽ gửi một yêu cầu API tối giản (thường là danh sách mô hình hoặc kết quả hoàn thành ngắn) và báo cáo kết quả thành công hoặc lỗi HTTP cụ thể. Đây là cách nhanh nhất để xác minh rằng khóa API và cơ sở URL của bạn đúng.
+Dùng **Kiểm tra kết nối** trong cài đặt nhà cung cấp. Một số hồ sơ chỉ thử điểm cuối danh sách mô hình trước và có thể thành công mà không gửi yêu cầu hội thoại; số khác gửi yêu cầu nhỏ. Sau đó chạy tác vụ thật nhỏ để xác minh mô hình đã chọn và hợp đồng đầu ra.
 
-### Bảng chẩn đoán
+### Tiến độ và chẩn đoán nhà phát triển
 
-**Cài đặt --> Notemd --> Chẩn đoán** hiển thị:
+Màn hình tiến độ báo trạng thái, lỗi và đích. Hoạt động API giúp phân biệt yêu cầu đang chờ với lần thử đã xong hoặc lỗi. Chỉ bật debug API khi cần. Chẩn đoán nhà cung cấp cho nhà phát triển dùng yêu cầu dài hơn, có thể tốn hạn mức; dùng khi phép thử ngắn thành công nhưng tác vụ thật thất bại.
 
-| Trường | Nội dung |
-|-------|---------|
-| Nhà cung cấp cuối cùng | Nhà cung cấp nào được gọi gần nhất |
-| Mô hình cuối cùng | Mô hình nào được gọi gần nhất |
-| Trạng thái cuối cùng | Mã trạng thái HTTP hoặc lỗi truyền dữ liệu |
-| Lỗi cuối cùng | Thông báo lỗi nguyên bản từ API |
-| Yêu cầu cuối cùng URL | Toàn bộ URL của yêu cầu cuối cùng (giá trị API đã được ẩn) |
-| Nội dung phản hồi cuối cùng | Phần nội dung phản hồi bị cắt ngắn (500 ký tự đầu tiên) |
+Nội dung chẩn đoán có thể chứa ghi chú, phản hồi một phần, điểm cuối hoặc thông tin xác thực. Kiểm tra và loại bỏ bí mật cục bộ trước khi chia sẻ. Bản xuất hồ sơ đã lọc bí mật vẫn cần xem lại siêu dữ liệu.
 
-Hãy sao chép toàn bộ kết quả chẩn đoán khi báo cáo sự cố trên GitHub.
+## Lỗi thường gặp
 
-## Các lỗi thường gặp
+### Khóa API sai hoặc thiếu
 
-### Khóa API không hợp lệ hoặc thiếu
+Với 401, xác nhận khóa thuộc đúng nhà cung cấp/điểm cuối và không có khoảng trắng thừa. Với 403, xem quyền tài khoản, giới hạn dự án, quyền dùng mô hình và thanh toán. Thử lại liên tục không sửa được thông tin xác thực sai.
 
-**Triệu chứng:** HTTP 401 hoặc "Khóa API được cung cấp không chính xác"
+### Mạng hoặc kết nối
 
-**Nguyên nhân:** Khóa API bị thiếu, chứa khoảng trắng, hoặc thuộc về nhà cung cấp khác.
+Kiểm tra máy chủ, cổng, giao thức và tuyến mạng từ thiết bị chạy Obsidian. Ollama/LM Studio cần máy chủ hoạt động và mô hình sẵn có. `localhost` là chính thiết bị đó, không phải máy khác. Chọn đúng hồ sơ; chương trình tự chọn đường dự phòng, không có công tắc chuyển giao vận chung cho người dùng.
 
-**Cách khắc phục:**
-1. Kiểm tra xem khóa không có khoảng trắng ở đầu hoặc cuối
-2. Đảm bảo khóa tương ứng với nhà cung cấp đã chọn (khóa OpenAI sẽ không hoạt động với Anthropic)
-3. Kiểm tra xem tài khoản của bạn có điểm tín dụng hoặc gói đăng ký hiệu lực hay không
-4. Nhấp vào **"Test Connection"** để xác minh
+### Giới hạn tốc độ 429
 
-### Lỗi mạng / Kết nối
+Giảm đồng thời, kiểm tra hạn mức yêu cầu/token và tính cả ứng dụng khác dùng cùng khóa. Thử lại giúp một số lỗi tạm thời, không bảo đảm vượt qua mọi giới hạn tài khoản.
 
-**Triệu chứng:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+### Không tìm thấy mô hình
 
-**Nguyên nhân:** Đầu cuối API không thể truy cập được từ máy của bạn.
+Dùng **Fetch models** khi có hoặc nhập mô hình/deployment tài khoản được phép dùng. Kiểm tra phiên bản API và vùng. Giá trị đặt sẵn có thể mang tính lịch sử, không chứng minh mô hình còn được cung cấp. Azure OpenAI cần tên deployment; Ark có thể cần endpoint ID.
 
-**Giải pháp:**
-1. Kiểm tra kết nối Internet của bạn
-2. Nếu đang ở sau proxy hoặc tường lửa, hãy kiểm tra xem tên miền API có bị chặn hay không
-3. Đối với Ollama: xác nhận rằng `ollama serve` đang chạy (`ollama list` nên trả về các mô hình)
-4. Đối với LMStudio: xác nhận rằng máy chủ đang chạy trên `localhost:1234`
-5. Thử phương thức truyền dữ liệu khác – người dùng di động nên đảm bảo rằng phương thức `requestUrl` đang được kích hoạt
-6. Kích hoạt `enableStableApiCall` để tự động thử lại khi xảy ra lỗi tạm thời
+### Không có liên kết hoặc khái niệm
 
-### 403 Forbidden
+Xem tệp kết quả thực tế, chất lượng nguồn, định dạng mô hình trả về và thư mục khái niệm không trống đã bật. Trích xuất độc lập mặc định chỉ có tiêu đề, không có liên kết ngược. So với lời nhắc tích hợp nếu lời nhắc riêng bỏ mất dấu bắt buộc.
 
-**Triệu chứng:** HTTP 403
+### Thiếu kết quả hoặc sai thư mục
 
-**Nguyên nhân:** Khóa API của bạn vẫn hợp lệ nhưng không có quyền truy cập vào tài nguyên được yêu cầu.
+Đọc đích tác vụ báo. Thêm liên kết thường tạo `_processed.md` cạnh nguồn; dịch tạo `_<language>.md`; sinh theo tiêu đề báo complete. Nếu không tạo được thư mục dịch, kết quả có thể về thư mục nguồn. Kiểm tra xung đột và quyền tệp trước khi chạy lại.
 
-**Giải pháp:**
-1. Một số mô hình yêu cầu quyền truy cập đặc biệt (ví dụ, GPT-4 qua Azure đòi hỏi tên triển khai)
-2. Một số nhà cung cấp hạn chế các mô hình theo cấp độ gói – vui lòng kiểm tra tài khoản của bạn
-3. Có thể có các hạn chế theo khu vực (một số nhà cung cấp ở Trung Quốc chặn IP quốc tế và ngược lại)
-4. Hãy kiểm tra xem tên mô hình có được viết đúng không (ví dụ, `gpt-4o` chứ không phải `gpt-4o-mini` khi mô hình nhỏ là tất cả những gì gói của bạn cho phép)
+### Hủy rồi vẫn còn tệp
 
-### Giới hạn tốc độ (429)
+Hủy dừng việc tiếp theo ở nơi hỗ trợ; lần ghi hoàn thành được giữ, không tự hoàn tác. Yêu cầu từ xa hoặc lần ghi đã được chấp nhận có thể xong sau đó. Kiểm tra kết quả từng tệp và đường khôi phục/xung đột trước khi xóa hay chạy lại cả thư mục.
 
-**Triệu chứng:** HTTP 429 hoặc "Giới hạn tốc độ đã vượt quá"
+### Sơ đồ hoặc xuất bằng công cụ gốc thất bại
 
-**Nguyên nhân:** Có quá nhiều yêu cầu trong một khoảng thời gian ngắn.
+Chọn tổ hợp sơ đồ/nguồn mà bộ chọn hỗ trợ. Xem trước không phải xác minh ứng dụng đích. Chạy kiểm tra môi trường slide hoặc CircuitikZ thích hợp và xem lỗi. Nếu chỉ có mã nguồn, lưu lại rồi dùng công cụ bên ngoài phù hợp. Xem giới hạn trong [sơ đồ](../features/diagrams).
 
-**Giải pháp:**
-1. Giảm `batchConcurrency` xuống còn `1` hoặc `2`
-2. Chờ vài phút trước khi thử lại
-3. Kiểm tra tài liệu về giới hạn tốc độ của nhà cung cấp dành cho cấp độ gói của bạn
-4. Kích hoạt `enableStableApiCall` để tự động thử lại với việc trì hoãn
-5. Cân nhắc chuyển sang nhà cung cấp có giới hạn cao hơn (DeepSeek, Ollama)
+## Báo lỗi
 
-### Mô hình không tìm thấy
+1. Tái hiện bằng ghi chú tổng hợp nhỏ và thư mục riêng.
+2. Ghi phiên bản, hành động, mô hình, cài đặt cần thiết, kết quả mong đợi và thực tế.
+3. Đính kèm tiến độ/lỗi đã loại bỏ bí mật và sản phẩm nhỏ nhất chứng minh vấn đề; bỏ nội dung riêng tư và siêu dữ liệu điểm cuối không cần thiết.
+4. Nêu có tái hiện với một tệp và lời nhắc mặc định không.
+5. Mở [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).
 
-**Triệu chứng:** "Mô hình không tìm thấy" hoặc HTTP 404
+Ảnh chụp đơn lẻ hiếm khi chứng minh lỗi định dạng hoặc hủy. Nếu có thể, kèm cặp nguồn/kết quả hoặc chuỗi bước tối thiểu.
 
-**Nguyên nhân:** Tên mô hình không tồn tại trên nhà cung cấp đã chọn.
+## Tiếp theo
 
-**Giải pháp:**
-1. Nhấn **"Get Model List"** để xem tất cả các mô hình có sẵn cho nhà cung cấp của bạn
-2. Một số tên mô hình thay đổi theo thời gian -- hãy kiểm tra tên hiện tại trong tài liệu hướng dẫn của nhà cung cấp
-3. Đối với Ollama: chạy `ollama list` để xem các mô hình đã được tải; chỉ những mô hình đã tải xuống mới có sẵn
-
-### Không có liên kết / Không tạo ra khái niệm nào
-
-**Triệu chứng:** Lệnh được chạy nhưng không tạo ra đầu ra nào
-
-**Nguyên nhân:** LLM trả về phản hồi trống hoặc không thể giải mã được.
-
-**Giải pháp:**
-1. Kiểm tra bảng điều khiển chẩn đoán để xem phản hồi thực tế của LLM
-2. Thử sử dụng một mô hình mạnh hơn (một số mô hình nhỏ gặp khó khăn trong việc tạo đầu ra có cấu trúc)
-3. Đảm bảo ghi chú có nội dung đủ dài (>50 từ)
-4. Xem xét lời nhắc tùy chỉnh của bạn để loại bỏ các hướng dẫn mâu thuẫn
-5. Tạm thời vô hiệu hóa việc ức chế từ đồng nghĩa để xem liệu nó có đang lọc quá mức hay không
-
-### ID Đầu cuối Doubao bị thiếu
-
-**Triệu chứng:** Xuất hiện lỗi khi sử dụng nhà cung cấp ByteDance Doubao
-
-**Nguyên nhân:** Doubao yêu cầu một ID đầu cuối Ark (định dạng: `ep-xxxxxxxx-xxxx-xxxx`) thay vì tên mô hình.
-
-**Sửa lỗi:** Thay thế mô hình đại diện mặc định bằng ID endpoint thực tế của bạn từ bảng điều khiển Volcengine.
-
-## Cấu hình
-
-| Cài đặt chẩn đoán | Vị trí | Mục đích |
-|--------------------|----------|---------|
-| **Kiểm tra kết nối** | Mục Cài đặt --> Mục Provider | Kiểm tra khóa API và khả năng kết nối |
-| **Lấy danh sách mô hình** | Mục Cài đặt --> Mục Provider | Xác nhận các mô hình nào có thể truy cập được |
-| `enableStableApiCall` | Mục Cài đặt --> Nâng cao | Kích hoạt việc thử lại với chế độ backoff |
-| `batchConcurrency` | Mục Cài đặt --> Nhóm xử lý | Kiểm soát tính song song để tránh giới hạn tốc độ |
-
-## Cách báo cáo sự cố
-
-Nếu sự cố của bạn không được đề cập ở trên:
-
-1. Mở **Cài đặt --> Notemd --> Chẩn đoán**
-2. Sao chép toàn bộ kết quả chẩn đoán
-3. Mở một vấn đề trên GitHub tại [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-4. Bao gồm: phiên bản Obsidian, phiên bản Notemd, nhà cung cấp, mô hình, kết quả chẩn đoán và các bước để tái tạo tình huống
-5. Che giấu khóa API của bạn khỏi bất kỳ log nào được chia sẻ
-
----
-
-## Các bước tiếp theo
-
-- [LLM Providers](/docs/providers/overview) -- Tài liệu tham khảo đầy đủ về cấu hình nhà cung cấp
-- [Batch Processing](/docs/advanced/batch-processing) -- Cài đặt đồng thời và thử lại cho các thao tác lớn
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Sửa chữa hành vi bất ngờ của LLM bằng cách điều chỉnh các mệnh lệnh
+- [Nhà cung cấp](../providers/overview): giao thức và giới hạn thử kết nối.
+- [Xử lý hàng loạt](./batch-processing): phạm vi và kết quả một phần.
+- [Lời nhắc tùy chỉnh](./custom-prompts): đầu vào/đầu ra từng tác vụ.
+- [Cấu hình](../getting-started/configuration): mặc định và đích thực tế.

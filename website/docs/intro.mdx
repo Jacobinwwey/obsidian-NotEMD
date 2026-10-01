@@ -1,14 +1,10 @@
 ---
 id: intro
 title: Introduction to Notemd
-description: AI-powered knowledge base builder for Obsidian with persistent note transformations, workflows, and spec-first diagrams
-keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links, Copilot alternative, Smart Connections alternative, obsidian AI plugin, auto wiki-link, concept notes]
+description: Turn Obsidian notes into linked Markdown, concept notes, research summaries, translations and diagram artifacts with explicit output and provider choices.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, Knowledge Management, Wiki-Links, Copilot Alternative, Smart Connections Alternative, AI Plugin]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords: [Notemd, Obsidian AI plugin, wiki-links, concept notes, research, diagrams]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -16,174 +12,88 @@ import TLDR from '@site/src/components/TLDR';
 # Introduction to Notemd
 
 <TLDR>
-**Notemd** (Note + EMD — Enhanced Markdown Documents) is an open-source Obsidian plugin that transforms LLM-powered reading into persistent knowledge. Unlike chat-based AI where insights vanish after the session, Notemd writes results **directly into your vault** as wiki-links, concept notes, research summaries, translations, workflows, and diagrams. It is built for researchers, students, and knowledge workers who want reading, research, and visual explanations to accumulate into a structured, evolving knowledge graph.
+Notemd is an MIT-licensed Obsidian plugin for transforming notes into files you can inspect and keep: wiki-linked Markdown, concept notes, research summaries, translations and diagrams. You choose the provider, task and output scope. Model-generated results need review before they become part of your knowledge base.
 </TLDR>
 
 ## What is Notemd?
 
-Notemd integrates **36 provider definitions** across cloud, gateway, and local runtimes (including OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, and more) into your Obsidian workflow to automate knowledge extraction, organization, translation, research, and diagram generation.
+Notemd connects existing Vault workflows to 36 provider presets, including hosted APIs, gateways and local servers. Tasks write files or update notes according to their individual output contracts. You can run actions separately or compose them into sidebar workflows.
 
-### Key Difference: Ephemeral vs. Persistent Knowledge
+Stored outputs remain in your Vault. When you use a cloud provider, task content is sent to that endpoint; web research also makes network requests. Local storage and local inference are separate choices.
 
-| Aspect | Chat-based AI (ChatGPT, etc.) | Notemd |
-|--------|-------------------------------|--------|
-| **Where results go** | Chat history (disappears) | Your Obsidian vault (persists) |
-| **Format** | Plain text answers | Structured files: `[[wiki-links]]`, concept notes, diagrams |
-| **Long-term value** | Must re-ask each time | Accumulates into a knowledge graph |
-| **Offline access** | Requires internet | Works fully offline with Ollama |
+## Choose Your Starting Point
+
+| You want to… | Start here |
+|--------------|------------|
+| Install and inspect your first output | [Quick start](./getting-started/quick-start) |
+| Run repeatable note or folder tasks | [Workflows](./features/workflows) and [batch processing](./advanced/batch-processing) |
+| Build, test or extend the plugin | [Developer guide](./developers/overview) |
+| Discover the supported Agent contract | [Agent guide](./agents/overview) |
 
 ## Core Capabilities
 
-### 1. **Automatic Wiki-Linking**
-- LLM identifies key concepts in your notes
-- Inserts `[[wiki-links]]` at each occurrence
-- Optionally creates linked concept notes
-- Synonym suppression to avoid duplicates
+### Wiki-Links And Concept Notes
 
-### 2. **Concept Note Generation**
-- Extracts core concepts from papers, articles, notes
-- Generates dedicated concept files with backlinks
-- Customizable output paths and templates
+Ask a model to identify concepts and add wiki-links. Add-links creates a separate processed note by default. A configured concept folder can receive concept files; standalone extraction defaults to title-only notes without backlinks. [Linking](./features/wiki-links) and [concept notes](./features/concept-notes) explain the difference.
 
-### 3. **Web Research Integration**
-- Query Tavily or DuckDuckGo from within Obsidian
-- LLM summarizes results with source citations
-- Appends research findings to current note
+### Research And Local Context
 
-### 4. **Multilingual Translation**
-- Translate selections or entire notes
-- Supports 21 plugin UI languages
-- Independent output language configuration
-- Batch translation support
+Select Tavily or DuckDuckGo for web research, then append a model-written summary to the active note. Optional scoped local retrieval can add note excerpts to generation tasks. The current local index is lexical; it is not an embedding-based semantic search system. [Research](./features/research) explains source and network boundaries.
 
-### 5. **Diagram Generation**
-- **Mermaid**: Flowcharts, sequence, class, state, ER, Gantt
-- **JSON Canvas**: Obsidian native layouts
-- **Vega-Lite**: Data charts, time series, scatter plots
-- **HTML / Editable HTML/SVG**: Self-contained figure artifacts with semantic annotations
-- **Draw.io / Drawnix artifact boundaries**: Maintainer-facing export paths from the same semantic figure model
-- **Constrained circuit diagrams**: CircuitikZ generation uses typed `CircuitSpec` payloads, deterministic golden templates, render diagnostics, and topology/layout validation rather than unrestricted LLM TikZ
-- **Preview diagnostics**: Render artifacts can surface compile/render smoke diagnostics, and non-inline sources can be inspected without requiring a plugin-side LaTeX runtime
-- Syntax auto-fix for Mermaid errors
+### Translation And Original-Text Extraction
 
-### 6. **One-Click Workflows**
-- Chain multiple actions into sidebar buttons
-- DSL-based workflow definition
-- Example: `add-links > extract-concepts > research > diagram`
+Translate a file or folder to the chosen output language. Use original-text extraction for question-directed source passages, then compare quotations with the source. File translation does not become selection-only merely because text is highlighted. [Translation](./features/translation) covers naming and overwrite behavior.
 
-## Who Should Use Notemd?
+### Diagrams And Exports
 
-✅ **Researchers** reading papers and building literature reviews
-✅ **Students** organizing study notes and creating concept maps
-✅ **Knowledge workers** who want reading insights to persist
-✅ **Bilingual professionals** needing translation + wiki-linking
-✅ **Privacy-conscious users** wanting local LLM support (Ollama)
-✅ **Power users** who customize prompts and workflows
+Choose a diagram type and compatible source format, inspect its preview, and save a source or supported visual export. The executable catalog has 33 entries; source formats and export formats are different choices. See [diagrams](./features/diagrams) for Draw.io, Drawnix, Mermaid, CircuitikZ and native-consumer limits.
 
-## Why Notemd + Obsidian?
+### Workflows
 
-**Obsidian** is a local-first, markdown-based knowledge base. **Notemd** adds AI superpowers:
-- Your data stays in your vault (not a cloud service)
-- Works offline with local models
-- Free and open source (MIT license)
-- Integrates with existing Obsidian plugins
-- Scales to tens of thousands of notes
+The default **One-Click Extract** sequence adds links, generates content for eligible notes in the concept or selected folder, then repairs Mermaid blocks in the complete folder. It can include pre-existing concept notes. Custom workflows retain each action's prerequisites and output behavior. [Workflows](./features/workflows) provides the exact DSL.
 
 ## Getting Started
 
-1. **Install**: Settings → Community Plugins → Browse → "Notemd"
-2. **Configure**: Add your LLM provider API key (or use local Ollama)
-3. **Try it**: Open a note → Right-click → "Process file (add links)"
-4. **Explore**: Check the sidebar for one-click workflows
+1. [Install Notemd](./getting-started/installation) in the intended Vault.
+2. Configure an accessible provider/model and test a disposable note.
+3. Choose the concept folder and inspect output destinations.
+4. Review the resulting files before enabling a larger batch.
 
-👉 [Installation Guide](./getting-started/installation) | [Quick Start Tutorial](./getting-started/quick-start)
+There is no guaranteed completion time or minimum note length for useful model output. Start small enough to inspect the result.
 
 ## Diagram Capability Direction
 
-Notemd's diagram work is moving away from "ask the model to write one syntax string" and toward a layered pipeline:
+The current diagram pipeline uses typed specifications and target-specific rendering for supported catalog entries. Developer contracts such as `DiagramSpec` describe that boundary; they are not a promise that arbitrary diagram syntax or every reference layout is supported.
 
-```mermaid
-graph LR
-    A[Source Note] --> B[DiagramSpec]
-    B --> C[Target Adapter]
-    C --> D[Rendered Artifact]
-    D --> E[Semantic Verification]
-    E --> F[Preview or Export]
-```
-
-The current implementation supports **33 executable diagram catalog rows** across Mermaid, JSON Canvas, Vega-Lite, HTML fallback, editable HTML/SVG, Draw.io XML artifacts, Drawnix JSON, and constrained CircuitikZ output. Each row has a production fixture and deterministic preview; the real-Vault learning set under [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) records bilingual inputs and generated results. Five exact reference grammars remain roadmap-only because their layout contracts are not claimed. Circuit diagrams stay deliberately constrained: typed `CircuitSpec` plus golden templates is safer than unrestricted LaTeX generation, while TikZJax remains an external preview/authoring boundary rather than a bundled runtime.
-
-Read the details in [Diagrams](./features/diagrams).
+Circuit output is constrained to supported `circuitikz` structures. TikZJax is an external tool, and an in-plugin preview is not proof of native compilation. Drawnix static relationships do not guarantee attached cross-branch arrows after rearrangement. Keep these limits when choosing an export for further editing.
 
 ## Architecture
 
-```mermaid
-graph LR
-    A[Obsidian Note] --> B[Notemd Plugin]
-    B --> C{Task Selection}
-    C -->|Add Links| D[LLM Provider]
-    C -->|Research| E[Search API]
-    C -->|Translate| D
-    C -->|Diagram| D
-    D --> F[Structured Output]
-    E --> D
-    F --> G[Update Vault]
-    G --> H[Wiki Links]
-    G --> I[Concept Notes]
-    G --> J[Diagrams]
-    G --> K[Research Summaries]
-```
+The plugin routes a task to its selected provider, validates or parses the task output, and writes the relevant note or artifact. Search and local retrieval supply optional context. Preview and export have additional format-specific constraints.
 
-## Notemd vs Other Obsidian AI Plugins
+Use the [developer guide](./developers/overview) for source ownership, extension contracts and verification commands. Use the [Agent guide](./agents/overview) for the bounded public export commands; the internal operation registry is not a general public automation API.
 
-Most Obsidian AI plugins are conversation-first (you ask, AI answers, insights stay in chat). Notemd is **write-first**: AI processes your notes and writes structured results directly into your vault.
+## Comparing Tools {#notemd-vs-other-obsidian-ai-plugins}
 
-| Capability | Notemd | Copilot | Smart Connections | Text Generator |
-|-----------|--------|---------|-------------------|-----------------|
-| Auto wiki-link insertion | Yes | No | No | No |
-| Concept note generation | Yes (with backlinks + dedup) | No | No | No |
-| Diagram generation | Yes (Mermaid, Canvas, Vega-Lite, HTML, editable artifacts) | No | No | No |
-| Web research integration | Yes (Tavily + DuckDuckGo) | No | No | No |
-| Batch folder processing | Yes | Limited | No | Limited |
-| Per-task model routing | Yes (7 tasks, independent models) | No | No | No |
-| One-click workflow chains | Yes (DSL) | No | No | No |
-| Translation (batch) | Yes | No | No | No |
-| Chat with vault | No | Yes | No | No |
-| Semantic similarity search | No | No | Yes | No |
-| Template-based generation | No | No | No | Yes |
-| LLM providers | 36 (cloud + gateway + local) | 3-5 | 2-3 | 3-5 |
-| Fully offline | Yes (Ollama) | Partial | Partial | Partial |
+Choose according to the work you need to complete: file transformation, conversation, deterministic linking, retrieval or native editing. Check each project's current documentation and test a representative sample. Record tool versions, enabled features and the same sample task when comparing results.
 
-**When to choose Notemd**: You want AI to build a persistent knowledge graph — not just chat about your notes.
+## Data And Compatibility Boundaries
 
-**When to choose Copilot**: You want a conversational AI assistant inside Obsidian.
+Cloud providers receive task inputs; search providers receive queries; local excerpts become prompt content when enabled. Review task-specific routing before assuming a workflow is local. Cancellation stops further work where supported and retains completed outputs; it cannot guarantee remote generation or billing stops.
 
-**When to choose Smart Connections**: You want to discover existing relationships between notes via semantic search.
-
-## Philosophy
-
-**Notemd believes that AI should augment human knowledge work, not replace it.** The plugin:
-- Keeps you in control (review before applying changes)
-- Preserves context (all results link back to source)
-- Respects privacy (local LLM support, no telemetry)
-- Stays extensible (open APIs, custom workflows)
+The manifest declares Obsidian `0.15.0` as its minimum and permits mobile loading. Physical mobile devices and that minimum version are not currently validated by the project's release evidence. Optional native exports can require desktop tools. The website has 34 locale routes and the plugin UI has 21 locales; model translation capability is separate.
 
 <!-- notemd-acknowledgments -->
 ## Acknowledgments and Referenced Projects
 
-Notemd is independently maintained. We thank the open-source projects and communities that informed documented design decisions or provide integration foundations. Listing a project recognizes influence or interoperability only; it does not imply endorsement, affiliation, bundled code, or a claim of code reuse.
+Notemd is independently maintained. A reference acknowledges influence or interoperability; it does not imply endorsement, affiliation, bundled code, or a claim of code reuse.
 
-- **Reference projects:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
-- **Open-source foundations:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
-- Each project retains its own license and terms; Notemd is available under the [MIT License](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
+- Reference projects: [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- Foundations and tools: [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Each retains its own license. Notemd uses the [MIT License](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
 
-## Open Source
+## Open Source And Support
 
-- **License**: MIT
-- **Source**: [github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
-- **Community**: [Discord](https://discord.gg/qnGgsQ9W) | [GitHub Discussions](https://github.com/Jacobinwwey/obsidian-NotEMD/discussions)
-- **Contribute**: PRs welcome, see [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+[Source code](https://github.com/Jacobinwwey/obsidian-NotEMD) · [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) · [Contributing](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
 
----
-
-**Next**: [Installation →](./getting-started/installation)
+For a problem report, provide exact versions, steps and sanitized evidence. For the first task, follow the [quick start](./getting-started/quick-start).

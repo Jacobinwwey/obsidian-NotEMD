@@ -1,16 +1,13 @@
 ---
 id: workflows
 title: 工作流
-description: 通过一键按钮串联多个任务
+description: 用有效动作 ID、明确文件夹范围和可预期错误策略组合 Notemd 侧边栏动作。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - 工作流
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,125 +15,98 @@ import TLDR from '@site/src/components/TLDR';
 # 工作流
 
 <TLDR>
-**Notemd 工作流可将多个任务整合为一次点击即可完成的操作。** 可通过简单的 DSL 定义类似 `add-links > extract-concepts > research > diagram` 的流程顺序。这些工作流会以侧边栏按钮的形式出现，可在当前笔记或文件夹中执行整个流程。系统预置了多种工作流；用户也可在设置中创建自定义工作流。每个步骤都使用独立的任务模型配置。
-
-这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
+工作流按顺序运行现有侧边栏动作，可能要求选择文件夹或打开编辑器。它不是文本管道：各动作保留自身输入、输出和副作用。从可丢弃笔记与专用目录开始。
 </TLDR>
 
 ## 概览
 
-工作流消除了逐个执行任务的繁琐流程。无需右键点击四次来添加链接、提取概念、查询陌生术语以及生成图表，只需按下侧边栏上的一个按钮，整个流程就会自动运行。Notemd负责处理任务顺序、错误传播以及进度报告。
+内置 **One-Click Extract** 定义为：
 
-工作流是通过一种轻量级的领域特定语言来定义的。它们存储在设置中，会以可点击按钮的形式出现在 Obsidian 侧边栏中，并且可以应用于当前笔记或整个文件夹。
-
-## 它是如何工作的？
-
-### 工作流执行管道
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Parse** -- 该 DSL 字符串会按照 `>`（或 `>`）被分割成有序的任务标识符列表。
-2. **Resolve** -- 每个标识符都对应一个内部命令（add-links、extract-concepts、research、translate、diagram 等）。
-3. **执行** -- 各步骤按顺序运行。每一步都会使用其配置的对应任务提供者和模型。
-4. **错误处理** -- 如果某个步骤失败，工作流会根据您设定的错误处理策略要么中止，要么继续执行下一步骤。
-5. **已完成** -- 提示通知会报告成功状态或列出所有失败的步骤。
+1. 为活动笔记添加链接，配置概念目录时创建概念笔记。
+2. 为概念目录或批量步骤所选目录内符合条件的笔记生成正文，包括已有笔记。
+3. 修复批量生成 complete 目录中的 Mermaid 块。
+
+默认工作流不执行网络研究。标题生成仅在独立研究设置开启时使用研究。范围和输出见[批量处理](../advanced/batch-processing)。
+
+## 工作原理
+
+### 执行管线
+
+步骤依次执行，侧边栏报告当前步骤与失败。取消停止后续步骤并传播到受支持请求路径；已完成写入保留，不存在全有或全无回滚。
+
+文件夹上下文明确定义：优先采用概念目录，批量生成记录来源和 complete 目录，后续 Mermaid 修复使用 complete 目录。其他动作仍有各自的活动文件、选区或交互前置条件。
 
 ### DSL 格式
 
-工作流被定义为以 `>` 分隔的任务标识符序列：
+每行定义一个有名称按钮，`::` 分隔名称和动作列表，`>` 分隔动作。忽略空行与 `#` 开头行，拒绝未知动作 ID。
 
+```text
+提取并生成图表::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**可用任务标识符：**
+可使用设置中的构建器选取动作，或直接编辑 DSL。动作 ID 稳定，显示标签跟随 UI 语言。文件夹动作使用独立 ID，不遵循通用字符串替换规则。
 
-| 标识符 | 操作 |
-|------------|--------|
-| `process-current-add-links` | 在当前笔记中添加维基链接 |
-| `extract-concepts-current` | 从当前笔记中提取概念 |
-| `research-and-summarize` | 研究选定的文本或笔记标题 |
-| `process-current-translate` | 翻译活动笔记 |
-| `summarize-to-mermaid` | 根据当前笔记生成图表 |
-| `generate-from-title` | 根据笔记标题生成内容 |
-| `extract-original-text` | 提取原始文本（用于OCR/扫描内容） |
+| 标识符 | 动作／前置条件 |
+| ------------ | ----------------------- |
+| `process-current-add-links` | 为活动笔记添加链接 |
+| `process-folder-add-links` | 为所选目录添加链接 |
+| `extract-concepts-current` | 提取活动笔记概念 |
+| `extract-concepts-folder` | 提取所选目录概念 |
+| `generate-from-title` | 根据活动笔记标题生成正文 |
+| `batch-generate-from-titles` | 为符合条件的目录笔记生成正文 |
+| `research-and-summarize` | 在打开的 Markdown 编辑器中研究选区或标题 |
+| `summarize-as-mermaid` | 将活动受支持输入总结为 Mermaid |
+| `generate-diagram` | 从受支持输入生成图表产物 |
+| `preview-diagram` | 预览受支持图表源或产物 |
+| `translate-current-file` | 翻译活动受支持文件 |
+| `batch-translate-folder` | 翻译所选文件夹 |
+| `extract-original-text` | 提取指定原文段落 |
+| `batch-extract-original-text` | 从符合条件的目录文件提取原文 |
+| `split-note-by-chapters` | 按章节拆分活动笔记 |
+| `batch-mermaid-fix` | 修复所选目录内 Mermaid 代码块 |
+| `fix-formula-current` | 规范活动笔记公式分隔符 |
+| `batch-fix-formula` | 规范所选目录公式分隔符 |
+| `check-duplicates-current` | 检查活动笔记重复项 |
+| `check-remove-duplicate-concepts` | 交互审核并移除重复概念 |
+| `test-llm-connection` | 测试已配置 provider |
+| `probe-slide-export-env` | 检查本地幻灯片导出环境 |
+| `export-slides` | 将活动文件导出为幻灯片 |
 
-**文件夹级变体**会在标识符名称中将 `current` 替换为 `folder`。
+### 默认与自定义工作流
 
-### 预定义工作流与自定义工作流
-
-Notemd 自带针对常见场景的现成工作流：
-
-| 工作流 | 链条 | 用例 |
-|----------|-------|----------|
-| **一键提取** | 添加链接 > 提取概念 > 研究 | 一次性处理一篇研究论文 |
-| **完整流程** | 添加链接 > 提取概念 > 研究 > 绘制图表 | 通过可视化完成完整的知识提取 |
-| **翻译 + 链接** | 翻译 > 添加链接 | 翻译并在目标语言中关联相关概念 |
-
-**自定义工作流**是在设置中创建的：
-
-1. 打开**设置** --> **Notemd** --> **工作流**
-2. 点击**“添加工作流”**
-3. 输入 DSL 链（例如：`process-current-add-links>extract-concepts-current`）
-4. 为其设置一个显示名称（例如“快速链接 + 提取”）。
-5. 新按钮会立即出现在侧边栏中。
+One-Click Extract 是内置默认，其他按钮由你定义。搜索工作流设置，命名、选择并排序动作，运行前检查侧栏提示。解析错误需先修正，不能假定链条仍会按预期执行。
 
 ## 配置
 
-| 设置 | 默认值 | 效果 |
-|---------|---------|--------|
-| `workflows` | 预定义集合 | 工作流定义数组（名称 + DSL） |
-| `workflowContinueOnError` | `true` | 如果当前步骤失败，则继续执行下一步。 |
-| `workflowShowProgress` | `true` | 在每一步完成之后显示进度提示。 |
+| 设置 | 默认值 | 作用 |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | 首个步骤报告失败后停止 |
+| `useMultiModelSettings` | `false` | 启用任务专用路由前使用活动 provider |
+| `enableResearchInGenerateContent` | `false` | 默认不在标题生成中执行网络研究 |
 
-### 工作流中的任务级模型
+使用 `continue_on_error` 时，即使前一步失败，后续步骤也可能运行。只有后续动作能处理剩余输入时才适用；继续执行不代表部分完成的流程成功。
 
-工作流中的每一步都会使用其**独立的**任务专用模型配置。无需在 DSL 本身中指定模型。解析顺序为：
+### 工作流中的任务模型
 
-1. 如果 `useMultiModelSettings` 存在，则按任务使用相应的提供者/模型
-2. 全局 `activeProvider`，否则
-
-这意味着 `add-links` 可以在 DeepSeek 上运行，而 `research` 则在 GPT-4o 上运行——所有操作都在同一个工作流点击中完成。
+Provider/model 选择归属各任务。启用任务专用模型时，空模型覆盖使用所选 provider 的模型。链条处理私密材料前，检查每个任务的 provider。
 
 ## 示例
 
-您刚刚将一篇机器学习论文的 PDF 导入到您的知识库中，现在希望进行完整的知识提取：
+配置空的 `trial-concepts` 目录，处理一篇可丢弃源笔记，核对概念文件和报告的 complete 目录。若需了解各步位置，先分别执行每个动作，审核后再扩大范围。
 
-1. 打开导入的笔记
-2. 点击**“完整流水线”**侧边栏按钮
-3. Notemd 执行：
-   - **步骤 1**：添加维基链接 -- `[[attention mechanism]]`、`[[transformer]]` 等。
-   - **步骤 2**：提取概念——在您的概念文件夹中创建概念笔记
-   - **步骤3**：调研——汇总关键术语的网页资料
-   - **第4步**：图表生成——创建该论文结构的Mermaid思维导图
-4. 大约30秒后，您的笔记将包含链接、概念说明，研究内容也会被添加进去，同时还会保存一个图表文件。
+## 建议
 
-只需一次点击即可完成所有操作。
+- 保持流程足够短，便于定位失败与输出归属。
+- 避免在无人值守链条加入清理／删除动作，它们仍保留交互确认要求。
+- 取消或出现恢复冲突后，重试前检查日志与文件。
+- 用流程实际 provider/model 和目录测试；连接成功不证明长批次符合配额。
 
-## 技巧
+## 后续阅读
 
-- **从预定义的工作流开始**——它们涵盖了最常见的模式。只有在需要不同的执行顺序时才进行自定义。
-- **启用 `workflowContinueOnError`** -- 图表生成过程中的某个步骤失败不应导致整个流程中止。
-- 使用**文件夹工作流**进行批量处理——右键点击文件夹，选择相应的工作流，即可处理所有笔记。
-- **清晰地为工作流命名**——侧边栏空间有限。请使用简短且具有明确动作指向的名称，例如“快速提取”或“翻译+链接”。
-
----
-
-## 后续步骤
-
-- [研究](./research) -- 在将其加入工作流之前，先了解研究步骤的功能
-- [Wiki-Links](./wiki-links) -- 大多数工作流中使用的核心链接功能
-- [概念说明](./concept-notes) -- 将概念提取作为工作流中的一个步骤
-- [批量处理](/docs/advanced/batch-processing) -- 文件夹工作流的并发处理与进度报告功能
+- [概念笔记](./concept-notes)：前置条件与模板。
+- [批量处理](../advanced/batch-processing)：选取、并发和部分完成。
+- [研究](./research)：联网与来源核验。

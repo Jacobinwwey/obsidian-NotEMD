@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Pluginul Notemd pentru Obsidian
 
+> Notemd este un plugin Obsidian cu licență MIT pentru Markdown cu legături, note despre concepte, rezumate, traduceri și diagrame. Fișierele rămân în seif; sarcinile cloud trimit conținut furnizorului ales, iar cercetarea web utilizează rețeaua.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Începe aici
+
+| Cititor | Intrare | Obiectiv |
+|---|---|---|
+| Începător | [Pornire rapidă](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/getting-started/quick-start) | Configurează un furnizor și verifică o notă |
+| Utilizator | [Fluxuri de lucru](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/features/workflows) | Controlează folderele, rezultatele și recuperarea |
+| Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
+| Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
+
+**Versiune:** 1.9.8
+
+- **Anulare și recuperare:** anularea rămâne activă în timpul programării și reîncercărilor și blochează scrierile târzii de cercetare și traducere. Rezultatele finalizate sunt păstrate, iar conflictele de recuperare sunt raportate.
+- **Istoric și export:** se păstrează textul căutării și focalizarea tastaturii. S-au corectat separatorii celulelor îmbinate PowerPoint și conexiunile/etichetele CircuitikZ. Căutarea locală în lot folosește un instantaneu coerent.
+- **Publicare și documentație:** se verifică proveniența surselor curate și a fișierelor descărcate, cu intrări pentru fiecare public și traduceri redactate direct.
+
+Cele 36 de presetări de furnizori și 33 de tipuri executabile de diagrame existau deja în 1.9.7. [Ghid de actualizare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/releases/1.9.8) · [Verifică versiunea publicată](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+Săgețile Drawnix între ramuri rămân statice după rearanjare. Mermaid/SVG în PPTX poate folosi imagini de rezervă. Anularea nu revine asupra modificărilor salvate și nu garantează oprirea generării sau facturării la distanță. Dispozitivele mobile fizice și Obsidian 0.15.0 rămân neverificate.
 
 Citiți documentația și în alte limbi: [Hub lingvistic](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- Îmbunătățirea multilingvă a cunoștințelor cu AI
-==================================================
-```
-
-O modalitate simplă de a-ți crea propria bază de cunoștințe.
-
-Notemd îți îmbunătățește fluxul de lucru din Obsidian prin integrarea cu diverse modele lingvistice mari (LLM) pentru a procesa note multilingve, a genera automat wiki-link-uri pentru conceptele cheie, a crea note de concept corespunzătoare, a face cercetare web și a te ajuta să construiești grafuri de cunoștințe puternice și multe altele.
-
 Dacă iubești să folosești Notemd, te rugăm să iei în considerare [⭐ să dai o stea pe GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) sau [☕️ să-mi cumperi o cafea](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Cuprins
 
@@ -50,13 +50,26 @@ Dacă iubești să folosești Notemd, te rugăm să iei în considerare [⭐ să
 
 ## Pornire rapidă
 
-1.  **Instalează și activează**: ia pluginul din Obsidian Marketplace.
-2.  **Configurează LLM-ul**: mergi la `Settings -> Notemd`, selectează furnizorul LLM dorit (de exemplu OpenAI sau unul local precum Ollama) și introdu cheia API/URL-ul.
-3.  **Deschide bara laterală**: fă clic pe iconița baghetă Notemd din ribbonul din stânga pentru a deschide sidebarul.
-4.  **Procesează o notă**: deschide orice notă și fă clic pe **"Process File (Add Links)"** în sidebar pentru a adăuga automat `[[wiki-links]]` la conceptele cheie.
-5.  **Rulează un flux rapid**: folosește butonul implicit **"One-Click Extract"** pentru a lega procesarea, generarea în lot și curățarea Mermaid dintr-un singur punct de intrare.
+1. Instalează și activează **Notemd** prin **Setări → Pluginuri comunitare → Răsfoire**.
+2. Configurează adresa exactă a serviciului, datele de autentificare și modelul. Testează conexiunea, apoi o generare reală; lista modelelor nu dovedește accesul la conversație.
+3. Creează folderul gol `trial-concepts` și selectează-l pentru note despre concepte; calea inițială este goală. Pregătește `Notemd trial.md` cu un paragraf de test pe care îl poți trimite furnizorului.
+4. Rulează **Process File (Add Links)**. Verifică `Notemd trial_processed.md` lângă sursa păstrată, legăturile și notele despre concepte.
+5. Redeschide sursa de test și rulează **One-Click Extract** cu acel folder: adăugare de legături, generare din titlurile notelor eligibile și corectare Mermaid în folderul complete. Pot fi incluse și note eligibile deja existente.
 
-Atât. Explorează setările pentru a debloca mai multe funcții, precum cercetare web, traducere și generare de conținut.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+Cercetarea web și generarea diagramelor sunt acțiuni separate. După anulare, așteaptă încheierea sarcinilor active și verifică rezultatele finalizate și fișierele de recuperare înainte de reluare.
+
+<details>
+<summary>Exemple ale interfeței</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Suport lingvistic
 
@@ -89,9 +102,9 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
 - **Întărirea lanțului stabil pentru requesturi lungi OpenAI-compatible**: în modul stabil, apelurile OpenAI-compatible folosesc acum o ordine explicită în 3 etape pentru fiecare încercare: transport principal direct cu streaming, apoi transport direct fără streaming, apoi fallback prin `requestUrl` (care poate totuși urca la parsare cu streaming când este necesar). Asta reduce fals-negativele în situațiile în care furnizorii termină răspunsuri buffered, dar pipe-urile de streaming sunt instabile.
 - **Fallback de streaming conștient de protocol pentru API-urile LLM**: încercările fallback de lungă durată trec acum la parsare cu streaming conștientă de protocol pentru toate căile LLM integrate, nu doar pentru endpointurile OpenAI-compatible. Notemd gestionează acum SSE în stil OpenAI/Azure, streaming Anthropic Messages, răspunsuri SSE Google Gemini și fluxuri Ollama NDJSON atât pe `http/https` desktop, cât și pe `fetch` non-desktop, iar punctele de intrare rămase în stil OpenAI direct reutilizează aceeași cale fallback comună.
 - **Preseturi de furnizori pregătite pentru China**: preseturile integrate acoperă acum `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` și `SiliconFlow` pe lângă furnizorii existenți globali și locali.
-- **Procesare în lot fiabilă**: logica îmbunătățită de procesare concurentă, cu **apeluri API eșalonate**, ajută la prevenirea erorilor de rate-limit și asigură performanță stabilă în joburile mari în lot. Noua implementare se asigură că sarcinile pornesc la intervale diferite, nu toate deodată.
-- **Raportare exactă a progresului**: a fost corectat un bug prin care bara de progres putea rămâne blocată, astfel încât UI-ul reflectă acum întotdeauna starea reală a operațiunii.
-- **Procesare paralelă în lot mai robustă**: a fost rezolvată o problemă prin care operațiunile paralele în lot se opreau prematur, asigurând procesarea fiabilă și eficientă a tuturor fișierelor.
+- **Procesare în lot fiabilă**: Apelurile API eșalonate reduc vârfurile de cereri. Cotele și limitele de frecvență ale furnizorului rămân valabile.
+- **Raportare exactă a progresului**: Progresul distinge fișierele finalizate, eșuate și anulate. Încheierea rulării nu înseamnă succes pentru fiecare fișier.
+- **Procesare paralelă în lot mai robustă**: Sarcinile active se încheie înaintea rezumatului. Anularea oprește lucrul ulterior, dar nu revine asupra modificărilor salvate; folderul nu formează o singură tranzacție.
 - **Acuratețea barei de progres**: a fost corectat un bug prin care bara de progres pentru comanda "Create Wiki-Link & Generate Note" rămânea blocată la 95%, astfel încât acum afișează corect 100% la finalizare.
 - **Depanare API extinsă**: modul "API Error Debugging Mode" capturează acum corpuri complete de răspuns de la furnizorii LLM și serviciile de căutare (Tavily/DuckDuckGo) și înregistrează și o cronologie a transportului pentru fiecare încercare, cu URL-uri de request sanitizate, durată scursă, headere de răspuns, corpuri de răspuns parțiale, conținut de flux parțial parsat și urme de stivă, pentru depanare mai bună în fallback-urile OpenAI-compatible, Anthropic, Google, Azure OpenAI și Ollama.
 - **Panou Developer Mode**: setările includ acum un panou dedicat exclusiv dezvoltatorilor pentru diagnosticare, care rămâne ascuns până când "Developer mode" este activat. Acesta permite selectarea căilor de apel pentru diagnostic și rularea repetată a sondelor de stabilitate pentru modul selectat.
@@ -105,7 +118,7 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
 - **Crearea notelor de concept (opțională și personalizabilă)**: creează automat note noi pentru conceptele descoperite într-un folder specificat din vault.
 - **Căi de ieșire personalizabile**: configurează căi relative separate în vault pentru salvarea fișierelor procesate și a notelor de concept nou create.
 - **Nume de fișiere de ieșire personalizabile (Add Links)**: opțional poți **suprascrie fișierul original** sau poți folosi un sufix/șir de înlocuire personalizat în locul sufixului implicit `_processed.md` la procesarea fișierelor pentru linkuri.
-- **Menținerea integrității linkurilor**: gestionare de bază pentru actualizarea linkurilor când notele sunt redenumite sau șterse în vault.
+- **Menținerea integrității linkurilor**: Actualizarea legăturilor la redenumire depinde de Obsidian și de setările sale. Ștergerea poate lăsa legături nerezolvate; verificați notele cu același nume.
 - **Extragere pură de concepte**: extrage concepte și creează note de concept corespunzătoare fără a modifica documentul original. Este ideal pentru popularea unei baze de cunoștințe din documente existente fără a le altera. Funcția are opțiuni configurabile pentru crearea de note de concept minimale și adăugarea de backlink-uri.
 
 ### Traducere
@@ -115,10 +128,10 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
     - **Suport pentru fișiere mari**: împarte automat fișierele mari în bucăți mai mici pe baza setării `Chunk word count` înainte de a le trimite către LLM. Fragmentele traduse sunt apoi reunite fără întreruperi într-un singur document.
     - Suportă traducerea între mai multe limbi.
     - Limba țintă poate fi personalizată din setări sau din UI.
-    - Deschide automat textul tradus în partea dreaptă a textului original pentru citire ușoară.
+    - Deschide traducerea salvată în spațiul de lucru Obsidian, conform aranjamentului disponibil.
 - **Traducere în lot**:
-    - Tradu toate fișierele dintr-un folder selectat.
-    - Suportă procesare paralelă atunci când "Enable Batch Parallelism" este activat.
+    - Implicit traduce fișierele eligibile aflate direct în folderul ales, fără subfoldere. Selecția avansată poate schimba domeniul; fișierele de destinație existente pot fi suprascrise.
+    - Traducerea folosește direct `batchConcurrency` (implicit 1), independent de `enableBatchParallelism`.
     - Folosește prompturi personalizate pentru traducere dacă sunt configurate.
 	- Adaugă opțiunea "Batch translate this folder" în meniul contextual din exploratorul de fișiere.
 - **Dezactivează traducerea automată**: când această opțiune este activată, sarcinile non-Translate nu mai forțează ieșirile într-o anumită limbă, păstrând contextul limbii originale. Sarcina explicită "Translate" va continua să traducă potrivit configurației.
@@ -134,7 +147,7 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
 - **Generare de conținut din titlu**:
     - Folosește titlul notei pentru a genera conținut inițial prin LLM, înlocuind conținutul existent.
     - **Cercetare opțională**: configurează dacă se efectuează cercetare web (folosind furnizorul selectat) pentru a oferi context generării.
-- **Generare de conținut în lot din titluri**: generează conținut pentru toate notele dintr-un folder selectat pe baza titlurilor lor (respectă setarea de cercetare opțională). Fișierele procesate cu succes sunt mutate într-un **subfolder configurabil "complete"** (de exemplu `[foldername]_complete` sau un nume personalizat) pentru a evita reprocesarea.
+- **Generare de conținut în lot din titluri**: Generează și înlocuiește conținutul fișierelor `.md` eligibile conform setării de cercetare. Exclude `_processed.md` și întregul arbore al folderului complete desemnat. După generare încearcă mutarea în folderul complete. O destinație ocupată blochează mutarea, nu generarea deja salvată; fișierele generate și mutate sunt numărate separat.
 - **Cuplare cu Mermaid Auto-Fix**: când repararea automată Mermaid este activată, fluxurile de lucru legate de Mermaid repară automat fișierele generate sau folderele de ieșire după procesare. Asta acoperă fluxurile Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid și Translate.
 
 ### Funcții utilitare
@@ -286,8 +299,8 @@ Accesează setările pluginului prin:
 
 #### Ieșirea notelor de concept
 -   **Customize Concept Note Path**:
-    *   **Dezactivat (implicit)**: crearea automată a notelor pentru `[[linked concepts]]` este dezactivată.
-    *   **Activat**: îți permite să specifici un folder unde vor fi create note noi de concept.
+    *   **Dezactivat**: Nu creează automat note pentru conceptele legate.
+    *   **Activat implicit**: Calea este inițial goală. Înainte de crearea notelor de concept, introduceți o cale validă relativă la seif.
 -   **Concept Note Folder Path**: (vizibil doar când personalizarea de mai sus este activată) introdu o *cale relativă* în interiorul vaultului tău (de exemplu `Concepts` sau `Generated/Topics`) unde vor fi salvate noile note de concept. Folderele vor fi create dacă nu există. **Trebuie completat dacă personalizarea este activată.** **Nu folosi căi absolute sau caractere invalide.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -334,8 +347,8 @@ Accesează setările pluginului prin:
 
 #### Remediere Mermaid în lot
 -   **Enable Mermaid Error Detection**:
-    *   **Off (Default)**: detectarea erorilor este omisă după procesare.
-    *   **On**: scanează fișierele procesate pentru erori Mermaid rămase și generează un raport `mermaid_error_{foldername}.md`.
+    *   **Dezactivat**: Omite detectarea erorilor după procesare.
+    *   **Activat implicit**: Caută erorile Mermaid rămase și creează `mermaid_error_{foldername}.md`.
 -   **Move files with Mermaid errors to specified folder**:
     *   **Off**: fișierele cu erori rămân pe loc.
     *   **On**: mută orice fișier care încă mai conține erori de sintaxă Mermaid după tentativa de reparare într-un folder dedicat pentru revizuire manuală.
@@ -351,7 +364,7 @@ Accesează setările pluginului prin:
 -   **API Call Interval (ms)**: întârzierea minimă în milisecunde *înainte și după* fiecare apel individual LLM API. Critică pentru API-uri cu rată mică sau pentru a preveni erorile 429. Setează la 0 pentru fără întârziere artificială. (Implicit: 500ms)
 -   **Chunk Word Count**: numărul maxim de cuvinte per bucată trimisă către LLM. Influențează numărul de apeluri API pentru fișierele mari. (Implicit: 3000)
 -   **Enable Duplicate Detection**: comută verificarea de bază a cuvintelor duplicate în conținutul procesat (rezultatul apare în consolă). (Implicit: Activat)
--   **Max Tokens**: numărul maxim de tokeni pe care LLM-ul ar trebui să-i genereze per fragment de răspuns. Influențează costul și detaliul. (Implicit: 4096)
+-   **Max Tokens**: numărul maxim de tokeni pe care LLM-ul ar trebui să-i genereze per fragment de răspuns. Influențează costul și detaliul. (Implicit: 8192) O limită de ieșire specifică furnizorului poate înlocui această valoare; există și valori implicite în funcție de model.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Traducere
@@ -379,7 +392,7 @@ Accesează setările pluginului prin:
     *   **Change Prompt Word**: îți permite să schimbi cuvântul de prompt pentru o sarcină specifică.
     *   **Custom Prompt Word**: introdu cuvântul de prompt personalizat pentru sarcină.
 -   **Use Custom Output Folder for 'Generate from Title'**:
-    *   **Dezactivat (implicit)**: fișierele generate cu succes sunt mutate într-un subfolder numit `[OriginalFolderName]_complete` relativ la părintele folderului original (sau `Vault_complete` dacă folderul original era rădăcina).
+    *   **Dezactivat (implicit)**: Destinația este folderul vecin `[foldername]_complete`, sau `Vault_complete` pentru rădăcina seifului. Opțiunea activată permite un nume personalizat.
     *   **Activat**: îți permite să specifici un nume personalizat pentru subfolderul în care sunt mutate fișierele finalizate.
 -   **Custom Output Folder Name**: (vizibil doar când setarea de mai sus este activată) introdu numele dorit pentru subfolder (de exemplu `Generated Content`, `_complete`). Caracterele invalide nu sunt permise. Implicit este `_complete` dacă este lăsat gol. Acest folder este creat relativ la directorul părinte al folderului original.
 
@@ -483,11 +496,11 @@ Aceasta este funcționalitatea de bază, axată pe identificarea conceptelor și
     *   Rulează comanda `Notemd: Translate Note/Selection` (din paleta de comenzi sau prin butonul din sidebar).
     *   Va apărea o fereastră modală care îți permite să confirmi sau să schimbi **Target Language** (valoarea implicită fiind cea specificată în Configuration).
     *   Pluginul folosește **LLM Provider** configurat (pe baza setărilor Multi-Model) pentru a efectua traducerea.
-    *   Conținutul tradus este salvat în **Translation Save Path** configurată, cu sufixul corespunzător, și este deschis într-un **panou nou în dreapta** conținutului original pentru comparație ușoară.
+    *   Salvează traducerea folosind calea și sufixul configurate și deschide fișierul salvat în spațiul de lucru Obsidian.
     *   Poți anula această sarcină din butonul din sidebar sau din butonul de anulare al ferestrei modale.
 3.  **Traducere în lot**:
     *   Rulează comanda `Notemd: Batch Translate Folder` din paleta de comenzi și selectează un folder sau fă clic dreapta pe un folder în exploratorul de fișiere și alege "Batch translate this folder".
-    *   Pluginul va traduce toate fișierele Markdown din folderul selectat.
+    *   Implicit traduce fișierele eligibile aflate direct în folderul ales, fără subfoldere. Selecția avansată poate schimba domeniul; fișierele de destinație existente pot fi suprascrise.
     *   Fișierele traduse sunt salvate în calea de traducere configurată, dar nu sunt deschise automat.
     *   Acest proces poate fi anulat din fereastra modală de progres.
 
@@ -514,7 +527,7 @@ Aceasta este funcționalitatea de bază, axată pe identificarea conceptelor și
     *   Rulează comanda `Notemd: Batch Generate Content from Titles` (din paleta de comenzi sau prin butonul din sidebar).
     *   Selectează folderul care conține notele pe care vrei să le procesezi.
     *   Pluginul va itera prin fiecare fișier `.md` din folder (excluzând fișierele `_processed.md` și fișierele din folderul desemnat "complete"), va genera conținut pe baza titlului notei și va înlocui conținutul existent. Fișierele sunt procesate în fundal fără a fi deschise în editor.
-    *   Fișierele procesate cu succes sunt mutate în folderul configurat "complete".
+    *   După generare încearcă mutarea în folderul complete. O destinație ocupată blochează mutarea, nu generarea deja salvată; fișierele generate și mutate sunt numărate separat.
     *   Această comandă respectă setarea **"Enable Research in 'Generate from Title'"** pentru fiecare notă procesată.
     *   Poți anula această sarcină din butonul din sidebar sau din butonul de anulare al ferestrei modale.
     *   Progresul și rezultatele (numărul de fișiere modificate, erori) sunt afișate în logul din sidebar/modal.
@@ -566,6 +579,8 @@ Aceasta este funcționalitatea de bază, axată pe identificarea conceptelor și
     *   Configurează opțional pluginul astfel încât să mute aceste fișiere problematice într-un folder separat pentru revizuire.
 
 ## Furnizori LLM acceptați
+
+Tabelul prezintă exemple selectate. Consultați [ghidul celor 36 de furnizori](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/providers/overview) pentru presetări și cerințe.
 
 | Furnizor          | Tip        | Necesită cheie API     | Observații                                                            |
 |-------------------|------------|------------------------|-----------------------------------------------------------------------|
@@ -635,7 +650,7 @@ Notemd rulează local în interiorul Obsidian, dar unele funcții trimit request
 ### Probleme comune
 -   **Pluginul nu se încarcă**: asigură-te că `manifest.json`, `main.js`, `styles.css` sunt în folderul corect (`<Vault>/.obsidian/plugins/notemd/`) și repornește Obsidian. Verifică Developer Console (`Ctrl+Shift+I` sau `Cmd+Option+I`) pentru erori la pornire.
 -   **Eșecuri de procesare / erori API**:
-    1.  **Verifică formatul fișierului**: asigură-te că fișierul pe care încerci să îl procesezi sau să îl verifici are extensia `.md` sau `.txt`. Notemd suportă în prezent doar aceste formate text.
+    1.  **Verificați formatul**: Formatele implicite depind de sarcină (`.md` sau `.md`/`.txt`). Modul dezvoltator cu intrări extinse permite alte texte și PDF pentru unele sarcini care păstrează sursa, precum traducerea și extragerea conceptelor. Adăugarea legăturilor rămâne limitată la `.md`/`.txt`.
     2.  Folosește comanda/butonul "Test LLM Connection" pentru a verifica setările furnizorului activ.
     3.  Verifică din nou API Key, Base URL, Model Name și API Version (pentru Azure). Asigură-te că cheia API este corectă și are suficiente credite/permisii.
     4.  Asigură-te că serverul tău local LLM (LMStudio, Ollama) rulează și că Base URL-ul este corect (de exemplu `http://localhost:1234/v1` pentru LMStudio).
@@ -696,7 +711,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.7 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.8 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->

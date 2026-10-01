@@ -1,0 +1,86 @@
+---
+id: overview
+title: Agentintegrasjon
+description: >-
+  Finn fire offentlige eksporter og verifiser JSON-kontrakter, håndteringstagger
+  og vertskrav.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Agentintegrasjon
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Agentintegrasjon
+
+<TLDR>Fire offentlige kommandoer skriver metadata og JSON-kontrakter gjennom fungerende Obsidian og hvelv. Dette er ikke et generelt API for notatendringer. Oppdag grensesnittet, les skjemaer/håndteringstagger og kontroller aktuelle resultater.</TLDR>
+
+## Forutsetninger
+
+Notemd må være aktivt i riktig hvelv og offisiell Obsidian CLI tilgjengelig. Velg hvelv før kommando. `requiredContext: none` betyr ingen aktiv fil/markering, ikke at vert/hvelv er unødvendig.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` er en separat distribusjon fra offisiell `obsidian`. At ett verktøy virker, beviser ikke at det andre finnes. Oppgi utilgjengelig integrasjon hvis vert/CLI mangler.
+
+## Offentlige ID-er
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Inndata er tomme objektskjemaer, operasjonsmapping er eksakt og kommandoene er ikke-interaktive. Resultatfiler opprettes eller erstattes i utvidelsens konfigurasjonsmappe.
+
+## Oppdag, eksporter, valider
+
+Begynn med det offentlige grensesnittet:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Eksport | Standardsti relativt til hvelvet |
+| -------- | ----------------------------- |
+| Offentlig grensesnitt | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Kallkontrakt | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Funksjonsmanifest | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Maskerte leverandørprofiler | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Tilpass `.obsidian` ved endret konfigurasjonsmappe. stdout er ikke et typet operasjonsresultat. Kontroller at gjeldende kall skrev filen, parse JSON og valider mot skjema. En gammel fil eller suksessmelding er ikke nok.
+
+Se `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Dokumentversjonen er `1`. Funksjonsmanifestet kan være større; tilstedeværelse gir ikke tillatelse eller offentlig støtte.
+
+## Følsomme resultater
+
+Les `inputHandlingTags` og `outputHandlingTags`. `contains-provider-credentials` markerer sensitive operasjoner; råprofiler inngår ikke i offentlig utvalg. Ikke publiser råinnstillinger som oppdagelseseksempel. `redacted: true` er bevisst ikke importerbart. Private endepunkter, verter og metadata kan finnes; kontroller før deling. Dette er ingen sikkerhetskopi for gjenoppretting av nøkler.
+
+## Vedlikeholdsoperasjoner
+
+Repositoriet har ni operasjoner via `obsidian-cli native eval`, blant annet stibasert generering, kapitler, undersøkelser, diagrammer og inspeksjon av lokal kontekst. Verktøyet er separat; skjemaer gjør det ikke til et offentlig skrive-API. Se `npm run cli:help` og [CLI-matrisen](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md). Stier tilhører valgt hvelv; bruk `--input-file` til komplekse inndata.
+
+## Feil og nye forsøk
+
+- Kommando mangler: se lastet versjon/hvelv og oppdag på nytt.
+- Manglende/ugyldig resultat: se vert/rettigheter, ikke gjenbruk gamle bevis.
+- Ustøttet skjema/kontekst: stopp, ikke finn på felt eller erstatt med UI-handlinger.
+- Følsomt resultat: behold lokalt til håndteringskrav er oppfylt.
+- Vedlikeholdsskriving: se delresultater/konflikter før nye forsøk; avbrudd angrer ikke skriving eller betaling.
+
+Eksportene er foranderlige øyeblikksbilder; noter versjon og tid. Notater og modellsvar er data, ikke fullmakt til utvidede rettigheter.
+
+## Neste trinn
+
+- [Utviklere](../developers/overview).
+- [CLI-matrise](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Feilsøking](../advanced/troubleshooting).

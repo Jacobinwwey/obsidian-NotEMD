@@ -1,16 +1,15 @@
 ---
 id: workflows
 title: Flujos de trabajo
-description: Conecte varias tareas con botones de un clic
+description: >-
+  Encadena acciones de Notemd con IDs válidos, carpetas explícitas y tratamiento
+  conocido de errores.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Flujos de trabajo
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,125 +17,98 @@ import TLDR from '@site/src/components/TLDR';
 # Flujos de trabajo
 
 <TLDR>
-**Notemd Los flujos de trabajo combinan múltiples tareas en una sola acción con un clic.** Defina secuencias como `add-links > extract-concepts > research > diagram` utilizando un DSL sencillo. Los flujos de trabajo aparecen como botones en la barra lateral que ejecutan toda la cadena en la nota o carpeta actual. Viene con flujos de trabajo predefinidos; cree otros personalizados en la configuración. Cada paso utiliza su propia configuración de modelo por tarea.
-
-Esto forma parte de la [Obsidian Guía de Gestión del Conocimiento de IA](/docs/pillar-ai-knowledge).
+Un flujo ejecuta acciones existentes en orden. Puede requerir editor activo o selección de carpeta. Cada acción conserva entradas, salidas y efectos: no es una tubería de texto arbitraria. Empieza con nota desechable y carpeta dedicada.
 </TLDR>
 
-## Resumen general
+## Visión general
 
-Un flujo de trabajo elimina la fricción que implica ejecutar tareas una por una. En lugar de hacer clic derecho cuatro veces para agregar enlaces, extraer conceptos, investigar términos desconocidos y generar un diagrama, basta con presionar un botón de la barra lateral y toda la secuencia se ejecuta. Notemd se encarga de la secuenciación, la propagación de errores y la generación de informes de progreso.
+Definición predeterminada de **One-Click Extract**:
 
-Los flujos de trabajo se definen en un DSL ligero (lenguaje específico del dominio). Se encuentran en la configuración, aparecen como botones clickeables en la barra lateral de Obsidian, y pueden aplicarse ya sea a la nota actual o a toda una carpeta.
-
-## Cómo funciona
-
-### Tubería de ejecución de flujos de trabajo
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Parse** -- La cadena del DSL se divide en `>` (o `>`) para obtener una lista ordenada de identificadores de tarea.
-2. **Resolve** -- Cada identificador se asocia a un comando interno (add-links, extract-concepts, research, translate, diagram, etc.).
-3. **Execute** -- Los pasos se ejecutan de forma secuencial. Cada paso utiliza su proveedor y modelo configurados por tarea.
-4. **Manejo de errores** -- Si un paso falla, el flujo de trabajo se interrumpe o continúa al siguiente paso, según su política de errores.
-5. **Listo** -- Una notificación tipo brindis informa sobre el éxito o enumera los pasos que fallaron.
+1. Añadir enlaces a la nota activa y conceptos si hay carpeta configurada.
+2. Generar contenido en notas aptas nuevas y existentes del directorio conceptual o elegido.
+3. Reparar Mermaid en el directorio complete resultante.
 
-### Formato DSL
+La cadena no investiga por defecto. La generación puede investigar si se activa su opción separada. Véase [lotes](../advanced/batch-processing).
 
-Los flujos de trabajo se definen como una secuencia de identificadores de tareas separados por `>`:
+## Funcionamiento
 
+### Ejecución
+
+Las etapas son secuenciales y la barra informa estado y fallos. Cancelar impide etapas posteriores y se propaga a peticiones compatibles. Las escrituras terminadas permanecen; no hay reversión global.
+
+Inicialmente se prefiere la carpeta conceptual configurada. La generación por lotes registra fuente y complete; la reparación Mermaid siguiente usa complete. Otras acciones mantienen requisitos de archivo, selección o diálogo.
+
+### DSL
+
+Una línea por botón: `::` separa nombre y acciones, `>` sus IDs. Se ignoran líneas vacías o iniciadas por `#`; IDs desconocidos se rechazan.
+
+```text
+Extraer y representar::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Identificadores de tareas disponibles:**
+Utiliza el constructor o edita DSL. Los IDs son estables y las etiquetas siguen el idioma de interfaz. Las variantes de carpeta tienen IDs propios, sin regla general de sustitución.
 
-| Identificador | Acción |
-|------------|--------|
-| `process-current-add-links` | Añadir enlaces wiki a la nota activa |
+| Identificador | Acción / requisito |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Añadir enlaces a la nota activa |
+| `process-folder-add-links` | Añadir enlaces en carpeta |
 | `extract-concepts-current` | Extraer conceptos de la nota activa |
-| `research-and-summarize` | Investiga el texto seleccionado o el título de la nota |
-| `process-current-translate` | Traducir la nota activa |
-| `summarize-to-mermaid` | Generar un diagrama a partir de la nota activa |
-| `generate-from-title` | Generar contenido a partir del título de la nota |
-| `extract-original-text` | Extraer texto original (para OCR / contenido escaneado) |
+| `extract-concepts-folder` | Extraer conceptos de carpeta |
+| `generate-from-title` | Generar contenido desde el título activo |
+| `batch-generate-from-titles` | Generar notas aptas de carpeta desde títulos |
+| `research-and-summarize` | Investigar selección o título en editor Markdown |
+| `summarize-as-mermaid` | Resumir entrada activa compatible en Mermaid |
+| `generate-diagram` | Generar artefacto de diagrama |
+| `preview-diagram` | Abrir fuente o artefacto de diagrama compatible |
+| `translate-current-file` | Traducir archivo activo compatible |
+| `batch-translate-folder` | Traducir carpeta |
+| `extract-original-text` | Extraer pasajes originales solicitados |
+| `batch-extract-original-text` | Extraer pasajes de archivos aptos |
+| `split-note-by-chapters` | Dividir nota activa por capítulos |
+| `batch-mermaid-fix` | Reparar bloques Mermaid de carpeta |
+| `fix-formula-current` | Normalizar delimitadores de fórmulas activos |
+| `batch-fix-formula` | Normalizar fórmulas en carpeta |
+| `check-duplicates-current` | Comprobar duplicados de nota activa |
+| `check-remove-duplicate-concepts` | Revisar y eliminar conceptos duplicados con interacción |
+| `test-llm-connection` | Probar proveedor |
+| `probe-slide-export-env` | Comprobar entorno local de diapositivas |
+| `export-slides` | Exportar archivo activo como diapositivas |
 
-**Variantes a nivel de carpeta** reemplazan `current` por `folder` en el nombre del identificador.
+### Botones propios
 
-### Flujos de trabajo predefinidos vs. personalizados
+One-Click Extract es el botón incluido. Los demás son definiciones tuyas. Nombra, elige y ordena acciones en ajustes, luego verifica la ayuda del botón. Corrige errores de sintaxis antes de ejecutar.
 
-Notemd viene con flujos de trabajo listos para patrones comunes:
+## Ajustes
 
-| Flujo de trabajo | Cadena | Caso de uso |
-|----------|-------|----------|
-| **Extracción con un clic** | add-links > extract-conceptos > investigación | Procesar un artículo de investigación en una sola pasada |
-| **Pipeline completo** | add-links > extract-conceptos > investigación > diagrama | Extracción completa de conocimiento con visualización |
-| **Traducir + Enlace** | Traducir > agregar-enlaces | Traduce luego los conceptos vinculados al idioma de destino |
+| Ajuste | Predeterminado | Efecto |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Detener al primer error de etapa comunicado |
+| `useMultiModelSettings` | `false` | Usar proveedor activo hasta habilitar rutas por tarea |
+| `enableResearchInGenerateContent` | `false` | Excluir investigación de títulos salvo activación |
 
-Los **flujos de trabajo personalizados** se crean en la configuración:
+`continue_on_error` permite continuar pese a fallos; úsalo solo cuando las entradas restantes basten. No convierte un resultado parcial en éxito total.
 
-1. Abre **Ajustes** --> **Notemd** --> **Flujos de trabajo**
-2. Haz clic en **"Agregar flujo de trabajo"**
-3. Ingresa la cadena DSL (p. ej., `process-current-add-links>extract-concepts-current`)
-4. Asignale un nombre de visualización (por ejemplo, "Enlace Rápido + Extraer").
-5. El nuevo botón aparece en la barra lateral de inmediato
+### Modelos por tarea
 
-## Configuración
-
-| Configuración | Predeterminado | Efecto |
-|---------|---------|--------|
-| `workflows` | Conjunto predefinido | Array de definiciones de flujo de trabajo (nombre + DSL) |
-| `workflowContinueOnError` | `true` | Continúe al siguiente paso si el paso actual falla |
-| `workflowShowProgress` | `true` | Muestra una notificación de progreso después de que se complete cada paso |
-
-### Modelos por tarea en flujos de trabajo
-
-Cada paso en un flujo de trabajo utiliza su propia configuración de modelo por tarea. No es necesario especificar modelos en el propio DSL. El orden de resolución es:
-
-1. Proveedor/modelo por tarea si `useMultiModelSettings` está activo
-2. Global `activeProvider` de lo contrario
-
-Esto significa que `add-links` puede ejecutarse en DeepSeek mientras que `research` se ejecuta en GPT-4o, todo dentro del mismo clic de flujo de trabajo.
+Cada acción mantiene su proveedor/modelo. Un modelo vacío usa el del proveedor elegido. Revisa todas las rutas para contenido privado.
 
 ## Ejemplo
 
-Acabas de importar un PDF de un artículo de aprendizaje automático a tu bóveda y deseas una extracción completa de conocimiento:
-
-1. Abre la nota importada
-2. Haga clic en el botón de la barra lateral **"Full Pipeline"**
-3. Notemd ejecuta:
-   - **Paso 1**: Agregar enlaces wiki -- `[[attention mechanism]]`, `[[transformer]]`, etc.
-   - **Paso 2**: Extraer conceptos: crea notas de concepto en tu carpeta de conceptos
-   - **Paso 3**: Investigación: resume fuentes web para términos clave
-   - **Paso 4**: Diagrama -- genera un mapa mental Mermaid de la estructura del artículo
-4. Después de ~30 segundos, su nota tendrá enlaces, existirán notas conceptuales, se añadirá la investigación y se guardará un archivo de diagrama
-
-Todo con un solo clic.
+Configura `trial-concepts` vacía y prueba una nota. Revisa conceptos y directorio complete. Si desconoces destinos, ejecuta cada acción antes de encadenarla. Amplía solo después de inspeccionar.
 
 ## Consejos
 
-- **Comience con flujos de trabajo predefinidos**; cubren los patrones más comunes. Personalícelos solo cuando necesite una secuencia diferente.
-- **Habilitar `workflowContinueOnError`** -- un paso fallido en el diagrama no debe interrumpir todo el pipeline.
-- **Utilice flujos de trabajo de carpetas** para el procesamiento en masa: haga clic con el botón derecho en una carpeta, elija un flujo de trabajo y todas las notas se procesarán.
-- **Asigne nombres claros a los flujos de trabajo**: el espacio en la barra lateral es limitado. Utilice nombres cortos y orientados a la acción como “Extraer rápido” o “Traducir + Enlazar”.
+- Mantener cadenas breves y salidas atribuibles.
+- Evitar limpieza/borrado desatendidos: siguen necesitando confirmación.
+- Tras cancelación o conflicto, leer informe y archivos.
+- Probar modelo y alcance exactos; una conexión correcta no garantiza cuotas para lotes largos.
 
----
+## Siguientes pasos
 
-## Próximos pasos
-
-- [Investigación](./research) -- Entienda qué hace el paso de investigación antes de agregarlo a los flujos de trabajo
-- [Wiki-Links](./wiki-links) -- Función de enlace principal utilizada en la mayoría de los flujos de trabajo
-- [Notas de concepto](./concept-notes) -- Extracción de conceptos como paso del flujo de trabajo
-- [Procesamiento por lotes](/docs/advanced/batch-processing) -- Concurrencia e informes de progreso para flujos de trabajo de carpetas
+- [Conceptos](./concept-notes).
+- [Lotes](../advanced/batch-processing).
+- [Investigación](./research).

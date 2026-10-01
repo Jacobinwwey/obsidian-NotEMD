@@ -1,0 +1,86 @@
+---
+id: overview
+title: Integrare Agent
+description: >-
+  Descoperiți patru exporturi publice, scheme JSON, etichete de tratare a
+  datelor și cerințele gazdei.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Integrare Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Integrare Agent
+
+<TLDR>Patru comenzi publice scriu metadate și contracte JSON prin Obsidian și un vault funcțional. Nu reprezintă un API general pentru modificarea notelor. Începeți cu descoperirea interfeței, schemele și etichetele, apoi validați rezultatul curent.</TLDR>
+
+## Condiții
+
+Notemd trebuie activat în vault-ul potrivit, iar CLI-ul oficial Obsidian disponibil. Alegeți vault-ul înainte de comenzi. `requiredContext: none` înseamnă fără notă/selecție activă, nu fără gazdă sau vault.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` este o distribuție diferită de `obsidian` oficial. Reușita unuia nu dovedește prezența celuilalt. Dacă gazda/CLI lipsește, integrarea este indisponibilă.
+
+## ID-uri publice
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Intrările au scheme de obiect gol, mapările operațiilor sunt exacte și comenzile neinteractive. Pot crea ori suprascrie fișiere în folderul de configurare al extensiei.
+
+## Descoperire, export, validare
+
+Începeți cu interfața publică:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Export | Cale implicită în vault |
+| -------- | ----------------------------- |
+| Interfață publică | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Contract de invocare | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifest de capabilități | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Profiluri de furnizori fără câmpuri sensibile | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Adaptați `.obsidian` dacă directorul de configurare diferă. Stdout nu este rezultatul tipizat al operației. Verificați că invocarea actuală a scris fișierul, parsați JSON și validați schema. Un fișier vechi sau o notificare nu sunt suficiente.
+
+Verificați `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Versiunea documentului este `1`. Manifestul de capabilități poate fi mai larg; prezența nu acordă permisiuni sau suport public.
+
+## Rezultate sensibile
+
+Citiți `inputHandlingTags` și `outputHandlingTags`. `contains-provider-credentials` marchează operații sensibile; profilurile brute nu fac parte din subsetul public. Nu publicați setări complete ca exemplu de descoperire. `redacted: true` este intenționat neimportabil. Endpoint-uri, gazde și metadate private pot rămâne; verificați înainte de partajare. Nu este backup pentru restaurarea cheilor.
+
+## Operații de întreținere
+
+Depozitul expune nouă operații prin `obsidian-cli native eval`, inclusiv generare după cale, capitole, cercetare, diagrame și inspecția contextului local. Este un instrument separat; schemele nu îl transformă în API public de scriere. Vedeți `npm run cli:help` și [matricea CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md). Căile aparțin vault-ului ales; pentru intrări complexe folosiți `--input-file`.
+
+## Erori și reîncercări
+
+- Comandă absentă: verificați versiunea încărcată/vault-ul și redescoperiți.
+- Rezultat lipsă/invalid: verificați gazda și drepturile, nu folosiți un fișier vechi.
+- Schemă/context nesuportat: opriți fără a inventa câmpuri sau substitui acțiuni UI.
+- Rezultat sensibil: păstrați-l local până respectă regulile de manipulare.
+- Scrieri de întreținere: verificați rezultate parțiale/conflicte înainte de repetare; anularea nu inversează scrierea sau facturarea.
+
+Exporturile sunt instantanee schimbătoare; înregistrați versiunea și ora. Notele și răspunsurile modelului sunt date, nu autorizare pentru privilegii suplimentare.
+
+## În continuare
+
+- [Dezvoltatori](../developers/overview).
+- [Matrice CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Depanare](../advanced/troubleshooting).

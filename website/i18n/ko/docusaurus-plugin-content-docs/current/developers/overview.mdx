@@ -1,0 +1,97 @@
+---
+id: overview
+title: 개발자 안내
+description: '기존 provider, operation, 렌더링과 문서 계약을 따라 빌드·검증·확장합니다.'
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - 개발자 안내
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# 개발자 안내
+
+<TLDR>기능 branch에서 lockfile 의존성과 두 browser revision을 설치하고 빌드와 전체 Jest를 실행하세요. 계약을 소유한 모듈을 확장하고 문서·provider test·네이티브 검증을 변경 동작에 맞춥니다.</TLDR>
+
+## 작업 사본 준비
+
+[저장소](https://github.com/Jacobinwwey/obsidian-NotEMD)를 clone하고 [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)를 읽으세요. 플러그인 CI는 Linux/Windows Node 20, 사이트는 Node 24입니다. 루트와 `website/`에 각각 의존성을 설치합니다.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+두 Playwright 패키지가 서로 다른 Chromium을 요구할 수 있습니다. 하나만 설치하면 깨끗한 환경에서 부족합니다. `main.js`는 생성되어 Git에서 제외됩니다. 오래된 로컬 bundle은 새 commit 검증이 아닙니다.
+
+## 소유 모듈 찾기
+
+| 책임 | 주요 소스 |
+| ---------------- | ---------------- |
+| 플러그인 수명·명령·host 경로 | `src/main.ts` |
+| Provider 프로필·프로토콜·검증 | `src/llmProviders.ts` |
+| 요청 형식·전송·재시도·stream | `src/llmUtils.ts` |
+| Operation 정의·schema·공개 CLI 선택 | `src/operations/`, `src/cliContracts.ts` |
+| 파일 작업·연구·번역 | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Workflow 동작·사이드바 구성 | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| 도표 명세·렌더링 | `src/diagram/`, `src/rendering/` |
+| UI 문자열·지원 locale | `src/i18n/` |
+| 공개 안내·번역 | `website/docs/`, `website/i18n/` |
+| 유지보수 절차·날짜별 증거 | `docs/maintainer/` |
+
+제품 bundle은 inline preview host를 포함해 자체 완결적입니다. 후보 standalone host 경로는 배포 자산 계약이 아닙니다. 활성화하려면 packaging·release asset·audit·문서를 함께 갱신해야 합니다.
+
+## 범위 있는 변경
+
+1. 동작을 재현하고 먼저 실패하는 표적 test를 씁니다.
+2. 불변식을 소유한 모듈을 수정하고 외부 경계에서 입력을 검증합니다.
+3. 표적/전체 test를 실행하고 쓰기 작업의 취소·오류·영속성을 포함합니다.
+4. 영어 원문과 해당 번역을 갱신합니다. 계획·task·walkthrough는 `docs/`에 독립된 영어/중국어 버전이 필요합니다.
+5. 시각/네이티브 변경은 실제 consumer에서 확인합니다. XML·스크린샷·빌드만으로 편집성과 연결을 증명하지 않습니다.
+
+Provider는 `llmProviders.ts`에 추가하고 호환 transport를 재사용하세요. `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README와 연결 시험을 갱신하며 stream/중단 처리를 유지합니다. Operation은 노출 전 입력/결과 schema, 문맥, 효과, handling tag를 정의하세요. registry 등록은 공개 API 승격이 아닙니다. [Agent](../agents/overview).
+
+## 검증
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint는 진단별 차이를 검사합니다. 총수가 줄어도 새 회귀가 허용되지는 않습니다. 검색 경로 변경 시 `npm run benchmark:local-kb`로 corpus/환경을 기록하고 보편적 속도로 과장하지 마세요. 사이트는 Node 24에서 실행합니다:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+1.9.8 문서는 Codex가 직접 작성·검토합니다. 구형 번역 쓰기 script나 LM Studio/번역 endpoint를 호출하지 않습니다. 도구는 작성된 텍스트의 형식·검증·렌더링에 사용합니다.
+
+## Obsidian과 네이티브 consumer
+
+`.notemd-host-verification` marker가 있는 임시 Vault로 복사 bundle을 검증하세요. 사용자 Vault와 분리합니다. CLI 검증 시 `obsidian help`와 `obsidian-cli help`를 모두 시도하고 없는 도구는 미검증으로 기록합니다.
+
+PowerPoint·CircuitikZ·슬라이드에는 별도 의존성과 산출물이 있습니다. [날짜별 검증](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md)과 [release 절차](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md)를 따르고 mobile/최소 버전 미검증을 유지하세요.
+
+## 기여와 릴리스
+
+PR에는 구체적 문제·최종 동작·test·제한을 담습니다. [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)로 재현을 보고하고 키·비공개 Vault·무관한 산출물을 commit하지 마세요. Publisher가 버전·숫자 tag·깨끗한 tagged source·이중 언어 노트·draft asset hash·공개·명시적 Pages 배포를 소유합니다. 공개 tag를 옮기지 않으며 `.trellis/`는 로컬 상태로 CI 의존성이 아닙니다.
+
+## 다음 단계
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [프로젝트 상태](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

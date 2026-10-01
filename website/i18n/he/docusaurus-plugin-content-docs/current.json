@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "הבא",
-    "description": "The label for version current"
+    "message": "תיעוד נוכחי",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "התחלה",
+    "message": "תחילת העבודה",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "תכונות בסיסיות",
+    "message": "יכולות עיקריות",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {

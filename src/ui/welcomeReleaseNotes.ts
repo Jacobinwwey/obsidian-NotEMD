@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.8',
+        highlights: [
+            'Cancellation reaches queued work, provider transports and retries; overlapping diagram saves preserve conflicting edits and report recovery outputs.',
+            'PowerPoint merged-table separators and CircuitikZ wiring are corrected, and batch title generation uses a consistent local-knowledge snapshot.',
+            'Updated guides explain actual defaults, output paths and supported developer/Agent entry points. Cancellation retains completed writes and cannot guarantee that provider billing stops.'
+        ]
+    },
+    {
         version: '1.9.7',
         highlights: [
             'Diagram workflows now keep Mermaid quadrant labels free of structural brackets copied from coordinate syntax; family-aware normalization preserves intentional punctuation.',
@@ -94,6 +102,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.8',
+        highlights: [
+            '取消信号贯穿排队任务、provider 传输与重试；重叠图表保存会保留冲突编辑，并报告恢复产物。',
+            '修正 PowerPoint 合并表格分隔线和 CircuitikZ 连线；标题生成批处理使用一致的本地知识快照。',
+            '指南已校正实际默认值、输出路径及开发者／Agent 入口。取消会保留已完成写入，且不能保证 provider 停止计费。'
+        ]
+    },
+    {
         version: '1.9.7',
         highlights: [
             '图表工作流现在不会让 Mermaid 象限图标签显示从坐标语法误复制的结构性括号；按 family 规范化，同时保留有意使用的标点。',
@@ -176,6 +192,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.8',
+        highlights: [
+            '取消訊號涵蓋排隊工作、provider 傳輸與重試；重疊圖表儲存會保留衝突編輯，並回報復原產物。',
+            '修正 PowerPoint 合併表格分隔線和 CircuitikZ 連線；標題生成批次作業使用一致的本地知識快照。',
+            '指南已校正實際預設值、輸出路徑及開發者／Agent 入口。取消會保留已完成的寫入，且不能保證 provider 停止計費。'
+        ]
+    },
     {
         version: '1.9.7',
         highlights: [

@@ -1,67 +1,56 @@
 ---
 id: anthropic
 title: Anthropic
-description: 配置 Anthropic Claude
+description: 通过 Notemd 的原生 Anthropic Messages 协议配置 Claude。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [anthropic, claude, provider, configuration]
-concepts: [Anthropic, Claude, API Configuration]
-citations:
-  - title: Anthropic API
-    url: https://docs.anthropic.com
-  - title: Claude
-    url: https://www.anthropic.com/claude
+keywords:
+  - Anthropic
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Anthropic 提供商
+# Anthropic Provider
 
 <TLDR>
-**Anthropic 使用的是原生的 Messages API 传输方式，而非兼容 OpenAI 的传输方式。** 当前的预设默认为 `claude-3-5-sonnet-20240620`、`https://api.anthropic.com` 和 `temperature: 0.5`。在调试时应将其视为独立的协议层。
-
-这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
+原生 Messages API 使用 Anthropic 预设。OpenAI-compatible 网关中的 Claude 应选择网关预设。执行任务前确认当前模型权限；历史默认值可能需要修改。
 </TLDR>
 
 ## 设置
 
-创建一个 Anthropic API 密钥，添加一个 `Anthropic` 提供商配置文件，除非通过专用的网关配置文件进行路由，否则将 Base URL 保持在原生端点上。在模型字段中选择您想要使用的 Claude 模型 ID；默认值可保持现有产品基线的稳定性。
+选择 **Anthropic**，填写 Anthropic API key，保留原生端点，除非你的部署明确提供同一协议。输入当前可用 Claude ID，运行 **测试连接**，再用可丢弃笔记验证目标任务。
 
-Anthropic 非常适合用于高质量摘要生成、研究综合以及概念提取。如果将其与价格较低的服务提供商结合使用，只需在那些能从它的高质量输出中受益的任务上启用它即可。
+## 端点与认证
 
-## 端点与身份验证
-
-| 字段 | 当前预设 |
-|-------|----------------|
-| 传输 | `anthropic` |
-| API 键 | 必需 |
+| 字段 | 预设值 |
+| ------- | -------------- |
+| 传输协议 | `anthropic` |
+| API key | 必填 |
 | 基础 URL | `https://api.anthropic.com` |
 | 默认模型 | `claude-3-5-sonnet-20240620` |
-| 温度 | `0.5` |
-| 连接测试 | 仅聊天模式 |
+| Temperature | `0.5` |
+| 连接测试 | `chat-only` |
 
-运行时会使用 `x-api-key` 和 `anthropic-version: 2023-06-01` 向 `/v1/messages` 发送请求。请勿在此预设下配置 OpenAI 风格的 `/v1/chat/completions` 端点，而应使用与 OpenAI 兼容的网关预设。
+运行时向 `/v1/messages` 发送请求，使用原生 API key 与 API version 请求头。不要将 OpenAI 聊天路径放进此预设。默认模型记录仓库设置，不表示上游仍提供该模型。
 
 ## 模型发现
 
-Anthropic 在提供程序注册表中使用了 `anthropic-models` 发现模式。如果您的密钥或账户无法列出模型，请在配置文件中保留一个已知的模型 ID，并通过连接测试进行验证。
+可用时使用 Anthropic 原生模型列表路由。列表受限时，手动输入可用模型并运行聊天连接测试。长内容和结构化任务需独立验证。
 
-该传输方式无法与支持 OpenAI 的提供商互换。通过 OpenRouter、LiteLLM 或其他网关路由的 Claude 模型应属于相应的网关配置文件，而非默认的 Anthropic 配置文件。
+## 故障排查
 
-## 故障排除
+- `401`／`403`：检查密钥、workspace／project 权限、计费和模型授权。
+- `404`：核对端点与当前模型可用性。
+- 网关模型 ID 失败：使用对应网关预设与其要求的 ID。
+- 长响应失败：增加重试前先检查输出限制与 provider 错误。
 
-- `401` 或 `403`：检查密钥的作用域、工作区访问权限、计费情况，以及该密钥是否属于预期的 Anthropic 工作区。
-- `404`：基础 URL 不正确，或者该账户无法使用所选的模型编号。
-- 网关型 Claude 模型 ID 失败：请将配置文件移至对应的网关提供商，因为原生 Anthropic 需要使用原生模型名称。
-- 过长的请求会在后期失败：请减小每个任务的模型输出大小，或使用已知输出token上限更高的模型。
+## 适用场景
 
-## 何时使用
+端点提供 Anthropic Messages 协议时使用原生预设。按自己的材料比较模型结果，不将 provider 选择视为通用质量排名；任务专用路由可仅在适合的任务中使用它。
 
-当合成质量、研究笔记或结构化文档的完整性比原始成本更为重要时，请使用 Anthropic。切勿将其作为通用的 OpenAI 兼容替代方案使用；独立的传输方式才是关键，混用不同协议会增加诊断难度。
+## 后续阅读
 
----
-
-## 后续步骤
-
-- [LLM 提供商](/docs/providers/overview) -- 完整配置、任务级模型以及重试逻辑
-- [故障排除](/docs/advanced/troubleshooting) -- 解决 401/403 错误及连接问题
+- [Provider 概览](./overview)：路由、重试和其他协议。
+- [故障排查](../advanced/troubleshooting)：区分连接与任务错误。

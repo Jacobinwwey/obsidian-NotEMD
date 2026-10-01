@@ -12,11 +12,31 @@
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Häufige Fragen",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "Einstieg",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "Neu bei Notemd",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "Tägliche Aufgaben",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "Entwickler",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agents",
+    "description": "Navbar label: Agents"
   }
 }

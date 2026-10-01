@@ -23,6 +23,10 @@ describe('translate contract', () => {
         jest.clearAllMocks();
     });
 
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     test('translateFile returns a structured result and leaves success notice to the host layer', async () => {
         const file = {
             path: 'Notes/Topic.md',
@@ -68,6 +72,42 @@ describe('translate contract', () => {
         expect(mockApp.vault.createFolder).toHaveBeenCalledWith('Translations');
         expect(mockApp.vault.create).toHaveBeenCalledWith('Translations/Topic_en.md', 'Translated content');
         expect(Notice).not.toHaveBeenCalled();
+    });
+
+    test.each([
+        { entry: Object.assign(new TFolder(), { path: 'Translations' }), label: 'a folder created by another task', expectedFolder: 'Translations', fallback: false },
+        { entry: Object.assign(new TFile(), { path: 'Translations' }), label: 'a conflicting file', expectedFolder: 'Notes', fallback: true },
+        { entry: null, label: 'a still missing folder', expectedFolder: 'Notes', fallback: true }
+    ])('folder creation failure with $label preserves the correct output destination', async ({ entry, expectedFolder, fallback }) => {
+        const file = Object.assign(new TFile(), {
+            path: 'Notes/Topic.md', name: 'Topic.md', basename: 'Topic', parent: { path: 'Notes' }
+        });
+        const settings = { ...mockSettings, useCustomTranslationSavePath: true, translationSavePath: 'Translations' };
+        let currentEntry: TFolder | TFile | null = null;
+        (mockApp.vault.read as jest.Mock).mockResolvedValue('Reference content');
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((lookupPath: string) =>
+            lookupPath === 'Translations' ? currentEntry : null
+        );
+        (mockApp.vault.createFolder as jest.Mock).mockImplementation(async () => {
+            // The path can change while Vault's asynchronous creation is pending.
+            currentEntry = entry;
+            throw new Error('Folder creation did not complete');
+        });
+        (mockApp.vault.create as jest.Mock).mockResolvedValue(undefined);
+        jest.spyOn(llmUtils, 'callLLM').mockResolvedValue('Translated content');
+        const logError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+        const result = await translateFile(mockApp, settings, file, 'en', reporter);
+
+        expect(result).toEqual(expect.objectContaining({
+            requestedOutputFolderPath: 'Translations',
+            outputFolderPath: expectedFolder,
+            outputFolderCreated: false,
+            usedFallbackOutputFolder: fallback,
+            outputPath: `${expectedFolder}/Topic_en.md`
+        }));
+        expect(mockApp.vault.create).toHaveBeenCalledWith(`${expectedFolder}/Topic_en.md`, 'Translated content');
+        expect(logError).toHaveBeenCalledTimes(fallback ? 1 : 0);
     });
 
     test('batchTranslateFolder returns structured batch results and leaves notices to the host layer', async () => {

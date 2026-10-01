@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "Arbetsflöden"
-description: "Koppla samman flera uppgifter med en-klick-knappar"
+title: Arbetsflöden
+description: >-
+  Kedja befintliga åtgärder med giltiga ID:n, tydlig mappkontext och avsiktlig
+  felhantering.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Arbetsflöden
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Arbetsflöden
 
-<TLDR>
-**Notemd Arbetsflöden kopplar samman flera uppgifter till en enda en-klick-handling.** Definiera sekvenser som `add-links > extract-concepts > research > diagram` med en enkel DSL. Arbetsflöden visas som knappar i sidofältet och kör hela kedjan i den aktuella anteckningen eller mappen. Produktet levereras med fördefinierade arbetsflöden; skapa egna i inställningarna. Varje steg använder sin egen modellkonfiguration per uppgift.
-
-Detta ingår i [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Ett arbetsflöde kör sidopanelsåtgärder i följd. En åtgärd kan kräva mappval eller aktiv redigerare. Det är ingen textpipeline: varje steg behåller egna indata, utdata och sidoeffekter. Börja med en testanteckning och separat mapp.</TLDR>
 
 ## Översikt
 
-Ett arbetsflöde eliminerar besväret med att köra uppgifter en efter en. Istället för att klicka höger fyra gånger för att lägga till länkar, extrahera koncept, undersöka okända termer och generera en diagram, trycker du på en knapp i sidofältet och hela kedjan exekveras. Notemd hanterar sekvenseringen, felöverföring och framstegsrapportering.
+Medföljande **One-Click Extract**:
 
-Arbetsflöden definieras med en lättviktig DSL (domänsspecifik språk). De finns i inställningarna, visas som klickbara knappar i Obsidian sidofältet och kan tillämpas antingen på den aktuella anteckningen eller en hel mapp.
-
-## Så här fungerar det
-
-### Arbetsflödesexekveringspipelinen
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Parse** -- DSL-strängen delas upp med `>` (eller `>`) till en ordnad lista av uppgiftsidentifikatorer.
-2. **Resolve** -- Varje identifikator kopplas till en intern kommando (add-links, extract-concepts, research, translate, diagram osv.).
-3. **Execute** -- Stegen körsekventiellt. Varje steg använder den konfigurerade leverantören och modellen per uppgift.
-4. **Error handling** -- Om ett steg misslyckas avbryts arbetsflödet eller fortsätts till nästa steg, beroende på din felpolicy.
-5. **Done** -- En toast-notifikation rapporterar framgång eller listar eventuella misslyckade steg.
+1. Lägg till länkar i aktiv anteckning och skapa begrepp om mapp är vald.
+2. Generera innehåll för lämpliga anteckningar i begrepps- eller vald mapp, inklusive befintliga filer.
+3. Reparera Mermaid i genereringens complete-mapp.
 
-### DSL-formatet
+Standardkedjan gör ingen webbforskning. Titelgenerering kan lägga till den via separat inställning. Se [batcher](../advanced/batch-processing).
 
-Arbetsflöden definieras som en `>`-skildd sekvens av uppgiftsidentifikatorer:
+## Så fungerar det
 
+### Körning
+
+Stegen körs sekventiellt med status och fel i sidopanelen. Avbrott stoppar kommande steg och når stödda anrop. Färdiga filer bevaras; kedjan är ingen transaktion. Begreppsmappen är första mappval. Batchgenerering sparar käll- och complete-kontext, och Mermaid använder complete. Övriga åtgärder behåller krav på fil, markering och interaktion.
+
+### DSL
+
+En namngiven knapp per rad. `::` skiljer namn från åtgärder och `>` skiljer ID:n. Tomma rader och rader som börjar med `#` ignoreras; okända ID:n avvisas.
+
+```text
+Extrahera och rita::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Tillgängliga uppgiftsidentifikatorer:**
+Använd byggaren eller redigera DSL. ID:n är stabila, etiketter följer UI-språket. Mappvarianter har egna ID:n; härled dem inte med godtycklig textersättning.
 
-| Identifier | Aktion |
-|------------|--------|
-| `process-current-add-links` | Lägg till wiki-länkar i den aktiva anteckningen |
-| `extract-concepts-current` | Extrahera koncept från den aktiva anteckningen |
-| `research-and-summarize` | Undersöka det valda texten eller anteckningsnamnet |
-| `process-current-translate` | Översätta den aktiva anteckningen |
-| `summarize-to-mermaid` | Generera en diagram från den aktiva anteckningen |
-| `generate-from-title` | Generera innehåll från anteckningsnamnet |
-| `extract-original-text` | Extrahera ursprunglig text (för OCR / skannat innehåll) |
+| ID | Åtgärd / krav |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Länkar i aktiv anteckning |
+| `process-folder-add-links` | Länkar i vald mapp |
+| `extract-concepts-current` | Begrepp ur aktiv anteckning |
+| `extract-concepts-folder` | Begrepp ur vald mapp |
+| `generate-from-title` | Innehåll från aktiv titel |
+| `batch-generate-from-titles` | Innehåll för lämpliga mappanteckningar |
+| `research-and-summarize` | Undersök markering/titel i öppen Markdown-redigerare |
+| `summarize-as-mermaid` | Sammanfatta stödd aktiv indata som Mermaid |
+| `generate-diagram` | Diagram från stödd indata |
+| `preview-diagram` | Förhandsvisa stödd källa eller diagram |
+| `translate-current-file` | Översätt aktiv stödd fil |
+| `batch-translate-folder` | Översätt vald mapp |
+| `extract-original-text` | Extrahera efterfrågade originalpassager |
+| `batch-extract-original-text` | Passager ur lämpliga mappfiler |
+| `split-note-by-chapters` | Dela aktiv anteckning i kapitel |
+| `batch-mermaid-fix` | Reparera Mermaid-kodblock i vald mapp |
+| `fix-formula-current` | Normalisera formelavgränsare i aktiv anteckning |
+| `batch-fix-formula` | Normalisera formelavgränsare i mapp |
+| `check-duplicates-current` | Kontrollera dubbletter i aktiv anteckning |
+| `check-remove-duplicate-concepts` | Granska och ta bort begreppsdubbletter interaktivt |
+| `test-llm-connection` | Testa inställd leverantör |
+| `probe-slide-export-env` | Kontrollera lokal bildspelsexportmiljö |
+| `export-slides` | Exportera aktiv fil till bildspel |
 
-**Varianter på mappnivå** ersätter `current` med `folder` i identifieringsnamnet.
+### Standardkedja eller egen
 
-### Fördefinierade kontra anpassade arbetsflöden
+One-Click Extract är förinställt. Definiera andra knappar själv: namn, ordning och inställningar. Kontrollera sidopanelens verktygstips och åtgärda parserfel före körning.
 
-Notemd levereras med färdiga arbetsflöden för vanliga mönster:
-
-| Arbetsflöde | Kedja | Användningsfall |
-|----------|-------|----------|
-| **En-klick-extraktion** | add-links > extract-concepts > research | Bearbeta en forskningsartikel i en enda gång |
-| **Fullständig pipeline** | add-links > extract-concepter > forskning > diagram | Fullständig kunskapsextraktion med visualisering |
-| **Översätta + Länka** | översätt > add-links | Översätt och länka koncept på mållspråket |
-
-**Anpassade arbetsflöden** skapas i inställningarna:
-
-1. Öppna **Inställningar** --> **Notemd** --> **Arbetsflöden**
-2. Klicka på **"Lägg till arbetsflöde"**
-3. Ange DSL-kedjan (t.ex. `process-current-add-links>extract-concepts-current`)
-4. Ge det en visningsnamn (t.ex. "Snabb länk + Extrahera")
-5. Den nya knappen visas omedelbart i sidofältet
-
-## Konfiguration
+## Inställningar
 
 | Inställning | Standard | Effekt |
-|---------|---------|--------|
-| `workflows` | Fördefinierad uppsättning | Array av arbetsflödesdefinitioner (namn + DSL) |
-| `workflowContinueOnError` | `true` | Gå vidare till nästa steg om det nuvarande steget misslyckas |
-| `workflowShowProgress` | `true` | Visa en framstegsnotis efter varje steg är slutfört |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Stoppa vid första rapporterade stegfel |
+| `useMultiModelSettings` | `false` | Aktiv leverantör tills uppgiftsstyrning aktiveras |
+| `enableResearchInGenerateContent` | `false` | Ingen forskning vid titelgenerering förrän den slås på |
 
-### Modeller per uppgift i arbetsflöden
+`continue_on_error` fortsätter efter fel. Använd bara när senare steg kan hantera kvarvarande indata. Fortsatt körning gör inte ett delvis misslyckat flöde lyckat.
 
-Varje steg i en arbetsflöde använder sin egen modellkonfiguration per uppgift. Du behöver inte ange modeller i DSL:n själv. Resolveringsordningen är:
+### Modell per steg
 
-1. Provider/modell per uppgift om `useMultiModelSettings` finns där
-2. Global `activeProvider` i annat fall
-
-Detta innebär att `add-links` kan köras på DeepSeek medan `research` köras på GPT-4o -- allt inom samma arbetsflödesklick.
+Modellval ägs av uppgiften. Tom override använder vald leverantörs modell. Kontrollera alla vägar innan privat innehåll skickas.
 
 ## Exempel
 
-Du har precis importerat en PDF från en maskininlärningsartikel till din säkerhetslåda och vill ha fullständig kunskapsextraktion:
-
-1. Öppna den importerade anteckningen
-2. Klicka på sidofältssknappen **"Full Pipeline"**
-3. Notemd kör:
-   - **Steg 1**: Lägg till wiki-länkar -- `[[attention mechanism]]`, `[[transformer]]` osv.
-   - **Steg 2**: Extrahera koncept -- skapar konceptanteckningar i din konceptmapp
-   - **Steg 3**: Forska -- sammanfattar webbkällor för nyckelord
-   - **Steg 4**: Diagram -- genererar en Mermaid-mindmap av artikels struktur
-4. Efter cirka 30 sekunder har din anteckning länkar, konceptanteckningar finns, forskningen har lagts till och en diagramfil har sparas
-
-Allt från en enda klick.
+Välj tom `trial-concepts` och en testkälla. Granska begreppen och rapporterad complete-mapp. Kör först stegen separat om destinationerna är oklara. Öka omfånget efter granskning.
 
 ## Tips
 
-- **Börja med fördefinierade arbetsflöden** -- de täcker de vanligaste mönstren. Anpassa endast när du behöver en annan sekvens.
-- **Aktivera `workflowContinueOnError`** -- ett misslyckat diagramsteg bör inte avbryta hela pipeline:n.
-- **Använd mapparbetsscheman** för massbearbetning -- klicka med höger på en mapp, välj ett arbetsschema, och varje anteckning bearbetas.
-- **Ge arbets scheman tydliga namn** -- utrymmet i sidofältet är begränsat. Använd korta, handlingstillriktade namn som "Snabb extraktion" eller "Översätta + Länka".
-
----
+- Håll kedjor begripliga så att fel och filernas ursprung kan följas.
+- Raderingsåtgärder behåller interaktiv bekräftelse; undvik dem i obevakade flöden.
+- Granska logg och filer efter avbrott eller återställningskonflikt.
+- Testa exakt modell och mapp; anslutningstest bevisar inte batchkvoter.
 
 ## Nästa steg
 
-- [Research](./research) -- Förstå vad forskningssteget gör innan du lägger till det i arbets scheman
-- [Wiki-Links](./wiki-links) -- Kärnfunktionen för länkning som används i de flesta arbets scheman
-- [Concept Notes](./concept-notes) -- Konceptextraktion som ett arbets schemastege
-- [Batch Processing](/docs/advanced/batch-processing) -- Samtidighet och progressrapportering för mapparbetsscheman
+- [Begrepp](./concept-notes).
+- [Batcher](../advanced/batch-processing).
+- [Forskning](./research).

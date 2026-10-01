@@ -1,0 +1,99 @@
+---
+id: overview
+title: Geliştirici rehberi
+description: >-
+  Mevcut sağlayıcı, işlem, çizim ve belge sözleşmelerini izleyerek derleyin,
+  test edin ve geliştirin.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Geliştirici rehberi
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Geliştirici rehberi
+
+<TLDR>Özellik dalında çalışın, kilitli bağımlılıkları ve iki tarayıcı sürümünü kurup derleme ile tüm Jest testlerini çalıştırın. Sözleşmenin mevcut sahibini değiştirin; belgeleri, sağlayıcı testlerini ve hedef uygulama kanıtlarını birlikte tutun.</TLDR>
+
+## Çalışma kopyası
+
+[Depoyu](https://github.com/Jacobinwwey/obsidian-NotEMD) klonlayıp [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) okuyun. Eklenti CI’si Linux/Windows Node 20, site Node 24 kullanır. Kök ve `website/` bağımlılıkları ayrı kurulur.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+İki Playwright paketi farklı Chromium sürümleri isteyebilir; tek kurulum yeterli değildir. `main.js` üretilir ve Git tarafından yok sayılır. Eski yerel paket yeni commit’i doğrulamaz.
+
+## Sorumluyu bulun
+
+| Sorumluluk | Ana kaynak |
+| ---------------- | ---------------- |
+| Eklenti yaşam döngüsü, komutlar ve ana uygulama yönlendirmesi | `src/main.ts` |
+| Sağlayıcı profilleri, protokol üstverisi ve doğrulama | `src/llmProviders.ts` |
+| İstekler, aktarımlar, tekrarlar ve akış | `src/llmUtils.ts` |
+| İşlemler, şemalar ve açık CLI seçimi | `src/operations/`, `src/cliContracts.ts` |
+| Dosya görevleri, araştırma ve çeviri | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| İş akışı eylemleri ve yan panel | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Diyagram tanımları ve çizim | `src/diagram/`, `src/rendering/` |
+| Arayüz metinleri ve diller | `src/i18n/` |
+| Açık rehberler ve çeviriler | `website/docs/`, `website/i18n/` |
+| Bakım talimatları ve tarihli kanıtlar | `docs/maintainer/` |
+
+Üretim paketi gömülü önizleme ana uygulamasıyla kendi kendine yeterlidir. Olası ayrı ana uygulama yolu, dağıtılmış dosya sözleşmesi değildir. Açmak için paketleme, dosyalar, denetimler ve belgeler birlikte değiştirilmelidir.
+
+## Sınırlı değişiklik
+
+1. Hatayı tekrarlayıp önce odaklı başarısız test yazın.
+2. Değişmezi sahiplenen yerde değiştirin; dış sınırda doğrulayın.
+3. Hedefli/tam testleri çalıştırın; yazmalarda iptal, hata ve kalıcılığı koruyun.
+4. İngilizce kaynağı ve etkilenen dilleri güncelleyin. Plan, görev ve walkthrough belgelerinin tam İngilizce/Çince sürümleri `docs/` altında ayrı olmalıdır.
+5. Görsel/uygulamaya özgü değişiklikleri gerçek hedefte kontrol edin; XML, görüntü veya derleme, düzenlenebilirlik ya da bağlantıların bağlılığını kanıtlamaz.
+
+Sağlayıcıyı `llmProviders.ts` içine ekleyin, uyumlu aktarımı kullanın ve `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README ile bağlantı kapsamını güncelleyin. Akışı ve kesilmiş yanıtları koruyun. İşlem açmadan girdi/sonuç şemaları, bağlam, yan etkiler ve veri işleme etiketleri verin. Kayıt girdisi açık Agent uç noktası değildir. [Agent](../agents/overview).
+
+## Doğrulama
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint tekil tanıları karşılaştırır; toplamın azalması yeni gerilemeyi mazur göstermez. Yerel getirme değiştiyse `npm run benchmark:local-kb` çalıştırıp veri kümesi/ortamı raporlayın. Site için Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+1.9.8 programındaki çevirileri Codex doğrudan yazar ve inceler. Eski çeviri yazma betiklerini, LM Studio veya çeviri uç noktalarını çalıştırmayın. Araçlar yazılmış metni biçimlendirebilir, doğrulayabilir ve görüntüleyebilir.
+
+## Obsidian ve hedef uygulamalar
+
+`.notemd-host-verification` işaretli deneme kasası kullanın; betikler kopyalanan paketi kontrol eder. Kullanıcı kasalarını ayrı tutun. Hem `obsidian help` hem `obsidian-cli help` deneyin; eksik araç erişilemezdir, başarılı ana uygulama testi sayılmaz.
+
+PowerPoint, CircuitikZ ve slaytların kendi ön koşulları/çıktıları vardır. [Tarihli kabul](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) ve [yayınlama talimatını](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md) izleyin. Test edilmemiş mobil/asgari sürümü açık tutun.
+
+## Katkı ve sürüm
+
+PR’da somut sorun, son davranış, testler ve sınırları yazın. [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) içinde tekrar adımları verin. Anahtar, özel not veya ilgisiz dosya commit etmeyin. Tek yayınlayıcı; uyumlu sürüm, sayısal etiket, temiz etiketli kaynak, iki dilli notlar, doğrulanmış taslak dosyalar, yayımlama ve açık Pages dağıtımından sorumludur. Yayımlanmış etiketi taşımayın. `.trellis/` yerel iş akışı durumudur, CI bağımlılığı değildir.
+
+## Sonraki adımlar
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Proje durumu](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

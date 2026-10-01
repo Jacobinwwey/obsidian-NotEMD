@@ -17,6 +17,8 @@ type MockElement = {
     createSpan: jest.Mock;
     setAttribute: jest.Mock;
     setText: jest.Mock;
+    ownerDocument: { activeElement: null };
+    querySelector: jest.Mock;
 };
 
 function element(tag = 'div', options: Record<string, any> = {}): MockElement {
@@ -35,9 +37,12 @@ function element(tag = 'div', options: Record<string, any> = {}): MockElement {
         createDiv: jest.fn(),
         createSpan: jest.fn(),
         setAttribute: jest.fn(),
-        setText: jest.fn()
+        setText: jest.fn(),
+        ownerDocument: { activeElement: null },
+        querySelector: jest.fn()
     } as MockElement;
     root.empty.mockImplementation(() => { root.children = []; });
+    root.querySelector.mockImplementation((selector: string) => all(root, item => Object.prototype.hasOwnProperty.call(item.attributes, selector.slice(1, -1)))[0] ?? null);
     root.setText.mockImplementation((text: string) => { root.text = text; });
     root.setAttribute.mockImplementation((name: string, value: string) => { root.attributes[name] = value; });
     root.createEl.mockImplementation((childTag: string, childOptions: Record<string, any> = {}) => {

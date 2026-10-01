@@ -1,446 +1,101 @@
 ---
 id: configuration
-title: "Konfigurointi"
-description: "Konfigoi Notemd-asetukset ja eelistöt"
+title: Asetukset
+description: 'Etsi palveluntarjoajien, tulospolkujen, kielten ja työnkulkujen asetukset.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Asetukset
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Konfigurointi
+# Asetukset
 
-<TLDR>
-**Notemd-konfigurointi kattaa 6 pääaluea:** (1) LLM-tarjoajat ja API-avainet, (2) Tekstinvalintat yksittäisten tehtävien mukaan, (3) Tulostuspaatit ja mallit, (4) UI-kieli ja tulostuskieli, (5) Palautteenpalvelut (Tavily/DuckDuckGo), (6) Kohdanomaiset työprosessit. Kaikki asetukset ovat Obsidian Asetukset → Notemd. Muutokset voivat toimia heti.
-</TLDR>
+<TLDR>Avaa Settings → Notemd ja etsi kenttä. Valitse palveluntarjoaja ja tulosten sijainti ennen ajoa. Testaa muutoksia yhdellä muistiinpanolla; käynnissä oleva tehtävä voi säilyttää aloitushetken asetukset.</TLDR>
 
-## Asetuksien yleenvaate
+## Yleiskuva
 
-Pääsy: **Obsidian Asetukset (⚙️) → Notemd**
-
-### Pääosat
-
-1. **Tarjoajan konfigurointi** — API-avainet, perus URL-tiedot, mallit
-2. **Tehtävin asetukset** — Tekstinvalintat yksittäisten tehtävien mukaan
-3. **Tulostuskonfigurointi** — Missä salata luodut tiedostot
-4. **Kielikoneet** — UI-kieli ja tulostuskieli
-5. **Palautteenyhteydet** — Tavily/DuckDuckGo-asetukset
-6. **Työprosessit** — Kohdanomaiset painikkeojärjestelmät
-7. **Edistyneet asetukset** — Diagnostiikka, pakettiprosessointi, osien jakaminen
+Oletuspalveluntarjoaja on DeepSeek ilman tunnistetietoja. Profiilin valinta ei luo tiliä, asenna mallia tai myönnä oikeuksia. Katso [palveluntarjoajat](../providers/overview).
 
 <!-- notemd-settings-favorites-guide -->
-## Notemd – asetusten löytö ja suosikot
+## Haku ja suosikit
 
-Asetustehtävä on suunniteltu korduvan käyttön varmistamiseksi, ei vain yksinkertaiselle konfiguroimiseen:
+**Search settings** etsii nimistä, kuvauksista, aliaksista ja näkyvistä luokista ja siirtää kenttään. **★ Favorites** näyttää tallennetut asetukset kuvauksineen, luokkineen ja kohteineen. Ne tallennetaan holvikohtaisesti, säilyvät uudelleenkäynnistyksessä ja siivoavat vanhat tunnisteet. Hakuteksti säilyy työkalurivin sulkemisen yli. Suosikkilista ja vain suosikeista hakeva suodatin ovat erillisiä.
 
-- Käytä tietoisuusperustetta **Search settings** -sivutta, jotta voit löytää asetukset niiden nimen, kirjelduksen, aliasin tai näkyvän kategorian perusteella. Tulokset sijoittuvat merkityksen mukaan ja sinun pääsee suoraan konkreettiseen asetuksiin.
-- Käytä **★ Favorites**-a, jotta voit säilyttää usein muuttamia asetuksia nykyisessä Vault:ssä. Painamalla sitä avautuu erillinen lista, jossa on asetuksen nimi, kirjeldus, kategoria ja suora navigointitarkoitus. Poista suosikot listasta ilman tarvittaessa lähtää asetustehtävästä.
-- Avastusvalikonpainike on vaikeudentomuodossa. Käytä chevron-nappia, jotta voit sulkea sen ujanteeksi yläoikeassa, kun sinulle on tarvita enemmän vertikaalista tilaa; nykyinen päätys säilytetään ja restahtuu, kun valikko avataan uudelleen.
-- Suosikolistat ovat erillisiä suosikkeja vain näyttävistä filtreistä. Suosikot käyttävät stabilisia asetustekijöitä, jotka jäävät aikaa Obsidian-pyördyksissä, ja vanhentuneet tekijöt poistetaan turvallisesti, kun asetus enää ei ole olemassa.
+**Diagram preview export PPI** on aluksi 300, alue 72–600, ja vaikuttaa vain PNG:hen. SVG/PDF säilyttävät tuetun vektorigeometrian. **Also export complete Mermaid visuals** ohjaa oheistiedostoja, ei Mermaidin näkymistä Drawnix-esikatselussa.
 
-Asetus **Diagram preview export PPI** on vaikeudentomuodossa **300 PPI** ja hyväksyy arvon **72–600**. Se hallitsee vain PNG-rasterointia; SVG ja PDF säilyttävät vektoriallukon. Asetus **Also export complete Mermaid visuals** hallitsee valittavia ulkopuolisia Mermaid-tuotteita eikä vaikuta Mermaid-näkyvyyseseen Drawnix-ennusteissa.
----
+## 1. Palveluntarjoaja
 
-## 1. Tarjoajan konfigurointi
+Anna oikean protokollan osoite, vaadittu avain ja saatavilla oleva malli. Luettelo ja onnistunut generointi ovat eri tarkistuksia. Paikallinen palvelin/malli valmistellaan erikseen; pilvi/yhdyskäytävä vastaanottaa sisällön. Tarkista myös tehtäväkohtaiset reitit ennen yksityistä aineistoa.
 
-### Tarjoajan lisääminen
+## 2. Tehtäväkohtaiset mallit
 
-1. **Valitse tarjoaja** valikosta (30+ saatavilla)
-2. **Sisesta API-avaini**
-3. **Valinta**: Määritä omat perus URL -arvot (proksi-/gateway-tarkoituksissa)
-4. **Klikkaa "Get Model List"**, jotta voit vahvistaa yhteyden
-5. **Valitse vaihtoehtoinen malli**
+`useMultiModelSettings` sallii eri tarjoajat/mallit linkeille, otsikoille, tutkimukselle, käännökselle, käsitteille, alkuperäistekstille ja Mermaidille. Tyhjä ohitus käyttää tarjoajan mallia; pois päältä käytetään aktiivista tarjoajaa. Vertaa tarkkuutta, viivettä ja oikeaa kustannusta samalla aineistolla.
 
-### Yleiset tarjoajat
+## 3. Tulokset
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
+| Tehtävä | Oletustulos |
+| ------ | ------------------------- |
+| Linkkien lisäys | Erillinen `_processed.md` lähteen viereen; alkuperäisen siirto pois |
+| Erillinen käsitepoiminta | Valittu käsitekansio; vain otsikko, paluulinkit pois |
+| Käännös | Viereinen `_<language>.md`; nykyinen kohde voidaan korvata |
+| Tutkimus | Yhteenveto lisätään aktiiviseen Markdowniin |
+| Erägenerointi otsikoista | Kirjoittaa sopiviin lähteisiin ja siirtää viereiseen `<folder>_complete`-kansioon, jos kohde sallii |
+| Kaavion esikatselu/vienti | Valitse tuettu lähde tai visuaalinen vienti ja tarkista raportoitu polku |
 
-#### Anthropic (Claude)
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
+Käsitekansio alkaa tyhjänä; `concepts` on esimerkkivalinta. Erillisissä muistiinpanoissa on suppea/täysi muoto, ei yleistä mallipohjamoottoria. [Käsitteet](../features/concept-notes). Käsittelyllä ja käännöksellä on omat jälkiliitteet ja kansiot. Tarkista kohteet ja palautusristiriidat; peruutus ei kumoa valmiita kirjoituksia.
 
-#### Ollama (Local)
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
+## 4. Kielet
+
+Käyttöliittymässä on 21 kieliversiota ja sivustossa 34 kielireittiä. `uiLocale: auto` valitsee tuetun vastineen; muuten UI käyttää englantia. Tuotettavan sisällön kieli on erillinen, aluksi englanti. Tuetuilla tehtävillä voi olla oma kieli; käännös käyttää `language`-asetusta. Määrät eivät todista mallin kielitaitoa.
+
+## 5. Haku
+
+Valitse Tavily ja avain tai DuckDuckGo nimenomaisesti. Tyhjä Tavily-avain ei vaihda palvelua. Molemmat käyttävät verkkoa, DuckDuckGo voi hakea tulossivuja. Otsikkogeneroinnin tutkimus on pois: `enableResearchInGenerateContent`. Paikallinen haku on myös pois, omilla kansio-/tehtävärajoilla. Kontekstiin valitut paikalliset katkelmat lähetetään valitulle LLM:lle.
+
+## 6. Työnkulut
+
+Käytä rakentajaa tai nimettyä DSL-riviä painiketta kohden:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
+`::` erottaa nimen toiminnoista ja `>` toimintotunnisteet. Oletus pysähtyy raportoituun virheeseen. Katso [työnkuluista](../features/workflows) laajuus ja virheen jälkeisen jatkamisen vaikutukset.
 
-### Usein tarjoajat
+## 7. Lisäasetukset
 
-Voit konfiguroida useita tarjoajia ja vaihtaa niiden välillä yksittäisen tehtävän kohdalla:
-- **Päätarjoaja**: Käytetään varauksena
-- **Tehtävän mukaiset tarjoajat**: Korvataan erillisten tehtävien kohdalla
+| Asetus | Alkuarvo | Vaikutus |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | Tarjoaja ilman tehtäväkohtaista reittiä |
+| `useMultiModelSettings` | `false` | Tarjoaja/malli tehtävän mukaan |
+| `useCustomConceptNoteFolder` | `true` | Salli käsitetulokset kansion valinnan jälkeen |
+| `conceptNoteFolder` | `''` | Ei käsitekansiota aluksi |
+| `extractConceptsMinimalTemplate` | `true` | Vain otsikko erillisissä käsitteissä |
+| `extractConceptsAddBacklink` | `false` | Paluulinkit erilliseen poimintaan |
+| `moveOriginalFileOnProcess` | `false` | Säilytä alkuperäinen linkityksessä |
+| `chunkWordCount` | `3000` | Likimääräiset tekstiosat, ei tokenraja |
+| `batchConcurrency` | `1` | Eräajon oletusrinnakkaisuus |
+| `enableBatchParallelism` | `false` | Rinnakkainen ajastus tätä kytkintä käyttävillä reiteillä |
+| `enableStableApiCall` | `false` | Erikseen valittava vakaa pyyntötila |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Pysäytä työnkulku raportoituun virheeseen |
 
----
+Osakoko ja vastauksen tokenbudjetti ovat eri asioita. Pienemmät osat eivät ratkaise kaikkia kontekstirajoja, eikä pienempi rinnakkaisuus estä jokaista 429-virhettä.
 
-## 2. Tehtävän mukaiset mallit
+## Asetusprofiilit
 
-Konfiguroi erilaisia mallia eri tehtäville, jotta voit optimoittaa kustannuksia ja laadua:
+Asetukset ovat holvin lisäosatietoja. Varmuuskopioi ennen muutoksia. Tarjoajavienti noudattaa omaa tunnistetietojen peittämistä koskevaa sopimustaan, ei varmuuskopioi koko holvia. Tarkista osoitteet ja metadata myös peitetystä viennistä. Älä julkaise raakaa asetustiedostoa tai yksityistä tekstiä sisältäviä diagnostiikkarunkoja.
 
-### Tehtävän tyypit
+## Asetusongelmat
 
-| Tehtävä | Vaihtoehtoinen malli | Tarkoitus |
-|------|--------------|---------|
-| **Yhdistäminen** | Päätarjoaja | Tunnistaa konsepttejä wiki-linkkejä kohdalla |
-| **Konseptin luominen** | Päätarjoaja | Eritä ja kirjelda konseptteja |
-| **Tutkimus** | Päätarjoaja | Yhteenvetöitä web-pyyhkäysjen tuloksista |
-| **Kääntö** | Päätarjoaja | Kääntä teksti |
-| **Diagrammin luominen** | Päätarjoaja | Luo Mermaid/Canvas-diagrammit |
+Testaa täsmälleen valittu tarjoaja/malli pienellä muistiinpanolla. Puuttuuko kenttä: tarkista haku, luokka, kehittäjätilan näkyvyys ja holvi. Ilmoita versio ja pienin asetuskokonaisuus ilman salaisuuksia.
 
-### Esimerkki: Kustannustehokas asetus
+## Seuraavaksi
 
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### Kuidas konfiguroida
-
-1. **Asetukset → Notemd → Tehtäön asetukset**
-2. Ihmeen mukaan valitse:
-   - ✅ **Käytä päätarjoajaa** (ominaisuus)
-   - 🔄 **Käytä omakustannuslistaa** → valitse tarjoaja + malli
-
----
-
-## 3. Tulostusasetukset
-
-### Konsepttipisteiden tulostus
-
-**Kunne uusi konseptikirjeet tallennetaan:**
-
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Malli:**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### Kaustakonstruktion valintat
-
-**Valinta 1: Sisempi (kaikki konseptit yhdessä kaustassa)**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**Valinta 2: Hierarktilinen (lähteekaustan mukaan)**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-Konfiguroi: **Asetukset → Tulostus → Käytä hierarktisia kaustoja**
-
-### Diagrammin tulostus
-
-**Kunne diagrammit tallennetaan:**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**Muoto:**
-- `.mmd` (Mermaid lähteä)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
-
-## 4. Kielitilat
-
-### UI Kieli
-
-**Ympäristön kieli** (painikkeet, menyt, dialoigot):
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-Tukittu: englanti, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية ja muut.
-
-### Tulostuskieli
-
-**Luoettu sisältön kieli** (konceptikirjeet, tutkimusyhteenvetot):
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**Käyttötila:** Kiinaan UI + englanninkielinen tulostus kaksikielisen tutkimuksen jaoks.
-
-### Kääntösihtti
-
-**Vaikuttavimmat kääntökielit** kääntötöidön tilanteissa:
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
-
-## 5. Palautteen yhdistäminen
-
-### Tavily (soovitatu)
-
-**AI-optimoitu palautteenpalvelu:**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-Get key: [tavily.com](https://tavily.com/)
-
-**Ominaisuudet:**
-- Kvalitettomat tulokset
-- AI-optimoituut yhteenvetot
-- Lähtöviiteet
-
-### DuckDuckGo (eksperimentaali)
-
-**Ei API-avainaa tarvita:**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**Merkkus:** Halvempi laatu, ilman käsittelemistä.
-
----
-
-## 6. Työprosessin konfigurointi
-
-### Omien työprosessien luominen
-
-**Töövoimat yhdistävät useat tehtävät yhteiseen painikkeeseen.**
-
-1. **Asetukset → Töövoimat → Lisää töövoima**
-2. **Nimi**: "Paper Analysis Flow"
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **Salvaa**
-
-Uusi painikkei ilmenee vasemmassa puolekaluun.
-
-### DSL-syntaksi
-
-**Muoto:** `action1>action2>action3`
-
-**Saadaulliset toimintat:**
-- `process-current-add-links` — Lisää wiki-linkkejä nykyiseen merkintään
-- `extract-concepts-current` — Luo konseptimerkintät
-- `research-and-summarize` — Web-tutkimus + yhteenveto
-- `translate-current` — Kääntä nykyinen merkintä
-- `summarize-as-mermaid` — Luo Mermaid-diagramma
-- `process-folder-add-links` — Päivitä koko kaustaa
-
-**Esimerkkitöövoimat:**
-
-**Nopea konsepttien poistaminen:**
-```
-process-current-add-links>extract-concepts-current
-```
-
-**Syvällinen tutkimus:**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**Monikielinen analyysi:**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
-
-## 7. Edistyneet asetukset
-
-### Pakettiprosessointi
-
-**Täydennä useita failia yhtä aikaa:**
-
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
-
-Suurempi arvo = nopeampi, mutta enemmän API kutsuja.
-
-### Tarkka osien jakaminen
-
-**Pikkojen notitoinnin korjaamiseksi jakaa ne osiin:**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-Ehdottaa tokenin määrän liikkeiden välttämiseksi.
-
-### Diagnostiikkapaneeli
-
-**Tarkista yksityiskohtaiset logit:**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-Näyttää:
-- API pyytäksi/tulokset
-- Tokenien käyttö
-- Käsitelyntai
-- Viannot
-
-### Kerran olevien konsepttien tunnistaminen
-
-**Vältä läheisesti duplikaatteja olevia konseptteja:**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-Yleisempi = aggressiivisempi yhdistäminen.
-
----
-
-## Konfigurointiprofiilit
-
-### Tilannusten eksportointi/importointi
-
-**Jaa konfigurointia eri laitteilla:**
-
-1. **Tilat → Edistyneet → Konfiguroinnin eksportointi**
-2. Säästää `notemd-config.json`
-3. Uudella laitteella: **Impordi konfigurointi**
-
-**Miten se sisältää:**
-- Tarjoajan API-avainet (valittava)
-- Mallivalintat
-- Tulostuspathit
-- Kohdanomaiset työprosessit
-
----
-
-## Suositeltu konfigurointi
-
-### Opiskelijoille
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### Tutkijoiden käyttöön
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### Yksityisyystä huolehtivien käyttäjien tilanne
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### Kaksikielisen työn tilanne
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## Konfiguroinnin vianohjaus
-
-### Asetukset ei salvesteta
-- Tarkista tiedostojen oikeudet `.obsidian/plugins/notemd/`-ssä
-- Yritä: Poista sovelluslaitteisto → Aktivoi uudelleen
-
-### API-virto on epäsisällinen
-- Ei lisätiloja
-- Tarkista aikakierroksia
-- Veroita krediteja tarjoajan tilastollisessa ympyrössä
-
-### Mallit ei laadu
-- Klikkaa "Saada mallilistaus" uudistamiseen
-- Tarkista verkon yhteyttä
-- Yritä toinen tarjoaja
-
----
-
-## Järguvät toimet
-
-- 📖 [Tutkita ominaisuuksia](../features/wiki-links)
-- 🔌 [Tarjoajan asennusohjeet](../providers/overview)
-- ❓ [Kysymyksiä ja vastauksia](../faq)
+- [Pika-aloitus](./quick-start).
+- [Eräajo](../advanced/batch-processing).
+- [Omat kehotteet](../advanced/custom-prompts).
+- [Vianmääritys](../advanced/troubleshooting).

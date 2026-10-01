@@ -1,106 +1,99 @@
 ---
 id: diagrams
-title: "डायग्राम"
-description: "एक स्पेसिफिकेशन-पहले वाली आर्किटेक्चर का उपयोग करके, अपने नोट्स से Mermaid, JSON Canvas, Vega-Lite, HTML, संपादनीय फिगर आर्टिफैक्ट्स, Draw.io, Drawnix, तथा प्रतिबंधित circuitikz डायग्राम उत्पन्न किए जा सकते हैं।"
+title: आरेख
+description: >-
+  आरेख बनाएँ, Drawnix/Mermaid panels देखें और source या SVG, PNG, PDF निर्यात
+  करें।
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [diagrams, mermaid, vega-lite, canvas, visualization, spec-first, drawio, drawnix, editable svg, circuitikz, TikZJax]
-concepts: [DiagramSpec, Mermaid, Vega-Lite, JSON Canvas, Editable HTML SVG, Draw.io, Drawnix, circuitikz, TikZJax, Intent Detection, Spec-First Architecture]
-citations:
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - आरेख
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# डायग्राम्स
+# आरेख
 
-<TLDR>
-**आपको किस प्रकार के डायग्राम की आवश्यकता है**, इसे चुनें, फिर उसका **संपादनीय स्रोत प्रारूप** चुनें। Obsidian में पूर्ण परिणाम का पूर्वावलोकन करें, जिसमें एक Drawnix बोर्ड एवं उसमें शामिल Mermaid विज़ुअल्स भी शामिल हैं, तथा प्रत्येक पैनल को SVG, PNG, या PDF के रूप में निर्यात करें।
-</TLDR>
+<TLDR>पहले diagram type, फिर editable source format चुनें। Obsidian में पूरा result देखें, Drawnix board और उसमें Mermaid visuals सहित। हर panel को SVG, PNG या PDF में export कर सकते हैं।</TLDR>
 
-## तीन विकल्पों को समझें
+## तीन अलग चुनाव
 
-| विकल्प | यह किस चीज़ को नियंत्रित करता है | उदाहरण |
-|---|---|---|
-| डायग्राम प्रकार | डायग्राम का क्या अर्थ है | फ्लोचार्ट, सीक्वेंस डायग्राम, सर्किट डायग्राम, डेटा चार्ट |
-| स्रोत प्रारूप | Notemd द्वारा बनाया जाने वाली संपादनीय या पुनः उपयोग योग्य फ़ाइल | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
-| निर्यात प्रारूप | साझा करने हेतु उपयोग की जाने वाली छवि या दस्तावेज़ | SVG, PNG, PDF |
+| चयन | क्या नियंत्रित होता है | उदाहरण |
+| --- | --- | --- |
+| Diagram type | आरेख का अर्थ | Flowchart, sequence, circuit, data chart |
+| Source format | संपादन या पुनः उपयोग योग्य फ़ाइल | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
+| Export format | साझा करने का चित्र या document | SVG, PNG, PDF |
 
-Draw.io एवं Drawnix **स्रोत प्रारूप** हैं, डायग्राम प्रकार नहीं हैं। CircuitikZ ऐसा स्रोत प्रारूप है जिसे सर्किट डायग्राम बनाने हेतु डिज़ाइन किया गया है। एक ही प्रीव्यू को कई दृश्य प्रारूपों में निर्यात किया जा सकता है, इसलिए CircuitikZ चुनने से आपको केवल SVG तक ही सीमित नहीं रखा जाता।
+Draw.io और Drawnix source formats हैं, diagram types नहीं। CircuitikZ circuits का source है; उसे चुनने से visual export केवल SVG तक सीमित नहीं होता।
 
-## स्रोत प्रारूप चुनें
+## Source format चुनें
 
-| प्रारूप | किसके लिए उपयुक्त है | स्रोत फ़ाइल |
-|---|---|---|
-| Mermaid | Markdown में सीधे डायग्राम रखने हेतु | Mermaid कोड ब्लॉक |
-| JSON Canvas | Obsidian के नेटिव कैनवास वर्कफ्लो हेतु | `.canvas` |
-| Draw.io | diagrams.net या संगत टूल्स में बाद में संपादन करने हेतु | `.drawio` |
-| Drawnix | हाथ से बनाए गए या व्हाइटबोर्ड-शैली के संपादन हेतु | `.drawnix` |
-| CircuitikZ | संरचित विद्युत एवं ट्रांजिस्टर परिपथों हेतु | `.tex` |
+| Format | उपयुक्त काम | Source file |
+| --- | --- | --- |
+| Mermaid | Markdown के भीतर diagrams | Mermaid code block वाला पाठ |
+| JSON Canvas | Native Obsidian canvas | `.canvas` |
+| Draw.io | diagrams.net या compatible editor में आगे संपादन | `.drawio` |
+| Drawnix | Whiteboard या हाथ से बने जैसा संपादन | `.drawnix` |
+| CircuitikZ | संरचित electrical/transistor circuits | `.tex` |
 
-यदि आपको किसी विशेष एडिटर की आवश्यकता नहीं है, तो **Preferred source format** को **Auto** पर ही छोड़ दें। Notemd, चुने गए डायग्राम प्रकार के लिए एक संगत प्रारूप ही चुन लेगा।
+विशिष्ट editor न चाहिए तो **Preferred source format** को **Auto** रखें; सही diagram type का compatible format चुना जाता है।
 
-## एक डायग्राम बनाएं एवं निर्यात करें
+## बनाना और export करना
 
-1. उस नोट को खोलें या उस टेक्स्ट को चुनें जिसे आप दृश्य रूप में प्रदर्शित करना चाहते हैं।
-2. Notemd साइडबार या कमांड पैलेट से **Generate diagram** विकल्प चुनें।
-3. एक **diagram type** चुनें, या इसे **Auto-detect** पर ही छोड़ दें।
-4. एक **source format** चुनें, या इसे **Auto** पर ही छोड़ दें। यदि आप संपादनीय नोड्स एवं एम्बेडेड Mermaid विज़ुअल्स वाला एक नॉलेज मैप चाहते हैं, तो **Drawnix** चुनें।
-5. प्रीव्यू की समीक्षा करें। मल्टी-पैनल परिणाम में Drawnix बोर्ड एवं हर Mermaid पैनल स्रोत क्रम में ही एक ऊर्ध्वाधर रूप से स्क्रॉल किए जा सकने वाले प्रीव्यू शेल के भीतर रहते हैं; Mermaid पैनलों की ऊँचाई उनके रेंडर्ड मान के आधार पर तय होती है, इसलिए वे कटते नहीं हैं।
-6. किसी एक विज़ुअल के लिए प्रत्येक पैनल के लिए **Export SVG**, **Export PNG**, या **Export PDF** विकल्प चुनें, या सभी पैनलों के लिए टॉप-लेवल इमेज निर्यात का उपयोग करें। कई पैनलों के लिए, स्रोत फोल्डर या कस्टम Vault-संबंधी फोल्डर चुनें; Notemd हर पैनल के लिए एक निर्धारित फ़ाइल बनाता है एवं किसी एक पैनल में विफलता आने पर भी कार्य जारी रखता है।
-7. यदि आपको संपादनीय आर्टिफैक्ट भी चाहिए, तो **Save source file** का उपयोग करें।
+1. Supported source note खोलें। Passage हेतु अलग note बनाएँ; selection file action नहीं घटाती।
+2. Type या **Auto-detect** चुनें।
+3. Source या **Auto** चुनें; Drawnix editable nodes और embedded Mermaid वाला supported map देता है।
+4. **Generate diagram** चलाएँ।
+5. एक vertical scroll preview में board तथा source-order Mermaid panels देखें; panels actual rendered height लेते हैं।
+6. हर panel का **Export SVG**, **Export PNG**, **Export PDF** या ऊपर का all-panel export लें। Source folder या custom vault-relative folder चुनें; हर panel का deterministic नाम और individual error के बाद continuation है।
+7. Editable artifact हेतु **Save source file** करें।
 
-“Export” मेनू में वर्तमान विज़ुअल प्रीव्यू के लिए **Export SVG**, **Export PNG**, एवं **Export PDF** विकल्प उपलब्ध होते हैं। प्रत्येक पैनल हेडर में भी किसी एक Mermaid या Drawnix विज़ुअल के लिए यही विकल्प उपलब्ध होते हैं, इसलिए बड़े प्रीव्यू को एक ही अपारदर्शी इमेज के रूप में निर्यात करने की आवश्यकता नहीं होती।
+Export menu और panel header वही तीन actions देते हैं। **History** preview छिपाए बिना search, filters, reopen और saved artifacts खोलता है। Active note न हो तब भी palette/sidebar से history मिलती है।
 
-प्रीव्यू में **History** चुनकर डायग्राम को छिपाए बिना ही Vault history ड्रॉअर खोलें। आप पूर्ण हो चुके डायग्रामों की खोज एवं फ़िल्टरिंग कर सकते हैं, किसी प्रीव्यू को पुनः खोल सकते हैं, या सहेजे गए आर्टिफैक्ट्स खोल सकते हैं। नोट सक्रिय न होने पर भी कमांड पैलेट एवं Notemd साइडबार से सीधे ही डायग्राम हिस्ट्री तक पहुँचा जा सकता है।
+SVG/PDF vector geometry से बनते हैं। PDF SVG layout और text metrics उपयोग करता है, पूरी preview को rasterize नहीं। PPI केवल PNG पर लागू: 72–600, default 300।
 
-SVG एवं PDF वेक्टर ज्यामिति से बनते हैं; PDF में पूरे प्रीव्यू को रास्टराइज़ करने के बजाय वही SVG लेआउट एवं टेक्स्ट मेट्रिक्स ही उपयोग में आते हैं। Notemd सेटिंग्स में दिया गया इमेज निर्यात PPI केवल PNG की रास्टराइज़ेशन प्रक्रिया को ही नियंत्रित करता है (72-600 PPI, डिफ़ॉल्ट रूप से 300)।
+## घने आरेख की पठनीयता
 
-## घने डायग्राम के लिए पठनीय प्रीव्यू
+Editable HTML/SVG lane-grid पहले summary मापकर wrap करता, फिर title/header रखता है। Cells connectors और edge labels से पहले paint होते हैं; orthogonal routing occupied cells और text areas बचाती है।
 
-संपादन योग्य HTML/SVG lane-grid डायग्राम शीर्षक और lane header रखने से पहले summary को मापकर wrap करते हैं। header को सुरक्षित summary क्षेत्र के नीचे रखा जाता है और connector तथा edge label से पहले cells बनाए जाते हैं। cross-lane edges collision-aware orthogonal grid routes का उपयोग करते हैं और lane labels तथा भरे हुए cells के लिए स्थान सुरक्षित रखते हैं, इसलिए लंबे विवरण टेक्स्ट नहीं ढकते और समझने के लिए क्षैतिज पैनिंग की जरूरत नहीं पड़ती।
+`quadrantChart` पर अलग normalization होता है, flowchart-specific quote/shape fixes नहीं। Copied opening bracket केवल point label का unmatched आखिरी character हो तो हटता है। Titles, axes और quadrant names के जानबूझकर दिए brackets रहते हैं।
 
-Mermaid quadrant charts को family-विशिष्ट normalization चरण मिलता है। `quadrantChart` के लिए केवल flowchart-विशिष्ट quote और shape repairs छोड़े जाते हैं; title, axis और quadrant name में जानबूझकर रखे गए brackets दिखाई देते रहते हैं। provider द्वारा कॉपी किया गया opening bracket तभी हटता है जब वह point label का unmatched अंतिम अक्षर हो।
+[Example set](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) bilingual inputs, SVG/PNG और manifest रखता है। `passed` उसी run और bundle identity का है, बाद की release में हर type के नए परीक्षण का नहीं। Catalog 33 rows, UI 21 locales और website 34 locales अलग surfaces हैं। पाँच exact reference grammars independent layout evidence तक selector से बाहर हैं।
 
-Repository हर executable diagram type के लिए real-Vault learning और evidence set रखता है। bilingual input notes, generated SVG/PNG results और machine-readable status manifest के लिए [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples) देखें। `passed` entries loaded plugin bundle के माध्यम से वास्तविक run दर्शाती हैं, static screenshot fixture नहीं।
+## Drawnix में Mermaid
 
-## एम्बेडेड Mermaid के साथ Drawnix प्रीव्यू
+SVG sanitize होकर Mermaid source `.drawnix` metadata में रहता है; preview को Drawnix/Plait runtime नहीं चाहिए। Default self-contained है, अलग `.assets` नहीं। **Also export complete Mermaid visuals** से source, SVG और manifest companions बनते हैं। पुराने `.assets` समर्थित हैं और missing SVG saved source से पुनः बन सकता है।
 
-जब कोई Drawnix आर्टिफैक्ट Mermaid विजुअल्स शामिल करता है, तो Notemd रेंडर किए गए SVG को सैनिटाइज़ करता है एवं Mermaid स्रोत को `.drawnix` मेटाडेटा में उसके साथ ही संग्रहीत रखता है। इस कारण प्रीव्यू, Drawnix नॉलेज मैप के भीतर Mermaid छवियों को Drawnix या Plait रनटाइम की आवश्यकता के बिना ही दिखा सकता है। डिफ़ॉल्ट पथ स्व-निहित होता है एवं यह कोई अलग `.assets` डायरेक्टरी नहीं बनाता। यदि आपको हैंडओवर या बाहरी संपादन हेतु Mermaid स्रोत, SVG एवं मैनिफेस्ट की आवश्यकता हो, तो **Also export complete Mermaid visuals** को सक्षम करें। `.assets` वाले मौजूदा आर्टिफैक्ट्स का समर्थन जारी रहता है, एवं मेटाडेटा में संरक्षित स्रोत पाठ से लुप्त Mermaid SVG को पुनः बनाया जा सकता है।
+Resolved image embeds जहाँ संभव data-backed SVG लेते हैं। पहले embedded data, फिर पुराने companion files और फिर available source rebuild लोड होता है। Referenced पुरानी files रखें; नया self-contained export पुरानी shared directory बेकार होने का प्रमाण नहीं।
 
-संभव होने पर, रिज़ॉल्व्ड इमेज एम्बेड्स को भी डेटा-आधारित SVG प्रीव्यू मिलता है; इसलिए पुरानी सहायक फ़ोल्डर हटाने से संग्रहीत Drawnix प्रीव्यू गायब नहीं होता। प्रीव्यू लोडिंग में पहले एम्बेडेड डेटा का उपयोग किया जाता है, फिर पुरानी सहायक फ़ाइलों का, एवं अंत में स्रोत-पाठ से पुनर्निर्माण का विकल्प।
+एक scrolling surface पहले Drawnix, फिर source-order Mermaid दिखाती है। Saved history reopen पर panels, dimensions और export actions लौटते हैं। Titles, summary और relationship labels की जगह सुरक्षित है। Supported readable layout न बन सके तो format error आता है। Cross-branch arrows static relations हैं; Drawnix rearrangement बाद attachment वर्तमान evidence से supported नहीं। Target editor में देखें।
 
-प्रीव्यू को जानबूझकर एक ही स्क्रॉलेबल सतह के रूप में डिज़ाइन किया गया है: सबसे पहले मुख्य Drawnix कैनवास दिखाई देता है, उसके बाद स्रोत क्रम के अनुसार प्रत्येक एम्बेडेड Mermaid पैनल। किसी संग्रहीत हिस्ट्री एंट्री को बंद एवं पुनः खोलने से वही पैनल सूची, आकार एवं निर्यात क्रियाएँ पुनः बन जाती हैं।
+## Native export सीमाएँ
 
-Drawnix संबंधों के स्पष्टीकरणों को प्रथम-श्रेणी के विजुअल तत्वों के रूप में प्रस्तुत किया गया है। रेंडरर, रखे गए नोड आयतों के चारों ओर डैश्ड तीर भेजता है एवं एक मापी गई शीर्षक/सारांश हेडर को सुरक्षित क्षेत्र के रूप में आरक्षित रखता है। लंबे सारांश एवं संबंध लेबल, मापी गई पंक्तियों में फिट हो जाते हैं; “फॉरेस्ट” भाग, प्राप्त हुए हेडर की ऊँचाई से नीचे स्थानांतरित हो जाता है, एवं नोड लेयर के बाद एक अपारदर्शी लेबल बॉक्स पेंट किया जाता है। हेडर को अंत में, एक अपारदर्शी पृष्ठभूमि के साथ रेंडर किया जाता है; इसलिए कोई बाहरी मार्ग, `以 Notemd 插件为对象的知识地图，覆盖系统架构、LLM 调用管道、图表渲染平台、模块地图、CLI 边界现实、关键设计决策与验证。` जैसे पाठ या `RendererRegistry feeds Vault files, preview modal, and export` जैसे संबंध स्पष्टीकरणों को ढक नहीं पाता। मूल `.drawnix` तीर, पुराने उपयोगकर्ताओं हेतु पुराने मेटाडेटा को बनाए रखते हुए, Plait-संगत `shape`, `texts[]`, मार्कर्स एवं स्ट्रोक फील्ड्स का उपयोग करता है। यदि किसी मांगे गए Drawnix मैप को कोई टकराव-मुक्त मार्ग या लेबल स्थान नहीं मिल पाता, तो फॉर्मेट त्रुटि के कारण जनरेशन विफल हो जाता है, एवं `.drawnix` ऑपरेशन के तहत Mermaid का कोई फॉलबैक चुपचाप संग्रहीत नहीं होता।
+Source और visual export अलग deliverables हैं। बाँटने से पहले target app में sample जाँचें। PowerPoint supported editable tables और merged cells के नीचे सुधरे separators रखता है; Mermaid/SVG image fallback हो सकते हैं। Preview या पूरे पृष्ठ की screenshot score native verification नहीं है।
 
-## सर्किट आरेख
+## Circuit diagrams
 
-समर्थित सर्किट संबंधी अनुरोधों हेतु **CircuitikZ स्रोत फ़ाइल** के साथ **Circuit diagram** विकल्प चुनें। Notemd पहले एक संरचित सर्किट विवरण तैयार करता है और फिर CircuitikZ स्रोत को लिखता है; यह मॉडल से बिना किसी प्रतिबंध के LaTeX लिखवाने की तुलना में अधिक विश्वसनीय है।
+**Circuit diagram** और **CircuitikZ source file** चुनें। पहले structured description, फिर source बनता है, unrestricted LaTeX नहीं। Support जानबूझकर सीमित है, खासकर common-source NMOS और supported CMOS blocks। Technical/publication use से पहले source और preview जाँचें।
 
-वर्तमान में CircuitikZ संबंधी सहायता जानबूझकर सीमित रखी गई है। कॉमन-सोर्स NMOS एम्प्लीफायर एवं समर्थित CMOS बिल्डिंग ब्लॉक ही सबसे अच्छा काम करते हैं। तकनीकी या प्रकाशन संबंधी कार्यों में जनरेट हुए सर्किट का उपयोग करने से पहले हमेशा प्रीव्यू एवं स्रोत फ़ाइल की जाँच अवश्य करें।
-
-SVG प्रीव्यू, Notemd द्वारा तैयार किया गया एक समीक्षा सहायक है; यह इस बात का प्रमाण नहीं है कि स्थानीय LaTeX या TikZJax इंस्टॉलेशन ने `.tex` फ़ाइल को सफलतापूर्वक कंपाइल किया है।
-
-**वैकल्पिक नेटिव कंपाइलेशन।** प्लग-इन में प्रीव्यू देखने, SVG/PNG फ़ाइलें प्राप्त करने, या प्रीव्यू PDF निर्यात करने हेतु आपको LaTeX की आवश्यकता नहीं है। डेस्कटॉप पर, यदि आपको कंपाइल संबंधी जानकारी या नेटिव LaTeX PDF चाहिए हो, तो आरेख सेटिंग्स या कमांड पैलेट से **CircuitikZ नेटिव कंपाइल एनवायरनमेंट** खोलें। Notemd, सिस्टम में मौजूद `tectonic` या `pdflatex` का उपयोग कर सकता है, कोई कस्टम एक्जीक्यूटेबल इस्तेमाल कर सकता है, या **Install** विकल्प चुनने के बाद पिन किया गया मैनेज्ड Tectonic रनटाइम भी इंस्टॉल कर सकता है। एनवायरनमेंट पैनल, प्रगति एवं त्रुटियों को ऑनलाइन दिखाता है एवं आपको बाद में मैनेज्ड रनटाइम हटाने की सुविधा भी देता है।
+SVG एक review साथी है, local LaTeX/TikZJax compile proof नहीं। Preview, SVG, PNG और preview PDF को LaTeX नहीं चाहिए। Desktop पर native PDF/diagnostics हेतु **CircuitikZ native compile environment** खोलें: system `tectonic`/`pdflatex`, custom executable या स्पष्ट **Install** के बाद pinned managed Tectonic। Panel progress/errors और managed runtime removal देता है।
 
 ## समस्या निवारण
 
-### परिणाम के रूप में गलत डायग्राम प्रकार प्राप्त हो रहा है
+### गलत type
 
-Auto-detect का उपयोग करने के बजाय, डायग्राम प्रकार को स्पष्ट रूप से चुनें। किसी सर्किट के लिए, **Circuit diagram** विकल्प चुनें एवं **Generate diagram** कमांड का उपयोग करें; पुरानी **Summarise as Mermaid diagram** कमांड का उपयोग न करें।
+Type स्पष्ट चुनें। Circuit के लिए **Circuit diagram** तथा **Generate diagram**, पुराना **Summarise as Mermaid diagram** नहीं।
 
-### एक स्रोत प्रारूप उपयुक्त नहीं है
+### अनुपयुक्त source
 
-स्रोत प्रारूप को **Auto** पर वापस सेट करें, या उस आरेख प्रकार के लिए उपयुक्त कोई प्रारूप चुनें। CircuitikZ सर्किट आरेखों के लिए है; Draw.io एवं Drawnix समर्थित संरचित आरेखों के लिए ही उपयोग में आते हैं।
+**Auto** पर लौटें या type-compatible format लें। CircuitikZ circuits के लिए, Draw.io/Drawnix supported structures के लिए हैं।
 
-### एक्सपोर्ट मेनू गायब है
+### Export menu नहीं
 
-SVG, PNG, और PDF के लिए एक विज़ुअल प्रीव्यू आवश्यक होता है। यदि केवल स्रोत पाठ ही उपलब्ध है, तो स्रोत फ़ाइल को सहेजें एवं उसे किसी उपयुक्त बाहरी टूल में खोलें।
+SVG/PNG/PDF को visual preview चाहिए। केवल text हो तो source बचाकर matching बाहरी tool में खोलें।
 
-### एक CircuitikZ फ़ाइल को बाहरी रूप से कंपाइल नहीं किया जा सकता है
+### CircuitikZ compile नहीं होता
 
-**CircuitikZ native compile environment** को खोलें एवं वहाँ पर मौजूद एनवायरनमेंट चेक को चलाएँ। मैनेज्ड रनटाइम की मरम्मत करें, या यह सुनिश्चित करें कि आपका कस्टम/सिस्टम कंपाइलर `circuitikz` पैकेज प्राप्त कर सकता है। Notemd, प्लगइन फ़ाइल के अंदर कोई पूर्ण TeX डिस्ट्रीब्यूशन समाहित नहीं करता है।
+**CircuitikZ native compile environment** जाँचें। Managed runtime repair करें या custom/system compiler का `circuitikz` package access देखें। Plugin file में पूरी TeX distribution नहीं आती।

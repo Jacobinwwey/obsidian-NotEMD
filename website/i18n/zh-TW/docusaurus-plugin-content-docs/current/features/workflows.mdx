@@ -1,16 +1,13 @@
 ---
 id: workflows
-title: "工作流程"
-description: "以一鍵按鈕串接多個任務"
+title: 工作流程
+description: 以有效動作 ID、明確目錄範圍與可預期錯誤策略組合側欄任務。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - 工作流程
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,125 +15,98 @@ import TLDR from '@site/src/components/TLDR';
 # 工作流程
 
 <TLDR>
-**Notemd 工作流程可將多個任務串聯成單一的一鍵操作。** 可使用簡易的 DSL 來定義如 `add-links > extract-concepts > research > diagram` 這樣的順序。工作流程會以側邊欄按鈕的形式出現，於目前的筆記或資料夾上執行整個流程。系統已內建預定義的工作流程；可在設定中建立自訂的工作流程。每個步驟都使用其專屬的單任務模型設定。
-
-這是[Obsidian AI知識管理指南](/docs/pillar-ai-knowledge)的一部分。
+工作流程依序執行現有側欄動作，可能要求資料夾或活動編輯器。它不是文字管線，各動作保留輸入、輸出與副作用。先使用可捨棄筆記和專用目錄。
 </TLDR>
 
 ## 概覽
 
-工作流程能消除逐一執行任務時的阻礙。不必右鍵點擊四次來添加連結、提取概念、查詢不熟悉的術語以及產生圖表，只要按一下側邊欄的按鈕，整個流程就會自動執行。Notemd 會負責處理順序安排、錯誤傳播以及進度報告。
+內置 **One-Click Extract** 定義：
 
-工作流程是以輕量級的 DSL（領域特定語言）來定義的。它們存在於設定中，會以可按下的按鈕形式出現在 Obsidian 的側邊欄上，且可以套用到目前的筆記或整個資料夾上。
-
-## 它是如何運作的
-
-### 工作流程執行管道
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Parse** -- DSL 字串會依 `>`（或 `>`）分割成有序的任務識別碼清單。
-2. **Resolve** -- 每個識別碼都對應一個內部指令（add-links、extract-concepts、research、translate、diagram 等）。
-3. **執行** -- 步驟會依序運行。每個步驟都會使用其所設定的每任務供應商與模型。
-4. **錯誤處理** -- 若某個步驟失敗，工作流程會根據您的錯誤處理原則，選擇中斷或繼續執行下一個步驟。
-5. **完成** -- 一則提示通知會回報成功狀態，或列出任何失敗的步驟。
+1. 為活動筆記添加連結；已配置目錄時建立概念檔。
+2. 為概念或批次選定目錄內符合條件的筆記生成正文，包含既有檔案。
+3. 修復批次生成的 complete 目錄內 Mermaid。
+
+預設不執行網路研究。只有標題生成的獨立研究設定開啟時，生成才使用研究。詳見[批次處理](../advanced/batch-processing)。
+
+## 工作原理
+
+### 執行管線
+
+步驟依序執行，側欄顯示進行步驟與失敗。取消停止後續步驟並傳播至支援請求，保留已完成寫入，沒有整體原子回復。
+
+概念目錄為初始優先上下文，批次生成記錄源目錄與 complete 目錄，後續 Mermaid 修復使用 complete。其他動作仍要求各自活動檔案、選區或互動條件。
 
 ### DSL 格式
 
-工作流程被定義為以 `>` 分隔的任務識別碼序列：
+每行一個命名按鈕，`::` 分隔名稱與動作，`>` 分隔 ID。忽略空行和 `#` 開頭行，未知動作 ID 會拒絕。
 
+```text
+擷取與圖表::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**可用的任務識別碼：**
+可用建構器或直接編輯 DSL。動作 ID 穩定，標籤隨 UI 語言。資料夾變體有自己的 ID，不能一般化替換名稱。
 
-| 識別碼 | 動作 |
-|------------|--------|
-| `process-current-add-links` | 在活躍筆記中加入維基連結 |
-| `extract-concepts-current` | 從活躍筆記中提取概念 |
-| `research-and-summarize` | 研究所選的文字或筆記標題 |
-| `process-current-translate` | 翻譯活躍筆記 |
-| `summarize-to-mermaid` | 根據目前的筆記生成圖表 |
-| `generate-from-title` | 根據筆記標題產生內容 |
-| `extract-original-text` | 提取原始文字（用於 OCR / 掃描內容） |
+| 標識符 | 動作／先決條件 |
+| ------------ | ----------------------- |
+| `process-current-add-links` | 為活動筆記添加連結 |
+| `process-folder-add-links` | 為所選資料夾添加連結 |
+| `extract-concepts-current` | 擷取活動筆記概念 |
+| `extract-concepts-folder` | 擷取所選資料夾概念 |
+| `generate-from-title` | 依活動筆記標題生成正文 |
+| `batch-generate-from-titles` | 為目錄內合格筆記生成正文 |
+| `research-and-summarize` | 在 Markdown 編輯器研究選區或標題 |
+| `summarize-as-mermaid` | 將受支援活動輸入摘要為 Mermaid |
+| `generate-diagram` | 由受支援輸入產生圖表 |
+| `preview-diagram` | 預覽受支援圖表源或產物 |
+| `translate-current-file` | 翻譯目前受支援檔案 |
+| `batch-translate-folder` | 翻譯所選資料夾 |
+| `extract-original-text` | 擷取指定原文片段 |
+| `batch-extract-original-text` | 從資料夾合格檔案擷取原文 |
+| `split-note-by-chapters` | 依章節拆分活動筆記 |
+| `batch-mermaid-fix` | 修復所選目錄 Mermaid 代碼塊 |
+| `fix-formula-current` | 正規化目前筆記公式分隔符 |
+| `batch-fix-formula` | 正規化所選目錄公式分隔符 |
+| `check-duplicates-current` | 檢查目前筆記重複項 |
+| `check-remove-duplicate-concepts` | 互動審核並移除重複概念 |
+| `test-llm-connection` | 測試已設定 provider |
+| `probe-slide-export-env` | 檢查本地投影片匯出環境 |
+| `export-slides` | 將活動檔案匯出為投影片 |
 
-**資料夾層級變體**會在識別名中將 `current` 替換為 `folder`。
+### 預設與自訂流程
 
-### 預定義工作流程與自訂工作流程
-
-Notemd 隨附適用於常見模式的預製工作流程：
-
-| 工作流程 | 鏈條 | 使用情境 |
-|----------|-------|----------|
-| **一次點擊提取** | add-links > extract-concepts > research | 一次處理完一篇研究論文 |
-| **完整流程** | add-links > extract-concepts > research > 圖表 | 完整知識抽取並加以視覺化呈現 |
-| **翻譯 + 連結** | 翻譯 > 加入連結 | 翻譯後在目標語言中建立連結概念 |
-
-**自訂工作流程**是在設定中建立的：
-
-1. 打開 **設定** --> **Notemd** --> **工作流程**
-2. 點擊 **「新增工作流程」**
-3. 輸入 DSL 連結串（例如：`process-current-add-links>extract-concepts-current`）
-4. 給它一個顯示名稱（例如：「快速連結 + 提取」）
-5. 新的按鈕會立即出現在側邊欄中。
+One-Click Extract 是內置預設，其他按鈕由你定義。搜尋設定、命名並排序動作，執行前核對側欄提示。先修正解析錯誤，再依賴預期鏈條。
 
 ## 設定
 
-| 設定 | 預設值 | 效果 |
-|---------|---------|--------|
-| `workflows` | 預先定義的集合 | 工作流程定義的陣列（名稱 + DSL） |
-| `workflowContinueOnError` | `true` | 若當前步驟失敗，請繼續執行下一個步驟 |
-| `workflowShowProgress` | `true` | 在每個步驟完成後顯示進度提示框 |
+| 設定 | 預設 | 作用 |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | 第一個步驟報告失敗後停止 |
+| `useMultiModelSettings` | `false` | 任務專用路由啟用前使用活動 provider |
+| `enableResearchInGenerateContent` | `false` | 標題生成預設不研究 |
 
-### 工作流程中的任務專用模型
+`continue_on_error` 允許前步失敗後繼續。僅在後續可使用剩餘輸入時啟用；繼續不使部分流程成為成功。
 
-工作流程中的每個步驟都使用其**自身**的單一任務模型設定。您不需要在 DSL 內部指定模型。解析順序為：
+### 流程中的任務模型
 
-1. 若 `useMultiModelSettings` 存在，則使用每任務的供應商/模型
-2. 全球 `activeProvider`，否則
-
-這表示 `add-links` 可以在 DeepSeek 上運行，而 `research` 則在 GPT-4o 上運行——所有操作都在同一個工作流程按鈕中完成。
+Provider/model 選擇屬於任務。啟用專用設定時，空模型覆寫使用該 provider 模型。處理私密材料前檢查每個任務。
 
 ## 範例
 
-您剛剛將一篇機器學習論文的 PDF 整體匯入您的保險庫，並希望進行完整的知識抽取：
+指定空的 `trial-concepts`，處理一篇可捨棄筆記，核對概念與 complete 目錄。如需了解各步輸出，先分別執行；審核後再擴大範圍。
 
-1. 打開已匯入的筆記
-2. 點擊 **「Full Pipeline」** 的側邊欄按鈕
-3. Notemd 執行：
-   - **步驟 1**：加入維基連結 -- `[[attention mechanism]]`、`[[transformer]]` 等。
-   - **步驟 2**：提取概念 -- 在您的概念資料夾中建立概念筆記
-   - **步驟 3**：資料搜集 -- 摘要關鍵字對應的網路資源
-   - **步驟 4**：圖表生成 -- 產生一篇論文的 Mermaid 思維導圖，呈現其結構
-4. 大約 30 秒後，您的筆記將包含連結、概念說明已建立、研究內容已附加，且圖表檔案也會被儲存下來
+## 建議
 
-只要一鍵，全部搞定。
+- 保持流程短，讓失敗與輸出歸屬清楚。
+- 無人值守鏈條避免清理／刪除，這些動作仍需互動確認。
+- 取消或復原衝突後，檢查日誌和檔案再重試。
+- 測試精確 provider/model 和目錄，連線成功不保證長批次符合配額。
 
-## 技巧
+## 延伸閱讀
 
-- **從預先定義的工作流程開始** -- 它們涵蓋了最常見的模式。只有在需要不同的執行順序時，才進行自訂。
-- **啟用 `workflowContinueOnError`** -- 當圖表製作過程中的某個步驟失敗時，不應該中斷整個流程。
-- **使用資料夾工作流程**進行大量處理 -- 右鍵點擊資料夾，選擇一個工作流程，所有筆記都會被處理。
-- **明確命名工作流程** -- 側邊欄的空間有限。請使用簡短且具行動指向性的名稱，例如「快速提取」或「翻譯 + 連結」。
-
----
-
-## 接下來的步驟
-
-- [研究](./research) -- 在將其加入工作流程之前，先了解研究步驟的功能
-- [Wiki-Links](./wiki-links) -- 大多數工作流程中使用的核心連結功能
-- [概念說明](./concept-notes) -- 以工作流程步驟的形式進行概念抽取
-- [批次處理](/docs/advanced/batch-processing) -- 資料夾工作流程的併發處理與進度報告
+- [概念筆記](./concept-notes)：條件與模板。
+- [批次處理](../advanced/batch-processing)：範圍、並行和部分完成。
+- [研究](./research)：網路與來源核驗。

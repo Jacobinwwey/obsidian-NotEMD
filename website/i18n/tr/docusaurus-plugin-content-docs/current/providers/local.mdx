@@ -1,63 +1,55 @@
 ---
 id: local
-title: "Yerel Modeller"
-description: "Ollama ve yerel LLM'ları yapılandırın"
+title: Yerel modeller
+description: >-
+  Ollama, LM Studio veya OVMS’yi hazırlayıp protokol, kimlik doğrulama ve ağ
+  sınırlarını inceleyin.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Yerel modeller
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Yerel Modeller
+# Yerel modeller
 
-<TLDR>
-**Yerel sağlayıcılar, içerikleri barındırılan API'lardan uzak tutar.** Mevcut yerel yol, yerel `ollama` iletimi kullanarak Ollama'yi ve OpenAI-uyumlu iletimi kullanarak LMStudio'yi kapsar. Her iki yol için de API anahtarı gerekmez, ancak yerel sunucu ve modelin zaten çalışıyor olması gerekir.
+<TLDR>Çalışan sunucu görevleri cihazınızda yürütebilir. Önce model ve protokolü hazırlayın. Web araştırması, dış uç noktalar, bağımlılık kurulumu ve ayrıca buluta yönlendirilen görevler çevrimdışı olmaz.</TLDR>
 
-Bu içerik [Obsidian AI Bilgi Yönetimi Kılavuzu](/docs/pillar-ai-knowledge) serisinin bir parçasıdır.
-</TLDR>
+## Hazırlık
 
-## Kurulum
+[Ollama](https://ollama.com/) sunucusu/modelini kurun veya [LM Studio](https://lmstudio.ai/) içinde model yükleyip API’yi başlatın. OVMS kurulumunu önceden hazırlayın. Notemd modelleri kurmaz veya sunucuları başlatmaz. Tam ad ve profil seçip bağlantıyı ve görevi test edin.
 
-Ollama için Ollama'yı yükleyin, istediğiniz modeli indirin, sunucuyu başlatın ve Notemd içinde bir `Ollama` sağlayıcı profili ekleyin. LMStudio için ise bir modeli LM Studio'nun yerel sunucusuna yükleyin ve bir `LMStudio` sağlayıcı profili ekleyin.
+## Uç nokta ve kimlik doğrulama
 
-Yerel modeller sadece ayarlar değil, işlevsel bağımlılıklardır. Notemd yalnızca yerel sürecin sunduğu özellikleri çağırabilir; bu yüzden eklentiyi hata ayıklamadan önce Obsidian dışındaki yerel modeli kontrol edin.
+| Profil | Temel URL | Örnek model | Protokol / erişim |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Ollama protokolü; zorunlu anahtar yok |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI uyumlu; anahtar isteğe bağlı, başlangıç `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI uyumlu; model ve erişim kurulumdan gelir |
 
-## Uç Nokta ve Kimlik Doğrulama
+`localhost`, Obsidian’ın çalıştığı cihazdır. Telefon bu adresle bilgisayara erişmez. LAN için gerçek adres ve uygun güvenlik gerekir. Korunmayan sunucuları güvenilmeyen ağlara açmayın.
 
-| Sağlayıcı | Base URL | Varsayılan Model | API Anahtarı | Notlar |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Gerekli değil | NDJSON akışı; `/api/tags` aracılığıyla model keşfi |
-| LMStudio | `localhost:1234/v1` | `local-model` | Gerekli değil | `"EMPTY"`'yu taşıyıcı token olarak gönderir; OpenAI-uyumlu |
+## Modeller
 
-Ollama, Base URL'ının altındaki yerel `/chat` yolunu kullanır. LMStudio ise OpenAI-uyumlu `chat/completions` rotasını takip eder ve yerel sunucuda yüklenmiş bir model bekler.
+Ollama `/api/tags` üzerinden etiketleri gösterir, LM Studio `/v1/models` sunabilir; OVMS kurulumu izler. Liste yeterli bellek veya doğru çıktı biçimini kanıtlamaz. Gerçek isteği deneyin.
 
-## Model Keşfi
+## Sorunlar
 
-Ollama, `ollama-tags` keşif modunu kullanır ve yerel olarak indirilen etiketleri listeler. LMStudio, sunucusu `/v1/models`'ı sunarken OpenAI-uyumlu model keşfi kullanır.
+- Bağlantı reddi: sunucu, dinleme adresi ve port.
+- Model yok: indirme/yükleme ve tam takma ad.
+- Kimlik doğrulama: gerekiyorsa gerçek token, körlemesine `EMPTY` değil.
+- Yavaş/eksik: bellek, bağlam ve bütçe; tek istekle başlayın.
+- Yanlış biçim: toplu ayardan önce protokol, istem ve modeli kontrol edin.
 
-Keşif hiçbir şey döndürmezse bu genellikle yerel sunucu durumuyla ilgilidir: model indirilmemiş, yüklenmemiş veya sunucu profille aynı ana makine/porta bağlanmamıştır.
+## Ne zaman seçilmeli
 
-## Sorun Giderme
+Veri sınırı, erişim ve ölçülen sonuçlar uygunsa. Ağ bağlantısını kesmeden bağımlılıkları hazırlayın. Tüm görev rotalarını kontrol edin; yerel parçalar bulut LLM’sine gidebilir. Tavily/DuckDuckGo çevrimiçi kalır; yerel uygulama aktarımı ayrı araçlar isteyebilir.
 
-- Bağlantı reddedildi: Ollama veya LM Studio'yu başlatın ve yapılandırılan portu doğrulayın.
-- Model bulunamadı: Test etmeden önce Ollama etiketini indirin veya LM Studio modelini yükleyin.
-- Yavaş çıktı: Bağlam boyutunu azaltın, daha küçük bir yerel model kullanın veya ağır görevleri barındırılan bir sağlayıcıya yönlendirin.
-- Boş veya bozuk yanıtlar: Seçilen sağlayıcı profilinin yerel sunucu protokolüyle eşleştiğinden emin olun; Ollama ve LMStudio birbirinin yerine kullanılamaz.
+## Sonraki adımlar
 
-## Ne Zaman Kullanılmalı
-
-Özel kasalar, çevrimdışı çalışma veya ucuz ve tekrarlayan görevler için yerel sağlayıcılar kullanın. Araştırma sentezi veya uzun süreli mantık yürütme işlemleri için yerelin otomatik olarak daha iyi olduğunu varsaymayın; model kalitesi ile donanım sınırları arasında bir denge vardır.
-
----
-
-## Sonraki Adımlar
-
-- [LLM Sağlayıcılar](/docs/providers/overview) -- Tam yapılandırma ve görev bazlı model ayarları
-- [Sorun Giderme](/docs/advanced/troubleshooting) -- Yerel sunucu çalışmıyorsa ortaya çıkan connection-refused hatalarını düzeltme
+- [Sağlayıcılar](./overview).
+- [Yapılandırma](../getting-started/configuration).
+- [Sorun giderme](../advanced/troubleshooting).

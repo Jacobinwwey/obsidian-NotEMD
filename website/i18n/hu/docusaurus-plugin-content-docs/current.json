@@ -1,10 +1,10 @@
 {
   "version.label": {
-    "message": "Tovább",
-    "description": "The label for version current"
+    "message": "Aktuális dokumentáció",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Előzet",
+    "message": "Első lépések",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
@@ -12,11 +12,11 @@
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM-providerek",
+    "message": "LLM-szolgáltatók",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Fejlesztett",
+    "message": "Haladó",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

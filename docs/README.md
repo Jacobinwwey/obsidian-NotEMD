@@ -4,6 +4,13 @@ Language: **English** | [简体中文](./README.zh-CN.md)
 
 This directory contains repository-level documentation for maintainers and contributors.
 
+| Audience | Entry point |
+|----------|-------------|
+| Newcomers | [Install and inspect a first task](https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start) |
+| Users | [Workflows and output boundaries](https://jacobinwwey.github.io/obsidian-NotEMD/docs/features/workflows) |
+| Developers | [Build, test and contribute](https://jacobinwwey.github.io/obsidian-NotEMD/docs/developers/overview) |
+| Agents | [Discover the public command contract](https://jacobinwwey.github.io/obsidian-NotEMD/docs/agents/overview) |
+
 ## Current Truth And Layout
 
 - [Release 1.9.8, Documentation, And Discoverability Plan (active)](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md)
@@ -34,6 +41,7 @@ This directory contains repository-level documentation for maintainers and contr
 - [circuitikz UI, Export, And Docs Sync Plan](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.md)
 - [Chapter Split + TOC Extraction](./chapter-split-toc.md)
 - [Release Workflow](./maintainer/release-workflow.md)
+- [Release Notes 1.9.8 (candidate)](./releases/1.9.8.md)
 - [Release Notes 1.9.7](./releases/1.9.7.md)
 - [Release Notes 1.9.6](./releases/1.9.6.md)
 - [Release Notes 1.9.5](./releases/1.9.5.md)

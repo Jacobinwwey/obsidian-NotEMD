@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "Fluxuri de lucru"
-description: "Ligați mai multe sarcini cu butoane într-un clic"
+title: Fluxuri de lucru
+description: >-
+  Înlănțuiți acțiuni existente cu ID-uri valide, context explicit și tratarea
+  previzibilă a erorilor.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Fluxuri de lucru
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Fluxuri de lucru
 
-<TLDR>
-**Notemd Fluxurile de lucru leagă mai multe sarcini într-o singură acțiune cu un clic.** Definiți secvențe precum `add-links > extract-concepts > research > diagram` folosind un DSL simplu. Fluxurile de lucru apar ca butoane în bara laterală care execută întreaga lanțare pe nota curentă sau folderul. Sunt incluse fluxuri de lucru predefinite; creați altele personalizate în setările aplicației. Fiecare pas folosește propria sa configurare de model pentru sarcina respectivă.
+<TLDR>Un flux execută pe rând acțiunile panoului. Fiecare poate cere un folder sau un editor activ. Nu este o conductă de text: acțiunile își păstrează intrările, rezultatele și efectele secundare. Începeți cu o notă și un folder de test.</TLDR>
 
-Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Prezentare
 
-## Prezentare generală
+Fluxul implicit **One-Click Extract**:
 
-O fluxură de lucru elimină dificultățile legate de executarea sarcinilor una câte una. În loc să faceți clic dreapta de patru ori pentru a adăuga linkuri, extrage concepte, căutați termeni necunoscuti și generați un diagramă, apăsați un buton din bara laterală și întreaga lanțare se execută. Notemd gestionează secvențierea, propagarea erorilor și raportarea progresului.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
 
-Fluxurile de lucru sunt definite într-un DSL ușor (limbaj specific domeniu). Ele se găsesc în setările aplicației, apar ca butoane clicabile în bara laterală Obsidian și pot fi aplicate fie pe nota curentă, fie pe întregul folder.
+1. Adaugă linkuri notei active și poate crea concepte dacă folderul este configurat.
+2. Generează după titlu pentru note eligibile din folderul de concepte/selectat, inclusiv existente.
+3. Repară Mermaid în folderul complete al generării.
+
+Lanțul implicit nu cercetează webul. Cercetarea poate fi activată separat la generarea din titluri. [Loturi](../advanced/batch-processing).
 
 ## Cum funcționează
 
-### Pipeline-ul de executare a fluxurilor de lucru
+### Execuție
 
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+Pașii rulează secvențial, cu stare și erori în panou. Anularea oprește pașii viitori și ajunge la cererile suportate. Fișierele terminate rămân; nu există tranzacție globală. Folderul de concepte are prioritate. Generarea în lot reține folderul sursă și complete; repararea Mermaid folosește complete. Alte acțiuni își păstrează cerințele de fișier, selecție și interacțiune.
+
+### DSL
+
+Un buton numit pe linie. `::` separă numele de acțiuni; `>` separă ID-urile. Liniile goale și cele care încep cu `#` sunt ignorate; ID-urile necunoscute sunt respinse.
+
+```text
+Concepte și diagramă::extract-concepts-current>summarize-as-mermaid
 ```
 
-1. **Analizare** -- Șirul DSL este împărțit la `>` (sau `>`) într-o listă ordonată de identificatoare de sarcini.
-2. **Resolvare** -- Fiecare identificator se referă la o comandă internă (add-links, extract-concepts, research, translate, diagram etc.).
-3. **Executare** -- Pașii se execută secvențial. Fiecare pas folosește furnizorul și modelul configurat pentru sarcina respectivă.
-4. **Gestionarea erorilor** -- Dacă un pas eșuează, fluxura de lucru fie se oprește, fie continuă la următorul pas, în funcție de politica dumneavoastră de gestionare a erorilor.
-5. **Finalizare** -- O notificare tip toast raportează succesul sau listează orice pași eșuați.
+Folosiți editorul de flux sau DSL-ul. ID-urile rămân stabile, etichetele urmează UI. Variantele de folder au ID-uri proprii; nu le deduceți prin înlocuiri arbitrare.
 
-### Formatul DSL
+| ID | Acțiune / condiție |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Linkuri în nota activă |
+| `process-folder-add-links` | Linkuri în folderul ales |
+| `extract-concepts-current` | Concepte din nota activă |
+| `extract-concepts-folder` | Concepte din folderul ales |
+| `generate-from-title` | Conținut din titlul activ |
+| `batch-generate-from-titles` | Conținut pentru notele eligibile ale folderului |
+| `research-and-summarize` | Cercetare după selecție/titlu în editorul Markdown deschis |
+| `summarize-as-mermaid` | Rezumarea intrării active suportate în Mermaid |
+| `generate-diagram` | Diagramă din intrare suportată |
+| `preview-diagram` | Previzualizare de sursă sau diagramă suportată |
+| `translate-current-file` | Traducerea fișierului activ suportat |
+| `batch-translate-folder` | Traducerea folderului ales |
+| `extract-original-text` | Extragerea pasajelor originale cerute |
+| `batch-extract-original-text` | Pasaje din fișiere eligibile ale folderului |
+| `split-note-by-chapters` | Împărțirea notei active în capitole |
+| `batch-mermaid-fix` | Repararea blocurilor Mermaid din folder |
+| `fix-formula-current` | Normalizarea delimitatorilor de formule în nota activă |
+| `batch-fix-formula` | Normalizarea delimitatorilor de formule în folder |
+| `check-duplicates-current` | Verificarea duplicatelor notei active |
+| `check-remove-duplicate-concepts` | Examinarea și ștergerea interactivă a conceptelor duplicate |
+| `test-llm-connection` | Testarea furnizorului configurat |
+| `probe-slide-export-env` | Verificarea mediului local de export al prezentării |
+| `export-slides` | Exportul fișierului activ în diapozitive |
 
-Fluxurile de lucru sunt definite ca o secvență de identificatoare de sarcini separate prin `>`:
+### Lanț implicit sau propriu
 
-```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
+One-Click Extract este predefinit. Definiți alte butoane prin nume și ordine și examinați descrierea din panou. Corectați erorile de parsare înainte de utilizare.
 
-**Identificatoarele de sarcină disponibile:**
+## Setări
 
-| Identificator | Acțiune |
-|------------|--------|
-| `process-current-add-links` | Adaugă linkuri wiki în nota activă |
-| `extract-concepts-current` | Extrage concepte din nota activă |
-| `research-and-summarize` | Cercetează textul selectat sau titlul notei |
-| `process-current-translate` | Traduce nota activă |
-| `summarize-to-mermaid` | Generează un diagram din nota activă |
-| `generate-from-title` | Generează conținut din titlul notei |
-| `extract-original-text` | Extrage textul original (pentru OCR / conținut scanat) |
+| Setare | Valoare implicită | Efect |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Oprire la prima eroare raportată de pas |
+| `useMultiModelSettings` | `false` | Furnizor activ până la activarea rutării per sarcină |
+| `enableResearchInGenerateContent` | `false` | Fără cercetare în generarea din titluri până la activare |
 
-**Variante la nivel de folder** înlocuiește `current` cu `folder` în numele identificatorului.
+`continue_on_error` permite continuarea după erori. Folosiți-l doar dacă pașii următori pot lucra cu intrările rămase. Continuarea nu transformă fluxul parțial în succes.
 
-### Fluxuri de lucru predefinite versus personalizate
+### Model per pas
 
-Notemd vine cu fluxuri de lucru gata preparate pentru pattern-uri comune:
-
-| Flux de lucru | Lanț | Caz de utilizare |
-|----------|-------|----------|
-| **Extragere cu un clic** | add-links > extract-concepts > research | Procesează o lucrare de cercetare într-o singură trecere |
-| **Pipeline complet** | add-links > extract-concepte > cercetare > diagramă | Extragerea completă a cunoștințelor cu vizualizare |
-| **Traduce + Legătură** | traduce > add-links | Traduce apoi legă conceptele în limbajul țintă |
-
-**Fluxuri de lucru personalizate** se creează în setările:
-
-1. Deschide **Setările** --> **Notemd** --> **Fluxuri de lucru**
-2. Face clic pe **"Adaugare flux de lucru"**
-3. Introdu lanțul DSL (de exemplu, `process-current-add-links>extract-concepts-current`)
-4. Dă-i un nume de afișare (de exemplu, "Legătură rapidă + Extragere")
-5. Noul buton apare imediat în bara laterală
-
-## Configurație
-
-| Setare | Implicit | Efect |
-|---------|---------|--------|
-| `workflows` | Set predefinit | Array de definiții de fluxuri de lucru (nume + DSL) |
-| `workflowContinueOnError` | `true` | Continuă la pasul următor dacă pasul actual eșuează |
-| `workflowShowProgress` | `true` | Afișează un toast cu progres după finalizarea fiecărui pas |
-
-### Modele pe sarcină în fluxurile de lucru
-
-Fiecare pas dintr-un flux de lucru utilizează propria sa configurare de model pentru fiecare sarcină. Nu este necesar să specificați modele în propriul DSL. Ordinea de rezolvare este:
-
-1. Provider/model pentru fiecare sarcină dacă `useMultiModelSettings` este disponibil
-2. `activeProvider` global în caz contrar
-
-Asta înseamnă că `add-links` poate fi rulat pe DeepSeek în timp ce `research` este rulat pe GPT-4o – toate în cadrul aceluiași flux de lucru.
+Modelul aparține sarcinii. Un câmp gol preia modelul furnizorului acelei sarcini. Verificați toate rutele înainte de conținut privat.
 
 ## Exemplu
 
-Ați importat recent un PDF dintr-un articol de științe în seiful dumneavoastră și doriți extragerea completă a cunoștințelor:
+Alegeți un `trial-concepts` gol și o sursă de test. Verificați conceptele și folderul complete raportat. Dacă destinația este neclară, rulați pașii separat. Extindeți după control.
 
-1. Deschideți nota importată
-2. Faceți clic pe butonul din bara laterală **"Full Pipeline"**
-3. Notemd execută:
-   - **Pasul 1**: Adăugați linkuri wiki – `[[attention mechanism]]`, `[[transformer]]` etc.
-   - **Pasul 2**: Extrageți concepte – creează note de concept în folderul dumneavoastră de concepte
-   - **Pasul 3**: Cercetare – rezumă sursele web pentru termenii cheie
-   - **Pasul 4**: Diagramă – generează o mapă mentală Mermaid a structurii articolului
-4. După aproximativ 30 de secunde, nota dumneavoastră conține linkuri, există note de concept, cercetarea este adăugată și un fișier de diagramă este salvat
+## Recomandări
 
-Totul prin un singur clic.
+- Păstrați lanțuri ușor de înțeles pentru diagnostic și proveniența fișierelor.
+- Ștergerile păstrează confirmarea interactivă; evitați-le în fluxuri nesupravegheate.
+- Citiți jurnalele și fișierele după anulare sau conflict.
+- Testați exact modelul/folderul; conexiunea nu dovedește cote suficiente pentru un lot mare.
 
-## Sfaturi
+## În continuare
 
-- **Începeți cu fluxuri de lucru predefinite** – acestea acoperă cele mai comune pattern-uri. Personalizați doar atunci când aveți nevoie de o secvență diferită.
-- **Activeazăți `workflowContinueOnError`** – o etapă de diagramă eșuată nu ar trebui să oprească întregul pipeline.
-- **Folosi fluxuri de lucru pentru foldere** pentru procesare în masă -- faceți clic dreapta pe o folderă, alegeți un flux de lucru, și fiecare notă este procesată.
-- **Denumiți fluxurile de lucru clar** -- spațiul din bara laterală este limitat. Folosiți nume scurte, orientate spre acțiune, cum ar fi „Extractare rapidă“ sau „Traduc + Link“.
-
----
-
-## Următoarele pași
-
-- [Cercetare](./research) -- Înțelegeți ce face pasul de cercetare înainte de a-l adăuga în fluxurile de lucru
-- [Legături Wiki](./wiki-links) -- Funcția principală de legături utilizată în majoritatea fluxurilor de lucru
-- [Note conceptuale](./concept-notes) -- Extracția de concepte ca pas al unui flux de lucru
-- [Procesare în masă](/docs/advanced/batch-processing) -- Concurență și raportare a progresului pentru fluxurile de lucru ale folderelor
+- [Concepte](./concept-notes).
+- [Loturi](../advanced/batch-processing).
+- [Cercetare](./research).

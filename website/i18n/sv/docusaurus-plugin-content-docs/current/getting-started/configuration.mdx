@@ -1,446 +1,101 @@
 ---
 id: configuration
-title: "Konfiguration"
-description: "Konfigurera Notemd inställningar och preferenser"
+title: Konfiguration
+description: 'Hitta inställningar för leverantörer, utdata, språk och arbetsflöden.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [configuration, settings, customization, preferences]
-concepts: [Configuration, Per-Task Models, Output Paths, Custom Workflows]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Konfiguration
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Konfiguration
 
-<TLDR>
-**Notemd konfigurationen omfattar 6 huvudområden:** (1) LLM leverantörer och API nycklar, (2) Modellval per uppgift, (3) Utdatavägar och mallar, (4) UI språk och utdataspråk, (5) Söktyper (Tavily/DuckDuckGo), (6) Anpassade arbetsflöden. Alla inställningar finns i Obsidian Inställningar → Notemd. Förändringar träder omedelbart i kraft.
-</TLDR>
+<TLDR>Öppna Settings → Notemd och sök efter fältet. Välj leverantör och utdatasökväg före körning. Testa ändringar på en anteckning; en pågående uppgift kan behålla inställningarna från start.</TLDR>
 
-## Översikt över inställningarna
+## Översikt
 
-Access: **Obsidian Inställningar (⚙️) → Notemd**
-
-### Huvudavsnitt
-
-1. **Leverantörskonfiguration** — API nycklar, bas URLs, modeller
-2. **Uppgiftsinställningar** — Modellval per uppgift
-3. **Utdatakonfiguration** — Var genererade filer sparas
-4. **Språkinsättningar** — UI och utdataspråk
-5. **SökinTEGRATION** — Tavily/DuckDuckGo inställning
-6. **Arbetsflöden** — Anpassade knappkedjor
-7. **Avancerat** — Diagnostik, batchbearbetning, chunking
+Standardleverantören är DeepSeek utan autentiseringsuppgifter. Att välja profil skapar inget konto, installerar ingen modell och ger inga rättigheter. Se [leverantörer](../providers/overview).
 
 <!-- notemd-settings-favorites-guide -->
-## Notemd – Upptäckt av inställningar och favoriter
+## Sökning och favoriter
 
-Inställningssidan är utformad för upprepade användningar snarare än enstaka konfigurationer:
+**Search settings** söker namn, beskrivningar, alias och synliga kategorier och leder till fältet. **★ Favorites** visar sparade inställningar med beskrivning, kategori och destination. De sparas per valv, överlever omstart och rensar gamla ID:n. Sökningen bevaras när verktygsfältet fälls ihop. Favoritlistan är skild från filtret som bara söker favoriter.
 
-- Använd det **Search settings**-fältet för att hitta en inställning efter dess namn, beskrivning, alias eller synlig kategori. Resultaten rankas enligt relevans och du hoppar direkt till den specifika inställningen.
-- Använd **★ Favorites** för att behålla inställningar som ofta justeras i den aktuella Vault. Genom att klicka på den öppnas en dedikerad lista med inställningens namn, beskrivning, kategori och ett direkt navigeringsmål. Ta bort en favorit från listan utan att lämna inställningssidan.
-- Upptäckstoolbanan är utvidgad som standard. Använd chevron-knappen för att sammanfatta den till en flytande kontroll i övre högra hörnet när du behöver mer vertikal utrymme; den aktuella sökningen bevaras och återställs när den utvidgas.
-- Favoritlistan är oberoende av filtret som endast visar favoriter. Favoriter använder stabila inställnings-ID:er, överlever Obsidian-startar, och obekanta ID:er tas säkert bort när en inställning inte längre existerar.
+**Diagram preview export PPI** börjar på 300, tillåter 72–600 och påverkar bara PNG. SVG/PDF bevarar stödd vektorgeometri. **Also export complete Mermaid visuals** styr följeslagarfiler, inte om Mermaid visas i Drawnix-förhandsvisningen.
 
-Inställningen **Diagram preview export PPI** har som standard värdet **300 PPI** och accepterar värden mellan **72-600**. Den styr endast PNG-rasteriseringen; SVG och PDF bevarar vektorgeometrin. Inställningen **Also export complete Mermaid visuals** styr valfria externa Mermaid-filer som komplettering och styr inte Mermaid-synligheten i Drawnix-previewer.
----
+## 1. Leverantör
 
-## 1. Leverantörskonfiguration
+Ange endpoint för rätt protokoll, nödvändig nyckel och tillgänglig modell. Modellista och lyckad generering är skilda kontroller. Förbered lokal server/modell; moln/gateway tar emot innehåll. Kontrollera även uppgiftsspecifika vägar innan privat material används.
 
-### Lägga till en leverantör
+## 2. Modell per uppgift
 
-1. **Välj leverantör** från rullgardinslistan (30+ tillgängliga)
-2. **Ange API nyckel**
-3. **Valfritt**: Ställ in en anpassad bas URL (för proxyer/gatewayer)
-4. **Klicka på "Få modelllista"** för att verifiera anslutningen
-5. **Välj standardmodell**
+`useMultiModelSettings` ger separata leverantörer/modeller för länkar, titlar, forskning, översättning, begrepp, originaltext och Mermaid. Tom override använder vald leverantörs modell; avstängt använder aktiv leverantör. Jämför noggrannhet, latens och verklig kostnad på samma anteckning.
 
-### Vanliga leverantörer
+## 3. Utdata
 
-#### OpenAI
-```
-Provider: OpenAI
-API Key: sk-...
-Base URL: https://api.openai.com/v1 (default)
-Model: gpt-4o-mini
-```
+| Uppgift | Standardresultat |
+| ------ | ------------------------- |
+| Länkar | Separat `_processed.md` intill källan; flytt av original avstängd |
+| Fristående begreppsextraktion | Vald begreppsmapp; bara titel, bakåtlänkar av |
+| Översättning | Intilliggande `_<language>.md`; befintligt mål kan skrivas över |
+| Forskning | Sammanfattning läggs till i aktiv Markdown |
+| Batchgenerering från titlar | Skriver lämpliga källor och flyttar till intilliggande `<folder>_complete` om målet tillåter |
+| Diagramförhandsvisning/export | Välj stödd källa eller visuell export och kontrollera rapporterad sökväg |
 
-#### Anthropic (Claude)
-```
-Provider: Anthropic
-API Key: sk-ant-...
-Model: claude-sonnet-4-6
-```
+Begreppsmappen är tom från början; `concepts` är ett exempel. Fristående extraktion har minimal/full form, ingen generell mallmotor. [Begrepp](../features/concept-notes). Bearbetning och översättning har separata suffix och mappar. Kontrollera mål och återställningskonflikter; avbrott ångrar inte slutförda skrivningar.
 
-#### Ollama (Lokal)
-```
-Provider: Ollama
-Base URL: http://localhost:11434 (default)
-Model: llama3.1
-API Key: (not required)
+## 4. Språk
+
+UI har 21 språkversioner, webbplatsen 34 språkrutter. `uiLocale: auto` väljer stödd mappning; annars används engelska. Genereringsspråk är separat, initialt engelska. Stödda uppgifter kan ha eget språk; översättning använder `language`. Antalen bevisar inte modellens språkförmåga.
+
+## 5. Sökning
+
+Välj Tavily med nyckel eller DuckDuckGo uttryckligen. Tom Tavily-nyckel växlar inte leverantör. Båda använder nätverk; DuckDuckGo kan hämta resultatsidor. Forskning vid titelgenerering är av: `enableResearchInGenerateContent`. Lokal hämtning är också av, med egna mapp-/uppgiftsgränser. Inkluderade lokala utdrag skickas till vald LLM.
+
+## 6. Arbetsflöden
+
+Använd byggaren eller en namngiven DSL-rad per knapp:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-#### DeepSeek
-```
-Provider: DeepSeek
-API Key: sk-...
-Model: deepseek-chat
-```
-
-### Flera leverantörer
-
-Du kan konfigurera flera leverantörer och byta mellan dem per uppgift:
-- **Huvudleverantör**: Används som fallback
-- **Uppgiftsspecifika leverantörer**: Överskrivs för specifika uppgifter
-
----
-
-## 2. Uppgiftsspecifika modeller
-
-Konfigurera olika modeller för olika uppgifter för att optimera kostnad/kvalitet:
-
-### Uppgiftstyper
-
-| Uppgift | Standardmodell | Syfte |
-|------|--------------|---------|
-| **Länkning** | Huvudleverantör | Identifiera koncept för wiki-länkar |
-| **Konceptgenerering** | Huvudleverantör | Extrahera och beskriva koncept |
-| **Forskning** | Huvudleverantör | Sammanfatta webbsökningresultat |
-| **Översättning** | Huvudleverantör | Översätta text |
-| **Diagramgenerering** | Huvudleverantör | Generera Mermaid/Canvas-diagram |
-
-### Exempel: Kostnadsoptimerad inställning
-
-```
-Linking: gpt-4o-mini (fast, many calls)
-Concept Generation: claude-sonnet-4-6 (quality extraction)
-Research: gpt-4o (web-grounded)
-Translation: gemini-flash (multilingual)
-Diagram: ollama/llama3.1 (free, local)
-```
-
-### Så här konfigurerar du
-
-1. **Inställningar → Notemd → Uppgiftsinställningar**
-2. För varje uppgift, välj:
-   - ✅ **Använd huvudleverantören** (standard)
-   - 🔄 **Använd anpassad leverantör** → välj leverantör + modell
-
----
-
-## 3. Utdatakonfiguration
-
-### Utdata av konceptnoter
-
-**Var nya konceptanteckningar sparas:**
-
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Mall:**
-```
-Settings → Output → Concept Template
-Default:
----
-tags: [concept]
-created: {{date}}
----
-
-# {{concept}}
-
-{{description}}
-
-## Backlinks
-{{backlinks}}
-```
-
-### Alternativ för mappstruktur
-
-**Alternativ 1: Platt (alla koncept i en mapp)**
-```
-vault/
-└── concepts/
-    ├── Machine Learning.md
-    ├── Neural Networks.md
-    └── Deep Learning.md
-```
-
-**Alternativ 2: Hierarkisk (enligt källmapp)**
-```
-vault/
-├── papers/
-│   └── concepts/
-│       └── Transformer.md
-└── notes/
-    └── concepts/
-        └── Attention Mechanism.md
-```
-
-Konfigurera: **Inställningar → Utdata → Använd hierarkiska mappar**
-
-### Diagramutdata
-
-**Var diagram sparas:**
-```
-Settings → Output → Diagram Folder
-Default: diagrams/
-```
-
-**Format:**
-- `.mmd` (Mermaid källa)
-- `.canvas` (JSON Canvas)
-- `.html` (Vega-Lite)
-
----
-
-## 4. Språkinställningar
-
-### UI Språk
-
-**Gränssnittsspråk** (knappar, menyer, dialogrutor):
-
-```
-Settings → Language → UI Language
-Options: 21+ languages
-Default: System language
-```
-
-Stödd: Engelska, 简体中文, 繁體中文, 日本語, 한국어, Español, Français, Deutsch, Русский, العربية, och mer.
-
-### UtdataSpråk
-
-**Språk för genererad innehåll** (konceptnoter, forskningssammanfattningar):
-
-```
-Settings → Language → Output Language
-Options: Same as UI languages
-Default: Same as UI
-```
-
-**Användningsfall:** Kinesiska UI + engelsk utdata för tvåspråkig forskning.
-
-### Översättningsmål
-
-**Standardmål språk** för översättningstjänster:
-
-```
-Settings → Translation → Target Language
-Default: English
-```
-
----
-
-## 5. Sökintegration
-
-### Tavily (Rekommenderat)
-
-**AI-optimerad söktjänst:**
-
-```
-Settings → Search → Service: Tavily
-API Key: tvly-...
-```
-
-Skaffa nyckel: [tavily.com](https://tavily.com/)
-
-**Funktioner:**
-- Högkvalitativa resultat
-- AI-optimerade sammanfattningar
-- Källciteringar
-
-### DuckDuckGo (Experimentellt)
-
-**Ingen API-nyckel nödvändig:**
-
-```
-Settings → Search → Service: DuckDuckGo
-```
-
-**Obs!** Lägre kvalitet, inget anpassning.
-
----
-
-## 6. Arbetssökvenskonfiguration
-
-### Skapa anpassade arbetssökvenser
-
-**Arbetsflöden kopplar samman flera uppgifter i en knapp.**
-
-1. **Inställningar → Arbetsflöden → Lägg till arbetsflöde**
-2. **Namn**: "Paper Analysis Flow"
-3. **DSL**: `process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid`
-4. **Spara**
-
-En ny knapp dyker upp i vänstra sidofältet.
-
-### DSL-syntax
-
-**Format:** `action1>action2>action3`
-
-**Tillgängliga åtgärder:**
-- `process-current-add-links` — Lägg till wiki-länkar till aktuell anteckning
-- `extract-concepts-current` — Generera konceptanteckningar
-- `research-and-summarize` — Webbsökning + sammanfattning
-- `translate-current` — Översätta aktuell anteckning
-- `summarize-as-mermaid` — Generera Mermaid-diagram
-- `process-folder-add-links` — Batchprocessa mapp
-
-**Exempel på arbetsflöden:**
-
-**Snabb konceptextraktion:**
-```
-process-current-add-links>extract-concepts-current
-```
-
-**Djup forskning:**
-```
-process-current-add-links>research-and-summarize>extract-concepts-current
-```
-
-**Flerspråkig analys:**
-```
-translate-current>process-current-add-links>extract-concepts-current
-```
-
----
+`::` skiljer namn från åtgärder, `>` skiljer åtgärds-ID:n. Standardpolicyn stoppar vid rapporterat fel. Se [arbetsflöden](../features/workflows) för omfång och fortsatt körning efter fel.
 
 ## 7. Avancerade inställningar
 
-### Batchbearbetning
+| Inställning | Standard | Effekt |
+| --------- | --------- | -------- |
+| `activeProvider` | `DeepSeek` | Leverantör utan separat uppgiftsväg |
+| `useMultiModelSettings` | `false` | Leverantör/modell per uppgift |
+| `useCustomConceptNoteFolder` | `true` | Tillåt begreppsutdata när en mapp valts |
+| `conceptNoteFolder` | `''` | Ingen begreppsmapp initialt |
+| `extractConceptsMinimalTemplate` | `true` | Endast titel i fristående begrepp |
+| `extractConceptsAddBacklink` | `false` | Aktivera bakåtlänkar vid fristående extraktion |
+| `moveOriginalFileOnProcess` | `false` | Behåll original vid länkning |
+| `chunkWordCount` | `3000` | Ungefärliga textdelar, ingen tokengräns |
+| `batchConcurrency` | `1` | Standard för batchsamtidighet |
+| `enableBatchParallelism` | `false` | Parallell schemaläggning på vägar som använder omkopplaren |
+| `enableStableApiCall` | `false` | Uttryckligt stabilt anropsläge |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Stoppa arbetsflödet vid rapporterat fel |
 
-**Bearbeta flera filer parallellt:**
+Textdelarnas storlek är skild från utdatas tokenbudget. Mindre delar löser inte alla kontextgränser; lägre samtidighet förhindrar inte alla 429-fel.
 
-```
-Settings → Advanced → Batch Processing
-Concurrency: 3 (default)
-```
+## Inställningsprofiler
 
-Högre = snabbare men fler API anrop.
+Inställningar är tilläggsdata i valvet. Säkerhetskopiera före ändringar. Leverantörsexport har ett eget kontrakt för maskering, inte en fullständig säkerhetskopia. Granska endpoints och metadata även i maskerad utdata. Publicera inte råa inställningar eller diagnostik med privata anteckningar.
 
-### Smart chunking
+## Konfigurationsproblem
 
-**För långa anteckningar, dela upp i chunkar:**
-
-```
-Settings → Advanced → Smart Chunking
-Chunk Size: 2000 words (default)
-Overlap: 200 words (default)
-```
-
-Förhindrar fel på grund av tokengräns.
-
-### Diagnostikpanelen
-
-**Visa detaljerade loggar:**
-
-```
-Settings → Advanced → Enable Diagnostics
-```
-
-Visar:
-- API förfrågningar/svar
-- Tokenanvändning
-- Bearbetningstider
-- Fel
-
-### Detektering av dubblella koncept
-
-**Undvik nära-duplika koncept:**
-
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (default, 0-1)
-```
-
-Högre = mer aggressiv sammanfogning.
-
----
-
-## Konfigurationsprofiler
-
-### Exportera/Importera inställningar
-
-**Dela konfigurationer mellan enheter:**
-
-1. **Inställningar → Avancerat → Exportera konfiguration**
-2. Sparar `notemd-config.json`
-3. På ny enhet: **Importera konfiguration**
-
-**Vad som ingår:**
-- Provider API-nycklar (valfritt)
-- Modellval
-- Utdatavägar
-- Anpassade arbetsflöden
-
----
-
-## Rekommenderade konfigurationer
-
-### För studenter
-
-```
-Provider: OpenAI (gpt-4o-mini)
-Concept Folder: concepts/
-UI Language: System
-Output Language: System
-Workflow: "Study Flow" (add-links>extract-concepts)
-```
-
-### För forskare
-
-```
-Providers:
-  - Linking: DeepSeek (cheap, many calls)
-  - Concepts: Claude Sonnet (high quality)
-  - Research: GPT-4o (web-grounded)
-Concept Folder: notes/concepts/
-Hierarchical: Yes
-Workflow: "Paper Flow" (add-links>extract>research>diagram)
-```
-
-### För användare med integritetsfokus
-
-```
-Provider: Ollama (llama3.1)
-All tasks: Local model
-Search: DuckDuckGo (no API)
-Diagnostics: Off
-```
-
-### För tvåspråkig arbete
-
-```
-UI Language: Chinese
-Output Language: English
-Translation Target: Chinese
-Provider: Gemini (multilingual)
-```
-
----
-
-## Felaktighetsfelsökning i konfigurationen
-
-### Inställningar sparas inte
-- Kontrollera filrättigheter i `.obsidian/plugins/notemd/`
-- Prova: Inaktivera plugin → Aktivera igen
-
-### API-nyckeln är ogiltig
-- Inga extra mellanrum
-- Kontrollera giltighetsperioden
-- Kontrollera krediterna i leverantörspanelen
-
-### Modeller laddas inte
-- Klicka på "Få modelllista" för att uppdatera
-- Kontrollera nätverksanslutning
-- Prova en annan leverantör
-
----
+Testa exakt leverantör/modell med en liten anteckning. Saknas ett fält, kontrollera sökning, kategori, utvecklarläge och valv. Rapportera version och minimala inställningar utan hemligheter.
 
 ## Nästa steg
 
-- 📖 [Utforska funktioner](../features/wiki-links)
-- 🔌 [Leverantörsinställningsguider](../providers/overview)
-- ❓ [FAQ](../faq)
+- [Snabbstart](./quick-start).
+- [Batcher](../advanced/batch-processing).
+- [Egna prompter](../advanced/custom-prompts).
+- [Felsökning](../advanced/troubleshooting).

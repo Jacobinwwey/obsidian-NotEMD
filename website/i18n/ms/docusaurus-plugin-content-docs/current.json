@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "Seterusnya",
-    "description": "The label for version current"
+    "message": "Dokumentasi semasa",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Mulakan Penggunaan",
+    "message": "Bermula",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Ciri-ciri Utama",
+    "message": "Ciri utama",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
@@ -16,7 +16,7 @@
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Terkini",
+    "message": "Lanjutan",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

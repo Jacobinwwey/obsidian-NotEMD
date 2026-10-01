@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Obsidian के लिए Notemd प्लगइन
 
+> Notemd, MIT लाइसेंस वाला Obsidian प्लगइन है जो लिंकयुक्त Markdown, अवधारणा नोट, सारांश, अनुवाद और आरेख बनाता है। फ़ाइलें वॉल्ट में रहती हैं; क्लाउड कार्य चुने गए प्रदाता को सामग्री भेजते हैं और वेब शोध नेटवर्क का उपयोग करता है।
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## यहाँ से शुरू करें
+
+| पाठक | प्रवेश | लक्ष्य |
+|---|---|---|
+| नए उपयोगकर्ता | [त्वरित शुरुआत](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/getting-started/quick-start) | प्रदाता सेट करें और एक नोट जाँचें |
+| उपयोगकर्ता | [कार्यप्रवाह](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/features/workflows) | फ़ोल्डर, आउटपुट और पुनर्प्राप्ति नियंत्रित करें |
+| डेवलपर | [डेवलपर मार्गदर्शिका](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/developers/overview) | मौजूदा अनुबंधों को बिल्ड, टेस्ट और विस्तारित करें |
+| एजेंट | [एजेंट मार्गदर्शिका](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/agents/overview) | चार समर्थित निर्यात कमांड खोजें |
+
+**संस्करण:** 1.9.8
+
+- **रद्द करना और पुनर्प्राप्ति:** शेड्यूलिंग और पुनः प्रयास में रद्द करने की स्थिति बनी रहती है तथा शोध और अनुवाद की देर से होने वाली लिखाई रुकती है। पूरे हो चुके आउटपुट सुरक्षित रहते हैं और पुनर्प्राप्ति टकराव बताए जाते हैं।
+- **इतिहास और मूल प्रारूप निर्यात:** खोज का पाठ और कीबोर्ड फ़ोकस बना रहता है। PowerPoint की संयुक्त कोशिकाओं के विभाजक और CircuitikZ तार/लेबल सुधारे गए हैं। स्थानीय बैच खोज एक सुसंगत स्नैपशॉट उपयोग करती है।
+- **रिलीज़ और दस्तावेज़:** साफ़ स्रोत की उत्पत्ति और डाउनलोड की गई फ़ाइलों का सत्यापन, पाठक-विशिष्ट प्रवेश और सीधे लिखे गए अनुवाद।
+
+36 प्रदाता प्रीसेट और 33 चलने योग्य आरेख प्रकार 1.9.7 में भी थे। [अपग्रेड मार्गदर्शिका](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/releases/1.9.8) · [सार्वजनिक रिलीज़ जाँचें](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+पुनर्व्यवस्था के बाद Drawnix के शाखाओं के बीच के तीर स्थिर रहते हैं। PPTX में Mermaid/SVG के लिए छवि विकल्प इस्तेमाल हो सकता है। रद्द करना सहेजे बदलाव वापस नहीं करता और दूरस्थ जनरेशन या बिलिंग रुकने की गारंटी नहीं देता। वास्तविक मोबाइल उपकरण और Obsidian 0.15.0 अभी सत्यापित नहीं हैं।
 
 दूसरी भाषाओं में दस्तावेज़ पढ़ें: [भाषा केंद्र](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- AI-संचालित बहुभाषी ज्ञान संवर्धन
-==================================================
-```
-
-अपना स्वयं का ज्ञान-आधार बनाने का एक आसान तरीका।
-
-Notemd आपके Obsidian वर्कफ़्लो को बेहतर बनाता है। यह विभिन्न बड़े भाषा मॉडल (LLMs) के साथ एकीकृत होकर आपके बहुभाषी नोट्स को संसाधित करता है, मुख्य अवधारणाओं के लिए स्वचालित रूप से wiki-links बनाता है, संबंधित concept notes तैयार करता है, वेब शोध करता है और शक्तिशाली ज्ञान ग्राफ़ बनाने में आपकी मदद करता है।
-
 यदि आप Notemd का उपयोग करना पसंद करते हैं, तो कृपया [⭐ GitHub पर स्टार दें](https://github.com/Jacobinwwey/obsidian-NotEMD) या [☕️ मुझे कॉफी खरीदें](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## विषय सूची
 
@@ -50,13 +50,26 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 
 ## त्वरित शुरुआत
 
-1.  **इंस्टॉल और सक्षम करें**: प्लगइन को Obsidian Marketplace से प्राप्त करें।
-2.  **LLM कॉन्फ़िगर करें**: `Settings -> Notemd` पर जाएँ, अपना LLM प्रदाता चुनें (जैसे OpenAI या स्थानीय प्रदाता जैसे Ollama), और अपनी API कुंजी/URL दर्ज करें।
-3.  **साइडबार खोलें**: बाएँ रिबन में Notemd वैंड आइकन पर क्लिक करके साइडबार खोलें।
-4.  **एक नोट संसाधित करें**: कोई भी नोट खोलें और साइडबार में **"Process File (Add Links)"** पर क्लिक करें ताकि मुख्य अवधारणाओं में स्वचालित रूप से `[[wiki-links]]` जोड़े जा सकें।
-5.  **त्वरित वर्कफ़्लो चलाएँ**: प्रोसेसिंग, बैच जनरेशन और Mermaid सफ़ाई को एक ही स्थान से जोड़ने के लिए डिफ़ॉल्ट **"One-Click Extract"** बटन का उपयोग करें।
+1. **Settings → Community plugins → Browse** से **Notemd** इंस्टॉल करके सक्षम करें।
+2. सही endpoint, पहचान विवरण और मॉडल सेट करें। कनेक्शन टेस्ट के बाद वास्तविक जनरेशन जाँचें; मॉडल सूची मिलना चैट अनुमति का प्रमाण नहीं है।
+3. खाली `trial-concepts` फ़ोल्डर बनाकर अवधारणा नोट फ़ोल्डर चुनें; शुरुआती पथ खाली है। `Notemd trial.md` में छोटा परीक्षण पाठ रखें जिसे प्रदाता को भेज सकते हैं।
+4. **Process File (Add Links)** चलाएँ। सुरक्षित मूल फ़ाइल के पास `Notemd trial_processed.md`, लिंक और अवधारणा नोट जाँचें।
+5. परीक्षण मूल नोट दोबारा खोलकर उसी फ़ोल्डर के साथ **One-Click Extract** चलाएँ: लिंक जोड़ना, योग्य नोटों के शीर्षकों से बैच जनरेशन और complete फ़ोल्डर में Mermaid सुधार। पहले से मौजूद योग्य नोट भी शामिल हो सकते हैं।
 
-बस इतना ही। वेब रिसर्च, अनुवाद और कंटेंट जनरेशन जैसी और सुविधाएँ अनलॉक करने के लिए सेटिंग्स देखें।
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+वेब शोध और आरेख बनाना अलग कार्य हैं। रद्द करने के बाद सक्रिय कार्य समाप्त होने दें और दोबारा चलाने से पहले पूर्ण आउटपुट तथा पुनर्प्राप्ति फ़ाइलें जाँचें।
+
+<details>
+<summary>इंटरफ़ेस के उदाहरण</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## भाषा समर्थन
 
@@ -89,9 +102,9 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 - **OpenAI-compatible stable long-request chain hardening**: stable mode में OpenAI-compatible कॉल अब हर प्रयास के लिए स्पष्ट 3-चरणीय क्रम अपनाती हैं: primary direct streaming transport, फिर direct non-stream transport, फिर `requestUrl` fallback (जो आवश्यक होने पर streamed parsing तक उन्नत हो सकता है)। इससे false negatives कम होते हैं जब providers buffered responses पूरा कर देते हैं लेकिन streaming pipes अस्थिर होते हैं।
 - **LLM API में protocol-aware streaming fallback**: लंबी fallback कोशिशें अब सिर्फ OpenAI-compatible endpoints पर नहीं, बल्कि हर built-in LLM path पर protocol-aware streamed parsing का उपयोग करती हैं। Notemd अब OpenAI/Azure-style SSE, Anthropic Messages streaming, Google Gemini SSE responses और Ollama NDJSON streams को desktop `http/https` और non-desktop `fetch` दोनों पर संभालता है, और बाकी direct OpenAI-style provider entrypoints भी उसी shared fallback path का उपयोग करते हैं।
 - **China-ready provider presets**: built-in presets अब `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` और `SiliconFlow` को मौजूदा global और local providers के साथ कवर करते हैं।
-- **विश्वसनीय बैच प्रोसेसिंग**: **अंतरालबद्ध API कॉल** के साथ बेहतर concurrent processing logic rate-limiting errors को रोकने और बड़े batch jobs में स्थिर प्रदर्शन सुनिश्चित करने में मदद करती है। नई implementation सुनिश्चित करती है कि tasks अलग-अलग अंतराल पर शुरू हों, सब एक साथ नहीं।
-- **सटीक प्रगति रिपोर्टिंग**: एक बग ठीक किया गया है जिसके कारण progress bar अटक सकता था, ताकि UI अब हमेशा वास्तविक स्थिति को दर्शाए।
-- **मजबूत parallel batch processing**: वह समस्या हल की गई है जिसमें parallel batch operations समय से पहले रुक जाती थीं, जिससे अब सभी फ़ाइलें विश्वसनीय और कुशलतापूर्वक संसाधित होती हैं।
+- **विश्वसनीय बैच प्रोसेसिंग**: अलग-अलग समय पर शुरू होने वाली API कॉल अनुरोधों की भीड़ कम करती हैं। प्रदाता का कोटा और दर सीमा फिर भी लागू रहते हैं।
+- **सटीक प्रगति रिपोर्टिंग**: प्रगति में पूरी हुई, विफल और रद्द फ़ाइलों को अलग दिखाया जाता है। प्रक्रिया समाप्त होने का मतलब हर फ़ाइल का सफल होना नहीं है।
+- **मजबूत parallel batch processing**: सारांश से पहले चालू कार्यों के समाप्त होने की प्रतीक्षा होती है। रद्द करने से आगे का काम रुकता है, लेकिन सहेजे गए बदलाव वापस नहीं होते; पूरा फ़ोल्डर एक ही लेनदेन नहीं है।
 - **प्रोग्रेस बार सटीकता**: "Create Wiki-Link & Generate Note" कमांड के progress bar के 95% पर अटकने वाले बग को ठीक किया गया है, जिससे अब पूरा होने पर सही 100% दिखता है।
 - **विस्तृत API डिबगिंग**: "API Error Debugging Mode" अब LLM providers और search services (Tavily/DuckDuckGo) से पूर्ण response bodies कैप्चर करता है, और प्रति-प्रयास transport timeline भी रिकॉर्ड करता है, जिसमें sanitized request URLs, elapsed duration, response headers, partial response bodies, parsed partial stream content और स्टैक ट्रेस शामिल हैं, ताकि OpenAI-compatible, Anthropic, Google, Azure OpenAI और Ollama fallbacks में बेहतर troubleshooting हो सके।
 - **Developer Mode panel**: settings में अब एक dedicated developer-only diagnostics panel शामिल है, जो "Developer mode" सक्षम होने तक छिपा रहता है। यह diagnostic call paths चुनने और चयनित mode के लिए repeated stability probes चलाने का समर्थन करता है।
@@ -105,7 +118,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 - **Concept note निर्माण (वैकल्पिक और अनुकूलन योग्य)**: एक निर्दिष्ट vault folder में खोजी गई अवधारणाओं के लिए स्वचालित रूप से नई नोट्स बनाता है।
 - **अनुकूलन योग्य आउटपुट पथ**: processed files और नई concept notes को सहेजने के लिए अपने vault के भीतर अलग-अलग relative paths कॉन्फ़िगर करें।
 - **अनुकूलन योग्य आउटपुट फ़ाइलनाम (Add Links)**: फ़ाइलों को प्रोसेस करते समय डिफ़ॉल्ट `_processed.md` के बजाय वैकल्पिक रूप से **मूल फ़ाइल को overwrite** करें या custom suffix/replacement string का उपयोग करें।
-- **लिंक अखंडता रखरखाव**: vault के भीतर नोट्स के rename या delete होने पर links अपडेट करने का बुनियादी प्रबंधन।
+- **लिंक अखंडता रखरखाव**: नाम बदलने पर लिंक का अद्यतन Obsidian और उसकी सेटिंग पर निर्भर है। हटाने से अनसुलझे लिंक रह सकते हैं; एक जैसे नाम वाले नोट अलग से जाँचें।
 - **शुद्ध concept extraction**: मूल दस्तावेज़ को बदले बिना concepts निकालें और उनके corresponding concept notes बनाएँ। मौजूदा दस्तावेज़ों से ज्ञान-आधार भरने के लिए यह आदर्श है। इस सुविधा में minimal concept notes बनाने और backlinks जोड़ने के विकल्प उपलब्ध हैं।
 
 ### अनुवाद
@@ -115,10 +128,10 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
     - **बड़ी फ़ाइलों का समर्थन**: बड़े फ़ाइलों को LLM को भेजने से पहले `Chunk word count` सेटिंग के आधार पर छोटे हिस्सों में बाँट दिया जाता है। फिर अनूदित हिस्सों को सहज रूप से एक दस्तावेज़ में जोड़ा जाता है।
     - अनेक भाषाओं के बीच अनुवाद का समर्थन करता है।
     - लक्ष्य भाषा को settings या UI में अनुकूलित किया जा सकता है।
-    - आसान पढ़ने के लिए अनूदित पाठ को मूल पाठ के दाएँ ओर स्वचालित रूप से खोलता है।
+    - सहेजा हुआ अनुवाद उपलब्ध विन्यास के अनुसार Obsidian कार्यक्षेत्र में खोलता है।
 - **बैच अनुवाद**:
-    - चयनित folder के भीतर सभी files का अनुवाद करें।
-    - "Enable Batch Parallelism" चालू होने पर parallel processing का समर्थन करता है।
+    - डिफ़ॉल्ट रूप से चुने हुए फ़ोल्डर में सीधे मौजूद पात्र फ़ाइलें अनुवादित होती हैं, उपफ़ोल्डर नहीं। उन्नत फ़ाइल चयन दायरा बदल सकता है; मौजूदा आउटपुट फ़ाइलें अधिलेखित हो सकती हैं।
+    - अनुवाद सीधे `batchConcurrency` इस्तेमाल करता है (डिफ़ॉल्ट 1), `enableBatchParallelism` से स्वतंत्र।
     - यदि कॉन्फ़िगर किया गया हो, तो translation के लिए custom prompts का उपयोग करता है।
 	- file explorer context menu में "Batch translate this folder" विकल्प जोड़ता है।
 - **स्वचालित अनुवाद अक्षम करें**: जब यह विकल्प सक्षम होता है, तो गैर-`Translate` कार्य अब आउटपुट को किसी विशिष्ट भाषा में बाध्य नहीं करते, जिससे मूल भाषा संदर्भ सुरक्षित रहता है। स्पष्ट "Translate" कार्य फिर भी कॉन्फ़िगरेशन के अनुसार अनुवाद करेगा।
@@ -134,7 +147,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 - **शीर्षक से सामग्री निर्माण**:
     - नोट शीर्षक का उपयोग करके LLM के माध्यम से प्रारंभिक सामग्री उत्पन्न करता है, मौजूदा सामग्री को बदलते हुए।
     - **वैकल्पिक शोध**: सामग्री जनरेशन के लिए संदर्भ प्रदान करने हेतु web research (selected provider के माध्यम से) करना है या नहीं, इसे कॉन्फ़िगर करें।
-- **शीर्षकों से बैच सामग्री जनरेशन**: चयनित folder की सभी नोट्स के लिए उनके title के आधार पर सामग्री उत्पन्न करता है (वैकल्पिक research setting का सम्मान करता है)। सफलतापूर्वक प्रोसेस की गई फ़ाइलें पुनःप्रसंस्करण से बचने के लिए **configurable "complete" subfolder** (जैसे `[foldername]_complete` या custom name) में ले जाई जाती हैं।
+- **शीर्षकों से बैच सामग्री जनरेशन**: शोध सेटिंग के अनुसार पात्र `.md` फ़ाइलों की सामग्री बनाकर बदलता है। `_processed.md` और निर्धारित complete फ़ोल्डर का पूरा वृक्ष बाहर रहता है। सामग्री बनने के बाद complete फ़ोल्डर में स्थानांतरण की कोशिश होती है। लक्ष्य पहले से मौजूद हो तो स्थानांतरण रुकता है, पहले से सहेजी गई सामग्री नहीं; बनाई गई और स्थानांतरित फ़ाइलों की गिनती अलग है।
 - **Mermaid auto-fix coupling**: जब Mermaid auto-fix सक्षम होता है, Mermaid-संबंधित workflows प्रोसेसिंग के बाद generated files या output folders को स्वचालित रूप से repair करते हैं। इसमें Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid और Translate flows शामिल हैं।
 
 ### उपयोगी सुविधाएँ
@@ -286,8 +299,8 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 
 #### कॉन्सेप्ट नोट आउटपुट
 -   **Customize Concept Note Path**:
-    *   **अक्षम (डिफ़ॉल्ट)**: `[[linked concepts]]` के लिए notes का automatic creation अक्षम रहता है।
-    *   **सक्षम**: आपको वह folder निर्दिष्ट करने देता है जहाँ नई concept notes बनाई जाएँगी।
+    *   **बंद**: जुड़े हुए अवधारणाओं के नोट अपने आप नहीं बनाता।
+    *   **डिफ़ॉल्ट रूप से चालू**: शुरुआती पथ खाली है। अवधारणा नोट बनाने से पहले वॉल्ट के भीतर मान्य सापेक्ष पथ दें।
 -   **Concept Note Folder Path**: (केवल तब दिखाई देता है जब ऊपर वाला विकल्प enabled हो) अपने vault के भीतर एक *relative path* दर्ज करें (जैसे `Concepts` या `Generated/Topics`) जहाँ नई concept notes सहेजी जाएँ। यदि folders मौजूद न हों तो बनाए जाएँगे। **यदि customization enabled है तो यह भरना आवश्यक है।** **Absolute paths या invalid characters का उपयोग न करें।**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -334,8 +347,8 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 
 #### बैच Mermaid सुधार
 -   **Enable Mermaid Error Detection**:
-    *   **Off (Default)**: प्रोसेसिंग के बाद error detection छोड़ दी जाती है।
-    *   **On**: processed files को शेष Mermaid syntax errors के लिए स्कैन करता है और `mermaid_error_{foldername}.md` रिपोर्ट बनाता है।
+    *   **बंद**: प्रसंस्करण के बाद त्रुटि जाँच छोड़ता है।
+    *   **डिफ़ॉल्ट रूप से चालू**: बची हुई Mermaid त्रुटियाँ खोजकर `mermaid_error_{foldername}.md` बनाता है।
 -   **Move files with Mermaid errors to specified folder**:
     *   **Off**: errors वाली files वहीं रहती हैं।
     *   **On**: fix attempt के बाद भी Mermaid syntax errors रखने वाली files को manual review के लिए समर्पित folder में move कर देता है।
@@ -351,7 +364,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 -   **API Call Interval (ms)**: प्रत्येक individual LLM API call के *पहले और बाद* milliseconds में न्यूनतम delay। low-rate APIs या 429 errors रोकने के लिए महत्वपूर्ण। किसी artificial delay के बिना 0 पर सेट करें। (Default: 500ms)
 -   **Chunk Word Count**: LLM को भेजे जाने वाले प्रति chunk अधिकतम शब्द। बड़ी files के लिए API calls की संख्या को प्रभावित करता है। (Default: 3000)
 -   **Enable Duplicate Detection**: processed content में duplicate words की बुनियादी जाँच को toggle करता है (परिणाम console में)। (डिफ़ॉल्ट: सक्षम)
--   **Max Tokens**: प्रति response chunk LLM द्वारा उत्पन्न किए जाने वाले अधिकतम tokens। यह cost और detail दोनों को प्रभावित करता है। (Default: 4096)
+-   **Max Tokens**: प्रति response chunk LLM द्वारा उत्पन्न किए जाने वाले अधिकतम tokens। यह cost और detail दोनों को प्रभावित करता है। (Default: 8192) प्रदाता की अलग आउटपुट सीमा इस मान को बदल सकती है; मॉडल के अनुसार डिफ़ॉल्ट मान भी उपलब्ध हैं।
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### अनुवाद
@@ -379,7 +392,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
     *   **Change Prompt Word**: आपको किसी विशिष्ट task के लिए prompt word बदलने देता है।
     *   **Custom Prompt Word**: task के लिए अपनी custom prompt word दर्ज करें।
 -   **Use Custom Output Folder for 'Generate from Title'**:
-    *   **अक्षम (डिफ़ॉल्ट)**: सफलतापूर्वक generated files मूल folder के parent के सापेक्ष `[OriginalFolderName]_complete` नामक subfolder में ले जाई जाती हैं (या यदि मूल folder root था तो `Vault_complete`)।
+    *   **अक्षम (डिफ़ॉल्ट)**: लक्ष्य मूल फ़ोल्डर के समान स्तर पर `[foldername]_complete` है; वॉल्ट की जड़ के लिए `Vault_complete` है। विकल्प चालू करके अपना नाम दिया जा सकता है।
     *   **सक्षम**: आपको उस subfolder के लिए custom name निर्दिष्ट करने देता है जहाँ complete files move की जाएँगी।
 -   **Custom Output Folder Name**: (केवल ऊपर वाला विकल्प enabled होने पर दिखाई देता है) subfolder के लिए इच्छित नाम दर्ज करें (जैसे `Generated Content`, `_complete`)। Invalid characters की अनुमति नहीं है। खाली छोड़ने पर डिफ़ॉल्ट `_complete` होगा। यह folder मूल folder की parent directory के सापेक्ष बनाया जाता है।
 
@@ -483,11 +496,11 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
     *   `Notemd: Translate Note/Selection` command चलाएँ (कमांड पैलेट या sidebar button के माध्यम से)।
     *   एक modal प्रकट होगा जो आपको **Target Language** की पुष्टि या परिवर्तन करने देगा (डिफ़ॉल्ट रूप से Configuration में निर्दिष्ट मान के साथ)।
     *   plugin अनुवाद करने के लिए configured **LLM Provider** (Multi-Model settings के आधार पर) का उपयोग करता है।
-    *   translated content configured **Translation Save Path** में उचित suffix के साथ सहेजी जाती है, और आसान तुलना के लिए **मूल सामग्री के दाईं ओर एक नए pane में** खोली जाती है।
+    *   निर्धारित पथ और प्रत्यय से अनुवाद सहेजता है, फिर सहेजी गई फ़ाइल Obsidian कार्यक्षेत्र में खोलता है।
     *   आप इस task को sidebar button या modal cancel button के माध्यम से cancel कर सकते हैं।
 3.  **बैच अनुवाद**:
     *   कमांड पैलेट से `Notemd: Batch Translate Folder` चलाएँ और folder चुनें, या file explorer में किसी folder पर right-click करके "Batch translate this folder" चुनें।
-    *   plugin चयनित folder के सभी Markdown files का अनुवाद करेगा।
+    *   डिफ़ॉल्ट रूप से चुने हुए फ़ोल्डर में सीधे मौजूद पात्र फ़ाइलें अनुवादित होती हैं, उपफ़ोल्डर नहीं। उन्नत फ़ाइल चयन दायरा बदल सकता है; मौजूदा आउटपुट फ़ाइलें अधिलेखित हो सकती हैं।
     *   translated files configured translation path में सहेजी जाती हैं लेकिन स्वचालित रूप से नहीं खुलतीं।
     *   यह प्रक्रिया progress modal के माध्यम से cancel की जा सकती है।
 
@@ -514,7 +527,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
     *   `Notemd: Batch Generate Content from Titles` command चलाएँ (कमांड पैलेट या sidebar button के माध्यम से)।
     *   वह folder चुनें जिसमें वे notes हों जिन्हें आप प्रोसेस करना चाहते हैं।
     *   plugin folder की प्रत्येक `.md` फ़ाइल पर iterate करेगा ( `_processed.md` files और निर्दिष्ट "complete" folder की files को छोड़कर), note title के आधार पर content उत्पन्न करेगा और मौजूदा content बदल देगा। files editor में खोले बिना background में प्रोसेस होती हैं।
-    *   सफलतापूर्वक प्रोसेस की गई files configured "complete" folder में move की जाती हैं।
+    *   सामग्री बनने के बाद complete फ़ोल्डर में स्थानांतरण की कोशिश होती है। लक्ष्य पहले से मौजूद हो तो स्थानांतरण रुकता है, पहले से सहेजी गई सामग्री नहीं; बनाई गई और स्थानांतरित फ़ाइलों की गिनती अलग है।
     *   यह command प्रत्येक note के लिए **"Enable Research in 'Generate from Title'"** setting का सम्मान करती है।
     *   आप इस task को sidebar button या modal cancel button के माध्यम से cancel कर सकते हैं।
     *   प्रगति और परिणाम (संशोधित files की संख्या, errors) sidebar/modal log में दिखाई देते हैं।
@@ -566,6 +579,8 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
     *   वैकल्पिक रूप से plugin को configure करें ताकि वह इन problematic files को review के लिए अलग folder में move कर सके।
 
 ## समर्थित LLM प्रदाता
+
+तालिका में चुने हुए उदाहरण हैं। सभी प्रीसेट और शर्तों के लिए [36 प्रदाताओं की मार्गदर्शिका](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/providers/overview) देखें।
 
 | प्रदाता           | प्रकार      | API कुंजी आवश्यक       | नोट्स                                                                  |
 |-------------------|-------------|------------------------|------------------------------------------------------------------------|
@@ -635,7 +650,7 @@ Notemd स्थानीय रूप से Obsidian के अंदर च�
 ### सामान्य समस्याएँ
 -   **प्लगइन लोड नहीं हो रहा**: सुनिश्चित करें कि `manifest.json`, `main.js`, `styles.css` सही folder (`<Vault>/.obsidian/plugins/notemd/`) में हों और Obsidian पुनः आरंभ करें। startup errors के लिए Developer Console (`Ctrl+Shift+I` या `Cmd+Option+I`) जाँचें।
 -   **प्रोसेसिंग विफलताएँ / API त्रुटियाँ**:
-    1.  **फ़ाइल प्रारूप जाँचें**: सुनिश्चित करें कि जिस फ़ाइल को आप प्रोसेस या जाँचना चाहते हैं उसमें `.md` या `.txt` extension हो। Notemd वर्तमान में केवल इन्हीं text-based formats का समर्थन करता है।
+    1.  **प्रारूप जाँचें**: डिफ़ॉल्ट प्रारूप कार्य पर निर्भर हैं (`.md` या `.md`/`.txt`)। विस्तृत इनपुट सक्षम होने पर डेवलपर मोड अनुवाद और अवधारणा निष्कर्षण जैसे कुछ स्रोत सुरक्षित रखने वाले कार्यों में अन्य पाठ प्रारूप और PDF स्वीकार करता है। लिंक जोड़ना अब भी `.md`/`.txt` तक सीमित है।
     2.  सक्रिय provider की settings सत्यापित करने के लिए "Test LLM Connection" command/button का उपयोग करें।
     3.  API Key, Base URL, Model Name और API Version (Azure के लिए) दोबारा जाँचें। सुनिश्चित करें कि API key सही है और पर्याप्त credits/permissions रखती है।
     4.  सुनिश्चित करें कि आपका local LLM server (LMStudio, Ollama) चल रहा हो और Base URL सही हो (जैसे LMStudio के लिए `http://localhost:1234/v1`)।
@@ -696,7 +711,7 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 ---
 
 
-*Notemd v1.9.7 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
+*Notemd v1.9.8 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
 
 
 <!-- repo-chronicle:start -->

@@ -1,16 +1,10 @@
 ---
 id: google
 title: Google
-description: Configure Google Gemini
+description: Configure Gemini through Notemd's native Generative Language API transport and validate the selected model.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords: [Notemd Google, Gemini, Generative Language API]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,50 +12,42 @@ import TLDR from '@site/src/components/TLDR';
 # Google Provider
 
 <TLDR>
-**Google uses the native Gemini Generative Language API transport.** The current preset defaults to `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1`, and `temperature: 0.5`. It is not an OpenAI-compatible profile.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+The Google preset uses the native Gemini Generative Language API. Configure an API key authorized for that endpoint and choose a currently available model. A gateway exposing Gemini through OpenAI-compatible chat uses the gateway preset instead.
 </TLDR>
 
 ## Setup
 
-Create a Google AI Studio or Google Cloud API key with Gemini access, add a `Google` provider profile, and keep the native Generative Language Base URL. Use the default Gemini Flash profile for fast translation and broad note workflows, then override per-task models when you need a larger or more capable Gemini model.
-
-Avoid placing Gemini model IDs in an OpenAI-compatible profile unless you are explicitly using a gateway that exposes Gemini through an OpenAI-compatible API.
+Select **Google**, enter the key, retain the native Generative Language endpoint, and choose a model served by that API version. Run **Test connection**, then translate or process a disposable note. The preset does not configure an arbitrary Google Cloud or Vertex deployment automatically.
 
 ## Endpoint And Authentication
 
-| Field | Current preset |
-|-------|----------------|
+| Field | Preset value |
+|-------|--------------|
 | Transport | `google` |
 | API key | Required |
 | Base URL | `https://generativelanguage.googleapis.com/v1` |
 | Default model | `gemini-2.0-flash-exp` |
 | Temperature | `0.5` |
-| Connection test | Chat-only |
+| Connection test | `chat-only` |
 
-The runtime calls `/models/{model}:generateContent?key={apiKey}`. The key is passed as a query parameter because that is how the native Gemini endpoint is wired in the plugin.
+The runtime constructs a native model `generateContent` request with API-key authentication. The preset's historical model ID is not a current-availability guarantee. Review endpoint URLs before sharing diagnostics because authentication information can appear in request details.
 
 ## Model Discovery
 
-Google uses the `google-models` discovery mode. Discovery should return Gemini models available to the API key; if the selector is empty, test the key against the same Base URL and confirm the model family is enabled for that account.
-
-Known output-token ceilings are model-aware in the provider registry. If a long translation or diagram explanation is truncated, select a Gemini model with a larger supported output cap or lower the requested output size.
+Use the native Google model discovery when available. Confirm that the chosen model supports generation on the configured API version. An empty list can indicate permissions, endpoint or model-availability problems; test the actual configuration rather than changing protocols at random.
 
 ## Troubleshooting
 
-- `400`: the model ID usually does not match the native Gemini route or the request exceeds the model's supported shape.
-- `401` or `403`: verify key restrictions, project/API enablement, and whether the key can access Gemini.
-- `404`: the model ID is not available at the configured API version.
-- Gateway examples fail under this profile: use the gateway preset instead of the native Google provider.
+- `400`: inspect model ID, request parameters and token/output limits.
+- `401` or `403`: check API-key restrictions, API enablement and model entitlement.
+- `404`: check whether that model exists on the selected API version.
+- Gateway examples fail: use the corresponding OpenAI-compatible gateway preset.
 
 ## When To Use
 
-Use Google for fast translation, large-volume note cleanup, and workflows where Gemini's cost/performance tradeoff is better than direct OpenAI or Anthropic. Prefer another provider for workflows that require OpenAI-compatible reasoning-model handling.
-
----
+Use this preset for the native Gemini API. Evaluate the intended translation, research or diagram task on a representative sample. This guide does not promise a model's relative speed, cost or translation quality.
 
 ## Next Steps
 
-- [LLM Providers](/docs/providers/overview) -- Full configuration, per-task models, and retry logic
-- [Translation](/docs/features/translation) -- Gemini Flash is recommended for high-volume translation tasks
+- [Provider overview](./overview): protocol selection and task models.
+- [Translation](../features/translation): output names, language selection and review.

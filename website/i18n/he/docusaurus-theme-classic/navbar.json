@@ -8,7 +8,7 @@
     "description": "The alt text of navbar logo"
   },
   "item.label.Docs": {
-    "message": "מסמכים",
+    "message": "תיעוד",
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
@@ -18,5 +18,25 @@
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "התחילו כאן",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "משתמשים חדשים",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "עבודה שוטפת",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "מפתחים",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }

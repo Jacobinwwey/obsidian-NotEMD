@@ -3,12 +3,22 @@ import { mockApp } from './__mocks__/app';
 
 function createMockElement(): any {
     const element: any = {
-        text: '', children: [], attributes: {},
+        text: '', children: [], attributes: {}, ownerDocument: { activeElement: null },
+        querySelector: jest.fn(), focus: jest.fn(),
         empty: jest.fn(() => { element.children = []; }),
         addClass: jest.fn(), removeClass: jest.fn(),
         setText: jest.fn((text: string) => { element.text = text; }),
         setAttribute: jest.fn((name: string, value: string) => { element.attributes[name] = value; })
     };
+    element.querySelector.mockImplementation((selector: string) => {
+        const attribute = selector.slice(1, -1);
+        for (const child of element.children) {
+            if (Object.prototype.hasOwnProperty.call(child.attributes, attribute)) return child;
+            const match = child.querySelector(selector);
+            if (match) return match;
+        }
+        return null;
+    });
     element.createDiv = jest.fn((options: any = {}) => {
         const child = createMockElement(); child.text = options.text ?? ''; child.attributes = { ...(options.attr ?? {}) }; element.children.push(child); return child;
     });

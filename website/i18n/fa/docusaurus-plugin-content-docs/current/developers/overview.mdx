@@ -1,0 +1,99 @@
+---
+id: overview
+title: راهنمای توسعه‌دهنده
+description: >-
+  با قراردادهای فعلی ارائه‌دهنده، عملیات، رسم و مستندات بسازید، بیازمایید و
+  توسعه دهید.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - راهنمای توسعه‌دهنده
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# راهنمای توسعه‌دهنده
+
+<TLDR>شاخهٔ جدا بسازید، وابستگی قفل‌شده و هر دو بازبینی مرورگر را نصب و build و کل Jest را اجرا کنید. مالک قرارداد موجود را گسترش دهید و مستندات، آزمون و شواهد مصرف‌کنندهٔ بومی را هماهنگ نگه دارید.</TLDR>
+
+## آماده‌سازی نسخهٔ کاری
+
+[مخزن](https://github.com/Jacobinwwey/obsidian-NotEMD) را clone کنید و [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) را بخوانید. CI افزونه از Node 20 در Linux و Windows و سایت از Node 24 استفاده می‌کند. وابستگی ریشه و `website/` جدا نصب می‌شود.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+دو بستهٔ Playwright ممکن است Chromium متفاوت بخواهند؛ نصب یکی برای محیط پاک کافی نیست. `main.js` ساخته و از Git کنار گذاشته می‌شود؛ bundle قدیمی شاهد commit جدید نیست.
+
+## یافتن مالک
+
+| مسئولیت | منبع اصلی |
+| ---------------- | ---------------- |
+| چرخهٔ افزونه، فرمان و مسیر میزبان | `src/main.ts` |
+| نمایه، پروتکل و اعتبارسنجی ارائه‌دهنده | `src/llmProviders.ts` |
+| قالب درخواست، انتقال، تکرار و stream | `src/llmUtils.ts` |
+| تعریف عملیات، schema و انتخاب CLI عمومی | `src/operations/`, `src/cliContracts.ts` |
+| کار فایل، پژوهش و ترجمه | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| عمل گردش‌کار و نوار کناری | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| مشخصات و رسم نمودار | `src/diagram/`, `src/rendering/` |
+| متن UI و locale پشتیبانی‌شده | `src/i18n/` |
+| راهنمای عمومی و ترجمه | `website/docs/`, `website/i18n/` |
+| روش نگهداری و شاهد تاریخ‌دار | `docs/maintainer/` |
+
+Bundle محصول خودبسنده و شامل میزبان inline پیش‌نمایش است. مسیر نامزد میزبان جدا قرارداد دارایی منتشرشده نیست. فعال‌سازی آن هماهنگی packaging، فایل انتشار، audit و مستندات را می‌خواهد.
+
+## تغییر محدود
+
+1. رفتار را بازتولید و ابتدا آزمون هدف‌دار شکست‌خورده بنویسید.
+2. ماژول مالک invariant را تغییر دهید؛ ورودی بیرونی را در مرز بررسی کنید.
+3. آزمون هدف و کامل را با لغو، خطا و ذخیرهٔ مرتبط اجرا کنید.
+4. منبع انگلیسی و ترجمه‌های مربوط را به‌روز کنید. طرح، کار و walkthrough باید نسخهٔ کامل و مستقل انگلیسی/چینی در `docs/` داشته باشند.
+5. تغییر بصری یا خروجی بومی را در برنامهٔ واقعی بیازمایید؛ XML، تصویر یا build به‌تنهایی ویرایش‌پذیری و اتصال خط را ثابت نمی‌کند.
+
+نمایهٔ جدید را در `llmProviders.ts` اضافه و transport سازگار را استفاده کنید. `llmProviders.test.ts`، `llmUtilsProviderSupport.test.ts`، README و اتصال را به‌روز و stream و پاسخ قطع‌شده را حفظ کنید. برای عملیات، schema ورودی/خروجی، زمینه، اثر و handling tag را پیش از افشا تعریف کنید. ثبت در رجیستری دسترسی عمومی نمی‌سازد. [Agent](../agents/overview).
+
+## اعتبارسنجی
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint هر تشخیص را مقایسه می‌کند؛ کاهش مجموع، خطای تازه را توجیه نمی‌کند. تغییر بازیابی را با `npm run benchmark:local-kb` و ذکر corpus و محیط بسنجید. سایت را با Node 24 اجرا کنید:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+در برنامهٔ 1.9.8 ترجمه مستقیماً توسط Codex نوشته و بررسی می‌شود. اسکریپت قدیمی نوشتن ترجمه یا endpoint مربوط به LM Studio یا موتور ترجمه را اجرا نکنید. ابزار می‌تواند متن نوشته‌شده را قالب‌بندی، بررسی و نمایش دهد.
+
+## Obsidian و مصرف‌کنندهٔ بومی
+
+خزانهٔ آزمایشی با marker `.notemd-host-verification` به کار ببرید؛ اسکریپت bundle کپی‌شده را بررسی می‌کند. خزانهٔ واقعی را جدا نگه دارید. در آزمون CLI هم `obsidian help` و هم `obsidian-cli help` را اجرا و نبود ابزار را عدم دسترسی ثبت کنید، نه موفقیت.
+
+PowerPoint، CircuitikZ و اسلاید پیش‌نیاز و خروجی جدا دارند. [گزارش تاریخ‌دار](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) و [روش انتشار](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md) را دنبال کنید. موبایل و حداقل نسخهٔ آزمون‌نشده را روشن نگه دارید.
+
+## مشارکت و انتشار
+
+PR باید مشکل مشخص، رفتار نهایی، آزمون و محدودیت را بگوید. [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) برای بازتولید است. کلید، متن خصوصی و خروجی نامرتبط را commit نکنید. Publisher مسئول نسخهٔ هماهنگ، tag عددی، منبع پاک، توضیح دوزبانه، draft بررسی‌شده، انتشار و Pages صریح است. tag عمومی را جابه‌جا نکنید. `.trellis/` وضعیت محلی است، نه وابستگی CI.
+
+## گام بعد
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [وضعیت طرح](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

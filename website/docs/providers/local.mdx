@@ -1,16 +1,10 @@
 ---
 id: local
 title: Local Models
-description: Configure Ollama and local LLMs
+description: Configure Ollama, LM Studio or OVMS with a running local model server and explicit network boundaries.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords: [Notemd local models, Ollama, LM Studio, OVMS, offline notes]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,46 +12,45 @@ import TLDR from '@site/src/components/TLDR';
 # Local Models
 
 <TLDR>
-**Local providers keep note content off hosted APIs.** The current local path covers Ollama with the native `ollama` transport and LMStudio through the OpenAI-compatible transport. No API key is required for either path, but the local server and model must already be running.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+A local provider lets a running model server on your device process task content. Install or load the model first, then configure the matching protocol. Local LLM selection does not make web search, remote endpoints, dependency installation or cloud-routed tasks offline.
 </TLDR>
 
 ## Setup
 
-For Ollama, install Ollama, pull the model you want, start the server, and add an `Ollama` provider profile in Notemd. For LMStudio, load a model in LM Studio's local server and add an `LMStudio` provider profile.
+For [Ollama](https://ollama.com/), install the server and pull a model. For [LM Studio](https://lmstudio.ai/), load a model and start its local API server. For OVMS, configure the model server deployment before adding its profile to Notemd.
 
-Local models are operational dependencies, not just settings. Notemd can only call what the local process exposes, so verify the local model outside Obsidian before debugging the plugin.
+Select the corresponding preset, enter the exact model name exposed by the server, run **Test connection**, and process a disposable note. Notemd does not install the model or start these servers for you.
 
 ## Endpoint And Authentication
 
-| Provider | Base URL | Default Model | API Key | Notes |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Not required | NDJSON streaming; model discovery via `/api/tags` |
-| LMStudio | `localhost:1234/v1` | `local-model` | Not required | Sends `"EMPTY"` as bearer token; OpenAI-compatible |
+| Preset | Default base URL | Model placeholder | Protocol / authentication |
+|--------|------------------|-------------------|---------------------------|
+| Ollama | `http://localhost:11434/api` | `llama3` | Native Ollama; no API key required |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | OpenAI-compatible; optional key, preset value `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | OpenAI-compatible; configure the deployment's model and access requirements |
 
-Ollama uses the native `/chat` path below its Base URL. LMStudio follows the OpenAI-compatible `chat/completions` route and expects a model that is loaded in the local server.
+`localhost` is the machine running Obsidian. A phone cannot reach a model on your computer through the phone's own loopback address. A LAN endpoint is a network service: use its actual address and appropriate authentication, and do not expose an unauthenticated server to untrusted networks.
 
 ## Model Discovery
 
-Ollama uses the `ollama-tags` discovery mode and lists locally pulled tags. LMStudio uses OpenAI-compatible model discovery when its server exposes `/v1/models`.
-
-If discovery returns nothing, that is usually a local-server state issue: the model is not pulled, not loaded, or the server is bound to a different host/port than the profile.
+Ollama lists pulled tags through `/api/tags`. LM Studio can expose `/v1/models`. OVMS has its own deployment-aware discovery rules. Listing a model is not a guarantee that it fits memory or can perform a particular structured task; verify an actual request.
 
 ## Troubleshooting
 
-- Connection refused: start Ollama or LM Studio and confirm the configured port.
-- Model not found: pull the Ollama tag or load the LM Studio model before testing.
-- Slow output: lower context size, use a smaller local model, or route heavy tasks to a hosted provider.
-- Empty or malformed responses: confirm the selected provider profile matches the local server protocol; Ollama and LMStudio are not interchangeable.
+- Connection refused: check server state, listening address and port.
+- Model unavailable: pull/load the model and use the exact name or alias served by the endpoint.
+- Authentication rejected: enter the token required by your server instead of assuming `EMPTY` is accepted.
+- Slow or incomplete output: inspect memory, context and output limits; start with one request at a time.
+- Malformed output: confirm the protocol, prompt and model capability before changing batch settings.
 
 ## When To Use
 
-Use local providers for private vaults, offline work, or cheap repetitive tasks. Do not assume local is automatically better for research synthesis or long reasoning; model quality and hardware limits are the tradeoff.
+Use local inference when its privacy boundary, availability and measured output meet your needs. Prepare model files and any optional export dependencies before disconnecting the network. Review every enabled task-specific provider and local-retrieval setting: local excerpts are sent to the selected LLM, which may still be cloud-hosted.
 
----
+Web research through Tavily or DuckDuckGo remains online. Native exporters may need separately installed tools. A local provider is one part of an offline workflow, not a blanket guarantee for every feature.
 
 ## Next Steps
 
-- [LLM Providers](/docs/providers/overview) -- Full configuration and per-task model setup
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix connection-refused errors when the local server is not running
+- [Provider overview](./overview): task routing and all presets.
+- [Configuration](../getting-started/configuration): choose task providers and output languages.
+- [Troubleshooting](../advanced/troubleshooting): isolate server and task failures.

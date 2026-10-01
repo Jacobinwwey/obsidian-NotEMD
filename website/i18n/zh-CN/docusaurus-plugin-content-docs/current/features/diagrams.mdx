@@ -1,99 +1,109 @@
 ---
 id: diagrams
 title: 图表
-description: 从笔记生成图表，选择可编辑源格式，并导出 SVG、PNG 或 PDF。
+description: 从笔记生成图表，在同一预览查看 Drawnix 与 Mermaid，并导出 SVG、PNG 或 PDF。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [图表, Mermaid, Draw.io, Drawnix, CircuitikZ, SVG, PNG, PDF]
-concepts: [图表类型, 生成格式, 图表导出]
+keywords:
+  - 图表
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# 图表生成
+# 图表
 
 <TLDR>
-先选择**所需的图表类型**，再挑选其**可编辑的源文件格式**。在 Obsidian 中预览完整的最终效果，其中包含 Drawnix 平板以及嵌入其中的 Mermaid 可视化内容，随后可将每个面板导出为 SVG、PNG 或 PDF 格式。
+先选择所需**图表类型**，再选择**可编辑源格式**。在 Obsidian 预览完整结果，包括 Drawnix 画布及嵌入 Mermaid，可分别导出各面板的 SVG、PNG 或 PDF。
 </TLDR>
 
 ## 理解三个不同选择
 
-| 选项 | 控制的内容 | 示例 |
+| 选择 | 控制内容 | 示例 |
 |---|---|---|
-| 图表类型 | 图表的含义 | 流程图、时序图、电路图、数据图表 |
-| 源文件格式 | Notemd 生成的、可编辑或可重复使用的文件 | Mermaid、JSON Canvas、Draw.io、Drawnix、CircuitikZ |
-| 导出格式 | 用于分享的图像或文档格式 | SVG、PNG、PDF |
+| 图表类型 | 表达的含义 | 流程图、时序图、电路图、数据图 |
+| 源格式 | 可编辑或复用的源文件 | Mermaid、JSON Canvas、Draw.io、Drawnix、CircuitikZ |
+| 导出格式 | 用于分享的图像或文档 | SVG、PNG、PDF |
 
-Draw.io 和 Drawnix 是**源格式**，不是图表类型。CircuitikZ 是专为电路图设计的源文件格式。同一个预览内容可以导出为多种可视化格式，因此选择 CircuitikZ 并不会限制你只能得到 SVG 格式。
+Draw.io 和 Drawnix 是**源格式**，不是图表类型。CircuitikZ 面向电路图，同一预览可导出多种视觉格式，选择 CircuitikZ 不代表只能导出 SVG。
 
-## 选择源文件格式
+## 选择源格式
 
-| 格式 | 最适合的场景 | 源文件 |
-|---|---|---|
-| Mermaid | 直接保存在 Markdown 中的图表 | Mermaid 代码块 |
-| JSON Canvas | 基于 Obsidian 原生画布的工作流 | `.canvas` |
-| Draw.io | 后续在 diagrams.net 或兼容工具中进行编辑 | `.drawio` |
-| Drawnix | 手绘或白板风格的编辑 | `.drawnix` |
-| CircuitikZ | 结构化的电路与晶体管电路 | `.tex` |
+| 格式 | 适用场景 | 源文件 |
+| --- | --- | --- |
+| Mermaid | 直接保存在 Markdown 的图表 | Mermaid 代码块 |
+| JSON Canvas | Obsidian 原生画布流程 | `.canvas` |
+| Draw.io | 后续在 diagrams.net 或兼容工具编辑 | `.drawio` |
+| Drawnix | 手绘或白板编辑 | `.drawnix` |
+| CircuitikZ | 结构化电路与晶体管电路 | `.tex` |
 
-如果您不需要特定的编辑器，可将**首选源文件格式**设置为**自动选择**。Notemd 会针对所选的图表类型自动挑选兼容的格式。
+不需要特定编辑器时，将**首选源格式**保留为 **Auto**，Notemd 会为所选类型匹配格式。
 
 ## 生成并导出图表
 
-1. 打开笔记或选中需要可视化的文本。
-2. 在 Notemd 侧边栏或命令面板中选择**生成图表**。
-3. 选择一个**图表类型**，或者保持为**自动检测**。
-4. 选择一个**源文件格式**，或者保持为**自动选择**。如果想要带有可编辑节点及嵌入 Mermaid 可视化内容的知识图谱，请选择**Drawnix**。
-5. 查看预览效果。多面板的结果会将 Drawnix 平板以及按原始顺序排列的所有 Mermaid 面板整合在一个垂直滚动的预览窗口中；Mermaid 面板会使用其实际渲染后的高度，而不会被裁剪。
-6. 为单个可视化内容选择面板的**导出 SVG**、**导出 PNG**或**导出 PDF**操作，或者对所有面板执行顶层图像导出。对于多个面板，可选择源文件所在文件夹或 Vault 相对路径下的自定义文件夹；Notemd 会为每个面板生成一个确定的文件，并在某个单独的导出失败后继续处理后续面板。
-7. 如果您还需要可编辑的原始文件，请使用**保存源文件**功能。
+1. 打开受支持源笔记。仅需部分内容时放入独立笔记；选中文本不缩小文件生成范围。
+2. 在图表设置选**图表类型**或 **Auto-detect**。
+3. 选**源格式**或 **Auto**。需要受支持的可编辑知识图谱及嵌入 Mermaid 时选 **Drawnix**。
+4. 从侧栏或命令面板运行 **生成图形**。
+5. 检查预览。多面板在一个垂直滚动容器内按源顺序显示 Drawnix 和 Mermaid，Mermaid 使用实际渲染高度而不裁剪。
+6. 通过面板 **Export SVG／PNG／PDF** 导出单个视觉，或用顶部图像导出全部面板。多面板可选源目录或 Vault 相对自定义目录，逐面板生成确定名称，单项失败后继续。
+7. 需要可编辑产物时选择**保存源文件**。
 
-“导出”菜单提供了针对当前可视化预览的**导出 SVG**、**导出 PNG**和**导出 PDF**操作。每个面板标题也提供了相同的操作选项，用于单独的 Mermaid 或 Drawnix 可视化内容，因此无需将大型预览整体作为一张不透明的图像进行导出。
+导出菜单针对当前视觉提供 SVG、PNG、PDF，各面板标题提供同样单项动作，无须把整个大型预览变成一张不可分的图片。
 
-在预览中点击**历史**，即可在不隐藏图表的情况下打开 Vault 历史记录抽屉。您可以搜索和筛选已完成的图表、重新打开某个预览，或查看已保存的原始文件。即使没有激活任何笔记，也可以直接通过命令面板和 Notemd 侧边栏访问图表历史记录。
+在预览中点击**历史**可打开 Vault 历史抽屉而不隐藏图表，搜索筛选已完成图表，重新预览或打开产物。没有活动笔记时，也可从命令面板或侧栏进入历史。
 
-SVG 和 PDF 是基于矢量几何生成的；PDF 使用与 SVG 相同的布局和文本度量标准，而非对整个预览进行光栅化处理。Notemd 设置中的图像导出 PPI 仅用于控制 PNG 的光栅化程度（范围为 72–600 PPI，默认值为 300）。
+SVG／PDF 使用矢量几何；PDF 复用 SVG 布局与文字度量，不对整个预览光栅化。图像 PPI 仅控制 PNG，范围 72–600，默认 300。
 
 ## 密集图表的可读预览
 
-Editable HTML/SVG lane-grid 图会先测量并换行摘要，再放置标题和 lane 标题栏。标题会移动到受保护的摘要区域下方，单元格先于连接线和边标签绘制。跨 lane 的边使用碰撞感知正交网格路由，并为 lane 标签和已占用单元格预留空间，因此长描述不会遮住文字，也不要求用户横向拖动预览才能理解图表。
+可编辑 HTML/SVG 泳道网格先测量和换行摘要，再放置标题与泳道表头。表头避开摘要区域，单元格先于连接线和边标签绘制。跨泳道边使用避碰正交网格路线，为标签和已占单元格保留空间，避免长文遮挡或迫使横向拖动。
 
-Mermaid 象限图使用按 family 区分的规范化流程。对于 `quadrantChart` 会跳过只适用于 flowchart 的引号和形状修复；只有当 provider 误复制的左括号成为数据点标签末尾的不匹配字符时，才会移除它。标题、坐标轴和四象限名称中有意使用的括号会保留。
+Mermaid 象限图按家族规范化。`quadrantChart` 跳过仅适用流程图的引号／形状修复；只有数据点标签末尾未配对的多余左括号会被移除，标题、轴和象限名中有意使用的括号保留。
 
-仓库为每个可执行图表类型保留真实 Vault 的学习与证据目录。请查看 [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples)，其中包含双语输入笔记、生成的 SVG/PNG 结果和机器可读状态 manifest。`passed` 条目代表通过已加载插件 bundle 的真实运行，而不是静态截图 fixture。
+仓库为每种可执行图表类型保留真实 Vault 证据，见 [`docs/diagram-examples/`](https://github.com/Jacobinwwey/obsidian-NotEMD/tree/main/docs/diagram-examples)：双语输入、SVG／PNG 和机器可读 manifest。`passed` 只对应记录中的运行与 bundle 身份，不证明后续版本重新运行了所有类型。
 
-当前可执行目录有 33 行，插件 UI 有 21 种 locale，已发布网站路由集有 34 种 locale。这是不同的统计面：UI locale 数量不等于已发布文档 locale 数量。5 个精确参考 grammar 在获得独立布局证据前仍不进入选择器。
+当前可执行目录有 33 项，插件 UI 21 个 locale，网站路由 34 个 locale，三者不可混用。五个精确参考语法在独立布局证据齐备前不进入选择器。
 
-## 带有嵌入 Mermaid 的 Drawnix 预览
+## 含嵌入 Mermaid 的 Drawnix 预览
 
-当 Drawnix 原始文件中包含 Mermaid 可视化内容时，Notemd 会对渲染后的 SVG 进行净化处理，并将对应的 Mermaid 源代码保留在 `.drawnix` 元数据中。因此，预览界面能够在 Drawnix 知识图谱中直接显示 Mermaid 图像，而无需依赖 Drawnix 或 Plait 运行时环境。那些被安全嵌入的纯 Mermaid 可视化内容不会生成单独的 `.assets` 目录；而对于外部二进制媒体或尚未解析完成的可视化内容，则会保留配套文件，从而避免数据丢失。
+Drawnix 含 Mermaid 时，Notemd 净化渲染 SVG，并在 `.drawnix` 元数据保留源文；预览不需要 Drawnix／Plait 运行时。默认路径自包含，不创建独立 `.assets`。需要交接或外部编辑时开启**同时导出完整 Mermaid 可视化**，生成源文、SVG 和 manifest 配套文件。已有 `.assets` 仍支持，旧 Mermaid SVG 缺失时可用元数据源文重建。
 
-该预览界面刻意设计为单一的可滚动区域：首先显示主要的 Drawnix 画布，随后按原始顺序依次展示每个嵌入的 Mermaid 面板。关闭并重新打开已保存的历史记录条目时，面板的列表、尺寸以及导出选项都会保持不变。
+尽可能为已解析图片嵌入生成数据支持的 SVG 预览。加载顺序为内嵌数据、旧配套文件、可用源文重建。已有产物仍引用配套目录时应保留；新导出自包含不证明旧共享目录未使用。
+
+预览只有一个滚动区域，主 Drawnix 画布在前，随后按源顺序显示 Mermaid。关闭并重新打开历史记录，会重建相同面板列表、尺寸和导出动作。
+
+预览为标题、摘要和关系标签留空间，静态连接线绕过节点。不支持可读布局时报告格式错误。跨分支箭头序列化为静态关系，当前证据不支持在 Drawnix 重排节点后仍保持附着；请在目标编辑器检查。
+
+## 原生导出边界
+
+源导出与视觉导出是不同交付物，分享前在目标应用测试代表性产物。PowerPoint 表格保留受支持可编辑结构，包括修正后的合并单元格下方分隔线；Mermaid／SVG 可能回退为图像，而非原生可编辑形状。插件预览或全页图像评分不能代替原生应用检查。
 
 ## 电路图
 
-对于支持的电路相关需求，请选择**电路图**类型，并搭配**CircuitikZ 源文件**。Notemd 会先生成结构化的电路描述，然后再编写 CircuitikZ 源代码。这种方式比让模型直接编写不受限制的 LaTeX 代码更为可靠。
+受支持电路请求选择**电路图**与 **CircuitikZ 源文件**。Notemd 先生成结构化电路描述，再生成 CircuitikZ，比请求任意 LaTeX 更可控。
 
-当前 CircuitikZ 支持有意保持受约束范围。基于通用源码的 NMOS 放大器以及部分受支持的 CMOS 构件效果最佳。在将生成的电路用于技术文档或出版物之前，务必仔细检查预览效果及源代码。
+当前 CircuitikZ 支持有意保持受约束范围。共源 NMOS 放大器和受支持 CMOS 基础模块较适合；用于技术文档或出版前始终审核预览与源文。
 
-SVG 预览是由 Notemd 生成、用于辅助审核的版本。它并不能证明本地安装的 LaTeX 或 TikZJax 已成功编译了对应的 `.tex` 文件。
+SVG 是 Notemd 生成的审核辅助，不证明本地 LaTeX 或 TikZJax 已成功编译 `.tex`。
 
-**可选的原生编译功能**：对于插件内的预览显示，以及 SVG、PNG 和预览 PDF 的导出功能，您并不需要使用 LaTeX。在桌面端，如果您需要查看编译诊断信息或生成原生 LaTeX PDF，可以从图表设置或命令面板中打开**CircuitikZ 原生编译环境**。Notemd 可以复用系统自带的 `tectonic` 或 `pdflatex`，也可以使用自定义的可执行文件；在您明确选择**安装**后，它还会自动安装已固定的管理型 Tectonic 运行时。环境面板会实时显示处理进度和错误信息，同时允许您日后移除该管理型运行时。
+**可选原生编译。** 插件预览和 SVG、PNG、预览 PDF 不需要 LaTeX。桌面端需要编译诊断或原生 LaTeX PDF 时，从设置或命令面板打开 **CircuitikZ native compile environment**。可复用系统 `tectonic`／`pdflatex`、自定义可执行文件，或显式点击 **Install** 安装固定版本托管 Tectonic。面板内显示进度和错误，并支持日后移除。
 
-## 故障排除
+## 故障排查
 
-### 生成的图表类型有误
+### 图表类型错误
 
-请直接手动选择图表类型，而不要依赖“自动检测”功能。对于电路图，请选择**电路图**类型，并使用**生成图表**命令，而非旧版的**汇总为 Mermaid 图表**命令。
+显式选择类型而非自动检测。电路选**电路图**并运行 **生成图形**，不是旧 **总结为 Mermaid 图表**。
 
-### 源文件格式不合适
+### 源格式不合适
 
-将源文件格式恢复为**自动选择**，或者挑选适合该图表类型的格式。CircuitikZ 仅适用于电路图；Draw.io 和 Drawnix 则适用于其他受支持的结构化图表。
+恢复 **Auto** 或选择该类型适用格式。CircuitikZ 面向电路，Draw.io 和 Drawnix 面向受支持结构化图表。
 
-### 缺少“导出”菜单
+### 导出菜单缺失
 
-SVG、PNG 和 PDF 的生成都需要有可视化预览内容。如果只有源代码文本可用，请先保存源文件，再使用对应的外部工具进行打开处理。
+SVG、PNG、PDF 需要可视化预览。只有源文时保存源文件并在匹配外部工具打开。
 
-### CircuitikZ 文件无法在外部环境编译
+### CircuitikZ 外部编译失败
 
-请打开**CircuitikZ 原生编译环境**并运行环境检测功能。修复管理型运行时问题，或确认您的自定义/系统编译器能够获取 `circuitikz` 包。Notemd 并未在插件文件中内置完整的 TeX 发行版。
+打开 **CircuitikZ native compile environment** 检查环境，修复托管运行时或确认自定义／系统编译器可获取 `circuitikz`。插件文件不捆绑完整 TeX 发行版。

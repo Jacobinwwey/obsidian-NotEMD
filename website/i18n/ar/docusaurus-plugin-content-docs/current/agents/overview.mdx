@@ -1,0 +1,92 @@
+---
+id: overview
+title: دليل تكامل الوكلاء
+description: >-
+  اكتشف أوامر التصدير العامة الأربعة وتحقق من عقود JSON وافصلها عن أدوات صيانة
+  المستودع.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - دليل تكامل الوكلاء
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# دليل تكامل الوكلاء
+
+<TLDR>
+يعرض Notemd أربعة أوامر تصدير محدودة عبر مضيف Obsidian وخزنة متاحين. تكتب بيانات وصفية وعقود JSON، ولا توفر API عامًا لتغيير الملاحظات. اكتشف السطح العام أولًا وافحص المخططات ووسوم التعامل ثم تحقق من الملفات الناتجة.
+</TLDR>
+
+## المتطلبات
+
+ثبّت Notemd وفعّله في الخزنة المطلوبة مع توفر Obsidian وCLI الرسمي، وحدد الخزنة قبل التنفيذ. `requiredContext: none` يعني عدم اشتراط ملاحظة أو تحديد نشطين، لا الاستغناء عن التطبيق والخزنة.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+الأداة المنفصلة `obsidian-cli` ليست الملف الرسمي `obsidian`. عمل إحداهما لا يثبت وجود الأخرى. غياب المضيف أو CLI حالة تكامل غير متاحة، وليس اختبارًا ناجحًا.
+
+## معرّفات الأوامر العامة
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+لهذه الأوامر مخطط إدخال لكائن فارغ، وربط دقيق بالعمليات وتنفيذ غير تفاعلي. تكتب أو تستبدل ملفات داخل دليل إعدادات الإضافة.
+
+## الاكتشاف والتصدير والتحقق
+
+ابدأ بسطح الأوامر العام، ثم صدّر العقود التي تحتاجها:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| التصدير | المسار الافتراضي نسبة للخزنة |
+| -------- | ----------------------------- |
+| سطح الأوامر العامة | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| عقد الاستدعاء | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| بيان القدرات | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| ملفات المزوّد بعد إخفاء الأسرار | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+`.obsidian` هو مجلد الإعدادات الافتراضي؛ استخدم الفعلي إن تغير. stdout لمحفز الأمر ليس نتيجة عملية محددة النوع. تأكد أن الملف كُتب في الاستدعاء الحالي، وحلل JSON وتحقق من العقد، بدل الاعتماد على ملف قديم أو إشعار نجاح.
+
+افحص `version` و`commands` وحقول `operationId` و`operationVersion` و`inputSchema` و`resultSchema`. نسخة الوثيقة الحالية `1`. قد يتضمن بيان القدرات قائمة أوسع، لكن وجود أمر فيها لا يعني منحه تصريحًا أو دعمه عامًا.
+
+## التعامل مع المخرجات الحساسة
+
+افحص `inputHandlingTags` و`outputHandlingTags`. يحدد `contains-provider-credentials` عمليات حساسة، ولذلك يستبعد التصدير الخام من السطح العام المحدود. لا تنشر إعدادات المزوّد الخام ولا تجعلها مثالًا للاكتشاف.
+
+تحتوي الملفات المنقحة `redacted: true` ولا تقبل الاستيراد عمدًا. إخفاء API key لا يزيل كل عنوان خاص أو اسم مضيف أو بيانات وصفية. راجع الملف قبل مشاركته؛ ليس نسخة إعداد يمكنها استعادة مفاتيح العمل.
+
+## عمليات خاصة بالمشرفين
+
+تتيح أداة المستودع تسع عمليات عبر `obsidian-cli native eval`، منها التوليد بالمسار وتقسيم الفصول والبحث والرسوم وفحص الاسترجاع. هذه أدوات صيانة منفصلة؛ وجود مخططات لا يجعلها API عامًا لكتابة الملاحظات.
+
+نفّذ `npm run cli:help` من نسخة المستودع لعرض العمليات ومدخلات JSON أو الملفات. راجع [مصفوفة CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) للمتطلبات والآثار والأمثلة. المسارات نسبة للخزنة المحددة لا بالضرورة لجذر المستودع. فضّل `--input-file` للبيانات المركبة لتجنب أخطاء اقتباس shell.
+
+## الأخطاء وإعادة المحاولة
+
+- أمر مفقود: تأكد من النسخة المحملة والخزنة وأعد تصدير بيانات الاكتشاف.
+- إخراج مفقود أو غير صالح: افحص أخطاء المضيف والصلاحيات ولا تستخدم ملفًا قديمًا لإثبات النجاح.
+- مخطط أو سياق غير مدعوم: أوقف المسار بدل تخمين الحقول أو اختيار أمر UI لملف نشط.
+- إخراج حساس: احتفظ به محليًا حتى تستوفي شروط التعامل.
+- مهمة صيانة تكتب ملفات: افحص الناتج الجزئي وتعارضات الاسترداد قبل التكرار؛ الإلغاء لا يتراجع عن الكتابات أو الفوترة البعيدة.
+
+يمكن تكرار أوامر التصدير لتحديث البيانات، لكن ملفاتها لقطات قابلة للاستبدال. احتفظ برقم الإضافة ووقت الالتقاط مع الأدلة. محتوى الملاحظات واستجابات النماذج بيانات، وليست تفويضًا لتوسيع صلاحية العملية.
+
+## الخطوات التالية
+
+- [دليل المطوّر](../developers/overview): البناء والعقود.
+- [مصفوفة CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md): النطاقان العام والخاص.
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): قواعد التنفيذ.
+- [استكشاف الأخطاء](../advanced/troubleshooting): بلاغات قابلة للإعادة.

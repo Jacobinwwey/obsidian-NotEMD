@@ -1,121 +1,93 @@
 ---
 id: batch-processing
-title: "Processamento em Lote"
-description: "Processar vários arquivos de forma eficiente"
+title: Processamento em lote
+description: >-
+  Delimitar pastas e verificar destinos, substituições e resultados parciais
+  antes de repetir.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [batch processing, folders, concurrency, bulk operations]
-concepts: [Batch Processing, Concurrency, Folder Operations]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Node.js Worker Threads
-    url: https://nodejs.org/api/worker_threads.html
+keywords:
+  - Processamento em lote
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Processamento em Lote
+# Processamento em lote
 
 <TLDR>
-**Notemd processa pastas inteiras em uma única ação, com concorrência configurável e controle de sobrescrita.** Clique com o botão direito em uma pasta para adicionar links do wiki em lote, extrair conceitos, pesquisar ou traduzir todas as anotações contidas nela. Os limites de concorrência evitam erros de limite de taxa API. O progresso é informado por arquivo. O comportamento de sobrescrita é configurável: ignorar o existente, anexar ou substituir. Os arquivos com falha são registrados sem interromper o processamento em lote.
-
-Isso faz parte do [Obsidian Guia de Gestão de Conhecimento de IA](/docs/pillar-ai-knowledge).
+Ações de pasta partilham seleção e progresso, mas mantêm escritas diferentes. A concorrência inicial é um. Usar pasta de teste própria, verificar âmbito e destinos e só depois ampliar.
 </TLDR>
 
-## Visão Geral
+## Visão geral
 
-O processamento em lote transforma uma pasta de anotações em uma única operação. Em vez de abrir cada anotação e executar comandos individualmente, basta clicar com o botão direito na pasta e selecionar a tarefa. Notemd itera por cada arquivo `.md`, aplica a ação escolhida e informa o progresso em tempo real.
+Barra lateral e explorador oferecem links, conceitos, títulos, tradução, texto original e reparação Mermaid/fórmulas. Não há pesquisa genérica de pasta; títulos pode incluí-la opcionalmente.
 
-Esse recurso é essencial para a extração de conhecimento em toda a estrutura de armazenamento. Após importar dezenas de PDFs, por exemplo, adicionar links em lote seguido de extração de conceitos em lote cria seu grafo de conhecimento em minutos, em vez de horas.
+Um lote não é transação da pasta inteira. Saídas já escritas ficam após falha de outra nota ou cancelamento.
 
-## Como Funciona
+## Funcionamento
 
-### Modelo de Execução em Lote
+### Execução
 
-```mermaid
-graph LR
-    A[Right-click Folder] --> B[Select Batch Task]
-    B --> C[Collect All .md Files]
-    C --> D[Partition by Concurrency]
-    D --> E[Execute Chunk in Parallel]
-    E --> F{All Files Done?}
-    F -->|No| G[Report Progress]
-    G --> E
-    F -->|Yes| H[Final Summary Toast]
-```
+1. Escolher tarefa e pasta contendo apenas o material pretendido.
+2. Recolher documentos elegíveis conforme extensões, perfis e exclusões de saída da tarefa.
+3. Aplicar fornecedor/modelo da tarefa e informar progresso, falhas e destinos.
+4. Rever relatório e resultados ao terminar ou cancelar.
 
-1. **Coleta de arquivos** -- Notemd escaneia a pasta alvo recursivamente (ou apenas no nível superior, dependendo das configurações) e coleta todos os arquivos `.md`.
-2. **Particionamento por concorrência** -- Os arquivos são divididos em blocos com base na configuração `batchConcurrency`. Cada bloco é executado paralelamente; os blocos são executados sequencialmente.
-3. **Execução** -- Cada arquivo é processado usando a mesma lógica do comando para um único arquivo. As configurações do provedor e do modelo por tarefa são respeitadas.
-4. **Relatórios de progresso** -- Uma notificação aparece após a conclusão de cada arquivo, mostrando o progresso `N / Total`.
-5. **Tratamento de erros** -- Se um arquivo falhar (erro API, tempo de espera da rede, etc.), o erro é registrado e o processamento em lote continua. O resumo final lista todos os arquivos com falha.
-6. **Conclusão** -- Uma notificação de resumo informa o total processado, os sucessos e as falhas.
+Links, conceitos, títulos, texto original e reparações incluem subpastas por padrão. **Tradução inclui apenas filhos diretos.** Perfis avançados podem mudar âmbito/filtros com modo de desenvolvimento e seleção avançada ativos. Confirmar o perfil real.
 
-### Comportamento de Sobrescrita
+### Substituição de saídas
 
-Ao processar um arquivo que já possui links wiki, notas conceituais ou traduções, o comportamento do Notemd depende da configuração de sobrescrita:
+| Tarefa | Verificar antes de repetir |
+| ------ | ------------------------------------ |
+| Links | Saídas separadas; sufixo, pasta e movimento da origem |
+| Conceitos | Notas existentes podem receber backlinks; duplicados são separados |
+| Títulos | Escreve nas fontes elegíveis e move para complete se livre |
+| Tradução | Pode substituir tradução correspondente; `_<language>.md` por padrão |
+| Mermaid / fórmulas | Modifica notas selecionadas; testar amostra e fazer backup |
 
-| Modo | Comportamento |
-|------|----------|
-| **Ignorar** | O conteúdo existente é deixado intacto. Apenas arquivos não modificados são processados. |
-| **Anexar** (padrão) | Novo conteúdo é anexado. Os links wiki, conceitos ou traduções existentes são preservados. |
-| **Substituir** | O arquivo é completamente reprocessado. Todas as modificações anteriores do Notemd são sobrescritas. |
+Não há opção universal ignorar/anexar/substituir. Destino complete ocupado impede o movimento, não a geração anterior. Contagens de gerados e movidos são distintas.
 
-Especificamente para links wiki: se uma nota já contiver `[[wiki-links]]`, o modo **Ignorar** a deixa como está, enquanto **Substituir** envia toda a nota para o LLM para inserção de novos links. Use **Ignorar** para processamento incremental e **Substituir** para reprocessamento após atualização do modelo.
+### Concorrência
 
-### Controle de Concorrência
+Manter `batchConcurrency: 1` até validar uma amostra. Algumas rotas exigem também `enableBatchParallelism`; tradução usa concorrência diretamente. Aumentar pressiona fornecedor, memória e servidor, sem garantir rapidez.
 
-A configuração do `batchConcurrency` limita as chamadas paralelas de API. Isso evita erros de limite de taxa (HTTP 429) ao processar pastas grandes em provedores com cotas rígidas.
+Intervalos API e entre grupos reduzem picos, sem garantir cumprimento de quotas ou isolamento de outros clientes.
 
-| Concorrência | Recomendado para | Impacto típico no limite de taxa |
-|-------------|----------------|---------------------------|
-| `1` | Planos gratuitos, provedores rigorosos | Nenhum (serial) |
-| `3` (padrão) | A maioria dos provedores de nuvem | Baixo |
-| `5` | Ollama (local), planos generosos | Nenhum / Baixo |
-| `10` | Modelos locais com inferência rápida | Nenhum |
+## Ajustes
 
-Se você encontrar erros 429 durante o processamento em lote, reduza a concorrência para 1 ou 2.
+| Ajuste | Padrão | Efeito |
+| --------- | --------- | -------- |
+| `batchConcurrency` | `1` | Concorrência solicitada onde aplicável |
+| `enableBatchParallelism` | `false` | Agendamento paralelo suportado |
+| `batchSize` | `50` | Tamanho de grupos nas rotas agrupadas |
+| `batchInterDelayMs` | `1000` | Espera entre grupos quando aplicável |
+| `apiCallIntervalMs` | `500` | Intervalo de chamadas concorrentes |
+| `folderTaskIncludeSubfoldersMode` | `legacy` | Preservar âmbito inicial de cada tarefa |
+| `enableStableApiCall` | `false` | Modo estável explícito |
 
-## Configuração
+### Modelos e contexto
 
-| Parâmetro | Padrão | Efeito |
-|---------|---------|--------|
-| `batchConcurrency` | `3` | Máximo de chamadas paralelas API durante operações em pastas |
-| `batchOverwriteExisting` | `false` | Sobrescrever o conteúdo existente de Notemd. `false` = modo de anexar. |
-| `batchSkipProcessed` | `false` | Ignorar arquivos que já contenham marcadores Notemd (por exemplo, links wiki) |
-| `batchRecursive` | `true` | Incluir subdiretórios ao escanear a pasta |
-| `enableStableApiCall` | `false` | Habilitar lógica de tentativa (até 4 tentativas) por arquivo durante o processamento em lote |
-
-### Modelos por Tarefa no Lote
-
-Cada operação em lote utiliza o modelo correspondente por tarefa. batch-add-links usa `addLinksProvider`, batch-research usa `researchProvider`, e assim por diante. Isso significa que você pode atribuir modelos baratos para operações de grande volume e reservar modelos caros para tarefas sensíveis à qualidade.
+Aplicam-se escolhas da tarefa individual; verificar antes de conteúdo privado. Pesquisa local em lotes por títulos usa um instantâneo de leitura criado no início. Alterações posteriores não entram silenciosamente; começar outro lote para as incluir.
 
 ## Exemplo
 
-Você tem uma pasta `papers/` com 40 notas de pesquisa importadas. Você deseja adicionar links wiki e extrair conceitos de todas elas:
+Criar duas notas de títulos em `trial-titles`, sem documentos alheios. Executar **Gerar em lote a partir dos títulos** e rever conteúdo, `trial-titles_complete` e contagens de gerados/movidos/erros. Repetir a pasta não é retoma exata apenas do pendente.
 
-1. Clique com o botão direito na pasta `papers/`
-2. Selecione **"Notemd: Processar pasta (adicionar links)"**
-3. Notemd escaneia a pasta, encontra 40 arquivos `.md` e processa 3 de cada vez (concorrência padrão)
-4. Uma notificação de progresso exibe: `12/40 files processed...`
-5. Após cerca de 3 minutos, uma notificação de resumo informa: `39 succeeded, 1 failed (API timeout on paper-37.md)`
-6. Repita com **"Notemd: Processar pasta (extrair conceitos)"** para criar notas de conceito para todos os 40
+## Cancelamento e recuperação
 
-O arquivo que falhou é registrado. Você pode executá‑lo novamente apenas nesse arquivo posteriormente.
+Cancelar impede novo agendamento e propaga-se às chamadas suportadas. Pedidos/escritas já aceites podem terminar, com cobrança controlada pelo fornecedor. Esperar, comparar saídas e conflitos e conservar cópias de recuperação até revisão.
 
-## Dicas
+## Conselhos
 
-- **Comece com baixa concorrência** -- Se você não tem certeza dos limites de taxa do seu provedor, comece com `1` e aumente gradualmente.
-- **Use o modo pular para atualizações incrementais** -- Após o primeiro lote completo, mude para `batchSkipProcessed: true` para que apenas novas notas sejam processadas nas execuções subsequentes.
-- **Ative chamadas estáveis de API** -- `enableStableApiCall: true` adiciona lógica de tentativa que recupera erros temporários de rede durante lotes longos.
-- **Reexecute após atualizações do modelo** -- Se você mudar para um modelo melhor, defina `batchOverwriteExisting: true` e execute novamente para obter links e conceitos aprimorados.
-
----
+- Verificar documentos realmente selecionados por perfis.
+- Reduzir concorrência e consultar quotas perante 429.
+- Distinguir cancelamento, falha e conclusão.
+- Manter amostra intacta e backup antes de modificar.
 
 ## Próximos passos
 
-- [Workflows](/docs/features/workflows) -- Conecte tarefas em lote em botões de barra lateral de um clique
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Personalize prompts para extração em lote
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Corrija erros de limite de taxa e falhas de conexão durante execuções em lote
-- [LLM Fornecedores](/docs/providers/overview) -- Referência de configuração do modelo por tarefa
+- [Fluxos](../features/workflows).
+- [Configuração](../getting-started/configuration).
+- [Problemas](./troubleshooting).

@@ -1,181 +1,80 @@
 ---
 id: quick-start
-title: "Ghid rapid de începere"
-description: "Începeți cu Notemd în 5 minute"
+title: Primii pași
+description: 'Pregătiți modelul, verificați prima notă și extindeți apoi la foldere.'
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Primii pași
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Ghid rapid de începere
+# Primii pași
 
-<TLDR>
-**Începeți să utilizați Notemd în 5 minute.** Trei pași: (1) Adăugați o cheie LLM API (sau folosiți Ollama local), (2) Deschideți o notă și rulați „Process file (add links)“, (3) Explorați fluxurile de lucru cu un clic din bara laterală. Suportează peste 30 de furnizori. Nu este necesar codificare. Funcționează offline cu Ollama.
-</TLDR>
+<TLDR>Începeți cu o notă Markdown de test și un furnizor accesibil. Verificați fișierul rezultat înainte de a procesa un folder. Sarcinile cloud transmit conținut; și modelele locale au nevoie de un server pornit și un model pregătit.</TLDR>
 
-## Pasul 1: Configurați primul dumneavoastră furnizor LLM (2 minute)
+## 1. Configurați modelul
 
-### Opțiunea A: Furnizor cloud (OpenAI, Anthropic, etc.)
+1. [Instalați și activați](./installation), apoi deschideți **Settings → Notemd**.
+2. Alegeți profilul, endpoint-ul, datele de autentificare și modelul disponibil. **Fetch models** nu înlocuiește un test de generare.
+3. Rulați **Test connection** și rezolvați problemele de cont, model sau adresă.
+4. La **Concept note folder path**, alegeți un folder separat, de exemplu `concepts`. Inițial câmpul este gol; numele este alegerea dvs.
 
-1. Deschideți **Settings** → **Notemd**
-2. Sub **Configurarea furnizorului LLM**, selectați un furnizor din listă descendentă
-3. Introduceți **Cheia API** a dumneavoastră
-4. (Opțional) Faceți clic pe **„Get Model List“** pentru a vedea modelele disponibile
-5. Selectați un model pentru fiecare tip de sarcină
+Pentru Ollama, descărcați modelul și introduceți numele exact; adresa implicită este `http://localhost:11434/api`. Pentru LM Studio, porniți serverul și selectați `LMStudio`. Vedeți [modele locale](../providers/local). Cercetarea web necesită rețea chiar dacă rezumarea folosește un model local.
 
-**Alegeri populare:**
-- **OpenAI**: `gpt-4o-mini` (rapid, accesibil)
-- **Anthropic**: `claude-sonnet-4-6` (calitate ridicată)
-- **DeepSeek**: `deepseek-chat` (foarte accesibil)
+## 2. Prima sarcină
 
-### Opțiunea B: Ollama local (nu este necesară cheia API)
+În `Notemd trial.md`, scrieți un text scurt pe care îl puteți trimite furnizorului:
 
-1. Instalează [Ollama](https://ollama.com/)
-2. Descarcă un model: `ollama pull llama3.1`
-3. În setările Notemd, selectează **"Ollama"** ca furnizor
-4. Numele modelului: `llama3.1` (sau orice model pe care l-ai descărcat)
-
-## Pasul 2: Încerce-ți prima sarcină (1 minut)
-
-### Adaugă legături Wiki într-o notă
-
-1. Deschide orice notă cu conținut semnificativ
-2. Faceți clic dreapta în editor
-3. Selectează **"Procesează fișierul (adaugă legături)"**
-4. Așteaptă câteva secunde
-5. Conceptele cheie sunt acum `[[wiki-linked]]`!
-
-**Exemplu:**
-
-**Înainte:**
-```
-Machine learning models use neural networks to process data.
+```text
+Învățarea automată folosește rețele neuronale pentru recunoașterea tiparelor.
 ```
 
-**După:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
+Rulați **Process file (add links)** din panou sau paletă. Implicit sursa rămâne și apare alături `Notemd trial_processed.md`. Deschideți rezultatul. Exemplu:
 
-## Pasul 3: Explorați funcțiile (2 min)
-
-### Extraeți notele de concept
-
-1. Faceți clic dreapta → **"Extrae concepte din fișierul curent"**
-2. Notemd creează fișiere separate pentru fiecare concept
-3. Verificați folderul dumneavoastră configurat pentru concepte (implicit: `concepts/`)
-4. Fiecare notă de concept are un link invers către nota originală
-
-### Cercetare și rezumat
-
-1. Selectați un subiect din nota dumneavoastră
-2. Faceți clic dreapta → **"Cercetare și rezumat"**
-3. Notemd efectuează căutări pe web (Tavily sau DuckDuckGo)
-4. Rezumatul se adaugă la nota ta împreună cu sursele
-
-### Fluxuri de lucru cu un clic
-
-1. Verifică **baza laterală stângă** pentru butoanele de flux de lucru
-2. Faceți clic pe **"Extragere cu un clic"** în orice notă
-3. Acesta rulează: adaugare linkuri → extragere concepte → cercetare → generare diagramă
-4. Totul într-un clic!
-
-## Sarcini obișnuite de început
-
-### Sarcină 1: Procesarea unui articol/jurnal
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```markdown
+[[Învățarea automată]] folosește [[rețele neuronale]] pentru recunoașterea tiparelor.
 ```
 
-### Sarcină 2: Traducerea notelor
+Pot apărea și note în folderul de concepte. Verificați fișierele și linkurile; modelul nu garantează o listă completă sau corectă de concepte.
 
+## 3. Alte sarcini
+
+### Extragerea conceptelor
+
+**Extract concepts (current file)** păstrează sursa și necesită un folder de concepte. Notele independente noi au doar titlu, fără backlink implicit. Activați-l explicit dacă îl doriți. [Note de concepte](../features/concept-notes).
+
+### Cercetare și rezumare
+
+Selectați un subiect în editorul Markdown sau folosiți titlul și rulați **Research & summarize**. Alegeți explicit Tavily cu cheie sau DuckDuckGo. Rezumatul se adaugă notei active. Deschideți sursele și verificați afirmațiile.
+
+### Flux cu un clic
+
+Fluxul implicit **One-Click Extract**:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
 
-### Sarcină 3: Crearea unei hărți de cunoștințe
+Adaugă linkuri, completează după titlu notele eligibile din folderul de concepte/selectat și repară Mermaid în folderul complete. Poate include note vechi. Începeți într-un folder de test; nu adaugă automat cercetare web sau generare generală de diagrame.
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## Anulare și control
 
-## Sfaturi pentru personalizare
+**Cancel** oprește lucrul ulterior unde este suportat. Rezultatele finalizate rămân; nu este rollback și nu garantează oprirea generării sau facturării la distanță. Așteptați încheierea, apoi verificați căile și conflictele de recuperare înainte de reluare.
 
-### Selectare a modelului pe sarcină
+## Probleme
 
-Puteți folosi modele diferite pentru sarcini diferite:
+- Cont/model: verificați profilul și conexiunea.
+- Lipsesc concepte: selectați un folder activ, nevid.
+- Linkuri inutile: examinați răspunsul și promptul; nicio lungime minimă nu garantează rezultatul.
+- Limite: păstrați concurența `1` cât verificați cotele.
 
-| Sarcină | Model recomandat | De ce |
-|------|------------------|-----|
-| Adăuga linkuri | `gpt-4o-mini`, `deepseek-chat` | Rapid, multe apeluri |
-| Extrag concepte | `claude-sonnet-4-6`, `gpt-4o` | Extracție de calitate |
-| Cercetare | `perplexity`, `gpt-4o` | Bazat pe web |
-| Traducere | `gemini-flash`, `gpt-4o` | Multilingvist |
-| Diagrame | `claude-opus`, model local | Raționament complex |
+## În continuare
 
-Configurați în: **Setări → Notemd → Modele specifice sarcinii**
-
-### Fluxuri de lucru personalizate
-
-Creați propriul dumneavoastră buton:
-
-1. Setări → Notemd → Fluxuri de lucru
-2. Faceți clic pe „Adăuga flux de lucru”
-3. Introduce DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Numește-l: „My Research Flow”
-5. O nouă buton apare în bara laterală
-
-## Dezvoltarea de soluții
-
-### "API Cheia invalidă"
-- Verifică dacă cheia este corectă (fără spații în plus)
-- Verifică dacă contul are credite
-- Testați cu butonul „Test de conexiune” din setări
-
-### „Modelul nu a fost găsit”
-- Faceți clic pe „Obține lista modelurilor” pentru a vedea modelele disponibile
-- Unii furnizori necesită nume specifice de modele (de exemplu, `gpt-4o` nu `gpt-4`)
-
-### Linkurile nu apar
-- Asigurați-vă că nota conține suficient conținut (>50 de cuvinte)
-- Încercați un model mai puternic
-- Verificați dacă apelul LLM a avut succes (vezi panoul de diagnostic)
-
-### Performanță lentă
-- Folosiți modele mai rapide (`gpt-4o-mini` în loc de `gpt-4o`)
-- Reduceți dimensiunea buclei în setările
-- Activeazăți procesare paralelă pentru sarcini în lot
-
-## Următoarele pași
-
-- 📖 [Explorați toate funcțiile](../features/wiki-links)
-- ⚙️ [Configurație avansată](./configuration)
-- 🔧 [Configurarea furnizorului LLM](../providers/overview)
-- ❓ [FAQ](../faq)
-
-## Tutorial video
-
-Urmări videoclipul de introducere de 3 minute (chineză):
-[【Complet open source și gratuit! NotEMD – Ghid rapid de 3 minute】](https://b23.tv/lqR0RlA)
-
-## Obținere de ajutor
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Probleme**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Documentație**: [Documentație completă](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Configurare](./configuration).
+- [Fluxuri](../features/workflows).
+- [Depanare](../advanced/troubleshooting).
+- Reproducere fără date sensibile în [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues).

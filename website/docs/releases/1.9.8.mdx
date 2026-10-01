@@ -1,0 +1,74 @@
+---
+id: 1.9.8
+title: Notemd 1.9.8 Upgrade Guide
+description: Understand the reliability, native export and documentation changes since 1.9.7, and verify a controlled upgrade.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.8, release notes, upgrade, cancellation, PowerPoint]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.8 Upgrade Guide
+
+<TLDR>
+1.9.8 concentrates on cancellation and output ownership, consistent batch retrieval, native export correctness and accurate documentation. Check the public GitHub Release for availability and download all runtime files from the same release. The provider and diagram catalog counts are existing capabilities, not additions introduced by this version.
+</TLDR>
+
+## What Changed Since 1.9.7
+
+| Area | User impact |
+|------|-------------|
+| Cancellation | Shared cancellation state reaches scheduled work, provider transports and retries; late responses are prevented from continuing the guarded write paths |
+| Artifact persistence | Overlapping saves and recovery track output ownership, including same-named sources and shared attachments |
+| Local retrieval | Batch title generation uses a consistent retrieval snapshot; retained-memory and frozen-corpus measurements are recorded |
+| Native output | PowerPoint table separators beneath merged cells and CircuitikZ wires/labels have targeted correctness fixes |
+| Verification | Linux/Windows CI, diagnostic-level lint regression checks, process tests and native-consumer evidence strengthen the release gates |
+| Documentation | Corrected task defaults, explicit newcomer/user/developer/Agent paths, directly authored translations and controlled publication |
+
+History search now retains consecutive keystrokes and the caret during asynchronous refreshes. The preview's history drawer keeps Tab navigation inside, focuses safely while loading and handles Escape without closing the parent preview. Retry and stale-response behavior have browser regression coverage.
+
+Research and translation also recheck cancellation after the final source read or output-folder preparation, before appending, creating or overwriting a file. Writes already accepted by Vault retain their completed results.
+
+The 36 provider presets and 33 executable diagram catalog entries were already present in 1.9.7. Release notes distinguish runtime changes, documentation work and merge records rather than counting the same change twice.
+
+If another task creates the translation destination while folder creation is pending, translation reuses that directory. A conflicting file or a still-missing directory retains the reported source-folder fallback; the task does not claim ownership of a directory created by its peer.
+
+## Upgrade Safely
+
+1. Stop active Notemd tasks and back up the Vault and plugin settings.
+2. Use Community plugins to update, or download `main.js`, `manifest.json` and `styles.css` from the same public [1.9.8 Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Replace only the plugin runtime files for a manual installation. Preserve the Vault's settings and generated files.
+4. Reload Obsidian and check the loaded version.
+5. Run a disposable note, inspect the output path, then try a small folder before resuming a large workflow.
+
+Existing command IDs and settings remain the upgrade contract. The default One-Click Extract workflow still performs add-links, batch title generation and batch Mermaid repair. Corrected documentation should not be mistaken for a change that adds research to that default chain.
+
+## Cancellation And Recovery
+
+Cancellation is not an undo transaction. Completed files remain, and an external request or write already accepted can finish. Remote generation and billing remain provider-controlled. Wait for the task to settle and inspect reported outputs before retrying.
+
+Recovery conflicts are visible rather than silently treated as successful replacement. Compare the current note with recovery files before removing either. Preserve companion directories that still serve existing artifacts, even when new exports can embed their own visuals.
+
+## Export And Compatibility Limits
+
+- PowerPoint table improvements are backed by targeted native assertions; a whole-slide image score alone did not catch the merged-border defect.
+- Mermaid and SVG content in PPTX can use image fallback. Do not assume every visual becomes editable PowerPoint shapes.
+- Drawnix static cross-branch relationships do not establish attached arrows after rearrangement in the editor.
+- CircuitikZ preview and native TeX compilation have separate checks and dependencies.
+- Physical mobile devices and Obsidian 0.15.0 remain unverified; the manifest minimum is not a fresh compatibility test.
+- Frozen lexical-retrieval evidence does not prove semantic search quality or performance on an arbitrary Vault.
+
+## Release Integrity
+
+The publishing workflow validates version metadata and local/remote tag identity, rebuilds the bundle from clean tagged sources, uploads a draft and verifies downloaded asset hashes before making it public. The four release assets are `main.js`, `manifest.json`, `styles.css` and `README.md`. A retry cannot silently replace public assets with unrelated bytes.
+
+Public website deployment follows verification that the release is available. Documentation translations are authored and reviewed directly by Codex for this program, without LM Studio or translation-engine calls. AI authorship is not a claim of independent native-speaker review.
+
+## Next Steps
+
+- [Public release and bilingual notes](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Quick start](../getting-started/quick-start): verify a first task after upgrade.
+- [Batch processing](../advanced/batch-processing): scope, output and partial completion.
+- [Developer guide](../developers/overview) and [Agent guide](../agents/overview): implementation and integration boundaries.
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): report regressions with exact versions and sanitized evidence.

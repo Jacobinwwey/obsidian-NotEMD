@@ -1,142 +1,110 @@
 ---
 id: workflows
-title: "Munkafolyamok"
-description: "Egy kattintással létrehozható gombokkal több munkát összekötés"
+title: Munkafolyamatok
+description: >-
+  Fűzze össze a meglévő műveleteket érvényes ID-kkal, egyértelmű
+  mappakontextussal és hibapolitikával.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [workflows, automation, one-click, chaining]
-concepts: [Workflows, Task Chaining, Automation]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Obsidian API
-    url: https://docs.obsidian.md
+keywords:
+  - Munkafolyamatok
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Munkafolyamok
+# Munkafolyamatok
 
-<TLDR>
-**Notemd A munkafolyamok több munkát egyetlen kattintással elvégzhető műveletként összeköti.** `add-links > extract-concepts > research > diagram` használatával egyszerű DSL-vel definiálhatóak a sorrendek. A munkafolyamok táblázatoldal gombokként jelennek meg, amelyek az aktuális feljegyzésen vagy mappában az összes műveletet elvégeznek. Előre beállított munkafolyamok is vannak; a beállításokban lehet személyre szabottakat is készíteni. Minden lépés használja saját, munkánkénti konfigurációs modellét.
-
-Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>A munkafolyamat az oldalsáv műveleteit egymás után futtatja. Egy-egy lépés mappaválasztást vagy aktív szerkesztőt igényelhet. Nem szöveges csővezeték: minden művelet megtartja bemenetét, kimenetét és mellékhatásait. Kezdjen próbaadatokkal.</TLDR>
 
 ## Áttekintés
 
-Egy munkafolyam elszabadítja a munkákat egy-egyre elvégezési fájdalmat. Helyett abban, hogy négy alkalommal jobb-kattintson az összekötés hozzáadására, a konceptek kihozására, ismeretlen kifejezések kutatására és egy diagram készítésére, csak egy táblázatoldal gombot kell nyomni, és az összes művelet elvégeződik. Notemd kezelje a sorrendet, a hibák terjedését és a fejlépési jelentéseket.
+Az alapértelmezett **One-Click Extract**:
 
-A munkafolyamok egy légképes DSL-ben (területspecifikus nyelvben) definiálódnak. Ezek a beállításokban találhatók, Obsidian táblázatoldal gombokként jelennek meg, és őket az aktuális feljegyzésre vagy egy teljes mappára is alkalmazhatók.
-
-## Hogyan működik
-
-### Munkafolyamok elvégezési folyamatútja
-
-```mermaid
-graph LR
-    A[Sidebar Button Click] --> B[Parse DSL Definition]
-    B --> C[Resolve Task List]
-    C --> D[Execute Step 1]
-    D --> E{Step Succeeded?}
-    E -->|Yes| F[Execute Step 2]
-    E -->|No| G{Continue on Error?}
-    G -->|Yes| F
-    G -->|No| H[Abort Workflow]
-    F --> I[... Execute Remaining Steps]
-    I --> J[Progress Report / Toast]
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-1. **Átalakítás** -- A DSL szövege `>` (vagy `>`) alapján az ordinaльis munkaidentifikátorok listájába oszlik.
-2. **Megoldás** -- Minden identifikátor egy belső parancshoz kapcsolódik (add-links, extract-concepts, research, translate, diagram stb.).
-3. **Elvégezés** -- A lépések sorrendben elvégződnek. Minden lépés használja a konfigurált, munkánkénti fornítót és modellét.
-4. **Hibák kezelése** -- Ha egy lépés nem sikerül, a munkafolyam vagy leáll, vagy továbbra is az utóbbi lépésre halad, attól függően, milyen hibavédelemi stratégiát használ.
-5. **Befejezés** -- Egy üzenetjelző tájékoztatja a sikerről vagy listázza az érvénytelen lépéseket.
+1. Hivatkozásokat ad az aktív jegyzethez, beállított mappával fogalmakat hozhat létre.
+2. A fogalom- vagy választott mappa alkalmas jegyzeteihez cím alapján tartalmat generál, meglévőkhöz is.
+3. A generálás complete mappájában Mermaid-javítást végez.
 
-### DSL formátuma
+Az alaplánc nem kutat a weben. A címgenerálás kutatása külön bekapcsolható. [Kötegek](../advanced/batch-processing).
 
-A munkafolyamok `>`-kel elválasztott munkaidentifikátorok sorrende olarak definiálódnak:
+## Működés
 
+### Végrehajtás
+
+A lépések sorban futnak, állapotuk és hibáik a panelen láthatók. A megszakítás leállítja a további lépéseket és támogatott kéréseket. A kész fájlok megmaradnak; nincs közös tranzakció. Elsőbbséget kap a fogalommappa. A kötegelt címgenerálás megjegyzi a forrás- és complete mappát; a Mermaid-javítás a complete mappát használja. Más műveletek megőrzik fájl-, kijelölés- és interakcióigényüket.
+
+### DSL
+
+Soronként egy elnevezett gomb. A `::` elválasztja a nevet, a `>` a művelet-ID-kat. Üres és `#` kezdetű sorok kimaradnak; ismeretlen ID-t a parser elutasít.
+
+```text
+Fogalmak és diagram::extract-concepts-current>summarize-as-mermaid
 ```
-process-current-add-links>extract-concepts-current>research-and-summarize
-```
 
-**Létrehozható munkaidentifikátorok:**
+Használja a munkafolyamat-szerkesztőt vagy a DSL-t. Az ID stabil, a címke felületfüggő. A mappaváltozatok saját ID-val rendelkeznek; ne képezze őket találomra.
 
-| Identifikátor | Ellenőrzés |
-|------------|--------|
-| `process-current-add-links` | Hozz létre wiki-hivatkozásokat a aktív felirathoz |
-| `extract-concepts-current` | Kivegyj a koncepteket a aktív feliratból |
-| `research-and-summarize` | Keress információt a kiválasztott szöveg vagy felirat címéről |
-| `process-current-translate` | Ügyelj át a aktív feliratot |
-| `summarize-to-mermaid` | Készíts el egy diagramot a aktív feliratból |
-| `generate-from-title` | Készíts el tartalmat a felirat címéről |
-| `extract-original-text` | Kivegyj a eredeti szöveget (OCR/skannált tartalomhoz) |
+| ID | Művelet / követelmény |
+| ------------ | ----------------------- |
+| `process-current-add-links` | Hivatkozások az aktív jegyzetben |
+| `process-folder-add-links` | Hivatkozások a választott mappában |
+| `extract-concepts-current` | Fogalmak az aktív jegyzetből |
+| `extract-concepts-folder` | Fogalmak a választott mappából |
+| `generate-from-title` | Tartalom az aktív címből |
+| `batch-generate-from-titles` | Mappa alkalmas jegyzeteinek kitöltése |
+| `research-and-summarize` | Kutatás kijelölés/cím alapján nyitott Markdown-szerkesztőben |
+| `summarize-as-mermaid` | Támogatott aktív bemenet Mermaid-összefoglalása |
+| `generate-diagram` | Diagram támogatott bemenetből |
+| `preview-diagram` | Támogatott forrás vagy diagram előnézete |
+| `translate-current-file` | Aktív támogatott fájl fordítása |
+| `batch-translate-folder` | Választott mappa fordítása |
+| `extract-original-text` | Kért eredeti részletek kinyerése |
+| `batch-extract-original-text` | Részletek mappa alkalmas fájljaiból |
+| `split-note-by-chapters` | Aktív jegyzet fejezetekre bontása |
+| `batch-mermaid-fix` | Mermaid-blokkok javítása a választott mappában |
+| `fix-formula-current` | Képlethatárolók normalizálása az aktív jegyzetben |
+| `batch-fix-formula` | Képlethatárolók normalizálása mappában |
+| `check-duplicates-current` | Aktív jegyzet duplikátumvizsgálata |
+| `check-remove-duplicate-concepts` | Dupla fogalmak interaktív vizsgálata és törlése |
+| `test-llm-connection` | Beállított szolgáltató tesztje |
+| `probe-slide-export-env` | Helyi diaexport-környezet ellenőrzése |
+| `export-slides` | Aktív fájl diaexportja |
 
-**Mappataseménki variánsok**: helyettesítsd `current`-t `folder`-vel az azonosító nevben.
+### Alaplánc vagy saját sor
 
-### Elődefinált és kiszolgált munkafolyamatok
+A One-Click Extract előre beállított. Más gombhoz adjon nevet és sorrendet, nézze meg a panel leírását, és használat előtt javítsa a parserhibát.
 
-Notemd rendelkezik előkészült munkafolyamatokkal a gyakori szabályzatokhoz:
+## Beállítások
 
-| Munkafolyamat | Hálózat | Használati esetek |
-|----------|-------|----------|
-| **Egy kattintással kivégzés** | add-links > extract-concepts > research | Kezelj egy kutatási tanulmányt egyetlen lépéssel |
-| **Teljes folyamatköri rendszer** | add-links > extract-conceptek > kutatás > diagram | Teljes tudalmi extrakció vizualizációs segítségével |
-| **Übersetzen + Verlinken** | übersetzen > add-links | A koncepteket az ülendszínbeli nyelven übersetjük és verlinkeljük |
+| Beállítás | Alapérték | Hatás |
+| --------- | --------- | -------- |
+| `customWorkflowErrorStrategy` | `stop_on_error` | Leállás az első jelentett lépéshibánál |
+| `useMultiModelSettings` | `false` | Aktív szolgáltató a feladatútválasztás bekapcsolásáig |
+| `enableResearchInGenerateContent` | `false` | Címgenerálás kutatás nélkül, amíg külön nem engedélyezi |
 
-**Szerkesztési folyamatok** beállításokban készülnek ki:
+A `continue_on_error` hibák után is folytat. Csak akkor használja, ha a következő lépések a megmaradt bemenetből működhetnek. A folytatás nem teszi sikeressé a részleges folyamatot.
 
-1. Nyitja meg a **Beállításokat** --> **Notemd** --> **Folyamatok**
-2. Kattintson a **"Folyamat hozzáadása"** gombra
-3. Írja be a DSL sorozatot (pl. `process-current-add-links>extract-concepts-current`)
-4. Adja nevet a megjelenítési nevekhez (pl. "Szybú verlink + Extrakció")
-5. A új gomb azonnal jelentkezik a sávoldalon
+### Modell lépésenként
 
-## Konfiguráció
+A modell a feladathoz tartozik. Üres mező annak szolgáltatói modelljét használja. Magánadatok előtt az összes útvonalat ellenőrizze.
 
-| Beállítás | Alapértelmezett | Hatás |
-|---------|---------|--------|
-| `workflows` | Előre meghatározott készlet | Folyamatok definiciói arraya (nev + DSL) |
-| `workflowContinueOnError` | `true` | Ha a jelen lépés nem sikerül, folytassa a következő lépésre |
-| `workflowShowProgress` | `true` | Mindent megfelelően végezett lépés után jelenik meg egy fejlépési üzenet |
+## Példa
 
-### Folyamatokban lévő feladatspecifikus modellek
+Válasszon üres `trial-concepts` mappát és próba-forrásjegyzetet. Nézze meg a fogalmakat és jelentett complete helyet. Bizonytalan cél esetén futtassa a lépéseket külön. Csak ellenőrzés után bővítsen.
 
-Egy munkafolyam minden lépése használ saját, szempontos modellkonfigurációját. Néhány modellt nem kell specifikálni a DSL benne. A megoldás sorrende az alábbiak:
+## Javaslatok
 
-1. Ha `useMultiModelSettings` van, akkor a szempontos fornalmazó/modell használódik
-2. Azonkívül globális `activeProvider` használódik
+- Átlátható lánc segíti a hibák és fájleredet követését.
+- Törlési lépések megtartják interaktív jóváhagyásukat; ne használja felügyelet nélkül.
+- Megszakítás és ütközés után olvassa a naplót és fájlokat.
+- Pontos modellt/mappát teszteljen; a kapcsolatteszt nem bizonyít nagy köteghez elegendő kvótát.
 
-Ez azt jelenti, hogy `add-links` lehet működni DeepSeek-on, miközben `research` működik a GPT-4o-n – mind azok a folyamatok azonos munkafolyam kattintásával történnek.
+## Tovább
 
-## példa
-
-Most importáltátok egy PDF-t, amely egy masinlernévelési tanulmányt tartalmaz, és szeretnél teljes tudalmi extrakciót:
-
-1. Nyitj meg az importált figyelmet
-2. Kattints a **"Full Pipeline"** oldalsávon lévő gombra
-3. Notemd elindítja a következőket:
-   - **1. lépés**: Hozz létre wiki-hivatkozásokat – `[[attention mechanism]]`, `[[transformer]]` stb.
-   - **2. lépés**: Kiválaszd a koncepteket – készít meg konceptfigyelmeteket a konceptmappádban
-   - **3. lépés**: Kutatás – összefoglalja a webforrásokat a kulcskifejezésekhez
-   - **4. lépés**: Diagram – készít meg egy Mermaid-os gondolatterületet a tanulmány struktúrájára
-4. Körülbelül 30 másodperc után a figyelmeted hivatkozásokkal rendelkezik, konceptfigyelmetek vannak, a kutatás tárgyaként van beleírva, és egy diagramfájl is mentésre kerül
-
-Mind ezek egyetlen kattintással történnek.
-
-## Tippek
-
-- **Kezdj el előredefinált munkafolyamokkal** – ők lefedik a leggyakoribb szabályzatokat. Csak akkor kialakítsd újra, ha egy másik sorrendet szeretnéd.
-- **Engedélyezd az `workflowContinueOnError`-t** – egy nem sikerült diagramlépés nem szabad leállítani a teljes folyamatot.
-- **Használj mappavéleti munkafolyamatokat** a masszív feldolgozáshoz – kattints jobb billentyűvel egy mappára, válasszd egy munkafolyamot, és minden jegy feldolgozódik.
-- **Nevezd a munkafolyamatokat klarán** – a sávszél területe korlátozott. Használj rövid, cselekvésirányú neveket, például "Rágrazás" vagy "Übersetzen + Linken".
-
----
-
-## További lépések
-
-- [Research](./research) – Megértsd, mire szolgál a kutatási lépés, mielőtt hozzáadod azt a munkafolyamokhoz
-- [Wiki-Links](./wiki-links) – A legtöbb munkafolyamban használt alapvető kötési funkció
-- [Concept Notes](./concept-notes) – Konceptek kiemelése mint munkafolyamlépés
-- [Batch Processing](/docs/advanced/batch-processing) – Mappavéleti munkafolyamatokhoz szóló egybenműködés és fejlépés jelentése
+- [Fogalmak](./concept-notes).
+- [Kötegek](../advanced/batch-processing).
+- [Kutatás](./research).

@@ -1,0 +1,77 @@
+---
+id: 1.9.8
+title: Panduan peningkatan Notemd 1.9.8
+description: >-
+  Pahami perbaikan reliabilitas, ekspor native, dan dokumentasi sejak 1.9.7,
+  lalu verifikasi peningkatan.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Panduan peningkatan Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Panduan peningkatan Notemd 1.9.8
+
+<TLDR>1.9.8 berfokus pada pembatalan/kepemilikan hasil, pengambilan batch konsisten, ketepatan ekspor native, dan dokumentasi. Periksa Release publik dan ambil runtime dari rilis sama. Jumlah penyedia/diagram adalah kemampuan lama, bukan tambahan versi ini.</TLDR>
+
+## Perubahan sejak 1.9.7
+
+| Area | Dampak |
+| ------ | ------------- |
+| Pembatalan | Status pembatalan mencapai penjadwalan, transport, retry; respons terlambat tidak melanjutkan jalur tulis terlindungi |
+| Persistensi artefak | Simpan/pemulihan tumpang tindih melacak pemilik hasil, termasuk sumber bernama sama dan lampiran bersama |
+| Pengambilan lokal | Generasi judul batch memakai snapshot konsisten; pengukuran memori/corpus tetap dicatat |
+| Keluaran native | Perbaikan separator PowerPoint di bawah sel gabungan serta kabel/label CircuitikZ |
+| Verifikasi | CI Linux/Windows, lint diagnostik individual, tes proses, dan bukti aplikasi tujuan |
+| Dokumentasi | Bawaan benar, pintu masuk pemula/pengguna/pengembang/Agent, terjemahan langsung, publikasi terkendali |
+
+Pencarian riwayat mempertahankan ketikan beruntun dan caret saat refresh asinkron. Drawer menjaga Tab di dalam, fokus aman saat loading, dan Escape tidak menutup pratinjau induk. Retry/respons usang memiliki regresi browser.
+
+Riset/terjemahan memeriksa pembatalan setelah pembacaan terakhir atau persiapan folder, sebelum append/buat/timpa. Penulisan yang diterima Vault tetap tercatat selesai.
+
+36 preset dan 33 entri diagram sudah ada pada 1.9.7. Catatan rilis memisahkan runtime, dokumentasi, merge agar tidak menghitung dua kali.
+
+Jika tugas lain membuat folder terjemahan saat pembuatan menunggu, folder itu dipakai ulang tanpa mengklaim kepemilikan pembuatannya. Konflik berkas atau folder tetap hilang mempertahankan fallback ke folder sumber yang dilaporkan.
+
+## Peningkatan terkendali
+
+1. Hentikan tugas dan cadangkan Vault/pengaturan.
+2. Perbarui lewat Community plugins atau ambil `main.js`, `manifest.json`, `styles.css` dari [Release publik 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) yang sama.
+3. Manual hanya mengganti runtime; pertahankan pengaturan dan hasil.
+4. Muat ulang, periksa versi.
+5. Coba catatan, periksa tujuan, lalu folder kecil sebelum pekerjaan besar.
+
+ID perintah dan pengaturan tetap menjadi kontrak peningkatan. One-Click Extract masih tambah tautan, generasi judul batch, dan perbaikan Mermaid. Koreksi dokumentasi tidak menambah riset pada rantai bawaan.
+
+## Pembatalan dan pemulihan
+
+Pembatalan bukan transaksi undo. Berkas selesai tetap ada; permintaan/penulisan luar yang diterima bisa selesai. Penyedia mengendalikan generasi/tagihan. Tunggu tugas menetap dan periksa hasil sebelum retry.
+
+Konflik pemulihan terlihat, tidak diam-diam dianggap penggantian sukses. Bandingkan catatan sekarang dengan pemulihan sebelum menghapus. Pertahankan folder pendamping yang masih dipakai artefak lama.
+
+## Batas ekspor dan kompatibilitas
+
+- Perbaikan tabel PowerPoint memiliki asersi native terarah; skor gambar seluruh slide pernah melewatkan separator rusak.
+- Mermaid/SVG dalam PPTX dapat memakai fallback gambar, bukan bentuk native editable.
+- Hubungan statis Drawnix lintas cabang tidak membuktikan panah melekat setelah penataan ulang.
+- Pratinjau CircuitikZ dan kompilasi TeX memiliki pemeriksaan/dependensi terpisah.
+- Perangkat seluler fisik dan Obsidian 0.15.0 belum diuji; minimum manifest bukan bukti baru.
+- Bukti pengambilan leksikal corpus tetap tidak membuktikan pencarian semantik atau kinerja semua Vault.
+
+## Integritas rilis
+
+Publisher memvalidasi versi dan identitas tag lokal/remote, membangun sumber tag bersih, mengunggah draft, lalu memeriksa hash unduhan sebelum publik. Aset wajib: `main.js`, `manifest.json`, `styles.css`, `README.md`. Retry tidak boleh mengganti byte publik dengan asal berbeda.
+
+Deployment situs mengikuti verifikasi Release tersedia. Codex menulis/meninjau terjemahan langsung tanpa LM Studio/mesin terjemahan. Kepengarangan AI bukan klaim review penutur asli independen.
+
+## Selanjutnya
+
+- [Release dan catatan bilingual](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Mulai cepat](../getting-started/quick-start): uji setelah upgrade.
+- [Batch](../advanced/batch-processing): lingkup dan hasil parsial.
+- [Pengembang](../developers/overview) dan [Agent](../agents/overview): implementasi/integrasi.
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): regresi dengan versi serta bukti teredaksi.

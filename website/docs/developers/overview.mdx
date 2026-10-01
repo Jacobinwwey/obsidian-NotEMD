@@ -1,0 +1,104 @@
+---
+id: overview
+title: Developer Guide
+description: Build, test and extend Notemd using its existing provider, operation, rendering and documentation contracts.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd development, TypeScript, Obsidian plugin, contribution, tests]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Developer Guide
+
+<TLDR>
+Start from a feature branch, install locked dependencies and both browser revisions, then build and run the full Jest suite. Extend the existing owner of a contract. Keep documentation, provider tests and native-consumer evidence aligned with the behavior you change.
+</TLDR>
+
+## Set Up A Working Checkout
+
+Clone [the repository](https://github.com/Jacobinwwey/obsidian-NotEMD), read [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md), and create a feature branch. Plugin CI uses Node 20 on Linux and Windows. The public website is verified with Node 24; use separate dependency installations at the repository root and under `website/`.
+
+From the repository root:
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+The two Playwright packages can resolve different Chromium revisions. Installing only one is insufficient for a clean test environment. `main.js` is generated and gitignored; do not treat an old local bundle as evidence for a new commit.
+
+## Find The Owner Before Editing
+
+| Responsibility | Primary source |
+|----------------|----------------|
+| Plugin lifecycle, commands and host routing | `src/main.ts` |
+| Provider presets, protocol metadata and validation | `src/llmProviders.ts` |
+| Request shaping, transports, retries and streaming | `src/llmUtils.ts` |
+| Operation definitions, schemas and public CLI selection | `src/operations/`, `src/cliContracts.ts` |
+| File tasks, research and translation | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Workflow actions and sidebar composition | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Diagram specifications and rendering | `src/diagram/`, `src/rendering/` |
+| UI strings and supported UI locales | `src/i18n/` |
+| Public guides and translations | `website/docs/`, `website/i18n/` |
+| Maintainer runbooks and dated evidence | `docs/maintainer/` |
+
+The current production bundle is self-contained, including the inline preview host. A candidate standalone render-host path is not a shipped asset contract. Do not activate it without updating packaging, release assets, audits and documentation together.
+
+## Implement A Bounded Change
+
+1. Reproduce the behavior and add a focused failing test before a behavior change.
+2. Change the module that owns the invariant. Validate external input at its boundary; avoid duplicating provider or operation knowledge across callers.
+3. Rerun the focused tests, then the full suite. Include cancellation, error and persistence cases where the operation can write files.
+4. Update the English source guide and affected locales. Planning, task and walkthrough documents must have separate complete English and Chinese versions under `docs/`.
+5. Inspect the actual consumer when changing visual or native-export behavior. Source XML, a screenshot or a green build alone cannot prove native editability or connector attachment.
+
+For a new provider, add the preset to `llmProviders.ts`, use the existing transport when compatible, and update `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README documentation and connection-test coverage. Keep streaming and interrupted-response handling intact.
+
+For an operation, define its input/result schemas, context, side effects and handling tags before exposing it. A registry entry does not automatically become a public Agent endpoint. See the [Agent guide](../agents/overview).
+
+## Verify The Change
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+The lint gate compares individual diagnostics with the baseline. Existing lint debt is not permission to add errors, and a lower aggregate count does not excuse a new regression. Use `npm run benchmark:local-kb` for the frozen retrieval-cost measurement when that path changes; report the corpus and environment rather than a universal speed claim.
+
+For the public website, use Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+Authored translations are written and reviewed directly by Codex for the 1.9.8 documentation program. Do not run legacy translation write scripts or call an LM Studio/translation endpoint to prepare them. Tooling may format, validate and render the authored text.
+
+## Test In Obsidian And Native Consumers
+
+Use a disposable Vault for plugin verification. The checked-in host scripts require the `.notemd-host-verification` marker and verify the copied bundle. Keep real user Vaults separate. Try both `obsidian help` and `obsidian-cli help` when checking CLI integration; record missing tools instead of treating a command stub as a successful host test.
+
+Native PowerPoint, CircuitikZ and slide-export checks have their own prerequisites and output artifacts. Follow the [dated reliability acceptance record](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) and [release runbook](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Keep unverified mobile and minimum-version claims explicit.
+
+## Contribute And Release
+
+Include the concrete problem, resulting behavior, tests and relevant limitations in a PR. Use [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) for a reproducible report. Do not commit API credentials, private Vault material or unrelated generated outputs.
+
+Release ownership stays in the checked-in publisher and runbook: synchronized metadata, numeric tag, clean tagged source, bilingual notes, verified draft assets, then publication and explicit Pages deployment. Never move a published tag to replace its binaries. `.trellis/` is local workflow state and must not become a CI dependency.
+
+## Next Steps
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): execution and review rules.
+- [Current project status](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md): plan progress and evidence.
+- [Agent guide](../agents/overview): exported capability and invocation contracts.
+- [Release 1.9.8](../releases/1.9.8): user impact and upgrade boundaries.

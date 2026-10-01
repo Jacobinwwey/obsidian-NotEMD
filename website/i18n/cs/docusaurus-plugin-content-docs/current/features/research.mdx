@@ -1,125 +1,90 @@
 ---
 id: research
-title: "Výzkum a vyhledávání na webu"
-description: "Integrujte vyhledávání na webu do svých poznámek"
+title: Rešerše a webové hledání
+description: >-
+  Shrnujte dohledané zdroje a rozlišujte webové doklady od volitelného lokálního
+  kontextu.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - Rešerše a webové hledání
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Výzkum a vyhledávání na webu
+# Rešerše a webové hledání
 
-<TLDR>
-**Notemd vyhledává na webu a vkládá LLM shrnuté výsledky přímo do vašich poznámek.** Tavily API je hlavní vyhledávací backend; DuckDuckGo slouží jako nulově konfigurovaná náhrada. Výsledky jsou shrnuty s odkazy na zdroje a přidány pod nadpisem `## Research`. Podporuje výzkum v jedné poznámce, hromadný výzkum v složkách a výběr modelu pro krok shrnutí podle úkolu.
-
-Toto je součástí [Obsidian Průvodce AI pro správu znalostí](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>Research & summarize hledá podle výběru nebo názvu, požádá LLM o shrnutí dostupného kontextu a připojí je k aktivnímu Markdownu. Výslovně vyberte Tavily či DuckDuckGo a ověřte odkazované zdroje.</TLDR>
 
 ## Přehled
 
-Výzkum je jednou z nejmocnějších integrací Notemd: uzavírá smyčku mezi čtením, vyhledáváním a psaním. Místo přechodu do prohlížeče, abyste našli neznámý termín, ho jen označíte a necháte Notemd provést vyhledávání, shrnutí a přidání výsledků – vše uvnitř vašeho úložiště.
-
-Celý proces je plně konfigurovatelný. Vy si můžete vybrat poskytovatele vyhledávání, LLM, které bude psát shrnutí, a také to, zda mají být výsledky přidány do aktuální poznámky nebo uloženy do samostatných souborů. Režim hromadného zpracování umožňuje vyhledat všechny poznámky ve složce jedním kliknutím.
+Vyhledávač a model shrnutí jsou samostatné volby. Tavily vyžaduje klíč; DuckDuckGo nikoli, ale potřebuje síť a může omezovat provoz. Lokální model z webové rešerše nedělá offline úlohu.
 
 ## Jak to funguje
 
-### Pipeline vyhledávání a následného shrnutí
+### Hledání a shrnutí
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+1. Otevřete cílovou poznámku v editoru Markdown a vyberte téma, případně použijte název.
+2. Spusťte **Research & summarize**.
+3. Tavily vrátí úryvky; DuckDuckGo může načíst stránky výsledků.
+4. Lze přidat povolený lokální kontext ze zvoleného rozsahu.
+5. Model zapíše sekci `Research Summary` s tématem a označením zdroje.
+6. Otevřete adresy a ověřte tvrzení. Získaný kontext nedokládá automaticky každou generovanou citaci.
 
-1. **Extrakce dotazu** – Notemd extrahuje vyhledávací termíny z vaší volby nebo z názvu poznámky.
-2. **Vyhledávání na webu** – nejprve se pokusí Tavily. Pokud není konfigurován klíč API, použije se automaticky DuckDuckGo (klíč není potřeba).
-3. **LLM shrnutí** – surové výsledky vyhledávání jsou odeslány do konfigurovaného LLM, které vytvoří stručné shrnutí s odkazy na zdroje.
-4. **Přidání** – formátované shrnutí je přidáno pod nadpisem `## Research` v aktuální poznámce.
+### Tavily nebo DuckDuckGo
 
-### Tavily versus DuckDuckGo
+| Volba | Příprava | Provozní hranice |
+| -------- | ------- | ---------------------- |
+| Tavily | Vyberte Tavily a zadejte klíč | Limity účtu a vrácené úryvky |
+| DuckDuckGo | Výslovně vyberte DuckDuckGo | Bez klíče; omezení hledání a dostupnost stránek |
 
-| Aspekt | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| Klíč API | Požadováno (dostupná bezplatná úroveň) | Nepožadováno |
-| Kvalita výsledků | Vyšší (vyvinuto speciálně pro AI) | Dostatečné pro běžné dotazy |
-| Limity rychlosti | Štědrá bezplatná úroveň | Podléhá omezování rychlosti |
-| Konfigurace | `tavilyApiKey` v nastaveních | Nulová konfigurace – automatický přechod |
+Prázdný či chybný klíč Tavily nepřepíná službu. Při malém množství webového kontextu čtěte zprávu. Zapnuté místní úryvky mohou stále podpořit shrnutí; označení zdroje je odliší od obsahu založeného na webu.
 
-### Výzkum ve skupinách souborů
+### Rešerše při generování podle názvu
 
-Klikněte pravým tlačítkem na složku a vyberte **"Notemd: Složka pro výzkum"**. Každý soubor `.md` v této složce je zpracován postupně (nebo paralelně až do nastavené konvergenční kapacity). Každá poznámka dostane svůj vlastní souhrn výzkumu.
+**Enable research in "Generate from title"** přidává rešerši také do dávky a výchozím stavem je vypnutá. To je podporovaná cesta pro složky; samostatná obecná akce Research Folder neexistuje.
 
-## Konfigurace
+## Nastavení
 
-| Nastavení | Výchozí | Účinek |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Klíč Tavily API. Pokud je prázdný, používá se výhradně DuckDuckGo. |
-| `researchProvider` / `researchModel` | DeepSeek | LLM na úrovni jednotlivých úloh pro shrnování výsledků vyhledávání |
-| `maxResearchContentTokens` | `4000` | Tokenový rozpočet pro obsah odeslaný do LLM. Přebytek je zkrácen. |
-| `researchAppendToNote` | `true` | Přidejte souhrn k původní poznámce. Pokud je hodnota false, vytvoří se samostatný soubor. |
-| `researchLanguage` | `'en'` | Jazyk výstupu pro shrnutý výzkum |
+| Nastavení | Výchozí hodnota | Účinek |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Vyhledávací služba |
+| `tavilyApiKey` | `''` | Klíč Tavily |
+| `tavilyMaxResults` | `5` | Požadovaný počet výsledků Tavily |
+| `tavilySearchDepth` | `basic` | Hloubka hledání Tavily |
+| `ddgMaxResults` | `5` | Požadovaný počet výsledků DuckDuckGo |
+| `ddgFetchTimeout` | `15` | Časový limit stránek v sekundách |
+| `maxResearchContentTokens` | `3000` | Přibližný rozpočet webového kontextu |
+| `researchProvider` | `DeepSeek` | Poskytovatel shrnutí při směrování úloh |
+| `researchModel` | `''` | Prázdná hodnota přebírá model poskytovatele |
+| `researchSummarizeLanguage` | `en` | Výstupní jazyk úlohy |
+| `enableResearchInGenerateContent` | `false` | Povolení rešerše při generování podle názvu |
+| `enableLocalKnowledgeRetrieval` | `false` | Samostatné povolení lokálního hledání |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Lokální kontext pro tuto úlohu |
 
-### Doporučení modelu na úrovni jednotlivých úloh
+### Kontext a model
 
-Výzkum těží z modelu, který zvládá vícejazyčný obsah a vytváří dobře strukturovaný text. Zvažte následující možnosti:
-
-- **DeepSeek** -- standardní verze, dostupná cenově, dobrá kvalita
-- **GPT-4o** -- lepší kvalita shrnutí, vyšší cena
-- **Gemini Flash** -- rychlý a levný, vhodný pro jednoduché dotazy
+Limity jsou odhady, nikoli přesné tokeny poskytovatele. Oříznutí může odebrat důkazy. Zúžte dotaz a upravte model/rozpočet. Lokální index vyhledává podle slov; nepoužívá skryté embeddings ani nezaručuje úplné nalezení.
 
 ## Příklad
 
-Čtete článek o *transformer attention mechanisms* a narazíte na neznámý termín: *relative positional encoding*. Místo toho, abyste nechali Obsidian:
+Vytvořte poznámku `Relativní poziční kódování`, proveďte rešerši a porovnejte ji s původními publikacemi či oficiální dokumentací. Uchovejte dotaz, skutečné URL a opravy. Příklad netvrdí, že již proběhlo hledání ve vašem trezoru.
 
-1. Zvýrazněte **"relative positional encoding"**
-2. Klikněte pravým tlačítkem --> **"Notemd: Výzkum a shrnutí"**
-3. Notemd prohledá web, shrne nejlepší výsledky a přidá:
+## Zrušení a soukromí
 
-```markdown
-## Research
+Dokončená připojení zůstávají. Přijatý požadavek modelu či stránky může doběhnout. Vyhledávač obdrží dotaz, weby požadavky a LLM celý kontext včetně povolených lokálních úryvků. Před sdílením ověřte diagnostiku.
 
-### Relative Positional Encoding
+## Doporučení
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
+- Rozlišujte webový zdroj, místní poznámku a závěr modelu.
+- Citace, data a hlavní tvrzení ověřte v originálu.
+- Hledání a LLM testujte odděleně malým dotazem.
+- Před dalším připojením přečtěte existující shrnutí.
 
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
+## Dále
 
-Shrnutí je nyní součástí vašeho úložiště, lze ho vyhledávat, odkazovat na něj a přistupovat k němu i offline.
-
-## Tipy
-
-- **Nastavte klíč Tavily pro lepší výsledky** -- dokonce i bezplatná verze poskytuje lepší relevanci než čisté DuckDuckGo.
-- **Použijte schopný model na shrnování** -- levné modely mohou zjednodušit jemné technické obsahy.
-- **Proveďte hromadný výzkum** po prvním přečtení, abyste najednou doplnili mezery v mnoha poznámkách.
-- **Prozkoumejte přidaná shrnutí** -- LLM mohou vytvářet falešné informace o zdrojích. Ověřte klíčová tvrzení.
-
----
-
-## Další kroky
-
-- [Concept Notes](./concept-notes) -- Vyextrahujte a uložte klíčové termíny z výsledků výzkumu
-- [Wiki-Links](./wiki-links) -- Propojte koncepty získané z výzkumu v rámci vašeho úložiště
-- [Translation](./translation) -- Přeložte shrnutí výzkumu do jiného jazyka
-- [LLM Poskytovatelé](/docs/providers/overview) -- Nakonfigurovat model používaný pro shrnutí
+- [Nastavení](../getting-started/configuration).
+- [Vlastní prompty](../advanced/custom-prompts).
+- [Řešení potíží](../advanced/troubleshooting).

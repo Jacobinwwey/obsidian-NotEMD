@@ -1,0 +1,97 @@
+---
+id: overview
+title: מדריך מפתחים
+description: 'בנו, בדקו והרחיבו את חוזי הספקים, הפעולות, הרינדור והמסמכים הקיימים.'
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - מדריך מפתחים
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# מדריך מפתחים
+
+<TLDR>עבדו בענף נפרד, התקינו תלויות נעולות ואת שתי גרסאות הדפדפן, בנו והריצו את כל Jest. שנו אצל הבעלים הקיים של החוזה ושמרו תיעוד, בדיקות ספק וראיות מיישומי יעד יחד.</TLDR>
+
+## עותק עבודה
+
+שכפלו את [המאגר](https://github.com/Jacobinwwey/obsidian-NotEMD) וקראו [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md). CI התוסף משתמש ב־Linux/Windows Node 20; האתר ב־Node 24. השורש ו־`website/` מתקינים תלויות בנפרד.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+שתי חבילות Playwright עשויות לדרוש Chromium שונה; התקנה אחת אינה מספיקה. `main.js` נוצר ואינו נכלל ב־Git. חבילה מקומית ישנה לא מאמתת commit חדש.
+
+## מציאת אחריות
+
+| אחריות | מקור ראשי |
+| ---------------- | ---------------- |
+| מחזור חיים, פקודות וניתוב ביישום המארח | `src/main.ts` |
+| פרופילי ספקים, מטא־נתוני פרוטוקול ואימות | `src/llmProviders.ts` |
+| בקשות, תעבורה, חזרות וזרימה | `src/llmUtils.ts` |
+| פעולות, סכמות ובחירת CLI ציבורי | `src/operations/`, `src/cliContracts.ts` |
+| משימות קבצים, מחקר ותרגום | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| פעולות תהליך וסרגל צד | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| מפרטי תרשימים ורינדור | `src/diagram/`, `src/rendering/` |
+| מחרוזות UI ושפות | `src/i18n/` |
+| מדריכים ציבוריים ותרגומים | `website/docs/`, `website/i18n/` |
+| נהלי תחזוקה וראיות מתוארכות | `docs/maintainer/` |
+
+חבילת ההפצה עצמאית וכוללת את מארח התצוגה. נתיב מוצע למארח נפרד אינו חוזה קבצים שנשלח למשתמשים. הפעלתו דורשת שינוי משותף באריזה, במשאבים, בבדיקות ובתיעוד.
+
+## שינוי מוגבל
+
+1. שחזרו וכתבו תחילה בדיקה ממוקדת שנכשלת.
+2. שנו אצל בעלי הכלל הקבוע ואמתו בגבול חיצוני.
+3. הריצו בדיקות ממוקדות ומלאות; שמרו ביטול, שגיאות ועמידות בכתיבה.
+4. עדכנו מקור אנגלי ושפות מושפעות. תוכניות, משימות והסברי walkthrough דורשים גרסאות מלאות ונפרדות באנגלית/סינית ב־`docs/`.
+5. בדקו שינוי חזותי או פורמט ביישום היעד האמיתי; XML, תמונה או build אינם מוכיחים עריכה או חיבור מחברים.
+
+הוסיפו ספק ב־`llmProviders.ts`, השתמשו בתעבורה תואמת ועדכנו `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README ובדיקות חיבור. שמרו זרימה ותשובות שנקטעו. חשיפת פעולה דורשת סכמות קלט/תוצאה, הקשר, תופעות לוואי ותגיות טיפול במידע. רישום אינו הופך פעולה לנקודת Agent ציבורית. [Agent](../agents/overview).
+
+## אימות
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint משווה אבחנות בודדות; סכום קטן יותר אינו מצדיק רגרסיה חדשה. בשינוי אחזור הריצו `npm run benchmark:local-kb` וציינו קורפוס וסביבה. לאתר עם Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+תרגומי תוכנית 1.9.8 נכתבים ונבדקים ישירות בידי Codex. אל תפעילו סקריפטי תרגום ישנים, LM Studio או שירות תרגום. כלים רשאים לעצב, לאמת ולרנדר טקסט שכבר נכתב.
+
+## Obsidian ויישומי יעד
+
+השתמשו בכספת חד־פעמית עם `.notemd-host-verification`; הסקריפטים בודקים חבילה מועתקת. השאירו כספות משתמש בנפרד. נסו גם `obsidian help` וגם `obsidian-cli help`; כלי חסר הוא לא זמין, לא בדיקת מארח שעברה.
+
+ל־PowerPoint, CircuitikZ ושקופיות דרישות ותוצרים משלהם. עקבו אחרי [קבלה מתוארכת](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) ו[נוהל הפצה](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). ציינו נייד וגרסת מינימום שלא נבדקו.
+
+## תרומה והפצה
+
+תארו ב־PR את הבעיה, ההתנהגות הסופית, הבדיקות והגבולות. צרפו שחזור ב־[Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). אל תשמרו ב־commit סודות, הערות פרטיות או תוצרים לא קשורים. מפרסם יחיד אחראי לסנכרון גרסה, תג מספרי, מקור מתויג נקי, הערות דו־לשוניות, נכסי טיוטה מאומתים, פרסום ופריסת Pages מפורשת. אין להזיז תג שכבר פורסם. `.trellis/` הוא מצב עבודה מקומי, לא תלות CI.
+
+## המשך
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [מצב הפרויקט](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

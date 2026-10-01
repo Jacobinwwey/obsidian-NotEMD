@@ -1,133 +1,76 @@
 ---
 id: installation
 title: 설치
-description: Obsidian에 Notemd을 설치하는 방법은 무엇인가요?
+description: Obsidian 커뮤니티 플러그인 또는 같은 GitHub Release의 파일로 설치하고 실제 작업을 검증합니다.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [installation, setup, obsidian plugin]
-concepts: [Installation, Community Plugins, BRAT, Manual Install]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - 설치
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # 설치
 
-<TLDR>
-**2분 이내에 Notemd를 설치하세요.** 두 가지 방법이 있습니다: (1) Obsidian 커뮤니티 플러그인(권장, 원클릭 설치), 또는 (2) GitHub Releases를 통한 수동 설치. Obsidian 0.15.0+가 필요합니다. Windows, macOS, Linux, iOS, Android에서 작동합니다. 외부 의존성이 없습니다. 4k회 이상 다운로드되었으며 MIT 라이선스를 따릅니다.
-</TLDR>
+<TLDR>커뮤니티 플러그인에서 Notemd를 설치하거나 같은 GitHub Release의 실행 파일 세 개를 Vault에 복사하세요. 활성화 후 provider를 설정하고 시험용 노트로 확인합니다. 모델 서버와 선택적 네이티브 내보내기 도구는 별도로 준비해야 합니다.</TLDR>
 
-## 방법 1: 커뮤니티 플러그인 (권장)
+## 방법 1: 커뮤니티 플러그인 권장
 
-1. **Obsidian 설정**을 엽니다(⚙️ 아이콘 또는 `Ctrl/Cmd + ,`).
-2. **Community plugins**로 이동하세요.
-3. **찾아보기**를 클릭하세요
-4. **"Notemd"**를 검색하세요.
-5. **Install**을 클릭하세요.
-6. **활성화**를 클릭하세요.
+1. 사용할 Vault에서 **Settings → Community plugins**를 엽니다.
+2. 필요하면 커뮤니티 플러그인을 허용하고 **Browse**를 누릅니다.
+3. **Notemd**를 검색하고 저장소가 `Jacobinwwey/obsidian-NotEMD`인지 확인한 뒤 **Install**을 누릅니다.
+4. **Enable** 후 리본 아이콘이나 명령 팔레트로 사이드바를 엽니다.
 
-**완료되었습니다!** 왼쪽 사이드바에 Notemd 아이콘이 표시될 것입니다.
+[Obsidian에서 Notemd 열기](obsidian://show-plugin?id=notemd). 브라우저가 처리하지 못하면 위 메뉴를 이용하세요. 문서를 읽는 데 전용 프로토콜 연결은 필요하지 않습니다.
 
 ## 방법 2: 수동 설치
 
-### 사전 요구 사항
-- Obsidian 0.15.0 이상
-- Git (클론용, 선택 사항)
+### 준비
 
-### 단계들
+설치된 Obsidian과 백업 가능한 Vault가 필요합니다. manifest의 최소 버전 `0.15.0`은 선언이며 최신 후보를 그 버전에서 시험했다는 뜻은 아닙니다.
 
-1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest)에서 **파일 다운로드**:
-   - `main.js`
-   - `styles.css`
-   - `manifest.json`
+### 절차
 
-2. **귀하의 볼트의 플러그인 폴더를 찾으세요:**
-   ```
-   <your-vault>/.obsidian/plugins/
-   ```
+1. [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest)에서 같은 릴리스의 `main.js`, `manifest.json`, `styles.css`를 받습니다. `README.md`는 참고 문서이며 실행 필수 파일은 아닙니다.
+2. `<vault>/.obsidian/plugins/notemd/`에 세 파일을 넣습니다. 설정 폴더를 바꾼 Vault는 실제 경로를 사용하세요.
+3. Obsidian을 다시 불러오고 Community plugins에서 활성화합니다.
+4. 표시 버전을 확인합니다. 새 manifest와 오래된 bundle을 섞지 마세요.
 
-`plugins` 폴더가 존재하지 않으면 생성하세요.
+## 대안: BRAT
 
-3. **Notemd 폴더 생성:**
-   ```
-   <your-vault>/.obsidian/plugins/notemd/
-   ```
-
-4. **세 개의 파일을** `notemd` 폴더에 복사하세요.
-
-5. **Obsidian 재로드:**
-   - `Ctrl/Cmd + R`를 누르거나,
-   - Obsidian를 재시작하세요.
-
-6. **플러그인 활성화하기:**
-   - 설정 → 커뮤니티 플러그인
-   - 목록에서 "Notemd"를 찾아보세요.
-   - 켜기로 전환하세요.
-
-## 대안: BRAT를 통해 설치하기
-
-[BRAT 플러그인](https://github.com/TfTHacker/obsidian42-brat)을 사용하는 경우:
-
-1. BRAT 설정을 엽니다.
-2. “Beta 플러그인 추가”를 클릭하세요.
-3. 입력: `Jacobinwwey/obsidian-NotEMD`
-4. “플러그인 추가”를 클릭하세요.
-5. Community 플러그인에서 Notemd를 활성화하세요
+이미 [BRAT](https://github.com/TfTHacker/obsidian42-brat)를 사용한다면 베타 플러그인 절차로 저장소를 추가할 수 있습니다. 버그 재현 시 버전을 고정하세요. BRAT는 외부 선택 도구로 일반 설치의 의존성이 아닙니다.
 
 ## 검증
 
-설치가 완료된 후 Notemd이 제대로 작동하는지 확인하세요:
+접근 가능한 provider와 모델을 설정하고 **연결 테스트** 후 [빠른 시작](./quick-start)의 복사 노트를 실행하세요. 일부 연결 시험은 모델 목록에만 접근합니다. 실제 생성과 저장은 별도 작업으로 검증해야 합니다.
 
-1. 어떤 노트든 열기
-2. 편집기에서 마우스 오른쪽 버튼 클릭
-3. Notemd와 같은 명령들을 볼 수 있습니다:
-   - "파일 처리 (링크 추가)"
-   - "개념 추출"
-   - "조사하고 요약하기"
+## 실행 조건
 
-## 다음 단계
+| 대상 | 범위 |
+| --------- | ---------- |
+| 플러그인 manifest | 최소 Obsidian `0.15.0`, `isDesktopOnly`는 false |
+| 검증 근거 | 릴리스별 날짜가 있는 검증 기록 참고; 실제 모바일 기기와 0.15.0은 현재 미검증 |
+| 클라우드 LLM | 네트워크, 허용된 계정/키, 지원 모델 |
+| 로컬 LLM | 별도로 설치해 실행 중인 서버와 내려받거나 로드한 모델 |
+| 네이티브 슬라이드·회로 내보내기 | 데스크톱 도구와 형식별 의존성; 먼저 환경 확인 |
 
-- **LLM 공급자 설정:** [빠른 시작 →](./quick-start)
-- **문제 해결:** [일반적인 문제 →](../advanced/troubleshooting)
-
-## 시스템 요구 사항
-
-| 플랫폼 | 버전 | 상태 |
-|----------|---------|--------|
-| **Obsidian** | 0.15.0+ | 필수 |
-| **Windows** | 7+ | ✅ 지원됨 |
-| **macOS** | 10.15+ | ✅ 지원됨 |
-| **Linux** | 네 | ✅ 지원됨 |
-| **iOS** | 15+ | ✅ 지원됨 |
-| **안드로이드** | 5+ | ✅ 지원됨 |
+모든 선택적 내보내기에 통용되는 OS 버전 보장은 없습니다. 회로 미리보기는 TeX 컴파일 증거가 아니며 데스크톱 시험은 모바일 시험을 대신하지 않습니다.
 
 ## 제거
 
-Notemd를 제거하려면:
+커뮤니티 플러그인에서 비활성화하거나 제거하세요. 생성 노트와 산출물은 일반 Vault 파일로 남습니다. 삭제 전 확인하고 재설치할 계획이면 설정을 백업하세요. 플러그인 제거는 이미 수행한 편집을 되돌리지 않습니다.
 
-1. 설정 → 커뮤니티 플러그인
-2. Notemd를 찾아주세요.
-3. ❌ 아이콘을 클릭하세요.
-4. 선택적으로 플러그인 폴더를 삭제할 수 있습니다: `<vault>/.obsidian/plugins/notemd/`
+## 업데이트
 
-귀하의 데이터(노트, 컨셉 노트 등)는 그대로 유지됩니다.
+Community plugins의 **Check for updates**로 업데이트하세요. 수동 업데이트는 작업 중지, Vault/설정 백업, 같은 릴리스의 실행 파일 세 개 교체, 재시작 순서입니다. 릴리스 노트와 작은 시험 결과를 확인한 후 배치를 재개하세요.
 
-## 업데이트 중입니다
+릴리스 파일로 Vault 설정을 덮어쓰지 마세요. 되돌릴 때는 백업과 호환되는 알려진 버전을 사용하고 필요한 생성 파일을 보존합니다.
 
-### 자동 업데이트 (권장)
-Obsidian는 자동으로 플러그인 업데이트를 확인합니다. 새 버전이 준비되면:
-1. 설정 → 커뮤니티 플러그인
-2. “업데이트 확인”을 클릭하세요.
-3. Notemd 옆에 있는 “Update”를 클릭하세요.
+## 다음 단계
 
-### 수동 업데이트
-최신 버전을 다운로드한 후 플러그인 폴더에 있는 세 개의 파일을 교체하세요.
-
-## 도움 받기
-
-- 📖 [빠른 시작 가이드](./quick-start)
-- ❓ [FAQ](../faq)
-- 💬 [Discord 커뮤니티](https://discord.gg/qnGgsQ9W)
-- 🐛 [문제 보고하기](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- [빠른 시작](./quick-start).
+- [설정](./configuration).
+- [문제 해결](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)에 재현 가능한 설치 문제를 보고하세요.

@@ -1,0 +1,99 @@
+---
+id: overview
+title: Посібник розробника
+description: >-
+  Збирайте, перевіряйте й розширюйте наявні контракти провайдерів, операцій,
+  відображення та документації.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Посібник розробника
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Посібник розробника
+
+<TLDR>Працюйте в окремій гілці, встановіть зафіксовані залежності й обидві ревізії браузера, виконайте build і весь Jest. Змінюйте власника контракту та оновлюйте разом документацію, тести провайдерів і докази цільових програм.</TLDR>
+
+## Робоча копія
+
+Клонуйте [репозиторій](https://github.com/Jacobinwwey/obsidian-NotEMD) і прочитайте [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md). CI розширення використовує Linux/Windows Node 20, сайт — Node 24. Корінь і `website/` встановлюються окремо.
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Два пакети Playwright можуть потребувати різних Chromium; одного встановлення недостатньо. `main.js` генерується й ігнорується Git. Старий локальний bundle не перевіряє нового коміту.
+
+## Власники відповідальності
+
+| Відповідальність | Основне джерело |
+| ---------------- | ---------------- |
+| Життєвий цикл, команди й інтеграція з Obsidian | `src/main.ts` |
+| Профілі, метадані протоколів і перевірка | `src/llmProviders.ts` |
+| Запити, транспорти, повтори й потоки | `src/llmUtils.ts` |
+| Операції, схеми та публічна підмножина CLI | `src/operations/`, `src/cliContracts.ts` |
+| Файлові завдання, дослідження та переклад | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| Дії процесів і бічна панель | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| Специфікації діаграм і відображення | `src/diagram/`, `src/rendering/` |
+| Рядки UI й мови | `src/i18n/` |
+| Публічні посібники та переклади | `website/docs/`, `website/i18n/` |
+| Правила підтримки й датовані докази | `docs/maintainer/` |
+
+Продукційний bundle самодостатній із вбудованим host перегляду. Можливий окремий host-шлях не є контрактом поставки. Його ввімкнення потребує узгоджених змін пакування, файлів, перевірок і документів.
+
+## Обмежена зміна
+
+1. Відтворіть проблему й спочатку напишіть цільовий тест, що падає.
+2. Змінюйте власника інваріанта, перевіряйте зовнішню межу.
+3. Запустіть цільові та повні тести; збережіть скасування, поширення помилок і надійний запис.
+4. Оновіть англійське джерело й зачеплені мови. Плани, завдання та walkthrough потребують повних окремих англійської/китайської версій у `docs/`.
+5. Візуальні й нативні зміни перевіряйте в справжній програмі; XML, картинка чи build не доводять редагованості або прикріплених з’єднань.
+
+Додайте провайдера до `llmProviders.ts`, повторно використайте сумісний транспорт, оновіть `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README і тести з’єднання. Зберігайте потоки та перервані відповіді. Для відкриття операції потрібні схеми входу/результату, контекст, ефекти й мітки поводження. Реєстрація не створює публічного Agent endpoint. [Agent](../agents/overview).
+
+## Перевірка
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint порівнює окремі діагностики; менша загальна кількість не виправдовує нової регресії. Для змін локального пошуку запустіть `npm run benchmark:local-kb` і вкажіть корпус/середовище. Для сайту потрібен Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+У програмі 1.9.8 Codex безпосередньо пише й перевіряє переклади. Не запускайте старих перекладацьких скриптів, LM Studio чи сервісів перекладу. Засоби можуть форматувати, перевіряти та відображати вже написаний текст.
+
+## Obsidian і цільові програми
+
+Використовуйте тимчасове сховище з `.notemd-host-verification`; скрипти перевіряють скопійований bundle. Користувацькі сховища тримайте окремо. Спробуйте і `obsidian help`, і `obsidian-cli help`; відсутній засіб позначайте недоступним, не успішною перевіркою host.
+
+PowerPoint, CircuitikZ і слайди мають окремі передумови/артефакти. Дотримуйтеся [датованої перевірки](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) та [процедури випуску](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md). Явно вказуйте неперевірені фізичні мобільні пристрої й мінімальну версію.
+
+## Внесок і випуск
+
+У PR опишіть проблему, кінцеву поведінку, тести й межі. Відтворення — в [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues). Не комітьте ключів, приватних нотаток чи сторонніх файлів. Один publisher відповідає за узгоджені версії, числовий тег, чисте джерело тегу, двомовні примітки, перевірені draft-файли, публікацію й явний Pages deploy. Публічний тег незмінний. `.trellis/` — локальний стан роботи, не залежність CI.
+
+## Далі
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Стан проєкту](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md).
+- [Agent](../agents/overview).
+- [1.9.8](../releases/1.9.8).

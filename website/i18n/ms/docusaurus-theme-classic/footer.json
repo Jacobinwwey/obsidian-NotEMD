@@ -1,6 +1,6 @@
 {
   "link.title.Docs": {
-    "message": "Dokumen",
+    "message": "Dokumentasi",
     "description": "The title of the footer links column with title=Docs in the footer"
   },
   "link.title.Community": {
@@ -8,35 +8,35 @@
     "description": "The title of the footer links column with title=Community in the footer"
   },
   "link.title.More": {
-    "message": "Lain-lain",
+    "message": "Lagi",
     "description": "The title of the footer links column with title=More in the footer"
   },
   "link.item.label.Getting Started": {
-    "message": "Mulakan Penggunaan",
+    "message": "Bermula",
     "description": "The label of footer link with label=Getting Started linking to /docs/intro"
   },
   "link.item.label.FAQ": {
-    "message": "FAQ",
+    "message": "Soalan lazim",
     "description": "The label of footer link with label=FAQ linking to /docs/faq"
   },
   "link.item.label.Discord": {
     "message": "Discord",
     "description": "The label of footer link with label=Discord linking to https://discord.gg/qnGgsQ9W"
   },
-  "link.item.label.GitHub Discussions": {
-    "message": "GitHub Discussions",
-    "description": "The label of footer link with label=GitHub Discussions linking to https://github.com/Jacobinwwey/obsidian-NotEMD/discussions"
-  },
   "link.item.label.GitHub": {
     "message": "GitHub",
     "description": "The label of footer link with label=GitHub linking to https://github.com/Jacobinwwey/obsidian-NotEMD"
   },
   "link.item.label.Sponsor": {
-    "message": "Penaja",
+    "message": "Sokong projek",
     "description": "The label of footer link with label=Sponsor linking to https://github.com/sponsors/Jacobinwwey"
   },
   "copyright": {
-    "message": "Copyright © 2026 Notemd. Dibina dengan Docusaurus. | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">Licensi MIT</a>",
+    "message": "Copyright © 2026 Notemd. Dibina dengan Docusaurus. | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">Lesen MIT</a>",
     "description": "The footer copyright"
+  },
+  "link.item.label.GitHub Issues": {
+    "message": "Laporkan masalah",
+    "description": "Repository issue tracker"
   }
 }

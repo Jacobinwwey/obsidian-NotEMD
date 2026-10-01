@@ -1,63 +1,59 @@
 ---
 id: local
-title: "Model Tempatan"
-description: "Konfigurasikan Ollama dan LLM tempatan"
+title: Model setempat
+description: >-
+  Sediakan Ollama, LM Studio atau OVMS dengan pelayan model berjalan dan batas
+  rangkaian yang jelas.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Model setempat
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Model Tempatan
+# Model setempat
 
-<TLDR>
-**Pembekal tempatan menyimpan kandungan nota di luar API yang dihoskan.** Laluan tempatan semasa meliputi Ollama menggunakan pengangkutan natif `ollama` dan LMStudio melalui pengangkutan yang serasi dengan OpenAI. Tiada kunci API diperlukan untuk mana-mana laluan, tetapi pelayan tempatan dan model mesti sudah berjalan.
+<TLDR>Penyedia setempat membolehkan pelayan model pada peranti memproses kandungan tugas. Pasang atau muatkan model dahulu, kemudian tetapkan protokol sepadan. Memilih LLM setempat tidak menjadikan carian web, titik akhir jauh, pemasangan kebergantungan atau tugas awan berasingan luar talian.</TLDR>
 
-Ini merupakan sebahagian daripada [Obsidian Panduan Pengurusan Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Persediaan
 
-## Pengaturan
+Bagi [Ollama](https://ollama.com/), pasang pelayan dan muat turun model. Bagi [LM Studio](https://lmstudio.ai/), muatkan model dan mulakan pelayan API setempat. Bagi OVMS, sediakan deployment pelayan sebelum menambah profil Notemd.
 
-Untuk Ollama, pasang Ollama, tarik model yang diinginkan, mulakan pelayan, dan tambah profil pembekal `Ollama` dalam Notemd. Untuk LMStudio, muatkan model dalam pelayan tempatan LM Studio dan tambah profil pembekal `LMStudio`.
+Pilih pratetap, masukkan nama model tepat yang didedahkan pelayan, jalankan **Test connection** dan proses nota ujian. Notemd tidak memasang model atau memulakan pelayan ini untuk anda.
 
-Model tempatan merupakan kebergantungan operasi, bukan sekadar tetapan. Notemd hanya boleh memanggil apa yang dipaparkan oleh proses tempatan, jadi sahkan model tempatan di luar Obsidian sebelum menyahpepijat plugin.
+## Titik akhir dan pengesahan
 
-## Titik Hujung Dan Pengesahan
+| Pratetap | URL asas lalai | Pemegang tempat model | Protokol / pengesahan |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Ollama natif; tiada kunci API diperlukan |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | Serasi OpenAI; kunci pilihan, nilai pratetap `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | Serasi OpenAI; tetapkan model dan keperluan akses deployment |
 
-| Penyedia | Base URL | Model Lalai | Kunci API | Nota |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Tidak diperlukan | Penstriman NDJSON; penemuan model melalui `/api/tags` |
-| LMStudio | `localhost:1234/v1` | `local-model` | Tidak diperlukan | Menghantar `"EMPTY"` sebagai token pembawa; serasi dengan OpenAI |
+`localhost` ialah mesin yang menjalankan Obsidian. Telefon tidak boleh mengakses model komputer melalui alamat gelung baliknya sendiri. Titik akhir LAN ialah perkhidmatan rangkaian: gunakan alamat sebenar dan pengesahan sesuai, serta elakkan mendedahkan pelayan tanpa pengesahan kepada rangkaian tidak dipercayai.
 
-Ollama menggunakan laluan natif `/chat` di bawah Base URLnya. LMStudio mengikuti laluan `chat/completions` yang serasi dengan OpenAI dan mengharapkan model yang dimuatkan dalam pelayan tempatan.
+## Penemuan model
 
-## Penemuan Model
+Ollama menyenaraikan tag dimuat turun melalui `/api/tags`. LM Studio boleh menyediakan `/v1/models`. OVMS mempunyai peraturan penemuan deployment sendiri. Model tersenarai tidak menjamin muat dalam memori atau mampu menjalankan tugas berstruktur; uji permintaan sebenar.
 
-Ollama menggunakan mod penemuan `ollama-tags` dan menyenaraikan tag yang ditarik secara tempatan. LMStudio menggunakan penemuan model yang serasi dengan OpenAI apabila pelayannya memaparkan `/v1/models`.
+## Penyelesaian masalah
 
-Jika penemuan tidak menghasilkan apa-apa, biasanya ia disebabkan masalah keadaan pelayan tempatan: model belum ditarik, belum dimuatkan, atau pelayan terikat pada hos/port yang berbeza daripada profil.
+- Sambungan ditolak: semak keadaan pelayan, alamat dengar dan port.
+- Model tiada: muat turun/muatkan dan gunakan nama atau alias tepat pelayan.
+- Pengesahan ditolak: masukkan token sebenar, jangan anggap `EMPTY` diterima.
+- Hasil perlahan/tidak lengkap: semak memori, konteks serta had keluaran; mulakan satu permintaan pada satu masa.
+- Format rosak: sahkan protokol, prompt dan keupayaan model sebelum tetapan kelompok.
 
-## Pemecahan masalah
+## Bila digunakan
 
-- Sambungan ditolak: mulakan Ollama atau LM Studio dan sahkan port yang dikonfigurasikan.
-- Model tidak ditemui: tarik tag Ollama atau muatkan model LM Studio sebelum menguji.
-- Keluaran perlahan: kurangkan saiz konteks, gunakan model tempatan yang lebih kecil, atau hantar tugas berat kepada pembekal yang dihoskan.
-- Jawapan kosong atau rosak: sahkan profil pembekal yang dipilih sepadan dengan protokol pelayan tempatan; Ollama dan LMStudio tidak boleh ditukar ganti.
+Gunakan inferens setempat apabila batas privasi, ketersediaan dan hasil terukur memenuhi keperluan. Sediakan model dan kebergantungan eksport pilihan sebelum memutuskan rangkaian. Semak setiap penyedia khusus tugas serta dapatan setempat: petikan dihantar kepada LLM pilihan yang mungkin masih dihoskan awan.
 
-## Bila Perlu Digunakan
+Penyelidikan Tavily/DuckDuckGo tetap dalam talian. Pengeksport natif mungkin memerlukan alat berasingan. Penyedia setempat ialah satu komponen aliran luar talian, bukan jaminan semua ciri.
 
-Guna penyedia tempatan untuk peti simpanan peribadi, kerja luar talian, atau tugas berulang yang murah. Jangan anggap bahawa penggunaan tempatan sentiasa lebih baik untuk sintesis penyelidikan atau penaakulan jangka panjang; kualiti model dan had perkakasan merupakan pertukaran yang perlu dipertimbangkan.
+## Seterusnya
 
----
-
-## Langkah Seterusnya
-
-- [LLM Penyedia](/docs/providers/overview) -- Tetapan penuh dan konfigurasi model untuk setiap tugas
-- [Penyelesaian masalah](/docs/advanced/troubleshooting) -- Perbaiki ralat connection-refused apabila pelayan tempatan tidak berjalan
+- [Gambaran penyedia](./overview): penghalaan dan semua pratetap.
+- [Konfigurasi](../getting-started/configuration): penyedia tugas serta bahasa.
+- [Penyelesaian masalah](../advanced/troubleshooting): asingkan kegagalan pelayan dan tugas.

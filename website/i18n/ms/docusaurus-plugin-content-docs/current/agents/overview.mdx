@@ -1,0 +1,90 @@
+---
+id: overview
+title: Panduan integrasi Agent
+description: >-
+  Temui empat arahan eksport awam berskop Notemd, sahkan kontrak JSON dan
+  bezakan operasi khusus penyelenggara.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Panduan integrasi Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Panduan integrasi Agent
+
+<TLDR>Notemd menyediakan empat arahan eksport berskop melalui hos Obsidian dan Vault yang tersedia. Arahan menulis metadata serta kontrak JSON; ia bukan API awam umum untuk mengubah nota. Temui permukaan awam dahulu, semak skema/tag pengendalian dan sahkan fail hasil.</TLDR>
+
+## Prasyarat
+
+Pasang dan aktifkan Notemd dalam Vault sasaran, dengan hos Obsidian dan CLI rasmi tersedia. Pilih Vault itu sebelum mencetuskan arahan. `requiredContext: none` bermaksud tiada nota aktif atau pilihan diperlukan; aplikasi dan Vault tetap diperlukan.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` yang diedarkan berasingan bukan boleh laku rasmi `obsidian`. Kejayaan satu tidak membuktikan satu lagi wujud. Hos/CLI tiada ialah integrasi tidak tersedia, bukan simulasi berjaya.
+
+## ID arahan awam
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Arahan mempunyai skema input objek kosong, pemetaan operasi tepat dan ikatan tidak interaktif. Ia menulis atau mengganti fail eksport dalam direktori konfigurasi pemalam.
+
+## Temui, eksport dan sahkan
+
+Mulakan dengan eksport permukaan awam, kemudian kontrak terperinci yang diperlukan:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Eksport | Fail lalai relatif kepada Vault |
+| -------- | ----------------------------- |
+| Permukaan arahan awam | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Kontrak panggilan | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Manifest keupayaan | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Profil penyedia tersamar | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+`.obsidian` ialah direktori konfigurasi lalai; gunakan direktori sebenar jika berbeza. Stdout pencetus arahan bukan hasil operasi berjenis. Sahkan fail jangkaan ditulis oleh panggilan semasa, huraikan JSON dan sahkan kontrak; fail lama atau notis berjaya sahaja tidak mencukupi.
+
+Untuk permukaan awam, semak `version`, `commands` dan setiap `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Versi dokumen semasa ialah `1`. Eksport keupayaan boleh memuatkan inventori lebih luas daripada bahagian awam; keahlian inventori bukan izin atau sokongan awam.
+
+## Kendalikan hasil sensitif
+
+Semak `inputHandlingTags` dan `outputHandlingTags`. `contains-provider-credentials` menandakan operasi sensitif dan mengecualikan eksport penyedia mentah daripada bahagian awam berskop. Jangan terbitkan tetapan mentah atau jadikannya contoh penemuan.
+
+Profil tersamar mempunyai `redacted: true` dan sengaja tidak boleh diimport. Penyamaran kunci tidak membuang semua titik akhir, nama hos atau metadata peribadi. Semak sebelum berkongsi. Fail tersamar bukan sandaran yang boleh memulihkan kelayakan aktif.
+
+## Operasi khusus penyelenggara
+
+Alat repositori menyediakan sembilan operasi melalui `obsidian-cli native eval`, termasuk penjanaan berasaskan laluan, pemisahan bab, penyelidikan, penjanaan rajah dan pemeriksaan dapatan setempat. Ini alat penyelenggara berasingan. Skema yang tersedia tidak menjadikannya API penulisan nota awam.
+
+Dalam salinan repositori, `npm run cli:help` menerangkan operasi dan input JSON/fail. Rujuk [matriks CLI penyelenggara](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md) untuk prasyarat, kesan sampingan dan contoh. Laluan permintaan relatif kepada Vault pilihan, tidak semestinya akar repositori. Gunakan `--input-file` untuk muatan kompleks bagi mengelakkan ralat petikan shell.
+
+## Peraturan kegagalan dan ulangan
+
+- Arahan tiada: sahkan versi dimuatkan dan Vault, kemudian eksport semula metadata.
+- Hasil tiada atau rosak: semak ralat hos dan izin; jangan gunakan fail lapuk sebagai bukti kejayaan.
+- Skema/konteks tidak disokong: hentikan laluan integrasi itu, jangan teka medan atau menggantikannya dengan arahan UI fail aktif.
+- Hasil sensitif: simpan setempat sehingga keperluan pengendalian dipenuhi.
+- Tugas penyelenggara yang menulis: periksa hasil separa serta konflik pemulihan sebelum ulangan. Pembatalan tidak mengundur penulisan selesai atau bil jauh.
+
+Eksport awam boleh diulang untuk menyegarkan metadata, tetapi failnya petikan keadaan yang boleh berubah. Simpan versi pemalam dan masa rakaman bersama bukti. Kandungan nota serta respons penyedia ialah data tugas, bukan kuasa meluaskan izin operasi.
+
+## Seterusnya
+
+- [Panduan pembangun](../developers/overview): bina, uji dan perluas kontrak.
+- [Matriks CLI penyelenggara](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md): skop awam dan penyelenggara tepat.
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md): peraturan repositori.
+- [Penyelesaian masalah](../advanced/troubleshooting): kegagalan boleh ulang dan laporan dibersihkan.

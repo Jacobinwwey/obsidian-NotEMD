@@ -1,121 +1,91 @@
 ---
 id: batch-processing
-title: "Pemrosesan Batch"
-description: "Memproses beberapa file secara efisien"
+title: Pemrosesan batch
+description: >-
+  Batasi folder, pahami keluaran tiap tugas, dan periksa hasil parsial sebelum
+  mengulang.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [batch processing, folders, concurrency, bulk operations]
-concepts: [Batch Processing, Concurrency, Folder Operations]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Node.js Worker Threads
-    url: https://nodejs.org/api/worker_threads.html
+keywords:
+  - Pemrosesan batch
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Pemrosesan Batch
+# Pemrosesan batch
 
-<TLDR>
-**Notemd memproses seluruh folder dalam satu tindakan dengan tingkat konkurensi yang dapat dikonfigurasi dan kontrol penggantian.** Klik kanan pada sebuah folder untuk menambahkan tautan wiki secara batch, mengekstrak konsep, melakukan penelitian, atau menerjemahkan semua catatan di dalamnya. Batasan konkurensi mencegah kesalahan batas kecepatan API. Kemajuan dipantau per file. Perilaku penggantian dapat dikonfigurasi: melewatkan yang sudah ada, menambahkan, atau menggantikan. File yang gagal dicatat tanpa menghentikan pemrosesan batch.
+<TLDR>Tindakan folder berbagi kontrol pemilihan dan progres, tetapi penulisan/penimpaannya berbeda. Konkurensi bawaan satu. Mulai dari folder uji, periksa cakupan dan tujuan, lalu perluas.</TLDR>
 
-Ini merupakan bagian dari [Obsidian Panduan Manajemen Pengetahuan AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Gambaran umum
 
-## Gambaran Umum
+Gunakan tindakan folder di bilah samping atau menu penjelajah berkas. Tersedia tambah tautan, ekstraksi konsep, generasi judul, terjemahan, ekstraksi kutipan asli, perbaikan Mermaid dan rumus. Tidak ada riset folder generik; generasi judul dapat menyertakan riset opsional.
 
-Pemrosesan batch mengubah folder berisi catatan menjadi satu operasi tunggal. Alih-alih membuka setiap catatan dan menjalankan perintah secara terpisah, Anda cukup klik kanan pada folder dan pilih tugasnya. Notemd akan menelusuri setiap file `.md`, menerapkan tindakan yang dipilih, dan melaporkan kemajuan secara real time.
+Batch bukan transaksi seluruh folder. Hasil yang berhasil ditulis tetap ada jika berkas lain gagal atau operasi dibatalkan.
 
-Fitur ini sangat penting untuk ekstraksi pengetahuan di seluruh vault. Setelah mengimpor puluhan file PDF, misalnya, dengan menambahkan tautan secara batch lalu mengekstrak konsep secara batch, grafik pengetahuan Anda dapat dibangun dalam hitungan menit bukan jam.
+## Cara kerja
 
-## Cara Kerjanya
+### Model eksekusi
 
-### Model Eksekusi Batch
+1. Pilih tugas/folder dan pastikan hanya berkas yang dimaksud akan diproses.
+2. Tugas mengumpulkan berkas yang memenuhi aturan ekstensi/pemilihan dan mengecualikan keluaran khusus tugas.
+3. Penyedia/model tugas digunakan dan progres, kegagalan, tujuan dilaporkan.
+4. Setelah selesai/batal, tinjau laporan serta berkas sebelum retry.
 
-```mermaid
-graph LR
-    A[Right-click Folder] --> B[Select Batch Task]
-    B --> C[Collect All .md Files]
-    C --> D[Partition by Concurrency]
-    D --> E[Execute Chunk in Parallel]
-    E --> F{All Files Done?}
-    F -->|No| G[Report Progress]
-    G --> E
-    F -->|Yes| H[Final Summary Toast]
-```
+Tambah tautan, konsep, generasi judul, kutipan asli, Mermaid, dan rumus secara bawaan menyertakan subfolder. **Terjemahan folder hanya anak langsung secara bawaan.** Profil pemilihan lanjutan dapat mengubah cakupan/filter jika mode pengembang dan pemilihan lanjutan aktif. Periksa profil nyata, jangan menganggap semua rekursif sama.
 
-1. **Pengumpulan file** -- Notemd memindai folder target secara rekursif (atau hanya tingkat atas, tergantung pengaturan) dan mengumpulkan semua file `.md`.
-2. **Pembagian konkurensi** -- File dibagi menjadi beberapa bagian berdasarkan pengaturan `batchConcurrency`. Setiap bagian dijalankan secara paralel; bagian lain dijalankan secara berurutan.
-3. **Eksekusi** -- Setiap file diproses menggunakan logika yang sama seperti perintah untuk file tunggal. Pengaturan penyedia dan model per tugas tetap dihormati.
-4. **Laporan kemajuan** -- Pemberitahuan toast diperbarui setelah setiap file selesai, menunjukkan persentase kemajuan `N / Total`.
-5. **Penanganan kesalahan** -- Jika suatu file gagal (kesalahan API, waktu tunggu jaringan, dll.), kesalahannya dicatat dan pemrosesan batch tetap berlanjut. Ringkasan akhir mencantumkan file yang gagal.
-6. **Penyelesaian** -- Pemberitahuan toast ringkasan melaporkan total file yang diproses, yang berhasil, dan yang gagal.
+### Penimpaan
 
-### Perilaku Menggantikan
+| Tugas | Periksa sebelum mengulang |
+| ------ | ------------------------------------ |
+| Tambah tautan | Hasil terpisah secara bawaan; periksa sufiks, folder, dan pemindahan sumber |
+| Ekstraksi konsep | Konsep lama dapat menerima tautan balik jika aktif; duplikat ditinjau terpisah |
+| Generasi judul | Isi ditulis ke sumber yang memenuhi syarat; hasil sukses dipindah ke complete jika tujuan bebas |
+| Terjemahan | Hasil terjemahan dengan nama sama dapat ditimpa; bawaan `_<language>.md` |
+| Mermaid / rumus | Mengubah catatan pilihan; periksa sampel dan pertahankan cadangan |
 
-Saat memproses file yang sudah memiliki tautan wiki, catatan konsep, atau terjemahan, perilaku Notemd bergantung pada pengaturan menggantikan:
+Tidak ada pengaturan lewati/tambah/ganti universal. Pada generasi judul, tujuan complete yang sudah ada mencegah pemindahan, bukan berarti generasi sebelumnya dilewati. Jumlah dihasilkan dan dipindahkan dibedakan.
 
-| Mode | Perilaku |
-|------|----------|
-| **Skip** | Konten yang ada tidak diubah. Hanya file yang belum dimodifikasi yang diproses. |
-| **Append** (default) | Konten baru ditambahkan. Tautan wiki, konsep, atau terjemahan yang sudah ada tetap dipertahankan. |
-| **Replace** | File diproses ulang sepenuhnya. Semua modifikasi Notemd sebelumnya akan digantikan. |
+### Konkurensi
 
-Untuk tautan wiki khususnya: jika sebuah catatan sudah berisi `[[wiki-links]]`, mode **skip** akan membiarkannya begitu saja, sementara mode **replace** akan mengirim ulang seluruh catatan ke LLM untuk penyisipan tautan yang baru. Gunakan **skip** untuk pemrosesan bertahap dan **replace** untuk pemrosesan ulang setelah pembaruan model.
+Pertahankan `batchConcurrency` pada `1` sampai sampel representatif berhasil. Beberapa jalur memerlukan `enableBatchParallelism` untuk penjadwalan paralel; terjemahan folder memakai konkurensinya langsung. Konkurensi menambah tekanan penyedia, memori, dan server lokal, bukan jaminan lebih cepat.
 
-### Kontrol Konkurensi
-
-Pengaturan `batchConcurrency` membatasi panggilan paralel API. Hal ini mencegah kesalahan batas kecepatan (HTTP 429) saat memproses folder besar pada penyedia dengan kuota yang ketat.
-
-| Konkurensi | Disarankan Untuk | Dampak Batas Kecepatan yang Umum |
-|-------------|----------------|---------------------------|
-| `1` | Tingkatan gratis, penyedia yang ketat | Tidak ada (serial) |
-| `3` (default) | Sebagian besar penyedia cloud | Rendah |
-| `5` | Ollama (local), tingkatan yang murah | Tidak ada / Rendah |
-| `10` | Model lokal dengan inferensi cepat | Tidak ada |
-
-Jika Anda mengalami kesalahan 429 saat pemrosesan batch, kurangi konkurensi menjadi 1 atau 2.
+Interval API dan jeda antarkelompok mengurangi lonjakan tetapi tidak menjamin terhindar dari kuota permintaan/token, batas akun, atau aplikasi lain yang memakai endpoint sama.
 
 ## Konfigurasi
 
-| Pengaturan | Default | Efek |
-|---------|---------|--------|
-| `batchConcurrency` | `3` | Maksimum panggilan API paralel selama operasi folder |
-| `batchOverwriteExisting` | `false` | Menulisi ulang konten Notemd yang sudah ada. `false` berarti mode tambahan. |
-| `batchSkipProcessed` | `false` | Melewatkan file yang sudah mengandung penanda Notemd (misalnya, tautan wiki) |
-| `batchRecursive` | `true` | Memasukkan subdirektori saat memindai folder |
-| `enableStableApiCall` | `false` | Mengaktifkan logika percobaan ulang (hingga 4 kali percobaan) per file selama proses batch |
+| Pengaturan | Bawaan | Efek |
+| --------- | --------- | -------- |
+| `batchConcurrency` | `1` | Konkurensi yang diminta pada jalur relevan |
+| `enableBatchParallelism` | `false` | Aktifkan penjadwalan paralel yang didukung |
+| `batchSize` | `50` | Ukuran kelompok pada penjadwalan berkelompok |
+| `batchInterDelayMs` | `1000` | Jeda antarkelompok jika diterapkan |
+| `apiCallIntervalMs` | `500` | Interval untuk penjadwalan permintaan konkuren |
+| `folderTaskIncludeSubfoldersMode` | `legacy` | Pertahankan cakupan subfolder bawaan tiap tugas |
+| `enableStableApiCall` | `false` | Mode permintaan stabil eksplisit |
 
-### Model Per-Tugas dalam Batch
+### Model per tugas
 
-Setiap operasi batch menggunakan model per-tugas yang sesuai. batch-add-links menggunakan `addLinksProvider`, batch-research menggunakan `researchProvider`, dan seterusnya. Hal ini berarti Anda dapat menugaskan model murah untuk operasi volume besar dan menyisihkan model mahal untuk tugas yang membutuhkan kualitas tinggi.
+Tindakan folder memakai pilihan penyedia/model tugas satu berkas terkait. Periksa sebelum isi privat. Pengambilan lokal opsional untuk generasi batch memakai satu snapshot di awal, sehingga suntingan saat proses tidak diam-diam masuk ke hasil pengambilan berikutnya. Mulai batch baru untuk menyertakannya.
 
 ## Contoh
 
-Anda memiliki sebuah folder `papers/` yang berisi 40 catatan penelitian yang diimpor. Anda ingin menambahkan tautan wiki dan mengekstrak konsep dari semuanya:
+Buat `trial-titles` berisi dua catatan judul saja. Jalankan **Pembuatan massal dari judul**, tinjau isi, `trial-titles_complete`, serta jumlah generasi/pemindahan/kesalahan. Diagnosis berkas gagal dahulu; mengulang folder bukan otomatis melanjutkan tepat bagian tersisa.
 
-1. Klik kanan pada folder `papers/`
-2. Pilih **"Notemd: Process folder (add links)"**
-3. Notemd memindai folder tersebut, menemukan 40 file `.md`, dan memprosesnya sebanyak 3 file sekaligus (konkurensi default)
-4. Tampilan toast progres menunjukkan: `12/40 files processed...`
-5. Setelah sekitar 3 menit, toast ringkasan melaporkan: `39 succeeded, 1 failed (API timeout on paper-37.md)`
-6. Ulangi dengan **"Notemd: Process folder (extract concepts)"** untuk membuat catatan konsep untuk seluruh 40 file tersebut
+## Pembatalan dan pemulihan
 
-File yang gagal akan dicatat. Anda dapat menjalankannya kembali hanya pada file tersebut nantinya.
+Pembatalan menghentikan penjadwalan baru dan diteruskan ke permintaan yang didukung. Panggilan/penulisan yang diterima sistem luar dapat selesai; tagihan dikendalikan penyedia. Tunggu tugas menetap, periksa hasil dan jalur konflik/pemulihan. Pertahankan berkas pemulihan sampai dibandingkan dengan catatan sekarang.
 
-## Tips
+## Saran
 
-- **Mulailah dengan konkurensi rendah** -- Jika Anda tidak yakin dengan batas kecepatan penyedia layanan, mulailah dengan `1` dan tingkatkan secara bertahap.
-- **Gunakan mode skip untuk pembaruan bertahap** -- Setelah batch pertama selesai, beralihlah ke `batchSkipProcessed: true` agar hanya catatan baru yang diproses pada eksekusi berikutnya.
-- **Aktifkan panggilan API yang stabil** -- `enableStableApiCall: true` menambahkan logika percobaan ulang yang memulihkan diri dari kesalahan jaringan sementara selama batch yang panjang.
-- **Jalankan kembali setelah pembaruan model** -- Jika Anda beralih ke model yang lebih baik, atur `batchOverwriteExisting: true` dan jalankan kembali untuk mendapatkan tautan dan konsep yang lebih baik.
+- Validasi berkas yang cocok sebelum memakai profil pemilihan.
+- Kurangi konkurensi dan periksa kuota saat 429.
+- Bedakan batal, gagal, dan selesai.
+- Simpan sampel utuh dan cadangan sebelum mengubah catatan lama.
 
----
+## Selanjutnya
 
-## Langkah Selanjutnya
-
-- [Workflows](/docs/features/workflows) -- Menggabungkan tugas batch menjadi tombol samping satu klik
-- [Custom Prompts](/docs/advanced/custom-prompts) -- Menyesuaikan prompt untuk ekstraksi batch
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Memperbaiki kesalahan batas kecepatan dan kegagalan koneksi selama eksekusi batch
-- [LLM Penyedia](/docs/providers/overview) -- Referensi konfigurasi model per tugas
+- [Alur](../features/workflows): penanganan gagal eksplisit.
+- [Konfigurasi](../getting-started/configuration): tujuan dan bawaan.
+- [Pemecahan masalah](./troubleshooting): diagnosis satu berkas gagal.

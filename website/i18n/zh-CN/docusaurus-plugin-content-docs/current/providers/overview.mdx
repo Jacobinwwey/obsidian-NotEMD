@@ -1,189 +1,142 @@
 ---
 id: overview
-title: LLM 提供商
-description: 配置36个LLM提供商——包括云、网关和本地类型——并支持按任务选择模型
+title: LLM Provider
+description: 配置五类协议下的 36 个 Notemd provider 预设，并验证各任务实际使用的模型。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [LLM providers, API, OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, per-task model]
-concepts: [LLM Integration, API Providers, Per-Task Models, OpenAI Compatible, Ollama, China Providers]
-citations:
-  - title: OpenAI API
-    url: https://platform.openai.com
-  - title: Anthropic API
-    url: https://docs.anthropic.com
+keywords:
+  - LLM Provider
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# LLM 提供商
+# LLM Provider
 
 <TLDR>
-**Notemd 支持 4 种传输类型下的 36 家 LLM 提供商。** 所有的 API 调用都直接使用原始的 HTTP（无需 SDK），并具备自动重试、传输方式回退以及 5 分钟的响应缓存功能。通过按任务选择模型，您可以使用低成本模型进行概念提取，也可以使用高性能模型进行研究。对于本地提供商（Ollama、LMStudio），无需 API 密钥。
+Notemd 有 36 个 provider 预设，覆盖 OpenAI-compatible、Anthropic、Google、Azure OpenAI 和 Ollama 五类协议。选择与端点协议匹配的预设，填写凭据，用小笔记验证可访问模型。默认值是可修改的起点，不保证上游模型当前仍可用。
 </TLDR>
 
-这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
+## Provider 分类
 
-## 提供商类别
+下列值来自 provider 注册表。保留完整 URL 协议与路径，模型或端点占位符必须替换为实际部署值。托管访问权、定价和退役安排由 provider 决定。
 
-### 云服务提供商
+### 云端 Provider
 
-| 服务提供商 | 默认基础 URL | 默认模型 | 温度 |
-|----------|-----------------|---------------|-------------|
-| **DeepSeek** | `api.deepseek.com` | `deepseek-v4-pro` | 0.5 |
-| **OpenAI** | `api.openai.com/v1` | `gpt-4o` | 0.5 |
-| **Anthropic** | `api.anthropic.com` | `claude-3-5-sonnet-20240620` | 0.5 |
-| **Google** | `generativelanguage.googleapis.com/v1` | `gemini-2.0-flash-exp` | 0.5 |
-| **Mistral** | `api.mistral.ai/v1` | `mistral-large-latest` | 0.5 |
-| **xAI** | `api.x.ai/v1` | `grok-4` | 0.7 |
-| **Cerebras** | `api.cerebras.ai/v1` | `gpt-oss-120b` | 0.5 |
-| **Fireworks** | `api.fireworks.ai/inference/v1` | `kimi-k2p5` | 0.5 |
-| **Nebius** | `api.studio.nebius.com/v1` | `openai/gpt-oss-120b` | 0.3 |
+| Provider | 预设模型 | 预设基础 URL |
+| ---------- | -------------- | ----------------- |
+| **DeepSeek** | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| **Qwen** | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Qwen Code** | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| **Doubao** | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| **Moonshot** | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| **Xiaomi MiMo** | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| **GLM** | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| **Z AI** | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| **MiniMax** | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| **Baidu Qianfan** | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| **SiliconFlow** | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| **Huawei Cloud MaaS** | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
+| **OpenAI** | `gpt-4o` | `https://api.openai.com/v1` |
+| **Anthropic** | `claude-3-5-sonnet-20240620` | `https://api.anthropic.com` |
+| **Google** | `gemini-2.0-flash-exp` | `https://generativelanguage.googleapis.com/v1` |
+| **Mistral** | `mistral-large-latest` | `https://api.mistral.ai/v1` |
+| **Azure OpenAI** | `gpt-4o` | 配置自己的 Azure 资源端点 |
+| **xAI** | `grok-4` | `https://api.x.ai/v1` |
+| **Groq** | `moonshotai/kimi-k2-instruct-0905` | `https://api.groq.com/openai/v1` |
+| **Together** | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | `https://api.together.xyz/v1` |
+| **Fireworks** | `accounts/fireworks/models/kimi-k2p5` | `https://api.fireworks.ai/inference/v1` |
+| **Nebius** | `openai/gpt-oss-120b` | `https://api.studio.nebius.com/v1` |
+| **Cerebras** | `gpt-oss-120b` | `https://api.cerebras.ai/v1` |
 
-### 网关/代理服务提供商
+### 网关／代理 Provider
 
-| 服务提供商 | 默认基础 URL | 默认模型 | 备注 |
-|----------|-----------------|---------------|-------|
-| **OpenRouter** | `openrouter.ai/api/v1` | `anthropic/claude-3.7-sonnet` | 添加 `HTTP-Referer` + `X-Title` 标头 |
-| **GitHub Models** | `models.github.ai/inference` | `gpt-4o-mini` | 添加 `X-GitHub-Api-Version` 标头 |
-| **AIHubMix** | `aihubmix.com/v1` | `gpt-4o-mini` | 添加 `APP-Code` 标头 |
-| **PPIO** | `api.ppinfra.com/v3/openai` | `qwen/qwen3-32b` | |
-| **Hugging Face** | `router.huggingface.co/v1` | `openai/gpt-oss-120b` | |
-| **Vercel AI Gateway** | `ai-gateway.vercel.sh/v1` | `anthropic/claude-sonnet-4.5` | |
-| **Requesty** | `router.requesty.ai/v1` | `anthropic/claude-3-7-sonnet-latest` | |
-| **Together** | `api.together.xyz/v1` | `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo` | |
-| **LiteLLM** | `localhost:4000/v1` | `your-proxy-model` | 可选的 API 键 |
-| **新的 API** | `localhost:3000/v1` | `gpt-4.1` | 可选的 API 键 |
-| **OpenAI Compatible** | （用户配置） | `your-model-id` | 自定义端点 |
+| Provider | 预设模型 | 预设基础 URL |
+| ---------- | -------------- | ----------------- |
+| **OpenRouter** | `anthropic/claude-3.7-sonnet` | `https://openrouter.ai/api/v1` |
+| **AIHubMix** | `gpt-4o-mini` | `https://aihubmix.com/v1` |
+| **GitHub Models** | `gpt-4o-mini` | `https://models.github.ai/inference` |
+| **PPIO** | `qwen/qwen3-32b` | `https://api.ppinfra.com/v3/openai` |
+| **New API** | `gpt-4.1` | `http://localhost:3000/v1` |
+| **LiteLLM** | `your-proxy-model` | `http://localhost:4000/v1` |
+| **Hugging Face** | `openai/gpt-oss-120b` | `https://router.huggingface.co/v1` |
+| **Vercel AI Gateway** | `anthropic/claude-sonnet-4.5` | `https://ai-gateway.vercel.sh/v1` |
+| **Requesty** | `anthropic/claude-3-7-sonnet-latest` | `https://router.requesty.ai/v1` |
+| **OpenAI Compatible** | `your-model-id` | `https://your-openai-compatible-endpoint/v1` |
 
-### 中国供应商
+### 本地 Provider
 
-| 服务提供商 | 默认基础 URL | 默认模型 | 备注 |
-|----------|-----------------|---------------|-------|
-| **Qwen** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-235b-a22b` | 阿里巴巴 DashScope |
-| **Qwen Code** | `dashscope.aliyuncs.com/compatible-mode/v1` | `qwen3-coder-plus` | 以编程为重点 |
-| **Doubao** | `ark.cn-beijing.volces.com/api/v3` | （需要端点 ID） | 字节跳动 Volcengine |
-| **Moonshot** | `api.moonshot.cn/v1` | `kimi-k2-0905-preview` | Kimi |
-| **Xiaomi MiMo** | `api.xiaomimimo.com/v1` | `mimo-v2.5-pro` | |
-| **GLM** | `open.bigmodel.cn/api/paas/v4` | `glm-5` | 中国浙江的端点 |
-| **Z AI** | `api.z.ai/api/paas/v4` | `glm-5` | Zhipu，国际端点 |
-| **MiniMax** | `api.minimaxi.com/v1` | `MiniMax-M2.7` | |
-| **Baidu Qianfan** | `qianfan.baidubce.com/v2` | `ernie-4.5-turbo-32k` | |
-| **SiliconFlow** | `api.siliconflow.cn/v1` | `Qwen/QwQ-32B` | 模型托管平台 |
-| **Huawei Cloud MaaS** | `api.modelarts-maas.com/v1` | `DeepSeek-V3` | |
+| Provider | 预设模型 | 预设基础 URL |
+| ---------- | -------------- | ----------------- |
+| **OVMS** | `openvino-model` | `http://localhost:8000/v3` |
+| **LMStudio** | `local-model` | `http://localhost:1234/v1` |
+| **Ollama** | `llama3` | `http://localhost:11434/api` |
 
-**Doubao 需要一个 Ark 端点 ID**（格式：`ep-xxxxxxxx-xxxx-xxxx`）。默认的占位符必须被替换。
+### 中国地区 Provider
 
-### 本地提供商
+DeepSeek、Qwen、Doubao、Moonshot、GLM 等见[地区 Provider 设置](./china)。分类说明配置方式，不保证地域可用性或中文质量；需匹配账户区域、端点和模型权限。
 
-| 服务提供商 | 默认基础 URL | 默认模型 | 备注 |
-|----------|-----------------|---------------|-------|
-| **Ollama** | `localhost:11434/api` | `llama3` | 没有 API 键。正在使用 NDJSON 流式传输。通过 `/api/tags` 进行模型发现。 |
-| **LMStudio** | `localhost:1234/v1` | `local-model` | 将 `"EMPTY"` 作为承载令牌发送。兼容 OpenAI 的发现机制 |
-| **OVMS** | `localhost:8000/v3` | `openvino-model` | OpenVINO 模型服务器 |
-| **Azure OpenAI** | （用户配置） | `gpt-4o` | 在 URL 中的部署名称。`api-key` 标头 |
+## 任务专用模型
 
-## 按任务选择模型
+启用 `useMultiModelSettings` 后可分别选择 provider 与模型覆盖值，否则使用 `activeProvider`。空模型覆盖使用该 provider 的配置模型；已保存但无效的 provider 会在设置加载时与活动 provider 协调。
 
-Notemd 支持为每个任务单独配置提供者和模型。可通过 `useMultiModelSettings: true` 启用该功能。
+| 任务 | Provider 设置 | 模型覆盖 |
+| ------ | ------------------ | ---------------- |
+| 添加链接 | `addLinksProvider` | `addLinksModel` |
+| 标题生成 | `generateTitleProvider` | `generateTitleModel` |
+| 研究摘要 | `researchProvider` | `researchModel` |
+| 翻译 | `translateProvider` | `translateModel` |
+| 概念提取 | `extractConceptsProvider` | `extractConceptsModel` |
+| Mermaid 摘要 | `summarizeToMermaidProvider` | `summarizeToMermaidModel` |
+| 原文提取 | `extractOriginalTextProvider` | `extractOriginalTextModel` |
 
-### 可用任务
-
-| 任务 | 设置键 | 默认提供方 |
-|------|-------------|-----------------|
-| 添加链接（维基链接插入） | `addLinksProvider` / `addLinksModel` | DeepSeek |
-| 研究（网络搜索+总结） | `researchProvider` / `researchModel` | DeepSeek |
-| 根据标题生成 | `generateTitleProvider` / `generateTitleModel` | DeepSeek |
-| 翻译 | `translateProvider` / `translateModel` | DeepSeek |
-| 图表生成 | `summarizeToMermaidProvider` / `Model` | DeepSeek |
-| 概念提取 | `extractConceptsProvider` / `Model` | DeepSeek |
-| 原始文本提取 | `extractOriginalTextProvider` / `Model` | DeepSeek |
-
-### 分辨率顺序
-
-1. 如果 `useMultiModelSettings` 处于开启状态 → 使用该任务专用的提供者及模型
-2. 如果任务模型覆盖值为空，则回退到提供者的默认模型。
-3. 如果任务提供者无效，则回退到全局 `activeProvider`
-4. 如果 `useMultiModelSettings` 关闭 → 所有任务将使用全局 `activeProvider`
-
-### 推荐配置
-
-```
-# Researcher: power for research, cheap for everything else
-activeProvider: DeepSeek
-extractConceptsProvider: DeepSeek
-researchProvider: OpenAI        # GPT-4o for better research quality
-summarizeToMermaidProvider: DeepSeek
-
-# Privacy-first: local only
-activeProvider: Ollama
-addLinksProvider: Ollama
-extractConceptsProvider: Ollama
-
-# Budget bilingual
-activeProvider: DeepSeek
-translateProvider: Google      # Gemini Flash for translation
-researchProvider: SiliconFlow  # Cheaper China-based routing
-```
+默认活动 provider 和已保存的任务 provider 均为 DeepSeek。私密任务前逐项核对；仅修改活动 provider 不会覆盖已启用的任务专用选择。
 
 ## API 调用架构
 
 ### 传输层
 
-1. **Obsidian `requestUrl`** — 主版本（内置，适用于所有平台）
-2. **桌面版 HTTP** — Node.js `http`/`https` 模块（流式处理 + 长请求）
-3. **Web `fetch`** — 当 Node.js 模块不可用时的备用方案
+插件使用 Obsidian 请求能力及协议感知回退。桌面回退可使用 Node HTTP 流，其他环境可使用 fetch。Provider 协议与运行时传输方式不同：OpenAI-compatible 网关提供的 Claude 应选择网关预设，而非原生 Anthropic。
 
-当网络出现临时故障时，该插件会自动在不同的传输方式之间切换。
+### 重试
 
-### 重试逻辑
-
-- **普通模式** (`enableStableApiCall: false`)：仅尝试一次。若出现短暂故障，会自动升级为稳定的重试机制。
-- **稳定重试模式** (`enableStableApiCall: true`)：最多进行4次尝试（1次初始尝试 + 3次重试），每次尝试间隔5秒。
-- **触发重试的临时错误**：`err_connection_closed`, `err_connection_reset`, `err_timed_out`, `econnreset`, `econnaborted`, `etimedout`, `socket hang up`, `network request failed`
-- **不可重试**：HTTP 400、401、403、404
+稳定请求模式默认关闭，适用路径的重试默认值为三次、间隔五秒。临时传输失败可进入共享重试／回退流程；认证和无效模型必须修正，不能依赖重试。远端超时、模型限制或配额耗尽仍可导致长请求失败。
 
 ### 响应缓存
 
-基于提供方+模型+温度值+提示词+内容生成的5分钟内存LRU缓存。5分钟内的相同请求可立即返回缓存结果。
+成功响应可由有界内存缓存复用，请求身份包含端点、模型、生成参数、提示词和内容。缓存不是持久存储、费用计量器，也不保证重复操作免除新付费请求。
 
-### 推理模型处理
+### 推理模型
 
-不支持 `system` 角色（DeepSeek R1、OpenAI o1/o3/o4/gpt-5）的模型会自动将系统提示与用户提示合并为一条完整的用户消息。
+预设与模型规则支持时会提供 reasoning/thinking 控制。不要在 provider 间照搬协议参数。用实际任务验证；能够聊天不表示接受所有推理、token 或采样设置。
 
-DeepSeek-特定模式：`thinkingEnabled`会向请求中添加`{ thinking: { type: 'enabled' } }`。级别`reasoningEffort`（低/中/高）会作为`reasoning_effort`传递。当开启思考功能时，会验证最大输出token数是否≥8000。
+### Token 估算
 
-### 令牌估算
-
-`estimateTokens(text)`: `Math.ceil(text.length / 4)` — 每个标记4个字符的启发式规则。用于在发送到 LLM 之前确保符合 `maxResearchContentTokens` 的要求。
-
-尚未实现成本跟踪功能。
+文本长度估算与输出上限不等于 provider 精确 token 数。费用以实际账户用量为准，插件没有通用费用估计。
 
 ## 模型发现
 
-| 模式 | 提供商 | 端点 |
-|------|-----------|----------|
-| `ollama-tags` | Ollama | `/api/tags` |
-| `google-models` | Google | 模型列表 API |
-| `anthropic-models` | Anthropic | 模型列表 API |
-| `openai-compatible-models` | DeepSeek、Qwen、Mistral 等。 | `/v1/models` |
-| `openrouter-models` | OpenRouter | 模型列表 API |
-| `github-models` | GitHub Models | 推理 API |
-| `none` | Azure OpenAI | 已禁用（需要部署名称） |
+**获取模型** 仅在预设支持时发现模型，有些部署要求手动输入模型或 deployment 名。列表权限与生成权限独立。
 
-## 快速入门
+**测试连接** 遵循预设测试模式：`models-then-chat` 可仅凭列表端点成功，`chat-only` 执行短生成请求。始终用小型实际任务验证工作流所需模型与输出结构。
 
-1. **选择提供商** — DeepSeek（中国），OpenAI（国际），或 Ollama（本地/免费）
-2. **输入 API 密钥** — 设置 → Notemd → 提供商 → API 密钥
-3. **测试连接** — 点击测试按钮
-4. **可选：任务专用模型** — 启用 `useMultiModelSettings` 并进行单独配置
+- Anthropic、Google 有原生模型列表协议。
+- Ollama 列出本地已拉取标签，LM Studio 列出服务暴露模型。
+- Azure OpenAI 需要 deployment 配置和 API version，通用模型列表不能替代。
+- 网关可能允许特定模型聊天，却限制模型发现。
 
-对于 Ollama：不需要 API 键。只需确保 `ollama serve` 正在运行即可。
+## 快速开始
 
----
+1. 在**设置 → Notemd**选择匹配预设。
+2. 填写端点、凭据和实际可用模型／deployment。
+3. 测试连接，再处理一篇可丢弃笔记。
+4. 检查输出和进度后再开启批量或任务专用路由。
 
-## 后续步骤
+本地使用前先下载／加载模型并启动服务。Ollama 不要求 API key；LM Studio 密钥可选，预设为 `EMPTY`，若服务要求认证则填真实 token。本地 LLM 不会使网络搜索或其他联网任务离线。
 
-- 📝 [概念说明](/docs/features/concept-notes) — 使用任务级提取模型
-- 🎨 [图表](/docs/features/diagrams) — 使用任务级图表模型
-- 🔍 [研究](/docs/features/research) — 使用专为研究设计的模型
-- ⚙️ [配置](/docs/getting-started/configuration) — 完整设置参考
+## 后续阅读
+
+- [OpenAI](./openai)、[Anthropic](./anthropic)、[Google](./google)、[中国地区 Provider](./china)、[本地模型](./local)：协议专用配置。
+- [配置](../getting-started/configuration)：任务与目标路径。
+- [故障排查](../advanced/troubleshooting)：失败、诊断边界与脱敏报告。

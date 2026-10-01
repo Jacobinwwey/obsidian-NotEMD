@@ -1,181 +1,84 @@
 ---
 id: quick-start
-title: "Guia Rápido de Início"
-description: "Comece a usar Notemd em 5 minutos"
+title: Início rápido
+description: >-
+  Configurar um fornecedor, processar uma nota de teste e verificar o resultado
+  antes de trabalhar com uma pasta.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [quick start, tutorial, getting started, first steps]
-concepts: [Quick Start, LLM Configuration, One-Click Workflow, Ollama]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Início rápido
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Guia Rápido de Início
+# Início rápido
 
 <TLDR>
-**Comece a utilizar Notemd em 5 minutos.** Três passos: (1) Adicione uma chave LLM API (ou use Ollama local), (2) Abra uma anotação e execute "Processar arquivo (adicionar links)", (3) Explore fluxos de trabalho com um clique na barra lateral. Suporta mais de 30 provedores. Não é necessário codificar. Funciona off-line com Ollama.
+Começar com uma nota Markdown descartável e um fornecedor já acessível. Verificar a saída antes de processar uma pasta. Chamadas à nuvem enviam o conteúdo; modelos locais precisam de servidor ativo e modelo preparado.
 </TLDR>
 
-## Passo 1: Configure seu primeiro provedor LLM (2 min)
+## Passo 1: configurar o fornecedor
 
-### Opção A: Provedor em nuvem (OpenAI, Anthropic, etc.)
+1. [Instalar e ativar Notemd](./installation), depois abrir **Settings → Notemd**.
+2. Escolher fornecedor, endereço, credenciais necessárias e modelo disponível. **Fetch models** pode descobrir modelos; estar listado não garante geração.
+3. Executar **Testar conexão** e resolver erros de autenticação, modelo ou endereço.
+4. Procurar **Caminho da pasta de notas de conceito** e escolher uma pasta dedicada, como `concepts`. O caminho inicial está vazio: `concepts/` é exemplo, não destino pré-configurado.
 
-1. Abra **Configurações** → **Notemd**
-2. Em **Configuração do Provedor LLM**, selecione um provedor na lista suspensa
-3. Insira sua **Chave API**
-4. (Opcional) Clique em **"Obter lista de modelos"** para ver os modelos disponíveis
-5. Selecione um modelo para cada tipo de tarefa
+No Ollama, obter primeiro o modelo e usar o nome exato; endereço inicial `http://localhost:11434/api`. No LM Studio, iniciar o servidor e escolher `LMStudio`. Ver [modelos locais](../providers/local). Pesquisa Web continua a exigir rede.
 
-**Escolhas populares:**
-- **OpenAI**: `gpt-4o-mini` (rápido, acessível)
-- **Anthropic**: `claude-sonnet-4-6` (alta qualidade)
-- **DeepSeek**: `deepseek-chat` (muito acessível)
+## Passo 2: experimentar uma tarefa
 
-### Opção B: Ollama local (não é necessária chave API)
+Criar `Notemd trial.md` com texto que possa ser enviado ao fornecedor:
 
-1. Instalar [Ollama](https://ollama.com/)
-2. Baixar um modelo: `ollama pull llama3.1`
-3. Nas configurações de Notemd, selecione **"Ollama"** como provedor
-4. Nome do modelo: `llama3.1` (ou qualquer modelo que você tenha baixado)
-
-## Passo 2: Teste sua primeira tarefa (1 min)
-
-### Adicionar links da Wiki a uma nota
-
-1. Abra qualquer nota com conteúdo significativo
-2. Clique com o botão direito no editor
-3. Selecione **"Processar arquivo (adicionar links)"**
-4. Aguarde alguns segundos
-5. Os conceitos principais estão agora `[[wiki-linked]]`!
-
-**Exemplo:**
-
-**Antes:**
-```
-Machine learning models use neural networks to process data.
+```text
+A aprendizagem automática utiliza redes neuronais para reconhecer padrões em exemplos.
 ```
 
-**Depois:**
-```
-[[Machine learning]] models use [[neural networks]] to process data.
-```
+Executar **Processar arquivo (adicionar links)**. Por padrão surge `Notemd trial_processed.md` ao lado da origem, que é preservada. Abrir e verificar os links. Exemplo possível:
 
-## Passo 3: Explore os recursos (2 min)
-
-### Extrair notas de conceito
-
-1. Clique com o botão direito → **"Extrair conceitos do arquivo atual"**
-2. Notemd cria arquivos separados para cada conceito
-3. Verifique a pasta de conceitos configurada (padrão: `concepts/`)
-4. Cada nota de conceito possui um link de retorno para sua nota original
-
-### Pesquisar e Resumir
-
-1. Destacar um tópico na sua anotação
-2. Clique com o botão direito → **"Pesquisar e resumir"**
-3. Notemd faz buscas na web (Tavily ou DuckDuckGo)
-4. O resumo é adicionado à sua anotação com as fontes
-
-### Fluxos de Trabalho de Um Clique
-
-1. Verifique a **barra lateral esquerda** para os botões de fluxo de trabalho
-2. Clique em **"Extrair com um Clique"** em qualquer anotação
-3. Ele executa: adicionar links → extrair conceitos → pesquisar → gerar diagrama
-4. Tudo em um único clique!
-
-## Tarefas Iniciais Comuns
-
-### Tarefa 1: Processar um Artigo/Trabalho Acadêmico
-
-```
-1. Paste article content into a note
-2. Run "Process file (add links)"
-3. Run "Extract concepts"
-4. Run "Research and summarize" on unfamiliar terms
-5. Run "Summarize as Mermaid diagram" for visual structure
+```markdown
+A [[aprendizagem automática]] utiliza [[redes neuronais]] para reconhecer padrões em exemplos.
 ```
 
-### Tarefa 2: Traduzir Anotações
+A pasta escolhida também pode receber notas de conceitos. Rever resultados e ligações: o modelo não garante identificar todos os conceitos corretamente.
 
+## Passo 3: explorar funções
+
+### Extrair conceitos
+
+**Extrair conceitos (arquivo atual)** preserva a origem e exige pasta de conceitos. A extração independente cria apenas títulos, sem backlinks por padrão. Ativar os backlinks explicitamente. Ver [conceitos](../features/concept-notes).
+
+### Pesquisar e resumir
+
+Selecionar um tema no editor Markdown ou usar o título e executar **Pesquisar e resumir**. Escolher Tavily com chave ou DuckDuckGo explicitamente. O resumo é acrescentado à nota; confirmar as fontes originais.
+
+### Encadear tarefas
+
+Definição exata de **One-Click Extract**:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
-1. Highlight text to translate
-2. Right-click → "Translate to target language"
-3. Set target language in settings first
-```
 
-### Tarefa 3: Criar um Mapa de Conhecimento
+Adiciona links, gera conteúdo para notas elegíveis na pasta de conceitos ou selecionada e repara Mermaid na pasta complete. Pode incluir notas anteriores. Começar com pasta de teste própria. Não acrescenta automaticamente pesquisa Web ou geração de diagramas.
 
-```
-1. Process 5-10 related notes with "add links"
-2. Run "Extract concepts" on each
-3. Open Graph view to see connections
-4. Your knowledge graph is forming!
-```
+## Cancelamento e revisão
 
-## Dicas de Personalização
+**Cancelar** interrompe trabalho posterior. Resultados concluídos permanecem: não é reversão transacional nem garantia de parar geração ou faturação remota. Esperar pela conclusão do cancelamento e verificar caminhos e conflitos antes de repetir.
 
-### Seleção de Modelo por Tarefa
+## Problemas
 
-Você pode usar modelos diferentes para tarefas distintas:
-
-| Tarefa | Modelo Recomendado | Por quê |
-|------|------------------|-----|
-| Adicionar Links | `gpt-4o-mini`, `deepseek-chat` | Rápido, muitas chamadas |
-| Extrair Conceitos | `claude-sonnet-4-6`, `gpt-4o` | Extração de Qualidade |
-| Pesquisa | `perplexity`, `gpt-4o` | Baseado na Web |
-| Tradução | `gemini-flash`, `gpt-4o` | Multilíngue |
-| Diagramas | `claude-opus`, modelo local | Raciocínio Complexo |
-
-Configurar em: **Configurações → Notemd → Modelos Específicos para Tarefas**
-
-### Fluxos de Trabalho Personalizados
-
-Criar seu próprio botão:
-
-1. Configurações → Notemd → Fluxos de Trabalho
-2. Clique em "Adicionar Fluxo de Trabalho"
-3. Insira DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
-4. Nomeie como: "Meu Fluxo de Pesquisa"
-5. Um novo botão aparece na barra lateral
-
-## Solução de problemas
-
-### "Chave API inválida"
-- Verifique se a chave está correta (sem espaços extras)
-- Confira se a conta tem créditos
-- Teste com o botão "Teste de Conexão" nas configurações
-
-### "Modelo não encontrado"
-- Clique em "Obter Lista de Modelos" para ver os modelos disponíveis
-- Alguns provedores exigem nomes de modelo específicos (por exemplo, `gpt-4o` e não `gpt-4`)
-
-### Links não estão aparecendo
-- Certifique‑se de que a nota tem conteúdo suficiente (>50 palavras)
-- Tente um modelo mais potente
-- Verifique se a chamada LLM foi bem‑sucedida (consulte o painel de diagnóstico)
-
-### Desempenho lento
-- Use modelos mais rápidos (`gpt-4o-mini` em vez de `gpt-4o`)
-- Reduza o tamanho do bloco nas configurações
-- Habilitar processamento paralelo para tarefas em lote
+- Autenticação/modelo: verificar perfil exato e repetir o teste.
+- Sem conceitos: confirmar pasta definida e ativada.
+- Links pouco úteis: analisar resposta e prompt; não existe tamanho mínimo que garanta sucesso.
+- Quotas: manter `batchConcurrency: 1` durante o diagnóstico.
 
 ## Próximos passos
 
-- 📖 [Explorar todos os recursos](../features/wiki-links)
-- ⚙️ [Configuração avançada](./configuration)
-- 🔧 [Configuração do provedor LLM](../providers/overview)
-- ❓ [Perguntas Frequentes](../faq)
-
-## Tutorial em vídeo
-
-Assista ao vídeo de introdução de 3 minutos (em chinês):
-[【Totalmente open source e gratuito! Guia rápido de 3 minutos do NotEMD】](https://b23.tv/lqR0RlA)
-
-## Obter ajuda
-
-- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
-- 🐛 **Problemas**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
-- 📚 **Documentação**: [Documentação completa](https://jacobinwwey.github.io/obsidian-NotEMD/)
+- [Configuração](./configuration).
+- [Fluxos](../features/workflows).
+- [Problemas](../advanced/troubleshooting).
+- [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) sem dados privados.

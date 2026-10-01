@@ -1,319 +1,124 @@
 ---
 id: wiki-links
-title: "Wiki-Linkek"
-description: "Kluczfontosságú konceptekhez automatikus Wiki-Link készítése"
+title: Wiki-hivatkozások
+description: >-
+  Kérjen hivatkozásjavaslatokat a modelltől, és mentse külön a feldolgozott
+  jegyzetet és opcionális fogalomfájlokat.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
-concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Auto Link Plugin
-    url: https://github.com/ov7a/obsidian-auto-link
+keywords:
+  - Wiki-hivatkozások
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Wiki-Linkek
+# Wiki-hivatkozások
 
-<TLDR>
-**Notemd automatikusan hozzáadja `[[wiki-links]]` a feljegyzésekétekben lévő kluczfontosságú konceptekhez.** A LLM olvasja a tartalmat, azonosítja a kontextusban lévő fontos kifejezéseket, és minden esetben beilleszi Obsidian-stílusú Wiki-Linkeket. Választhatóan készít meg konceptfeljegyzéseket távolhívásokkal. Támogatja a szinonimák leképezését, a nevetsítés/hozzáadáskor a linkek integritását, valamint a teljesen kivonási módot (nem történik fájl módosítása). A Auto Linktől eltérően, amely csak meglévő feljegyzés címeket használ, Notemd az AI-t használ a új konceptek azonosítására és a megfelelő feljegyzések készítésére. Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>A Process file (add links) a kiválasztott LLM-től kér fogalmakat és Obsidian-hivatkozásokat. Alapból külön `_processed.md` készül, a forrás megmarad. Fogalomfájlokhoz célmappa kell. Bővítés előtt ellenőrizze az eredményt.</TLDR>
 
 ## Áttekintés
 
-Wiki-Linkek hozzáadása az Notemd alapvető funkciója. Egy általános szöveget egy összekött kapcsolatokból álló tudományos grafikonként változtatja meg az alábbi módon:
+A modell választása futásonként eltérhet, és még nem létező fogalomfájlra is mutathat. A hivatkozás navigációs cél, nem a jelentésazonosság vagy egy magyarázat helyességének bizonyítéka.
 
-1. **Az LLM segítségével az feljegyzést analizálja**
-2. **Kluczfontosságú koncepteket azonosítja** (kifejezések, személyek, metodák, teoríák)
-3. **Minden esetben hozzáadja `[[wiki-links]]`**
-4. **Választhatóan készít meg konceptfeljegyzéseket** távolhívásokkal
+## Működés
 
-## Hogyan működik
+### Feldolgozás
 
-### Folyamat
+A jegyzet részekre bontva kerül a szolgáltatóhoz/modellhez, majd a válaszokból áll össze. A feladat a kiválasztott mappában fogalomfájlokat is létrehozhat/frissíthet. Ellenőrizze a részhibákat és a valódi kimeneti útvonalat.
 
-```mermaid
-graph LR
-    A[Your Note] --> B[LLM Analysis]
-    B --> C{Concepts Found}
-    C --> D[Insert Wiki-Links]
-    C --> E[Create Concept Notes]
-    D --> F[Updated Note]
-    E --> F
-    F --> G[Connected Knowledge Graph]
+### Példa
+
+Forrás:
+
+```text
+A gépi tanulás neurális hálózatokat használ mintázatok felismerésére.
 ```
 
-### példa
+Lehetséges eredmény:
 
-**Előtt:**
 ```markdown
-Machine learning models use neural networks to learn patterns from data.
-The transformer architecture revolutionized natural language processing.
+A [[gépi tanulás]] [[neurális hálózatok]] segítségével ismer fel mintázatokat.
 ```
 
-**Után:**
-```markdown
-[[Machine learning]] models use [[neural networks]] to learn patterns from data.
-The [[transformer architecture]] revolutionized [[natural language processing]].
-```
+Szemléltető példa; a fogalmakat a forrás, modell és prompt határozza meg.
 
 ## Használat
 
-### Alap: Hozzáadás linkeket a jelenlegi feljegyzéshez
+### Aktív jegyzet
 
-1. Nyitja meg egy feljegyzést
-2. Kattintson kézzel a szerkesztőben → **"Folyamatítja a fájlt (hozzáadja linkeket)"**
-3. Várjon néhány másodpercet
-4. A konceptek most már összeköttek!
+Másolaton futtassa a **Process file (add links)** műveletet, és nézze meg a mellette létrejött `_processed.md` fájlt. Egyedi utótag, mappa és eredetiáthelyezés módosíthatja a célhelyet.
 
-### Bárcs: Kezelj több figyelmet
+### Több jegyzet
 
-1. Kattints jobb kattintással egy mappára a fájlkeresőben
-2. Válassza ki **"Notemd: Process folder (add links)"**-t
-3. Konfigurálás:
-   - Konkurenccs (mennyi fájl paralellegben)
-   - Átírja a meglévő hivatkozásokat (igen/nem)
-4. Kattints **Kezelés**-re
+Válassza a **Process folder (add links)** műveletet, ellenőrizze a mappát és hatókört, majd kezdjen kis mintával. Nincs minden mappafeladatra közös felülírás/kihagyás kapcsoló. [Kötegelt feldolgozás](../advanced/batch-processing).
 
-### Selektív: Hivatkozz specifikus szökekre
+### Saját kifejezés kijelölése
 
-1. Hajtas ki a kezelendő szöveget
-2. Kattints jobb kattintással → **"Kezelje a választott részt (hivatkozások hozzáadása)"**
-3. Csak a felhajtott rész kerül analízishez
+A **Create wiki link and generate note from selection** külön művelet a kijelölt kifejezéshez. Nem szűkíti a teljes fájl feldolgozását a kijelölésre. Vizsgálja meg a fogalomjegyzetet és a generált tartalmat.
 
-## Notemd vs Auto Link
+## Módszerválasztás
 
-Obsidian két módot biztosít az automatikus wiki-hivatkozásokhoz:
+A modell tartalomból javasol fogalmakat. Ismert jegyzetnevekhez ismételhető hivatkozások esetén determinisztikus címegyeztetés célszerűbb. Más eszközöket aktuális dokumentációval és azonos, dátumozott mintán hasonlítson össze.
 
-| | **Auto Link** | **Notemd** |
-|--|---------------|-------------|
-| Hivatkozás forrása | A tárolóban lévő meglévő figyelmetek címek | A LLM által az anyagban azonosított konceptek |
-| Új konceptekkel kötés lehet létrehozni | Nem – a cím már létezni kell | Igen – a AI azonosítja a koncepteket és készít meg a figyelemeket |
-| Synonym handling | Nem | Igen – a synonym suppression funkció használata |
-| Konceptfigyelemek készítése | Nem | Igen – visszalinkekkel és duplikátok elszűrésével |
-| Halmagkezelés | Nem (egy fájl), | Igen (mappatasemén) |
-| Munkaalkalmazásokhoz szóló modellek irányítása | Nem | Igen |
+## Lehetőségek
 
-**Auto Link** címekkel összeillik: ha „Machine Learning” nevű egy figyelem létezik, az `[[Machine Learning]]`-ba összefogja a megjelenéseket. Ha a figyelem nincs, semmi nem történik.
+### Szinonimák korlátozása
 
-**Notemd** az AI vezeti: a LLM olvasja a tartalmadat, megérti a kontextust, azonosítja a koncepteket, amelyeknek *kötésük* kell lennie – még ha még nincs ilyen figyelem is – és készít meg az összefüggést és a konceptfigyelemet.
+A `replaceSynonymsDuringConceptExtraction` átfedő fogalmak visszafogására utasít. Alapból kikapcsolt Boolean, nem számszerű hasonlósági küszöb. Ellenőrizze a rövidítéseket és rokon jelentéseket.
 
-## Funkciók
+### Hivatkozások épsége
 
-### Synonym Suppression
+Az átnevezési frissítéseket az Obsidian, annak beállításai és az elvégzett művelet szabályozzák. Törölt cél után feloldatlan wiki-hivatkozás maradhat, ami nem azonos egy nem hivatkozott említéssel. Azonos fájlneveket külön mappákban ellenőrizzen.
 
-**Probléma:** „transformer“, „transformers“, „Transformer architecture” → 3 különböző koncept
+### Csak kinyerés
 
-**Löszer:** Notemd az egymáshoz hasonló elemeket azonosítja és a kanonikus formát használja.
+Az **Extract concepts (current file)** változatlanul hagyja a forrást. Sablonjai és visszahivatkozásai eltérnek a hivatkozásfeldolgozástól. [Fogalomjegyzetek](./concept-notes).
 
-**Konfiguráció:**
-```
-Settings → Advanced → Synonym Suppression
-Threshold: 0.8 (0 = off, 1 = aggressive)
-```
+## Fogalomfájlok
 
-### Link integritása
+### Automatikus létrehozás
 
-**Amikor nevezészi át egy konceptnote-t:**
-- Az összes wiki-hivatkozás automatikusan frissül (Obsidian alapfunkció)
-- A visszahivatkozások megmaradnak
+Engedélyezett és kiválasztott mappával címek és `Linked From` hivatkozások jöhetnek létre. Kutatott magyarázatok, kapcsolódófogalom-szakaszok és általános frontmatter sablonok nem készülnek automatikusan. A tartalmat külön generálja címek alapján.
 
-**Amikor törljük egy konceptnote-t:**
-- A hivatkozások maradnak, de „nem kapcsolódó menetekként” jelennek meg
-- Bármilyen helyről lehet újra létrehozni
+### Beállítások
 
-### Tisztas kihasználási módszer
+Keresse meg a fogalommappát, feldolgozott fájlok mappáját, utótagot és eredetiáthelyezést. A fogalommappa kezdetben üres. A próbák kimenetét különítse el a forrástól.
 
-**Kihagyja a koncepteket, anélkül hogy módosítaná az eredeti fájlt:**
+## Haladó használat
 
-1. Jobb kattintás → **„Kihagyja a koncepteket (nem kapcsolódóként)”**
-2. A konceptnote-k létrejönnek
-3. Az eredeti fájl megmarad
+### Kontextus és promptok
 
-Használati eset: Olvasói jogú tartalom vagy végleges verziók kezelése.
+A `chunkWordCount` közelítő részméretet ad. A témakör és egyéni prompt befolyásolja a választást. Általános mondat/bekezdés-választó, minimális gyakoriság és fogalomsablon-változók nem dokumentált kapcsolói ennek a feladatnak.
 
-## Konceptnote kialakítása
+## Javaslatok
 
-### Automatikus kialakítás
-
-**Ha aktiválva van (alapértelmezett), Notemd készít ki:**
-
-```markdown
----
-tags: [concept, auto-generated]
-created: 2026-06-13
-source: [[Original Note Name]]
----
-
-# Machine Learning
-
-A branch of artificial intelligence that enables computers
-to learn from data without explicit programming.
-
-## Occurrences in Your Vault
-
-- [[Original Note Name#Section]]
-- [[Another Note#Header]]
-
-## Related Concepts
-
-- [[Neural Networks]]
-- [[Deep Learning]]
-- [[Supervised Learning]]
-```
-
-### Konfiguráció
-
-**Kimenet mappája:**
-```
-Settings → Output → Concept Folder
-Default: concepts/
-```
-
-**Hierarchikus struktúra:**
-```
-Settings → Output → Use Hierarchical Folders
-If enabled:
-  papers/my-paper.md → papers/concepts/Concept.md
-If disabled:
-  → concepts/Concept.md
-```
-
-**Szabvány:**
-```
-Settings → Output → Concept Template
-Customize with variables:
-  {{concept}} — Concept name
-  {{description}} — LLM-generated description
-  {{backlinks}} — List of source notes
-  {{date}} — Creation date
-```
-
-## Előre tervezett opciók
-
-### Kontextus ablaka
-
-**Mennyi környezeti szöveget küldni:**
-
-```
-Settings → Linking → Context Window
-Options: Sentence | Paragraph | Full Note
-Default: Paragraph
-```
-
-Nagyobb érték = jobb pontosítás, magasabb költség.
-
-### Minimum jelentésesség száma
-
-**Csak azokat a koncepteket kötjük össze, amelyek többször jelennek meg:**
-
-```
-Settings → Linking → Min Occurrences
-Default: 1 (link all)
-```
-
-2 vagy 3-re állítva lehet fókuszolni a gyakori tématákra.
-
-### Kizárási módulok
-
-**Elhagyjuk bizonyos szavakat:**
-
-```
-Settings → Linking → Exclude List
-Example: note, idea, example, thing
-```
-
-Ez megakadályozza a generikus kifejezések túlzott kötését.
-
-### Szerkeszthető kérdések
-
-**Átírjuk az alapértelmezett LLM instrukciókat:**
-
-```
-Settings → Advanced → Custom Linking Prompt
-Default:
-  "Identify key concepts, theories, methods, and technical
-   terms in the following text. Return as a list..."
-```
-
-Módosítsuk a doménai specifikus igényekhez (pl. "Fókuszoljunk a médicai terminológiara").
-
-## Tippek és a legjobb praktikák
-
-### ✅ CSELEKEDJ
-
-- **Kezelj az értékeléseket 100 szóval több** — Rövid értékelések kevés konceptet adnak létre
-- **Használj erős modellt** a jobb konceptidentifikációhoz (GPT-4o, Claude)
-- **Ellenőrizd előtt fogadod** — ellenőrizd, hogy a javasolt hivatkozások logikusak legyenek
-- **Alakítsd iteratívul** — kezelj 5-10 értékelést, ellenőrizd a grafikonot, módosítsd a beállításokat
-
-### ❌ NE CSELEKEDJ
-
-- **Túl sok hivatkozást adj** — nem minden névnek hivatkozás van szüksége
-- **Kezelj újra az előszörírást** — a konceptek változhatnak, várj, amíg stabilak lesznek
-- **Ignorálj a szinonimákat** — aktiváld a leképezést, hogy elkerüljed a "ML" és a "Machine Learning" különbségét
+- Idézetet, képletet és kódot vessen össze a forrással.
+- Döntse el, mely kifejezések érdemelnek fogalomjegyzetet.
+- Promptváltozást állandó mintán teszteljen.
+- Áthelyezés és felülírás előtt készítsen mentést.
 
 ## Teljesítmény
 
-### Hajtássebesség
-
-| Értékelés mérete | GPT-4o-mini | Claude Sonnet | Ollama (lokal) |
-|-----------|-------------|---------------|----------------|
-| 500 szó | 2-3 másodpercek | 3-5 másodpercek | 5-10 másodpercek |
-| 2000 szó | 5-8 másodpercek | 10-15 másodpercek | 20-40 másodpercek |
-| 5000+ szó | Kisebb blokkokban (másik kérések) | Részletes | Részletes |
-
-### Árértékelés
-
-**Példa: 1000 szóból álló jegyzet a GPT-4o-minivel**
-- Bevétel: ~1500 token
-- Kimenet: ~200 token
-- Ár: ~
-
-**100 jegyzet összekeverésének feldolgozása:** körülbelül $0.10
+Az idő és költség a szolgáltatótól, modelltől, bemenettől, kimenettől és ismétlésektől függ. Nincs rögzített idő jegyzetenként vagy ár száz fájlra. Mérje saját mintáját és tényleges fogyasztását.
 
 ## Hibaelhárítás
 
-### Nincs hivatkozás megadva
+### Nincsenek hivatkozások
 
-**Ellenőrzés:**
-1. LLM kérések sikerültek (Beállítások → Diagnozis)
-2. A figyelemnek elég tartalma van (>50 szó).
-3. A koncepciók technikai/specifikusak (nem csak névmutatók).
-
-**Próbáljuk:**
-- Használj egy erősebb modellt
-- Növelje a kontextus ablakot
-- Ellenőrizz a API kulcs valóságságát
+Ellenőrizze a kérést, választ, forrást és jelentett kimenetet. Minimális szószám nem garantál hasznos hivatkozást.
 
 ### Túl sok hivatkozás
 
-**Lösések:**
-1. Növelje a minimális előfordulások számát (2 vagy 3)
-2. Hozzáadja a népszerű szavakat az kizárás listaához
-3. Használj egy kevésbé agresszív modellt
+Szűkítse a promptot vagy témakört. A szinonimaszabály irányítja a modellt, de nem kényszerít szótárt.
 
-### Hibás konceptek kötődtek össze
+### Hivatkozások átnevezés után
 
-**Elrendezések:**
-1. Használj személyre szabott kérést a domén specifikusításához
-2. Hajtson lépélyezési leképezés be
-3. Ellátogasson manuálisan és távolítsa el a kötéseket
+Nézze meg az Obsidian beállításait és kétértelmű neveket. Tudatosan javítsa a célt. Új LLM-válasz nem determinisztikus hivatkozásjavítás.
 
-### A hivatkozások megváltoztatás után rosszul működnek
+## Tovább
 
-**Ez normál Obsidian viselkedés.**
-
-Minden hivatkozást frissítéshez:
-1. Nevezz át a konceptleírást
-2. Obsidian automatikusan frissíti `[[old]]` → `[[new]]`
-
----
-
-## További lépések
-
-- 📖 [Konceptleírások](./concept-notes) — Befejezettséges információk a konceptleírás kialakításáról
-- 🔍 [Tudományos integráció](./research) — Összekapcsolja a hivatkozásokat a web-tudományi kutatásokkal
-- 🎨 [Diagramok](./diagrams) — Visualizálja a tudományos grafikonját
+- [Fogalmak](./concept-notes).
+- [Munkafolyamatok](./workflows).
+- [Egyéni promptok](../advanced/custom-prompts).

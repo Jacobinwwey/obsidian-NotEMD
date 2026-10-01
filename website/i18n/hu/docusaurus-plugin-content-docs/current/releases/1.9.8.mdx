@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Frissítés Notemd 1.9.8-ra
+description: >-
+  Tekintse át az 1.9.7 utáni megbízhatósági, export- és dokumentációs
+  változásokat, majd ellenőrzötten frissítsen.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Frissítés Notemd 1.9.8-ra
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Frissítés Notemd 1.9.8-ra
+
+<TLDR>Az 1.9.8 a megszakítást, kimeneti tulajdonlást, kötegelt visszakeresés következetességét, exportot és pontos dokumentációt javítja. Elérhetőséget a nyilvános GitHub Release oldalon ellenőrizzen, és azonos kiadás fájljait használja. A szolgáltató- és diagramszám már meglévő képesség.</TLDR>
+
+## Az 1.9.7 óta
+
+| Terület | Változás |
+| ------ | ------------- |
+| Megszakítás | Közös állapot ütemezésben, transportban és ismétlésben; késői válasz nem kezd védett írást |
+| Fájlok tartóssága | Azonos nevű források és közös kísérőfájlok tulajdonlása átfedő mentés/helyreállítás során |
+| Helyi visszakeresés | Egy pillanatkép címkötegenként; rögzített korpusz és memóriamérés |
+| Alkalmazásexport | Javított PowerPoint-elválasztók egyesített cellák alatt, CircuitikZ-vezetékek és címkék |
+| Ellenőrzés | Linux/Windows CI, diagnózisonkénti lint, folyamathatár- és alkalmazásbizonyíték |
+| Dokumentáció | Valódi alapbeállítások, négy olvasói út, közvetlen fordítások és ellenőrzött publikálás |
+
+Az előzménykeresés aszinkron frissítés közben is megtartja a gépelést és kurzort. A fiók bent tartja a Tab fókuszát, betöltéskor fókuszt kap, Escape-re pedig a főelőnézet nélkül zárul. Újrapróbálást és elavult választ böngészőtesztek fednek.
+
+Kutatás és fordítás a végső olvasás vagy mappaelőkészítés után, a hozzáfűzés/létrehozás/felülírás előtt ellenőrzi a megszakítást. A vault által elfogadott írás késznek számít. Más feladat által közben létrehozott fordítási mappa újrahasználható, saját létrehozás állítása nélkül. Fájlütközésnél vagy továbbra is hiányzó mappánál megmarad a jelentett hiba és forrásmappás fallback.
+
+A 36 profil és 33 végrehajtható diagramtétel már 1.9.7-ben létezett. Kódot, dokumentációt és merge commitot külön számolunk.
+
+## Ellenőrzött frissítés
+
+1. Állítsa le a feladatokat, mentse a vaultot és beállításokat.
+2. Frissítsen Community plugins útján, vagy szerezze be a `main.js`, `manifest.json`, `styles.css` fájlt ugyanabból a [nyilvános 1.9.8-ból](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Kézzel csak futtatási fájlt cseréljen, beállítást és kimenetet tartson meg.
+4. Újratöltés után ellenőrizze a verziót.
+5. Nagy feladat előtt próbajegyzeten és kis mappán ellenőrizzen.
+
+Parancs-ID-k és beállítások megmaradnak. A One-Click Extract továbbra is hivatkozás, címgenerálás és Mermaid-javítás. Dokumentációjavítás nem ad kutatást az alaplánchoz.
+
+## Megszakítás és helyreállítás
+
+A megszakítás nem fordított tranzakció. Kész fájl megmarad, elfogadott kérés/írás lezárulhat, számlázást a szolgáltató irányít. Várjon és vizsgáljon. Takarítás előtt hasonlítsa a látható konfliktusokat és helyreállítási fájlokat. Tartsa meg a régi artefaktumok által használt kísérőmappákat.
+
+## Export- és kompatibilitási határok
+
+- PowerPointban célzott alkalmazásellenőrzések vannak; a korábbi teljesképes pontszám nem találta meg a hibát.
+- Mermaid/SVG PPTX-ben képként is szerepelhet.
+- Statikus Drawnix-ágközi nyilak átrendezés utáni csatlakozása nem igazolt.
+- CircuitikZ-előnézet és TeX-fordítás külön ellenőrzés.
+- Fizikai mobileszközök és Obsidian 0.15.0 továbbra sem ellenőrzöttek.
+- Rögzített korpuszon mért szóalapú keresés nem bizonyít szemantikus keresést vagy minden vault teljesítményét.
+
+## Kiadási integritás
+
+A publisher verziót és helyi/távoli tagazonosságot ellenőriz, tiszta tagforrást épít, draft fájlokat tölt fel, majd letöltött hasheket hasonlít publikálás előtt. Kötelező: `main.js`, `manifest.json`, `styles.css`, `README.md`. Ismétlés nem cserélhet nyilvános bájtokat más eredetű kimenetre.
+
+Pages a nyilvános kiadás ellenőrzése után publikálható. A Codex közvetlenül ír és ellenőriz, LM Studio és fordítási motor nélkül. Független anyanyelvi ellenőrzést nem állítunk.
+
+## Tovább
+
+- [Kiadás angol/kínai jegyzetekkel](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Gyors kezdés](../getting-started/quick-start).
+- [Kötegek](../advanced/batch-processing).
+- [Fejlesztők](../developers/overview), [Agent](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) verziókkal és tisztított bizonyítékkal.

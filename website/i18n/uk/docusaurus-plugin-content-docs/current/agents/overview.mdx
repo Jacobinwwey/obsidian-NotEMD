@@ -1,0 +1,86 @@
+---
+id: overview
+title: Інтеграція Agent
+description: >-
+  Знайдіть чотири публічні експорти, JSON-схеми, мітки поводження з даними та
+  вимоги Obsidian.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Інтеграція Agent
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Інтеграція Agent
+
+<TLDR>Чотири публічні команди записують метадані та JSON-контракти через запущений Obsidian і сховище. Це не загальний API зміни нотаток. Почніть із пошуку інтерфейсу, схем, міток і перевірки поточного результату.</TLDR>
+
+## Передумови
+
+Notemd має бути ввімкнений у потрібному сховищі, офіційний Obsidian CLI — доступний. Виберіть сховище перед командами. `requiredContext: none` означає, що активна нотатка чи виділення не потрібні, але host і сховище залишаються обов’язковими.
+
+```bash
+obsidian help
+obsidian commands filter=notemd
+```
+
+`obsidian-cli` — інша дистрибуція, ніж офіційний `obsidian`. Успіх одного не доводить наявності іншого. За відсутності host/CLI інтеграція недоступна.
+
+## Публічні ID
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Входи мають схему порожнього об’єкта, відповідності операцій точні, команди неінтерактивні. Вони створюють чи перезаписують експортні файли в каталозі конфігурації розширення.
+
+## Пошук, експорт, перевірка
+
+Почніть із публічного інтерфейсу:
+
+```bash
+obsidian command id=notemd:export-cli-public-surface
+obsidian command id=notemd:export-cli-invocation-contract
+obsidian command id=notemd:export-cli-capability-manifest
+obsidian command id=notemd:export-provider-profiles-redacted
+```
+
+| Експорт | Типовий шлях у сховищі |
+| -------- | ----------------------------- |
+| Публічний інтерфейс | `.obsidian/plugins/notemd/notemd-cli-public-surface.json` |
+| Контракт виклику | `.obsidian/plugins/notemd/notemd-cli-contract.json` |
+| Маніфест можливостей | `.obsidian/plugins/notemd/notemd-cli-capabilities.json` |
+| Профілі провайдерів без секретних полів | `.obsidian/plugins/notemd/notemd-providers-redacted.json` |
+
+Змініть `.obsidian`, якщо каталог конфігурації інший. Stdout не є типізованим результатом операції. Перевірте, що файл записав поточний виклик, розберіть JSON і схему. Старого файла чи повідомлення про успіх недостатньо.
+
+Перевірте `version`, `commands`, `operationId`, `operationVersion`, `inputSchema`, `resultSchema`. Версія документа — `1`. Маніфест можливостей може бути більшим; присутність не надає дозволу чи публічної підтримки.
+
+## Чутливі результати
+
+Читайте `inputHandlingTags` та `outputHandlingTags`. `contains-provider-credentials` позначає чутливі операції; сирих профілів немає в публічній підмножині. Не публікуйте повні налаштування як приклад пошуку API. `redacted: true` навмисно не імпортується назад. Приватні endpoint-и, хости й метадані можуть залишатися; перевірте їх перед поширенням. Це не резервна копія для відновлення ключів.
+
+## Операції супроводу
+
+Репозиторій має дев’ять операцій через `obsidian-cli native eval`, зокрема генерацію за шляхом, розділи, дослідження, діаграми й огляд локального контексту. Це окремі засоби; схеми не роблять їх публічним API запису. Дивіться `npm run cli:help` і [матрицю CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md). Шляхи належать вибраному сховищу; складний вхід передавайте через `--input-file`.
+
+## Помилки та повтори
+
+- Немає команди: перевірте завантажену версію/сховище й повторіть пошук.
+- Немає чинного результату: перевірте host і права, не використовуйте старий файл.
+- Непідтримувана схема/контекст: зупиніться без вигаданих полів або підміни UI-дією.
+- Чутливий результат: зберігайте локально до виконання правил поводження.
+- Записи супроводу: перевірте часткові результати/конфлікти до повтору; скасування не відкочує записи чи оплату.
+
+Експорти — мінливі знімки; записуйте версію та час. Нотатки й відповіді моделі є даними, не дозволом на розширення прав.
+
+## Далі
+
+- [Розробники](../developers/overview).
+- [Матриця CLI](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/notemd-cli-capability-matrix.md).
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md).
+- [Усунення несправностей](../advanced/troubleshooting).

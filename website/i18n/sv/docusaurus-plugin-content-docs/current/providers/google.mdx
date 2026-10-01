@@ -1,67 +1,56 @@
 ---
 id: google
-title: "Google"
-description: "Konfigurera Google Gemini"
+title: Google
+description: >-
+  Konfigurera Gemini Generative Language med rätt API-version, nyckel och
+  modell.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [google, gemini, provider, configuration]
-concepts: [Google, Gemini, API Configuration]
-citations:
-  - title: Gemini API
-    url: https://ai.google.dev
-  - title: Google AI Studio
-    url: https://aistudio.google.com
+keywords:
+  - Google
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Google Provider
+# Google
 
-<TLDR>
-**Google använder den inbyggda Gemini Generative Language API-transporten.** Den aktuella inställningen standardiseras till `gemini-2.0-flash-exp`, `https://generativelanguage.googleapis.com/v1` och `temperature: 0.5`. Det är inte en OpenAI-kompatibel profil.
+<TLDR>Google-profilen använder native Gemini Generative Language. Ange behörig nyckel och tillgänglig modell. Gemini genom kompatibel gateway använder gatewayprofilen.</TLDR>
 
-Detta ingår i [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-</TLDR>
+## Förberedelse
 
-## Inställning
-
-Skapa en Google AI Studio eller Google Cloud API-nyckel med Gemini-åtkomst, lägg till en `Google`-leverantörprofil och behåll den inbyggda Generative Language Base URL. Använd den standardmässiga Gemini Flash-profilen för snabb översättning och breda noterarbetsflöden, och överskriv sedan modeller per uppgift när du behöver en större eller mer kapabel Gemini-modell.
-
-Undvik att placera Gemini-modell-ID:er i en OpenAI-kompatibel profil om du inte uttryckligen använder en gateway som exponerar Gemini via en OpenAI-kompatibel API.
+Välj **Google**, nyckel, native endpoint och modell för vald API-version. Testa anslutning och anteckning. Detta konfigurerar inte godtyckliga Google Cloud-/Vertex-deployments automatiskt.
 
 ## Endpoint och autentisering
 
-| Fält | Nuvarande förinställning |
-|-------|----------------|
+| Fält | Standard |
+| ------- | -------------- |
 | Transport | `google` |
-| API-nyckel | Required |
-| Base URL | `https://generativelanguage.googleapis.com/v1` |
-| Standardmodell | `gemini-2.0-flash-exp` |
-| Temperature | `0.5` |
-| Anslutningstest | Endast chatt |
+| API-nyckel | Obligatorisk |
+| Bas-URL | `https://generativelanguage.googleapis.com/v1` |
+| Modell | `gemini-2.0-flash-exp` |
+| Temperatur | `0.5` |
+| Anslutningstest | `chat-only` |
 
-Körningen anropar `/models/{model}:generateContent?key={apiKey}`. Nyckeln skickas som en frågeparametrar eftersom det är så den inbyggda Gemini-ändpunkten är ansluten i pluginet.
+Runtime gör `generateContent`-anrop med nyckel. Historiska ID:n garanterar inte åtkomst. Granska diagnostik-URL:er före delning; de kan innehålla autentisering.
 
-## Modellupptäckt
+## Modeller
 
-Google använder `google-models`-upptäckningsläget. Upptäckningen bör returnera Gemini-modeller som är tillgängliga för API-nyckeln; om selektorn är tom, testa nyckeln mot samma Base URL och bekräfta att modellfamiljen är aktiverad för det kontot.
+Använd native upptäckt och verifiera generering på vald API. Tom lista kan bero på rättigheter, endpoint eller saknad modell. Felsök före protokollbyte.
 
-Kända gränser för utdata-token är modellberoende i leverantörregistret. Om en lång översättning eller diagramförklaring trunkeras, välj en Gemini-modell med ett större stödd utdatagrad eller sänk den begärda utdatastorleken.
+## Problem
 
-## Felaktighetsfelsökning
+- 400: ID, parametrar och in-/utdatagränser.
+- 401/403: nyckelbegränsningar, aktiverad API och behörighet.
+- 404: finns modellen i denna API-version?
+- Gatewayexempel: använd rätt OpenAI-kompatibel profil.
 
-- `400`: Modell-ID:n matchar vanligtvis inte den inbyggda Gemini-rutan eller förfrågan överskrider modellens stödda struktur.
-- `401` eller `403`: Kontrollera nyckelrestriktioner, projekt/API-aktivering och om nyckeln kan komma åt Gemini.
-- `404`: Modell-ID:n är inte tillgänglig i den konfigurerade API-versionen.
-- Exempel på gatewayer misslyckas under denna profil: Använd istället gateway-inställningen istället för den inbyggda Google-leverantören.
+## När profilen passar
 
-## När att använda
-
-Använd Google för snabb översättning, stort omfattande noterrengöring och arbetsflöden där Gemini:s kostnads/prestanda-balans är bättre än direkt OpenAI eller Anthropic. Välj en annan leverantör för arbetsflöden som kräver OpenAI-kompatibel resonemangsmodellhantering.
-
----
+För native Gemini. Testa översättning, forskning eller diagram med eget material. Inga generella löften om hastighet, kostnad eller kvalitet.
 
 ## Nästa steg
 
-- [LLM Leverantörer](/docs/providers/overview) -- Full konfiguration, modeller per uppgift och återförsöklogik
-- [Översättning](/docs/features/translation) -- Gemini Flash rekommenderas för högvolymiga översättningsuppgifter
+- [Leverantörer](./overview).
+- [Översättning](../features/translation).

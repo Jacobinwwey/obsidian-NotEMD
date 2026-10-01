@@ -1,16 +1,10 @@
 ---
 id: research
 title: Research & Web Search
-description: Integrate web search into your notes
+description: Select a search provider, summarize retrieved sources into a note, and distinguish web results from optional local knowledge context.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords: [Notemd research, Tavily, DuckDuckGo, source citations, local retrieval]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,108 +12,76 @@ import TLDR from '@site/src/components/TLDR';
 # Research & Web Search
 
 <TLDR>
-**Notemd queries the web and injects LLM-summarized results directly into your notes.** Tavily API is the primary search backend; DuckDuckGo serves as a zero-config fallback. Results are summarized with source citations and appended under a `## Research` heading. Supports single-note research, batch folder research, and per-task model selection for the summarization step.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+Research & summarize searches the selected topic or current note title, asks your configured LLM to summarize the available context, and appends the result to the active Markdown note. Select Tavily or DuckDuckGo explicitly. Search results and model-generated citations require review.
 </TLDR>
 
 ## Overview
 
-Research is one of Notemd's most powerful integrations: it closes the loop between reading, searching, and writing. Instead of switching to a browser to look up an unfamiliar term, you highlight it and let Notemd search, summarize, and append the findings -- all within your vault.
-
-The process is fully configurable. You choose the search provider, the LLM that writes the summary, and whether results are appended to the active note or written to separate files. Batch mode lets you research every note in a folder in one click.
+Configure the search provider separately from the LLM that writes the summary. Tavily requires a key. DuckDuckGo does not require one, but still makes network requests and can be throttled. A local summarization model does not make web research offline.
 
 ## How It Works
 
 ### Search-then-Summarize Pipeline
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
-
-1. **Query extraction** -- Notemd extracts search terms from your selection or the note title.
-2. **Web search** -- Tavily is attempted first. If no API key is configured, DuckDuckGo is used automatically (no key required).
-3. **LLM summarization** -- Raw search results are sent to the configured LLM, which produces a concise summary with inline source citations.
-4. **Append** -- The formatted summary is appended under a `## Research` heading in the active note.
+1. Open the target note in a Markdown editor. Select a short topic, or leave the selection empty to use the note title.
+2. Run **Research & summarize** from the sidebar or command palette.
+3. Notemd queries the configured search provider. Tavily snippets are used as context; DuckDuckGo results can trigger page-content fetches.
+4. If local knowledge retrieval is enabled for this task, scoped local excerpts can also enter the prompt.
+5. The research provider/model writes a summary. Notemd appends it under a `Research Summary` heading identifying the topic and context source.
+6. Review the appended text and open relevant source URLs. Search retrieval does not establish that every generated statement or citation is supported.
 
 ### Tavily vs. DuckDuckGo
 
-| Aspect | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| API key | Required (free tier available) | Not required |
-| Result quality | Higher (purpose-built for AI) | Adequate for general queries |
-| Rate limits | Generous free tier | Subject to throttling |
-| Configuration | `tavilyApiKey` in settings | Zero config -- auto-fallback |
+| Choice | Setup | Operational boundary |
+|--------|-------|----------------------|
+| Tavily | Select Tavily and enter its API key | Uses the account's search quota and returned snippets |
+| DuckDuckGo | Select DuckDuckGo explicitly | No key; subject to search throttling and result-page availability |
 
-### Batch Folder Research
+An empty or invalid Tavily key does not automatically select DuckDuckGo. If search produces no useful context, inspect the report. When enabled and available, local knowledge context can still support a summary; its source label distinguishes that result from web-backed research.
 
-Right-click a folder and select **"Notemd: Research folder"**. Every `.md` file in the folder is processed sequentially (or in parallel up to the configured concurrency). Each note receives its own research summary.
+### Research During Title Generation
+
+Enable **Enable research in "Generate from title"** to include research in title generation, including its batch variant. It is off by default. This is the supported folder-generation route; there is no standalone generic Research Folder action.
 
 ## Configuration
 
 | Setting | Default | Effect |
 |---------|---------|--------|
-| `tavilyApiKey` | `''` | Tavily API key. When empty, DuckDuckGo is used exclusively. |
-| `researchProvider` / `researchModel` | DeepSeek | Per-task LLM for summarizing search results |
-| `maxResearchContentTokens` | `4000` | Token budget for content sent to the LLM. Excess is truncated. |
-| `researchAppendToNote` | `true` | Append summary to the source note. If false, creates a separate file. |
-| `researchLanguage` | `'en'` | Output language for the summarized research |
+| `searchProvider` | `tavily` | Select the search backend |
+| `tavilyApiKey` | `''` | Supply a key before using Tavily |
+| `tavilyMaxResults` | `5` | Requested Tavily result count |
+| `tavilySearchDepth` | `basic` | Tavily search depth |
+| `ddgMaxResults` | `5` | Requested DuckDuckGo result count |
+| `ddgFetchTimeout` | `15` | Result-page fetch timeout in seconds |
+| `maxResearchContentTokens` | `3000` | Approximate web-context budget |
+| `researchProvider` | `DeepSeek` | Summarization provider when task-specific routing is enabled |
+| `researchModel` | `''` | Use that provider's configured model when empty |
+| `researchSummarizeLanguage` | `en` | Output choice when task-specific languages are enabled |
+| `enableResearchInGenerateContent` | `false` | Opt in to research during title generation |
+| `enableLocalKnowledgeRetrieval` | `false` | Enable scoped local retrieval separately |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Use local retrieval for this task |
 
-### Per-Task Model Recommendation
+### Context And Model Selection
 
-Research benefits from a model that handles multilingual content and produces well-structured prose. Consider:
-
-- **DeepSeek** -- default, affordable, good quality
-- **GPT-4o** -- higher quality summarization, higher cost
-- **Gemini Flash** -- fast and inexpensive, solid for straightforward queries
+Context limits use an estimate rather than provider-exact tokenization. Truncation can omit evidence. Choose a model and output budget appropriate for the source material, and keep the research question focused. Local indexing is lexical; it does not imply embedding-based semantic search or complete recall.
 
 ## Example
 
-You are reading a paper on *transformer attention mechanisms* and encounter an unfamiliar term: *relative positional encoding*. Rather than leaving Obsidian:
+Create a note titled `Relative positional encoding`. Run research, then verify the explanation against the linked original papers or official documentation. Keep the question, actual source URLs and any corrections in the note so another reader can audit the conclusion. Example text in a guide is not a research result produced for your Vault.
 
-1. Highlight **"relative positional encoding"**
-2. Right-click --> **"Notemd: Research and summarize"**
-3. Notemd searches the web, summarizes the top results, and appends:
+## Cancellation And Privacy
 
-```markdown
-## Research
-
-### Relative Positional Encoding
-
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
-
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
-
-The summary is now part of your vault, searchable, linkable, and offline-accessible.
+Cancel stops further task work where supported; completed appends remain. A provider or page fetch already in progress may finish. The search service receives the query, fetched websites receive requests, and the selected LLM receives the collected prompt context, including local excerpts when enabled. Review diagnostic reports before sharing them.
 
 ## Tips
 
-- **Set a Tavily key for best results** -- even the free tier provides better relevance than raw DuckDuckGo.
-- **Use a capable summarization model** -- cheap models may flatten nuanced technical content.
-- **Batch research** after an initial read-through to fill gaps across many notes at once.
-- **Review appended summaries** -- LLMs can hallucinate source details. Verify key claims.
-
----
+- Distinguish a web source, a local note and a model-generated inference.
+- Verify quotations, dates and high-impact claims in the original material.
+- Use a small test query to diagnose search and LLM failures separately.
+- Inspect existing summaries before rerunning to avoid redundant appended material.
 
 ## Next Steps
 
-- [Concept Notes](./concept-notes) -- Extract and persist key terms from research results
-- [Wiki-Links](./wiki-links) -- Link research-derived concepts across your vault
-- [Translation](./translation) -- Translate research summaries into another language
-- [LLM Providers](/docs/providers/overview) -- Configure the model used for summarization
+- [Configuration](../getting-started/configuration): search and local-context settings.
+- [Custom prompts](../advanced/custom-prompts): supported research placeholders.
+- [Troubleshooting](../advanced/troubleshooting): credentials, quotas and missing context.

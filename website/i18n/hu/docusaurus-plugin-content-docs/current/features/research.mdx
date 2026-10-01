@@ -1,125 +1,90 @@
 ---
 id: research
-title: "Tudományos kutatás és web keresés"
-description: "A web keresést a jegyeidbe integrálj"
+title: Kutatás és webes keresés
+description: >-
+  Foglalja össze a visszakeresett forrásokat a webes bizonyíték és helyi
+  kontextus elkülönítésével.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - Kutatás és webes keresés
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Tudományos kutatás és web keresés
+# Kutatás és webes keresés
 
-<TLDR>
-**Notemd kérdezéseket a weben küld és LLM-összefoglalott eredményeket közvetlenül a jegyeidbe beír.** Tavily API az elsődleges keresési alapközpont; DuckDuckGo egy nulkonfigurációs lehetséges választék. A eredmények forrásokkal együtt összefoglalódnak és egy `## Research` címke alatt kerülnek hozzá. Támogatja a egyetlen jegyben történő kutatást, batch módú mappákban történő kutatást, valamint a összefoglalási lépéshez szóló munkavégzési modellek választását.
-
-Ez része a [Obsidian AI tudományos kezelési útmutatójának](/docs/pillar-ai-knowledge).
-</TLDR>
+<TLDR>A Research & summarize kijelölés vagy cím alapján keres, a rendelkezésre álló kontextust LLM-mel összefoglalja, és hozzáfűzi az aktív Markdownhoz. Válasszon kifejezetten Tavilyt vagy DuckDuckGót, és ellenőrizze a hivatkozott forrásokat.</TLDR>
 
 ## Áttekintés
 
-A tudományos kutatás az Notemd legerősebb integrációinak egyébé: az összekapcsolja a olvasást, a keresést és az írásot. Neked nem kell más böngészőbe válni, hogy egy ismeretlen termét keresd – eljelöld azt és hagyd, hogy Notemd keresse, összefoglalja és a találatokat hozzáírja – mind az összeállításodban.
+A kereső és összefoglaló modell külön választás. Tavilyhoz kulcs kell; DuckDuckGóhoz nem, de hálózat és elérhető szolgáltatás igen. Helyi modell nem teszi a webes kutatást offline-ná.
 
-A folyamat teljesen konfigurálható. Te válaszolod ki a keresési szolgáltatót, az LLM-t, amely az összefoglalást írja le, és azt is, hogy a eredmények kerülnek hozzá az aktív jegyhez vagy külön fájlokba íródnak. A batch módban egy kattintással lehet mappában lévő minden jegyet kutatni.
+## Működés
 
-## Hogyan működik
+### Keresés és összefoglalás
 
-### Keresés-után-összefoglalás folyamatára
+1. Nyissa meg a célt a Markdown-szerkesztőben, válasszon témát, vagy használja a címet.
+2. Indítsa a **Research & summarize** műveletet.
+3. Tavily részleteket ad; DuckDuckGo eredményoldalakat is letölthet.
+4. A kiválasztott körből engedélyezett helyi kontextus adható hozzá.
+5. A modell `Research Summary` szakaszt ír témával és forrástípussal.
+6. Nyissa meg a címeket, ellenőrizze az állításokat. A kapott kontextus nem igazol minden generált idézetet.
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+### Tavily vagy DuckDuckGo
 
-1. **Kérések kiemelése** – Notemd kiemeli a keresési kifejezéseket a választott elemekből vagy a jegy címéből.
-2. **Web keresés** – először próbálja meg Tavily. Ha nincs konfigurált API kulcs, automatikusan használja ki DuckDuckGo-t (kulcs nem szükséges).
-3. **LLM összefoglalása** – A gyors keresési eredmények küldődnek a konfigurált LLM-ba, amely egy összefoglaló formátumú részletet készít ki, beleértve az inline forrásokat.
-4. **Hozzáírás** – A formázott összefoglalás kerül hozzá egy `## Research` címke alatt az aktív jegyhez.
+| Választás | Előkészítés | Működési határ |
+| -------- | ------- | ---------------------- |
+| Tavily | Válasszon Tavilyt, adjon meg kulcsot | Fiókkvóták és visszaadott részletek |
+| DuckDuckGo | Válasszon DuckDuckGót kifejezetten | Kulcs nélkül; keresési korlátozás és oldalak elérhetősége |
 
-### Tavily vs. DuckDuckGo
+Üres vagy hibás Tavily-kulcs nem vált szolgáltatót. Kevés webes kontextusnál olvassa a jelentést. Engedélyezett helyi részletek még alapul szolgálhatnak; a forráscímke megkülönbözteti ezt a webre támaszkodó összefoglalótól.
 
-| Aspektus | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| API kulcs | Előnyeléges (ingyenes szint is létezik) | Nem elvárható |
-| Eredmény minősége | Magasabb (kifejezetten AI-hez készült) | Elég a számos kérdés esetén |
-| Háromlás korlátok | Nagyszerű ingyenes szint | Korlátozások vonatkoznak |
-| Konfiguráció | `tavilyApiKey` beállításokban | Nulles beállítás – automatikus visszaállás |
+### Kutatás címgeneráláskor
 
-### Halmazmappák kutatása
+A **Enable research in "Generate from title"** a köteghez is kutatást adhat, alapból kikapcsolva. Ez a támogatott mappás út; általános önálló Research Folder művelet nincs.
 
-Kattints a mappára és válasszd **"Notemd: Kutatási mappa"**. A mappában lévő minden `.md` fájl sorrendben (vagy konfigurált egyidejűségig paralelně) feldolgozódik. Minden jegynek kapcsolódik hozzá saját kutatási összefoglalata.
+## Beállítások
 
-## Konfiguráció
+| Beállítás | Alapérték | Hatás |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Keresőszolgáltatás |
+| `tavilyApiKey` | `''` | Tavily-kulcs |
+| `tavilyMaxResults` | `5` | Kért Tavily-találatszám |
+| `tavilySearchDepth` | `basic` | Tavily-keresés mélysége |
+| `ddgMaxResults` | `5` | Kért DuckDuckGo-találatszám |
+| `ddgFetchTimeout` | `15` | Oldalletöltési időkorlát másodpercben |
+| `maxResearchContentTokens` | `3000` | Webes kontextus közelítő kerete |
+| `researchProvider` | `DeepSeek` | Összefoglaló szolgáltató feladatútválasztáskor |
+| `researchModel` | `''` | Üres mező a szolgáltató modelljét használja |
+| `researchSummarizeLanguage` | `en` | Feladat kimeneti nyelve |
+| `enableResearchInGenerateContent` | `false` | Kutatás engedélyezése címgeneráláshoz |
+| `enableLocalKnowledgeRetrieval` | `false` | Helyi keresés külön engedélyezése |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Helyi kontextus ehhez a feladathoz |
 
-| Beállítás | Alapértelmezett | Hatás |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Tavily API kulcs. Ha üres, kizárólag DuckDuckGo használódik. |
-| `researchProvider` / `researchModel` | DeepSeek | Munkaalkalmazásos LLM a keresési eredmények összefoglalásához |
-| `maxResearchContentTokens` | `4000` | Token-összege az LLM-ba küldett tartalomhoz. A túlterhelés keveredik le. |
-| `researchAppendToNote` | `true` | Összefoglalást adjuk hozzá a forrásjegyhez. Ha false, készül el külön fájl. |
-| `researchLanguage` | `'en'` | Összefoglalt kutatásnak használt kiinduló nyelv |
+### Kontextus és modell
 
-### Munkaalkalmazásos modellelési ajánlat
+A keretek becslések, nem pontos szolgáltatói tokenek. A levágás bizonyítékot is eltávolíthat. Szűkítse a kérdést, igazítsa a modellt/keretet. A helyi index szóalapú, rejtett embedding és teljes visszakeresési garancia nélkül.
 
-A kutatás előnyeinek eléréséhez szükség van olyan modellre, amely kezelheti a több nyelvű tartalmat és készíthet ki jó struktúrájú beszédből álló részleteket. Figyelembe vételével:
+## Példa
 
-- **DeepSeek** -- alapértelmezett, olcsó, magas minőségű
-- **GPT-4o** -- magasabb minőségű összefoglalások, magasabb ár
-- **Gemini Flash** -- gyors és olcsó, jó választás egyszerű kérésekre
+Készítsen `Relatív pozíciókódolás` jegyzetet, kutasson, majd vesse össze eredeti közleményekkel vagy hivatalos dokumentációval. Őrizze meg a kérdést, valódi URL-eket és javításait. A példa nem jelent már lefutott keresést az Ön vaultjában.
 
-## példa
+## Megszakítás és adatvédelem
 
-Egy tanulmányt olvasol, amely *transformer attention mechanisms* témáját 다룹니다, és egy ismeretlen termést találsz: *relative positional encoding*. Obsidian helyett nem hagyj meg a helyet:
+A kész hozzáfűzés megmarad. Elfogadott modell- vagy oldalkérés befejeződhet. A kereső a kérdést, a webhely a lekérést, az LLM az összes kontextust kapja, a helyi részletekkel együtt. Megosztás előtt vizsgálja a diagnosztikát.
 
-1. **"relative positional encoding"**-ot jelöld ki
-2. Kattints jobb gombbal --> **"Notemd: Kutatás és összefoglalás"**
-3. Notemd weben keres, a legjobb eredményeket összefoglalja, és hozzáadja:
+## Javaslatok
 
-```markdown
-## Research
+- Különítse el a webes forrást, helyi jegyzetet és modellkövetkeztetést.
+- Idézeteket, dátumokat és lényeges állításokat az eredetiben ellenőrizzen.
+- Keresőt és LLM-et külön, kis kérdéssel próbáljon.
+- Új hozzáfűzés előtt olvassa el a meglévő összefoglalókat.
 
-### Relative Positional Encoding
+## Tovább
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
-
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
-
-A összefoglalás most része a te tárgyaidadnak, kereshető, kötethető össze és offline is elérhető.
-
-## Tippek
-
-- **Legjobb eredményekhez állítj be egy Tavily kulcsot** -- még az ingyenes szint is jobb relevanciát nyújt, mint a szabad DuckDuckGo.
-- **Használj egy hatékony összefoglalási modellt** -- olcsó modellek lehetővé teszik, hogy a finomhangos technikai tartalmak elmosolódjanak.
-- **Bárkiutatás** tenni kell az első olvasás után, hogy egyaránt több feljegyzésben lévő hiányokat teljesíthessük.
-- **Ellenőrizd a hozzáadott összefoglalásokat** -- LLM-ek lehet, hogy kitalálják a forrásinformációkat. ellenőrizd a fontos állításokat.
-
----
-
-## További lépések
-
-- [Concept Notes](./concept-notes) -- A kutatási eredményekből a kulcsfontosságú termékeket kivonj és tárolj
-- [Wiki-Links](./wiki-links) -- A kutatásból származó koncepteket összekötj a te tárgyaidadban
-- [Translation](./translation) -- A kutatási összefoglalásokat más nyelvre fordítsd
-- [LLM Társadalmi szolgáltatók](/docs/providers/overview) -- Konfigurálja a összefoglaláshoz használt modellt
+- [Beállítások](../getting-started/configuration).
+- [Egyéni promptok](../advanced/custom-prompts).
+- [Hibaelhárítás](../advanced/troubleshooting).

@@ -16,27 +16,27 @@
     "description": "The label of footer link with label=Getting Started linking to /docs/intro"
   },
   "link.item.label.FAQ": {
-    "message": "FAQ",
+    "message": "よくある質問",
     "description": "The label of footer link with label=FAQ linking to /docs/faq"
   },
   "link.item.label.Discord": {
     "message": "Discord",
     "description": "The label of footer link with label=Discord linking to https://discord.gg/qnGgsQ9W"
   },
-  "link.item.label.GitHub Discussions": {
-    "message": "GitHub Discussions",
-    "description": "The label of footer link with label=GitHub Discussions linking to https://github.com/Jacobinwwey/obsidian-NotEMD/discussions"
-  },
   "link.item.label.GitHub": {
     "message": "GitHub",
     "description": "The label of footer link with label=GitHub linking to https://github.com/Jacobinwwey/obsidian-NotEMD"
   },
   "link.item.label.Sponsor": {
-    "message": "スポンサー",
+    "message": "支援する",
     "description": "The label of footer link with label=Sponsor linking to https://github.com/sponsors/Jacobinwwey"
   },
   "copyright": {
-    "message": "Copyright © 2026 Notemd. Docusaurus で構築。 | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">MIT ライセンス</a>",
+    "message": "Copyright © 2026 Notemd. Docusaurus で作成。 | <a href=\"https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE\">MIT ライセンス</a>",
     "description": "The footer copyright"
+  },
+  "link.item.label.GitHub Issues": {
+    "message": "問題を報告",
+    "description": "Repository issue tracker"
   }
 }

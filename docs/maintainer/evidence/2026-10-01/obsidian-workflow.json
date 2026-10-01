@@ -1,0 +1,44 @@
+{
+  "observedAt": "2026-10-01T05:20:19.949Z",
+  "vault": "1Knowledge",
+  "version": "1.9.8",
+  "fixture": "Notemd-1.9.8-user-scenarios-1790832019940",
+  "requests": 2,
+  "passed": true,
+  "workflow": {
+    "passed": true,
+    "dsl": "One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix",
+    "sourceUnchanged": true,
+    "processedPath": "Notemd-1.9.8-user-scenarios-1790832019940/Source_processed.md",
+    "generatedPath": "Notemd-1.9.8-user-scenarios-1790832019940/concepts_complete/Notemd Acceptance Concept.md",
+    "outputs": [
+      "Notemd-1.9.8-user-scenarios-1790832019940/concepts_complete/Notemd Acceptance Concept.md",
+      "Notemd-1.9.8-user-scenarios-1790832019940/Source_processed.md",
+      "Notemd-1.9.8-user-scenarios-1790832019940/Source.md"
+    ]
+  },
+  "publicExports": [
+    {
+      "id": "notemd:export-provider-profiles-redacted",
+      "bytes": 6544,
+      "sha256": "1913ce5273cb73cfa441beb45c76e9a829bf5284fd5a1fd4b644aa77bf0901f1"
+    },
+    {
+      "id": "notemd:export-cli-capability-manifest",
+      "bytes": 13899,
+      "sha256": "5ec59ed1196205639c347bb11f33b93ecf7e53df02173a0aeda971de03c0ff50"
+    },
+    {
+      "id": "notemd:export-cli-invocation-contract",
+      "bytes": 46951,
+      "sha256": "6c499e1ed01f8e4cdb2aa6936754d7524293de99241bfa1979847d0e32862d35"
+    },
+    {
+      "id": "notemd:export-cli-public-surface",
+      "bytes": 3391,
+      "sha256": "6fdf3f2d9f70e6cdd2b84e87df254e376b3ef0d89e84362881899765fad0e5c3"
+    }
+  ],
+  "settingsRestored": true,
+  "idle": true
+}

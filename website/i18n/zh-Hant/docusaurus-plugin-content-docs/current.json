@@ -1,7 +1,7 @@
 {
   "version.label": {
-    "message": "下一步",
-    "description": "The label for version current"
+    "message": "目前文件",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
     "message": "入門",
@@ -12,7 +12,7 @@
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM 提供商",
+    "message": "LLM 供應商",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {

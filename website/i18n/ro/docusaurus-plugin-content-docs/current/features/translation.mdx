@@ -1,123 +1,82 @@
 ---
 id: translation
-title: "Traducere"
-description: "Traduce notele și selecțiile"
+title: Traducere
+description: >-
+  Traduceți fișiere și foldere prin LLM-ul ales și verificați limba, căile și
+  suprascrierile.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [translation, languages, i18n, batch translation]
-concepts: [Translation, Multi-Language, Batch Processing]
-citations:
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
-  - title: Google Translate API
-    url: https://cloud.google.com/translate
+keywords:
+  - Traducere
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
 # Traducere
 
-<TLDR>
-**Notemd traduce textul între peste 21 de limbi folosind tehnologiea LLM.** Suportă traducerea a unei selecții, a întregii note și a unui folder în lot. Fiecare sarcină de traducere poate folosi un furnizor și un model dedicat prin setări specifice pentru acea sarcină. Limba de ieșire poate fi configurată independent de limbă UI. Rezultatele sunt adăugate sau scrise într-un fișier nou în funcție de preferințele dumneavoastră.
+<TLDR>Notemd traduce fișierul activ sau fișierele eligibile ale unui folder prin LLM-ul selectat. Implicit scrie separat, cu sufix de limbă. Calitatea depinde de model; 21 de limbi UI și 34 de rute web nu sunt limite sau garanții de traducere.</TLDR>
 
-Acesta face parte din [Obsidian Ghidul de gestionare a cunoștințelor AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Prezentare
 
-## Prezentare generală
-
-Traducerea în Notemd nu este o căutare din dicționar – este o traducere bazată pe LLM, conștientă de context. Modelul vede întreg paragraful sau nota, păstrând tonul, terminologia specifică domeniu și structura propozițiilor. Acest lucru oferă rezultate de calitate mai ridicată decât serviciile de traducere cuvânt cu cuvânt, în special pentru texte tehnice, academice și creative.
-
-Funcția suportă trei domenii: selecție, nota activă și întreg folder. În combinație cu selectarea modelului pentru fiecare sarcină, puteți folosi un model rapid (Gemini Flash) pentru traduceri obișnuite și un model puternic (Claude Sonnet) pentru conținut care necesită sensibilitate la nuanțe – fără a schimba furnizorul global.
+Alegeți limba și furnizorul, apoi testați o copie cu termeni, linkuri și cod. Se utilizează un LLM, nu o integrare dedicată Google Translate. Comenzile vizează fișiere/foldere. Pentru un pasaj, folosiți o notă temporară; selecția nu restrânge **Translate current file**.
 
 ## Cum funcționează
 
-### Comanda Translate
+### Sarcina de traducere
 
-```mermaid
-graph LR
-    A[User selects text or note] --> B[Determine source language]
-    B --> C[Build translation prompt]
-    C --> D[LLM translates with context]
-    D --> E[Parse translated text]
-    E --> F{Append or new file?}
-    F -->|Append| G[Insert after selection]
-    F -->|New file| H[Write translated .md]
-```
+1. Alegeți limba țintă, implicit engleza, independent de UI.
+2. Deschideți sursa și rulați **Translate current file**.
+3. Textul lung este fragmentat, trimis și reasamblat.
+4. Deschideți calea raportată și verificați sensul, termenii, citatele, Markdownul și codul.
 
-1. **Detectarea sursă** – LLM deduce limbajul sursă din conținut. Nu este nevoie să-l specificați manual.
-2. **Construcția promptului** – Notemd creează un prompt care include limba țintă, o sugestie opțională de domeniu și conținutul care trebuie tradus.
-3. **Traducerea LLM** – `translateProvider` / `translateModel` configurat procesează cererea. Modelul păstrează formatarea markdown, linkurile wiki și blocurile de cod.
-4. **Ieșire** – Textul tradus este fie adăugat sub original, fie scris într-un fișier nou din depozit.
+Traducerea în franceză a `Example.md` creează de regulă `Example_fr.md` lângă sursa păstrată. Rezultatul existent este suprascris. Adăugarea în original sau o secțiune fixă `Translation` nu sunt garanții implicite.
 
 ### Perechi de limbi
 
-Notemd suportă orice pereche de limbi pe care LLM o susține. Printre perechile comune se numără:
+Modelul deduce limba sursă. O opțiune de meniu nu dovedește precizia perechii. Verificați limbile amestecate și terminologia; fragmentarea poate pierde context.
 
-| Sursă | Target | Calitate tipică |
-|--------|--------|----------------|
-| Engleză | Chineză simplificată | Excelent |
-| Chineză | Engleză | Excelent |
-| Engleză | Japoneză | Foarte bun |
-| Engleză | Germană / Franțuzea / Spaniolă | Foarte bun |
-| Orice limbă suportată | Orice limbă suportată | Depinde de model |
+### Modelul sarcinii
 
-Setarea `translateLanguage` controlează **limbajul de ieșire**. Limbajul sursă este detectat automat.
+Rutarea utilizează `translateProvider`/`translateModel`, altfel furnizorul activ. Local sunt necesare serverul și modelul; în cloud se trimit conținutul și promptul. Evaluați un eșantion propriu.
 
-### Selectare a modelului pe sarcină
+### Traducerea folderului
 
-Calitatea traducerii variază semnificativ în funcție de model. Notemd vă permite să atribuiți un model dedicat doar pentru traducere:
+**Batch translate folder** include implicit numai copiii direcți. Profilurile avansate pot schimba acest lucru. Surse cu același nume într-o singură destinație pot intra în conflict. Verificați traducerile vechi și căile înainte de repetare.
 
-| Model | Viteza | Calitate | Costul | Cel mai potrivit pentru |
-|-------|-------|--------|------|----------|
-| `gemini-2.0-flash-exp` | Rapid | Bun | Scăzut | Casual, volum mare |
-| `gpt-4o-mini` | Rapid | Bun | Scăzut | Căutări rapide |
-| `deepseek-chat` | Mediu | Bun | Foarte scăzut | Budjet multilingv |
-| `claude-3-5-sonnet` | Mediu | Excelent | Mediu | Tehnic / academic |
-| `gpt-4o` | Mediu | Excelent | Mediu | Proză sensibilă la nuanțe |
+## Setări
 
-### Traducere a folderului în lot
+| Setare | Valoare implicită | Efect |
+| --------- | --------- | -------- |
+| `language` | `en` | Limba țintă |
+| `translateProvider` | `DeepSeek` | Furnizor la rutare per sarcină |
+| `translateModel` | `''` | Gol preia modelul furnizorului |
+| `useCustomTranslationSuffix` | `false` | Codul limbii ca sufix implicit |
+| `translationCustomSuffix` | `_translated` | Sufix când personalizarea este activată |
+| `useCustomTranslationSavePath` | `false` | Salvare implicită lângă sursă |
+| `translationSavePath` | `''` | Folder de ieșire relativ la vault |
+| `batchConcurrency` | `1` | Concurența cerută pentru traducerea folderului |
 
-Faceți clic dreapta pe un folder și selectați **"Notemd: Translate folder"** pentru a traduce toate notele din acel folder. Fiecare fișier este procesat independent. Setarea de concurență controlează câte fișiere se traduc simultan.
-
-## Configurație
-
-| Setare | Implicit | Efect |
-|---------|---------|--------|
-| `translateProvider` / `translateModel` | DeepSeek | Provider dedicat pentru sarcini de traducere |
-| `translateLanguage` | `'en'` | Limbajul țintă pentru output |
-| `translationAppendToNote` | `true` | Adăugați textul tradus sub textul original. Dacă este setat pe false, se creează un fișier nou. |
-| `batchConcurrency` | `3` | Numărul de fișiere procesate simultan în timpul traducerii în lot |
+Dacă folderul personalizat nu poate fi pregătit, poate fi utilizat folderul sursei. Citiți calea reală. Un sufix personalizat gol poate viza originalul; folosiți unul distinct pentru traducere separată.
 
 ## Exemplu
 
-Citiți o notă de cercetare în chineză și doriți o versiune în engleză:
+Copiați o notă scurtă în chineză într-un folder de test, selectați engleza și traduceți. Comparați `_en.md` cu sursa: termeni, numere, formule și linkuri. Extindeți abia apoi.
 
-1. Deschideți nota
-2. Clic dreapta --> **"Notemd: Translate current file"**
-3. Notemd detectează limba chineză, o traduce în limbă țintă configurată (engleză) și adaugă:
+## Anulare și control
 
-```markdown
-## Translation (English)
+Anularea oprește continuarea suportată; traducerile finalizate rămân, iar oprirea facturării nu este garantată. Verificați raportul și fișierele. Păstrarea Markdownului este instrucțiune pentru model, nu garanție de echivalență semantică impusă de parser.
 
-The experimental results show that the proposed method achieves
-a 12% improvement in F1 score compared to the baseline, primarily
-due to the enhanced feature extraction module described in Section 3.
-```
+## Recomandări
 
-Textul chinez original rămâne neschimbat deasupra traducerii. Titlul `## Translation` păstrează ambele versiuni în același fișier pentru ușor referință.
+- Salvați sursa și verificați coliziunile.
+- Folosiți sufix/folder de test separat.
+- Controlați manual codul, matematica, URL-urile și numele.
+- Curățați diagnosticele înainte de partajare.
 
-## Sfaturi
+## În continuare
 
-- **Utilizați Gemini Flash pentru volume** -- este cea mai rapidă și ieftină opțiune pentru traducerea în lot a folderurilor mari.
-- **Păstra linkurile wiki** -- instrucțiunea Notemd solicită LLM să păstreze `[[wiki-links]]` intact în traducere. Verificați după traducere, deoarece unele modele le dezpachetează ocazional.
-- **Setează limba de ieșire explicit** -- detectarea automată funcționează pentru sursă, dar configurați întotdeauna `translateLanguage` pentru a evita ambiguitățile legate de țintă.
-- **Traducere în lot a notițelor conceptuale** -- dacă folderul dumneavoastră cu concepte este într-o limbă și doriți el să fie în alta, traducerea la nivel de folder o gestionează într-un singur pas.
-
----
-
-## Următoarele pași
-
-- [Cercetare](./research) -- Căutați și rezumați în orice limbă, apoi traduceți rezultatele
-- [Fluxuri de lucru](./workflows) -- Înșirați traducerea cu linkuri wiki sau extracție a conceptelor
-- [Procesare în lot](/docs/advanced/batch-processing) -- Concurgență și comportamentul de suprascriere pentru operațiile pe folder
-- [LLM Furnizori](/docs/providers/overview) -- Alegeți cel mai bun model pentru perechea dumneavoastră de limbi
+- [Loturi](../advanced/batch-processing).
+- [Prompturi](../advanced/custom-prompts).
+- [Furnizori](../providers/overview).

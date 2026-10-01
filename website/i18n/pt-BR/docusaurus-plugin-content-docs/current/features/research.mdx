@@ -1,125 +1,92 @@
 ---
 id: research
-title: "Pesquisa e Busca na Web"
-description: "Integre a busca na web às suas anotações"
+title: Pesquisa Web e resumos
+description: >-
+  Escolher o motor de pesquisa, resumir fontes e distinguir contexto Web de
+  excertos locais opcionais.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [research, web search, Tavily, DuckDuckGo, summarization]
-concepts: [Web Research, Tavily, Search Integration, Summarization]
-citations:
-  - title: Tavily API
-    url: https://tavily.com
-  - title: DuckDuckGo
-    url: https://duckduckgo.com
+keywords:
+  - Pesquisa Web e resumos
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Pesquisa e Busca na Web
+# Pesquisa Web e resumos
 
 <TLDR>
-**Notemd consulta a web e insere os resultados resumidos em LLM diretamente nas suas anotações.** Tavily API é o backend de busca principal; DuckDuckGo funciona como um fallback sem configuração. Os resultados são resumidos com citações das fontes e anexados sob um cabeçalho `## Research`. Suporta pesquisa em única anotação, pesquisa em pastas em lote e seleção de modelo por tarefa para a etapa de resumo.
-
-Isso faz parte do [Obsidian Guia de Gestão de Conhecimento de IA](/docs/pillar-ai-knowledge).
+**Pesquisar e resumir** pesquisa o tema selecionado ou título da nota, pede ao LLM um resumo do contexto disponível e acrescenta-o à nota Markdown ativa. Escolher Tavily ou DuckDuckGo explicitamente e verificar fontes e citações.
 </TLDR>
 
-## Visão Geral
+## Visão geral
 
-A pesquisa é uma das integrações mais poderosas do Notemd: ela fecha o ciclo entre leitura, busca e escrita. Em vez de abrir um navegador para buscar um termo desconhecido, basta destacá‑lo e deixar que Notemd faça a busca, o resumo e anexe as descobertas — tudo dentro do seu vault.
+Motor de pesquisa e LLM de resumo são configurados separadamente. Tavily exige chave; DuckDuckGo não, mas pode limitar pedidos. Modelo local não torna pesquisa Web offline.
 
-O processo é totalmente configurável. Você escolhe o provedor de busca, o LLM que escreve o resumo e se os resultados devem ser anexados à anotação ativa ou gravados em arquivos separados. O modo em lote permite pesquisar todas as anotações de uma pasta com um único clique.
+## Funcionamento
 
-## Como Funciona
+### Pesquisar e resumir
 
-### Pipeline de Busca e Resumo
+1. Abrir a nota no editor Markdown, selecionar tema curto ou usar o título.
+2. Executar **Pesquisar e resumir**.
+3. Tavily fornece excertos; DuckDuckGo pode levar à leitura das páginas encontradas.
+4. Pesquisa local ativada para a tarefa pode acrescentar excertos do cofre.
+5. O modelo gera texto acrescentado sob `Research Summary`, com tema e origem do contexto.
+6. Rever e abrir URLs originais. Encontrar uma fonte não comprova cada afirmação ou citação.
 
-```mermaid
-graph LR
-    A[User Selection or Note] --> B[Extract Query]
-    B --> C{Tavily Available?}
-    C -->|Yes| D[Tavily API Search]
-    C -->|No| E[DuckDuckGo Fallback]
-    D --> F[Raw Search Results]
-    E --> F
-    F --> G[LLM Summarization]
-    G --> H[Formatted Summary + Citations]
-    H --> I[Append to Note]
-```
+### Tavily ou DuckDuckGo
 
-1. **Extração da consulta** -- Notemd extrai os termos de busca da sua seleção ou do título da anotação.
-2. **Busca na web** -- Tavily é tentado primeiro. Se nenhuma chave API estiver configurada, DuckDuckGo é usado automaticamente (não é necessária chave alguma).
-3. **Resumo com LLM** -- Os resultados brutos da busca são enviados ao LLM configurado, que gera um resumo conciso com citações de fonte embutidas.
-4. **Anexar** -- O resumo formatado é anexado sob um cabeçalho `## Research` na anotação ativa.
+| Escolha | Preparação | Limite |
+| -------- | ------- | ---------------------- |
+| Tavily | Selecionar Tavily e fornecer chave | Quota da conta e excertos devolvidos |
+| DuckDuckGo | Selecionar DuckDuckGo explicitamente | Sem chave; limites de pedidos e disponibilidade de páginas |
 
-### Tavily vs. DuckDuckGo
+Chave Tavily vazia ou inválida não seleciona DuckDuckGo. Sem contexto Web útil, consultar relatório. Excertos locais ativos e disponíveis podem sustentar um resumo, identificado pela etiqueta de origem.
 
-| Aspecto | Tavily | DuckDuckGo |
-|--------|--------|------------|
-| Chave API | Necessário (versão gratuita disponível) | Não necessário |
-| Qualidade do resultado | Mais alta (desenvolvida especificamente para IA) | Adequada para consultas gerais |
-| Limites de taxa | Nível gratuito generoso | Sujeito a limitação de velocidade |
-| Configuração | `tavilyApiKey` nas configurações | Sem configuração -- fallback automático |
+### Pesquisa durante geração por títulos
 
-### Pesquisa em pasta em lote
+Ativar **Enable research in "Generate from title"** para incluir pesquisa, também em lote. Está desligado por padrão. É o percurso suportado para pastas; não há uma ação genérica independente Research Folder.
 
-Clique com o botão direito em uma pasta e selecione **"Notemd: Pasta de pesquisa"**. Cada arquivo `.md` na pasta é processado sequencialmente (ou em paralelo, até a concorrência configurada). Cada nota recebe seu próprio resumo da pesquisa.
+## Ajustes
 
-## Configuração
+| Ajuste | Padrão | Efeito |
+| --------- | --------- | -------- |
+| `searchProvider` | `tavily` | Selecionar motor de pesquisa |
+| `tavilyApiKey` | `''` | Chave necessária para Tavily |
+| `tavilyMaxResults` | `5` | Quantidade pedida de resultados Tavily |
+| `tavilySearchDepth` | `basic` | Profundidade Tavily |
+| `ddgMaxResults` | `5` | Quantidade pedida de resultados DuckDuckGo |
+| `ddgFetchTimeout` | `15` | Tempo de leitura de páginas em segundos |
+| `maxResearchContentTokens` | `3000` | Orçamento aproximado de contexto Web |
+| `researchProvider` | `DeepSeek` | Fornecedor de resumo com rota por tarefa |
+| `researchModel` | `''` | Modelo do fornecedor se vazio |
+| `researchSummarizeLanguage` | `en` | Idioma com opções por tarefa |
+| `enableResearchInGenerateContent` | `false` | Acrescentar pesquisa à geração por títulos |
+| `enableLocalKnowledgeRetrieval` | `false` | Ativar pesquisa local delimitada |
+| `enableLocalKnowledgeForResearchSummarize` | `false` | Usar contexto local nesta tarefa |
 
-| Parâmetro | Padrão | Efeito |
-|---------|---------|--------|
-| `tavilyApiKey` | `''` | Chave Tavily API. Quando vazia, DuckDuckGo é usado exclusivamente. |
-| `researchProvider` / `researchModel` | DeepSeek | LLM por tarefa para resumir resultados de busca |
-| `maxResearchContentTokens` | `4000` | Orçamento de tokens para o conteúdo enviado ao LLM. O excesso é truncado. |
-| `researchAppendToNote` | `true` | Anexar resumo à nota original. Se for falso, cria um arquivo separado. |
-| `researchLanguage` | `'en'` | Idioma de saída para a pesquisa resumida |
+### Contexto e modelo
 
-### Recomendação de modelo por tarefa
-
-A pesquisa se beneficia de um modelo que lida com conteúdo multilíngue e gera textos bem estruturados. Veja alguns exemplos:
-
-- **DeepSeek** -- padrão, acessível e de boa qualidade
-- **GPT-4o** -- resumos de maior qualidade, porém mais caro
-- **Gemini Flash** -- rápido e barato, adequado para consultas simples
+Os limites usam estimativas, não tokenização exata do fornecedor. Truncar pode omitir provas. Focar a pergunta e ajustar modelo e saída. O índice local é lexical, sem embeddings nem recuperação completa garantida.
 
 ## Exemplo
 
-Você está lendo um artigo sobre *mecanismos de atenção do transformer* e encontra um termo desconhecido: *relative positional encoding*. Em vez de deixar Obsidian:
+Criar nota `Codificação posicional relativa`, pesquisar e comparar com artigos originais ou documentação oficial. Guardar pergunta, URLs reais e correções para tornar a conclusão verificável. Um exemplo do guia não é resultado executado no cofre.
 
-1. Destaque **"relative positional encoding"**
-2. Clique com o botão direito --> **"Notemd: Pesquisar e resumir"**
-3. Notemd busca na internet, resume os principais resultados e acrescenta:
+## Cancelamento e privacidade
 
-```markdown
-## Research
+Anexos concluídos ficam; pedidos em curso podem terminar. O motor recebe a consulta, sites recebem pedidos e o LLM recebe contexto, incluindo excertos locais ativos. Rever diagnósticos antes de partilhar.
 
-### Relative Positional Encoding
+## Conselhos
 
-Relative positional encoding is a method used in transformer models
-where positional information is expressed as relative distances between
-tokens rather than absolute positions. Introduced by Shaw et al. (2018),
-it improves generalization to unseen sequence lengths compared to
-absolute encodings (Vaswani et al., 2017).
-
-Sources:
-- [Shaw et al., Self-Attention with Relative Position Representations (2018)](https://arxiv.org/abs/1803.02155)
-- [Transformer Positional Encoding Overview](https://example.com/transformer-pos-enc)
-```
-
-O resumo agora faz parte do seu repositório, podendo ser pesquisado, vinculado e acessado offline.
-
-## Dicas
-
-- **Defina uma chave Tavily para obter melhores resultados** -- mesmo a versão gratuita oferece maior relevância do que o DuckDuckGo bruto.
-- **Use um modelo de resumo eficaz** -- modelos baratos podem simplificar demais conteúdo técnico detalhado.
-- **Realize pesquisas em lote** após uma leitura inicial para preencher lacunas em várias anotações ao mesmo tempo.
-- **Revise os resumos adicionados** -- LLMs podem gerar informações falsas sobre as fontes. Verifique as afirmações principais.
-
----
+- Separar fonte Web, nota local e inferência do modelo.
+- Verificar citações, datas e afirmações importantes no original.
+- Diagnosticar pesquisa e LLM separadamente com pergunta pequena.
+- Rever resumos existentes antes de repetir anexos.
 
 ## Próximos passos
 
-- [Notas de Conceito](./concept-notes) -- Extraia e armazene termos importantes dos resultados da pesquisa
-- [Links da Wiki](./wiki-links) -- Vincule conceitos derivados da pesquisa em todo o seu repositório
-- [Tradução](./translation) -- Traduza resumos de pesquisa para outro idioma
-- [LLM Fornecedores](/docs/providers/overview) -- Configurar o modelo usado para resumo
+- [Configuração](../getting-started/configuration).
+- [Prompts](../advanced/custom-prompts).
+- [Problemas](../advanced/troubleshooting).

@@ -1,10 +1,10 @@
 {
   "version.label": {
-    "message": "Selanjutnya",
-    "description": "The label for version current"
+    "message": "Dokumentasi saat ini",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Pelajari lebih lanjut",
+    "message": "Mulai",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
@@ -16,7 +16,7 @@
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Advanced",
+    "message": "Lanjutan",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

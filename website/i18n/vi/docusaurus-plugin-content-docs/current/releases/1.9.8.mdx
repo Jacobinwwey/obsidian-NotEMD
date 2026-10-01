@@ -1,0 +1,77 @@
+---
+id: 1.9.8
+title: Nâng cấp Notemd 1.9.8
+description: >-
+  Hiểu thay đổi về độ tin cậy, xuất gốc và tài liệu từ 1.9.7, rồi nâng cấp có
+  kiểm tra.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Nâng cấp Notemd 1.9.8
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Nâng cấp Notemd 1.9.8
+
+<TLDR>1.9.8 tập trung vào hủy tác vụ, quyền sở hữu đầu ra, truy xuất nhất quán khi xử lý hàng loạt, xuất chính xác và tài liệu đúng. Kiểm tra GitHub Release công khai và tải tệp chạy cùng bản phát hành. Số nhà cung cấp và sơ đồ là khả năng đã có, không phải mục mới của phiên bản này.</TLDR>
+
+## Thay đổi từ 1.9.7
+
+| Phạm vi | Tác động |
+| ------ | ------------- |
+| Hủy | Trạng thái hủy chung đến lịch chạy, giao vận và thử lại; phản hồi muộn không tiếp tục đường ghi được bảo vệ |
+| Lưu sản phẩm | Theo dõi sở hữu khi lưu/khôi phục chồng lấn, gồm nguồn cùng tên và tệp đi kèm chung |
+| Truy xuất cục bộ | Sinh theo tiêu đề dùng một ảnh chụp truy xuất nhất quán; có phép đo bộ nhớ giữ lại và corpus cố định |
+| Đầu ra gốc | Sửa có mục tiêu đường kẻ dưới ô PowerPoint gộp và dây/nhãn CircuitikZ |
+| Xác minh | CI Linux/Windows, lint từng chẩn đoán, kiểm thử tiến trình và bằng chứng ứng dụng đích |
+| Tài liệu | Mặc định đúng, đường riêng cho người mới/người dùng/nhà phát triển/Agent, bản dịch viết trực tiếp và phát hành có kiểm tra |
+
+Tìm lịch sử giữ các phím gõ liên tiếp và vị trí con trỏ khi làm mới bất đồng bộ. Ngăn lịch sử giữ Tab bên trong, đặt focus an toàn khi tải và xử lý Escape mà không đóng bản xem trước cha. Thử lại và phản hồi lỗi thời có kiểm thử trình duyệt.
+
+Nghiên cứu và dịch kiểm tra lại hủy sau lần đọc cuối hoặc chuẩn bị thư mục, trước khi thêm/tạo/ghi đè. Lần ghi Vault đã chấp nhận vẫn được tính hoàn thành.
+
+36 hồ sơ và 33 mục sơ đồ thực thi đã có trong 1.9.7. Ghi chú phát hành tách thay đổi lúc chạy, tài liệu và merge để không đếm hai lần.
+
+Nếu tác vụ khác tạo thư mục đích trong lúc đang chờ tạo, dịch tái dùng thư mục đó mà không nhận sở hữu lần tạo. Nếu đích là tệp xung đột hoặc thư mục vẫn thiếu, giữ hành vi báo lỗi và quay về thư mục nguồn.
+
+## Nâng cấp có kiểm soát
+
+1. Dừng tác vụ Notemd và sao lưu kho/cài đặt.
+2. Cập nhật qua Community plugins hoặc tải `main.js`, `manifest.json`, `styles.css` từ cùng [Release 1.9.8 công khai](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+3. Khi cài tay, chỉ thay tệp chạy; giữ cài đặt và kết quả.
+4. Tải lại Obsidian và kiểm tra phiên bản.
+5. Thử ghi chú, xem đích rồi thử thư mục nhỏ trước khi chạy lớn.
+
+ID lệnh và cài đặt hiện có được giữ. One-Click Extract vẫn là thêm liên kết, sinh theo tiêu đề hàng loạt và sửa Mermaid. Sửa tài liệu không thêm nghiên cứu vào chuỗi mặc định.
+
+## Hủy và khôi phục
+
+Hủy không phải giao dịch hoàn tác. Tệp hoàn thành còn nguyên; yêu cầu hoặc ghi bên ngoài đã nhận có thể xong. Sinh từ xa và phí do nhà cung cấp kiểm soát. Chờ tác vụ ổn định, xem kết quả rồi mới thử lại.
+
+Xung đột khôi phục được hiển thị thay vì coi thay thế là thành công. So ghi chú hiện tại với tệp khôi phục trước khi xóa. Giữ thư mục đi kèm còn phục vụ sản phẩm cũ dù bản xuất mới có thể nhúng hình.
+
+## Giới hạn xuất và tương thích
+
+- Bảng PowerPoint có kiểm tra gốc có mục tiêu; điểm ảnh toàn slide từng bỏ sót lỗi đường kẻ ô gộp.
+- Mermaid/SVG trong PPTX có thể là ảnh, không phải mọi hình đều thành đối tượng PowerPoint sửa được.
+- Quan hệ tĩnh Drawnix giữa nhánh không chứng minh mũi tên gắn sau sắp xếp lại.
+- Xem trước CircuitikZ và biên dịch TeX gốc có phép thử/phụ thuộc riêng.
+- Di động thực và Obsidian 0.15.0 chưa xác minh; manifest không phải phép thử mới.
+- Bằng chứng truy xuất từ vựng trên corpus cố định không chứng minh tìm ngữ nghĩa hoặc hiệu năng mọi kho.
+
+## Tính toàn vẹn phát hành
+
+Quy trình xác minh phiên bản và định danh tag cục bộ/từ xa, dựng bundle từ nguồn tag sạch, tải draft rồi kiểm tra hash tải về trước khi công khai. Bốn tài sản là `main.js`, `manifest.json`, `styles.css`, `README.md`. Thử lại không được âm thầm thay tài sản công khai bằng byte khác nguồn gốc.
+
+Triển khai website sau khi xác minh Release khả dụng. Codex trực tiếp viết và kiểm tra bản dịch, không gọi LM Studio hay máy dịch. Tác giả AI không phải tuyên bố đã có người bản ngữ độc lập duyệt.
+
+## Tiếp theo
+
+- [Release và ghi chú Anh/Trung](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Bắt đầu nhanh](../getting-started/quick-start): thử sau nâng cấp.
+- [Xử lý hàng loạt](../advanced/batch-processing): phạm vi và kết quả một phần.
+- [Nhà phát triển](../developers/overview) và [Agent](../agents/overview): giới hạn triển khai/tích hợp.
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): báo hồi quy với phiên bản và bằng chứng đã lọc.

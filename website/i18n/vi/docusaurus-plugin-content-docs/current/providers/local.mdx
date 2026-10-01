@@ -1,63 +1,59 @@
 ---
 id: local
-title: "Mô hình địa phương"
-description: "Cấu hình Ollama và các LLM địa phương"
+title: Mô hình cục bộ
+description: >-
+  Cấu hình Ollama, LM Studio hoặc OVMS với máy chủ đang chạy và giới hạn mạng rõ
+  ràng.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [local, ollama, lmstudio, provider, configuration, offline]
-concepts: [Local Models, Ollama, LMStudio, Offline]
-citations:
-  - title: Ollama
-    url: https://ollama.com
-  - title: LM Studio
-    url: https://lmstudio.ai
+keywords:
+  - Mô hình cục bộ
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Mô hình địa phương
+# Mô hình cục bộ
 
-<TLDR>
-**Các nhà cung cấp địa phương giữ nội dung ghi chú khỏi các API được lưu trữ trên mạng.** Đường dẫn địa phương hiện tại bao phủ Ollama bằng giao thức vận chuyển `ollama` gốc và LMStudio thông qua giao thức tương thích OpenAI. Không cần khóa API cho bất kỳ đường dẫn nào, nhưng máy chủ và mô hình địa phương phải đã đang chạy.
+<TLDR>Nhà cung cấp cục bộ cho máy chủ mô hình trên thiết bị xử lý nội dung. Cài hoặc nạp mô hình trước rồi chọn giao thức phù hợp. Lựa chọn này không biến tìm kiếm web, điểm cuối từ xa, cài phụ thuộc hoặc tác vụ định tuyến đám mây thành ngoại tuyến.</TLDR>
 
-Đây là một phần của [Obsidian Hướng dẫn Quản lý Kiến thức AI](/docs/pillar-ai-knowledge).
-</TLDR>
+## Thiết lập
 
-## Cài đặt
+Với [Ollama](https://ollama.com/), cài máy chủ và tải mô hình. Với [LM Studio](https://lmstudio.ai/), nạp mô hình và khởi động máy chủ API cục bộ. Với OVMS, chuẩn bị triển khai máy chủ trước khi thêm hồ sơ Notemd.
 
-Đối với Ollama, hãy cài đặt Ollama, tải xuống mô hình bạn muốn, khởi động máy chủ, và thêm hồ sơ nhà cung cấp `Ollama` vào Notemd. Đối với LMStudio, tải mô hình vào máy chủ địa phương của LM Studio và thêm hồ sơ nhà cung cấp `LMStudio`.
+Chọn hồ sơ, nhập đúng tên mà máy chủ cung cấp, chạy **Kiểm tra kết nối** rồi xử lý ghi chú thử. Notemd không cài mô hình hoặc khởi động các máy chủ thay bạn.
 
-Các mô hình địa phương là các yếu tố phụ thuộc vận hành, không chỉ là thiết lập. Notemd chỉ có thể gọi những gì quy trình địa phương cung cấp, vì vậy hãy kiểm tra mô hình địa phương bên ngoài Obsidian trước khi gỡ lỗi plugin.
+## Điểm cuối và xác thực
 
-## Endpoint Và Xác thực
+| Hồ sơ | URL cơ sở mặc định | Tên mô hình mẫu | Giao thức / xác thực |
+| -------- | ------------------ | ------------------- | --------------------------- |
+| Ollama | `http://localhost:11434/api` | `llama3` | Ollama gốc; không bắt buộc khóa API |
+| LMStudio | `http://localhost:1234/v1` | `local-model` | Tương thích OpenAI; khóa tùy chọn, đặt sẵn `EMPTY` |
+| OVMS | `http://localhost:8000/v3` | `openvino-model` | Tương thích OpenAI; cấu hình mô hình và quyền của triển khai |
 
-| Nhà cung cấp | Base URL | Mô hình mặc định | Khóa API | Ghi chú |
-|----------|----------|---------------|---------|-------|
-| Ollama | `localhost:11434/api` | `llama3` | Không cần thiết | Phát trực tiếp NDJSON; khám phá mô hình thông qua `/api/tags` |
-| LMStudio | `localhost:1234/v1` | `local-model` | Không cần thiết | Gửi `"EMPTY"` dưới dạng token xác thực; tương thích OpenAI |
+`localhost` là máy đang chạy Obsidian. Điện thoại không truy cập được mô hình trên máy tính qua địa chỉ loopback của điện thoại. Điểm cuối LAN là dịch vụ mạng: dùng địa chỉ và xác thực phù hợp, không mở máy chủ không xác thực ra mạng không đáng tin.
 
-Ollama sử dụng đường dẫn `/chat` gốc dưới Base URL của nó. LMStudio tuân theo đường dẫn `chat/completions` tương thích OpenAI và yêu cầu một mô hình đã được tải vào máy chủ địa phương.
+## Tìm mô hình
 
-## Khám phá mô hình
-
-Ollama sử dụng chế độ khám phá `ollama-tags` và liệt kê các thẻ được tải xuống địa phương. LMStudio sử dụng cơ chế khám phá mô hình tương thích OpenAI khi máy chủ của nó cung cấp `/v1/models`.
-
-Nếu việc khám phá không trả về kết quả gì, đó thường là vấn đề về trạng thái máy chủ địa phương: mô hình chưa được tải xuống, chưa được tải, hoặc máy chủ đang được kết nối đến host/port khác so với hồ sơ đã cấu hình.
+Ollama liệt kê tag đã tải qua `/api/tags`; LM Studio có thể cung cấp `/v1/models`. OVMS có quy tắc theo triển khai. Danh sách không bảo đảm mô hình vừa bộ nhớ hoặc đáp ứng tác vụ có cấu trúc; hãy gửi yêu cầu thực tế.
 
 ## Khắc phục sự cố
 
-- Từ chối kết nối: hãy khởi động Ollama hoặc LM Studio và kiểm tra lại cổng đã cấu hình.
-- Không tìm thấy mô hình: hãy tải xuống thẻ Ollama hoặc tải mô hình của LM Studio trước khi thử nghiệm.
-- Kết quả xuất ra chậm: hãy giảm kích thước bối cảnh, sử dụng mô hình địa phương nhỏ hơn, hoặc chuyển các tác vụ nặng sang nhà cung cấp được lưu trữ trên mạng.
-- Phản hồi trống hoặc bị lỗi: hãy kiểm tra xem hồ sơ nhà cung cấp đã chọn có tương thích với giao thức máy chủ địa phương hay không; Ollama và LMStudio không thể thay thế cho nhau.
+- Từ chối kết nối: kiểm tra máy chủ, địa chỉ lắng nghe và cổng.
+- Thiếu mô hình: tải/nạp và dùng đúng tên hoặc bí danh điểm cuối cung cấp.
+- Từ chối xác thực: dùng token máy chủ yêu cầu, không giả định `EMPTY` được nhận.
+- Chậm hoặc thiếu đầu ra: xem bộ nhớ, ngữ cảnh và giới hạn; bắt đầu từng yêu cầu một.
+- Sai định dạng: xác nhận giao thức, lời nhắc và khả năng mô hình trước khi đổi cài đặt hàng loạt.
 
-## Khi nào nên sử dụng
+## Khi nên dùng
 
-Sử dụng các nhà cung cấp địa phương cho các kho lưu trữ riêng tư, công việc ngoại tuyến, hoặc các nhiệm vụ lặp đi lặp lại có chi phí thấp. Đừng cho rằng việc sử dụng phiên bản địa phương luôn tốt hơn cho việc tổng hợp nghiên cứu hoặc suy luận dài hạn; chất lượng mô hình và giới hạn phần cứng chính là những yếu tố cần cân nhắc.
+Dùng suy luận cục bộ khi ranh giới riêng tư, khả dụng và kết quả đáp ứng nhu cầu. Chuẩn bị mô hình và phụ thuộc xuất trước khi ngắt mạng. Kiểm tra từng nhà cung cấp theo tác vụ và truy xuất cục bộ: trích đoạn vẫn gửi đến mô hình được chọn, có thể ở đám mây.
 
----
+Tavily/DuckDuckGo vẫn dùng mạng. Công cụ xuất gốc có thể cần cài riêng. Mô hình cục bộ chỉ là một phần của quy trình ngoại tuyến, không bảo đảm cho mọi tính năng.
 
-## Các bước tiếp theo
+## Tiếp theo
 
-- [LLM Các nhà cung cấp](/docs/providers/overview) -- Cấu hình đầy đủ và thiết lập mô hình cho từng nhiệm vụ
-- [Giải quyết sự cố](/docs/advanced/troubleshooting) -- Khắc phục lỗi connection-refused khi máy chủ địa phương không đang chạy
+- [Tổng quan](./overview): định tuyến và toàn bộ hồ sơ.
+- [Cấu hình](../getting-started/configuration): mô hình tác vụ và ngôn ngữ.
+- [Khắc phục sự cố](../advanced/troubleshooting): tách lỗi máy chủ và tác vụ.

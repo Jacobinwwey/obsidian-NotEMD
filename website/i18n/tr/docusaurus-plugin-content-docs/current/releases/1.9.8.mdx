@@ -1,0 +1,73 @@
+---
+id: 1.9.8
+title: Notemd 1.9.8’e yükseltme
+description: >-
+  1.9.7 sonrası güvenilirlik, hedef uygulama çıktıları ve belge değişikliklerini
+  inceleyerek yükseltin.
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - Notemd 1.9.8’e yükseltme
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.8’e yükseltme
+
+<TLDR>1.9.8 iptal, çıktı sahipliği, tutarlı toplu getirme, hedef uygulama çıktıları ve doğru belgelere odaklanır. Açık GitHub sürümünde erişimi kontrol edip aynı sürümün dosyalarını alın. Sağlayıcı/diyagram sayıları önceden var olan kapasitedir.</TLDR>
+
+## 1.9.7 sonrası
+
+| Alan | Etkisi |
+| ------ | ------------- |
+| İptal | Planlama, aktarım ve tekrarlarda ortak durum; geç yanıt korunan yazmayı başlatmaz |
+| Dosya kalıcılığı | Çakışan kaydetme/kurtarmada aynı adlı kaynakların ve paylaşılan eklerin sahipliği |
+| Yerel getirme | Toplu başlıklarda tek anlık görüntü; sabit veri kümesi ve bellek ölçümü |
+| Hedef uygulama çıktısı | Birleşik hücre altındaki PowerPoint ayraçları ile CircuitikZ kablo/etiket düzeltmeleri |
+| Doğrulama | Linux/Windows CI, tekil lint tanıları, süreç testleri ve gerçek uygulama kanıtı |
+| Belgeler | Gerçek varsayılanlar, dört okur girişi, doğrudan çeviriler ve kontrollü yayım |
+
+Geçmiş araması asenkron yenilemede kesintisiz yazmayı ve imleci korur. Çekmece Tab’ı içeride tutar, yüklemede odak alır ve Escape üst önizlemeyi kapatmadan çekmeceyi kapatır. Tekrar ve eski yanıtlar tarayıcı regresyonlarında kapsanır.
+
+Araştırma/çeviri, son okuma veya klasör hazırlığından sonra ekleme/oluşturma/üzerine yazma öncesi iptali kontrol eder. Kasanın kabul ettiği yazmalar tamamlanmış sayılır. Beklerken başka görev çeviri klasörünü oluşturduysa, kendi oluşturması gibi saymadan kullanır. Çakışan dosya veya hâlâ eksik klasör, bildirilen hata ve kaynak klasörüne dönüş davranışını korur.
+
+36 profil ve 33 çalıştırılabilir diyagram öğesi 1.9.7’de vardı. Çalışma kodu, belgeler ve birleştirme commit’leri ayrı sayılır.
+
+## Kontrollü yükseltme
+
+1. Görevleri durdurun, kasa/ayarları yedekleyin.
+2. Community plugins üzerinden güncelleyin veya aynı [açık 1.9.8](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8) sürümünden `main.js`, `manifest.json`, `styles.css` alın.
+3. Elle yalnız çalışma dosyalarını değiştirin, ayar/sonuçları koruyun.
+4. Yeniden yükleyip sürümü kontrol edin.
+5. Büyük partiden önce deneme notu ve küçük klasör çalıştırın.
+
+Komut kimlikleri ve ayarlar korunur. One-Click Extract hâlâ bağlantı, toplu başlık üretimi ve Mermaid onarımıdır. Belge düzeltmesi varsayılan zincire araştırma eklemez.
+
+## İptal ve kurtarma
+
+İptal tersine çevrilen transaksiyon değildir. Tamamlanan dosyalar kalır, kabul edilen istek/yazmalar bitebilir, uzak ücretlendirmeyi sağlayıcı kontrol eder. Bekleyip çıktıyı inceleyin. Temizlikten önce görünen çakışmaları ve kurtarma dosyalarını karşılaştırın. Eski çıktılar tarafından kullanılan eşlikçi klasörleri koruyun.
+
+## Dışa aktarma ve uyumluluk sınırları
+
+- PowerPoint için hedefli uygulama kontrolleri vardır; önceki tam slayt puanı kusuru kaçırmıştı.
+- PPTX içinde Mermaid/SVG görüntüye dönüşebilir.
+- Drawnix dallar arası statik oklarının yeniden düzenleme sonrası bağlı kaldığı kanıtlanmadı.
+- CircuitikZ önizlemesi ve TeX derlemesi ayrı testlerdir.
+- Fiziksel mobil cihazlar ve Obsidian 0.15.0 hâlâ doğrulanmamıştır.
+- Sabit sözcüksel ölçüm anlamsal aramayı veya her kasadaki performansı kanıtlamaz.
+
+## Sürüm bütünlüğü
+
+Yayınlayıcı sürüm ile yerel/uzak etiket kimliğini kontrol eder, temiz etiketli kaynağı yeniden derler, taslak dosyaları yükler ve yayımlamadan indirilen hash’leri karşılaştırır. `main.js`, `manifest.json`, `styles.css`, `README.md` zorunludur. Tekrar denemek açık dosya baytlarını ilgisiz çıktıyla değiştiremez.
+
+Pages açık sürüm doğrulandıktan sonra dağıtılır. Codex, LM Studio veya çeviri motoru olmadan doğrudan yazar ve inceler. Bu, bağımsız ana dil editörü incelemesi iddiası değildir.
+
+## Sonraki adımlar
+
+- [Sürüm ve İngilizce/Çince notlar](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+- [Hızlı başlangıç](../getting-started/quick-start).
+- [Toplu işleme](../advanced/batch-processing).
+- [Geliştiriciler](../developers/overview), [Agent](../agents/overview).
+- [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues): sürümler ve temizlenmiş kanıt.

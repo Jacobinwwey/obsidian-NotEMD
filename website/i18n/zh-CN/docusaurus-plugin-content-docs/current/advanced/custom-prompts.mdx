@@ -1,16 +1,13 @@
 ---
 id: custom-prompts
 title: 自定义提示词
-description: 根据您的需求自定义 LLM 提示词
+description: 覆盖受支持的任务提示词，同时保留解析器要求的输出格式。
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [custom prompts, prompts, focused learning, domain]
-concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: LLM Prompt Engineering
-    url: https://platform.openai.com/docs/guides/prompt-engineering
+keywords:
+  - 自定义提示词
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,117 +15,76 @@ import TLDR from '@site/src/components/TLDR';
 # 自定义提示词
 
 <TLDR>
-**Notemd 允许你为每种任务类型覆盖默认的 LLM 提示语。** 自定义提示语让你能够控制模型的优先级：你可以将概念提取限制在特定领域，更改链接风格，或调整翻译的语气。像 `{{content}}` 和 `{{concept}}` 这样的提示变量会在运行时被替换。专注学习领域功能会自动在提取结果前加上你的研究领域名称，从而限定结果范围。
-
-这是[Obsidian AI知识管理指南](/docs/pillar-ai-knowledge)的一部分。
+全局开关和任务开关均开启、且自定义文本非空时，自定义提示词替换任务内置提示词。你需要保留输出契约；没有自动模板系统会补回所有遗漏的格式要求。
 </TLDR>
 
 ## 概览
 
-Notemd内置的提示词是为通用知识处理任务设计的。它们在多个领域都能良好运行，但仍有空间进行领域特定的优化。自定义提示词可以让您明确告知LLM针对您的具体需求应如何运作——无论是仅提取医学术语、仅关联命名实体，还是以正式语体进行翻译。
+先在代表性笔记上测试默认提示词。若聚焦学习或同义词抑制已能解决问题，优先使用现有设置；需要特定提取策略、结构或翻译风格时再自定义，批量使用前比较输出。
 
-自定义提示词不会取代整个系统提示词。它们会覆盖或补充**特定任务的操作指令部分**，同时保留 Notemd 用于解析的结构化输出格式（如 `CONCEPT:` 行、维基链接语法）。
+## 工作原理
 
-## 它是如何工作的？
+### 提示词结构
 
-### 提示词架构
+Notemd 选择内置或已启用的自定义任务提示词，添加适用的聚焦学习与语言指令，再替换该任务提供的占位符。笔记内容也可能作为独立消息发送。各任务输入不同，研究可用的变量不代表所有任务都可用。
 
-每个 Notemd 任务都遵循相同的提示结构：
-
-```
-[System role: You are a helpful assistant...]
-[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
-[Custom task prompt]                                <-- your override (optional)
-[Output format instructions]                        <-- always preserved
-[Content: {{content}}]                              <-- runtime substitution
-```
-
-1. **基础系统提示** -- 设定助手的角色。不可被覆盖。
-2. **专注学习领域** -- 通过添加 `Relevant Fields: [medicine / law / computer science / ...]` 来限定范围。这是一个设置开关，而非原始提示语。
-3. **自定义任务提示** -- 用于替换默认的任务说明（例如需要提取哪些类型的概念、链接的强度如何控制）。
-4. **输出格式** -- 结构规则（`CONCEPT:` 行，wiki 链接格式）。始终以 Notemd 结尾以确保可解析性。
-5. **内容** -- 实际的笔记文本，运行时通过 `{{content}}` 进行替换。
+替换提取提示词可能删掉 `CONCEPT:` 契约，替换研究提示词可能遗漏检索上下文。请求格式正确并不能证明输出可解析或有来源支撑。
 
 ### 提示词变量
 
-变量会在执行时被替换。可用变量因任务而异：
+必须使用下列大写名称和单层花括号：
 
-| 变量 | 任务 | 已替换为 |
-|----------|-------|---------------|
-| `{{content}}` | 全部 | 备注或选中文本 |
-| `{{concept}}` | 概念说明模板 | 提取出的概念名称 |
-| `{{description}}` | 概念说明模板 | 由LLM生成的概念描述 |
-| `{{backlinks}}` | 概念说明模板 | 包含链接的源代码注释列表 |
-| `{{date}}` | 概念说明模板 | 当前日期（YYYY-MM-DD） |
-| `{{language}}` | 翻译 | 目标输出语言 |
-| `{{source}}` | 概念说明模板 | 源文件备注文件名 |
+| 任务 | 提供的占位符 |
+| ------ | ----------------------- |
+| 标题生成 | `{TITLE}`, `{RESEARCH_CONTEXT_SECTION}` |
+| 研究摘要 | `{TOPIC}`, `{LANGUAGE}`, `{SEARCH_RESULTS_CONTEXT}` |
+| 翻译 | `{LANGUAGE}`, `{TEXT}` |
+| 原文提取 | `{REFERENCE_CONTENT}`, `{USER_INPUT}` |
 
-### 专注学习领域
+`{LANGUAGE}` 按任务语言策略解析。添加链接和独立概念提取将源文作为任务内容发送，不要虚构内容占位符。未知变量不会自动填充；这些是任务提示词替换，不是概念笔记文件模板。
 
-聚焦学习功能是领域范围设定的快捷方式。无需编写提及您所在领域的自定义提示语，只需在设置中输入 `focusedLearningDomain` 即可：
+### 聚焦学习领域
 
-```
-Settings → Advanced → Focused Learning Domain
-Example: "medicine" or "computer science" or "Chinese philosophy"
-```
-
-这会在提取提示的前面加上 `Relevant Fields: [medicine]`，从而使 LLM 优先考虑与领域相关的概念，同时忽略通用概念。它的体积比完整的自定义提示更小，且适用于所有的提取任务。
+启用聚焦学习并填写领域，例如 `electrical engineering`，提示词会收到 `Relevant Fields` 指令。它引导注意力，不是硬过滤器，也不能证明无关概念已排除。
 
 ## 配置
 
-| 设置 | 默认值 | 效果 |
-|---------|---------|--------|
-| `customAddLinksPrompt` | `''` | 覆盖默认的添加链接任务提示 |
-| `customExtractConceptsPrompt` | `''` | 覆盖默认的概念提取提示词 |
-| `customResearchPrompt` | `''` | 覆盖默认的调研+总结提示词 |
-| `customTranslatePrompt` | `''` | 覆盖默认的翻译提示语 |
-| `customDiagramPrompt` | `''` | 覆盖默认的图表生成提示语 |
-| `focusedLearningDomain` | `''` | 在提取和链接提示语的前面加上领域背景信息 |
-| `extractConceptsMinimalTemplate` | `true` | 使用仅标题的概念说明模板（会影响 `{{concept}}` 模板的适用范围） |
-| `customConceptNoteTemplate` | `''` | 用完整的变量支持覆盖概念说明文件模板 |
+| 任务 | 启用开关 | 提示词字段 |
+| ------ | --------------- | -------------- |
+| 添加链接 | `useCustomPromptForAddLinks` | `customPromptAddLinks` |
+| 标题生成 | `useCustomPromptForGenerateTitle` | `customPromptGenerateTitle` |
+| 研究摘要 | `useCustomPromptForResearchSummarize` | `customPromptResearchSummarize` |
+| Mermaid 摘要 | `useCustomPromptForSummarizeToMermaid` | `customPromptSummarizeToMermaid` |
+| 概念提取 | `useCustomPromptForExtractConcepts` | `customPromptExtractConcepts` |
+| 翻译 | `useCustomPromptForTranslate` | `translatePrompt` |
+| 原文提取 | `useCustomPromptForExtractOriginalText` | `customPromptExtractOriginalText` |
 
-**当自定义提示字段为空时，将使用内置的默认提示。**
+这些开关都要求 `enableGlobalCustomPrompts`。自定义文本为空时回退内置提示词。合并原文提取有独立内置格式，不共享普通提取覆盖。图表能力生成也有自己的类型化输出要求；Mermaid 摘要提示词不是通用图表提示词。
 
 ## 示例
 
-你是一名医学研究员，负责从临床试验记录中提取概念。默认的提示词会同时提取普通名词和医学术语，这会让你的概念文件夹变得杂乱无章。
+电路笔记的概念提取可开启全局和提取开关，使用保留解析标记的聚焦指令：
 
-**解决方案：** 设定专注的学习领域以及自定义的提取提示。
-
-1. 将 `focusedLearningDomain` 设置为 `medicine`
-2. 将 `customExtractConceptsPrompt` 设置为：
-
-```
-Extract only clinically relevant concepts: diseases, drug names,
-anatomical terms, measurement endpoints, and statistical methods.
-Ignore generic English nouns, brand names, and institutional names.
-Prioritize MeSH terminology where applicable.
+```text
+从给定笔记中提取核心电气工程概念。
+优先选择具体元件名称和物理机制，避免泛化名词。
+每行只返回一个概念，严格使用以下格式：
+CONCEPT: 术语名称
+不要添加解释，也不要用代码块包裹结果。
 ```
 
-现在，当你在临床笔记上运行“提取概念”功能时，LLM 会生成：
+用笔记副本测试，检查返回条目、文件名和遗漏概念，并与默认提示词比较。修改前保存原提示词以便恢复。
 
-```
-CONCEPT: Randomized Controlled Trial
-CONCEPT: Double-Blind Method
-CONCEPT: Myocardial Infarction
-CONCEPT: Creatine Kinase-MB
-CONCEPT: Kaplan-Meier Estimate
-```
+## 建议
 
-而不是那种可能会提取出“医院”或“月份”之类不需要的通用术语的默认行为。
+- 一次测试一个任务，先控制范围再扩大批量。
+- 研究提示词保留来源证据，提取提示词保留准确原文。
+- 本地化说明时保留可执行标识符和输出标记。
+- 更换模型或 provider 后重新验证；提示词不是校验保证。
 
-## 技巧
+## 后续阅读
 
-- 在编写完整的自定义提示语之前，**先从专注的学习领域开始**。通过一个设置即可覆盖80%的使用场景。
-- **保留输出格式** -- 永远不要从自定义提示中删除诸如“每行一个”或“CONCEPT: 前缀”之类的格式说明。Notemd的解析器依赖于这些说明。
-- **先使用单条笔记进行测试**——自定义提示词可能会对提取的覆盖范围产生意外影响。在批量处理之前，请先在一条笔记上验证。
-- **保持提示语简洁**——过长的自定义提示语会消耗令牌，进而削弱模型的专注度。
-
----
-
-## 后续步骤
-
-- [Wiki-Links](/docs/features/wiki-links) -- 当你自定义添加链接提示时，会链接到什么内容
-- [概念说明](/docs/features/concept-notes) -- 概念说明模板与 `{{concept}}` 变量
-- [批量处理](/docs/advanced/batch-processing) -- 对整个文件夹应用自定义提示词
-- [故障排除](/docs/advanced/troubleshooting) -- 解决自定义提示词产生意外输出的问题
+- [概念笔记](../features/concept-notes)：受支持模板。
+- [研究](../features/research)：上下文与来源。
+- [翻译](../features/translation)：语言与输出。
+- [故障排查](./troubleshooting)：格式错误或空响应。

@@ -1,10 +1,10 @@
 {
   "version.label": {
-    "message": "下一頁",
-    "description": "The label for version current"
+    "message": "目前文件",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "快速入門",
+    "message": "入門",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
@@ -12,11 +12,11 @@
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
-    "message": "LLM供應商",
+    "message": "LLM 供應商",
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "進階功能",
+    "message": "進階",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

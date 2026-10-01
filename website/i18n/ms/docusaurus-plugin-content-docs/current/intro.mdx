@@ -1,189 +1,104 @@
 ---
 id: intro
-title: "Pengenalan kepada Notemd"
-description: "Pembina pangkalan pengetahuan berasaskan AI untuk Obsidian dengan transformasi nota yang kekal, aliran kerja, dan diagram berdasarkan spesifikasi"
-keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links, Copilot alternative, Smart Connections alternative, obsidian AI plugin, auto wiki-link, concept notes]
+title: Pengenalan Notemd
+description: >-
+  Ubah nota Obsidian menjadi Markdown berpaut, nota konsep, ringkasan
+  penyelidikan, terjemahan dan artifak rajah dengan penyedia serta hasil
+  pilihan.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-concepts: [Notemd, Obsidian, LLM, Knowledge Management, Wiki-Links, Copilot Alternative, Smart Connections Alternative, AI Plugin]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
+keywords:
+  - Pengenalan Notemd
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Pengenalan kepada Notemd
+# Pengenalan Notemd
 
-<TLDR>
-**Notemd** (Nota + EMD — Dokumen Markdown Diperbaiki) ialah plugin sumber terbuka untuk Obsidian yang menukar bacaan yang dikuasakan oleh LLM menjadi pengetahuan yang kekal. Berbeza dengan AI berasaskan sembang di mana pandangan hilang selepas sesi, Notemd menulis hasil **terus ke dalam vault anda** sebagai pautan wiki, nota konsep, ringkasan penyelidikan, terjemahan, aliran kerja, dan diagram. Ia dibina untuk penyelidik, pelajar, dan pekerja pengetahuan yang ingin bacaan, penyelidikan, dan penjelasan visual dikumpulkan menjadi graf pengetahuan yang terstruktur dan berkembang.
-</TLDR>
+<TLDR>Notemd ialah pemalam Obsidian berlesen MIT yang mengubah nota menjadi fail boleh diperiksa dan disimpan: Markdown berpaut wiki, nota konsep, ringkasan penyelidikan, terjemahan dan rajah. Anda memilih penyedia, tugas serta skop hasil. Semak hasil model sebelum memasukkannya dalam pangkalan pengetahuan.</TLDR>
 
-## Apa itu Notemd?
+## Apakah Notemd?
 
-Notemd menggabungkan **lebih daripada 30 Model Bahasa Besar** (OpenAI, Anthropic, Google, DeepSeek, Qwen, Ollama, dan lain-lain) ke dalam aliran kerja Obsidian anda untuk mengautomasikan pengeluaran pengetahuan, pengorganisasian, terjemahan, penyelidikan, dan pembuatan diagram.
+Notemd menghubungkan aliran Vault dengan 36 pratetap penyedia, termasuk API dihoskan, gerbang dan pelayan setempat. Tugas menulis fail atau mengemas kini nota mengikut kontrak hasil masing-masing. Jalankan tindakan berasingan atau susun sebagai aliran bar sisi.
 
-### Perbezaan utama: Pengetahuan sementara berbanding pengetahuan kekal
+Hasil tersimpan kekal dalam Vault. Penyedia awan menerima kandungan tugas; penyelidikan web juga menggunakan rangkaian. Simpanan setempat dan inferens setempat ialah pilihan berasingan.
 
-| Aspek | AI berasaskan sembang (ChatGPT, dll.) | Notemd |
-|--------|-------------------------------|--------|
-| **Ke mana hasil pergi** | Sejarah sembang (hilang) | Vault Obsidian anda (kekal) |
-| **Format** | Jawapan teks biasa | Fail terstruktur: `[[wiki-links]]`, nota konsep, diagram |
-| **Nilai jangka panjang** | Perlu tanya semula setiap kali | Terkumpul menjadi graf pengetahuan |
-| **Akses luar talian** | Memerlukan internet | Bekerja sepenuhnya tanpa internet dengan Ollama |
+## Pilih titik permulaan
+
+| Matlamat | Mulakan di sini |
+| -------------- | ------------ |
+| Pasang dan periksa hasil pertama | [Mula pantas](./getting-started/quick-start) |
+| Jalankan tugas nota atau folder yang boleh diulang | [Aliran kerja](./features/workflows) dan [pemprosesan kelompok](./advanced/batch-processing) |
+| Bina, uji atau perluas pemalam | [Panduan pembangun](./developers/overview) |
+| Temui kontrak Agent disokong | [Panduan Agent](./agents/overview) |
 
 ## Keupayaan utama
 
-### 1. **Penghubungan Wiki automatik**
-- LLM mengenal pasti konsep utama dalam nota anda
-- Menyisipkan `[[wiki-links]]` pada setiap kejadian
-- Secara pilihan, mencipta nota konsep yang berhubung
-- Penindasan sinonim untuk elakkan duplikasi
+### Pautan wiki dan nota konsep
 
-### 2. **Penghasilan nota konsep**
-- Mengeluarkan konsep utama daripada kertas kerja, artikel, nota
-- Menghasilkan fail konsep khusus dengan pautan balik
-- Laluan keluaran dan templat yang boleh disesuaikan
+Minta model mengenal pasti konsep serta menambah pautan wiki. Tambah pautan mencipta nota diproses berasingan secara lalai. Folder konsep terpilih boleh menerima fail konsep; ekstraksi kendiri lalai hanya tajuk tanpa pautan balik. [Pautan](./features/wiki-links) dan [nota konsep](./features/concept-notes) menerangkan perbezaannya.
 
-### 3. **Penggabungan penyelidikan web**
-- Menyemak Tavily atau DuckDuckGo daripada dalam Obsidian
-- LLM merumuskan hasil dengan rujukan sumber
-- Menambah hasil kajian ke nota semasa
+### Penyelidikan dan konteks setempat
 
-### 4. **Terjemahan Pelbagai Bahasa**
-- Menterjemah bahagian tertentu atau keseluruhan nota
-- menyokong lebih daripada 21+ UI bahasa
-- Konfigurasi bahasa keluaran secara berasingan
-- Sokongan terjemahan berkumpulan
+Pilih Tavily atau DuckDuckGo untuk penyelidikan, kemudian tambah ringkasan model ke nota aktif. Dapatan setempat berskop pilihan boleh memasukkan petikan nota ke tugas penjanaan. Indeks semasa leksikal, bukan sistem carian semantik embedding. [Penyelidikan](./features/research) menerangkan batas sumber/rangkaian.
 
-### 5. **Penghasilan Diagram**
-- **Mermaid**: Aliran, urutan, kelas, keadaan, ER, Gantt
-- **JSON Canvas**: Susun atur asli Obsidian
-- **Vega-Lite**: Carta data, siri masa, plot serakan
-- **HTML / HTML yang boleh diubah suai/SVG**: Artefak rajah berdikari dengan anotasi semantik
-- **Draw.io / sempadan artefak Drawnix**: Laluan eksport untuk pentadbir daripada model rajah semantik yang sama
-- **Rancangan jalan cerita diagram litar**: Sokongan circuitikz/TikZJax sedang direka berdasarkan rujukan emas, arahan terhad, maklum balas rendering, dan pengesahan topologi/susun atur berbanding TikZ LLM yang tidak terhad secara mentah
-- **Diagnostik pratonton**: Artefak rendering boleh menunjukkan diagnosis kompilasi/rendering, dan sumber bukan inline boleh diperiksa tanpa memerlukan persekitaran LaTeX di pihak plugin
-- Pembaikan sintaks automatik untuk ralat Mermaid
+### Terjemahan dan ekstraksi teks asal
 
-### 6. **Aliran Kerja Satu Klik**
-- Gabungkan beberapa tindakan ke dalam butang sidebar
-- Definisi aliran kerja berasaskan DSL
-- Contoh: `add-links > extract-concepts > research > diagram`
+Terjemah fail atau folder ke bahasa pilihan. Gunakan ekstraksi teks asal untuk petikan sumber berpandukan soalan, kemudian bandingkan petikan dengan sumber. Menyorot teks tidak menjadikan terjemahan fail khusus pada pilihan. [Terjemahan](./features/translation) menerangkan nama dan tulis ganti.
 
-## Siapa yang patut gunakan Notemd?
+### Rajah dan eksport
 
-✅ **Penyelidik** yang membaca kertas kerja dan membina ulasan literatur
-✅ **Pelajar** yang mengatur nota belajar dan mencipta peta konsep
-✅ **Pekerja pengetahuan** yang mahu pandangan bacaan disimpan secara kekal
-✅ **Profesional dwibahasa** yang memerlukan terjemahan + pautan wiki
-✅ **Pengguna yang mementingkan privasi** yang mahu sokongan LLM tempatan (Ollama)
-✅ **Pengguna berkuasa** yang menyesuaikan promp dan aliran kerja
+Pilih jenis rajah serta format sumber serasi, semak pratonton dan simpan sumber atau visual disokong. Katalog boleh laku mempunyai 33 entri; format sumber dan eksport berbeza. Lihat [rajah](./features/diagrams) untuk Draw.io, Drawnix, Mermaid, CircuitikZ serta batas aplikasi natif.
 
-## Mengapa Notemd + Obsidian?
+### Aliran kerja
 
-**Obsidian** ialah pangkalan pengetahuan berasaskan markdown yang mengutamakan penggunaan tempatan. **Notemd** menambah keupayaan AI yang luar biasa:
-- Data anda kekal di dalam peti simpanan anda (bukan perkhidmatan awan)
-- Bekerja tanpa sambungan internet dengan model tempatan
-- Bebas dan sumber terbuka (lesen MIT)
-- Berpasangan dengan plugin Obsidian yang sedia ada
-- Boleh diperluas hingga puluhan ribu nota
+**One-Click Extract** lalai menambah pautan, menjana kandungan nota layak dalam folder konsep/pilihan, kemudian membaiki Mermaid dalam folder complete. Nota konsep sedia ada boleh terlibat. Aliran tersuai mengekalkan prasyarat dan hasil setiap tindakan. [Aliran kerja](./features/workflows) menyediakan DSL tepat.
 
-## Pengenalan
+## Bermula
 
-1. **Pasang**: Tetapan → Plugin Komuniti → Cari → "Notemd"
-2. **Konfigurasikan**: Tambah penyedia LLM dan kunci API anda (atau gunakan Ollama tempatan)
-3. **Cubalah**: Buka sebuah nota → Klik kanan → "Proses fail (tambah pautan)"
-4. **Terokai**: Semak bar sisi untuk aliran kerja satu klik
+1. [Pasang Notemd](./getting-started/installation) dalam Vault sasaran.
+2. Sediakan penyedia/model boleh dicapai dan uji nota sementara.
+3. Pilih folder konsep serta periksa destinasi hasil.
+4. Semak fail sebelum mengaktifkan kelompok lebih besar.
 
-👉 [Panduan Pasang](./getting-started/installation) | [Tutorial Permulaan Cepat](./getting-started/quick-start)
+Tiada masa siap atau panjang nota minimum menjamin hasil model berguna. Mulakan dengan saiz yang boleh diperiksa.
 
-## Arah Keupayaan Diagram
+## Arah keupayaan rajah
 
-Kerja diagram Notemd kini beralih daripada "meminta model menulis satu rentetan sintaks" kepada paip berlapis:
+Aliran rajah menggunakan spesifikasi berjenis dan pemaparan khusus sasaran untuk entri disokong. Kontrak pembangun seperti `DiagramSpec` menerangkan sempadan itu; ia bukan janji menyokong sebarang sintaks rajah atau semua susun atur rujukan.
 
-```mermaid
-graph LR
-    A[Source Note] --> B[DiagramSpec]
-    B --> C[Target Adapter]
-    C --> D[Rendered Artifact]
-    D --> E[Semantic Verification]
-    E --> F[Preview or Export]
-```
+Hasil litar terhad kepada struktur `circuitikz` disokong. TikZJax ialah alat luaran; pratonton pemalam bukan bukti kompilasi natif. Hubungan statik Drawnix tidak menjamin anak panah rentas cabang terikat selepas susun semula. Pertimbangkan batas ini bagi eksport yang akan disunting.
 
-Pelaksanaan semasa sudah menyokong Mermaid, JSON Canvas, Vega-Lite, fallback HTML, HTML/SVG yang boleh diubah suai, artifak Draw.io XML, subset minimum Drawnix JSON, diagnosis pratonton/fallback hanya sumber, serta prototaip offline `CircuitSpec -> circuitikz` untuk templat emas sumber biasa dan inverter CMOS. Diagram litar merupakan kelas yang lebih sukar: circuitikz boleh nyatakan topologi elektrik yang tepat, tetapi output LLM tanpa sekatan sering menghasilkan laluan yang tidak dapat dibaca atau LaTeX yang tidak dapat dipaparkan. Arah seterusnya ialah mengekalkan circuitikz terhad dengan templat rujukan emas, peraturan susunan grid nod, diagnosis paparan, dan kitaran maklum balas tangkapan skrin.
+## Seni bina
 
-Baca butiran lanjut di [Diagram](./features/diagrams).
+Pemalam menghalakan tugas kepada penyedia pilihan, mengesahkan atau menghuraikan hasil dan menulis nota/artifak berkaitan. Carian serta dapatan setempat membekalkan konteks pilihan. Pratonton dan eksport mempunyai batas tambahan khusus format.
 
-## Arkitektur
+Gunakan [panduan pembangun](./developers/overview) untuk pemilikan sumber, peluasan dan pengesahan. [Panduan Agent](./agents/overview) menerangkan eksport awam berskop; daftar operasi dalaman bukan API automasi awam umum.
 
-```mermaid
-graph LR
-    A[Obsidian Note] --> B[Notemd Plugin]
-    B --> C{Task Selection}
-    C -->|Add Links| D[LLM Provider]
-    C -->|Research| E[Search API]
-    C -->|Translate| D
-    C -->|Diagram| D
-    D --> F[Structured Output]
-    E --> D
-    F --> G[Update Vault]
-    G --> H[Wiki Links]
-    G --> I[Concept Notes]
-    G --> J[Diagrams]
-    G --> K[Research Summaries]
-```
+## Membandingkan alat {#notemd-vs-other-obsidian-ai-plugins}
 
-## Notemd berbanding Plugin AI Obsidian yang Lain
+Pilih mengikut tugas: transformasi fail, perbualan, pautan deterministik, dapatan atau suntingan natif. Baca dokumentasi semasa setiap projek dan uji sampel perwakilan. Rekod versi, ciri diaktifkan dan tugas sampel yang sama ketika membandingkan hasil.
 
-Kebanyakan plugin AI Obsidian adalah berbentuk perbualan terlebih dahulu (anda tanya, AI jawab, pandangan kekal dalam sembang). Notemd pula ialah **penulisan terlebih dahulu**: AI memproses nota anda dan menulis hasil berstruktur terus ke dalam peti simpanan anda.
+## Batas data dan keserasian
 
-| Keupayaan | Notemd | Copilot | Smart Connections | Text Generator |
-|-----------|--------|---------|-------------------|-----------------|
-| Pengisian pautan wiki automatik | Ya | Tidak | Tidak | Tidak |
-| Penghasilan nota konsep | Ya (dengan pautan balik + penghapusan duplikat) | Tidak | Tidak | Tidak |
-| Penghasilan diagram | Ya (Mermaid, Canvas, Vega-Lite, HTML, artifak boleh diubah) | Tidak | Tidak | Tidak |
-| Penyepaduan penyelidikan web | Ya (Tavily + DuckDuckGo) | Tidak | Tidak | Tidak |
-| Pemprosesan folder secara berkumpulan | Ya | Terhad | Tidak | Terhad |
-| Laluan model mengikut tugas | Ya (7 tugas, model bebas) | Tidak | Tidak | Tidak |
-| Rantaian kerja satu klik | Ya (DSL) | Tidak | Tidak | Tidak |
-| Terjemahan (secara berkumpulan) | Ya | Tidak | Tidak | Tidak |
-| Berbual dengan vault | Tidak | Ya | Tidak | Tidak |
-| Pencarian persamaan semantik | Tidak | Tidak | Ya | Tidak |
-| Penghasilan berasaskan templat | Tidak | Tidak | Tidak | Ya |
-| Penyedia LLM | 36 (awan + pintu gerbang + tempatan) | 3-5 | 2-3 | 3-5 |
-| Sepenuhnya luar talian | Ya (Ollama) | Sebahagian | Sebahagian | Sebahagian |
+Penyedia awan menerima input tugas, penyedia carian menerima kueri dan petikan setempat menjadi kandungan prompt apabila aktif. Semak penghalaan khusus tugas sebelum menganggap aliran setempat. Pembatalan menghentikan kerja seterusnya apabila disokong serta mengekalkan hasil selesai; ia tidak menjamin penjanaan atau bil jauh berhenti.
 
-**Bila memilih Notemd**: Anda mahu AI membina graf pengetahuan yang kekal — bukan sekadar berbual tentang nota anda.
-
-**Bila memilih Copilot**: Anda mahu pembantu AI berbual di dalam Obsidian.
-
-**Bila memilih Smart Connections**: Anda mahu menemui hubungan sedia ada antara nota melalui carian semantik.
-
-## Falsafah
-
-**Notemd percaya bahawa AI sepatutnya melengkapi kerja pengetahuan manusia, bukan menggantikannya.** Plugin ini:
-- Menjaga kawalan anda (semak sebelum melaksanakan perubahan)
-- Menjaga konteks (semua hasil merujuk kembali ke sumber)
-- Menghormati privasi (sokongan LLM tempatan, tiada telemetri)
-- Keupayaan untuk diperluas (antaramuka terbuka APIs, aliran kerja tersuai)
+Manifest mengisytiharkan minimum Obsidian `0.15.0` dan membenarkan pemuatan mudah alih. Peranti mudah alih fizikal serta versi minimum itu belum disahkan oleh bukti keluaran. Eksport natif pilihan boleh memerlukan alat desktop. Laman mempunyai 34 laluan bahasa, UI 21 bahasa; keupayaan terjemahan model berasingan.
 
 <!-- notemd-acknowledgments -->
+
 ## Penghargaan dan projek rujukan
 
-Notemd diselenggara secara bebas. Kami berterima kasih kepada projek dan komuniti sumber terbuka yang memaklumkan keputusan reka bentuk yang didokumenkan atau menyediakan asas penyepaduan. Penyenaraian hanya mengiktiraf pengaruh atau kebolehoperasian; ia tidak membayangkan sokongan, pertalian, kod dibundel atau tuntutan penggunaan semula kod.
+Notemd diselenggara secara bebas. Rujukan mengiktiraf pengaruh atau kesalingoperasian, bukan sokongan, pertalian atau dakwaan kod dibundel tanpa bukti.
 
-- **Projek rujukan:** [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net / draw.io](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
-- **Asas sumber terbuka:** [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
-- Setiap projek mengekalkan lesen dan syaratnya sendiri; Notemd tersedia di bawah [Lesen MIT](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
+- Projek rujukan: [cloudy-tech-diagrams-skill](https://github.com/cloudy-liu/cloudy-tech-diagrams-skill), [Drawnix](https://github.com/plait-board/drawnix), [diagrams.net](https://www.diagrams.net/), [repo-saga](https://github.com/teee32/repo-saga).
+- Asas dan alat: [Mermaid](https://github.com/mermaid-js/mermaid), [Vega-Lite](https://vega.github.io/vega-lite/), [Slidev](https://github.com/slidevjs/slidev), [CircuitikZ](https://github.com/circuitikz/circuitikz), [Tectonic](https://github.com/tectonic-typesetting/tectonic), [Docusaurus](https://docusaurus.io).
+- Setiap projek mengekalkan lesennya. Notemd menggunakan [Lesen MIT](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE).
 
-## Sumber Terbuka
+## Sumber terbuka dan sokongan
 
-- **Lesen**: MIT
-- **Sumber**: [github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
-- **Komuniti**: [Discord](https://discord.gg/qnGgsQ9W) | [GitHub Discussions](https://github.com/Jacobinwwey/obsidian-NotEMD/discussions)
-- **Menyumbang**: Permohonan PR dialu-alukan, rujuk [CONTRIBUTING.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
+[Kod sumber](https://github.com/Jacobinwwey/obsidian-NotEMD) · [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) · [Sumbangan](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/CONTRIBUTING.md)
 
----
-
-**Seterusnya**: [Pemasangan →](./getting-started/installation)
+Sertakan versi tepat, langkah dan bukti dibersihkan apabila melaporkan masalah. Ikut [mula pantas](./getting-started/quick-start) untuk tugas pertama.

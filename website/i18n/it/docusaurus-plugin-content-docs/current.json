@@ -1,14 +1,14 @@
 {
   "version.label": {
-    "message": "Prossimo",
-    "description": "The label for version current"
+    "message": "Documentazione attuale",
+    "description": "Current documentation version label"
   },
   "sidebar.tutorialSidebar.category.Getting Started": {
-    "message": "Inizio",
+    "message": "Primi passi",
     "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Core Features": {
-    "message": "Funzionalità principali",
+    "message": "Funzioni principali",
     "description": "The label for category 'Core Features' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.LLM Providers": {
@@ -16,7 +16,7 @@
     "description": "The label for category 'LLM Providers' in sidebar 'tutorialSidebar'"
   },
   "sidebar.tutorialSidebar.category.Advanced": {
-    "message": "Avanzato",
+    "message": "Avanzate",
     "description": "The label for category 'Advanced' in sidebar 'tutorialSidebar'"
   }
 }

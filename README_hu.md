@@ -1,37 +1,37 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+[![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest) [![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b)](https://github.com/Jacobinwwey/obsidian-NotEMD/releases)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
 # Notemd bővítmény az Obsidianhez
 
+> A Notemd MIT-licencű Obsidian-bővítmény hivatkozásokkal ellátott Markdownhoz, fogalomjegyzetekhez, összefoglalókhoz, fordításokhoz és diagramokhoz. A fájlok a tárolóban maradnak; a felhőfeladatok tartalmat küldenek a kiválasztott szolgáltatónak, a webes kutatás pedig hálózatot használ.
+
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
+
+<!-- notemd-release-entry-1.9.8 -->
+## Kezdje itt
+
+| Olvasó | Belépés | Cél |
+|---|---|---|
+| Kezdő | [Gyorsindítás](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/getting-started/quick-start) | Szolgáltató beállítása és egy jegyzet ellenőrzése |
+| Felhasználó | [Munkafolyamatok](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/features/workflows) | Mappák, kimenetek és helyreállítás kezelése |
+| Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
+| Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
+
+**Verzió:** 1.9.8
+
+- **Megszakítás és helyreállítás:** a megszakítás az ütemezés és újrapróbálkozás alatt is érvényes, és megakadályozza a kutatás és fordítás késői írásait. Az elkészült kimenetek megmaradnak, a helyreállítási ütközések láthatók.
+- **Előzmények és export:** megmarad a keresési szöveg és a billentyűzetfókusz. Javítva a PowerPoint egyesített celláinak elválasztói és a CircuitikZ bekötései, feliratai. A kötegelt helyi keresés egységes pillanatképet használ.
+- **Kiadás és dokumentáció:** tiszta források eredetének és letöltött fájloknak az ellenőrzése, külön olvasói belépési pontok és közvetlenül írt fordítások.
+
+A 36 szolgáltatói előbeállítás és 33 végrehajtható diagramtípus már az 1.9.7-ben is létezett. [Frissítési útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/releases/1.9.8) · [Nyilvános kiadás ellenőrzése](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+
+A Drawnix ágak közötti nyilai átrendezés után statikusak maradnak. A PPTX Mermaid/SVG tartalma képként jelenhet meg. A megszakítás nem vonja vissza a mentett módosításokat, és nem garantálja a távoli generálás vagy számlázás leállását. Fizikai mobileszközök és az Obsidian 0.15.0 nincsenek ellenőrizve.
 
 Olvassa el a dokumentációt további nyelveken is: [Nyelvi központ](./docs/i18n/README.md)
 
-```
-==================================================
-  _   _       _   _ ___    __  __ ___
- | \ | | ___ | |_| |___|  |  \/  |___ \
- |  \| |/ _ \| __| |___|  | |\/| |   | |
- | |\  | (_) | |_| |___   | |  | |___| |
- |_| \_|\___/ \__|_|___|  | |  | |____/
-==================================================
- AI-alapú többnyelvű tudásbővítés
-==================================================
-```
-
-Egyszerű módja annak, hogy létrehozza saját tudásbázisát.
-
-A Notemd az Obsidian munkafolyamatát fejleszti azáltal, hogy különféle nagy nyelvi modellekkel (LLM-ekkel) integrálódik a többnyelvű jegyzetek feldolgozásához, automatikusan wiki-linkeket hoz létre a kulcsfontosságú fogalmakhoz, elkészíti a hozzájuk tartozó fogalomjegyzeteket, webes kutatást végez, és segít erőteljes tudásgráfok felépítésében.
-
 Ha szereted használni a Notemd-et, kérlek fontold meg [⭐ egy csillag adását GitHub-on](https://github.com/Jacobinwwey/obsidian-NotEMD) vagy [☕️ vegyél nekem egy kávét](https://ko-fi.com/jacobinwwey).
-
-.9.0
-
-<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
-<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
-<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
 
 ## Tartalomjegyzék
 
@@ -50,13 +50,26 @@ Ha szereted használni a Notemd-et, kérlek fontold meg [⭐ egy csillag adásá
 
 ## Gyorsindítás
 
-1.  **Telepítés és engedélyezés**: szerezze be a bővítményt az Obsidian Marketplace-ről.
-2.  **LLM konfigurálása**: lépjen a `Settings -> Notemd` menübe, válassza ki a használni kívánt LLM-szolgáltatót (például OpenAI vagy egy helyi szolgáltató, például Ollama), majd adja meg az API-kulcsot vagy az URL-t.
-3.  **Oldalsáv megnyitása**: kattintson a Notemd varázspálca ikonjára a bal oldali szalagon az oldalsáv megnyitásához.
-4.  **Jegyzet feldolgozása**: nyisson meg egy tetszőleges jegyzetet, és kattintson az oldalsávon a **"Process File (Add Links)"** gombra, hogy a rendszer automatikusan hozzáadja a `[[wiki-links]]` hivatkozásokat a kulcsfogalmakhoz.
-5.  **Gyors munkafolyamat futtatása**: használja az alapértelmezett **"One-Click Extract"** gombot a feldolgozás, a kötegelt generálás és a Mermaid-tisztítás összekapcsolásához egyetlen belépési pontból.
+1. Telepítse és engedélyezze a **Notemd** bővítményt a **Beállítások → Közösségi bővítmények → Böngészés** útvonalon.
+2. Állítsa be a pontos végpontot, hitelesítő adatokat és modellt. Tesztelje a kapcsolatot, majd a tényleges generálást; a modellista elérése nem igazol csevegési jogosultságot.
+3. Hozzon létre üres `trial-concepts` mappát és válassza ki fogalomjegyzetekhez; a kezdeti útvonal üres. A `Notemd trial.md` tesztjegyzetbe írjon a szolgáltatónak elküldhető rövid szöveget.
+4. Futtassa a **Process File (Add Links)** műveletet. Ellenőrizze a megőrzött forrás melletti `Notemd trial_processed.md` fájlt, a hivatkozásokat és a fogalomjegyzeteket.
+5. Nyissa meg újra a tesztforrást, és futtassa a **One-Click Extract** munkafolyamatot a tesztmappával: hivatkozások hozzáadása, megfelelő jegyzetek generálása címekből, Mermaid-javítás a complete mappában. Meglévő megfelelő jegyzetek is bekerülhetnek.
 
-Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket nyisson meg, például a webes kutatást, a fordítást és a tartalomgenerálást.
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
+```
+
+A webes kutatás és a diagramgenerálás külön művelet. Megszakítás után várja meg az aktív feladatok végét, majd ellenőrizze az elkészült és helyreállítási kimeneteket az újrafuttatás előtt.
+
+<details>
+<summary>Felületi példák</summary>
+
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/3099bf73-97d1-482b-ba97-c28b113b623e" />
+
+</details>
 
 ## Nyelvi támogatás
 
@@ -89,9 +102,9 @@ Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket n
 - **OpenAI-compatible stabil hosszú kéréslánc megerősítése**: stabil módban az OpenAI-compatible hívások most egy explicit háromlépcsős sorrendet követnek minden próbálkozásnál: elsődleges közvetlen streaming szállítás, majd közvetlen nem streaming szállítás, végül `requestUrl` tartalék (amely szükség esetén továbbra is átválthat streamelt feldolgozásra). Ez csökkenti a hamis negatív eredményeket, amikor a szolgáltatók pufferelt válaszokat sikeresen lezárnak, de a streaming csatornák instabilak.
 - **Protokolltudatos streaming tartalék az LLM API-kon át**: a hosszú futású tartalék próbálkozások most minden beépített LLM útvonalon protokolltudatos streamelt feldolgozásra váltanak, nem csak az OpenAI-compatible végpontokon. A Notemd most kezeli az OpenAI/Azure-stílusú SSE-t, az Anthropic Messages streaminget, a Google Gemini SSE válaszokat és az Ollama NDJSON folyamokat mind asztali `http/https`, mind nem asztali `fetch` környezetben, és a megmaradó közvetlen OpenAI-stílusú szolgáltatói belépési pontok is ugyanezt a közös tartalék útvonalat használják.
 - **Kínára optimalizált szolgáltatói előbeállítások**: a beépített előbeállítások most lefedik a `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan` és `SiliconFlow` szolgáltatókat a meglévő globális és helyi szolgáltatók mellett.
-- **Megbízható kötegelt feldolgozás**: a továbbfejlesztett párhuzamos feldolgozási logika **időben eltolva indított API-hívásokkal** segít elkerülni a rate-limit hibákat, és stabil teljesítményt biztosít a nagy kötegelt feladatoknál. Az új megvalósítás biztosítja, hogy a feladatok különböző időpontokban induljanak, ne egyszerre.
-- **Pontos folyamatjelentés**: javítva lett egy hiba, amely miatt az előrehaladási sáv elakadhatott, így a felület most mindig a művelet valós állapotát tükrözi.
-- **Robusztus párhuzamos kötegelt feldolgozás**: megoldódott egy probléma, amely miatt a párhuzamos kötegelt műveletek túl korán megálltak, így most minden fájl megbízhatóan és hatékonyan feldolgozható.
+- **Megbízható kötegelt feldolgozás**: Az időben eltolt API-hívások csökkentik a kéréscsúcsokat. A szolgáltató kvótái és sebességkorlátai továbbra is érvényesek.
+- **Pontos folyamatjelentés**: A folyamatjelzés megkülönbözteti a befejezett, hibás és megszakított fájlokat. A futás lezárása nem jelenti minden fájl sikerét.
+- **Robusztus párhuzamos kötegelt feldolgozás**: Az összesítés megvárja az aktív feladatok lezárását. A megszakítás leállítja a további munkát, de nem vonja vissza a mentett módosításokat; a mappa nem egyetlen tranzakció.
 - **Előrehaladási sáv pontossága**: javítva lett egy hiba, amely miatt a "Create Wiki-Link & Generate Note" parancs előrehaladási sávja 95%-nál megragadt; most a folyamat végén helyesen 100%-ot mutat.
 - **Fejlettebb API-hibakeresés**: az "API Error Debugging Mode" most teljes választesteket rögzít az LLM-szolgáltatóktól és a keresőszolgáltatásoktól (Tavily/DuckDuckGo), valamint próbálkozásonként egy szállítási idővonalat is naplóz megtisztított kérés-URL-ekkel, eltelt idővel, válaszfejlécekkel, részleges választestekkel, részben elemzett stream tartalommal és veremnyomokkal az OpenAI-compatible, Anthropic, Google, Azure OpenAI és Ollama tartalék útvonalak hibakereséséhez.
 - **Developer Mode panel**: a beállítások most egy dedikált, csak fejlesztőknek szóló diagnosztikai panelt is tartalmaznak, amely rejtve marad, amíg a "Developer mode" nincs bekapcsolva. Támogatja a diagnosztikai hívási útvonalak kiválasztását és ismételt stabilitási tesztek futtatását a kiválasztott módhoz.
@@ -105,7 +118,7 @@ Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket n
 - **Fogalomjegyzetek létrehozása (opcionális és testreszabható)**: automatikusan új jegyzeteket hoz létre a felfedezett fogalmakhoz egy megadott vault-mappában.
 - **Testreszabható kimeneti útvonalak**: külön relatív útvonalak állíthatók be a vaulton belül a feldolgozott fájlok és az új fogalomjegyzetek mentéséhez.
 - **Testreszabható kimeneti fájlnevek (Add Links)**: opcionálisan **felülírhatja az eredeti fájlt**, vagy egyéni utótagot/cserekarakterláncot használhat az alapértelmezett `_processed.md` helyett a linkfeldolgozásnál.
-- **Hivatkozásintegritás fenntartása**: alapvető kezelés biztosított a linkek frissítésére, amikor a jegyzeteket átnevezi vagy törli a vaulton belül.
+- **Hivatkozásintegritás fenntartása**: Az átnevezés utáni hivatkozásfrissítés az Obsidian és beállításai feladata. A törlés feloldatlan hivatkozásokat hagyhat; az azonos nevű jegyzeteket külön ellenőrizze.
 - **Tiszta fogalomkivonatolás**: kivonatolja a fogalmakat, és létrehozza a hozzájuk tartozó fogalomjegyzeteket az eredeti dokumentum módosítása nélkül. Ez ideális tudásbázis feltöltésére meglévő dokumentumokból azok megváltoztatása nélkül. A funkció konfigurálható lehetőségeket kínál minimális fogalomjegyzetek létrehozására és visszamutató hivatkozások hozzáadására.
 
 ### Fordítás
@@ -115,10 +128,10 @@ Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket n
     - **Nagy fájlok támogatása**: a rendszer automatikusan kisebb részekre bontja a nagy fájlokat a `Chunk word count` beállítás alapján, mielőtt azokat elküldené az LLM-nek. A lefordított részek ezután zökkenőmentesen egyetlen dokumentummá állnak össze.
     - Több nyelv közötti fordítást is támogat.
     - A célnyelv testreszabható a beállításokban vagy a felületen.
-    - A lefordított szöveget automatikusan az eredeti szöveg jobb oldalán nyitja meg a kényelmes olvasáshoz.
+    - A mentett fordítást az Obsidian munkaterületén nyitja meg az elérhető elrendezés szerint.
 - **Kötegelt fordítás**:
-    - Lefordít minden fájlt egy kiválasztott mappában.
-    - Támogatja a párhuzamos feldolgozást, ha az "Enable Batch Parallelism" be van kapcsolva.
+    - Alapértelmezés szerint a kiválasztott mappa közvetlenül benne lévő, megfelelő fájljait fordítja, almappák nélkül. A speciális fájlkiválasztás módosíthatja a hatókört; a meglévő célfájlok felülíródhatnak.
+    - A fordítás közvetlenül a `batchConcurrency` értékét használja (alapérték: 1), az `enableBatchParallelism` beállítástól függetlenül.
     - A konfigurációtól függően egyéni promptokat is használhat a fordításhoz.
 	- A fájlkezelő helyi menüjébe hozzáad egy "Batch translate this folder" lehetőséget.
 - **Automatikus fordítás kikapcsolása**: ha ez be van kapcsolva, a nem `Translate` feladatok nem erőltetik többé a kimeneteket egy adott nyelvre, így megőrzik az eredeti nyelvi kontextust. Az explicit "Translate" feladat továbbra is a konfiguráció szerint fordít.
@@ -134,7 +147,7 @@ Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket n
 - **Tartalomgenerálás címből**:
     - A jegyzet címét használja fel kezdeti tartalom előállítására LLM segítségével, lecserélve a meglévő tartalmat.
     - **Opcionális kutatás**: beállítható, hogy történjen-e webes kutatás (a kiválasztott szolgáltatóval) a generáláshoz szükséges kontextus biztosításához.
-- **Kötegelt tartalomgenerálás címekből**: tartalmat generál az összes jegyzethez egy kiválasztott mappában a címük alapján (figyelembe veszi az opcionális kutatási beállítást). A sikeresen feldolgozott fájlok egy **konfigurálható "complete" almappába** kerülnek (például `[foldername]_complete` vagy egyéni név), hogy ne legyenek újra feldolgozva.
+- **Kötegelt tartalomgenerálás címekből**: A megfelelő `.md` fájlok tartalmát generálja és lecseréli a kutatási beállítás szerint. A `_processed.md` és a kijelölt complete célmappa teljes fáját kizárja. Generálás után megpróbálja a fájlt a complete mappába mozgatni. A foglalt cél a mozgatást akadályozza, a már mentett generálást nem; a generált és mozgatott fájlok száma külön szerepel.
 - **Mermaid auto-fix csatolás**: ha a Mermaid automatikus javítás engedélyezve van, a Mermaidhez kapcsolódó munkafolyamatok a feldolgozás után automatikusan javítják a generált fájlokat vagy kimeneti mappákat. Ez lefedi a Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid és Translate folyamatokat.
 
 ### Segédfunkciók
@@ -286,8 +299,8 @@ A bővítmény beállításai itt érhetők el:
 
 #### Fogalomjegyzetek kimenete
 -   **Customize Concept Note Path**:
-    *   **Kikapcsolva (alapértelmezett)**: a `[[linked concepts]]` jegyzetek automatikus létrehozása ki van kapcsolva.
-    *   **Bekapcsolva**: lehetővé teszi annak a mappának a megadását, ahová az új fogalomjegyzetek kerülnek.
+    *   **Kikapcsolva**: Nem hoz létre automatikusan jegyzeteket a hivatkozott fogalmakhoz.
+    *   **Alapértelmezés szerint bekapcsolva**: Az útvonal kezdetben üres. Fogalomjegyzetek létrehozása előtt adjon meg egy érvényes, a tárhoz viszonyított relatív útvonalat.
 -   **Concept Note Folder Path**: (csak akkor látható, ha a fenti testreszabás engedélyezve van) adjon meg egy *relatív útvonalat* a vaulton belül (például `Concepts` vagy `Generated/Topics`), ahová az új fogalomjegyzetek kerüljenek. A mappák automatikusan létrejönnek, ha még nem léteznek. **A testreszabás engedélyezése esetén kötelező megadni.** **Ne használjon abszolút útvonalakat vagy érvénytelen karaktereket.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
@@ -334,8 +347,8 @@ A bővítmény beállításai itt érhetők el:
 
 #### Kötegelt Mermaid-javítás
 -   **Enable Mermaid Error Detection**:
-    *   **Off (Default)**: a feldolgozás utáni hibafelismerés ki van kapcsolva.
-    *   **On**: átvizsgálja a feldolgozott fájlokat megmaradt Mermaid-szintaktikai hibák után, és létrehoz egy `mermaid_error_{foldername}.md` jelentést.
+    *   **Kikapcsolva**: Kihagyja a feldolgozás utáni hibakeresést.
+    *   **Alapértelmezés szerint bekapcsolva**: Megkeresi a megmaradt Mermaid-hibákat, és létrehozza a `mermaid_error_{foldername}.md` jelentést.
 -   **Move files with Mermaid errors to specified folder**:
     *   **Off**: a hibás fájlok a helyükön maradnak.
     *   **On**: azokat a fájlokat, amelyek a javítási kísérlet után is Mermaid-szintaktikai hibát tartalmaznak, egy dedikált mappába helyezi át kézi felülvizsgálatra.
@@ -351,7 +364,7 @@ A bővítmény beállításai itt érhetők el:
 -   **API Call Interval (ms)**: minimális késleltetés ezredmásodpercben minden egyes LLM API-hívás *előtt és után*. Fontos alacsony limitű API-k esetén, vagy a 429 hibák megelőzésére. Állítsa 0-ra, ha nincs szükség mesterséges késleltetésre. (Alapértelmezett: 500ms)
 -   **Chunk Word Count**: az LLM-nek elküldött egyetlen rész maximális szószáma. Befolyásolja a nagy fájlokhoz szükséges API-hívások számát. (Alapértelmezett: 3000)
 -   **Enable Duplicate Detection**: kapcsolja ki/be az alapvető ismétlődő szóellenőrzést a feldolgozott tartalomban (eredmények a konzolban). (Alapértelmezett: Engedélyezett)
--   **Max Tokens**: az LLM által egyetlen válaszrészben generálható tokenek maximális száma. Kihat a költségre és a részletezettségre. (Alapértelmezett: 4096)
+-   **Max Tokens**: az LLM által egyetlen válaszrészben generálható tokenek maximális száma. Kihat a költségre és a részletezettségre. (Alapértelmezett: 8192) A szolgáltató saját kimeneti korlátja felülírhatja ezt az értéket; modellfüggő alapértékek is léteznek.
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Fordítás
@@ -379,7 +392,7 @@ A bővítmény beállításai itt érhetők el:
     *   **Change Prompt Word**: lehetővé teszi a prompt szó cseréjét egy adott feladatnál.
     *   **Custom Prompt Word**: adja meg az egyéni promptszót az adott feladathoz.
 -   **Use Custom Output Folder for 'Generate from Title'**:
-    *   **Kikapcsolva (alapértelmezett)**: a sikeresen generált fájlok egy `[OriginalFolderName]_complete` nevű almappába kerülnek az eredeti mappa szülőkönyvtárához képest (vagy `Vault_complete` mappába, ha az eredeti mappa a gyökér volt).
+    *   **Kikapcsolva (alapértelmezett)**: A cél az eredetivel azonos szinten lévő `[foldername]_complete` mappa, a tár gyökerénél pedig `Vault_complete`. A bekapcsolt beállítás egyéni nevet enged.
     *   **Bekapcsolva**: lehetővé teszi, hogy egyéni nevet adjon meg annak az almappának, ahová a kész fájlok kerüljenek.
 -   **Custom Output Folder Name**: (csak akkor látható, ha a fenti beállítás engedélyezve van) adja meg az almappa kívánt nevét (például `Generated Content`, `_complete`). Érvénytelen karakterek nem használhatók. Üresen hagyva az alapértelmezett érték `_complete`. Ez a mappa az eredeti mappa szülőkönyvtárához képest jön létre.
 
@@ -483,11 +496,11 @@ Ez az alapfunkció, amely a fogalmak azonosítására és `[[wiki-links]]` hivat
     *   Futtassa a `Notemd: Translate Note/Selection` parancsot (parancspalettából vagy oldalsáv-gombbal).
     *   Megjelenik egy modális ablak, ahol megerősítheti vagy módosíthatja a **Target Language** beállítást (alapértelmezésben a Konfiguráció részben megadott értéket használja).
     *   A bővítmény a konfigurált **LLM Provider**-t használja (a Multi-Model beállítások alapján) a fordítás végrehajtásához.
-    *   A lefordított tartalom a konfigurált **Translation Save Path** helyre kerül a megfelelő utótaggal, és **az eredeti tartalom jobb oldalán egy új panelen** nyílik meg az egyszerű összehasonlítás érdekében.
+    *   A beállított útvonallal és utótaggal menti a fordítást, majd a mentett fájlt megnyitja az Obsidian munkaterületén.
     *   A feladat megszakítható az oldalsáv gombjával vagy a modális ablak megszakító gombjával.
 3.  **Kötegelt fordítás**:
     *   Futtassa a `Notemd: Batch Translate Folder` parancsot a parancspalettáról, és válasszon ki egy mappát, vagy kattintson jobb gombbal egy mappára a fájlkezelőben, majd válassza a "Batch translate this folder" lehetőséget.
-    *   A bővítmény a kiválasztott mappában lévő összes Markdown-fájlt lefordítja.
+    *   Alapértelmezés szerint a kiválasztott mappa közvetlenül benne lévő, megfelelő fájljait fordítja, almappák nélkül. A speciális fájlkiválasztás módosíthatja a hatókört; a meglévő célfájlok felülíródhatnak.
     *   A lefordított fájlok a konfigurált fordítási útvonalra kerülnek, de nem nyílnak meg automatikusan.
     *   Ez a folyamat a folyamatjelző modális ablakból megszakítható.
 
@@ -514,7 +527,7 @@ Ez az alapfunkció, amely a fogalmak azonosítására és `[[wiki-links]]` hivat
     *   Futtassa a `Notemd: Batch Generate Content from Titles` parancsot (parancspalettából vagy oldalsáv-gombbal).
     *   Válassza ki azt a mappát, amely a feldolgozni kívánt jegyzeteket tartalmazza.
     *   A bővítmény végigiterál a mappa minden `.md` fájlján (kivéve a `_processed.md` fájlokat és a kijelölt "complete" mappában lévőket), a cím alapján tartalmat generál, és lecseréli a meglévő tartalmat. A fájlok a háttérben kerülnek feldolgozásra anélkül, hogy megnyílnának a szerkesztőben.
-    *   A sikeresen feldolgozott fájlok a konfigurált "complete" mappába kerülnek.
+    *   Generálás után megpróbálja a fájlt a complete mappába mozgatni. A foglalt cél a mozgatást akadályozza, a már mentett generálást nem; a generált és mozgatott fájlok száma külön szerepel.
     *   Ez a parancs minden feldolgozott jegyzetnél tiszteletben tartja az **"Enable Research in 'Generate from Title'"** beállítást.
     *   A feladat megszakítható az oldalsáv gombjával vagy a modális ablak megszakító gombjával.
     *   Az előrehaladás és az eredmények (módosított fájlok száma, hibák) az oldalsáv/modális ablak naplójában láthatók.
@@ -566,6 +579,8 @@ Ez az alapfunkció, amely a fogalmak azonosítására és `[[wiki-links]]` hivat
     *   Opcionálisan beállítható, hogy a problémás fájlokat a bővítmény külön felülvizsgálati mappába helyezze át.
 
 ## Támogatott LLM-szolgáltatók
+
+A táblázat válogatott példákat mutat. Az előbeállításokat és feltételeket a [36 szolgáltató útmutatója](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/providers/overview) tartalmazza.
 
 | Szolgáltató       | Típus      | API-kulcs szükséges    | Megjegyzések                                                         |
 |-------------------|------------|------------------------|-----------------------------------------------------------------------|
@@ -635,7 +650,7 @@ A Notemd helyben fut az Obsidianon belül, de bizonyos funkciók külső kérés
 ### Gyakori problémák
 -   **A bővítmény nem töltődik be**: győződjön meg arról, hogy a `manifest.json`, `main.js`, `styles.css` fájlok a megfelelő mappában (`<Vault>/.obsidian/plugins/notemd/`) vannak, majd indítsa újra az Obsidian alkalmazást. Ellenőrizze a Developer Console-t (`Ctrl+Shift+I` vagy `Cmd+Option+I`) az indításkori hibákért.
 -   **Feldolgozási hibák / API-hibák**:
-    1.  **Ellenőrizze a fájlformátumot**: győződjön meg arról, hogy a feldolgozni vagy ellenőrizni kívánt fájl `.md` vagy `.txt` kiterjesztésű. A Notemd jelenleg csak ezeket a szövegalapú formátumokat támogatja.
+    1.  **Ellenőrizze a formátumot**: Az alapformátumok feladatfüggők (`.md` vagy `.md`/`.txt`). A fejlesztői mód kibővített bemenetekkel más szövegeket és PDF-et is enged bizonyos forrásmegőrző feladatoknál, például fordításnál és fogalomkinyerésnél. A hivatkozások hozzáadása továbbra is `.md`/`.txt` fájlokra korlátozott.
     2.  Használja a "Test LLM Connection" parancsot/gombot az aktív szolgáltató beállításainak ellenőrzésére.
     3.  Ellenőrizze újra az API Key, Base URL, Model Name és (Azure esetén) API Version értékeket. Győződjön meg arról, hogy az API-kulcs helyes, és rendelkezik elegendő kredittel/jogosultsággal.
     4.  Győződjön meg arról, hogy a helyi LLM-szerver (LMStudio, Ollama) fut, és a Base URL helyes (például `http://localhost:1234/v1` LMStudio esetén).
@@ -696,7 +711,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.7 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.8 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->

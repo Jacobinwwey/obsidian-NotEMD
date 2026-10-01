@@ -1,341 +1,133 @@
 ---
 id: pillar-ai-knowledge
-title: "Obsidian Průvodce správou znalostí s AI"
-description: "Kompletní průvodce vytvářením propojené databáze znalostí pomocí AI — od wiki-odkazů a extrakce konceptů až po vyhledávání, překlad a generování diagramů"
+title: Správa znalostí s AI v Obsidianu
+description: >-
+  Uchovejte zdroje, vymezte úlohy a kontrolujte výstupy před rozšiřováním
+  automatizace.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [obsidian, AI, knowledge management, wiki-links, concept notes, LLM, diagrams, research, translation, workflows, Copilot alternative, Smart Connections alternative, obsidian AI plugin]
-concepts: [Notemd, Obsidian, AI Knowledge Management, Wiki-Links, Concept Notes, LLM Integration, Diagrams, Research, Translation, Workflows, Copilot Alternative]
-citations:
-  - title: Obsidian
-    url: https://obsidian.md
-  - title: Tavily
-    url: https://tavily.com
-  - title: Mermaid
-    url: https://mermaid.js.org
-  - title: Vega-Lite
-    url: https://vega.github.io/vega-lite/
+keywords:
+  - Správa znalostí s AI v Obsidianu
+  - Notemd
+  - Obsidian
 ---
 
 import TLDR from '@site/src/components/TLDR';
 
-# Obsidian Průvodce správou znalostí s AI
+# Správa znalostí s AI v Obsidianu
 
-<TLDR>
-**Notemd převádí čtení poháněné LLM na trvalé znalosti: wiki-odkazy spojují koncepty, poznámky k konceptům vytvářejí vyhledatelnou grafiku, vyhledávání přináší obsah z webu do vaší databáze, překlad odstraňuje jazykové bariéry, diagramy zpřehledňují strukturu a pracovní postupy to vše spojují jedním kliknutím.** Tento průvodce pokrývá celý proces — od surových poznámek až po propojenou, vizuální, vícejazyčnou databázi znalostí.
-</TLDR>
+<TLDR>Užitečný znalostní postup rozlišuje zdroj, obsah vytvořený modelem a vaše opravy. Notemd nabízí odkazy, extrakci, rešerši, překlad a diagramy jako kontrolovatelné soubory. Začněte jedním zdrojem, ověřte výsledek a pak automatizujte omezenou složku.</TLDR>
 
-## Proč správa znalostí s AI?
+## Určete výsledek
 
-Tradiční zápis poznámek vytváří jednoduché soubory. I při ručních wiki-odkazech zůstávají většina poznámek oddělená. Notemd využívá LLM k automatizaci vrstvy spojování:
+Vyberte propojenou poznámku ke čtení, sadu pojmů, podloženou rešerši, překlad nebo diagram. Více souborů a odkazů automaticky nezlepšuje pochopení ani dohledání. Určete způsob kontroly a pozdějšího nalezení materiálu.
 
-- **LLMy čtou váš obsah** a identifikují to, co je důležité — termíny, metody, osoby, teorie
-- **Odkazy se vkládají automaticky** při každém výskytu konceptu, nejsou ukryty v „viz také“
-- **Poznámky k konceptům se generují** jako samostatné vyhledatelné soubory
-- **Vyhledávání obohacuje poznámky** kontextem z webu
-- **Diagramy zpřehledňují strukturu** — mapy myšlenek, diagramy toků, grafy dat ze stejného obsahu
-
-Výsledkem je graf znalostí, který roste s každou poznámkou, kterou zpracujete, nejen tehdy, když si vzpomenete přidat odkazy.
-
-## Celý proces
+## Celý postup
 
 ```mermaid
-graph TD
-    A[Raw Note] --> B[Add Links]
-    B --> C[Wiki-Linked Note]
-    B --> D[Concept Notes]
-    C --> E[Connected Knowledge Graph]
+flowchart TD
+    A[Kopie zdrojové poznámky] --> B[Volba úlohy a rozsahu]
+    B --> C[Odkazy nebo poznámky pojmů]
+    B --> D[Rešerše, překlad či diagram]
+    C --> E[Porovnání se zdrojem a doklady]
     D --> E
-    F[Web Research] --> E
-    G[Translation] --> E
-    H[Diagram Generation] --> I[Visual Structure]
-    E --> H
-    I --> E
-    J[One-Click Workflow] --> B
-    J --> F
-    J --> G
-    J --> H
+    E --> F[Opravené výstupy v trezoru]
 ```
 
-Každý krok je nezávislý. Můžete použít jeden nebo všechny. Nejúčinnější sekvence: **Přidání odkazů → Poznámky k konceptům → Diagramy**.
+Jde o dostupné úlohy, nikoli o tvrzení, že je všechny vykoná jedno výchozí tlačítko. Před sestavením postupu uchovejte zdroj a prověřte cíl každého kroku.
 
----
+## 1. Wiki odkazy: výslovné vazby
 
-## 1. Wiki-odkazy: Vytváření explicitních spojení
+Spusťte **Process file (add links)** na testovací poznámce. Ověřte sousední `_processed.md`, užitečnost termínů a věrnost citací, kódu a rovnic.
 
-Wiki-odkazy tvoří základ grafu znalostí. Notemd využívá LLM k:
+Zaměření a potlačení synonym usměrňují model, ale nevynucují přesnou ekvivalenci ani číselnou podobnost. Potřebujete-li opakovatelné odkazy na existující názvy, zvažte deterministické párování.
 
-1. Přečtěte si obsah poznámky (rozdělte ho na části u delších dokumentů)
-2. Identifikujte základní koncepty – upřednostňujte konkrétní technické termíny před obecnými podstatnými jmény
-3. Vložte `[[wiki-links]]` při každém výskytu
-4. Potlačte synonyma, aby „ML“ a „Machine Learning“ nevytvářely samostatné uzly
+[Wiki odkazy](./features/wiki-links)
 
-### Kdy použít
+## 2. Pojmy: oddělte termín a vysvětlení
 
-- **Každá poznámka delší než 100 slov** – kratší poznámky obsahují málo konceptů
-- **Výzkumné články, technické dokumenty, zápisy ze schůzek** – bohaté na termíny specifické pro danou oblast
-- **Po ustálení obsahu** – neopakovaně zpracovávejte návrhy
+Před extrakcí vyberte složku pojmů. Samostatná extrakce vytváří pouze názvy a zdroj nemění. Pro `Linked From` v nových samostatných poznámkách povolte zpětné odkazy a vypněte minimální šablonu.
 
-### Klíčové nastavení
+Extrakce a vysvětlování jsou samostatné operace. **Batch generate from titles** může doplnit i existující způsobilé poznámky vybrané složky. Testujte odděleně a prověřte hlášené přesuny do complete. Kontrola duplicit používá názvové heuristiky; podobný název není stejný technický pojem.
 
-| Nastavení | Doporučené | Důvod |
-|---------|-----------|-----|
-| `addLinksProvider` | DeepSeek nebo GPT-4o-mini | Dobrá přesnost za nízkou cenu |
-| Potlačení synonym | Ano | Zabraňuje vzniku duplicitních uzlů |
-| Okno kontextu | Odstavec | Rovnováha mezi přesností a náklady |
+[Poznámky pojmů](./features/concept-notes)
 
-→ [Wiki-Links deep dive](/docs/features/wiki-links)
+## 3. Rešerše: dohledatelné zdroje
 
----
+Vyberte téma nebo použijte název, nastavte Tavily/DuckDuckGo a spusťte **Research & summarize**. Prázdný klíč Tavily nepřepíná službu. Otevřete zdroje a ověřte hlavní tvrzení připojeného shrnutí.
 
-## 2. Konceptuální poznámky: Vyhledatelné znalostní uzly
+Volitelné lokální hledání přidává vymezené úryvky. Index je lexikální a text jde vybranému LLM. Lokální indexování neznamená celou rešerši offline ani výhradně na zařízení.
 
-Wiki-odkazy spojují myšlenky v rámci textu, ale konceptuální poznámky umožňují nezávislé vyhledání každé myšlenky. Každý koncept má svůj vlastní `.md` soubor:
+[Rešerše](./features/research)
 
-```markdown
-# Machine Learning
+## 4. Překlad: význam a struktura
 
-## Linked From
-- [[My Research Notes]]
-- [[Neural Networks Explained]]
+Zvolte výstupní jazyk a překlad souboru. Výchozí přípona je `_<language>.md`; existující cíl lze přepsat. Pasáž nejprve vložte do dočasné poznámky.
+
+Porovnejte termíny, čísla, kód, odkazy a matematický zápis. Dlouhé texty se dělí a model může ztratit kontext mezi částmi. 21 jazyků UI a 34 cest webu neprokazuje kvalitu žádného jazykového páru.
+
+[Překlad](./features/translation)
+
+## 5. Diagramy: editovatelný artefakt
+
+Vyberte zamýšlený typ a kompatibilní zdroj. Zkontrolujte náhled a uložte zdroj i potřebné podporované SVG, PNG nebo PDF. Obrázek neprokazuje zachování všech vztahů v jiném editoru.
+
+Používejte podporovaný katalog. CircuitikZ má omezené konstrukce a vlastní kontrolu kompilace. Statické šipky Drawnix mezi větvemi nezaručují připojení po přesunu. Opravy tabulek PowerPointu neruší obrazový fallback pro Mermaid/SVG.
+
+[Diagramy](./features/diagrams)
+
+## 6. Postupy: automatizujte ověřenou sekvenci
+
+Syntaxe používá název, `::` a ID oddělená `>`. Výchozí postup:
+
+```text
+One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix
 ```
 
-### Proces extrakce
+Provádí odkazy, generování ze složky názvů a opravu Mermaid. Nepřidává obecnou rešerši ani generování diagramu. Akce zachovávají předpoklady a výstupy; nejde o libovolnou textovou rouru.
 
-Příkaz LLM je velmi strukturovaný:
-- Normalizovat na jednotnou formu
-- Upřednostňovat víceslovné koncepty před jednoslovnými („Dielectric Relaxation“ nikoli „Relaxation“)
-- Přeskočit části s odkazy/bibliografií
-- Výstup v podobě `CONCEPT:` řádků pro jednoznačnou analýzu
+Výchozí politika zastaví na hlášené chybě. Pokračování je vhodné jen tehdy, mohou-li další kroky použít zbývající vstupy. Zrušení zachová hotové soubory, není rollback.
 
-Koncepty jsou odstraňovány z duplicit pomocí `Set<string>`. Chyby LLM v jednotlivých částech nezastaví celý proces.
+[Postupy](./features/workflows)
 
-### Zpětné odkazy
+## 7. Poskytovatelé: protokol a zátěž
 
-Pokud je to povoleno, každá konceptuální poznámka zaznamenává, které zdrojové poznámky ji zmiňují. Vestavěná tabulka zpětných odkazů Obsidian také zobrazuje obrácené spojení.
+36 profilů pokrývá pět protokolových rodin. Vyberte endpoint, modelová práva a datovou politiku podle úlohy. Před srovnáním rychlosti a ceny testujte stejný zdroj i prompt.
 
-### Odstranění duplicit
+Směrování poskytovatelů/modelů podle úloh je vypnuté. Povolte jej záměrně a před označením postupu za lokální prověřte každou zapnutou cestu.
 
-4krokový motor na odstraňování duplicit Notemd zachycuje:
-1. **Přesné shody** — srovnání názvů souborů bez ohledu na velikost písmen
-2. **Množné čísla** — "Models.md" oproti "Model.md"
-3. **Normalizace symbolů** — "A-B.md" oproti "A B.md"
-4. **Obsah jednoho slova** — "ML.md" je označeno, pokud existuje "Machine Learning.md"
+[Poskytovatelé](./providers/overview)
 
-### Nastavení klíčů
+## Kontrolní seznam pro začátek
 
-| Nastavení | Doporučené | Důvod |
-|---------|-----------|-----|
-| `conceptNoteFolder` | `concepts/` nebo `🧠 concepts/` | Udržuje trezor uspořádaný |
-| `extractConceptsAddBacklink` | Ano | Umožňuje zpětné vyhledávání |
-| `extractConceptsMinimalTemplate` | Ne | Kompletní šablona s odkazy |
-| Model na úrovni úkolu | DeepSeek | Extrakce konceptů nevyžaduje nákladné modely |
-| Potlačování synonym | Ano | Stejná nastavení ovlivňují jak propojování, tak extrakci |
-
-→ [Concept Notes deep dive](/docs/features/concept-notes)
-
----
-
-## 3. Výzkum: Začlenění webu
-
-Notemd integruje vyhledávání na webu do vašeho pracovního postupu při psaní poznámek:
-
-1. **Vytváření dotazu** — název nebo výběr poznámky se stane vyhledávacím dotazem
-2. **Vyhledávání na webu** — Tavily (doporučeno, vyžaduje klíč API) nebo DuckDuckGo (zdarma, bez klíče)
-3. **LLM shrnutí** — výsledky vyhledávání jsou zhuštěny do relevantního shrnutí
-4. **Přidání do poznámky** — shrnutí se přidá na pozici kurzoru nebo jako nová sekce
-
-### Kdy použít
-
-- Před zpracováním nového tématu — nejprve získejte webový kontext
-- Když potřebujete poznámku o konceptu obohatit — nejprve prověřte informace a poté přidejte odkazy
-- Pro přehledy literatury — hromadně vyhledejte složku s poznámkami
-
-### Klíčové nastavení
-
-| Nastavení | Doporučeno | Důvod |
-|---------|-----------|-----|
-| `researchProvider` | GPT-4o nebo Claude | Výzkum vyžaduje kvalitnější shrnutí |
-| Služba pro vyhledávání | Tavily | Lepší relevance, nastavitelná hloubka |
-| `maxResearchContentTokens` | 4000 | Rovnováha mezi hloubkou a náklady |
-
-→ [Podrobný průzkum](/docs/features/research)
-
----
-
-## 4. Překlad: Překonávání jazykových bariér
-
-Notemd překládá poznámky pomocí vašeho nastaveného LLM — ne speciálního překladače API. To znamená:
-
-- **Překlady s pochopením kontextu** — LLM rozumí celému dokumentu, ne jen větám po větách
-- **Zpracování odborných termínů** — „gradient descent“ zůstává jako „梯度下降“, nikoli „坡度向下
-- **Podpora hromadného překladu** — přeložte celou složku s poznámkami najednou
-- **Model pro jednotlivé úkoly** — použijte Gemini Flash k překladu (rychlý, levný, vícejazyčný)
-
-### Jazyková podpora
-
-Notemd sám podporuje 21 UI jazyků. Cílový jazyk překladu lze nastavit pro každý úkol. Běžné páry: EN↔ZH, EN↔JA, EN↔KO, EN↔DE, EN↔FR, EN↔ES.
-
-→ [Podrobný průzkum překladu](/docs/features/translation)
-
----
-
-## 5. Diagramy: Zviditelnění struktury
-
-Pipeline diagramů Notemd je založen na specifikacích: LLM vytvoří strukturovaný `DiagramSpec` JSON, poté adaptéry jej převedou do cílového formátu. To poskytuje spolehlivější výstup než žádost o surovou Mermaid syntaxi od LLM.
-
-### Detekce záměru
-
-Notemd odhadne nejlepší typ diagramu na základě obsahu:
-
-- **Tabulky s čísly** → graf dat (Vega-Lite)
-- **Slovník klienta/serveru** → sekvenční diagram (Mermaid)
-- **Entita/hlavní klíč** → ER diagram (Mermaid)
-- **Krok/průběh procesu** → diagram toků (Mermaid)
-- **Klíčová slova konceptuální mapy** → JSON Canvas (Obsidian nativní)
-- **Výchozí** → mind map (Mermaid)
-
-### Řetězec renderování
-
-Hlavní cíl → náhrada → náhrada → HTML. Pokud syntaxe Mermaid selže, pokusí se ještě jednou s kontextem chyby odeslat ji na LLM, poté přejde na minimální diagram.
-
-### Klíčové nastavení
-
-| Nastavení | Doporučené | Důvod |
-|---------|-----------|-----|
-| `enableExperimentalDiagramPipeline` | Ano | Lepší kvalita prostřednictvím specifikací nejprve |
-| `experimentalDiagramCompatibilityMode` | `best-fit` | Nativní cíl podle záměru |
-| `summarizeToMermaidProvider` | GPT-4o nebo Claude | Specifikace diagramů vyžadují prostorové uvažování |
-| `autoMermaidFixAfterGenerate` | Ano | Automaticky zachycuje chyby syntaxe LLM |
-| Rozšíření místních znalostí | Povoleno pro doménově specifické účely | Zlepšuje přesnost s kontextem trezoru |
-
-→ [Podrobný průzkum diagramů](/docs/features/diagrams)
-
----
-
-## 6. Pracovní postupy: Automatizace jedním kliknutím
-
-Pracovní postupy spojují více úloh do jednoho tlačítka v postranním panelu. Formát DSL je následující:
-
-```
-task1 | task2 | task3
-```
-
-Příklad: `addLinks | extractConcepts | generateDiagram` — zpracuje poznámku z hrubého textu na plně propojený, vizuální znalostní uzel jedním kliknutím.
-
-### Doporučené pracovní postupy
-
-| Pracovní postup | Řetězec | Použití |
-|----------|-------|----------|
-| Celý proces | `addLinks \| extractConcepts \| generateDiagram` | Nové poznámky |
-| Výzkum nejprve | `research \| addLinks` | Neznámá témata |
-| Polyglot | `translate \| addLinks` | Vícejazyčné poznámky |
-| Pouze diagram | `generateDiagram` | Rychlá vizualizace |
-
-→ [Podrobný průzkum pracovních toků](/docs/features/workflows)
-
----
-
-## 7. LLM poskytovatelé: 36 možností od cloudu po lokální zařízení
-
-Notemd podporuje 36 poskytovatelů v 4 typech přenosu. Klíčové skupiny:
-
-- **Mezinárodní cloud**: OpenAI, Anthropic, Google, Mistral, xAI
-- **Čínský cloud**: DeepSeek, Qwen, Doubao, Moonshot, GLM, Baidu, SiliconFlow
-- **Brány**: OpenRouter, GitHub Models, Hugging Face, Vercel
-- **Lokální**: Ollama, LMStudio, OVMS — bez klíče API, žádná data neopouštějí váš počítač
-
-### Strategie modelu podle úlohy
-
-Nejekonomičtější nastavení využívá levné modely pro jednoduché úlohy a výkonné modely pro složité úlohy:
-
-```
-extractConcepts  → DeepSeek (fast, cheap, accurate enough)
-addLinks          → DeepSeek or GPT-4o-mini
-research          → GPT-4o or Claude (needs quality)
-generateDiagram   → GPT-4o or Claude (needs spatial reasoning)
-translate         → Gemini Flash (fast, multilingual)
-```
-
-→ [Přehled LLM poskytovatelů](/docs/providers/overview)
-
----
-
-## Seznam kontrol při začínání
-
-1. **Nainstalujte Notemd** — [Komunitní pluginy](/docs/getting-started/installation) (doporučeno) nebo ručně
-2. **Konfigurujte poskytovatele** — DeepSeek (nejjednodušší), OpenAI, nebo Ollama (zdarma)
-3. **Zpracujte svou první poznámku** — klikněte pravým tlačítkem → "Zpracovat soubor (přidat odkazy)"
-4. **Nastavit složku konceptů** — Nastavení → Notemd → Výstup → Složka konceptů
-5. **Vytáhnout koncepty** — spustit „Vytáhnout koncepty“ na téže poznámce
-6. **Vytvořit diagram** — spustit „Vytvořit diagram“, abyste vizualizovali vazby
-7. **Vytvořit pracovní postup** — spojit výše uvedené do jednoho tlačítka pro jedno kliknutí
-
-## Doporučené konfigurace
-
-### Student (Budget)
-
-```
-Provider: DeepSeek (free tier available)
-Concept extraction: DeepSeek
-Research: DuckDuckGo (free) + DeepSeek
-Diagrams: Off (or legacy Mermaid)
-Workflows: addLinks | extractConcepts
-```
-
-### Výzkumník (Kvalita)
-
-```
-Provider: GPT-4o (primary)
-Concept extraction: DeepSeek (cost savings)
-Research: GPT-4o + Tavily
-Diagrams: best-fit mode, GPT-4o
-Workflows: research | addLinks | extractConcepts | generateDiagram
-```
-
-### Privacita na prvním místě (pouze lokálně)
-
-```
-Provider: Ollama (llama3 or qwen2.5:7b)
-All tasks: Ollama
-Research: DuckDuckGo (free, no API key)
-Diagrams: legacy Mermaid mode
-```
-
-### Dvoujazyčný (ZH + EN)
-
-```
-Primary: DeepSeek (Chinese queries)
-Translation: Google Gemini Flash
-Research: Tavily + DeepSeek (Chinese search context)
-Language output: per-task (extractConceptsLanguage: zh-CN)
-```
-
----
+1. Nainstalujte plugin a zálohujte zdroje.
+2. Nastavte a ověřte konkrétní profil/model.
+3. Vyberte složku pojmů a odlišné cíle.
+4. Spusťte jednu úlohu na kopii.
+5. Porovnejte výstup a uchovejte opravy.
+6. Před delším postupem ověřte malou složku a částečné dokončení.
 
 ## Běžné vzory
 
-### Vzor: Zpracování výzkumné práce
+### Výzkumný článek
 
-1. Importovat obsah PDF (nebo vložit)
-2. **Výzkum** — získat webový kontext k tématu
-3. **Přidat odkazy** — identifikovat a propojit klíčové koncepty
-4. **Vytáhnout koncepty** — vytvořit samostatné poznámky
-5. **Vytvořit diagram** — vizualizovat strukturu práce
+Převeďte článek externím nástrojem do Markdownu a nejprve ověřte vzorce, tabulky a obrázky. Extrahujte pojmy či původní pasáže, zkoumejte vybrané otázky a vytvořte diagram jen pro vztah, který dokážete ověřit. Uchovejte odkaz na originál i opravy.
 
-### Vzor: Obohacení denní poznámky
+### Sbírka pojmů
 
-1. Napište denní poznámku
-2. **Přidat odkazy** — spojuje dnešní myšlenky se stávajícími koncepty
-3. Poznámky k konceptům se automaticky aktualizují s odkazy zpět
+Použijte vyhrazenou složku, kontrolujte terminologii a vysvětlení generujte pro záměrně vybranou podmnožinu. Před odstraněním duplicit zálohujte. Více pojmů nenahrazuje správné definice a dobrou navigaci.
 
-### Vzor: Přehled literatury
+### Soukromý materiál
 
-1. Vytvořte složku s články/poznámkami
-2. **Hromadné přidání odkazů** — zpracujte celou složku
-3. **Odstranit duplikované koncepty** — vyčistěte téměř shodné poznámky
-4. **Vytvořit diagram** — mapa myšlenek celé literatury
+Připravte lokální server, modely a závislosti; ověřte směrování úloh a při požadavku offline vynechte síťovou rešerši. Diagnostiku před sdílením zkontrolujte. Výchozí loopback adresa nebrání změně profilu na vzdálený server.
 
----
+### Přerušená dávka
 
-*Notemd je open source (MIT) a funguje s Obsidian 0.15.0+ na všech platformách. [Nainstalujte nyní](/docs/getting-started/installation) nebo [zobrazit na GitHubu](https://github.com/Jacobinwwey/obsidian-NotEMD).*
+Vyčkejte na ustálení zrušení či chyby. Čtěte zprávu, prověřte hotové i obnovené výstupy a konflikty a opakujte jen zamýšlenou práci. Zrušený stav neznamená prázdný výsledek. Doprovodné soubory nemažte bez kontroly odkazů.
+
+## Dále
+
+- [Rychlý start](./getting-started/quick-start).
+- [Dávky](./advanced/batch-processing).
+- [Vývojáři](./developers/overview).
+- [Agent](./agents/overview).

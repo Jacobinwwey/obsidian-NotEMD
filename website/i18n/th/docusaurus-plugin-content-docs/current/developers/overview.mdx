@@ -1,0 +1,97 @@
+---
+id: overview
+title: คู่มือนักพัฒนา
+description: Build ทดสอบ และขยายสัญญาผู้ให้บริการ การทำงาน การเรนเดอร์ และเอกสารที่มีอยู่
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords:
+  - คู่มือนักพัฒนา
+  - Notemd
+  - Obsidian
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# คู่มือนักพัฒนา
+
+<TLDR>ทำงานบน branch แยก ติดตั้ง dependency ที่ล็อกไว้และเบราว์เซอร์ทั้งสอง revision จากนั้น build และรัน Jest ทั้งชุด เปลี่ยนที่เจ้าของสัญญาเดิม พร้อมรักษาเอกสาร การทดสอบผู้ให้บริการ และหลักฐานจากแอปปลายทางให้สอดคล้อง</TLDR>
+
+## เตรียม working copy
+
+Clone [repository](https://github.com/Jacobinwwey/obsidian-NotEMD) และอ่าน [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md) CI ปลั๊กอินใช้ Linux/Windows กับ Node 20 ส่วนเว็บไซต์ใช้ Node 24 ติดตั้ง dependency ที่ root และ `website/` แยกกัน
+
+```bash
+npm ci
+npx --no-install playwright install --with-deps chromium
+node node_modules/playwright-chromium/cli.js install chromium
+npm run build
+npm test -- --runInBand
+```
+
+Playwright สองแพ็กเกจอาจต้องใช้ Chromium คนละ revision ติดตั้งตัวเดียวจึงไม่พอ `main.js` ถูกสร้างและ gitignore ไว้ bundle เก่าในเครื่องไม่ตรวจสอบ commit ใหม่
+
+## หาเจ้าของส่วนงาน
+
+| ความรับผิดชอบ | แหล่งโค้ดหลัก |
+| ---------------- | ---------------- |
+| วงจรชีวิตปลั๊กอิน คำสั่ง และการเชื่อมกับแอปโฮสต์ | `src/main.ts` |
+| โปรไฟล์ผู้ให้บริการ metadata โพรโทคอล และการตรวจค่า | `src/llmProviders.ts` |
+| คำขอ การรับส่ง การลองใหม่ และสตรีม | `src/llmUtils.ts` |
+| Operations, schemas และชุด CLI สาธารณะ | `src/operations/`, `src/cliContracts.ts` |
+| งานไฟล์ การค้นคว้า และการแปล | `src/fileUtils.ts`, `src/searchUtils.ts`, `src/translate.ts` |
+| การทำงานเวิร์กโฟลว์และแถบด้านข้าง | `src/workflowButtons.ts`, `src/ui/NotemdSidebarView.ts` |
+| ข้อกำหนดแผนภาพและการเรนเดอร์ | `src/diagram/`, `src/rendering/` |
+| ข้อความ UI และภาษา | `src/i18n/` |
+| คู่มือสาธารณะและคำแปล | `website/docs/`, `website/i18n/` |
+| ขั้นตอนผู้ดูแลและหลักฐานระบุวันที่ | `docs/maintainer/` |
+
+Bundle ที่แจกจ่ายมี preview host ภายในและทำงานได้ในตัว เส้นทางแยก host ที่อาจเสนอไว้ไม่ใช่สัญญาไฟล์ที่ส่งมอบ การเปิดใช้ต้องเปลี่ยนการแพ็ก assets การตรวจ และเอกสารร่วมกัน
+
+## เปลี่ยนให้มีขอบเขต
+
+1. ทำซ้ำปัญหาแล้วเขียนการทดสอบเฉพาะที่ล้มเหลวก่อน
+2. แก้ที่เจ้าของ invariant และตรวจข้อมูลที่ขอบเขตภายนอก
+3. รันการทดสอบเฉพาะและทั้งชุด รักษาการยกเลิก ข้อผิดพลาด และความคงทนของการเขียน
+4. อัปเดตต้นฉบับอังกฤษและภาษาที่กระทบ เอกสารแผน งาน และ walkthrough ต้องมีอังกฤษ/จีนครบถ้วนแยกกันใต้ `docs/`
+5. ตรวจการเปลี่ยนภาพ/รูปแบบในแอปปลายทางจริง XML ภาพ หรือ build ไม่พิสูจน์การแก้ไขได้หรือจุดเชื่อมที่ยังติดกัน
+
+เพิ่มผู้ให้บริการใน `llmProviders.ts` ใช้ transport ที่เข้ากันได้ และเพิ่ม `llmProviders.test.ts`, `llmUtilsProviderSupport.test.ts`, README และการตรวจเชื่อมต่อ รักษาสตรีมและคำตอบที่ถูกขัดจังหวะ ก่อนเปิด operation ต้องมี input/result schema บริบท ผลข้างเคียง และแท็กจัดการข้อมูล การอยู่ใน registry ไม่ได้ทำให้เป็น Agent endpoint สาธารณะ ดู [Agent](../agents/overview)
+
+## การตรวจสอบ
+
+```bash
+npm run build
+npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
+npm run lint:regressions -- --base-ref origin/main
+git diff --check
+```
+
+Lint เปรียบเทียบข้อวินิจฉัยรายรายการ จำนวนรวมลดลงไม่ใช่เหตุให้ยอมรับ regression ใหม่ หากเปลี่ยนการค้นข้อมูล ให้ใช้ `npm run benchmark:local-kb` พร้อมรายงาน corpus และสภาพแวดล้อม สำหรับเว็บไซต์บน Node 24:
+
+```bash
+npm --prefix website ci
+npm --prefix website run build
+npm --prefix website run audit:build
+npm run docs:build
+```
+
+โครงการเอกสาร 1.9.8 ให้ Codex เขียนและตรวจคำแปลโดยตรง ห้ามเรียกสคริปต์เขียนคำแปลแบบเก่า LM Studio หรือบริการแปล เครื่องมือใช้จัดรูปแบบ ตรวจสอบ และเรนเดอร์ข้อความที่เขียนแล้วได้
+
+## Obsidian และแอปปลายทาง
+
+ใช้ vault ทดลองที่มีเครื่องหมาย `.notemd-host-verification` สคริปต์ตรวจ bundle ที่คัดลอกมา แยกจาก vault ผู้ใช้จริง ลองทั้ง `obsidian help` และ `obsidian-cli help` ถ้าเครื่องมือไม่มีให้รายงานว่าใช้ไม่ได้ ไม่ใช่ผ่านการทดสอบ host
+
+PowerPoint, CircuitikZ และสไลด์มีข้อกำหนดกับ artifacts ของตน ทำตาม [การตรวจรับที่ระบุวันที่](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/reliability-acceptance-2026-09-12.md) และ [ขั้นตอน release](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/release-workflow.md) แสดงขอบเขตมือถือและเวอร์ชันขั้นต่ำที่ยังไม่ทดสอบ
+
+## การมีส่วนร่วมและ release
+
+PR ควรบอกปัญหา พฤติกรรมสุดท้าย การทดสอบ และข้อจำกัด แนบการทำซ้ำใน [Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues) อย่า commit คีย์ โน้ตส่วนตัว หรือผลลัพธ์ที่ไม่เกี่ยวข้อง ให้ผู้เผยแพร่เพียงรายเดียวรับผิดชอบเวอร์ชันตรงกัน tag ตัวเลข source ที่สะอาดตรง tag บันทึกสองภาษา draft assets ที่ตรวจแล้ว การเผยแพร่ และการ deploy Pages อย่างชัดเจน ห้ามย้าย tag ที่เผยแพร่แล้ว `.trellis/` เป็นสถานะงานเฉพาะเครื่อง ไม่ใช่ dependency ของ CI
+
+## ขั้นต่อไป
+
+- [AGENTS.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/AGENTS.md)
+- [สถานะโครงการ](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/docs/maintainer/project-plan-status.md)
+- [Agent](../agents/overview)
+- [1.9.8](../releases/1.9.8)

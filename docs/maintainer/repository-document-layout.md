@@ -17,11 +17,14 @@ By 2026-07-02, the repository already had canonical current-main truth under `do
 
 These locations now carry active documentation truth:
 
+- `website/docs/` and `website/i18n/` - public task guides, audience entry points and their reviewed translations
 - `docs/README.md` and `docs/README.zh-CN.md` - repository docs hub
 - `docs/maintainer/` - maintainer control docs and workflow contracts
 - `docs/brainstorms/` - dated progress audits, closure analysis, and bounded-direction docs
 - `docs/superpowers/plans/` - longer-running plans and roadmaps
 - `docs/releases/` - release notes
+
+The public FAQ owns visible answers and structured FAQ metadata in the same source document. `docs/faq.md` and its Chinese counterpart are discovery entries, not separate answer catalogs. `CONTRIBUTING.md` routes contributors to the developer guide; AGENTS remains the execution-rule owner. Website release facts are a small projection of package/manifest metadata in `website/src/lib/releaseFacts.cjs`, consumed by browser and Node tooling. Historical acceptance and chronicle records retain their own dates and source revisions.
 
 ### Archive docs
 
@@ -36,6 +39,7 @@ Those files are preserved for reference, but they are not the default source of 
 Root Markdown should now be limited to repository contract or discovery surfaces:
 
 - `README*.md`
+- `CONTRIBUTING.md`
 - `AGENTS.md`
 - `GEMINI.md`
 - `change.md`

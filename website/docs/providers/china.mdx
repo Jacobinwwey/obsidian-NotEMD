@@ -1,16 +1,10 @@
 ---
 id: china
 title: China Providers
-description: Configure Qwen, DeepSeek, GLM, etc.
+description: Match regional provider accounts, endpoint paths and model or deployment IDs in Notemd.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
-concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
-citations:
-  - title: Qwen API
-    url: https://help.aliyun.com/zh/dashscope
-  - title: DeepSeek API
-    url: https://platform.deepseek.com
+keywords: [Notemd DeepSeek, Qwen, Doubao, Moonshot, GLM, regional endpoints]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -18,58 +12,50 @@ import TLDR from '@site/src/components/TLDR';
 # China Providers
 
 <TLDR>
-**Notemd supports China-region and China-origin providers through mostly OpenAI-compatible endpoints.** The current set includes DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Huawei Cloud MaaS, and Z AI. The value is regional reach and cost control; the risk is provider-specific model naming and account gating.
-
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+Use the provider preset matching your account and deployment. Regional endpoint paths, model names and permissions are not interchangeable, even when providers expose the same OpenAI-compatible protocol. Verify a small task before choosing a provider for a workload.
 </TLDR>
 
 ## Setup
 
-Create the provider account, generate an API key, then pick the matching Notemd provider preset instead of using a generic OpenAI profile. The preset owns the default Base URL, model, API test mode, model-discovery behavior, and any provider-specific UI fields.
-
-Use per-task model selection aggressively here. For example, keep DeepSeek or GLM on reasoning-heavy workflows, use Qwen or Moonshot for broad Chinese-language work, and route coding tasks to Qwen Code when that account exposes the coder models.
+Create an API account with the chosen provider, obtain its key, and select the corresponding Notemd preset. Confirm the account's endpoint region and model entitlement. Run **Test connection** and a disposable note task; preset defaults do not guarantee current model availability.
 
 ## Endpoint And Authentication
 
-| Provider | Default Model | Base URL |
-|----------|---------------|----------|
-| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
-| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
-| Doubao | (endpoint ID required) | `ark.cn-beijing.volces.com/api/v3` |
-| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
-| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
-| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
-| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
-| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
-| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
-| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
-| Z AI | `glm-5` | `api.z.ai/api/paas/v4` |
+| Preset | Default model | Default base URL |
+|--------|---------------|------------------|
+| DeepSeek | `deepseek-v4-pro` | `https://api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | `ep-xxxxxxxxxxxxxxxx` | `https://ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `https://api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `https://api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `https://open.bigmodel.cn/api/paas/v4` |
+| Z AI | `glm-5` | `https://api.z.ai/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `https://api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `https://qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `https://api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `https://api.modelarts-maas.com/v1` |
 
-**Note:** Doubao requires an Ark endpoint ID (format: `ep-xxxxxxxx-xxxx-xxxx`) instead of a standard model name.
-
-Most of these providers use the shared OpenAI-compatible runtime, but their account and model semantics differ. Keep the preset-specific Base URL unless you have verified the account's alternate endpoint.
+Replace Doubao's placeholder with an Ark endpoint ID or a model ID your deployment supports. GLM and Z AI have different regional presets. A key for one account region or subscription path may not work on another endpoint; use the provider's account instructions rather than choosing solely by your physical location.
 
 ## Model Discovery
 
-DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Baidu Qianfan, and SiliconFlow use OpenAI-compatible model discovery when the provider supports listing. Huawei Cloud MaaS uses the `huaweicloud-modelarts-models` mode because ModelArts deployment metadata is not identical to a generic `/v1/models` list.
+Use model discovery where the provider permits it. Huawei Cloud MaaS uses deployment-aware discovery; other listed presets have OpenAI-compatible discovery paths where supported. Lack of listing permission does not necessarily mean an explicitly configured model cannot generate.
 
-Do not treat discovery failure as proof that chat is impossible. Several providers allow chat while limiting model-list permissions. In that case, keep an explicit model ID in the profile and validate with the connection test.
+Connection-test behavior also differs by preset. DeepSeek can succeed from a model-list response alone, while several regional presets perform a short chat request. A real task remains necessary to verify its prompt and output requirements.
 
 ## Troubleshooting
 
-- Auth succeeds but chat fails: the model name may be outside the account's entitlement or region.
-- Doubao fails with a normal model name: use the Ark endpoint ID in the model field when your deployment requires it.
-- Reasoning responses are truncated: check provider-specific max output tokens and Notemd's model-aware max-token settings.
-- Regional networking varies: use the provider's China-region endpoint when the vault machine is inside China; use the international endpoint only when the account and network path are both valid.
+- Key accepted but generation denied: check model entitlement, deployment and account region.
+- Ark model rejected: confirm whether that endpoint expects a deployment ID or model ID.
+- Truncated reasoning response: inspect requested output limits and provider-specific thinking settings.
+- Network error: test the configured endpoint from the device running Obsidian and inspect the reported transport error.
 
 ## When To Use
 
-Use China providers when regional latency, payment/account access, Chinese-language quality, or cost is the primary constraint. Prefer direct OpenAI, Anthropic, Google, or local providers when you need a simpler protocol boundary or stronger cross-provider debugging consistency.
-
----
+Choose according to reachable account endpoints, data-handling requirements and measured task output. Region or model branding is not a quality, privacy or cost guarantee. [Provider overview](./overview) also lists gateways and local servers when those better match your deployment.
 
 ## Next Steps
 
-- [LLM Providers](/docs/providers/overview) -- Full configuration, per-task models, and retry logic
-- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix regional connectivity and authentication errors
+- [Provider overview](./overview): all 36 presets and task routing.
+- [Troubleshooting](../advanced/troubleshooting): reproduce authentication and model errors.

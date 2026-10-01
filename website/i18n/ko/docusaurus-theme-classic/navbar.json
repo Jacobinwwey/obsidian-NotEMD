@@ -12,11 +12,31 @@
     "description": "Navbar item with label Docs"
   },
   "item.label.FAQ": {
-    "message": "FAQ",
+    "message": "자주 묻는 질문",
     "description": "Navbar item with label FAQ"
   },
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Start here": {
+    "message": "시작하기",
+    "description": "Navbar label: Start here"
+  },
+  "item.label.Newcomers": {
+    "message": "처음 사용하는 분",
+    "description": "Navbar label: Newcomers"
+  },
+  "item.label.User workflows": {
+    "message": "일상 작업",
+    "description": "Navbar label: User workflows"
+  },
+  "item.label.Developers": {
+    "message": "개발자",
+    "description": "Navbar label: Developers"
+  },
+  "item.label.Agents": {
+    "message": "Agent",
+    "description": "Navbar label: Agents"
   }
 }
