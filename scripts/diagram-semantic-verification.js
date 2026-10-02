@@ -630,7 +630,7 @@ function resolveRenderHostRuntimeConsumptionFacts({
         const presentationRegistrySource = fs.readFileSync(presentationRegistryPath, 'utf8');
 
         const mainCreatesIframeRenderHostSession = mainSource.includes('new IframeRenderHost().createSession(');
-        const openPreviewDelegatesThroughModal = mainSource.includes('this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved)');
+        const openPreviewDelegatesThroughModal = /this\.openDiagramPreviewModal\(artifact,\s*sourcePath,\s*artifactSaved(?:,|\))/.test(mainSource);
         const previewModalUsesIframeSrcdoc = previewModalSource.includes('iframe.srcdoc =')
             && previewModalSource.includes('createSession(artifact')
             && previewModalSource.includes('.htmlSrcdoc');

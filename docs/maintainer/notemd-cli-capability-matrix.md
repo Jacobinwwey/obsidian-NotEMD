@@ -109,6 +109,7 @@ The repo now also carries a small maintainer helper over `obsidian-cli native ev
   - `content.split-note-by-chapters`
   - `research.summarize-topic`
   - `diagram.generate`
+  - `diagram.export.retry`
   - `local-knowledge.inspect`
   - `provider.profile.export-redacted`
   - `cli.capability-manifest.export`
@@ -120,7 +121,7 @@ Boundary:
 - this is maintainer-grade repo tooling, not a public CLI API
 - the operation catalog lives in `scripts/lib/maintainer-cli-operation-help.js` as shared maintainer helper metadata, including compact example payloads for the path-based operations
 - the checked-in `scripts/invoke-maintainer-cli-operation.js` entrypoint is now also process-level regression-locked: `--help`, `--input-json`, `--input-file`, `--pretty`, child stderr passthrough, and unparseable `obsidian-cli native eval` failures are covered without depending on a live desktop session
-- export operations remain empty-payload only; bounded content operations accept explicit JSON input
+- metadata/profile export operations remain empty-payload only; content and diagram-export retry operations accept explicit JSON input
 - minimal inspect example: `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"]}' --pretty`
 - for `--vault docs`, all `sourcePath` and `knowledgePaths` values are vault-relative; use `index.zh-CN.md` and `maintainer`, not `docs/index.zh-CN.md` or `docs/maintainer`
 - `local-knowledge.inspect` is intentionally maintainer-only explainability surface: it exposes task scope, effective knowledge-base path resolution, derived or explicit query, query diagnostics, current-file exclusion inputs, retrieval options, candidate file paths, raw formatted context, structured `contextBlocks` evidence, and the structured retrieval summary without widening the public CLI contract
@@ -141,6 +142,14 @@ Boundary:
 - `content.split-note-by-chapters` also accepts optional `splitHeadingLevel` (`auto`, `h1`-`h6`) so scripts can avoid depending on the current settings snapshot
 - `content.split-note-by-chapters` results now also expose `requestedSplitHeadingLevel`, `chapterNotePaths`, `managedArtifactPaths`, `removedStalePaths`, deterministic `tocMetadata`, and stable `nestedHeadings[].blockId` values so automation can reason about the managed artifact set, TOC front-matter metadata, and repeated-heading-safe TOC targets without re-deriving them from filenames or ambiguous heading text; reruns now also refuse to overwrite or delete manifest-managed artifacts whose contents drifted from the last generated snapshot
 - path-based maintainer operations stay maintainer-only until their side effects, output schemas, and failure semantics are promoted as part of a public contract batch
+
+### Multi-format diagrams (main, unreleased)
+
+`diagram.generate` accepts `requestedOutputs`, for example `{"sourcePath":"Notes/topic.md","requestedTypeId":"drawnix-knowledge-map","requestedOutputs":["source:drawnix","html-diagram","svg","png","pdf"]}`. Output IDs are `source:mermaid`, `source:json-canvas`, `source:vega-lite`, `source:drawio`, `source:drawnix`, `source:circuitikz`, `html-diagram`, `html-summary`, `svg`, `png`, and `pdf`. The HTML IDs mean graphic preview and structured summary respectively. Presentation PPTX/MP4 export is independent.
+
+Explicit type/intent constrains this invocation; an output-only override can coordinate the stored type. Neither changes saved user settings. `followThrough.exportRun` reports `completed`, `partial` or `cancelled`, the manifest path, effective plan, inactive requests and per-output paths/status/receipts. Partial delivery is not full success. One native target is active per batch; compatible derived formats share its rendering.
+
+`diagram.export.retry` takes `{"manifestPath":"Notes/topic_diagram-<UUID>/run.notemd-diagram.json"}` and returns the run directly. It restores the saved specification, renderer artifact and cached intermediates, checks existing receipts, and retries unfinished outputs without calling the LLM. Preserve the whole batch directory, including native companions. Changed successful files or externally modified manifests are retained and reported as conflicts. This remains a maintainer-only operation, not a new public command binding.
 
 ## Current Command Matrix
 

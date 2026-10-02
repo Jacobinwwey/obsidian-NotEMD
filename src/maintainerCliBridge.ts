@@ -20,12 +20,14 @@ import { ChapterSplitResult } from './chapterSplit';
 import { ResearchSummarizeResult } from './searchUtils';
 import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES, ChapterSplitHeadingLevelSetting, ProgressReporter } from './types';
 import { assertMaintainerCliInput, assertOperationResult } from './operations/contractSchemas';
+import type { DiagramExportRun } from './diagram/diagramExportRun';
 
 export type MaintainerCliOperationId =
     | 'content.batch-generate-from-titles'
     | 'content.split-note-by-chapters'
     | 'research.summarize-topic'
     | 'diagram.generate'
+    | 'diagram.export.retry'
     | 'local-knowledge.inspect'
     | 'provider.profile.export-redacted'
     | 'cli.capability-manifest.export'
@@ -42,6 +44,7 @@ export type MaintainerCliOperationResult =
     | ChapterSplitResult
     | ResearchSummarizeResult
     | DiagramCommandRunResult
+    | DiagramExportRun
     | LocalKnowledgeInspectResult
     | ExportRedactedProviderProfilesCommandResult
     | ExportCliCapabilityManifestCommandResult
@@ -50,6 +53,7 @@ export type MaintainerCliOperationResult =
     | null;
 
 export interface MaintainerCliBridgeHost {
+    retryDiagramExportsCommand?: (manifestPath: string, reporter?: ProgressReporter) => Promise<DiagramExportRun>;
     batchGenerateContentForTitlesCommand: (
         reporter?: ProgressReporter,
         folderPathOverride?: string,
@@ -253,6 +257,7 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
         ['save-artifact', 'save-mermaid'] as const
     ) || 'save-artifact';
     const inputOverrides: DiagramCommandInputOverrides = {};
+    if (input.requestedOutputs !== undefined) inputOverrides.requestedOutputs = [...input.requestedOutputs as string[]];
     const requestedIntent = optionalString(input, 'requestedIntent');
     const requestedTypeId = optionalString(input, 'requestedTypeId');
     const requestedRenderTarget = optionalEnum(input, 'requestedRenderTarget', [
@@ -349,6 +354,10 @@ export async function invokeMaintainerCliOperation(
                 reporter,
                 buildDiagramCommandOptions(input)
             ));
+        case 'diagram.export.retry':
+            assertMaintainerCliInput(request.operationId, request.input);
+            if (!host.retryDiagramExportsCommand) throw new Error('Diagram export retry is unavailable in this host.');
+            return awaitValidatedOperationResult(request.operationId, host.retryDiagramExportsCommand(requireString(input, 'manifestPath'), reporter));
         case 'local-knowledge.inspect':
             assertMaintainerCliInput(request.operationId, request.input);
             return awaitValidatedOperationResult(request.operationId, host.inspectLocalKnowledgeCommand(

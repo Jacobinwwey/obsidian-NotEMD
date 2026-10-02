@@ -28,7 +28,7 @@ export interface DiagramHistoryViewController {
 
 const INTENTS = ['flowchart', 'sequence', 'class', 'state', 'er', 'gantt', 'pie', 'mindmap', 'timeline', 'quadrant', 'xychart', 'sankey', 'block', 'packet', 'kanban', 'architecture', 'circuit'];
 const SOURCE_FORMATS = ['mermaid', 'drawio', 'drawnix', 'circuitikz'];
-const EXPORT_FORMATS = ['svg', 'png', 'pdf'];
+const EXPORT_FORMATS = ['svg', 'png', 'pdf', 'html-diagram', 'html-summary'];
 
 export function mountDiagramHistoryView(parent: HTMLElement, options: DiagramHistoryViewOptions): DiagramHistoryViewController {
     const view = new DiagramHistoryView(options);
@@ -197,11 +197,12 @@ class DiagramHistoryView implements DiagramHistoryViewController {
         header.createEl('strong', { text: entry.title, attr: { title: entry.title } });
         if (entry.sourcePath) header.createDiv({ text: entry.sourcePath, cls: 'notemd-diagram-history-entry-source', attr: { title: entry.sourcePath } });
         item.createDiv({ text: `${new Date(entry.completedAt).toLocaleString()} · ${entry.intent} · ${entry.sourceFormat}`, cls: 'notemd-diagram-history-entry-meta' });
+        if (entry.exportManifestPath) item.createDiv({ text: getI18nStrings({ uiLocale: this.options.uiLocale }).diagramOutputs[entry.status] });
         const artifacts = item.createDiv({ cls: 'notemd-diagram-history-entry-artifacts', attr: { 'data-notemd-history-entry-artifacts': 'true' } });
         const exportNames = Object.keys(entry.exportPaths);
         artifacts.setText(exportNames.length ? formatI18n(copy.exports, { formats: exportNames.join(', ').toUpperCase() }) : copy.noExports);
         const actions = item.createDiv({ cls: 'notemd-diagram-history-actions', attr: { 'data-notemd-history-entry-actions': 'true' } });
-        if (entry.artifactPath && this.options.store.reopenArtifact) {
+        if ((entry.artifactPath || entry.exportManifestPath) && this.options.store.reopenArtifact) {
             const reopen = actions.createEl('button', { text: copy.reopen, cls: 'mod-cta' });
             reopen.onclick = async () => { if (!(await this.options.store.reopenArtifact!(entry))) new Notice(copy.reopenFailed); };
         }

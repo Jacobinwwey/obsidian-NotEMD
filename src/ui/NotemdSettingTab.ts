@@ -9,15 +9,11 @@ import {
     TaskKey
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
-import type { RenderTarget } from '../diagram/types';
 import {
-    applyDiagramTypePreference,
-    applyDiagramRenderTargetPreference,
     getDiagramTypeSelectionValue,
-    resolveDiagramTypeId,
     resolvePreferredDiagramTypeId
 } from '../diagram/diagramPreferenceCompatibility';
-import { getExecutableDiagramTypeOptions } from './diagramCatalogLabels';
+import { renderDiagramOutputSelector } from './diagramOutputSelector';
 import { renderDiagramTypePreviewPanel, resolveDiagramPreviewTypeId, type DiagramTypePreviewPanelController } from './diagramTypePreviewPanel';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
@@ -2737,100 +2733,21 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        let diagramTypeDropdown: { setValue(value: string): unknown } | null = null;
-        let renderTargetDropdown: { setValue(value: string): unknown } | null = null;
-
-        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.intent' })
+        const typeSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.intent' })
             .setName(experimentalDiagramI18n.intentName)
-            .setDesc(experimentalDiagramI18n.intentDesc)
-            .addDropdown(dropdown => {
-                diagramTypeDropdown = dropdown;
-                dropdown.addOption('auto', experimentalDiagramI18n.intentAuto);
-                getExecutableDiagramTypeOptions({
-                    intentMindmap: experimentalDiagramI18n.intentMindmap,
-                    intentDrawnixKnowledgeMap: experimentalDiagramI18n.intentDrawnixKnowledgeMap,
-                    intentFlowchart: experimentalDiagramI18n.intentFlowchart,
-                    intentSequence: experimentalDiagramI18n.intentSequence,
-                    intentClassDiagram: experimentalDiagramI18n.intentClassDiagram,
-                    intentErDiagram: experimentalDiagramI18n.intentErDiagram,
-                    intentStateDiagram: experimentalDiagramI18n.intentStateDiagram,
-                    intentCanvasMap: experimentalDiagramI18n.intentCanvasMap,
-                    intentCircuit: experimentalDiagramI18n.intentCircuit,
-                    intentDataChart: experimentalDiagramI18n.intentDataChart,
-                    intentBarChart: experimentalDiagramI18n.intentBarChart,
-                    intentLineChart: experimentalDiagramI18n.intentLineChart,
-                    intentScatterPlot: experimentalDiagramI18n.intentScatterPlot,
-                    intentRadar: experimentalDiagramI18n.intentRadar,
-                    intentOrgChart: experimentalDiagramI18n.intentOrgChart,
-                    intentTimeline: experimentalDiagramI18n.intentTimeline,
-                    intentSwimlane: experimentalDiagramI18n.intentSwimlane,
-                    intentQuadrant: experimentalDiagramI18n.intentQuadrant,
-                    intentArchitecture: experimentalDiagramI18n.intentArchitecture,
-                    intentCurrentState: experimentalDiagramI18n.intentCurrentState,
-                    intentIntegrationTopology: experimentalDiagramI18n.intentIntegrationTopology,
-                    intentDataFlow: experimentalDiagramI18n.intentDataFlow,
-                    intentAccessMatrix: experimentalDiagramI18n.intentAccessMatrix,
-                    intentGantt: experimentalDiagramI18n.intentGantt,
-                    intentLayerStack: experimentalDiagramI18n.intentLayerStack,
-                    intentSetOverlap: experimentalDiagramI18n.intentSetOverlap,
-                    intentRankedFunnel: experimentalDiagramI18n.intentRankedFunnel,
-                    intentLoop: experimentalDiagramI18n.intentLoop,
-                    intentNested: experimentalDiagramI18n.intentNested,
-                    intentTree: experimentalDiagramI18n.intentTree,
-                    intentProcess: experimentalDiagramI18n.intentProcess,
-                    intentMedallion: experimentalDiagramI18n.intentMedallion,
-                    intentHighLevel: experimentalDiagramI18n.intentHighLevel
-                }).forEach(({ value, label }) => dropdown.addOption(value, label));
-                dropdown
-                    .setValue(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
-                    .onChange(async (value: string) => {
-                        applyDiagramTypePreference(
-                            this.plugin.settings,
-                            resolveDiagramTypeId(value)
-                        );
-                        await this.plugin.saveSettings();
-                        renderTargetDropdown?.setValue(
-                            this.plugin.settings.preferredDiagramRenderTarget || 'auto'
-                        );
-                        diagramTypeDropdown?.setValue(
-                            getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings))
-                        );
-                        this.diagramTypePreviewController?.setSelectedType(
-                            resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
-                        );
-                    });
-            });
-
-        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.renderTarget' })
-            .setName(experimentalDiagramI18n.renderTargetName)
-            .setDesc(experimentalDiagramI18n.renderTargetDesc)
-            .addDropdown(dropdown => {
-                renderTargetDropdown = dropdown;
-                dropdown.addOption('auto', experimentalDiagramI18n.renderTargetAuto);
-                dropdown.addOption('mermaid', experimentalDiagramI18n.renderTargetMermaid);
-                dropdown.addOption('json-canvas', experimentalDiagramI18n.renderTargetJsonCanvas);
-                dropdown.addOption('vega-lite', experimentalDiagramI18n.renderTargetVegaLite);
-                dropdown.addOption('html', experimentalDiagramI18n.renderTargetHtml);
-                dropdown.addOption('editable-html-svg', experimentalDiagramI18n.renderTargetEditableHtmlSvg);
-                dropdown.addOption('drawio', experimentalDiagramI18n.renderTargetDrawio);
-                dropdown.addOption('drawnix', experimentalDiagramI18n.renderTargetDrawnix);
-                dropdown.addOption('circuitikz', experimentalDiagramI18n.renderTargetCircuitikz);
-                dropdown
-                    .setValue(this.plugin.settings.preferredDiagramRenderTarget || 'auto')
-                    .onChange(async (value: string) => {
-                        applyDiagramRenderTargetPreference(
-                            this.plugin.settings,
-                            value === 'auto' ? undefined : value as RenderTarget
-                        );
-                        diagramTypeDropdown?.setValue(
-                            getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings))
-                        );
-                        this.diagramTypePreviewController?.setSelectedType(
-                            resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
-                        );
-                        await this.plugin.saveSettings();
-                    });
-            });
+            .setDesc(experimentalDiagramI18n.intentDesc);
+        const outputSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.renderTarget' })
+            .setName(i18n.diagramOutputs.name)
+            .setDesc(i18n.diagramOutputs.description);
+        renderDiagramOutputSelector({
+            typeParent: typeSetting.controlEl,
+            outputParent: outputSetting.controlEl,
+            getSettings: () => this.plugin.settings,
+            saveSettings: () => this.plugin.saveSettings(),
+            onTypeChanged: () => this.diagramTypePreviewController?.setSelectedType(
+                resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
+            )
+        });
 
         const exampleSetting = this.createCatalogSetting(containerEl, {
             id: 'settings.experimentalDiagramPipeline.examples'

@@ -551,7 +551,7 @@ describe('diagram command architecture', () => {
 
         adapter.openPreview(artifact, 'Notes/Topic_diagram.canvas', true);
 
-        expect(previewSpy).toHaveBeenCalledWith(artifact, 'Notes/Topic_diagram.canvas', true);
+        expect(previewSpy).toHaveBeenCalledWith(artifact, 'Notes/Topic_diagram.canvas', true, undefined, undefined, undefined);
     });
 
     test('exposes canonical stable diagram command ids alongside legacy compatibility aliases', async () => {

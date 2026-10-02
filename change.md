@@ -4,6 +4,22 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## Unreleased / main
+
+### English
+
+- Add multi-select diagram outputs with supported choices first, latest-choice coordination and visible inactive requests. Keep presentation export configuration and dependencies independent.
+- Distinguish diagram HTML from structured-summary HTML. Persist one generated specification, per-output delivery state and SHA-256 receipts; retry partial exports from preview/history/maintainer CLI without another model request or overwriting user edits.
+- Preserve unknown preference schema versions and extension fields through ordinary selection changes. Serialize settings writes and read the current settings object after reload.
+- Fix real Obsidian manifest updates, normalize quoted evidence at the input boundary, and include Nested Scope levels in summaries. Keep UTF-8 and offline graphic export behavior through generation, persistence and recovery.
+
+### 中文
+
+- 新增图形输出多选、支持项优先排序、最新选择自动协调与暂不可用请求展示；演示导出的配置与依赖保持独立。
+- 区分图形 HTML 与结构化摘要 HTML。持久化一次生成的规格、逐格式状态及 SHA-256 收据；从预览、历史或维护 CLI 恢复部分失败的导出，不重复调用模型、不覆盖用户修改。
+- 普通勾选操作保留未知偏好版本及扩展字段，设置保存串行执行，重载后操作当前设置对象。
+- 修复真实 Obsidian 中的恢复记录更新，在输入边界规范化对象形式引文，摘要包含 Nested Scope 各层内容；生成、保存和恢复链路继续保持 UTF-8 与离线图形导出能力。
+
 ## 1.9.8
 
 ### English

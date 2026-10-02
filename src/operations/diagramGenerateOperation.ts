@@ -151,6 +151,7 @@ export async function runDiagramGenerateOperation(
                 requestedIntent: input.requestedIntent,
                 requestedVariant: input.requestedVariant,
                 requestedRenderTarget: input.requestedRenderTarget,
+                ...(input.requestedOutputs !== undefined ? { requestedOutputs: input.requestedOutputs } : {}),
                 compatibilityMode: input.compatibilityMode,
                 targetLanguage: input.targetLanguage,
                 sourceVisuals: input.sourceVisuals,

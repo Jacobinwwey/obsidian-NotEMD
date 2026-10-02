@@ -13,8 +13,10 @@ import { resolveSourceVisualReferences, scanSourceVisualReferences } from '../di
 import { buildFallbackMermaidSvg } from '../diagram/sourceVisualArtifactBuilder';
 import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 import { DRAWNIX_SOURCE_VISUAL_METADATA_VERSION } from '../diagram/adapters/drawnix/drawnixExporter';
+import type { DiagramExportRun, DiagramExportRequest } from '../diagram/diagramExportRun';
 
 export interface DiagramCommandHostAdapter {
+    exportOutputs?: (file: TFile, generation: DiagramGenerationResult, input: DiagramOperationInput, reporter: ProgressReporter) => Promise<DiagramExportRun>;
     saveMermaidSummary: (file: TFile, mermaidContent: string, reporter: ProgressReporter) => Promise<string>;
     saveArtifact: (file: TFile, artifact: RenderArtifact, reporter: ProgressReporter) => Promise<string>;
     getFileByPath: (path: string) => TFile | null;
@@ -23,13 +25,14 @@ export interface DiagramCommandHostAdapter {
     openFile: (file: TFile) => void;
     maybeAutoFixMermaid: (file: TFile, reporter: ProgressReporter, reason: string) => Promise<void>;
     supportsPreview: (artifact: RenderArtifact) => boolean;
-    openPreview: (artifact: RenderArtifact, sourcePath: string, artifactSaved?: boolean) => void;
+    openPreview: (artifact: RenderArtifact, sourcePath: string, artifactSaved?: boolean, exportRun?: DiagramExportRun, exportRequest?: DiagramExportRequest) => void;
     notify: (message: string, duration?: number) => void;
 }
 
 export type DiagramCommandExecutionMode = DiagramOperationExecutionMode;
 
 export interface DiagramCommandInputOverrides {
+    requestedOutputs?: string[];
     requestedIntent?: DiagramIntent;
     requestedTypeId?: import('../diagram/types').DiagramCatalogTypeId;
     requestedRenderTarget?: RenderTarget;
@@ -68,6 +71,7 @@ export interface DiagramCommandExecutionDetails {
 }
 
 export interface DiagramCommandFollowThroughDetails {
+    exportRun?: DiagramExportRun;
     kind: 'save-mermaid' | 'save-artifact' | 'preview-artifact';
     outputPath?: string;
     previewOpened: boolean;
@@ -1360,6 +1364,7 @@ export async function runGenerateDiagramCommandWithHost(
             requestedIntentOverride: options.inputOverrides?.requestedIntent,
             requestedTypeIdOverride: options.inputOverrides?.requestedTypeId,
             requestedRenderTargetOverride: options.inputOverrides?.requestedRenderTarget,
+            requestedOutputsOverride: options.inputOverrides?.requestedOutputs,
             compatibilityModeOverride: options.inputOverrides?.compatibilityMode,
             targetLanguageOverride: options.inputOverrides?.targetLanguage
         });

@@ -1,4 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
+import { startDiagramExportRun, readDiagramExportRun, retryDiagramExportRun } from './diagram/diagramExportRun';
+import type { DiagramExportRun, DiagramExportRequest } from './diagram/diagramExportRun';
+import { migrateDiagramOutputPreferences } from './diagram/diagramOutputPreferences';
 import {
     NotemdSettings,
     ProgressReporter,
@@ -197,6 +200,7 @@ export default class NotemdPlugin extends Plugin {
     statusBarItem: HTMLElement;
     private ribbonIconEl: HTMLElement | null = null;
     private isBusy: boolean = false;
+    private diagramHistoryRepository?: ReturnType<typeof createDiagramHistoryRepository>;
     private suppressConceptNotePathWarningOnce = false;
     currentProcessingFileBasename: { value: string | null } = { value: null }; // Keep track of the file being processed
 
@@ -274,7 +278,7 @@ export default class NotemdPlugin extends Plugin {
     }
 
     private createDiagramHistoryStore(): DiagramHistoryStore {
-        const repository = createDiagramHistoryRepository(
+        const repository = this.diagramHistoryRepository ??= createDiagramHistoryRepository(
             async () => this.settings.diagramHistoryEntries ?? [],
             async entries => {
                 this.settings.diagramHistoryEntries = entries;
@@ -282,6 +286,7 @@ export default class NotemdPlugin extends Plugin {
             },
             this.settings.diagramHistoryRetentionLimit
         );
+        repository.setRetentionLimit(this.settings.diagramHistoryRetentionLimit);
         return {
             loadPage: query => repository.query(query),
             removeEntry: id => repository.removeIndexEntry(id),
@@ -342,14 +347,14 @@ export default class NotemdPlugin extends Plugin {
         }).open();
     }
 
-    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string) {
+    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false, existingHistoryEntryId?: string, exportRun?: DiagramExportRun, exportRequest?: DiagramExportRequest) {
         const i18n = this.getUiStrings();
         const targetLabel = getRenderTargetDisplayName(artifact.target);
         const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
         const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
         const historyStore = this.createDiagramHistoryStore();
-        const historyEntryId = existingHistoryEntryId ?? `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        if (!existingHistoryEntryId) void historyStore.recordCompleted!({
+        const historyEntryId = existingHistoryEntryId ?? exportRun?.manifestPath ?? `diagram-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        if (!existingHistoryEntryId && !exportRun) void historyStore.recordCompleted!({
             id: historyEntryId,
             completedAt: Date.now(),
             title: previewTitle,
@@ -362,12 +367,22 @@ export default class NotemdPlugin extends Plugin {
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
             exportPpi: this.settings.diagramPreviewExportPpi,
             historyEntryId,
-            historyStore
+            historyStore,
+            exportRun,
+            exportRequest,
+            onExportRunSaved: run => this.recordDiagramExportRun(run)
         }).open();
     }
 
     private createDiagramCommandHostAdapter(): DiagramCommandHostAdapter {
         return {
+            exportOutputs: async (file, generation, input, reporter) => {
+                const run = await startDiagramExportRun(this.app, file.path, generation, input.requestedOutputs ?? [], input.exportPpi ?? 300, reporter, undefined,
+                    input.exportFolder);
+                try { await this.recordDiagramExportRun(run); }
+                catch (error) { reporter.log(formatI18n(this.getUiStrings().diagramOutputs.historyFailed, { message: error instanceof Error ? error.message : String(error) })); }
+                return run;
+            },
             saveMermaidSummary: (file, mermaidContent, reporter) =>
                 saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter),
             saveArtifact: (file, artifact, reporter) =>
@@ -385,8 +400,8 @@ export default class NotemdPlugin extends Plugin {
             maybeAutoFixMermaid: (file, reporter, reason) =>
                 this.maybeAutoFixMermaidForFile(file, reporter, reason),
             supportsPreview: (artifact) => this.supportsDiagramPreview(artifact),
-            openPreview: (artifact, sourcePath, artifactSaved = false) =>
-                this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved),
+            openPreview: (artifact, sourcePath, artifactSaved = false, exportRun, exportRequest) =>
+                this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved, undefined, exportRun, exportRequest),
             notify: (message, duration) => {
                 new Notice(message, duration);
             }
@@ -494,6 +509,12 @@ export default class NotemdPlugin extends Plugin {
     }
 
     private async reopenDiagramHistoryArtifact(entry: DiagramHistoryEntry): Promise<boolean> {
+        if (entry.exportManifestPath) {
+            const snapshot = await readDiagramExportRun(this.app, entry.exportManifestPath);
+            this.openDiagramPreviewModal(snapshot.generation.artifact, snapshot.run.sourcePath,
+                snapshot.run.outputs.some(output => output.id.startsWith('source:') && output.status === 'completed'), entry.id, snapshot.run);
+            return true;
+        }
         if (!entry.artifactPath) return false;
         const host = this.createDiagramCommandHostAdapter();
         const reopened = await previewArtifactFromSavedPath({
@@ -508,6 +529,37 @@ export default class NotemdPlugin extends Plugin {
             artifactSavedOverride: true
         });
         return reopened !== null;
+    }
+
+    private async recordDiagramExportRun(run: DiagramExportRun): Promise<void> {
+        const { generation } = await readDiagramExportRun(this.app, run.manifestPath);
+        const completed = run.outputs.filter(output => output.status === 'completed');
+        const source = completed.find(output => output.id.startsWith('source:'));
+        const entry: DiagramHistoryEntry = {
+            id: run.manifestPath, completedAt: Date.now(), title: generation.spec.title ?? 'Diagram', sourcePath: run.sourcePath,
+            intent: generation.spec.intent, sourceFormat: generation.artifact.target, artifactPath: source?.path,
+            exportManifestPath: run.manifestPath,
+            companionPaths: run.outputs.flatMap(output => output.files.map(file => file.path)).filter(path => path !== source?.path),
+            exportPaths: Object.fromEntries(completed.filter(output => !output.id.startsWith('source:')).map(output => [output.id, output.path])),
+            status: run.status,
+            errorMessage: run.outputs.filter(output => output.error).map(output => `${output.id}: ${output.error}`).join('\n') || undefined
+        };
+        await this.createDiagramHistoryStore().recordCompleted!(entry);
+    }
+
+    public async retryDiagramExportsCommand(manifestPath: string, reporter: ProgressReporter = this.getReporter()): Promise<DiagramExportRun> {
+        if (this.isBusy) throw new Error(this.getUiStrings().notices.anotherProcessRunning);
+        this.setBusy(true);
+        try {
+            this.startReporterAction(reporter, this.getUiStrings().diagramOutputs.retry);
+            const run = await retryDiagramExportRun(this.app, manifestPath, reporter);
+            try { await this.recordDiagramExportRun(run); }
+            catch (error) { reporter.log(formatI18n(this.getUiStrings().diagramOutputs.historyFailed, { message: error instanceof Error ? error.message : String(error) })); }
+            return run;
+        } finally {
+            this.setBusy(false);
+            if (reporter instanceof NotemdSidebarView) reporter.finishProcessing();
+        }
     }
 
     private async deleteDiagramHistoryArtifacts(entry: DiagramHistoryEntry): Promise<boolean> {
@@ -1424,6 +1476,7 @@ export default class NotemdPlugin extends Plugin {
         }
 
         this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData, { providers: mergedProviders });
+        this.settings.diagramOutputPreferences = migrateDiagramOutputPreferences(this.settings);
         this.settings.diagramPreviewExportPpi = resolvePreviewExportPpi(this.settings.diagramPreviewExportPpi);
         this.settings.globalModelAwareMaxTokensTracking = this.normalizeGlobalModelAwareMaxTokensTracking(
             this.settings.globalModelAwareMaxTokensTracking
@@ -2616,6 +2669,7 @@ export default class NotemdPlugin extends Plugin {
 
     async invokeMaintainerCliOperation(request: MaintainerCliOperationRequest) {
         return invokeMaintainerCliOperation({
+            retryDiagramExportsCommand: (manifestPath, reporter) => this.retryDiagramExportsCommand(manifestPath, reporter),
             batchGenerateContentForTitlesCommand: async (reporter, folderPathOverride, fileSelectionOverride) => (
                 this.batchGenerateContentForTitlesCommand(reporter, folderPathOverride, fileSelectionOverride)
             ),

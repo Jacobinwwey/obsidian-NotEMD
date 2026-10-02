@@ -20,6 +20,15 @@ function entry(id: string, completedAt: number, overrides: Partial<DiagramHistor
 }
 
 describe('diagram history repository', () => {
+    test('serializes concurrent additions and applies a changed retention setting', async () => {
+        let stored: DiagramHistoryEntry[] = [];
+        const repository = createDiagramHistoryRepository(async () => stored, async entries => { stored = entries; }, 10);
+        await Promise.all([repository.recordCompleted(entry('one', 1)), repository.recordCompleted(entry('two', 2))]);
+        expect(stored.map(item => item.id)).toEqual(['two', 'one']);
+        repository.setRetentionLimit(2);
+        await repository.recordCompleted(entry('three', 3));
+        expect(stored.map(item => item.id)).toEqual(['three', 'two']);
+    });
     test('exposes storage-independent history querying', () => {
         const page = queryDiagramHistoryEntries([entry('older', 1), entry('newer', 2)], { pageSize: 20 });
         expect(page.items.map(item => item.id)).toEqual(['newer', 'older']);

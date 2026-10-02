@@ -32,8 +32,10 @@ import { validateDrawnixMindMapSpec } from './adapters/drawnix/drawnixMindMapPro
 import { enrichDrawnixSourceCoverage } from './adapters/drawnix/drawnixSourceCoverage';
 import { hashResolvedSourceVisualManifest, ResolvedSourceVisual } from './sourceVisuals';
 import { normalizeDiagramSpecPayload } from './payloads/legacyPayload';
+import { addDiagramOutputPreference, getDiagramSourceOutputId, getExecutableDiagramOutputRequests, isDiagramOutputId, migrateDiagramOutputPreferences, resolveDiagramOutputPlan } from './diagramOutputPreferences';
 
 export interface DiagramGenerationOptions {
+    requestedOutputs?: readonly string[];
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
     sourcePath?: string;
     targetLanguage?: string;
@@ -50,6 +52,9 @@ export type DiagramOperationOutputMode = 'artifact' | 'mermaid';
 export type DiagramOperationExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
 export interface DiagramOperationInput {
+    requestedOutputs?: string[];
+    exportPpi?: number;
+    exportFolder?: string;
     sourcePath?: string;
     sourceMarkdown: string;
     localKnowledgeContext?: string;
@@ -67,11 +72,12 @@ export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramTypeId' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions'>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramTypeId' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions' | 'diagramOutputPreferences'> & Partial<Pick<NotemdSettings, 'diagramPreviewExportPpi' | 'useCustomSummarizeToMermaidSavePath' | 'summarizeToMermaidSavePath'>>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
     requestedTypeIdOverride?: DiagramCatalogTypeId;
     requestedRenderTargetOverride?: RenderTarget;
+    requestedOutputsOverride?: string[];
     compatibilityModeOverride?: 'best-fit' | 'legacy-mermaid';
     targetLanguageOverride?: string;
 }
@@ -93,13 +99,28 @@ export function resolveDiagramOperationCompatibilityMode(
 }
 
 export function buildDiagramOperationInput(params: BuildDiagramOperationInputParams): DiagramOperationInput {
+    const preferences = params.settings.diagramOutputPreferences ? migrateDiagramOutputPreferences(params.settings) : undefined;
+    let requestedOutputs = params.executionMode === 'save-mermaid' ? undefined : params.requestedOutputsOverride
+        ?? (preferences ? getExecutableDiagramOutputRequests(preferences) : undefined);
+    const selectedSettings = { ...params.settings };
+    if (requestedOutputs !== undefined && params.requestedOutputsOverride === undefined && params.requestedRenderTargetOverride) {
+        const sourceOutput = getDiagramSourceOutputId(params.requestedRenderTargetOverride);
+        requestedOutputs = [...requestedOutputs.filter(id => id !== sourceOutput), sourceOutput];
+    }
+    if (requestedOutputs !== undefined && !params.requestedTypeIdOverride && !params.requestedIntentOverride
+        && (params.requestedOutputsOverride !== undefined || params.requestedRenderTargetOverride)) {
+        // Explicit CLI output choices follow the same transitions as the selectors;
+        // saved preferences remain untouched and an explicit type always wins.
+        selectedSettings.diagramOutputPreferences = { version: 1, requestedOutputs: [] };
+        for (const id of requestedOutputs) if (isDiagramOutputId(id)) addDiagramOutputPreference(selectedSettings, id);
+    }
     const configuredRenderTarget = params.requestedRenderTargetOverride
-        ?? params.settings.preferredDiagramRenderTarget;
-    const requestedRenderTarget = params.executionMode === 'save-mermaid' || !isSupportedRenderTarget(configuredRenderTarget)
+        ?? selectedSettings.preferredDiagramRenderTarget;
+    let requestedRenderTarget = params.executionMode === 'save-mermaid' || !isSupportedRenderTarget(configuredRenderTarget)
         ? undefined
         : configuredRenderTarget;
     const configuredTypeId = params.requestedTypeIdOverride
-        ?? resolvePreferredDiagramTypeId(params.settings);
+        ?? (requestedOutputs !== undefined && params.requestedIntentOverride ? findDefaultDiagramType(params.requestedIntentOverride).id : resolvePreferredDiagramTypeId(selectedSettings));
     const configuredType = configuredTypeId
         ? getExecutableDiagramType(configuredTypeId)
         : undefined;
@@ -120,6 +141,10 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         ? undefined
         : configuredType?.variant;
 
+    if (requestedOutputs !== undefined && configuredType) {
+        requestedRenderTarget = resolveDiagramOutputPlan(configuredType.id, requestedOutputs, requestedRenderTarget).target;
+    }
+
     if (requestedRenderTarget === 'circuitikz' && configuredIntent && configuredIntent !== 'circuit') {
         throw new Error('CircuitikZ source format requires the circuit diagram type.');
     }
@@ -137,6 +162,10 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         : configuredVariant;
 
     return {
+        ...(requestedOutputs !== undefined ? {
+            requestedOutputs: [...requestedOutputs], exportPpi: params.settings.diagramPreviewExportPpi ?? 300,
+            exportFolder: params.settings.useCustomSummarizeToMermaidSavePath ? params.settings.summarizeToMermaidSavePath : undefined
+        } : {}),
         sourcePath: params.sourcePath,
         sourceMarkdown: params.sourceMarkdown,
         requestedIntent,
@@ -144,7 +173,7 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
         requestedRenderTarget,
         compatibilityMode: resolveDiagramOperationCompatibilityMode(
             params.executionMode,
-            params.compatibilityModeOverride ?? params.settings.experimentalDiagramCompatibilityMode,
+            requestedOutputs !== undefined ? 'best-fit' : params.compatibilityModeOverride ?? params.settings.experimentalDiagramCompatibilityMode,
             requestedRenderTarget
         ),
         outputMode: params.executionMode === 'save-mermaid' ? 'mermaid' : 'artifact',
@@ -458,13 +487,21 @@ export async function generateDiagramArtifact(
     markdown: string,
     inputOptions: DiagramGenerationOptions
 ): Promise<DiagramGenerationResult> {
-    const options = normalizeDrawnixGenerationOptions(inputOptions);
+    const options = { ...normalizeDrawnixGenerationOptions(inputOptions) };
     const plan = buildDiagramPlan(markdown, {
         compatibilityMode: options.compatibilityMode,
         requestedIntent: options.requestedIntent,
         requestedVariant: options.requestedVariant,
         requestedRenderTarget: options.requestedRenderTarget
     });
+
+    if (options.requestedOutputs !== undefined) {
+        const typeId = plan.catalogTypeId ?? findDefaultDiagramType(plan.intent).id;
+        const outputPlan = resolveDiagramOutputPlan(typeId, options.requestedOutputs, plan.renderTarget);
+        plan.renderTarget = outputPlan.target;
+        // The selected type still constrains the spec; output selection only changes its renderer.
+        options.requestedRenderTarget = outputPlan.target;
+    }
 
     const prompt = buildGenerationPrompt(plan, options);
 
@@ -527,7 +564,7 @@ export async function generateDiagramArtifact(
     let targets = [plan.renderTarget, ...plan.fallbackTargets]
         .filter((target, index, allTargets) => allTargets.indexOf(target) === index)
         // When user explicitly chose an intent, don't fall back to HTML — let retry handle failures
-        .filter(target => !(options.requestedIntent && target === 'html'));
+        .filter(target => !(options.requestedIntent && target === 'html' && target !== plan.renderTarget));
 
     // A user-selected Drawnix artifact is a strict format contract. Falling back
     // to Mermaid here would return a text artifact while callers still persist

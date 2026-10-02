@@ -424,7 +424,7 @@ function normalizeSpec(candidate: any): DiagramSpec {
         layoutHints: payload.layoutHints && typeof payload.layoutHints === 'object' ? payload.layoutHints : undefined,
         sourceLanguage: typeof payload.sourceLanguage === 'string' ? payload.sourceLanguage : undefined,
         outputLanguage: typeof payload.outputLanguage === 'string' ? payload.outputLanguage : undefined,
-        evidenceRefs: Array.isArray(payload.evidenceRefs) ? payload.evidenceRefs : [],
+        evidenceRefs: normalizeDiagramEvidenceRefs(payload.evidenceRefs),
         payload: payload.payload && typeof payload.payload === 'object'
             ? payload.payload as DiagramPayload
             : undefined,
@@ -433,6 +433,17 @@ function normalizeSpec(candidate: any): DiagramSpec {
             ? payload.extensions as Record<string, unknown>
             : undefined
     };
+}
+
+/** Accept the common quoted-reference response at the input edge without stringifying objects. */
+export function normalizeDiagramEvidenceRefs(input: unknown): string[] {
+    if (input === undefined || input === null) return [];
+    if (!Array.isArray(input)) throw new Error('Diagram evidenceRefs must be an array of quoted strings.');
+    return input.map(reference => {
+        if (typeof reference === 'string') return reference;
+        if (reference && typeof reference === 'object' && typeof reference.quote === 'string') return reference.quote;
+        throw new Error('Diagram evidenceRefs contains a reference without a quoted string.');
+    });
 }
 
 export function parseDiagramSpecResponse(raw: string): DiagramSpec {

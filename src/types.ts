@@ -217,6 +217,7 @@ export interface NotemdSettings {
     /** Stable catalog selection; preferredDiagramIntent remains the legacy semantic projection. */
     preferredDiagramTypeId?: DiagramCatalogTypeId;
     preferredDiagramRenderTarget?: RenderTarget;
+    diagramOutputPreferences?: import('./diagram/diagramOutputPreferences').DiagramOutputPreferences;
     diagramPreviewExportPpi: number;
     drawnixExportMermaidCompanions: boolean;
     circuitikzCompilerPreference: 'auto' | 'managed' | 'system' | 'custom';

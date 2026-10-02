@@ -20,12 +20,19 @@ const OPERATION_HELP = {
   'diagram.generate': {
     summary: 'Generate a saved diagram artifact or Mermaid output.',
     required: ['sourcePath'],
-    optional: ['executionMode', 'requestedIntent', 'requestedRenderTarget', 'compatibilityMode', 'targetLanguage'],
+    optional: ['executionMode', 'requestedIntent', 'requestedTypeId', 'requestedRenderTarget', 'requestedOutputs', 'compatibilityMode', 'targetLanguage'],
     exampleInput: '{"sourcePath":"index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}',
     additionalExamples: [
+      '{"sourcePath":"docs/topic.md","requestedTypeId":"drawnix-knowledge-map","requestedOutputs":["source:drawnix","html-diagram","svg"]}',
       '{"sourcePath":"circuits/common-source.md","executionMode":"save-artifact","requestedIntent":"circuit","requestedRenderTarget":"circuitikz","compatibilityMode":"best-fit","targetLanguage":"en"}',
       '{"sourcePath":"docs/architecture.zh-CN.md","executionMode":"save-artifact","requestedIntent":"drawnixMindmap","requestedRenderTarget":"drawnix","targetLanguage":"zh-CN"}'
     ]
+  },
+  'diagram.export.retry': {
+    summary: 'Retry unfinished diagram exports using their saved specification without another LLM request.',
+    required: ['manifestPath'],
+    optional: [],
+    exampleInput: '{"manifestPath":"docs/topic_diagram-UUID/run.notemd-diagram.json"}'
   },
   'local-knowledge.inspect': {
     summary: 'Inspect task-scoped local knowledge retrieval inputs, paths, and context.',

@@ -36,6 +36,7 @@
       "required": ["sourcePath"],
       "properties": {
         "sourcePath": { "type": "string" },
+        "requestedOutputs": { "type": "array", "items": { "type": "string" } },
         "executionMode": { "type": "string", "enum": ["save-artifact", "save-mermaid"] },
         "requestedIntent": { "type": "string" },
         "requestedTypeId": {
@@ -49,6 +50,11 @@
         "compatibilityMode": { "type": "string", "enum": ["best-fit", "legacy-mermaid"] },
         "targetLanguage": { "type": "string" }
       }
+    },
+    "diagram.export.retry": {
+      "type": "object",
+      "required": ["manifestPath"],
+      "properties": { "manifestPath": { "type": "string" } }
     },
     "local-knowledge.inspect": {
       "type": "object",

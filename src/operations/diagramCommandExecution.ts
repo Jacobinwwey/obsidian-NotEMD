@@ -11,6 +11,7 @@ import {
 } from './diagramCommandHostAdapter';
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
+import { formatI18n, getI18nStrings } from '../i18n';
 
 export interface DiagramCommandExecutionHost {
     getSettings: () => NotemdSettings;
@@ -101,6 +102,42 @@ export async function runArtifactDiagramExecutionWithHost(
         reporter: params.reporter,
         getLegacyMermaidPrompt: host.getLegacyMermaidPrompt
     });
+
+    if (params.operationInput.requestedOutputs !== undefined && params.executionMode === 'preview-artifact') {
+        diagramHost.openPreview(result.artifact, params.file.path, false, undefined, {
+            sourcePath: params.file.path, generation: result, requestedOutputs: [...params.operationInput.requestedOutputs], ppi: params.operationInput.exportPpi ?? 300, outputFolder: params.operationInput.exportFolder
+        });
+        params.reporter.updateStatus(host.getActionCompleteText(params.actionLabel), 100);
+        diagramHost.notify(params.i18n.notices.experimentalDiagramPreviewReady);
+        return {
+            generation: result,
+            followThrough: { kind: params.executionMode, previewOpened: true, autoFixAttempted: false, artifactTarget: result.artifact.target },
+            localKnowledgeContextUsed: params.localKnowledgeContextUsed, localKnowledgeRetrieval: params.localKnowledgeRetrieval, previewOpened: true
+        };
+    }
+    if (params.operationInput.requestedOutputs !== undefined && params.executionMode === 'save-artifact') {
+        if (!diagramHost.exportOutputs) throw new Error('Diagram multi-format export is unavailable in this host.');
+        const exportRun = await diagramHost.exportOutputs(params.file, result, params.operationInput, params.reporter);
+        const saved = exportRun.outputs.filter(output => output.status === 'completed');
+        const outputPath = saved.find(output => output.id.startsWith('source:'))?.path ?? saved[0]?.path;
+        const copy = getI18nStrings(settings).diagramOutputs;
+        const status = formatI18n(copy.runStatus, { status: copy[exportRun.status], count: saved.length, total: exportRun.outputs.length });
+        params.reporter.updateStatus(status, 100);
+        params.reporter.log(status);
+        params.reporter.log(exportRun.manifestPath);
+        if (exportRun.plan.usedDefaultOutput) params.reporter.log(copy.fallback);
+        if (exportRun.plan.inactiveOutputs.length) params.reporter.log(formatI18n(copy.inactive, { outputs: exportRun.plan.inactiveOutputs.map(output => output.id).join(', ') }));
+        diagramHost.notify(status);
+        const previewOpened = !params.reporter.cancelled && diagramHost.supportsPreview(result.artifact);
+        if (previewOpened) diagramHost.openPreview(result.artifact, params.file.path, Boolean(saved.some(output => output.id.startsWith('source:'))), exportRun);
+        return {
+            generation: result,
+            followThrough: { kind: params.executionMode, outputPath, previewOpened, autoFixAttempted: false, artifactTarget: result.artifact.target, exportRun },
+            localKnowledgeContextUsed: params.localKnowledgeContextUsed,
+            localKnowledgeRetrieval: params.localKnowledgeRetrieval,
+            outputPath, previewOpened
+        };
+    }
 
     const outputPath = await completeArtifactDiagramCommand({
         host: diagramHost,

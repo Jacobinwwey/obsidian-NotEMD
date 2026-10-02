@@ -1,6 +1,17 @@
 import { buildDiagramSpecPrompt } from '../diagram/prompts/diagramSpecPrompt';
+import { assertValidDiagramSpec } from '../diagram/spec';
 
 describe('diagram spec prompt builder', () => {
+    test('supplies a valid nested payload example with explicit containment levels', () => {
+        const prompt = buildDiagramSpecPrompt({ requiredIntent: 'nested' });
+        const example = prompt.match(/Canonical payload shape \(required\): (\{[^\n]+\})\./)?.[1];
+        expect(example).toBeDefined();
+        const fields = JSON.parse(example!);
+        expect(fields.payload.kind).toBe('nested');
+        expect(fields.payload.levels).toHaveLength(3);
+        expect(() => assertValidDiagramSpec({ intent: 'nested', title: 'Containment', schemaVersion: 2, ...fields })).not.toThrow();
+        expect(prompt).toContain('outermost to innermost');
+    });
     test('builds a spec-first prompt instead of direct mermaid output instructions', () => {
         const prompt = buildDiagramSpecPrompt();
 

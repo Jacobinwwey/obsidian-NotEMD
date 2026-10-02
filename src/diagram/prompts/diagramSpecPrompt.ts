@@ -30,6 +30,8 @@ function buildCanonicalPayloadShapeSection(
             return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "ranked-segments", "orientation": "funnel", "segments": [{ "id": "stage", "label": "...", "sub": "...", "focal": true }] } }. Keep four to six ordered segments and do not replace them with a different payload kind.`;
         case 'tree':
             return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "tree", "nodes": [{ "id": "root", "label": "..." }, { "id": "child", "label": "...", "parentId": "root" }] } }. Use exactly one root; every non-root node must carry a valid parentId.`;
+        case 'nested':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "nested", "levels": [{ "id": "outer", "label": "Outer scope" }, { "id": "middle", "label": "Contained scope" }, { "id": "inner", "label": "Innermost scope", "focal": true }] } }. Provide three to five source-backed containment levels ordered outermost to innermost. Each level requires a unique id and a concise label; sub is optional and at most one level may be focal. Replace the example labels with source content in the requested language. Do not encode these levels only as generic nodes, sections, or nestedSpec.`;
         default:
             return '';
     }
@@ -270,6 +272,7 @@ Validation rules:
 - Reference only existing node ids in edges. Edge objects must use "from" and "to" fields (not "source"/"target").
 - Keep labels concise and faithful to the source.
 - Put verbatim evidence snippets into evidenceRefs when the source contains critical wording.
+- evidenceRefs must be an array of strings, such as ["Verbatim source quotation"]. Do not emit id/quote objects in this field.
 - For dataChart intent, every dataSeries[] entry must include dataSeries[].id, dataSeries[].label, and dataSeries[].points.
 - For dataChart intent, every points[] entry must include points[].x and a numeric points[].y extracted from the source.
 - Even single-series charts must include both series id and series label.

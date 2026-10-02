@@ -1,6 +1,7 @@
 import type { OperationSchema } from './types';
 import { getOperationDefinition } from './registry';
 import { validateContractValue } from './schemaRuntime';
+import { DIAGRAM_EXPORT_RUN_RESULT_SCHEMA } from './diagramExportContract';
 
 export {
     assertContractValue,
@@ -49,6 +50,7 @@ const LOCAL_KNOWLEDGE_INSPECT_RESULT_SCHEMA: OperationSchema = {
 };
 
 const MAINTAINER_CLI_RESULT_SCHEMAS: Record<string, OperationSchema> = {
+    'diagram.export.retry': DIAGRAM_EXPORT_RUN_RESULT_SCHEMA,
     'local-knowledge.inspect': LOCAL_KNOWLEDGE_INSPECT_RESULT_SCHEMA
 };
 

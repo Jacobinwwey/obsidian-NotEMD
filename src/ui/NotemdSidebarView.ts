@@ -4,15 +4,11 @@ import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } 
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
-import type { RenderTarget } from '../diagram/types';
 import {
-    applyDiagramTypePreference,
-    applyDiagramRenderTargetPreference,
     getDiagramTypeSelectionValue,
-    resolveDiagramTypeId,
     resolvePreferredDiagramTypeId
 } from '../diagram/diagramPreferenceCompatibility';
-import { getExecutableDiagramTypeOptions } from './diagramCatalogLabels';
+import { renderDiagramOutputSelector } from './diagramOutputSelector';
 import {
     renderDiagramTypePreviewPanel,
     resolveDiagramPreviewTypeId,
@@ -141,8 +137,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private slideExportOutlineActionsEl: HTMLElement | null = null;
     private slideExportControlsSectionEl: (HTMLElement & { open?: boolean }) | null = null;
     private slideExportEnvironmentPanelEl: HTMLElement | null = null;
-    private diagramIntentSelector: HTMLSelectElement | null = null;
-    private diagramRenderTargetSelector: HTMLSelectElement | null = null;
     private diagramTypePreviewController: DiagramTypePreviewPanelController | null = null;
     private apiLivenessPhase: ApiLivenessVisualPhase = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1715,102 +1709,20 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     private buildDiagramIntentSelector(parent: HTMLElement) {
         const i18n = this.getStrings();
-        const row = parent.createDiv({ cls: 'notemd-inline-control' });
-        row.createEl('label', { text: i18n.settings.developer.experimentalDiagramPipeline.intentName, cls: 'notemd-inline-label' });
-        const selector = row.createEl('select', { cls: 'notemd-language-select' });
-        this.diagramIntentSelector = selector;
-
         const diagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
-        const intents = [
-            { value: 'auto', label: diagramI18n.intentAuto },
-            ...getExecutableDiagramTypeOptions({
-                intentMindmap: diagramI18n.intentMindmap,
-                intentDrawnixKnowledgeMap: diagramI18n.intentDrawnixKnowledgeMap,
-                intentFlowchart: diagramI18n.intentFlowchart,
-                intentSequence: diagramI18n.intentSequence,
-                intentClassDiagram: diagramI18n.intentClassDiagram,
-                intentErDiagram: diagramI18n.intentErDiagram,
-                intentStateDiagram: diagramI18n.intentStateDiagram,
-                intentCanvasMap: diagramI18n.intentCanvasMap,
-                intentCircuit: diagramI18n.intentCircuit,
-                intentDataChart: diagramI18n.intentDataChart,
-                intentBarChart: diagramI18n.intentBarChart,
-                intentLineChart: diagramI18n.intentLineChart,
-                intentScatterPlot: diagramI18n.intentScatterPlot,
-                intentRadar: diagramI18n.intentRadar,
-                intentOrgChart: diagramI18n.intentOrgChart,
-                intentTimeline: diagramI18n.intentTimeline,
-                intentSwimlane: diagramI18n.intentSwimlane,
-                intentQuadrant: diagramI18n.intentQuadrant,
-                intentArchitecture: diagramI18n.intentArchitecture,
-                intentCurrentState: diagramI18n.intentCurrentState,
-                intentIntegrationTopology: diagramI18n.intentIntegrationTopology,
-                intentDataFlow: diagramI18n.intentDataFlow,
-                intentAccessMatrix: diagramI18n.intentAccessMatrix,
-                intentGantt: diagramI18n.intentGantt,
-                intentLayerStack: diagramI18n.intentLayerStack,
-                intentSetOverlap: diagramI18n.intentSetOverlap,
-                intentRankedFunnel: diagramI18n.intentRankedFunnel,
-                intentLoop: diagramI18n.intentLoop,
-                intentNested: diagramI18n.intentNested,
-                intentTree: diagramI18n.intentTree,
-                intentProcess: diagramI18n.intentProcess,
-                intentMedallion: diagramI18n.intentMedallion,
-                intentHighLevel: diagramI18n.intentHighLevel
-            })
-        ];
-
-        intents.forEach(item => {
-            selector.add(new Option(item.label, item.value));
-        });
-
-        selector.value = getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings));
-        selector.onchange = async () => {
-            const newValue = selector.value === 'auto' ? undefined : selector.value;
-            applyDiagramTypePreference(this.plugin.settings, resolveDiagramTypeId(newValue));
-            targetSelector.value = this.plugin.settings.preferredDiagramRenderTarget || 'auto';
-            this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(selector.value));
-            await this.plugin.saveSettings();
-        };
-
-        const targetRow = parent.createDiv({ cls: 'notemd-inline-control' });
-        targetRow.createEl('label', {
-            text: i18n.settings.developer.experimentalDiagramPipeline.renderTargetName,
-            cls: 'notemd-inline-label'
-        });
-        const targetSelector = targetRow.createEl('select', { cls: 'notemd-language-select' });
-        this.diagramRenderTargetSelector = targetSelector;
-
-        const renderTargets = [
-            { value: 'auto', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetAuto },
-            { value: 'mermaid', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetMermaid },
-            { value: 'json-canvas', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetJsonCanvas },
-            { value: 'vega-lite', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetVegaLite },
-            { value: 'html', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetHtml },
-            { value: 'editable-html-svg', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetEditableHtmlSvg },
-            { value: 'drawio', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawio },
-            { value: 'drawnix', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetDrawnix },
-            { value: 'circuitikz', label: i18n.settings.developer.experimentalDiagramPipeline.renderTargetCircuitikz },
-        ];
-
-        renderTargets.forEach(item => {
-            targetSelector.add(new Option(item.label, item.value));
-        });
-
-        targetSelector.value = this.plugin.settings.preferredDiagramRenderTarget || 'auto';
-        targetSelector.onchange = async () => {
-            applyDiagramRenderTargetPreference(
-                this.plugin.settings,
-                targetSelector.value === 'auto' ? undefined : targetSelector.value as RenderTarget
-            );
-            selector.value = getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings));
-            this.diagramTypePreviewController?.setSelectedType(resolveDiagramPreviewTypeId(selector.value));
-            await this.plugin.saveSettings();
-        };
-
-        parent.createEl('p', {
-            text: i18n.settings.developer.experimentalDiagramPipeline.exportFormatsDesc,
-            cls: 'notemd-control-hint'
+        const row = parent.createDiv({ cls: 'notemd-inline-control' });
+        row.createEl('label', { text: diagramI18n.intentName, cls: 'notemd-inline-label' });
+        const outputRow = parent.createDiv({ cls: 'notemd-diagram-output-setting' });
+        outputRow.createEl('label', { text: i18n.diagramOutputs.name, cls: 'notemd-inline-label' });
+        outputRow.createEl('p', { text: i18n.diagramOutputs.description, cls: 'notemd-control-hint' });
+        renderDiagramOutputSelector({
+            typeParent: row,
+            outputParent: outputRow,
+            getSettings: () => this.plugin.settings,
+            saveSettings: () => this.plugin.saveSettings(),
+            onTypeChanged: () => this.diagramTypePreviewController?.setSelectedType(
+                resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
+            )
         });
 
         const renderThumbnail = typeof this.plugin.renderDiagramExampleThumbnail === 'function'
@@ -1863,7 +1775,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             },
             renderThumbnail
         });
-        this.diagramTypePreviewController.setSelectedType(resolveDiagramPreviewTypeId(selector.value));
+        this.diagramTypePreviewController.setSelectedType(resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings))));
     }
 
     async onOpen() {
@@ -2062,8 +1974,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.slideExportOutlineActionsEl = null;
         this.slideExportControlsSectionEl = null;
         this.slideExportEnvironmentPanelEl = null;
-        this.diagramIntentSelector = null;
-        this.diagramRenderTargetSelector = null;
         this.diagramTypePreviewController?.destroy();
         this.diagramTypePreviewController = null;
         this.expandedApiActivityRequestIds.clear();

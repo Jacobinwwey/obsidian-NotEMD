@@ -8,6 +8,7 @@ import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES } from '../types';
 import { DIAGRAM_CATALOG_TYPE_IDS } from '../diagram/types';
 import { OperationCommandBinding, OperationDefinition, OperationSchema } from './types';
 import { assertOperationRegistry } from './operationContractRegistry';
+import { DIAGRAM_EXPORT_RUN_RESULT_SCHEMA } from './diagramExportContract';
 
 const COMMAND_TRIGGER_SURFACES = ['command-palette', 'hotkey', 'official-cli-command'] as const;
 
@@ -112,6 +113,7 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
     properties: {
         sourcePath: { type: 'string' },
         sourceMarkdown: { type: 'string' },
+        requestedOutputs: { type: 'array', items: { type: 'string' } },
         requestedIntent: { type: 'string' },
         requestedTypeId: { type: 'string', enum: [...DIAGRAM_CATALOG_TYPE_IDS] },
         requestedRenderTarget: {
@@ -171,6 +173,7 @@ const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
         followThrough: {
             type: 'object',
             properties: {
+                exportRun: DIAGRAM_EXPORT_RUN_RESULT_SCHEMA,
                 kind: {
                     type: 'string',
                     enum: ['save-mermaid', 'save-artifact', 'preview-artifact']

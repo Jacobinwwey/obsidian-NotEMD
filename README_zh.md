@@ -172,6 +172,9 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/803d444f-e477-428a-9ce6-4aac8075062a" />
 
 - **实验性图表流水线**:
+    - **main 开发版（尚未发布）：** 图表类型单选、图形输出多选。设置与工作台优先显示支持项，保留不兼容请求并说明状态，按最新显式选择自动协调。选择 Drawnix 源文件可切换到兼容类型；改选 Nested Scope 后，Drawnix 请求保留为暂不可用，继续交付支持的格式。演示导出保留独立设置、依赖库和环境要求；PPTX/MP4 仍属于演示导出流程。
+    - **图形 HTML**（`html-diagram`）包含可缩放的 SVG 预览；**结构化摘要 HTML**（`html-summary`，原通用“HTML”）展示规格的文本、结构与引文，不是另一种图形格式。“可编辑 HTML/SVG”保留为内部渲染器名称，不表示网页内提供图形编辑器；需要原生编辑时应导出源文件。
+    - 多格式生成会保存到 `<笔记名>_diagram-<UUID>/`：原生文件为 `source/artifact.<ext>`，附件保留相对路径，派生文件为 `diagram.html/svg/png/pdf`，可选摘要为 `summary.html`，恢复记录为 `run.notemd-diagram.json`。保存命令直接导出所选格式；预览命令通过“导出所选格式”保存。所有格式共用一次生成的规格，部分失败或取消保留成功文件；预览、历史及维护 CLI `diagram.export.retry` 从记录恢复，不再次请求模型。恢复会校验成功文件的哈希，不覆盖用户修改。全部请求不可用时，尝试有效渲染器的默认源输出，同时保留不可用请求的状态。
     - [图形 Gallery](./docs/diagram-gallery.zh-CN.md) 列出可执行语义类型、默认/兼容 render target 以及生产 SVG/PNG 预览。设置页和 Notemd 工作台只暴露可执行类型；用户选择类型后，由 Notemd 生产 renderer 动态生成单个预览。`ref/diagram-design` 仅用于开发期 taxonomy 与质量对比，原始截图不会打包或显示。
     - 规范优先的图表路径可以把笔记内容路由到 Mermaid、Obsidian JSON Canvas、Vega-Lite、HTML、可编辑 HTML/SVG、Draw.io、Drawnix 或受约束 circuitikz，而不是把所有场景都压回 Mermaid 文本生成。
     - `mindmap`、`flowchart`、`sequenceDiagram`、`classDiagram`、`erDiagram` 与 `stateDiagram-v2` 仍由 Mermaid adapter 覆盖；`dataChart` 使用受控 Vega-Lite 模板；`circuit` 使用 `circuitikz` render target。
@@ -181,6 +184,8 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
     - PNG/PDF 光栅导出会先生成适合 Canvas 的中间 SVG：Mermaid 光栅渲染关闭 HTML label，将 foreignObject 标签转换为 SVG 文本，移除外部图片引用，同时让多 panel 的样式和 defs 保留在各自的嵌套 SVG 画布中；原始 SVG 导出仍保持矢量内容。
     - Draw.io、Drawnix 与 Circuitikz 都保持 artifact 边界：插件不捆绑 diagrams.net、Drawnix、Plait、LaTeX 或 TikZJax runtime，而是写出原生源文件和 Obsidian 可查看的 SVG companion。
     - 电路图必须使用 `intent: "circuit"` 与已验证 `CircuitSpec`。`CircuitikzRenderer` 会写出确定性 `.tex`，并附加用于 Obsidian 预览和 SVG/PNG/PDF 导出的 SVG companion；该 companion 不是 LaTeX/TikZJax 编译结果。
+
+下表说明旧单文件调用的命名和单独预览导出能力；多格式批次采用上面的目录结构。
 
 | 目标 | 生成 artifact | 内联预览 | 导出 SVG | 导出 PNG | 导出 PDF | 保存源文件 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -264,7 +269,7 @@ Notemd 的设置较多，是因为模型提供商、笔记工作流、图表、�
 - **图形历史保留上限**：限制 Vault 历史索引数量；清理索引不会删除已生成文件。
 - **图形预览导出 PPI**：默认值为 300，支持 72-600；仅控制 PNG 的栅格分辨率，SVG 和 PDF 预览均基于矢量几何生成，质量不受此设置影响。
 - **同时完整输出 Mermaid 图**：可选写出 Mermaid 源码、SVG 与 manifest companion；即使关闭该设置，Drawnix 预览仍然可以显示 Mermaid。
-- **首选图表类型 / 生成格式**：把图表语义与 Mermaid、Draw.io、Drawnix、CircuitikZ 等可编辑源格式分开。
+- **首选图表类型 / 图形输出**：语义类型单选，原生源文件、图形预览及摘要多选；支持项优先，按最新选择协调并保留暂不可用请求。
 - **CircuitikZ 原生编译环境（可选）**：检查已有 `tectonic` 或 `pdflatex`，也可在用户明确确认后安装固定版本的托管 Tectonic。未安装 LaTeX 时，SVG、PNG 和预览 PDF 导出仍然可用。
 - **高级批处理文件选择**：启用可保存的文件夹/文件选择配置和规则预览。
 - **自动创建缺失的批处理目标文件夹**：用户首次授权后可启用；已经存在且非空的文件夹仍会在每次批处理开始前确认一次。

@@ -109,6 +109,7 @@
   - `content.split-note-by-chapters`
   - `research.summarize-topic`
   - `diagram.generate`
+  - `diagram.export.retry`
   - `local-knowledge.inspect`
   - `provider.profile.export-redacted`
   - `cli.capability-manifest.export`
@@ -120,7 +121,7 @@
 - 这是 maintainer-grade repo 工具，不是 public CLI API
 - 操作目录统一收敛在 `scripts/lib/maintainer-cli-operation-help.js`，作为共享帮助元数据，并为 path-based operations 提供简洁 example payload
 - 已检入的 `scripts/invoke-maintainer-cli-operation.js` 入口现在也具备 process-level 回归锁定：`--help`、`--input-json`、`--input-file`、`--pretty`、子进程 stderr 透传，以及无法解析的 `obsidian-cli native eval` 失败路径都已覆盖，而不依赖真实桌面会话
-- export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
+- 元数据和配置导出仍然只接受空 payload；内容操作及图形导出重试接受显式 JSON 输入
 - 最小 inspect 示例：`npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"]}' --pretty`
 - 对 `--vault docs` 来说，`sourcePath` 与 `knowledgePaths` 都必须写成 vault-relative 路径；应使用 `index.zh-CN.md`、`maintainer`，而不是 `docs/index.zh-CN.md`、`docs/maintainer`
 - `local-knowledge.inspect` 是刻意保持 maintainer-only 的 explainability surface：它会暴露 task scope、实际生效的知识库路径解析结果、显式或自动派生的 query、query diagnostics、current-file exclusion 输入、retrieval options、候选文件路径、原始格式化 context、结构化 `contextBlocks` 证据，以及结构化 retrieval 摘要，但不会因此扩大 public CLI 契约
@@ -141,6 +142,14 @@
 - `content.split-note-by-chapters` 现在还支持可选 `splitHeadingLevel`（`auto`、`h1`-`h6`），脚本可避免继续隐式依赖当前 settings 快照
 - `content.split-note-by-chapters` 的结果现在还会显式带出 `requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`、确定性的 `tocMetadata` 以及稳定的 `nestedHeadings[].blockId`，自动化调用方不必再靠文件名规则或重复标题的歧义去反推 managed artifact 集合、TOC front-matter metadata 与 TOC 目标；rerun 时若 manifest 管理的生成文件已被手改，当前实现也会拒绝静默覆盖或删除
 - 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only
+
+### 图形多格式导出（main，尚未发布）
+
+`diagram.generate` 接受 `requestedOutputs`，例如 `{"sourcePath":"Notes/topic.md","requestedTypeId":"drawnix-knowledge-map","requestedOutputs":["source:drawnix","html-diagram","svg","png","pdf"]}`。输出 ID 包括 `source:mermaid`、`source:json-canvas`、`source:vega-lite`、`source:drawio`、`source:drawnix`、`source:circuitikz`、`html-diagram`、`html-summary`、`svg`、`png`、`pdf`。两个 HTML ID 分别表示图形预览与结构化摘要。演示 PPTX/MP4 导出保持独立。
+
+显式 type/intent 约束本次调用；仅覆盖输出时可协调已保存的类型，两种方式均不修改用户设置。`followThrough.exportRun` 返回 `completed`、`partial` 或 `cancelled`、恢复记录路径、有效计划、暂不可用请求及逐输出路径/状态/收据。部分交付不代表全部成功；每批仅激活一个原生目标，兼容派生格式共享其渲染结果。
+
+`diagram.export.retry` 接受 `{"manifestPath":"Notes/topic_diagram-<UUID>/run.notemd-diagram.json"}` 并直接返回批次状态。它恢复保存的规格、渲染产物与中间缓存，校验已成功文件，仅重试未完成输出，不调用模型。应保留包含原生附件的完整批次目录；成功文件或执行期间的恢复记录被外部修改时，保留修改并报告冲突。该操作仅面向维护 CLI，不增加公共命令绑定。
 
 ## 当前命令矩阵
 

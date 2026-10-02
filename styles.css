@@ -2771,3 +2771,60 @@
     .notemd-diagram-history-toolbar :is(input, select) { flex: 1 1 100%; width: 100%; }
     .notemd-diagram-history-actions button { flex: 1 1 12rem; min-height: 44px; }
 }
+
+/* Diagram preferences keep compatibility explanations visible at narrow sidebar widths. */
+.notemd-diagram-output-control {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    max-width: 440px;
+}
+.notemd-diagram-output-group {
+    border: 0;
+    padding: 0;
+    margin: 0 0 12px;
+    min-width: 0;
+}
+.notemd-diagram-output-group legend {
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+    margin-bottom: 6px;
+}
+.notemd-diagram-output-choice {
+    padding: 4px 0;
+    overflow-wrap: anywhere;
+}
+.notemd-diagram-output-choice label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.notemd-diagram-output-choice small {
+    display: block;
+    color: var(--text-muted);
+    margin-left: 24px;
+}
+.notemd-diagram-output-choice[data-diagram-output-state="adjustable"] label,
+.notemd-diagram-output-choice[data-diagram-output-state="unsupported"] label {
+    color: var(--text-muted);
+}
+.notemd-diagram-output-choice button {
+    margin: 4px 0 0 24px;
+    height: auto;
+    white-space: normal;
+}
+.notemd-diagram-output-error {
+    color: var(--text-error);
+}
+.notemd-diagram-export-run {
+    padding: 0.75rem;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-export-run li a,
+.notemd-diagram-export-run li small {
+    display: block;
+    margin-block: 0.25rem;
+}

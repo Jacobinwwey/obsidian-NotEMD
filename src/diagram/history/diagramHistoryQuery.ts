@@ -1,6 +1,6 @@
 import type { DiagramIntent, RenderTarget } from '../types';
 
-export type DiagramHistoryExportKind = 'svg' | 'png' | 'pdf';
+export type DiagramHistoryExportKind = 'svg' | 'png' | 'pdf' | 'html-diagram' | 'html-summary';
 
 export interface DiagramHistoryEntry {
     id: string;
@@ -10,8 +10,10 @@ export interface DiagramHistoryEntry {
     intent: DiagramIntent;
     sourceFormat: RenderTarget;
     artifactPath?: string;
+    exportManifestPath?: string;
+    companionPaths?: string[];
     exportPaths: Partial<Record<DiagramHistoryExportKind, string>>;
-    status: 'completed' | 'failed';
+    status: 'completed' | 'failed' | 'partial' | 'cancelled';
     errorMessage?: string;
 }
 
@@ -36,7 +38,7 @@ export interface DiagramHistoryPage {
 }
 
 export function cloneDiagramHistoryEntry(entry: DiagramHistoryEntry): DiagramHistoryEntry {
-    return { ...entry, exportPaths: { ...entry.exportPaths } };
+    return { ...entry, exportPaths: { ...entry.exportPaths }, ...(entry.companionPaths ? { companionPaths: [...entry.companionPaths] } : {}) };
 }
 
 function normalizedTokens(value: string): string[] {

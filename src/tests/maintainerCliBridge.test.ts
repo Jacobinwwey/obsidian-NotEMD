@@ -90,6 +90,18 @@ function createMaintainerCliHost() {
 }
 
 describe('maintainer CLI bridge', () => {
+    test('passes multi-format requests intact and validates export retry results', async () => {
+        const host = createMaintainerCliHost();
+        await invokeMaintainerCliOperation(host as any, { operationId: 'diagram.generate', input: { sourcePath: '中文.md', requestedOutputs: ['source:drawnix', 'svg', 'html-diagram'] } });
+        expect(host.generateDiagramForPathCommand).toHaveBeenCalledWith('中文.md', undefined, expect.objectContaining({ inputOverrides: { requestedOutputs: ['source:drawnix', 'svg', 'html-diagram'] } }));
+        const run = { status: 'partial', sourcePath: '中文.md', manifestPath: 'run/run.notemd-diagram.json',
+            plan: { typeId: 'nested', target: 'editable-html-svg', outputs: ['svg'], inactiveOutputs: [], usedDefaultOutput: false },
+            outputs: [{ id: 'svg', path: 'run/diagram.svg', status: 'failed', files: [], error: 'retry' }] };
+        const retryDiagramExportsCommand = jest.fn(async () => run);
+        expect(await invokeMaintainerCliOperation({ ...host, retryDiagramExportsCommand } as any, { operationId: 'diagram.export.retry', input: { manifestPath: run.manifestPath } })).toEqual(run);
+        expect(retryDiagramExportsCommand).toHaveBeenCalledWith(run.manifestPath, undefined);
+        await expect(invokeMaintainerCliOperation(host as any, { operationId: 'diagram.generate', input: { sourcePath: '中文.md', requestedOutputs: ['svg', 9] } })).rejects.toThrow();
+    });
     test('dispatches bounded content operations with parsed input fields', async () => {
         const host = {
             batchGenerateContentForTitlesCommand: jest.fn().mockResolvedValue({ generatedCount: 3 }),

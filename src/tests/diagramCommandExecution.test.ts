@@ -45,6 +45,26 @@ function createExecutionHost() {
 }
 
 describe('diagram command execution', () => {
+    test('multi-output generation invokes one export run and reports partial delivery without a complete notice', async () => {
+        const { host, diagramHost } = createExecutionHost();
+        const generation = { plan: { intent: 'mindmap' }, spec: { intent: 'mindmap' }, artifact: { target: 'mermaid' } } as any;
+        const run = { status: 'partial', outputs: [{ id: 'svg', status: 'completed', path: 'Notes/run/diagram.svg' }, { id: 'pdf', status: 'failed' }], plan: { inactiveOutputs: [] }, manifestPath: 'Notes/run/run.notemd-diagram.json' };
+        const exportOutputs = jest.fn(async () => run);
+        Object.assign(diagramHost, { exportOutputs });
+        const generate = jest.spyOn(diagramGenerateOperation, 'runDiagramGenerateOperation').mockResolvedValue(generation);
+        const input = { sourcePath: 'Notes/topic.md', sourceMarkdown: '# Topic', compatibilityMode: 'best-fit' as const, outputMode: 'artifact' as const, requestedOutputs: ['svg', 'pdf'], exportPpi: 300 };
+        const result = await runArtifactDiagramExecutionWithHost(host, {
+            file: { path: 'Notes/topic.md' } as any, operationInput: input, provider: mockSettings.providers[0], modelName: 'test',
+            reporter: createReporter(), actionLabel: 'Generate diagram', i18n: STRINGS_EN,
+            executionMode: 'save-artifact', localKnowledgeContextUsed: false, localKnowledgeRetrieval: {} as any
+        });
+        expect(generate).toHaveBeenCalledTimes(1);
+        expect(exportOutputs).toHaveBeenCalledWith(expect.anything(), generation, input, expect.anything());
+        expect(result.followThrough).toHaveProperty('exportRun', run);
+        expect(diagramHost.saveArtifact).not.toHaveBeenCalled();
+        expect(diagramHost.notify).not.toHaveBeenCalledWith(STRINGS_EN.notices.experimentalDiagramComplete);
+    });
+
     test('save mermaid execution runs generation and completion below main.ts', async () => {
         const reporter = createReporter();
         const { host, diagramHost } = createExecutionHost();

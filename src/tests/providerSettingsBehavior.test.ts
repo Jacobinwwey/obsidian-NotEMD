@@ -520,6 +520,7 @@ function createMockElement(
             attr: childOptions.attr as Record<string, string> | undefined,
             type: typeof childOptions.type === 'string' ? childOptions.type : undefined,
             placeholder: typeof childOptions.placeholder === 'string' ? childOptions.placeholder : undefined,
+            value: typeof childOptions.value === 'string' ? childOptions.value : undefined,
             parent: element
         });
         if (childTag === 'select') {
@@ -860,41 +861,25 @@ describe('provider settings behavior', () => {
         };
     });
 
-    test('separates diagram type, source format, and available export formats without developer mode', async () => {
+    test('exposes multiple diagram outputs without developer mode and coordinates native source selection', async () => {
         const plugin = createPlugin();
         plugin.settings.enableDeveloperMode = false;
         plugin.settings.enableExperimentalDiagramPipeline = true;
-        plugin.settings.experimentalDiagramCompatibilityMode = 'best-fit';
-
         const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
         tab.display();
-
-        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
-        const targetSetting = findSettingByName(tab.containerEl, 'Preferred source format');
-        const exportSetting = findSettingByName(tab.containerEl, 'Available export formats');
-
-        expect(intentSetting).toBeDefined();
-        expect(targetSetting).toBeDefined();
-        expect(exportSetting).toBeDefined();
-        expect(exportSetting?.desc).toBe('Source file, SVG, PNG, and PDF are available from diagram preview.');
-
-        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
-        const targetDropdown = targetSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
-
-        expect(intentDropdown?.options.circuit).toBe('Circuit diagram');
-        expect(intentDropdown?.options.drawnixMindmap).toBe('Drawnix knowledge map');
-        expect(intentDropdown?.options['bar-chart']).toBe('Bar chart (Vega-Lite)');
-        expect(intentDropdown?.options['line-chart']).toBe('Line chart (Vega-Lite)');
-        expect(intentDropdown?.options['scatter-plot']).toBe('Scatter plot (Vega-Lite)');
-        expect(targetDropdown?.options.drawio).toBe('Draw.io source file');
-        expect(targetDropdown?.options.drawnix).toBe('Drawnix source file');
-        expect(targetDropdown?.options.circuitikz).toBe('CircuitikZ source file');
-
-        await intentDropdown?.onChangeHandler?.('circuit');
-        await targetDropdown?.onChangeHandler?.('circuitikz');
-
+        expect(findSettingByName(tab.containerEl, 'Preferred output files')).toBeDefined();
+        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
+        expect(selector.children.find(option => option.value === 'circuit')?.text).toContain('Circuit diagram');
+        expect(selector.children.find(option => option.value === 'bar-chart')?.text).toContain('Bar chart');
+        selector.value = 'circuit';
+        await selector.onchange?.();
+        const source = tab.containerEl.querySelector('[data-diagram-output="source:circuitikz"]') as MockElement & { checked: boolean };
+        source.checked = true;
+        await source.onchange?.();
         expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
+        expect(plugin.settings.diagramOutputPreferences.requestedOutputs).toContain('source:circuitikz');
+        expect(tab.containerEl.querySelector('[data-diagram-output="svg"]')).toBeTruthy();
         expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
     });
 
@@ -907,9 +892,9 @@ describe('provider settings behavior', () => {
         const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
         tab.display();
 
-        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
-        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
-        await intentDropdown?.onChangeHandler?.('bar-chart');
+        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
+        selector.value = 'bar-chart';
+        await selector.onchange?.();
         await Promise.resolve();
         await Promise.resolve();
 
@@ -932,9 +917,9 @@ describe('provider settings behavior', () => {
         expect(flattenElements(tab.containerEl).filter(element => element.tag === 'img')).toHaveLength(0);
         expect(flattenElements(panel!).filter(element => element.cls.includes('notemd-diagram-type-preview-canvas'))).toHaveLength(1);
 
-        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
-        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
-        await intentDropdown?.onChangeHandler?.('sequence');
+        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
+        selector.value = 'sequence';
+        await selector.onchange?.();
         await Promise.resolve();
         await Promise.resolve();
 
@@ -994,33 +979,27 @@ describe('provider settings behavior', () => {
         expect(plugin.settings.circuitikzCustomCompilerKind).toBe('tectonic');
     });
 
-    test('keeps CircuitikZ settings compatible when the diagram type changes', async () => {
+    test('preserves requested source formats through automatic degradation and recovery', async () => {
         const plugin = createPlugin();
         plugin.settings.enableExperimentalDiagramPipeline = true;
         plugin.settings.experimentalDiagramCompatibilityMode = 'legacy-mermaid';
         plugin.settings.preferredDiagramIntent = 'flowchart';
         plugin.settings.preferredDiagramRenderTarget = 'drawio';
-
         const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
         tab.display();
-
-        const intentSetting = findSettingByName(tab.containerEl, 'Preferred diagram type');
-        const intentDropdown = intentSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
-        const targetSetting = findSettingByName(tab.containerEl, 'Preferred source format');
-        const targetDropdown = targetSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
-
-        await intentDropdown?.onChangeHandler?.('circuit');
-
+        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
+        selector.value = 'circuit';
+        await selector.onchange?.();
         expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
         expect(plugin.settings.experimentalDiagramCompatibilityMode).toBe('best-fit');
-        expect(targetDropdown?.value).toBe('circuitikz');
-
-        await intentDropdown?.onChangeHandler?.('flowchart');
-
+        expect(plugin.settings.diagramOutputPreferences.requestedOutputs).toEqual(['source:drawio']);
+        expect(tab.containerEl.querySelector('[data-diagram-output-summary]').text).toContain('Draw.io');
+        selector.value = 'flowchart';
+        await selector.onchange?.();
         expect(plugin.settings.preferredDiagramIntent).toBe('flowchart');
-        expect(plugin.settings.preferredDiagramRenderTarget).toBeUndefined();
-        expect(targetDropdown?.value).toBe('auto');
+        expect(plugin.settings.preferredDiagramRenderTarget).toBe('drawio');
+        expect(plugin.settings.diagramOutputPreferences.requestedOutputs).toEqual(['source:drawio']);
     });
 
     test('keeps advanced settings collapsed after the user closes them and reopens the settings tab', () => {

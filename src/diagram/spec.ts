@@ -534,6 +534,9 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
 
     validateDiagramIntent(spec, errors);
     validateCanonicalPayloadBoundary(spec, errors);
+    if (spec.evidenceRefs !== undefined && (!Array.isArray(spec.evidenceRefs) || spec.evidenceRefs.some(reference => typeof reference !== 'string'))) {
+        errors.push('Diagram evidenceRefs must contain only strings.');
+    }
 
     if (!spec.title?.trim()) {
         errors.push('Diagram spec title is required.');

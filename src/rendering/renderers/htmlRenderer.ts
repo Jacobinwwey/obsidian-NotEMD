@@ -749,7 +749,9 @@ function renderHtmlDocument(spec: DiagramSpec): string {
 
         <section class="notemd-html-renderer-section">
             <h2>${escapeHtml(labels.structure)}</h2>
-            ${spec.orgChartSpec ? renderOrgChartSpec(spec.orgChartSpec, labels) : renderNodeTree(spec.nodes, labels)}
+            ${spec.payload?.kind === 'nested'
+                ? `<ol class="notemd-html-renderer-list">${spec.payload.levels.map(level => `<li><strong>${escapeHtml(level.label)}</strong>${level.sub ? ` — ${escapeHtml(level.sub)}` : ''}</li>`).join('')}</ol>`
+                : spec.orgChartSpec ? renderOrgChartSpec(spec.orgChartSpec, labels) : renderNodeTree(spec.nodes, labels)}
         </section>
 
         ${renderEdges(spec.edges ?? [], nodeLabels, labels)}

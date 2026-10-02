@@ -6,6 +6,7 @@ import * as mermaidPreview from '../rendering/preview/mermaidPreview';
 import * as previewExport from '../rendering/preview/previewExport';
 import * as bundledPreviewDeps from '../rendering/webview/bundledPreviewDeps';
 import * as exportFolderModal from '../ui/DiagramPreviewExportFolderModal';
+import * as exportRuns from '../diagram/diagramExportRun';
 
 const bundledMermaidDeps = {
     initialize: jest.fn(),
@@ -262,6 +263,50 @@ async function clickPanelExportMenuItem(modal: any, panelIndex: number, itemInde
 }
 
 describe('diagram preview modal', () => {
+    test('keeps successful exports visible when recording their history fails', async () => {
+        const run: exportRuns.DiagramExportRun = {
+            status: 'partial', sourcePath: 'Notes/Topic.md', manifestPath: 'Notes/run/run.notemd-diagram.json',
+            plan: { typeId: 'flowchart', target: 'mermaid', outputs: ['svg'], inactiveOutputs: [], usedDefaultOutput: false },
+            outputs: [{ id: 'svg', path: 'Notes/run/diagram.svg', status: 'failed', files: [] }]
+        };
+        const saved: exportRuns.DiagramExportRun = { ...run, status: 'completed', outputs: run.outputs.map(output => ({ ...output, status: 'completed' })) };
+        const retry = jest.spyOn(exportRuns, 'retryDiagramExportRun').mockResolvedValue(saved);
+        try {
+            const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en', {
+                exportRun: run, onExportRunSaved: async () => { throw new Error('history index unavailable'); }
+            }));
+            modal.onOpen();
+            await collectButtons(modal.contentEl).find(button => button.text === 'Retry unfinished exports')!.onclick?.();
+            const panel = findByClass(modal.contentEl, 'notemd-diagram-export-run')!;
+            expect(collectText(panel).join(' ')).toContain('history index unavailable');
+            expect(collectText(panel).join(' ')).toContain('1/1');
+            expect(collectByTag(panel, 'a').some(link => link.text === saved.outputs[0].path)).toBe(true);
+            expect(collectButtons(panel).some(button => button.text === 'Retry unfinished exports')).toBe(false);
+        } finally { retry.mockRestore(); }
+    });
+
+    test('shows partial delivery and retries the saved run rather than generating another diagram', async () => {
+        const run: exportRuns.DiagramExportRun = {
+            status: 'partial', sourcePath: 'Notes/Topic.md', manifestPath: 'Notes/run/run.notemd-diagram.json',
+            plan: { typeId: 'flowchart', target: 'mermaid', outputs: ['svg', 'pdf'], inactiveOutputs: [{ id: 'source:drawnix', reason: 'incompatible-type' }], usedDefaultOutput: false },
+            outputs: [{ id: 'svg', path: 'Notes/run/diagram.svg', status: 'completed', files: [] }, { id: 'pdf', path: 'Notes/run/diagram.pdf', status: 'failed', error: 'PDF failed', files: [] }]
+        };
+        const saved: exportRuns.DiagramExportRun = { ...run, outputs: run.outputs.map(output => ({ ...output, status: 'completed' })) };
+        const retry = jest.spyOn(exportRuns, 'retryDiagramExportRun').mockResolvedValue(saved);
+        const record = jest.fn(async () => undefined);
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md'), 'en', { exportRun: run, onExportRunSaved: record }));
+        modal.onOpen();
+        const panel = findByClass(modal.contentEl, 'notemd-diagram-export-run')!;
+        expect(panel.children.some(child => child.text.includes('1/2'))).toBe(true);
+        expect(panel.children.some(child => child.text.includes('Not included'))).toBe(true);
+        const button = collectButtons(panel).find(button => button.text === 'Retry unfinished exports')!;
+        await button.onclick?.();
+        expect(retry).toHaveBeenCalledWith(mockApp, run.manifestPath, expect.objectContaining({ cancelled: false }));
+        expect(record).toHaveBeenCalledWith(saved);
+        expect(collectButtons(modal.contentEl).some(button => button.text === 'Retry unfinished exports')).toBe(false);
+        retry.mockRestore();
+    });
+
     beforeEach(() => {
         jest.clearAllMocks();
         clearDiagramPreviewHistory();

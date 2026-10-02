@@ -10,6 +10,43 @@ import {
 } from '../diagram/diagramPreferenceCompatibility';
 
 describe('diagram operation input helpers', () => {
+    test('explicit CLI output selection outranks saved type preferences without changing settings', () => {
+        const settings = { ...mockSettings, preferredDiagramTypeId: 'nested' as const,
+            diagramOutputPreferences: { version: 1, requestedOutputs: ['svg'] } };
+        const input = buildDiagramOperationInput({ sourceMarkdown: '# Test', executionMode: 'save-artifact', settings, requestedOutputsOverride: ['source:drawnix', 'svg'] });
+        expect(input.requestedIntent).toBe('drawnixMindmap');
+        expect(input.requestedRenderTarget).toBe('drawnix');
+        expect(settings.preferredDiagramTypeId).toBe('nested');
+        expect(settings.diagramOutputPreferences.requestedOutputs).toEqual(['svg']);
+    });
+
+    test('legacy target and intent overrides remain effective after preference migration', () => {
+        const settings = { ...mockSettings, preferredDiagramTypeId: 'nested' as const,
+            diagramOutputPreferences: { version: 1, requestedOutputs: ['source:mermaid'] } };
+        const input = buildDiagramOperationInput({ sourceMarkdown: '# Circuit', executionMode: 'save-artifact', settings, requestedIntentOverride: 'circuit', requestedRenderTargetOverride: 'circuitikz' });
+        expect(input.requestedIntent).toBe('circuit');
+        expect(input.requestedRenderTarget).toBe('circuitikz');
+        expect(input.requestedOutputs).toContain('source:circuitikz');
+    });
+    test('snapshots multiple outputs and keeps the selected type when a source request becomes inactive', () => {
+        const settings = { ...mockSettings, preferredDiagramTypeId: 'nested' as const, preferredDiagramRenderTarget: 'drawnix' as const,
+            diagramOutputPreferences: { version: 1, requestedOutputs: ['source:drawnix', 'svg', 'html-summary'] } };
+        const input = buildDiagramOperationInput({ sourcePath: '中文.md', sourceMarkdown: '# 中文', executionMode: 'save-artifact', settings });
+        settings.diagramOutputPreferences.requestedOutputs.push('pdf');
+        expect(input.requestedOutputs).toEqual(['source:drawnix', 'svg', 'html-summary']);
+        expect(input.requestedRenderTarget).toBe('editable-html-svg');
+        expect(input.requestedIntent).toBe('nested');
+    });
+
+    test('does not interpret an unknown preference schema or change legacy Mermaid execution', () => {
+        const settings = { ...mockSettings, diagramOutputPreferences: { version: 9, requestedOutputs: ['source:drawnix'] } };
+        const input = buildDiagramOperationInput({ sourceMarkdown: '# Topic', executionMode: 'save-artifact', settings });
+        expect(input.requestedOutputs).toEqual(['unsupported-preferences-version:9']);
+        expect(settings.diagramOutputPreferences).toEqual({ version: 9, requestedOutputs: ['source:drawnix'] });
+        const mermaid = buildDiagramOperationInput({ sourceMarkdown: '# Topic', executionMode: 'save-mermaid', settings });
+        expect(mermaid.requestedOutputs).toBeUndefined();
+        expect(mermaid.compatibilityMode).toBe('legacy-mermaid');
+    });
     test('selecting Drawnix establishes the Drawnix intent and best-fit compatibility invariant', () => {
         const settings = {
             ...mockSettings,

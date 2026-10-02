@@ -5,6 +5,15 @@ import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { DiagramRenderer } from '../rendering/types';
 import { DiagramSpec } from '../diagram/types';
 
+test('honors an explicitly selected structured HTML renderer for a fixed diagram type', async () => {
+    const spec: DiagramSpec = { schemaVersion: 2, intent: 'nested', title: 'Scopes', nodes: [], payload: { kind: 'nested', levels: [{ id: 'a', label: 'Outer' }, { id: 'b', label: 'Middle' }, { id: 'c', label: 'Inner' }] } };
+    const llmInvoker = jest.fn(async () => JSON.stringify(spec));
+    const result = await generateDiagramArtifact('# Scopes', { compatibilityMode: 'best-fit', requestedIntent: 'nested', requestedRenderTarget: 'html', requestedOutputs: ['html-summary'], llmInvoker });
+    expect(result.artifact.target).toBe('html');
+    expect(result.artifact.content).toContain('Inner');
+    expect(llmInvoker).toHaveBeenCalledTimes(1);
+});
+
 function findDiagramNodeById(nodes: DiagramSpec['nodes'], id: string): DiagramSpec['nodes'][number] | undefined {
     for (const node of nodes) {
         if (node.id === id) {

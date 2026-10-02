@@ -13,6 +13,9 @@ export function createDiagramHistoryRepository(load: LoadEntries, save: SaveEntr
     };
 
     return {
+        setRetentionLimit(limit: number): void {
+            retentionLimit = limit;
+        },
         async recordCompleted(entry: DiagramHistoryEntry): Promise<void> {
             await write(async () => {
                 const entries = (await load()).filter(existing => existing.id !== entry.id);

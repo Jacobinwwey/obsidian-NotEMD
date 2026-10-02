@@ -41,8 +41,16 @@ import {
     getBundledVegaLitePreviewDeps
 } from '../rendering/webview/bundledPreviewDeps';
 import { selectDiagramPreviewExportFolder } from './DiagramPreviewExportFolderModal';
+import { retryDiagramExportRun, startDiagramExportRun } from '../diagram/diagramExportRun';
+import type { DiagramExportRun, DiagramExportRequest } from '../diagram/diagramExportRun';
+import { getDiagramOutputLabel } from './diagramOutputSelector';
+import { resolveDiagramOutputPlan } from '../diagram/diagramOutputPreferences';
+import { findDefaultDiagramType } from '../diagram/diagramTypeCatalog';
 
 export interface DiagramPreviewModalOptions {
+    exportRun?: DiagramExportRun;
+    exportRequest?: DiagramExportRequest;
+    onExportRunSaved?: (run: DiagramExportRun) => Promise<void>;
     exportPpi?: number;
     historyEntryId?: string;
     historyStore?: DiagramHistoryStore;
@@ -56,6 +64,12 @@ export class DiagramPreviewModal extends Modal {
     private readonly historyEntryId?: string;
     private historyDrawer: DiagramHistoryDrawer | null = null;
     private readonly iframeResizeObservers = new Map<HTMLIFrameElement, ResizeObserver>();
+    private exportRun?: DiagramExportRun;
+    private exportHistoryError?: string;
+    private readonly exportRequest?: DiagramExportRequest;
+    private readonly exportSession: RenderPreviewSession;
+    private readonly onExportRunSaved?: (run: DiagramExportRun) => Promise<void>;
+    private exportReporter: { cancelled: boolean; log: (message: string) => void } = { cancelled: false, log: () => undefined };
 
     constructor(
         app: App,
@@ -65,6 +79,10 @@ export class DiagramPreviewModal extends Modal {
     ) {
         super(app);
         this.session = session;
+        this.exportSession = session;
+        this.exportRun = options.exportRun;
+        this.exportRequest = options.exportRequest;
+        this.onExportRunSaved = options.onExportRunSaved;
         this.exportPpi = resolvePreviewExportPpi(options.exportPpi);
         this.historyStore = options.historyStore;
         this.historyEntryId = options.historyEntryId;
@@ -78,6 +96,7 @@ export class DiagramPreviewModal extends Modal {
     }
 
     onClose() {
+        this.exportReporter.cancelled = true;
         this.disconnectIframeResizeObservers();
         this.historyDrawer?.destroy();
         this.historyDrawer = null;
@@ -177,9 +196,67 @@ export class DiagramPreviewModal extends Modal {
             });
         }
         this.renderDiagnosticsPanel(stage, i18n);
+        if (this.session === this.exportSession) this.renderExportRun(stage);
 
         const previewContainer = stage.createDiv({ cls: 'notemd-diagram-preview-body' });
         void this.renderPreview(previewContainer);
+    }
+
+    private renderExportRun(stage: HTMLElement): void {
+        if (!this.exportRun && !this.exportRequest) return;
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).diagramOutputs;
+        const panel = stage.createDiv({ cls: 'notemd-diagram-export-run', attr: { 'data-diagram-export-run': '', 'aria-live': 'polite' } });
+        if (this.exportHistoryError) panel.createEl('p', { text: this.exportHistoryError, attr: { role: 'alert' } });
+        const run = this.exportRun;
+        if (!run && this.exportRequest) {
+            const request = this.exportRequest;
+            const typeId = request.generation.plan.catalogTypeId ?? findDefaultDiagramType(request.generation.spec.intent).id;
+            const plan = resolveDiagramOutputPlan(typeId, request.requestedOutputs, request.generation.artifact.target);
+            panel.createEl('p', { text: formatI18n(copy.effective, { outputs: plan.outputs.map(id => getDiagramOutputLabel(id, { uiLocale: this.uiLocale })).join(', ') }) });
+            if (plan.inactiveOutputs.length) panel.createEl('p', { text: formatI18n(copy.inactive, { outputs: plan.inactiveOutputs.map(output => getDiagramOutputLabel(output.id, { uiLocale: this.uiLocale })).join(', ') }) });
+        }
+        if (run) {
+            panel.createEl('p', { text: formatI18n(copy.runStatus, { status: copy[run.status], count: run.outputs.filter(output => output.status === 'completed').length, total: run.outputs.length }) });
+            const list = panel.createEl('ul');
+            for (const output of run.outputs) {
+                const item = list.createEl('li');
+                item.createEl('span', { text: formatI18n(copy.outputStatus, { output: getDiagramOutputLabel(output.id, { uiLocale: this.uiLocale }), status: copy[output.status] }) });
+                if (output.status === 'completed') {
+                    const link = item.createEl('a', { text: output.path, href: '#', attr: { 'data-diagram-export-path': output.path } });
+                    link.onclick = event => { event.preventDefault(); void this.app.workspace.openLinkText(output.path, run.sourcePath, true); };
+                }
+                if (output.error) item.createEl('small', { text: output.error });
+            }
+            if (run.plan.inactiveOutputs.length) panel.createEl('p', { text: formatI18n(copy.inactive, { outputs: run.plan.inactiveOutputs.map(output => getDiagramOutputLabel(output.id, { uiLocale: this.uiLocale })).join(', ') }) });
+            if (run.plan.usedDefaultOutput) panel.createEl('p', { text: copy.fallback });
+            panel.createEl('p', { text: formatI18n(copy.runManifest, { path: run.manifestPath }) });
+        }
+        if (run?.outputs.every(output => output.status === 'completed')) return;
+        const button = panel.createEl('button', { text: run ? copy.retry : copy.exportSelected, attr: { 'data-diagram-export-retry': '' } });
+        const feedback = panel.createEl('p', { attr: { role: 'alert' } });
+        button.onclick = async () => {
+            button.disabled = true;
+            button.setText(copy.retrying);
+            this.exportReporter = { cancelled: false, log: message => feedback.setText(message) };
+            try {
+                const request = this.exportRequest;
+                const saved = run ? await retryDiagramExportRun(this.app, run.manifestPath, this.exportReporter)
+                    : await startDiagramExportRun(this.app, request!.sourcePath, request!.generation, request!.requestedOutputs, request!.ppi, this.exportReporter, undefined, request!.outputFolder);
+                this.exportRun = saved;
+                try {
+                    await this.onExportRunSaved?.(saved);
+                    this.exportHistoryError = undefined;
+                } catch (error) {
+                    this.exportHistoryError = formatI18n(copy.historyFailed, { message: error instanceof Error ? error.message : String(error) });
+                }
+                if (!this.exportReporter.cancelled) this.renderModal();
+            } catch (error) {
+                feedback.setText(error instanceof Error ? error.message : String(error));
+            } finally {
+                button.disabled = false;
+                button.setText(run ? copy.retry : copy.exportSelected);
+            }
+        };
     }
 
     private resetHistoryDrawer(): void {
