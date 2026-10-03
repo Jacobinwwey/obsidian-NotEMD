@@ -731,7 +731,7 @@ MIT ライセンス - 詳細は [LICENSE](LICENSE) ファイルを参照して�
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ja.svg)
 
-_リリースタグ `1.9.8` 向けに 2026-10-01 に最新更新しました。 最新コミット日: 2026-10-01。_
+_リリースタグ `1.9.9` 向けに 2026-10-03 に最新更新しました。 最新コミット日: 2026-10-03。_
 <!-- repo-chronicle:end -->
 
 
