@@ -55,6 +55,7 @@ export interface DiagramOperationInput {
     requestedOutputs?: string[];
     exportPpi?: number;
     exportFolder?: string;
+    exportCacheFolder?: string;
     sourcePath?: string;
     sourceMarkdown: string;
     localKnowledgeContext?: string;
@@ -72,7 +73,7 @@ export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramTypeId' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions' | 'diagramOutputPreferences'> & Partial<Pick<NotemdSettings, 'diagramPreviewExportPpi' | 'useCustomSummarizeToMermaidSavePath' | 'summarizeToMermaidSavePath'>>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramTypeId' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions' | 'diagramOutputPreferences'> & Partial<Pick<NotemdSettings, 'diagramPreviewExportPpi' | 'useCustomSummarizeToMermaidSavePath' | 'summarizeToMermaidSavePath' | 'diagramExportCacheFolder'>>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
     requestedTypeIdOverride?: DiagramCatalogTypeId;
@@ -164,7 +165,8 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
     return {
         ...(requestedOutputs !== undefined ? {
             requestedOutputs: [...requestedOutputs], exportPpi: params.settings.diagramPreviewExportPpi ?? 300,
-            exportFolder: params.settings.useCustomSummarizeToMermaidSavePath ? params.settings.summarizeToMermaidSavePath : undefined
+            exportFolder: params.settings.useCustomSummarizeToMermaidSavePath ? params.settings.summarizeToMermaidSavePath : undefined,
+            exportCacheFolder: params.settings.diagramExportCacheFolder
         } : {}),
         sourcePath: params.sourcePath,
         sourceMarkdown: params.sourceMarkdown,

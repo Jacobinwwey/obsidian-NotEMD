@@ -10,6 +10,14 @@ import {
 } from '../diagram/diagramPreferenceCompatibility';
 
 describe('diagram operation input helpers', () => {
+    test.each(['save-artifact', 'preview-artifact'] as const)('snapshots independent output and cache folders for %s', executionMode => {
+        const settings = { ...mockSettings, useCustomSummarizeToMermaidSavePath: true, summarizeToMermaidSavePath: 'Exports',
+            diagramExportCacheFolder: 'Shared/Cache', diagramOutputPreferences: { version: 1, requestedOutputs: ['svg'] } };
+        const input = buildDiagramOperationInput({ sourcePath: 'Notes/topic.md', sourceMarkdown: '# Topic', executionMode, settings });
+        settings.diagramExportCacheFolder = 'Changed';
+        expect(input.exportFolder).toBe('Exports');
+        expect(input.exportCacheFolder).toBe('Shared/Cache');
+    });
     test('explicit CLI output selection outranks saved type preferences without changing settings', () => {
         const settings = { ...mockSettings, preferredDiagramTypeId: 'nested' as const,
             diagramOutputPreferences: { version: 1, requestedOutputs: ['svg'] } };

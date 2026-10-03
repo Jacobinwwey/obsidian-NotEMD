@@ -10,6 +10,7 @@ import type { DiagramSpec } from './types';
 import { getDiagramSourceOutputId, isDiagramOutputId, resolveDiagramOutputPlan } from './diagramOutputPreferences';
 import type { DiagramOutputId, DiagramOutputPlan } from './diagramOutputPreferences';
 import { normalizeDiagramEvidenceRefs } from './diagramSpecResponseParser';
+import { rewriteDrawnixArtifactCompanionPaths, rewriteSourceVisualManifestCompanionPaths } from './sourceVisualCompanionPaths';
 
 type ExportReporter = Pick<ProgressReporter, 'cancelled' | 'log'>;
 type ExportStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
@@ -44,11 +45,13 @@ export interface DiagramExportRequest {
     requestedOutputs: string[];
     ppi: number;
     outputFolder?: string;
+    cacheFolder?: string;
 }
 
 interface SavedCompanion extends Omit<RenderArtifactCompanion, 'content'> { content: string }
 interface ExportManifest extends DiagramExportRun {
-    version: 1;
+    version: 1 | 2;
+    outputStem?: string;
     generation: Omit<DiagramGenerationResult, 'artifact'> & {
         artifact: Omit<RenderArtifact, 'companions'> & { companions?: SavedCompanion[] };
     };
@@ -99,16 +102,75 @@ function validatePath(path: string): string {
     return path;
 }
 
-function runDirectory(manifestPath: string): string {
-    validatePath(manifestPath);
-    if (!manifestPath.endsWith(`/${MANIFEST_NAME}`)) throw new Error('Invalid diagram export manifest path.');
-    return manifestPath.slice(0, -MANIFEST_NAME.length - 1);
+type ExportPaths = Record<'source' | 'html-diagram' | 'html-summary' | 'svg' | 'png' | 'pdf', string> & {
+    companionBase: string;
+    companionScope?: string;
+    stagingPrefix: string;
+};
+
+/** Empty means the source note's notemd_assert folder, not the Vault root. */
+export function normalizeDiagramExportCacheFolder(folder: string): string {
+    const normalized = folder.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+    if (folder.trim() && !normalized) throw new Error('Invalid diagram cache folder.');
+    return normalized ? validatePath(normalized) : '';
 }
 
-function outputPath(directory: string, id: DiagramOutputId, artifact: RenderArtifact): string {
-    const fileName = id.startsWith('source:') ? `source/artifact${getRenderTargetDescriptor(artifact.target).sourceExtension}`
-        : id === 'html-diagram' ? 'diagram.html' : id === 'html-summary' ? 'summary.html' : `diagram.${id}`;
-    return `${directory}/${fileName}`;
+function parentDirectory(path: string): string {
+    return path.slice(0, Math.max(0, path.lastIndexOf('/')));
+}
+
+function validateManifestPath(manifestPath: string): void {
+    validatePath(manifestPath);
+    if (!manifestPath.endsWith(`/${MANIFEST_NAME}`) && !manifestPath.endsWith(`.${MANIFEST_NAME}`)) {
+        throw new Error('Invalid diagram export manifest path.');
+    }
+}
+
+function siblingExportPaths(stem: string, cacheStem: string, artifact: RenderArtifact): ExportPaths {
+    return {
+        source: `${stem}.source${getRenderTargetDescriptor(artifact.target).sourceExtension}`,
+        'html-diagram': `${stem}.html`, 'html-summary': `${stem}.summary.html`,
+        svg: `${stem}.svg`, png: `${stem}.png`, pdf: `${stem}.pdf`,
+        companionBase: '', companionScope: `${cacheStem}.assets`, stagingPrefix: cacheStem
+    };
+}
+
+function savedExportPaths(manifest: ExportManifest): ExportPaths {
+    const suffix = manifest.version === 1 ? `/${MANIFEST_NAME}` : `.${MANIFEST_NAME}`;
+    if (!manifest.manifestPath.endsWith(suffix)) throw new Error('Invalid diagram export manifest path for its version.');
+    const stem = validatePath(manifest.manifestPath.slice(0, -suffix.length));
+    if (manifest.version === 2) {
+        const outputStem = validatePath(manifest.outputStem!);
+        if (outputStem.split('/').pop() !== stem.split('/').pop()) throw new Error('Invalid diagram export output stem path.');
+        return siblingExportPaths(outputStem, stem, manifest.generation.artifact);
+    }
+    // Recovery preserves the original v1 locations; successful files are never migrated.
+    return {
+        source: `${stem}/source/artifact${getRenderTargetDescriptor(manifest.generation.artifact.target).sourceExtension}`,
+        'html-diagram': `${stem}/diagram.html`, 'html-summary': `${stem}/summary.html`,
+        svg: `${stem}/diagram.svg`, png: `${stem}/diagram.png`, pdf: `${stem}/diagram.pdf`,
+        companionBase: `${stem}/source`, stagingPrefix: `${stem}/export`
+    };
+}
+
+function outputPath(paths: ExportPaths, id: DiagramOutputId): string {
+    return paths[id.startsWith('source:') ? 'source' : id as Exclude<DiagramOutputId, `source:${string}`>];
+}
+
+function scopeArtifactCompanions(artifact: RenderArtifact, scope: string): RenderArtifact {
+    const companionPathMap = new Map((artifact.companions ?? []).map(companion => [validatePath(companion.path), `${scope}/${companion.path}`]));
+    return {
+        ...artifact,
+        content: artifact.target === 'drawnix' ? rewriteDrawnixArtifactCompanionPaths(artifact.content, companionPathMap) : artifact.content,
+        companions: artifact.companions?.map(companion => ({
+            ...companion, path: companionPathMap.get(companion.path)!,
+            content: typeof companion.content === 'string' && companion.mimeType === 'application/json'
+                ? rewriteSourceVisualManifestCompanionPaths(companion.content, companionPathMap) : companion.content
+        })),
+        sourceVisualManifest: artifact.sourceVisualManifest?.map(visual => ({
+            ...visual, companionPaths: visual.companionPaths.map(path => companionPathMap.get(path) ?? path)
+        }))
+    };
 }
 
 function restoreArtifact(manifest: ExportManifest): RenderArtifact {
@@ -120,15 +182,16 @@ function restoreArtifact(manifest: ExportManifest): RenderArtifact {
     };
 }
 
-function nativeFiles(artifact: RenderArtifact, path: string): Array<{ path: string; content: string | ArrayBuffer }> {
-    const directory = path.slice(0, path.lastIndexOf('/'));
-    return [{ path, content: artifact.content }, ...(artifact.companions ?? []).map(companion => ({ path: `${directory}/${companion.path}`, content: companion.content }))];
+function nativeFiles(artifact: RenderArtifact, paths: ExportPaths): Array<{ path: string; content: string | ArrayBuffer }> {
+    return [{ path: paths.source, content: artifact.content }, ...(artifact.companions ?? []).map(companion => ({
+        path: `${paths.companionBase ? `${paths.companionBase}/` : ''}${companion.path}`, content: companion.content
+    }))];
 }
 
-function parseManifest(text: string, path: string): ExportManifest {
+function parseManifest(text: string, path: string): { manifest: ExportManifest; paths: ExportPaths } {
     const manifest = JSON.parse(text) as ExportManifest;
-    const directory = runDirectory(path);
-    if (!manifest || manifest.version !== 1 || manifest.manifestPath !== path
+    validateManifestPath(path);
+    if (!manifest || ![1, 2].includes(manifest.version) || manifest.manifestPath !== path
         || !Array.isArray(manifest.outputs) || !manifest.plan || !manifest.cache || !manifest.generation
         || !Array.isArray(manifest.requestedOutputs) || !manifest.requestedOutputs.every(id => typeof id === 'string')
         || !Number.isFinite(manifest.ppi) || manifest.ppi < 72 || manifest.ppi > 600) {
@@ -153,12 +216,16 @@ function parseManifest(text: string, path: string): ExportManifest {
     for (const companion of artifact.companions ?? []) validatePath(companion.path);
     if ((manifest.cache.svg !== undefined && typeof manifest.cache.svg !== 'string')
         || (manifest.cache.summary !== undefined && typeof manifest.cache.summary !== 'string')) throw new Error('Invalid diagram export cache.');
-    const nativePaths = nativeFiles(restoreArtifact(manifest), `${directory}/source/artifact${getRenderTargetDescriptor(artifact.target).sourceExtension}`).map(file => file.path);
+    const paths = savedExportPaths(manifest);
+    if (paths.companionScope && artifact.companions?.some(companion => !companion.path.startsWith(`${paths.companionScope}/`))) {
+        throw new Error('Diagram companion path is outside its export scope.');
+    }
+    const nativePaths = nativeFiles(restoreArtifact(manifest), paths).map(file => file.path);
     const keys = nativePaths.map(path => path.toLowerCase());
     if (keys.some((key, index) => keys.some((other, otherIndex) => index !== otherIndex && (key === other || key.startsWith(`${other}/`))))) throw new Error('Diagram companion paths collide with another export file.');
     const seen = new Set<string>();
     for (const output of manifest.outputs) {
-        if (!isDiagramOutputId(output.id) || seen.has(output.id) || output.path !== outputPath(directory, output.id, artifact)
+        if (!isDiagramOutputId(output.id) || seen.has(output.id) || output.path !== outputPath(paths, output.id)
             || !['pending', 'completed', 'failed', 'cancelled'].includes(output.status) || !Array.isArray(output.files)) {
             throw new Error('Invalid diagram export output path or state.');
         }
@@ -174,14 +241,21 @@ function parseManifest(text: string, path: string): ExportManifest {
             throw new Error('Missing or duplicate diagram export receipt.');
         }
     }
-    return manifest;
+    return { manifest, paths };
 }
 
 async function ensureDirectory(app: App, directory: string): Promise<void> {
+    if (!directory) return; // The Vault root already exists and must not be created.
     const parts = directory.split('/');
     for (let length = 1; length <= parts.length; length++) {
         const path = parts.slice(0, length).join('/');
-        if (!(await app.vault.adapter.exists(path))) await app.vault.adapter.mkdir(path);
+        if (!(await app.vault.adapter.exists(path))) {
+            try { await app.vault.adapter.mkdir(path); }
+            catch (error) {
+                // Independent batches may create the shared cache folder concurrently.
+                if ((await app.vault.adapter.stat(path))?.type !== 'folder') throw error;
+            }
+        }
     }
 }
 
@@ -191,7 +265,7 @@ function checkCancellation(reporter: ExportReporter): void {
 }
 
 /** Only newly owned staging files are removed. Published files are never overwritten. */
-async function commitFile(app: App, path: string, content: string | ArrayBuffer, reporter: ExportReporter): Promise<ExportFileReceipt> {
+async function commitFile(app: App, path: string, content: string | ArrayBuffer, stagingPrefix: string, reporter: ExportReporter): Promise<ExportFileReceipt> {
     const adapter = app.vault.adapter;
     checkCancellation(reporter);
     const bytes = asBytes(content);
@@ -200,8 +274,8 @@ async function commitFile(app: App, path: string, content: string | ArrayBuffer,
         if (await hashBytes(await adapter.readBinary(path)) === sha256) return { path, sha256 };
         throw new Error(`Export file changed or already exists: ${path}`);
     }
-    await ensureDirectory(app, path.slice(0, path.lastIndexOf('/')));
-    const staging = `${path}.${crypto.randomUUID()}.pending`;
+    await ensureDirectory(app, parentDirectory(path));
+    const staging = `${stagingPrefix}.${crypto.randomUUID()}.pending`;
     try {
         await adapter.writeBinary(staging, bytes);
         if (await hashBytes(await adapter.readBinary(staging)) !== sha256) throw new Error('Export write verification failed.');
@@ -257,7 +331,7 @@ function defaultDependencies(): DiagramExportDependencies {
     };
 }
 
-async function executeRun(app: App, manifest: ExportManifest, reporter: ExportReporter, deps: DiagramExportDependencies, previousText?: string): Promise<DiagramExportRun> {
+async function executeRun(app: App, manifest: ExportManifest, paths: ExportPaths, reporter: ExportReporter, deps: DiagramExportDependencies, previousText?: string): Promise<DiagramExportRun> {
     const adapter = app.vault.adapter;
     const artifact = restoreArtifact(manifest);
     let savedText = previousText;
@@ -333,9 +407,9 @@ async function executeRun(app: App, manifest: ExportManifest, reporter: ExportRe
             const content = await renderOutput(output.id);
             checkCancellation(reporter);
             validateDelivery(output.id, content);
-            const deliveries = output.id.startsWith('source:') ? nativeFiles(artifact, output.path) : [{ path: output.path, content }];
+            const deliveries = output.id.startsWith('source:') ? nativeFiles(artifact, paths) : [{ path: output.path, content }];
             for (const file of deliveries) {
-                const receipt = await commitFile(app, file.path, file.content, reporter);
+                const receipt = await commitFile(app, file.path, file.content, paths.stagingPrefix, reporter);
                 output.files = [...output.files.filter(existing => existing.path !== receipt.path), receipt];
                 await checkpoint();
             }
@@ -353,7 +427,7 @@ async function executeRun(app: App, manifest: ExportManifest, reporter: ExportRe
             && !manifest.outputs.some(candidate => candidate.status === 'completed')) {
             const fallbackId = getDiagramSourceOutputId(artifact.target);
             if (!manifest.outputs.some(candidate => candidate.id === fallbackId)) {
-                manifest.outputs.push({ id: fallbackId, path: outputPath(runDirectory(manifest.manifestPath), fallbackId, artifact), status: 'pending', files: [] });
+                manifest.outputs.push({ id: fallbackId, path: outputPath(paths, fallbackId), status: 'pending', files: [] });
                 manifest.plan.outputs.push(fallbackId);
                 manifest.plan.usedDefaultOutput = true;
             }
@@ -367,50 +441,52 @@ async function executeRun(app: App, manifest: ExportManifest, reporter: ExportRe
 
 export async function startDiagramExportRun(
     app: App, sourcePath: string, generation: DiagramGenerationResult, requestedOutputs: readonly string[], ppi: number,
-    reporter: ExportReporter, deps?: DiagramExportDependencies, outputFolder?: string
+    reporter: ExportReporter, deps?: DiagramExportDependencies, folders: Pick<DiagramExportRequest, 'outputFolder' | 'cacheFolder'> = {}
 ): Promise<DiagramExportRun> {
     validatePath(sourcePath);
     if (!Number.isFinite(ppi) || ppi < 72 || ppi > 600) throw new Error('Diagram export PPI must be between 72 and 600.');
     const typeId = generation.plan.catalogTypeId ?? findDefaultDiagramType(generation.spec.intent).id;
     const plan = resolveDiagramOutputPlan(typeId, requestedOutputs, generation.artifact.target);
+    const { outputFolder } = folders;
+    const cacheFolder = normalizeDiagramExportCacheFolder(folders.cacheFolder ?? '') || `${parentDirectory(sourcePath) ? `${parentDirectory(sourcePath)}/` : ''}notemd_assert`;
     if (outputFolder) validatePath(outputFolder);
     const destination = outputFolder === undefined ? sourcePath : `${outputFolder ? `${outputFolder}/` : ''}${sourcePath.split('/').pop()!}`;
     const base = destination.replace(/\.[^/.]+$/, '');
-    const directory = `${base}_diagram-${crypto.randomUUID()}`;
-    const artifact = generation.artifact;
+    const stem = `${base}_diagram-${crypto.randomUUID()}`;
+    const cacheStem = `${cacheFolder}/${stem.split('/').pop()!}`;
+    const paths = siblingExportPaths(stem, cacheStem, generation.artifact);
+    const artifact = scopeArtifactCompanions(generation.artifact, paths.companionScope!);
     const manifest: ExportManifest = {
-        version: 1, manifestPath: `${directory}/${MANIFEST_NAME}`, sourcePath, status: 'partial',
+        version: 2, outputStem: stem, manifestPath: `${cacheStem}.${MANIFEST_NAME}`, sourcePath, status: 'partial',
         generation: { ...generation, artifact: { ...artifact, companions: artifact.companions?.map(companion => ({
             ...companion, binary: companion.content instanceof ArrayBuffer,
             content: typeof companion.content === 'string' ? companion.content : encodeBase64(new Uint8Array(companion.content))
         })) } },
         requestedOutputs: [...requestedOutputs], plan, ppi, cache: {},
-        outputs: plan.outputs.map(id => ({ id, path: outputPath(directory, id, artifact), status: 'pending', files: [] }))
+        outputs: plan.outputs.map(id => ({ id, path: outputPath(paths, id), status: 'pending', files: [] }))
     };
     // JSON roundtrip freezes mutable renderer/settings objects for the complete run.
     const snapshot = parseManifest(JSON.stringify(manifest), manifest.manifestPath);
     checkCancellation(reporter);
     return withExportRunLock(app, manifest.manifestPath, async () => {
-        const parent = directory.includes('/') ? directory.slice(0, directory.lastIndexOf('/')) : '';
-        if (parent) await ensureDirectory(app, parent);
-        if (await app.vault.adapter.exists(directory)) throw new Error('Diagram export directory already exists.');
-        await app.vault.adapter.mkdir(directory);
-        return executeRun(app, snapshot, reporter, deps ?? defaultDependencies());
+        await ensureDirectory(app, parentDirectory(manifest.manifestPath));
+        if (await app.vault.adapter.exists(manifest.manifestPath)) throw new Error('Diagram export manifest already exists.');
+        return executeRun(app, snapshot.manifest, snapshot.paths, reporter, deps ?? defaultDependencies());
     });
 }
 
 export async function retryDiagramExportRun(app: App, manifestPath: string, reporter: ExportReporter, deps?: DiagramExportDependencies): Promise<DiagramExportRun> {
-    runDirectory(manifestPath);
+    validateManifestPath(manifestPath);
     return withExportRunLock(app, manifestPath, async () => {
         const text = await app.vault.adapter.read(manifestPath);
-        const manifest = parseManifest(text, manifestPath);
-        return await executeRun(app, manifest, reporter, deps ?? defaultDependencies(), text);
+        const { manifest, paths } = parseManifest(text, manifestPath);
+        return await executeRun(app, manifest, paths, reporter, deps ?? defaultDependencies(), text);
     });
 }
 
 export async function readDiagramExportRun(app: App, manifestPath: string): Promise<{ run: DiagramExportRun; generation: DiagramGenerationResult }> {
-    runDirectory(manifestPath);
-    const manifest = parseManifest(await app.vault.adapter.read(manifestPath), manifestPath);
+    validateManifestPath(manifestPath);
+    const { manifest } = parseManifest(await app.vault.adapter.read(manifestPath), manifestPath);
     return {
         run: { status: manifest.status, manifestPath, sourcePath: manifest.sourcePath, plan: manifest.plan, outputs: manifest.outputs },
         generation: { ...manifest.generation, artifact: restoreArtifact(manifest) }

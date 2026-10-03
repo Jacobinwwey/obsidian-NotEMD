@@ -32,7 +32,7 @@ const OPERATION_HELP = {
     summary: 'Retry unfinished diagram exports using their saved specification without another LLM request.',
     required: ['manifestPath'],
     optional: [],
-    exampleInput: '{"manifestPath":"docs/topic_diagram-UUID/run.notemd-diagram.json"}'
+    exampleInput: '{"manifestPath":"docs/notemd_assert/topic_diagram-UUID.run.notemd-diagram.json"}'
   },
   'local-knowledge.inspect': {
     summary: 'Inspect task-scoped local knowledge retrieval inputs, paths, and context.',

@@ -105,7 +105,8 @@ export async function runArtifactDiagramExecutionWithHost(
 
     if (params.operationInput.requestedOutputs !== undefined && params.executionMode === 'preview-artifact') {
         diagramHost.openPreview(result.artifact, params.file.path, false, undefined, {
-            sourcePath: params.file.path, generation: result, requestedOutputs: [...params.operationInput.requestedOutputs], ppi: params.operationInput.exportPpi ?? 300, outputFolder: params.operationInput.exportFolder
+            sourcePath: params.file.path, generation: result, requestedOutputs: [...params.operationInput.requestedOutputs], ppi: params.operationInput.exportPpi ?? 300,
+            outputFolder: params.operationInput.exportFolder, cacheFolder: params.operationInput.exportCacheFolder
         });
         params.reporter.updateStatus(host.getActionCompleteText(params.actionLabel), 100);
         diagramHost.notify(params.i18n.notices.experimentalDiagramPreviewReady);

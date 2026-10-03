@@ -322,7 +322,7 @@ export function renderDrawnixMindMapSvg(
         <desc id="notemd-drawnix-mindmap-desc">${escapeHtml(projection.summary ?? 'Drawnix knowledge map')}</desc>
         <style>
             .notemd-drawnix-mindmap-label { font-family: ${PREVIEW_FONT_STACK}; font-size: 14px; font-weight: 400; }
-            .notemd-drawnix-mindmap-relation-label { font-family: ${PREVIEW_FONT_STACK}; font-size: 12px; fill: #475569; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }
+            .notemd-drawnix-mindmap-relation-label { font-family: ${PREVIEW_FONT_STACK}; font-size: 12px; fill: #475569; }
             .notemd-drawnix-source-visual-heading { font-family: ${PREVIEW_FONT_STACK}; font-size: 19px; font-weight: 700; fill: #172033; }
             .notemd-drawnix-source-visual-title { font-family: ${PREVIEW_FONT_STACK}; font-size: 15px; font-weight: 700; fill: #172033; }
             .notemd-drawnix-source-visual-meta { font-family: ${PREVIEW_FONT_STACK}; font-size: 11px; fill: #64748b; }

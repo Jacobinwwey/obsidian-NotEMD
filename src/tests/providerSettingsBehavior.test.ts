@@ -76,6 +76,8 @@ type MockTextControl = {
         addEventListener: jest.Mock;
         blur: jest.Mock;
         setAttrs?: jest.Mock;
+        setAttribute: jest.Mock;
+        removeAttribute: jest.Mock;
     };
     setPlaceholder: jest.Mock;
     setValue: jest.Mock;
@@ -156,6 +158,7 @@ type MockSettingControl =
 class MockSetting {
     containerEl: MockElement;
     settingEl: MockElement;
+    infoEl: MockElement;
     nameEl: MockElement;
     descEl: MockElement;
     controlEl: MockElement;
@@ -167,6 +170,7 @@ class MockSetting {
     constructor(containerEl: MockElement) {
         this.containerEl = containerEl;
         this.settingEl = createMockElement('div', { cls: 'setting-item', parent: containerEl });
+        this.infoEl = createMockElement('div', { cls: 'setting-item-info', parent: this.settingEl });
         this.nameEl = createMockElement('div', { cls: 'setting-item-name', parent: this.settingEl });
         this.descEl = createMockElement('div', { cls: 'setting-item-description', parent: this.settingEl });
         this.controlEl = createMockElement('div', { cls: 'setting-item-control', parent: this.settingEl });
@@ -178,7 +182,8 @@ class MockSetting {
             const textControl = this.controls.find((control): control is MockTextControl => control.kind === 'text');
             return textControl?.inputEl ?? null;
         });
-        this.settingEl.children.push(this.nameEl, this.descEl, this.controlEl);
+        this.infoEl.children.push(this.nameEl, this.descEl);
+        this.settingEl.children.push(this.infoEl, this.controlEl);
         containerEl.children.push(this.settingEl);
     }
 
@@ -564,7 +569,9 @@ function createMockTextControl(): MockTextControl {
             value: '',
             addEventListener: jest.fn(),
             blur: jest.fn(),
-            setAttrs: jest.fn()
+            setAttrs: jest.fn(),
+            setAttribute: jest.fn(),
+            removeAttribute: jest.fn()
         },
         setPlaceholder: jest.fn(),
         setValue: jest.fn(),
@@ -859,6 +866,31 @@ describe('provider settings behavior', () => {
             this.text = label;
             this.value = value;
         };
+    });
+
+    test('persists a normalized intermediate folder, keeps invalid input visible, and clears back to the default', async () => {
+        const plugin = createPlugin();
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+        const setting = findSettingByName(tab.containerEl, 'Diagram intermediate files folder')!;
+        const control = setting.controls.find(control => control.kind === 'text') as MockTextControl;
+        expect(control.placeholder).toContain('notemd_assert');
+        control.inputEl.value = ' Shared\\中文/ ';
+        await triggerDeferredTextBlur(control);
+        expect(plugin.settings.diagramExportCacheFolder).toBe('Shared/中文');
+        expect(control.inputEl.value).toBe('Shared/中文');
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+        control.inputEl.value = '../outside';
+        await triggerDeferredTextBlur(control);
+        expect(plugin.settings.diagramExportCacheFolder).toBe('Shared/中文');
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+        expect(control.inputEl.setAttribute).toHaveBeenCalledWith('aria-invalid', 'true');
+        expect(setting.infoEl.children.some(child => child.text.includes('Vault-relative'))).toBe(true);
+        control.inputEl.value = '';
+        await triggerDeferredTextBlur(control);
+        expect(plugin.settings.diagramExportCacheFolder).toBe('');
+        expect(control.inputEl.removeAttribute).toHaveBeenCalledWith('aria-invalid');
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
     });
 
     test('exposes multiple diagram outputs without developer mode and coordinates native source selection', async () => {

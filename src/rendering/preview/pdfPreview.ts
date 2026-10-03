@@ -45,6 +45,17 @@ function parseSvgDocument(svg: string): Element {
         throw new Error('Preview renderer returned malformed SVG markup for PDF export.');
     }
 
+    // Older Drawnix snapshots carry a white text halo. svg2pdf ignores paint-order
+    // and paints that stroke over the glyph fill. Boxed labels already have their
+    // own background, so suppress only their redundant halo, including tspans.
+    for (const label of Array.from(root.querySelectorAll<SVGElement>('text[data-drawnix-mindmap-relation-label="true"]'))) {
+        if (!label.parentElement?.querySelector('[data-drawnix-mindmap-relation-label-background="true"]')) continue;
+        for (const text of [label, ...Array.from(label.querySelectorAll<SVGElement>('tspan'))]) {
+            text.style.setProperty('stroke', 'none');
+            text.style.setProperty('stroke-width', '0');
+        }
+    }
+
     return root;
 }
 

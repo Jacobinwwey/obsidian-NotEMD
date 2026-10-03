@@ -54,6 +54,7 @@ import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 import { createLocalizedSettingMetadataResolver, retainKnownSettingIds } from './settings/settingCatalog';
 import { SettingCatalogEntry, SettingSearchMatch } from './settings/settingSearch';
+import { normalizeDiagramExportCacheFolder } from '../diagram/diagramExportRun';
 import { resolveSettingsNavigation } from './settings/SettingsNavigation';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
@@ -2840,6 +2841,44 @@ export class NotemdSettingTab extends PluginSettingTab {
                 text.inputEl.max = String(MAX_PREVIEW_EXPORT_PPI);
                 text.inputEl.step = '1';
             });
+
+        const cacheSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.diagramExportCacheFolder' })
+            .setName(experimentalDiagramI18n.cacheFolderName)
+            .setDesc(experimentalDiagramI18n.cacheFolderDesc);
+        const cacheFeedback = cacheSetting.infoEl.createDiv({ cls: 'setting-item-description', attr: { role: 'alert' } });
+        cacheFeedback.hidden = true;
+        cacheSetting.addText(text => {
+            text.setPlaceholder(experimentalDiagramI18n.cacheFolderPlaceholder)
+                .setValue(this.plugin.settings.diagramExportCacheFolder ?? '');
+            text.inputEl.setAttribute('aria-label', experimentalDiagramI18n.cacheFolderName);
+            const commit = async () => {
+                let folder: string;
+                try { folder = normalizeDiagramExportCacheFolder(text.getValue()); }
+                catch {
+                    text.inputEl.setAttribute('aria-invalid', 'true');
+                    cacheFeedback.setText(experimentalDiagramI18n.cacheFolderInvalid);
+                    cacheFeedback.hidden = false;
+                    return;
+                }
+                text.inputEl.removeAttribute('aria-invalid');
+                cacheFeedback.hidden = true;
+                text.setValue(folder);
+                const previous = this.plugin.settings.diagramExportCacheFolder ?? '';
+                if (folder === previous) return;
+                this.plugin.settings.diagramExportCacheFolder = folder;
+                try { await this.plugin.saveSettings(); }
+                catch (error) {
+                    if (this.plugin.settings.diagramExportCacheFolder === folder) this.plugin.settings.diagramExportCacheFolder = previous;
+                    cacheFeedback.setText(experimentalDiagramI18n.cacheFolderSaveFailed);
+                    cacheFeedback.hidden = false;
+                    console.error('Failed to save diagram intermediate folder:', error);
+                }
+            };
+            text.inputEl.addEventListener('blur', () => { void commit(); });
+            text.inputEl.addEventListener('keydown', event => {
+                if (event.key === 'Enter') { event.preventDefault(); text.inputEl.blur(); }
+            });
+        });
 
         this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.drawnixCompanions' })
             .setName(experimentalDiagramI18n.drawnixExportMermaidCompanionsName)

@@ -378,7 +378,7 @@ export default class NotemdPlugin extends Plugin {
         return {
             exportOutputs: async (file, generation, input, reporter) => {
                 const run = await startDiagramExportRun(this.app, file.path, generation, input.requestedOutputs ?? [], input.exportPpi ?? 300, reporter, undefined,
-                    input.exportFolder);
+                    { outputFolder: input.exportFolder, cacheFolder: input.exportCacheFolder });
                 try { await this.recordDiagramExportRun(run); }
                 catch (error) { reporter.log(formatI18n(this.getUiStrings().diagramOutputs.historyFailed, { message: error instanceof Error ? error.message : String(error) })); }
                 return run;

@@ -241,7 +241,7 @@ export class DiagramPreviewModal extends Modal {
             try {
                 const request = this.exportRequest;
                 const saved = run ? await retryDiagramExportRun(this.app, run.manifestPath, this.exportReporter)
-                    : await startDiagramExportRun(this.app, request!.sourcePath, request!.generation, request!.requestedOutputs, request!.ppi, this.exportReporter, undefined, request!.outputFolder);
+                    : await startDiagramExportRun(this.app, request!.sourcePath, request!.generation, request!.requestedOutputs, request!.ppi, this.exportReporter, undefined, request!);
                 this.exportRun = saved;
                 try {
                     await this.onExportRunSaved?.(saved);

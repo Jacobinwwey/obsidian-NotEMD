@@ -149,7 +149,7 @@ Boundary:
 
 Explicit type/intent constrains this invocation; an output-only override can coordinate the stored type. Neither changes saved user settings. `followThrough.exportRun` reports `completed`, `partial` or `cancelled`, the manifest path, effective plan, inactive requests and per-output paths/status/receipts. Partial delivery is not full success. One native target is active per batch; compatible derived formats share its rendering.
 
-`diagram.export.retry` takes `{"manifestPath":"Notes/topic_diagram-<UUID>/run.notemd-diagram.json"}` and returns the run directly. It restores the saved specification, renderer artifact and cached intermediates, checks existing receipts, and retries unfinished outputs without calling the LLM. Preserve the whole batch directory, including native companions. Changed successful files or externally modified manifests are retained and reported as conflicts. This remains a maintainer-only operation, not a new public command binding.
+`diagram.export.retry` takes `{"manifestPath":"Notes/notemd_assert/topic_diagram-<UUID>.run.notemd-diagram.json"}` and returns the run directly. New batches save outputs beside the source note or directly in the configured custom folder; legacy v1 subdirectory manifests remain readable and retryable in place. It restores the saved specification, renderer artifact and cached intermediates, checks existing receipts, and retries unfinished outputs without calling the LLM. Preserve the manifest, its output files and any native `.assets` directory. Changed successful files or externally modified manifests are retained and reported as conflicts. This remains a maintainer-only operation, not a new public command binding.
 
 ## Current Command Matrix
 

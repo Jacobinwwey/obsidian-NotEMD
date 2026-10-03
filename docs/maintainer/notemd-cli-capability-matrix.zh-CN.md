@@ -149,7 +149,7 @@
 
 显式 type/intent 约束本次调用；仅覆盖输出时可协调已保存的类型，两种方式均不修改用户设置。`followThrough.exportRun` 返回 `completed`、`partial` 或 `cancelled`、恢复记录路径、有效计划、暂不可用请求及逐输出路径/状态/收据。部分交付不代表全部成功；每批仅激活一个原生目标，兼容派生格式共享其渲染结果。
 
-`diagram.export.retry` 接受 `{"manifestPath":"Notes/topic_diagram-<UUID>/run.notemd-diagram.json"}` 并直接返回批次状态。它恢复保存的规格、渲染产物与中间缓存，校验已成功文件，仅重试未完成输出，不调用模型。应保留包含原生附件的完整批次目录；成功文件或执行期间的恢复记录被外部修改时，保留修改并报告冲突。该操作仅面向维护 CLI，不增加公共命令绑定。
+`diagram.export.retry` 接受 `{"manifestPath":"Notes/notemd_assert/topic_diagram-<UUID>.run.notemd-diagram.json"}` 并直接返回批次状态。新批次的输出直接位于原笔记目录或配置的自定义目录；旧 v1 子目录记录仍可原地读取和重试。它恢复保存的规格、渲染产物与中间缓存，校验已成功文件，仅重试未完成输出，不调用模型。应保留恢复记录、对应输出文件以及原生 `.assets` 附件目录；成功文件或执行期间的恢复记录被外部修改时，保留修改并报告冲突。该操作仅面向维护 CLI，不增加公共命令绑定。
 
 ## 当前命令矩阵
 

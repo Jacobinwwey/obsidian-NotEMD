@@ -8,6 +8,8 @@ This document summarizes the major functional and architectural changes implemen
 
 ### English
 
+- Keep boxed Drawnix relationship labels visible in vector PDF export. Remove the redundant white text outline and normalize older cached SVG labels before svg2pdf can paint their outline over the glyphs.
+- Save selected diagram formats directly beside the source note or in the explicit custom folder, including the Vault root. Add a configurable intermediate folder (default: source-folder/notemd_assert) for recovery records, cached renders, staging and isolated attachments. Keep unique filenames and in-place recovery of legacy exports.
 - Replace the flat output checklist with a compact multi-select dropdown. Own the popup's Obsidian keyboard scope and portal lifecycle; defer preview measurement until settings popouts have visible geometry.
 - Show labeled core Drawnix relationships with local routes where space permits. Preserve omitted edges in native metadata, and keep SVG/native label coordinates identical.
 - Add multi-select diagram outputs with supported choices first, latest-choice coordination and visible inactive requests. Keep presentation export configuration and dependencies independent.
@@ -17,6 +19,8 @@ This document summarizes the major functional and architectural changes implemen
 
 ### 中文
 
+- 修复矢量 PDF 中 Drawnix 关系标签文字被遮盖的问题：去掉方框内多余的白色文字描边，并在 PDF 转换前兼容旧缓存 SVG，避免描边覆盖字形。
+- 将所选图形格式直接保存到原笔记目录或显式指定的自定义目录，支持 Vault 根目录；新增可配置中间文件目录，默认原文目录/notemd_assert，集中存放恢复记录、渲染缓存、写入暂存及隔离附件，保留唯一文件名与旧记录原地恢复能力。
 - 将平铺输出复选框改为紧凑多选下拉菜单，管理弹层的 Obsidian 键盘作用域与生命周期；设置独立窗口可见后再校验预览几何。
 - Drawnix 显示带明确标签的核心关系，空间允许时优先使用局部短路径；省略关系保存在原生 metadata，SVG 与原生标签坐标保持一致。
 - 新增图形输出多选、支持项优先排序、最新选择自动协调与暂不可用请求展示；演示导出的配置与依赖保持独立。
