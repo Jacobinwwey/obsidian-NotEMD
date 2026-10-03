@@ -83,9 +83,12 @@ export function renderDiagramTypePreviewPanel(
 
     let requestVersion = 0;
     let destroyed = false;
+    let layoutObserver: ResizeObserver | undefined;
 
     const controller: DiagramTypePreviewPanelController = {
         setSelectedType(typeId) {
+            layoutObserver?.disconnect();
+            layoutObserver = undefined;
             const currentVersion = ++requestVersion;
             if (destroyed) {
                 return;
@@ -130,6 +133,13 @@ export function renderDiagramTypePreviewPanel(
             setPreviewState('loading', true);
             setText(canvas, params.copy.loading, 'notemd-diagram-type-preview-loading');
 
+            const reportFailure = (error: unknown): void => {
+                if (destroyed || currentVersion !== requestVersion) return;
+                layoutObserver?.disconnect();
+                console.error(`Could not render selected diagram preview "${typeId}":`, error);
+                setPreviewState('error', false);
+                setText(canvas, params.copy.failed, 'notemd-diagram-type-preview-error');
+            };
             void params.renderThumbnail(typeId).then(svg => {
                 if (destroyed || currentVersion !== requestVersion) {
                     return;
@@ -154,19 +164,28 @@ export function renderDiagramTypePreviewPanel(
                         canvas.setAttribute('data-preview-aspect-ratio', `${viewBox.width}/${viewBox.height}`);
                     }
                 }
-                assertMountedSvgPresentationSafety(canvas, `Diagram type "${typeId}"`);
-                setPreviewState('ready', false);
-            }).catch(error => {
-                if (destroyed || currentVersion !== requestVersion) {
-                    return;
+                const measureVisiblePreview = (): boolean => {
+                    const rect = renderedSvg?.getBoundingClientRect();
+                    if (rect && (rect.width === 0 || rect.height === 0)) return false;
+                    assertMountedSvgPresentationSafety(canvas, `Diagram type "${typeId}"`);
+                    setPreviewState('ready', false);
+                    return true;
+                };
+                // A cached thumbnail can resolve before Obsidian attaches a
+                // settings popout. Validate actual geometry when it becomes visible.
+                if (!measureVisiblePreview()) {
+                    layoutObserver = new ResizeObserver(() => {
+                        if (destroyed || currentVersion !== requestVersion) return;
+                        try { if (measureVisiblePreview()) layoutObserver?.disconnect(); }
+                        catch (error) { reportFailure(error); }
+                    });
+                    layoutObserver.observe(canvas);
                 }
-                console.error(`Could not render selected diagram preview "${typeId}":`, error);
-                setPreviewState('error', false);
-                setText(canvas, params.copy.failed, 'notemd-diagram-type-preview-error');
-            });
+            }).catch(reportFailure);
         },
         destroy() {
             destroyed = true;
+            layoutObserver?.disconnect();
             requestVersion += 1;
             panel.remove();
         }

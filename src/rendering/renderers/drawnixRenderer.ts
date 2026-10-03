@@ -6,6 +6,7 @@ import {
     validateDrawnixMindMapExportedData
 } from '../../diagram/adapters/drawnix/drawnixExporter';
 import { buildDrawnixMindMapProjection } from '../../diagram/adapters/drawnix/drawnixMindMapProjection';
+import { selectDrawnixCoreRelations } from '../../diagram/adapters/drawnix/drawnixCoreRelations';
 import { buildSourceVisualCompanions } from '../../diagram/sourceVisualArtifactBuilder';
 import { DiagramRenderer, RenderArtifact, RenderOptions } from '../types';
 import { renderDrawnixMindMapSvg } from './drawnixMindMapSvgRenderer';
@@ -36,7 +37,8 @@ export class DrawnixRenderer implements DiagramRenderer {
     async render(spec: DiagramSpec, options: RenderOptions = {}): Promise<RenderArtifact> {
         assertValidDiagramSpec(spec);
 
-        const projection = buildDrawnixMindMapProjection(spec);
+        const relations = selectDrawnixCoreRelations(spec);
+        const projection = buildDrawnixMindMapProjection({ ...spec, edges: relations.edges });
         const emitMermaidCompanions = options.drawnixExportMermaidCompanions === true;
         const sourceVisualCompanions = await buildSourceVisualCompanions(options.sourceVisuals, {
             inlineMermaidVisuals: !emitMermaidCompanions,
@@ -58,7 +60,7 @@ export class DrawnixRenderer implements DiagramRenderer {
                 }
                 : visual;
         });
-        const data = exportDrawnixMindMapProjection(projection, sourceVisualMetadata);
+        const data = exportDrawnixMindMapProjection(projection, sourceVisualMetadata, relations.omitted);
         const content = stringifyDrawnixMindMapExportedData(data);
         const previewSvgContent = renderDrawnixMindMapSvg(projection, sourceVisualCompanions.previewVisuals);
         const validationErrors = validateDrawnixMindMapExportedData(data);
@@ -79,6 +81,11 @@ export class DrawnixRenderer implements DiagramRenderer {
                     : undefined
         }));
         const diagnostics = [...coverageDiagnostics, ...sourceVisualCompanions.diagnostics];
+        if (relations.omitted.length) diagnostics.push({
+            severity: 'info', kind: 'drawnix-core-relations',
+            message: `The overview shows ${relations.edges.length} labeled core relationships; ${relations.omitted.length} additional or unspecified relationships are retained in metadata.`,
+            advice: 'Inspect metadata.notemd.omittedRelations for the original relationships and omission reasons.'
+        });
         if (projection.crossRelations.length > 0) {
             diagnostics.push({
                 severity: 'warning',

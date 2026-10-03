@@ -1,5 +1,5 @@
 import { DiagramEdge, DiagramNode, DiagramSpec } from '../../types';
-import { routeDrawnixRelationThroughReservedLane } from './drawnixRelationRouter';
+import { findDrawnixCompactRelationRoute, routeDrawnixRelationThroughReservedLane } from './drawnixRelationRouter';
 import type {
     DrawnixCrossRootRouteObstacle,
     DrawnixCrossRootRouteStrategy
@@ -478,6 +478,8 @@ function createCrossRelations(
 ): DrawnixMindMapCrossRelation[] {
     const nodeById = new Map(placedNodes.map(node => [node.id, node]));
     const laneByRelationId = new Map(relationLanes.map(lane => [lane.relationId, lane]));
+    const previousRoutes: DrawnixPoint[][] = [];
+    const occupiedLabels: DrawnixRect[] = [];
     return edges.map((edge, index) => {
         const sourceId = edge.from.trim();
         const targetId = edge.to.trim();
@@ -494,7 +496,7 @@ function createCrossRelations(
         }
         const label = normalizedText(edge.label, normalizedText(edge.relation, '')) || undefined;
         const labelMetrics = label ? measureDrawnixRelationLabel(label) : undefined;
-        const labelLayout = labelMetrics && lane.labelBounds
+        let labelLayout = labelMetrics && lane.labelBounds
             ? {
                 ...lane.labelBounds,
                 lines: labelMetrics.lines,
@@ -504,20 +506,27 @@ function createCrossRelations(
         if (labelMetrics && !labelLayout) {
             throw new Error(`Drawnix relation label "${id}" has no reserved label geometry.`);
         }
-        const route = routeDrawnixRelationThroughReservedLane({
+        const additionalObstacles = [
+            ...protectedObstacles, ...occupiedLabels.map(bounds => inflateDrawnixRect(bounds, RELATION_LABEL_GAP)),
+            ...relationLanes.filter(otherLane => otherLane.relationId !== id)
+                .flatMap(otherLane => otherLane.labelBounds ? [otherLane.labelBounds] : [])
+        ];
+        const compact = labelMetrics ? findDrawnixCompactRelationRoute({
+            source, target, nodes: placedNodes, labelSize: labelMetrics,
+            canvasWidth, canvasHeight, additionalObstacles, previousRoutes
+        }) : null;
+        const route = compact ?? routeDrawnixRelationThroughReservedLane({
             source,
             target,
             nodes: placedNodes,
             lane,
             canvasWidth,
             canvasHeight,
-            additionalObstacles: [
-                ...protectedObstacles,
-                ...relationLanes
-                    .filter(otherLane => otherLane.relationId !== id)
-                    .flatMap(otherLane => otherLane.labelBounds ? [otherLane.labelBounds] : [])
-            ]
+            additionalObstacles
         });
+        if (compact && labelLayout) labelLayout = { ...labelLayout, ...compact.labelBounds };
+        if (labelLayout) occupiedLabels.push(labelLayout);
+        previousRoutes.push(route.points);
 
         return {
             id,

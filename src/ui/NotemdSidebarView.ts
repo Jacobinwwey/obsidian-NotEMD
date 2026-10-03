@@ -8,7 +8,7 @@ import {
     getDiagramTypeSelectionValue,
     resolvePreferredDiagramTypeId
 } from '../diagram/diagramPreferenceCompatibility';
-import { renderDiagramOutputSelector } from './diagramOutputSelector';
+import { renderDiagramOutputSelector, type DiagramOutputSelectorController } from './diagramOutputSelector';
 import {
     renderDiagramTypePreviewPanel,
     resolveDiagramPreviewTypeId,
@@ -138,6 +138,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private slideExportControlsSectionEl: (HTMLElement & { open?: boolean }) | null = null;
     private slideExportEnvironmentPanelEl: HTMLElement | null = null;
     private diagramTypePreviewController: DiagramTypePreviewPanelController | null = null;
+    private diagramOutputController: DiagramOutputSelectorController | null = null;
     private apiLivenessPhase: ApiLivenessVisualPhase = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
     private apiLivenessRequests = new Map<string, ApiActivityRequestRecord>();
@@ -1710,14 +1711,16 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private buildDiagramIntentSelector(parent: HTMLElement) {
         const i18n = this.getStrings();
         const diagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
-        const row = parent.createDiv({ cls: 'notemd-inline-control' });
+        const row = parent.createDiv({ cls: 'notemd-inline-control notemd-diagram-preference-row' });
         row.createEl('label', { text: diagramI18n.intentName, cls: 'notemd-inline-label' });
-        const outputRow = parent.createDiv({ cls: 'notemd-diagram-output-setting' });
+        const outputRow = parent.createDiv({ cls: 'notemd-inline-control notemd-diagram-preference-row' });
         outputRow.createEl('label', { text: i18n.diagramOutputs.name, cls: 'notemd-inline-label' });
-        outputRow.createEl('p', { text: i18n.diagramOutputs.description, cls: 'notemd-control-hint' });
-        renderDiagramOutputSelector({
+        const outputControl = outputRow.createDiv();
+        this.diagramOutputController?.destroy();
+        this.diagramOutputController = renderDiagramOutputSelector({
+            app: this.app,
             typeParent: row,
-            outputParent: outputRow,
+            outputParent: outputControl,
             getSettings: () => this.plugin.settings,
             saveSettings: () => this.plugin.saveSettings(),
             onTypeChanged: () => this.diagramTypePreviewController?.setSelectedType(
@@ -1949,6 +1952,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     async onClose() {
+        this.diagramOutputController?.destroy();
+        this.diagramOutputController = null;
         this.statusEl = null;
         this.progressAreaEl = null;
         this.progressEl = null;

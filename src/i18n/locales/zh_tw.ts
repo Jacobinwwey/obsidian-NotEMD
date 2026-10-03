@@ -19,9 +19,10 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         historyFailed: '輸出已儲存，但歷史索引更新失敗：{message}。可透過匯出紀錄復原此批次。',
         name: '偏好輸出檔案',
         description: '可選擇多種圖形輸出。相容項目優先顯示，其他選項保留，選取時自動協調圖表類型。簡報匯出使用獨立設定。',
-        supported: '目前圖表可用',
-        adjustable: '自動協調後可用',
+        supported: '相容格式',
+        adjustable: '其他格式',
         unsupported: '不支援',
+        inactiveShort: '暫不可用',
         adjustmentHint: '選取此輸出會自動協調圖表類型或目前原始檔案格式。',
         inactiveHint: '已要求，但目前計畫暫不可用。',
         useOutput: '優先使用此輸出',
@@ -34,7 +35,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         htmlDiagramDescription: '保留 SVG 圖形版面；提供瀏覽功能，並非完整的瀏覽器編輯器。',
         htmlSummaryDescription: '結構化閱讀頁面，不保留圖形版面。',
         saveFailed: '無法儲存圖形偏好：{message}',
-        unsupportedVersion: '這些輸出偏好來自不支援的版本，請選擇輸出以更新設定。'
+        unsupportedVersion: '已保留新版偏好，目前使用預設輸出。'
     },
     common: {
         language: '語言',

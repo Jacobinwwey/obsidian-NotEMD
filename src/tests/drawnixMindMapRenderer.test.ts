@@ -5,7 +5,6 @@ import {
 } from '../diagram/adapters/drawnix/drawnixMindMapProjection';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { renderDrawnixMindMapSvg } from '../rendering/renderers/drawnixMindMapSvgRenderer';
-import * as drawnixRelationRouter from '../diagram/adapters/drawnix/drawnixRelationRouter';
 import { DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE } from './fixtures/drawnixArchitectureDocumentTreeFixture';
 
 function createKnowledgeMapSpec(): DiagramSpec {
@@ -534,7 +533,6 @@ describe('Drawnix mind-map renderer', () => {
     });
 
     test('routes the relationship-rich architecture stress fixture without losing relations', () => {
-        const routeSpy = jest.spyOn(drawnixRelationRouter, 'routeDrawnixRelationThroughReservedLane');
         const projection = buildDrawnixMindMapProjection(DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE);
 
         expect(projection.roots).toHaveLength(1);
@@ -542,8 +540,6 @@ describe('Drawnix mind-map renderer', () => {
         expect(projection.crossRelations).toHaveLength(DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE.edges?.length ?? 0);
         expect(projection.root.data.topic.children[0].text).toBe('architecture.zh-CN');
         expect(projection.crossRelations.every(relation => relation.points.length >= 2)).toBe(true);
-        expect(routeSpy).toHaveBeenCalledTimes(DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE.edges?.length ?? 0);
-        routeSpy.mockRestore();
     });
 
     test('produces deterministic layout without overlapping node rectangles', () => {
@@ -910,13 +906,17 @@ describe('Drawnix mind-map renderer', () => {
         expect(artifact.previewSvg?.content).toContain('data-drawnix-mindmap-node-id="depth-4"');
     });
 
-    test('rejects cross relations that duplicate hierarchy ownership', async () => {
+    test('keeps hierarchy ownership without redundant arrows and retains omitted relations', async () => {
         const invalidSpec: DiagramSpec = {
             ...createKnowledgeMapSpec(),
             edges: [{ from: 'notemd', to: 'diagram', label: 'duplicate hierarchy' }]
         };
 
-        await expect(new DrawnixRenderer().render(invalidSpec)).rejects.toThrow(/duplicates a parent-child relationship/i);
+        const artifact = await new DrawnixRenderer().render(invalidSpec);
+        const exported = JSON.parse(artifact.content);
+        expect(exported.elements.some((element: { type: string }) => element.type === 'arrow-line')).toBe(false);
+        expect(exported.metadata.notemd.omittedRelations).toEqual([{ edge: invalidSpec.edges![0], reason: 'hierarchy' }]);
+        expect(artifact.previewSvg?.content).toContain('data-drawnix-mindmap-node-id="diagram"');
     });
 
     test('lays out more than four labelled cross-branch relations in separate safe lanes', async () => {

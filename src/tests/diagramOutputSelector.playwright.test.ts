@@ -1,6 +1,7 @@
 import { build } from 'esbuild';
 import { chromium, Browser, Page } from 'playwright';
 import * as path from 'path';
+import { readFileSync } from 'fs';
 
 describe('diagram output selection in a real DOM', () => {
     let browser: Browser;
@@ -12,7 +13,7 @@ describe('diagram output selection in a real DOM', () => {
             bundle: true, write: false, format: 'iife', globalName: 'DiagramSelection', platform: 'browser',
             plugins: [{ name: 'obsidian', setup(builder) {
                 builder.onResolve({ filter: /^obsidian$/ }, () => ({ path: 'obsidian', namespace: 'mock' }));
-                builder.onLoad({ filter: /.*/, namespace: 'mock' }, () => ({ contents: "export const getLanguage = () => 'en';" }));
+                builder.onLoad({ filter: /.*/, namespace: 'mock' }, () => ({ contents: "export class Scope { register(modifiers, key, callback) { this.escape = callback; } } export const getLanguage = () => 'en'; export function setIcon(element) { element.innerHTML = '<svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\"><path d=\"M7 17 17 7M7 7h10v10\" fill=\"none\" stroke=\"currentColor\"/></svg>'; }" }));
             } }]
         });
         bundle = compiled.outputFiles[0].text;
@@ -45,6 +46,7 @@ describe('diagram output selection in a real DOM', () => {
             runtime.settings = { uiLocale: 'en', experimentalDiagramCompatibilityMode: 'best-fit', preferredDiagramTypeId: 'nested', preferredDiagramIntent: 'nested', preferredDiagramRenderTarget: 'editable-html-svg' };
             runtime.saves = 0;
             runtime.control = runtime.DiagramSelection.renderDiagramOutputSelector({
+                app: { keymap: { pushScope: (scope: any) => { runtime.scope = scope; }, popScope: () => { runtime.scope = null; } } },
                 typeParent: document.querySelector('#type'), outputParent: document.querySelector('#outputs'),
                 getSettings: () => runtime.settings,
                 saveSettings: () => { runtime.saves++; return runtime.persist?.() ?? Promise.resolve(); },
@@ -53,7 +55,52 @@ describe('diagram output selection in a real DOM', () => {
         });
     });
 
+    test('collapses output choices until the compact trigger is opened', async () => {
+        expect(await page.locator('[data-diagram-output="svg"]').isVisible()).toBe(false);
+        await page.locator('[data-diagram-output-trigger]').click();
+        expect(await page.locator('[data-diagram-output="svg"]').isVisible()).toBe(true);
+        expect(await page.locator('[data-diagram-output-trigger]').getAttribute('aria-expanded')).toBe('true');
+        expect(await page.locator('.notemd-diagram-output-choice small').count()).toBe(0);
+    });
+
+    test('closes with Escape or outside focus and releases popup on destroy', async () => {
+        const trigger = page.locator('[data-diagram-output-trigger]');
+        await trigger.click();
+        await page.keyboard.press('Escape');
+        expect(await trigger.evaluate(element => element === document.activeElement)).toBe(true);
+        expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+        await trigger.click();
+        await page.locator('#outside').focus();
+        expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+        expect(await page.locator('#outside').evaluate(element => element === document.activeElement)).toBe(true);
+        await trigger.click();
+        await page.evaluate(() => (window as any).control.destroy());
+        expect(await page.locator('[data-diagram-output-popup]').count()).toBe(0);
+    });
+
+    test('owns the host Escape scope only while its popup is open', async () => {
+        await page.locator('[data-diagram-output-trigger]').click();
+        expect(await page.evaluate(() => typeof (window as any).scope?.escape)).toBe('function');
+        await page.evaluate(() => (window as any).scope.escape());
+        expect(await page.locator('[data-diagram-output-trigger]').getAttribute('aria-expanded')).toBe('false');
+        expect(await page.evaluate(() => (window as any).scope)).toBe(null);
+    });
+
+    test('fits a narrow viewport and keeps native tab order after portal dismissal', async () => {
+        await page.setViewportSize({ width: 320, height: 480 });
+        await page.addStyleTag({ content: readFileSync(path.join(__dirname, '../../styles.css'), 'utf8') });
+        await page.locator('[data-diagram-output-trigger]').click();
+        const popup = await page.locator('[data-diagram-output-popup]').boundingBox();
+        expect(popup!.x).toBeGreaterThanOrEqual(8);
+        expect(popup!.x + popup!.width).toBeLessThanOrEqual(312);
+        expect(popup!.y + popup!.height).toBeLessThanOrEqual(480);
+        await page.keyboard.press('Tab');
+        expect(await page.locator('#outside').evaluate(el => el === document.activeElement)).toBe(true);
+        expect(await page.locator('[data-diagram-output-trigger]').getAttribute('aria-expanded')).toBe('false');
+    });
+
     test('orders supported choices first while keeping every incompatible choice visible', async () => {
+        await page.locator('[data-diagram-output-trigger]').click();
         const states = await page.locator('[data-diagram-output-state]').evaluateAll(elements => elements.map(element => element.getAttribute('data-diagram-output-state')));
         expect(states[0]).toBe('supported');
         expect(states.indexOf('adjustable')).toBeGreaterThan(0);
@@ -62,9 +109,11 @@ describe('diagram output selection in a real DOM', () => {
     });
 
     test('coordinates both directions without resetting or losing selected requests', async () => {
+        await page.locator('[data-diagram-output-trigger]').click();
         await page.locator('input[data-diagram-output="source:drawnix"]').check();
         expect(await page.locator('[data-diagram-type]').inputValue()).toBe('drawnixMindmap');
         await page.locator('[data-diagram-type]').selectOption('nested');
+        await page.locator('[data-diagram-output-trigger]').click();
         expect(await page.locator('input[data-diagram-output="source:drawnix"]').isChecked()).toBe(true);
         expect(await page.locator('[data-diagram-output-summary]').innerText()).toContain('Drawnix');
         await page.locator('[data-diagram-promote-output="source:drawnix"]').click();
@@ -72,6 +121,7 @@ describe('diagram output selection in a real DOM', () => {
     });
 
     test('keeps keyboard focus on the changed output after sorting and never steals it after saving', async () => {
+        await page.locator('[data-diagram-output-trigger]').click();
         const svg = page.locator('input[data-diagram-output="svg"]');
         await svg.focus();
         await page.keyboard.press('Space');
@@ -87,6 +137,7 @@ describe('diagram output selection in a real DOM', () => {
             runtime.settings.diagramOutputPreferences = { version: 1, requestedOutputs: ['future-format', 'svg'] };
             runtime.control.refresh();
         });
+        await page.locator('[data-diagram-output-trigger]').click();
         const unknown = page.locator('input[data-diagram-output="future-format"]');
         expect(await unknown.isChecked()).toBe(true);
         expect(await unknown.isEnabled()).toBe(true);
@@ -95,6 +146,7 @@ describe('diagram output selection in a real DOM', () => {
     });
 
     test('edits the current settings object after a command has reloaded settings', async () => {
+        await page.locator('[data-diagram-output-trigger]').click();
         await page.evaluate(() => {
             const runtime = window as any;
             runtime.oldSettings = runtime.settings;
@@ -106,6 +158,7 @@ describe('diagram output selection in a real DOM', () => {
     });
 
     test('serializes rapid changes and persists the latest selection after a failed save', async () => {
+        await page.locator('[data-diagram-output-trigger]').click();
         await page.evaluate(() => {
             const runtime = window as any;
             runtime.activeSaves = 0;

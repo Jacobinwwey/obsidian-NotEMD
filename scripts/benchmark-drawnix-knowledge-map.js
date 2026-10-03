@@ -103,7 +103,8 @@ function assertBenchmarkSummary(summary) {
   const expected = {
     rootCount: 1,
     nodeCount: expectedNodeCount(),
-    edgeCount: SUBSYSTEM_COUNT * BRANCHES_PER_SUBSYSTEM,
+    edgeCount: 6,
+    retainedRelationCount: SUBSYSTEM_COUNT * BRANCHES_PER_SUBSYSTEM,
     validationErrorCount: 0
   };
   for (const [key, value] of Object.entries(expected)) {
@@ -133,6 +134,9 @@ function run(options) {
     encoding: 'utf8'
   });
   const summary = JSON.parse(stdout);
+  const board = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+  const omittedRelationCount = board.metadata?.notemd?.omittedRelations?.length ?? 0;
+  summary.retainedRelationCount = summary.edgeCount + omittedRelationCount;
   assertBenchmarkSummary(summary);
 
   return {
@@ -146,6 +150,8 @@ function run(options) {
     rootCount: summary.rootCount,
     nodeCount: summary.nodeCount,
     edgeCount: summary.edgeCount,
+    omittedRelationCount,
+    retainedRelationCount: summary.retainedRelationCount,
     validationErrorCount: summary.validationErrorCount
   };
 }

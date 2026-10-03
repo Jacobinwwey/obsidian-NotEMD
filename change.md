@@ -8,6 +8,8 @@ This document summarizes the major functional and architectural changes implemen
 
 ### English
 
+- Replace the flat output checklist with a compact multi-select dropdown. Own the popup's Obsidian keyboard scope and portal lifecycle; defer preview measurement until settings popouts have visible geometry.
+- Show labeled core Drawnix relationships with local routes where space permits. Preserve omitted edges in native metadata, and keep SVG/native label coordinates identical.
 - Add multi-select diagram outputs with supported choices first, latest-choice coordination and visible inactive requests. Keep presentation export configuration and dependencies independent.
 - Distinguish diagram HTML from structured-summary HTML. Persist one generated specification, per-output delivery state and SHA-256 receipts; retry partial exports from preview/history/maintainer CLI without another model request or overwriting user edits.
 - Preserve unknown preference schema versions and extension fields through ordinary selection changes. Serialize settings writes and read the current settings object after reload.
@@ -15,6 +17,8 @@ This document summarizes the major functional and architectural changes implemen
 
 ### 中文
 
+- 将平铺输出复选框改为紧凑多选下拉菜单，管理弹层的 Obsidian 键盘作用域与生命周期；设置独立窗口可见后再校验预览几何。
+- Drawnix 显示带明确标签的核心关系，空间允许时优先使用局部短路径；省略关系保存在原生 metadata，SVG 与原生标签坐标保持一致。
 - 新增图形输出多选、支持项优先排序、最新选择自动协调与暂不可用请求展示；演示导出的配置与依赖保持独立。
 - 区分图形 HTML 与结构化摘要 HTML。持久化一次生成的规格、逐格式状态及 SHA-256 收据；从预览、历史或维护 CLI 恢复部分失败的导出，不重复调用模型、不覆盖用户修改。
 - 普通勾选操作保留未知偏好版本及扩展字段，设置保存串行执行，重载后操作当前设置对象。

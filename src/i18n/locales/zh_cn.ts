@@ -19,9 +19,10 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         historyFailed: '输出已保存，但历史索引更新失败：{message}。可通过导出记录恢复此批次。',
         name: '首选输出文件',
         description: '可选择多种图形输出。兼容项优先显示，其他选项保留，选择时自动协调图表类型。演示导出使用独立设置。',
-        supported: '当前图表可用',
-        adjustable: '自动协调后可用',
+        supported: '兼容格式',
+        adjustable: '其他格式',
         unsupported: '不支持',
+        inactiveShort: '暂不可用',
         adjustmentHint: '选择此输出会自动协调图表类型或当前源文件格式。',
         inactiveHint: '已请求，但当前计划暂不可用。',
         useOutput: '优先使用此输出',
@@ -34,7 +35,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         htmlDiagramDescription: '保留 SVG 图形布局；提供浏览功能，不是完整的浏览器编辑器。',
         htmlSummaryDescription: '结构化阅读页面，不保留图形布局。',
         saveFailed: '无法保存图形偏好：{message}',
-        unsupportedVersion: '这些输出偏好来自不支持的版本，请选择输出以更新配置。'
+        unsupportedVersion: '已保留新版偏好，当前使用默认输出。'
     },
     common: {
         language: '语言',

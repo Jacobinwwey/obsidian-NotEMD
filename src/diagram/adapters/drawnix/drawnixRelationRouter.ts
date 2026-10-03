@@ -3,7 +3,7 @@ import type {
     DrawnixRootRegion
 } from './drawnixMindMapProjection';
 import type { DrawnixRelationLane } from './drawnixRelationLaneLayout';
-import { drawnixPolylineLength, inflateDrawnixRect } from './drawnixGeometry';
+import { drawnixPolylineLength, drawnixRectanglesOverlap, inflateDrawnixRect } from './drawnixGeometry';
 import type { DrawnixPoint, DrawnixRect } from './drawnixGeometry';
 
 export type DrawnixCrossRootRouteStrategy = 'grid' | 'local-lane' | 'outer-lane' | 'reserved-lane';
@@ -65,6 +65,17 @@ export interface DrawnixReservedRelationLaneRouterInput {
 
 export interface DrawnixReservedRelationLaneRoute extends DrawnixCrossRootRoute {
     nativeTextPosition: number;
+}
+
+export interface DrawnixCompactRelationRouterInput {
+    source: DrawnixMindMapPlacedNode;
+    target: DrawnixMindMapPlacedNode;
+    nodes: readonly DrawnixMindMapPlacedNode[];
+    labelSize: DrawnixRelationLabelSize;
+    canvasWidth: number;
+    canvasHeight: number;
+    additionalObstacles: readonly DrawnixRect[];
+    previousRoutes: readonly DrawnixPoint[][];
 }
 
 const ROUTE_CLEARANCE = 28;
@@ -517,6 +528,70 @@ function endpointsTowardTrack(
     const left: DrawnixPoint = [node.x, centerY];
     const right: DrawnixPoint = [node.x + node.width, centerY];
     return trackX < node.x + node.width / 2 ? [left, right] : [right, left];
+}
+
+/** Reserve a nearby label and short route together; the exterior lane remains
+ * available when dense branches leave no readable local corridor. */
+export function findDrawnixCompactRelationRoute(input: DrawnixCompactRelationRouterInput):
+    (DrawnixReservedRelationLaneRoute & { labelBounds: DrawnixRect }) | null {
+    const { source, target, labelSize } = input;
+    const obstacles = [...input.nodes.map(node => nodeRectangle(node,
+        node.id === source.id || node.id === target.id ? 0 : 12)), ...input.additionalObstacles];
+    const ports = (node: DrawnixMindMapPlacedNode): DrawnixPoint[] => [
+        [node.x, node.y + node.height / 2], [node.x + node.width, node.y + node.height / 2],
+        [node.x + node.width / 2, node.y], [node.x + node.width / 2, node.y + node.height]
+    ];
+    const previousSegments = input.previousRoutes.flatMap(points => points.slice(1).map((end, i) => {
+        const start = points[i];
+        return { x: Math.min(start[0], end[0]) - 4, y: Math.min(start[1], end[1]) - 4,
+            width: Math.abs(end[0] - start[0]) + 8, height: Math.abs(end[1] - start[1]) + 8 };
+    }));
+    const candidates: Array<DrawnixReservedRelationLaneRoute & { labelBounds: DrawnixRect; score: number }> = [];
+    const seen = new Set<string>();
+    for (const start of ports(source)) for (const end of ports(target)) {
+        const xTracks = [(start[0] + end[0]) / 2,
+            Math.min(source.x, target.x) - ROUTE_CLEARANCE,
+            Math.max(source.x + source.width, target.x + target.width) + ROUTE_CLEARANCE,
+            Math.min(source.x, target.x) - labelSize.width / 2 - ROUTE_CLEARANCE,
+            Math.max(source.x + source.width, target.x + target.width) + labelSize.width / 2 + ROUTE_CLEARANCE];
+        const yTracks = [(start[1] + end[1]) / 2,
+            Math.min(source.y, target.y) - labelSize.height / 2 - ROUTE_CLEARANCE,
+            Math.max(source.y + source.height, target.y + target.height) + labelSize.height / 2 + ROUTE_CLEARANCE];
+        const routes = [
+            ...xTracks.map(x => [start, [x, start[1]], [x, end[1]], end] as DrawnixPoint[]),
+            ...yTracks.map(y => [start, [start[0], y], [end[0], y], end] as DrawnixPoint[])
+        ];
+        for (const route of routes) {
+            const points = simplify(route);
+            const key = JSON.stringify(points);
+            if (seen.has(key)) continue;
+            seen.add(key);
+            if (points.some(([x, y]) => x < 0 || y < 0 || x > input.canvasWidth || y > input.canvasHeight)
+                || !routeSegmentsAreClear(points, obstacles)
+                || !routeSegmentsAreClear(points, previousSegments)) continue;
+            const length = drawnixPolylineLength(points);
+            let travelled = 0;
+            for (let i = 1; i < points.length; i++) {
+                const a = points[i - 1], b = points[i];
+                const segmentLength = Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]);
+                const labelSpan = a[1] === b[1] ? labelSize.width : labelSize.height;
+                for (const fraction of [0.5, 0.25, 0.75]) {
+                const bounds = { x: a[0] + (b[0] - a[0]) * fraction - labelSize.width / 2,
+                    y: a[1] + (b[1] - a[1]) * fraction - labelSize.height / 2, ...labelSize };
+                if (segmentLength * Math.min(fraction, 1 - fraction) >= labelSpan / 2 + 12 && bounds.x >= 0 && bounds.y >= 0
+                    && bounds.x + bounds.width <= input.canvasWidth && bounds.y + bounds.height <= input.canvasHeight
+                    && !obstacles.some(rect => drawnixRectanglesOverlap(bounds, inflateDrawnixRect(rect, 12)))
+                    && !previousSegments.some(rect => drawnixRectanglesOverlap(bounds, rect))) {
+                    candidates.push({ points, labelBounds: bounds, nativeTextPosition: (travelled + segmentLength * fraction) / length,
+                        strategy: 'local-lane', score: length + (points.length - 2) * BEND_PENALTY });
+                }
+                }
+                travelled += segmentLength;
+            }
+        }
+    }
+    candidates.sort((a, b) => a.score - b.score);
+    return candidates[0] ?? null;
 }
 
 function endpointsForReservedLaneGrid(

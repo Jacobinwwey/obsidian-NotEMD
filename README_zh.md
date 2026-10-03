@@ -172,6 +172,8 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/803d444f-e477-428a-9ce6-4aac8075062a" />
 
 - **实验性图表流水线**:
+    - 输出选项采用紧凑多选下拉菜单，收起时显示选择摘要。兼容格式优先，其余请求仍可找到。Escape 仅关闭菜单，不关闭 Obsidian 设置窗口；所选图表保留生产渲染器生成的预览。
+    - Drawnix 主图最多显示六条带明确标签的核心有向关系，每个节点最多关联三条。无标签、泛化、重复、层级及超出密度的关系保存在 `metadata.notemd.omittedRelations`，附省略原因。相邻节点优先使用短路径，密集布局仍可回退到外侧通道。提示词要求方向有原文支持并保留历史不确定性，渲染器本身不能证明语义正确。
     - **main 开发版（尚未发布）：** 图表类型单选、图形输出多选。设置与工作台优先显示支持项，保留不兼容请求并说明状态，按最新显式选择自动协调。选择 Drawnix 源文件可切换到兼容类型；改选 Nested Scope 后，Drawnix 请求保留为暂不可用，继续交付支持的格式。演示导出保留独立设置、依赖库和环境要求；PPTX/MP4 仍属于演示导出流程。
     - **图形 HTML**（`html-diagram`）包含可缩放的 SVG 预览；**结构化摘要 HTML**（`html-summary`，原通用“HTML”）展示规格的文本、结构与引文，不是另一种图形格式。“可编辑 HTML/SVG”保留为内部渲染器名称，不表示网页内提供图形编辑器；需要原生编辑时应导出源文件。
     - 多格式生成会保存到 `<笔记名>_diagram-<UUID>/`：原生文件为 `source/artifact.<ext>`，附件保留相对路径，派生文件为 `diagram.html/svg/png/pdf`，可选摘要为 `summary.html`，恢复记录为 `run.notemd-diagram.json`。保存命令直接导出所选格式；预览命令通过“导出所选格式”保存。所有格式共用一次生成的规格，部分失败或取消保留成功文件；预览、历史及维护 CLI `diagram.export.retry` 从记录恢复，不再次请求模型。恢复会校验成功文件的哈希，不覆盖用户修改。全部请求不可用时，尝试有效渲染器的默认源输出，同时保留不可用请求的状态。

@@ -97,7 +97,7 @@ class PreviewElement {
                     classList: { add: jest.fn() },
                     style: {},
                     setAttribute: jest.fn(),
-                    getBoundingClientRect: () => ({ x: 0, y: 0, width: 880, height: 532 }),
+                    getBoundingClientRect: () => ({ x: 0, y: 0, width: this.clientWidth, height: 532 }),
                     querySelectorAll: () => []
                 } as unknown as PreviewElement
                 : null);
@@ -121,6 +121,35 @@ describe('diagram type preview panel', () => {
         jest.doMock('../rendering/preview/svgSafety', () => ({
             assertMountedSvgPresentationSafety: jest.fn()
         }));
+    });
+
+    test('defers presentation measurement while the settings popout has not laid out its canvas', async () => {
+        const { renderDiagramTypePreviewPanel } = await import('../ui/diagramTypePreviewPanel');
+        const safety = await import('../rendering/preview/svgSafety');
+        let resized: (() => void) | undefined;
+        const disconnect = jest.fn();
+        const previousObserver = globalThis.ResizeObserver;
+        globalThis.ResizeObserver = class {
+            constructor(callback: () => void) { resized = callback; }
+            observe() { /* Layout will arrive after the popout attaches. */ }
+            disconnect = disconnect;
+        } as unknown as typeof ResizeObserver;
+        try {
+            const root = new PreviewElement();
+            const controller = renderDiagramTypePreviewPanel({ parent: root as unknown as HTMLElement, copy,
+                renderThumbnail: async () => '<svg viewBox="0 0 100 60"></svg>' });
+            const canvas = root.children[0].children[2];
+            canvas.clientWidth = 0;
+            controller.setSelectedType('flowchart');
+            await Promise.resolve();
+            expect(canvas.attrs.get('data-preview-state')).toBe('loading');
+            expect(safety.assertMountedSvgPresentationSafety).not.toHaveBeenCalled();
+            canvas.clientWidth = 320;
+            resized?.();
+            expect(canvas.attrs.get('data-preview-state')).toBe('ready');
+            expect(disconnect).toHaveBeenCalled();
+            controller.destroy();
+        } finally { globalThis.ResizeObserver = previousObserver; }
     });
 
     test('progressively discloses one production-rendered preview and ignores stale requests', async () => {

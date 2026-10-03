@@ -1628,6 +1628,14 @@
     object-position: center;
 }
 
+.notemd-diagram-preview-setting {
+    flex-direction: column;
+    align-items: stretch;
+}
+.notemd-diagram-preview-setting .setting-item-info { margin: 0; }
+.notemd-diagram-preview-setting .setting-item-control { width: 100%; }
+.notemd-diagram-preview-setting .notemd-diagram-type-preview-panel { flex: 1; min-width: 0; }
+
 .notemd-diagram-type-preview-canvas > svg.notemd-diagram-type-preview-svg {
     aspect-ratio: auto;
 }
@@ -2772,47 +2780,109 @@
     .notemd-diagram-history-actions button { flex: 1 1 12rem; min-height: 44px; }
 }
 
-/* Diagram preferences keep compatibility explanations visible at narrow sidebar widths. */
+/* Keep preference controls compact; the popup escapes host scroll clipping. */
+.notemd-diagram-preference-row {
+    display: grid;
+    grid-template-columns: minmax(76px, 0.36fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+}
 .notemd-diagram-output-control {
     display: block;
     min-width: 0;
     width: 100%;
     max-width: 440px;
 }
+.notemd-diagram-output-trigger,
+.notemd-diagram-preference-row select,
+select[data-diagram-type] {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    max-width: 440px;
+}
+.notemd-diagram-output-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    text-align: start;
+    font: inherit;
+    background: var(--background-modifier-form-field);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-s);
+    box-shadow: none;
+    cursor: pointer;
+}
+.notemd-diagram-output-selection { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.notemd-diagram-output-count { color: var(--text-muted); font-size: var(--font-ui-small); }
+.notemd-diagram-output-chevron { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); margin-inline: 4px; }
+.notemd-diagram-output-popup {
+    position: fixed;
+    z-index: var(--layer-popover, 1000);
+    box-sizing: border-box;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 6px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-family: var(--font-interface);
+    font-size: var(--font-ui-small, 14px);
+    box-shadow: var(--shadow-s);
+}
+.notemd-diagram-output-popup[hidden] { display: none !important; }
+.notemd-diagram-output-trigger:focus-visible,
+.notemd-diagram-output-choice :is(input, button):focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
 .notemd-diagram-output-group {
     border: 0;
     padding: 0;
-    margin: 0 0 12px;
+    margin: 0;
     min-width: 0;
 }
 .notemd-diagram-output-group legend {
     color: var(--text-muted);
     font-size: var(--font-ui-small);
-    margin-bottom: 6px;
+    padding: 8px;
+    font-weight: var(--font-medium, 500);
 }
+.notemd-diagram-output-group + .notemd-diagram-output-group { border-top: 1px solid var(--background-modifier-border); margin-top: 4px; }
 .notemd-diagram-output-choice {
-    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-s);
     overflow-wrap: anywhere;
 }
+.notemd-diagram-output-choice:hover { background: var(--background-modifier-hover); }
 .notemd-diagram-output-choice label {
     display: flex;
-    align-items: baseline;
-    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px;
+    box-sizing: border-box;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
 }
-.notemd-diagram-output-choice small {
-    display: block;
-    color: var(--text-muted);
-    margin-left: 24px;
-}
+.notemd-diagram-output-choice input { flex: none; margin: 0; }
+.notemd-diagram-output-inactive { margin-inline-start: auto; font-size: 11px; white-space: nowrap; color: var(--text-muted); }
 .notemd-diagram-output-choice[data-diagram-output-state="adjustable"] label,
 .notemd-diagram-output-choice[data-diagram-output-state="unsupported"] label {
     color: var(--text-muted);
 }
 .notemd-diagram-output-choice button {
-    margin: 4px 0 0 24px;
-    height: auto;
-    white-space: normal;
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+    flex: none;
+    box-shadow: none;
+    background: transparent;
+    cursor: pointer;
 }
+.notemd-diagram-output-summary { margin: 6px 8px; color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.notemd-diagram-output-summary:empty, .notemd-diagram-output-error:empty { display: none; }
 .notemd-diagram-output-error {
     color: var(--text-error);
 }

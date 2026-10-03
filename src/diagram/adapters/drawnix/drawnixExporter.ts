@@ -5,6 +5,7 @@ import {
     DrawnixMindMapProjection
 } from './drawnixMindMapProjection';
 import type { SourceVisualKind, SourceVisualStatus } from '../../sourceVisuals';
+import type { DrawnixOmittedRelation } from './drawnixCoreRelations';
 
 export const DRAWNIX_EXPORT_VERSION = 1 as const;
 export const DRAWNIX_SOURCE_VISUAL_METADATA_VERSION = 1 as const;
@@ -29,6 +30,7 @@ export interface DrawnixMindMapMetadata {
     notemd: {
         version: typeof DRAWNIX_SOURCE_VISUAL_METADATA_VERSION;
         sourceVisuals: DrawnixSourceVisualAttachment[];
+        omittedRelations?: DrawnixOmittedRelation[];
     };
 }
 
@@ -51,13 +53,15 @@ export interface DrawnixMindMapExportedData {
 
 export function exportDrawnixMindMapProjection(
     projection: DrawnixMindMapProjection,
-    sourceVisuals: readonly DrawnixSourceVisualAttachment[] = []
+    sourceVisuals: readonly DrawnixSourceVisualAttachment[] = [],
+    omittedRelations: readonly DrawnixOmittedRelation[] = []
 ): DrawnixMindMapExportedData {
-    const metadata = sourceVisuals.length > 0
+    const metadata = sourceVisuals.length > 0 || omittedRelations.length > 0
         ? {
             notemd: {
                 version: DRAWNIX_SOURCE_VISUAL_METADATA_VERSION,
-                sourceVisuals: sourceVisuals.map(visual => ({ ...visual, companionPaths: [...visual.companionPaths] }))
+                sourceVisuals: sourceVisuals.map(visual => ({ ...visual, companionPaths: [...visual.companionPaths] })),
+                ...(omittedRelations.length ? { omittedRelations: omittedRelations.map(item => ({ ...item, edge: { ...item.edge } })) } : {})
             }
         }
         : undefined;
@@ -117,6 +121,11 @@ export function isDrawnixMindMapMetadata(value: unknown): value is DrawnixMindMa
     }
 
     const ids = new Set<string>();
+    if (notemd.omittedRelations !== undefined && (!Array.isArray(notemd.omittedRelations) || !notemd.omittedRelations.every(item =>
+        isRecord(item) && isRecord(item.edge) && typeof item.edge.from === 'string' && typeof item.edge.to === 'string'
+        && (item.edge.label === undefined || typeof item.edge.label === 'string')
+        && (item.edge.relation === undefined || typeof item.edge.relation === 'string')
+        && ['no-label', 'hierarchy', 'duplicate', 'parallel', 'density'].includes(String(item.reason))))) return false;
     return notemd.sourceVisuals.every(visual => {
         if (!isSourceVisualAttachment(visual) || ids.has(visual.id)) {
             return false;

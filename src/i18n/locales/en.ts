@@ -15,9 +15,10 @@ export const STRINGS_EN = {
         historyFailed: 'Outputs are saved, but the history index could not be updated: {message}. Reopen the export record to recover this run.',
         name: 'Preferred output files',
         description: 'Select several diagram outputs. Compatible choices appear first; other choices stay visible and adjust the diagram type when selected. Presentation exports have separate settings.',
-        supported: 'Available for this diagram',
-        adjustable: 'Available with automatic adjustment',
+        supported: 'Compatible',
+        adjustable: 'Other formats',
         unsupported: 'Unavailable',
+        inactiveShort: 'Inactive',
         adjustmentHint: 'Selecting this output automatically adjusts the diagram type or active source format.',
         inactiveHint: 'Requested, but unavailable in the current plan.',
         useOutput: 'Use this output',
@@ -30,7 +31,7 @@ export const STRINGS_EN = {
         htmlDiagramDescription: 'Preserves the SVG diagram layout. This is a viewer, not a complete browser editor.',
         htmlSummaryDescription: 'A structured reading page; does not preserve the graphical layout.',
         saveFailed: 'Could not save diagram preferences: {message}',
-        unsupportedVersion: 'These output preferences were saved by an unsupported version. Select an output to update them.'
+        unsupportedVersion: 'Preferences from a newer version are preserved; default output is used.'
     },
     common: {
         language: 'Language',

@@ -13,7 +13,7 @@ import {
     getDiagramTypeSelectionValue,
     resolvePreferredDiagramTypeId
 } from '../diagram/diagramPreferenceCompatibility';
-import { renderDiagramOutputSelector } from './diagramOutputSelector';
+import { renderDiagramOutputSelector, type DiagramOutputSelectorController } from './diagramOutputSelector';
 import { renderDiagramTypePreviewPanel, resolveDiagramPreviewTypeId, type DiagramTypePreviewPanelController } from './diagramTypePreviewPanel';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
@@ -98,6 +98,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     private readonly settingDeclarationOptions = new Map<HTMLElement, SettingDeclarationOptions>();
     private settingsDiscoveryCleanup?: () => void;
     private diagramTypePreviewController: DiagramTypePreviewPanelController | null = null;
+    private diagramOutputController: DiagramOutputSelectorController | null = null;
 
     private createCatalogSetting(containerEl: HTMLElement, options: SettingDeclarationOptions = {}): Setting {
         const setting = new Setting(containerEl);
@@ -1959,7 +1960,16 @@ export class NotemdSettingTab extends PluginSettingTab {
     }
 
 
+    hide(): void {
+        this.diagramOutputController?.destroy();
+        this.diagramOutputController = null;
+        this.diagramTypePreviewController?.destroy();
+        this.diagramTypePreviewController = null;
+    }
+
     display(): void {
+        this.diagramOutputController?.destroy();
+        this.diagramOutputController = null;
         const { containerEl } = this;
         this.diagramTypePreviewController?.destroy();
         this.diagramTypePreviewController = null;
@@ -2734,12 +2744,11 @@ export class NotemdSettingTab extends PluginSettingTab {
             });
 
         const typeSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.intent' })
-            .setName(experimentalDiagramI18n.intentName)
-            .setDesc(experimentalDiagramI18n.intentDesc);
+            .setName(experimentalDiagramI18n.intentName);
         const outputSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.renderTarget' })
-            .setName(i18n.diagramOutputs.name)
-            .setDesc(i18n.diagramOutputs.description);
-        renderDiagramOutputSelector({
+            .setName(i18n.diagramOutputs.name);
+        this.diagramOutputController = renderDiagramOutputSelector({
+            app: this.app,
             typeParent: typeSetting.controlEl,
             outputParent: outputSetting.controlEl,
             getSettings: () => this.plugin.settings,
@@ -2752,8 +2761,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         const exampleSetting = this.createCatalogSetting(containerEl, {
             id: 'settings.experimentalDiagramPipeline.examples'
         })
-            .setName(experimentalDiagramI18n.diagramExampleGalleryName)
-            .setDesc(experimentalDiagramI18n.diagramExampleGalleryDesc);
+            .setName(experimentalDiagramI18n.diagramExampleGalleryName);
+        exampleSetting.settingEl.addClass('notemd-diagram-preview-setting');
         this.diagramTypePreviewController = renderDiagramTypePreviewPanel({
             parent: exampleSetting.controlEl,
             copy: {
