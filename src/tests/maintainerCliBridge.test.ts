@@ -90,6 +90,18 @@ function createMaintainerCliHost() {
 }
 
 describe('maintainer CLI bridge', () => {
+    test('preserves per-type requests and validates batch results at the CLI boundary', async () => {
+        const host = createMaintainerCliHost();
+        const chartRequests = [{ typeId: 'drawnix-knowledge-map', requestedOutputs: ['pdf'] }, { typeId: 'nested', requestedOutputs: ['svg', 'png'] }];
+        const batch = { kind: 'batch', executionMode: 'save-artifact', sourcePath: '中文.md', actionLabel: 'Generate diagram', status: 'partial', pendingTypeIds: [], results: [
+            { typeId: 'drawnix-knowledge-map', result: createDiagramSuccessResult() },
+            { typeId: 'nested', result: { kind: 'error', executionMode: 'save-artifact', sourcePath: '中文.md', actionLabel: 'Generate diagram', errorMessage: 'provider failed' } }
+        ] };
+        host.generateDiagramForPathCommand.mockResolvedValue(batch);
+        await expect(invokeMaintainerCliOperation(host as any, { operationId: 'diagram.generate', input: { sourcePath: '中文.md', chartRequests } })).resolves.toMatchObject(batch);
+        expect(host.generateDiagramForPathCommand).toHaveBeenCalledWith('中文.md', undefined, expect.objectContaining({ chartRequests }));
+        await expect(invokeMaintainerCliOperation(host as any, { operationId: 'diagram.generate', input: { sourcePath: '中文.md', chartRequests: [{ typeId: 'not-a-chart', requestedOutputs: [] }] } })).rejects.toThrow();
+    });
     test('passes multi-format requests intact and validates export retry results', async () => {
         const host = createMaintainerCliHost();
         await invokeMaintainerCliOperation(host as any, { operationId: 'diagram.generate', input: { sourcePath: '中文.md', requestedOutputs: ['source:drawnix', 'svg', 'html-diagram'] } });

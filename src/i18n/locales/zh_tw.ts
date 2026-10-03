@@ -4,6 +4,10 @@ type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } 
 
 export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
     diagramOutputs: {
+        typesName: '圖表類型',
+        autoSelection: '自動選擇圖表類型',
+        incompatibleType: '此圖表類型不支援該格式。',
+        batchStatus: '{status}：已完成 {count}/{total} 種圖表',
         completed: '已完成',
         partial: '部分完成',
         cancelled: '已取消',
@@ -17,13 +21,13 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         runManifest: '匯出紀錄：{path}',
         fallback: '本次使用了可用的預設輸出。',
         historyFailed: '輸出已儲存，但歷史索引更新失敗：{message}。可透過匯出紀錄復原此批次。',
-        name: '偏好輸出檔案',
-        description: '可選擇多種圖形輸出。相容項目優先顯示，其他選項保留，選取時自動協調圖表類型。簡報匯出使用獨立設定。',
+        name: '輸出格式',
+        description: '每種圖表獨立選擇輸出格式，相容項目優先，不支援的選項保留顯示。簡報匯出使用獨立設定。',
         supported: '相容格式',
         adjustable: '其他格式',
         unsupported: '不支援',
         inactiveShort: '暫不可用',
-        adjustmentHint: '選取此輸出會自動協調圖表類型或目前原始檔案格式。',
+        adjustmentHint: '選取此輸出可調整目前圖表的原始檔案格式。',
         inactiveHint: '已要求，但目前計畫暫不可用。',
         useOutput: '優先使用此輸出',
         automatic: '自動輸出',

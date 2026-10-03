@@ -283,6 +283,7 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
     }
     return {
         executionMode,
+        ...(input.chartRequests !== undefined ? { chartRequests: structuredClone(input.chartRequests) as DiagramCommandOptions['chartRequests'] } : {}),
         inputOverrides: Object.keys(inputOverrides).length > 0 ? inputOverrides : undefined
     };
 }

@@ -129,8 +129,8 @@ export async function runArtifactDiagramExecutionWithHost(
         if (exportRun.plan.usedDefaultOutput) params.reporter.log(copy.fallback);
         if (exportRun.plan.inactiveOutputs.length) params.reporter.log(formatI18n(copy.inactive, { outputs: exportRun.plan.inactiveOutputs.map(output => output.id).join(', ') }));
         diagramHost.notify(status);
-        const previewOpened = !params.reporter.cancelled && diagramHost.supportsPreview(result.artifact);
-        if (previewOpened) diagramHost.openPreview(result.artifact, params.file.path, Boolean(saved.some(output => output.id.startsWith('source:'))), exportRun);
+        // The command coordinator opens one preview after the whole selection completes.
+        const previewOpened = false;
         return {
             generation: result,
             followThrough: { kind: params.executionMode, outputPath, previewOpened, autoFixAttempted: false, artifactTarget: result.artifact.target, exportRun },

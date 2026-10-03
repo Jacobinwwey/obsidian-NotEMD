@@ -20,9 +20,10 @@ const OPERATION_HELP = {
   'diagram.generate': {
     summary: 'Generate a saved diagram artifact or Mermaid output.',
     required: ['sourcePath'],
-    optional: ['executionMode', 'requestedIntent', 'requestedTypeId', 'requestedRenderTarget', 'requestedOutputs', 'compatibilityMode', 'targetLanguage'],
+    optional: ['executionMode', 'requestedIntent', 'requestedTypeId', 'requestedRenderTarget', 'requestedOutputs', 'chartRequests', 'compatibilityMode', 'targetLanguage'],
     exampleInput: '{"sourcePath":"index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}',
     additionalExamples: [
+      '{"sourcePath":"docs/topic.md","chartRequests":[{"typeId":"drawnix-knowledge-map","requestedOutputs":["source:drawnix","pdf"]},{"typeId":"nested","requestedOutputs":["svg","png"]}]}',
       '{"sourcePath":"docs/topic.md","requestedTypeId":"drawnix-knowledge-map","requestedOutputs":["source:drawnix","html-diagram","svg"]}',
       '{"sourcePath":"circuits/common-source.md","executionMode":"save-artifact","requestedIntent":"circuit","requestedRenderTarget":"circuitikz","compatibilityMode":"best-fit","targetLanguage":"en"}',
       '{"sourcePath":"docs/architecture.zh-CN.md","executionMode":"save-artifact","requestedIntent":"drawnixMindmap","requestedRenderTarget":"drawnix","targetLanguage":"zh-CN"}'

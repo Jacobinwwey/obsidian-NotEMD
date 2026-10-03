@@ -122,6 +122,7 @@ export async function runDiagramGenerateOperation(
         modelName,
         reporter
     } = params;
+    if (reporter.cancelled) throw new Error('Diagram generation cancelled.');
     const llmCall = params.callLLMImpl ?? callLLM;
     const runStructuredGeneration = params.generateDiagramArtifactImpl ?? generateDiagramArtifact;
     const sourceMarkdownForGeneration = buildSourceMarkdownForDiagramGeneration(input);

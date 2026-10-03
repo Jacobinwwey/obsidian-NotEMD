@@ -114,6 +114,9 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
         sourcePath: { type: 'string' },
         sourceMarkdown: { type: 'string' },
         requestedOutputs: { type: 'array', items: { type: 'string' } },
+        chartRequests: { type: 'array', items: { type: 'object', required: ['typeId', 'requestedOutputs'], properties: {
+            typeId: { type: 'string', enum: [...DIAGRAM_CATALOG_TYPE_IDS] }, requestedOutputs: { type: 'array', items: { type: 'string' } }
+        } } },
         requestedIntent: { type: 'string' },
         requestedTypeId: { type: 'string', enum: [...DIAGRAM_CATALOG_TYPE_IDS] },
         requestedRenderTarget: {
@@ -132,7 +135,7 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
     }
 };
 
-const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
+const DIAGRAM_SINGLE_GENERATE_RESULT_SCHEMA = {
     type: 'object',
     required: ['kind', 'executionMode', 'sourcePath', 'actionLabel'],
     properties: {
@@ -187,6 +190,19 @@ const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
         outputPath: { type: 'string' },
         previewOpened: { type: 'boolean' },
         errorMessage: { type: 'string' }
+    }
+};
+
+const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
+    ...DIAGRAM_SINGLE_GENERATE_RESULT_SCHEMA,
+    properties: {
+        ...DIAGRAM_SINGLE_GENERATE_RESULT_SCHEMA.properties,
+        kind: { type: 'string', enum: ['success', 'error', 'batch'] },
+        status: { type: 'string', enum: ['completed', 'partial', 'cancelled'] },
+        pendingTypeIds: { type: 'array', items: { type: 'string', enum: [...DIAGRAM_CATALOG_TYPE_IDS] } },
+        results: { type: 'array', items: { type: 'object', required: ['typeId', 'result'], properties: {
+            typeId: { type: 'string', enum: [...DIAGRAM_CATALOG_TYPE_IDS] }, result: DIAGRAM_SINGLE_GENERATE_RESULT_SCHEMA
+        } } }
     }
 };
 

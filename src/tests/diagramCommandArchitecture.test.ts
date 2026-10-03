@@ -117,6 +117,7 @@ describe('diagram command architecture', () => {
                 artifact: {} as any
             },
             outputPath: 'Notes/Topic_diagram.canvas',
+            followThrough: { kind: 'save-artifact', previewOpened: true, autoFixAttempted: false, artifactTarget: 'json-canvas' },
             previewOpened: true
         });
         jest.spyOn(plugin as any, 'getProviderAndModelForTask').mockReturnValue({
@@ -139,7 +140,8 @@ describe('diagram command architecture', () => {
             reporter,
             expect.any(String),
             expect.anything(),
-            'save-artifact'
+            'save-artifact',
+            expect.objectContaining({ activeProvider: mockSettings.activeProvider })
         );
     });
 
@@ -152,6 +154,7 @@ describe('diagram command architecture', () => {
                 artifact: {} as any
             },
             outputPath: 'Notes/Topic_diagram.md',
+            followThrough: { kind: 'save-artifact', previewOpened: true, autoFixAttempted: false, artifactTarget: 'mermaid' },
             previewOpened: true
         });
         jest.spyOn(plugin as any, 'getProviderAndModelForTask').mockReturnValue({
@@ -183,7 +186,8 @@ describe('diagram command architecture', () => {
             reporter,
             expect.any(String),
             expect.anything(),
-            'save-artifact'
+            'save-artifact',
+            expect.objectContaining({ activeProvider: mockSettings.activeProvider })
         );
     });
 

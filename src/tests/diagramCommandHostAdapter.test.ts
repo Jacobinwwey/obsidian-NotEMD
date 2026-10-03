@@ -97,6 +97,51 @@ function createDiagramHost() {
 }
 
 describe('diagram command host adapter', () => {
+    test('freezes per-type requests and source once, continuing after one type fails', async () => {
+        const { host, reporter } = createDiagramHost();
+        const settings = { ...mockSettings, diagramTypeOutputPreferences: { version: 1, selectedTypeIds: ['nested', 'flowchart'], outputsByType: { nested: ['pdf'], flowchart: ['svg'] } } };
+        host.getSettings.mockReturnValue(settings);
+        host.executeArtifactCommand.mockImplementationOnce(async () => {
+            settings.diagramTypeOutputPreferences.outputsByType.flowchart = ['png'];
+            throw new Error('first provider request failed');
+        });
+        const result = await runGenerateDiagramCommandWithHost(host as any, { name: 'Topic.md', path: 'Notes/Topic.md' } as any, reporter as any);
+        expect(result).toMatchObject({ kind: 'batch', status: 'partial', results: [
+            { typeId: 'nested', result: { kind: 'error', errorMessage: 'first provider request failed' } },
+            { typeId: 'flowchart', result: { kind: 'success', operationInput: { requestedOutputs: ['svg'] } } }
+        ] });
+        expect(host.readFile).toHaveBeenCalledTimes(1);
+        expect(host.setBusy.mock.calls).toEqual([[true], [false]]);
+    });
+
+    test('cancellation leaves subsequent types unstarted and always releases the lock', async () => {
+        const { host, reporter } = createDiagramHost();
+        host.getSettings.mockReturnValue({ ...mockSettings, diagramTypeOutputPreferences: { version: 1, selectedTypeIds: ['nested', 'flowchart'], outputsByType: {} } });
+        const complete = host.executeArtifactCommand.getMockImplementation()!;
+        host.executeArtifactCommand.mockImplementationOnce(async (...args) => { reporter.cancelled = true; return complete(...args); });
+        const result = await runGenerateDiagramCommandWithHost(host as any, { name: 'Topic.md', path: 'Notes/Topic.md' } as any, reporter as any);
+        expect(result).toMatchObject({ kind: 'batch', status: 'cancelled', pendingTypeIds: ['flowchart'] });
+        expect(host.executeArtifactCommand).toHaveBeenCalledTimes(1);
+        expect(host.finalizeReporter).toHaveBeenCalledTimes(1);
+        expect(host.setBusy).toHaveBeenLastCalledWith(false);
+    });
+
+    test('maps each type progress to the batch and keeps cancellation on the original reporter', async () => {
+        const { host, reporter } = createDiagramHost();
+        host.getSettings.mockReturnValue({ ...mockSettings, diagramTypeOutputPreferences: { version: 1, selectedTypeIds: ['nested', 'flowchart'], outputsByType: {} } });
+        const complete = host.executeArtifactCommand.getMockImplementation()!;
+        host.executeArtifactCommand.mockImplementation(async (...args) => {
+            const childReporter = args[4];
+            childReporter.abortController = new AbortController();
+            expect((reporter as any).abortController).toBe(childReporter.abortController);
+            childReporter.updateStatus('start', 20);
+            childReporter.updateStatus('complete', 100);
+            return complete(...args);
+        });
+        await runGenerateDiagramCommandWithHost(host as any, { name: 'Topic.md', path: 'Notes/Topic.md' } as any, reporter as any);
+        expect(reporter.updateStatus.mock.calls.map(call => call[1])).toEqual([10, 50, 60, 100, 100]);
+    });
+
     test('a failed save never reaches the completed preview and history handoff', async () => {
         const { diagramHost, reporter } = createDiagramHost();
         const completedPreviewPaths: string[] = [];
@@ -338,7 +383,8 @@ describe('diagram command host adapter', () => {
             expect.anything(),
             expect.anything(),
             STRINGS_EN,
-            'save-artifact'
+            'save-artifact',
+            expect.objectContaining({ activeProvider: mockSettings.activeProvider })
         );
     });
 

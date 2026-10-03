@@ -179,6 +179,16 @@ export interface DiagramOutputChoice {
     status: 'supported' | 'adjustable' | 'unsupported';
 }
 
+export function getDiagramOutputChoicesForType(typeId: DiagramCatalogTypeId, requested: readonly string[]): DiagramOutputChoice[] {
+    const plan = resolveDiagramOutputPlan(typeId, requested);
+    const ids = [...new Set([...DIAGRAM_OUTPUT_DESCRIPTORS.map(output => output.id), ...requested])];
+    const rank = { supported: 0, adjustable: 1, unsupported: 2 };
+    return ids.map((id): DiagramOutputChoice => ({ id, selected: requested.includes(id),
+        status: targetProducesOutput(typeId, plan.target, id) ? 'supported'
+            : resolveDiagramOutputPlan(typeId, [id]).outputs.some(output => output === id) ? 'adjustable' : 'unsupported'
+    })).sort((left, right) => rank[left.status] - rank[right.status]);
+}
+
 export function getDiagramOutputChoices(settings: DiagramOutputSettings): DiagramOutputChoice[] {
     const preferences = migrateDiagramOutputPreferences(settings);
     const typeId = resolveSelectionType(settings);

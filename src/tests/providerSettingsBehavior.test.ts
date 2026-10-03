@@ -899,18 +899,16 @@ describe('provider settings behavior', () => {
         plugin.settings.enableExperimentalDiagramPipeline = true;
         const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
         tab.display();
-        expect(findSettingByName(tab.containerEl, 'Preferred output files')).toBeDefined();
-        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
-        expect(selector.children.find(option => option.value === 'circuit')?.text).toContain('Circuit diagram');
-        expect(selector.children.find(option => option.value === 'bar-chart')?.text).toContain('Bar chart');
-        selector.value = 'circuit';
+        expect(findSettingByName(tab.containerEl, 'Output formats')).toBeDefined();
+        const selector = tab.containerEl.querySelector('[data-diagram-type-check="circuit"]') as MockElement & { checked: boolean };
+        expect(tab.containerEl.querySelector('[data-diagram-type-check="bar-chart"]')).toBeTruthy();
+        selector.checked = true;
         await selector.onchange?.();
         const source = tab.containerEl.querySelector('[data-diagram-output="source:circuitikz"]') as MockElement & { checked: boolean };
         source.checked = true;
         await source.onchange?.();
-        expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
-        expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
-        expect(plugin.settings.diagramOutputPreferences.requestedOutputs).toContain('source:circuitikz');
+        expect(plugin.settings.diagramTypeOutputPreferences.selectedTypeIds).toContain('circuit');
+        expect(plugin.settings.diagramTypeOutputPreferences.outputsByType.circuit).toContain('source:circuitikz');
         expect(tab.containerEl.querySelector('[data-diagram-output="svg"]')).toBeTruthy();
         expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
     });
@@ -924,15 +922,13 @@ describe('provider settings behavior', () => {
         const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
         tab.display();
 
-        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
-        selector.value = 'bar-chart';
+        const selector = tab.containerEl.querySelector('[data-diagram-type-check="bar-chart"]') as MockElement & { checked: boolean };
+        selector.checked = true;
         await selector.onchange?.();
         await Promise.resolve();
         await Promise.resolve();
 
-        expect(plugin.settings.preferredDiagramTypeId).toBe('bar-chart');
-        expect(plugin.settings.preferredDiagramIntent).toBe('dataChart');
-        expect(plugin.settings.preferredDiagramRenderTarget).toBe('vega-lite');
+        expect(plugin.settings.diagramTypeOutputPreferences.selectedTypeIds).toContain('bar-chart');
         expect(plugin.renderDiagramExampleThumbnail).toHaveBeenCalledWith('bar-chart');
     });
 
@@ -949,8 +945,8 @@ describe('provider settings behavior', () => {
         expect(flattenElements(tab.containerEl).filter(element => element.tag === 'img')).toHaveLength(0);
         expect(flattenElements(panel!).filter(element => element.cls.includes('notemd-diagram-type-preview-canvas'))).toHaveLength(1);
 
-        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
-        selector.value = 'sequence';
+        const selector = tab.containerEl.querySelector('[data-diagram-type-check="sequence"]') as MockElement & { checked: boolean };
+        selector.checked = true;
         await selector.onchange?.();
         await Promise.resolve();
         await Promise.resolve();
@@ -1011,7 +1007,7 @@ describe('provider settings behavior', () => {
         expect(plugin.settings.circuitikzCustomCompilerKind).toBe('tectonic');
     });
 
-    test('preserves requested source formats through automatic degradation and recovery', async () => {
+    test('keeps each type source preference when another type is selected or removed', async () => {
         const plugin = createPlugin();
         plugin.settings.enableExperimentalDiagramPipeline = true;
         plugin.settings.experimentalDiagramCompatibilityMode = 'legacy-mermaid';
@@ -1019,19 +1015,19 @@ describe('provider settings behavior', () => {
         plugin.settings.preferredDiagramRenderTarget = 'drawio';
         const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
         tab.display();
-        const selector = tab.containerEl.querySelector('[data-diagram-type]') as MockElement;
-        selector.value = 'circuit';
+        const selector = tab.containerEl.querySelector('[data-diagram-type-check="circuit"]') as MockElement & { checked: boolean };
+        selector.checked = true;
         await selector.onchange?.();
-        expect(plugin.settings.preferredDiagramIntent).toBe('circuit');
-        expect(plugin.settings.preferredDiagramRenderTarget).toBe('circuitikz');
-        expect(plugin.settings.experimentalDiagramCompatibilityMode).toBe('best-fit');
-        expect(plugin.settings.diagramOutputPreferences.requestedOutputs).toEqual(['source:drawio']);
-        expect(tab.containerEl.querySelector('[data-diagram-output-summary]').text).toContain('Draw.io');
-        selector.value = 'flowchart';
-        await selector.onchange?.();
+        expect(plugin.settings.diagramTypeOutputPreferences.selectedTypeIds).toEqual(['flowchart', 'circuit']);
+        expect(plugin.settings.diagramTypeOutputPreferences.outputsByType.flowchart).toEqual(['source:drawio']);
+        expect(tab.containerEl.querySelector('[data-diagram-output="source:circuitikz"]').checked).toBe(true);
+        const selected = tab.containerEl.querySelector('[data-diagram-type-check="circuit"]') as MockElement & { checked: boolean };
+        selected.checked = false;
+        await selected.onchange?.();
+        expect(plugin.settings.diagramTypeOutputPreferences.selectedTypeIds).toEqual(['flowchart']);
         expect(plugin.settings.preferredDiagramIntent).toBe('flowchart');
         expect(plugin.settings.preferredDiagramRenderTarget).toBe('drawio');
-        expect(plugin.settings.diagramOutputPreferences.requestedOutputs).toEqual(['source:drawio']);
+        expect(plugin.settings.diagramTypeOutputPreferences.outputsByType.flowchart).toEqual(['source:drawio']);
     });
 
     test('keeps advanced settings collapsed after the user closes them and reopens the settings tab', () => {

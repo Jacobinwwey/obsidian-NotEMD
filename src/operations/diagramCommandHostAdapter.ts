@@ -1,5 +1,5 @@
 import { TFile } from 'obsidian';
-import { formatI18n } from '../i18n';
+import { formatI18n, getI18nStrings } from '../i18n';
 import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
 import { DiagramIntent, isSupportedDiagramIntent, RenderTarget } from '../diagram/types';
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
@@ -14,6 +14,8 @@ import { buildFallbackMermaidSvg } from '../diagram/sourceVisualArtifactBuilder'
 import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 import { DRAWNIX_SOURCE_VISUAL_METADATA_VERSION } from '../diagram/adapters/drawnix/drawnixExporter';
 import type { DiagramExportRun, DiagramExportRequest } from '../diagram/diagramExportRun';
+import { getDiagramGenerationSelections, getDiagramTypeOutputRequests, type DiagramGenerationSelection } from '../diagram/diagramTypeOutputPreferences';
+import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
 
 export interface DiagramCommandHostAdapter {
     exportOutputs?: (file: TFile, generation: DiagramGenerationResult, input: DiagramOperationInput, reporter: ProgressReporter) => Promise<DiagramExportRun>;
@@ -43,6 +45,7 @@ export interface DiagramCommandInputOverrides {
 export interface DiagramCommandOptions {
     executionMode: DiagramCommandExecutionMode;
     inputOverrides?: DiagramCommandInputOverrides;
+    chartRequests?: DiagramGenerationSelection[];
 }
 
 export interface DiagramCommandUiStrings {
@@ -79,7 +82,18 @@ export interface DiagramCommandFollowThroughDetails {
     artifactTarget: string;
 }
 
-export type DiagramCommandRunResult =
+export interface DiagramCommandBatchResult {
+    kind: 'batch';
+    status: 'completed' | 'partial' | 'cancelled';
+    executionMode: DiagramCommandExecutionMode;
+    sourcePath: string;
+    actionLabel: string;
+    results: Array<{ typeId: DiagramGenerationSelection['typeId']; result: DiagramSingleCommandRunResult }>;
+    pendingTypeIds: DiagramGenerationSelection['typeId'][];
+}
+
+export type DiagramCommandRunResult = DiagramSingleCommandRunResult | DiagramCommandBatchResult;
+export type DiagramSingleCommandRunResult =
     | {
         kind: 'success';
         executionMode: DiagramCommandExecutionMode;
@@ -154,7 +168,8 @@ export interface DiagramCommandRunHost {
         reporter: ProgressReporter,
         actionLabel: string,
         i18n: DiagramCommandUiStrings,
-        executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>
+        executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>,
+        settingsSnapshot?: NotemdSettings
     ) => Promise<DiagramCommandExecutionDetails>;
     createDiagramHostAdapter: () => DiagramCommandHostAdapter;
     saveErrorLog: (error: unknown, reporter: ProgressReporter) => Promise<void>;
@@ -1319,6 +1334,28 @@ function logDiagramCommandStart(
     }
 }
 
+/** Subtask progress must not reset the overall bar or detach the live cancel controller. */
+function createDiagramBatchReporter(reporter: ProgressReporter, index: number, total: number): ProgressReporter {
+    let progress = index / total * 100;
+    return {
+        log: message => reporter.log(message),
+        updateStatus: (message, percent) => {
+            if (percent !== undefined && Number.isFinite(percent) && percent >= 0) progress = Math.max(progress, (index + Math.min(percent, 100) / 100) / total * 100);
+            reporter.updateStatus(`[${index + 1}/${total}] ${message}`, progress);
+        },
+        requestCancel: () => reporter.requestCancel(),
+        clearDisplay: () => reporter.clearDisplay(),
+        get cancelled() { return reporter.cancelled; },
+        get abortController() { return reporter.abortController; },
+        set abortController(controller) { reporter.abortController = controller; },
+        get activeTasks() { return reporter.activeTasks; },
+        set activeTasks(count) { reporter.activeTasks = count; },
+        updateActiveTasks: delta => reporter.updateActiveTasks(delta),
+        ...(reporter.getLogs ? { getLogs: () => reporter.getLogs!() } : {}),
+        ...(reporter.updateApiLiveness ? { updateApiLiveness: (event: Parameters<NonNullable<ProgressReporter['updateApiLiveness']>>[0]) => reporter.updateApiLiveness!(event) } : {})
+    };
+}
+
 export async function runGenerateDiagramCommandWithHost(
     host: DiagramCommandRunHost,
     file: TFile,
@@ -1343,6 +1380,25 @@ export async function runGenerateDiagramCommandWithHost(
         await host.loadSettings();
         i18n = host.getUiStrings();
         actionLabel = host.getActionLabel(options.executionMode, i18n);
+        const settings = structuredClone(host.getSettings());
+        const explicitType = options.inputOverrides?.requestedTypeId;
+        const selectionRequests = options.executionMode === 'save-mermaid' ? [] : options.chartRequests
+            ?? (explicitType ? [{ typeId: explicitType, requestedOutputs: options.inputOverrides?.requestedOutputs ?? getDiagramTypeOutputRequests(settings, explicitType) }]
+                : options.inputOverrides?.requestedIntent || options.inputOverrides?.requestedRenderTarget || options.inputOverrides?.requestedOutputs ? []
+                    : settings.diagramTypeOutputPreferences ? getDiagramGenerationSelections(settings) : []);
+        const selections = structuredClone(selectionRequests);
+        if (options.chartRequests && (options.executionMode !== 'save-artifact' || !selections.length
+            || new Set(selections.map(item => item.typeId)).size !== selections.length
+            || options.inputOverrides?.requestedTypeId || options.inputOverrides?.requestedIntent || options.inputOverrides?.requestedRenderTarget || options.inputOverrides?.requestedOutputs)) {
+            throw new Error('Chart requests must be unique and cannot be combined with single-chart overrides.');
+        }
+        for (const selection of selections) getExecutableDiagramType(selection.typeId);
+        if (settings.diagramTypeOutputPreferences?.version === 1 && !selections.length && !options.inputOverrides) {
+            settings.preferredDiagramTypeId = undefined;
+            settings.preferredDiagramIntent = undefined;
+            settings.preferredDiagramRenderTarget = undefined;
+            settings.diagramOutputPreferences = { version: 1, requestedOutputs: [] };
+        }
         const inputTaskId = options.executionMode === 'save-mermaid' ? 'summarize-as-mermaid' : 'generate-diagram';
         if (!isSupportedInputFileForTask(host.getSettings(), inputTaskId, file)) {
             throw new Error('No supported diagram input file selected.');
@@ -1353,13 +1409,13 @@ export async function runGenerateDiagramCommandWithHost(
             throw new Error(getEmptyFileErrorMessage(options.executionMode));
         }
 
-        const { provider, modelName } = host.getProviderAndModelForTask('summarizeToMermaid');
+        const { provider, modelName } = structuredClone(host.getProviderAndModelForTask('summarizeToMermaid'));
         useReporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
-        let operationInput = buildDiagramOperationInput({
+        const inputParams = {
             sourcePath: file.path,
             sourceMarkdown: fileContent,
             executionMode: options.executionMode,
-            settings: host.getSettings(),
+            settings,
             targetLanguage: host.getTaskLanguageCode('summarizeToMermaid'),
             requestedIntentOverride: options.inputOverrides?.requestedIntent,
             requestedTypeIdOverride: options.inputOverrides?.requestedTypeId,
@@ -1367,7 +1423,9 @@ export async function runGenerateDiagramCommandWithHost(
             requestedOutputsOverride: options.inputOverrides?.requestedOutputs,
             compatibilityModeOverride: options.inputOverrides?.compatibilityMode,
             targetLanguageOverride: options.inputOverrides?.targetLanguage
-        });
+        };
+        const inputs = selections.length ? selections.map(selection => buildDiagramOperationInput({ ...inputParams,
+            requestedTypeIdOverride: selection.typeId, requestedOutputsOverride: [...selection.requestedOutputs] })) : [buildDiagramOperationInput(inputParams)];
         const sourceVisualReferences = scanSourceVisualReferences(fileContent);
         if (sourceVisualReferences.length > 0) {
             const sourceVisuals = await resolveSourceVisualReferences(
@@ -1375,45 +1433,84 @@ export async function runGenerateDiagramCommandWithHost(
                 file.path,
                 diagramHost
             );
-            operationInput = { ...operationInput, sourceVisuals };
+            for (const input of inputs) input.sourceVisuals = sourceVisuals;
             const unresolvedCount = sourceVisuals.filter(visual => visual.status === 'unresolved').length;
             useReporter.log(`Preserved ${sourceVisuals.length} source visual reference(s) for Drawnix export${unresolvedCount > 0 ? `; ${unresolvedCount} unresolved reference(s) remain in the manifest.` : '.'}`);
         }
 
-        const executionDetails = options.executionMode === 'save-mermaid'
-            ? await host.executeSaveMermaidCommand(
-                file,
-                operationInput,
-                provider,
-                modelName,
-                useReporter,
-                actionLabel,
-                i18n
-            )
-            : await host.executeArtifactCommand(
-                file,
-                operationInput,
-                provider,
-                modelName,
-                useReporter,
-                actionLabel,
-                i18n,
-                options.executionMode
-            );
+        const executeInput = async (operationInput: DiagramOperationInput, operationReporter: ProgressReporter): Promise<Extract<DiagramSingleCommandRunResult, { kind: 'success' }>> => {
+            if (useReporter.cancelled) throw new Error('Diagram generation cancelled.');
+            const executionDetails = options.executionMode === 'save-mermaid'
+                ? await host.executeSaveMermaidCommand(
+                    file,
+                    operationInput,
+                    provider,
+                    modelName,
+                    operationReporter,
+                    actionLabel,
+                    i18n
+                )
+                : await host.executeArtifactCommand(
+                    file,
+                    operationInput,
+                    provider,
+                    modelName,
+                    operationReporter,
+                    actionLabel,
+                    i18n,
+                    options.executionMode,
+                    settings
+                );
 
-        return {
-            kind: 'success',
-            executionMode: options.executionMode,
-            sourcePath: file.path,
-            actionLabel,
-            operationInput,
-            generation: executionDetails.generation,
-            followThrough: executionDetails.followThrough,
-            localKnowledgeContextUsed: executionDetails.localKnowledgeContextUsed,
-            localKnowledgeRetrieval: executionDetails.localKnowledgeRetrieval,
-            outputPath: executionDetails.outputPath,
-            previewOpened: executionDetails.previewOpened
+            return {
+                kind: 'success',
+                executionMode: options.executionMode,
+                sourcePath: file.path,
+                actionLabel,
+                operationInput,
+                generation: executionDetails.generation,
+                followThrough: executionDetails.followThrough,
+                localKnowledgeContextUsed: executionDetails.localKnowledgeContextUsed,
+                localKnowledgeRetrieval: executionDetails.localKnowledgeRetrieval,
+                outputPath: executionDetails.outputPath,
+                previewOpened: executionDetails.previewOpened
+            };
         };
+        const openSavedPreview = (result: Extract<DiagramSingleCommandRunResult, { kind: 'success' }>): void => {
+            const run = result.followThrough.exportRun;
+            if (!run || useReporter.cancelled || !diagramHost.supportsPreview(result.generation.artifact)) return;
+            diagramHost.openPreview(result.generation.artifact, file.path, run.outputs.some(output => output.id.startsWith('source:') && output.status === 'completed'), run);
+            result.previewOpened = true;
+            result.followThrough.previewOpened = true;
+        };
+        if (inputs.length === 1) {
+            const result = await executeInput(inputs[0], useReporter);
+            openSavedPreview(result);
+            return result;
+        }
+        const results: DiagramCommandBatchResult['results'] = [];
+        for (let index = 0; index < inputs.length; index++) {
+            if (useReporter.cancelled) break;
+            const typeId = selections[index].typeId;
+            useReporter.log(`[${index + 1}/${inputs.length}] ${typeId}`);
+            try { results.push({ typeId, result: await executeInput(inputs[index], createDiagramBatchReporter(useReporter, index, inputs.length)) }); }
+            catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                useReporter.log(`${typeId}: ${errorMessage}`);
+                host.logError(`Diagram generation (${typeId}):`, error);
+                results.push({ typeId, result: { kind: 'error', executionMode: options.executionMode, sourcePath: file.path, actionLabel, errorMessage } });
+            }
+        }
+        const completed = results.filter(item => item.result.kind === 'success' && (!item.result.followThrough.exportRun || item.result.followThrough.exportRun.status === 'completed')).length;
+        const status = useReporter.cancelled ? 'cancelled' : completed === inputs.length ? 'completed' : 'partial';
+        const copy = getI18nStrings(settings).diagramOutputs;
+        const message = formatI18n(copy.batchStatus, { status: copy[status], count: completed, total: inputs.length });
+        useReporter.log(message);
+        useReporter.updateStatus(message, 100);
+        diagramHost.notify(message);
+        const lastSuccess = results.map(item => item.result).reverse().find((result): result is Extract<DiagramSingleCommandRunResult, { kind: 'success' }> => result.kind === 'success');
+        if (lastSuccess) openSavedPreview(lastSuccess);
+        return { kind: 'batch', status, executionMode: options.executionMode, sourcePath: file.path, actionLabel, results, pendingTypeIds: selections.slice(results.length).map(item => item.typeId) };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
 

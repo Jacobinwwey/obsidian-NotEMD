@@ -218,6 +218,7 @@ export interface NotemdSettings {
     preferredDiagramTypeId?: DiagramCatalogTypeId;
     preferredDiagramRenderTarget?: RenderTarget;
     diagramOutputPreferences?: import('./diagram/diagramOutputPreferences').DiagramOutputPreferences;
+    diagramTypeOutputPreferences?: import('./diagram/diagramTypeOutputPreferences').DiagramTypeOutputPreferences;
     diagramPreviewExportPpi: number;
     diagramExportCacheFolder?: string;
     drawnixExportMermaidCompanions: boolean;

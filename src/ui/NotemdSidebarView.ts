@@ -4,14 +4,9 @@ import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } 
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import { FFMPEG_INSTALL_HINTS, type EnvironmentReport, type ProbeResult } from '../slideExport/types';
-import {
-    getDiagramTypeSelectionValue,
-    resolvePreferredDiagramTypeId
-} from '../diagram/diagramPreferenceCompatibility';
 import { renderDiagramOutputSelector, type DiagramOutputSelectorController } from './diagramOutputSelector';
 import {
     renderDiagramTypePreviewPanel,
-    resolveDiagramPreviewTypeId,
     type DiagramTypePreviewPanelController
 } from './diagramTypePreviewPanel';
 import { NOTEMD_SLIDEV_FORK_RELEASE_URL, NOTEMD_SLIDEV_INSTALL_COMMAND } from '../slideExport/slidevDistribution';
@@ -1712,7 +1707,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const i18n = this.getStrings();
         const diagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
         const row = parent.createDiv({ cls: 'notemd-inline-control notemd-diagram-preference-row' });
-        row.createEl('label', { text: diagramI18n.intentName, cls: 'notemd-inline-label' });
+        row.createEl('label', { text: i18n.diagramOutputs.typesName, cls: 'notemd-inline-label' });
         const outputRow = parent.createDiv({ cls: 'notemd-inline-control notemd-diagram-preference-row' });
         outputRow.createEl('label', { text: i18n.diagramOutputs.name, cls: 'notemd-inline-label' });
         const outputControl = outputRow.createDiv();
@@ -1723,9 +1718,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             outputParent: outputControl,
             getSettings: () => this.plugin.settings,
             saveSettings: () => this.plugin.saveSettings(),
-            onTypeChanged: () => this.diagramTypePreviewController?.setSelectedType(
-                resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
-            )
+            onPreviewType: typeId => this.diagramTypePreviewController?.setSelectedType(typeId),
+            getPreviewElement: () => this.diagramTypePreviewController?.element
         });
 
         const renderThumbnail = typeof this.plugin.renderDiagramExampleThumbnail === 'function'
@@ -1778,7 +1772,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             },
             renderThumbnail
         });
-        this.diagramTypePreviewController.setSelectedType(resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings))));
+        this.diagramTypePreviewController.setSelectedType(this.diagramOutputController.getEditingType());
     }
 
     async onOpen() {

@@ -8,22 +8,26 @@ This document summarizes the major functional and architectural changes implemen
 
 ### English
 
+- Generate multiple chart types with independent output selections. Keep a live preview beside the compact type menu, support keyboard/hover browsing without persistence, and preserve each type's formats when deselected. Sequential batches retain partial successes and a continuous progress/cancellation channel.
+- Name deliveries by semantic type (`note_drawnix.pdf`, `note_flowchart.svg`) with collision suffixes; decouple UUID cache records using manifest v3 while retaining v1/v2 recovery.
 - Keep boxed Drawnix relationship labels visible in vector PDF export. Remove the redundant white text outline and normalize older cached SVG labels before svg2pdf can paint their outline over the glyphs.
 - Save selected diagram formats directly beside the source note or in the explicit custom folder, including the Vault root. Add a configurable intermediate folder (default: source-folder/notemd_assert) for recovery records, cached renders, staging and isolated attachments. Keep unique filenames and in-place recovery of legacy exports.
 - Replace the flat output checklist with a compact multi-select dropdown. Own the popup's Obsidian keyboard scope and portal lifecycle; defer preview measurement until settings popouts have visible geometry.
 - Show labeled core Drawnix relationships with local routes where space permits. Preserve omitted edges in native metadata, and keep SVG/native label coordinates identical.
-- Add multi-select diagram outputs with supported choices first, latest-choice coordination and visible inactive requests. Keep presentation export configuration and dependencies independent.
+- Show supported outputs first and retain disabled incompatible choices within each chart type. Keep presentation export configuration and dependencies independent.
 - Distinguish diagram HTML from structured-summary HTML. Persist one generated specification, per-output delivery state and SHA-256 receipts; retry partial exports from preview/history/maintainer CLI without another model request or overwriting user edits.
 - Preserve unknown preference schema versions and extension fields through ordinary selection changes. Serialize settings writes and read the current settings object after reload.
 - Fix real Obsidian manifest updates, normalize quoted evidence at the input boundary, and include Nested Scope levels in summaries. Keep UTF-8 and offline graphic export behavior through generation, persistence and recovery.
 
 ### 中文
 
+- 支持一次生成多种图表，各自独立选择输出格式。紧凑类型菜单旁保留实时预览，悬停和键盘浏览不写配置，取消勾选后保留各类型格式。顺序批次保留部分成功结果，使用连续总进度和同一个取消通道。
+- 产物按语义类型命名，如 `笔记_drawnix.pdf`、`笔记_flowchart.svg`，重名追加序号；manifest v3 将 UUID 缓存记录与产物名称解耦，继续支持 v1/v2 恢复。
 - 修复矢量 PDF 中 Drawnix 关系标签文字被遮盖的问题：去掉方框内多余的白色文字描边，并在 PDF 转换前兼容旧缓存 SVG，避免描边覆盖字形。
 - 将所选图形格式直接保存到原笔记目录或显式指定的自定义目录，支持 Vault 根目录；新增可配置中间文件目录，默认原文目录/notemd_assert，集中存放恢复记录、渲染缓存、写入暂存及隔离附件，保留唯一文件名与旧记录原地恢复能力。
 - 将平铺输出复选框改为紧凑多选下拉菜单，管理弹层的 Obsidian 键盘作用域与生命周期；设置独立窗口可见后再校验预览几何。
 - Drawnix 显示带明确标签的核心关系，空间允许时优先使用局部短路径；省略关系保存在原生 metadata，SVG 与原生标签坐标保持一致。
-- 新增图形输出多选、支持项优先排序、最新选择自动协调与暂不可用请求展示；演示导出的配置与依赖保持独立。
+- 每种图表的输出列表优先显示支持项，不兼容项保留并置灰；演示导出的配置与依赖保持独立。
 - 区分图形 HTML 与结构化摘要 HTML。持久化一次生成的规格、逐格式状态及 SHA-256 收据；从预览、历史或维护 CLI 恢复部分失败的导出，不重复调用模型、不覆盖用户修改。
 - 普通勾选操作保留未知偏好版本及扩展字段，设置保存串行执行，重载后操作当前设置对象。
 - 修复真实 Obsidian 中的恢复记录更新，在输入边界规范化对象形式引文，摘要包含 Nested Scope 各层内容；生成、保存和恢复链路继续保持 UTF-8 与离线图形导出能力。

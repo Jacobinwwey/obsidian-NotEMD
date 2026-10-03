@@ -477,8 +477,8 @@ export default class NotemdPlugin extends Plugin {
             getTaskLanguageCode: (task) => resolveTaskLanguageCode(this.settings, task),
             executeSaveMermaidCommand: (file, operationInput, provider, modelName, reporter, actionLabel, i18n) =>
                 this.executeSaveMermaidDiagramCommand(file, operationInput, provider, modelName, reporter, actionLabel, i18n),
-            executeArtifactCommand: (file, operationInput, provider, modelName, reporter, actionLabel, i18n, executionMode) =>
-                this.executeArtifactDiagramCommand(file, operationInput, provider, modelName, reporter, actionLabel, i18n, executionMode),
+            executeArtifactCommand: (file, operationInput, provider, modelName, reporter, actionLabel, i18n, executionMode, settingsSnapshot) =>
+                this.executeArtifactDiagramCommand(file, operationInput, provider, modelName, reporter, actionLabel, i18n, executionMode, settingsSnapshot),
             createDiagramHostAdapter: () => this.createDiagramCommandHostAdapter(),
             saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings),
             logError: (message, details) => console.error(message, details)
@@ -2910,11 +2910,12 @@ export default class NotemdPlugin extends Plugin {
         reporter: ProgressReporter,
         actionLabel: string,
         i18n: DiagramCommandUiStrings,
-        executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>
+        executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>,
+        settingsSnapshot: NotemdSettings = this.settings
     ): Promise<DiagramCommandExecutionDetails> {
-        const localKnowledgeResult = await this.withDiagramLocalKnowledgeContext(operationInput, reporter);
+        const localKnowledgeResult = await this.withDiagramLocalKnowledgeContext(operationInput, reporter, settingsSnapshot);
 
-        return runArtifactDiagramExecutionWithHost(this.createDiagramCommandExecutionHost(), {
+        return runArtifactDiagramExecutionWithHost({ ...this.createDiagramCommandExecutionHost(), getSettings: () => settingsSnapshot }, {
             file,
             operationInput: localKnowledgeResult.operationInput,
             provider,
@@ -2946,14 +2947,15 @@ export default class NotemdPlugin extends Plugin {
 
     private async withDiagramLocalKnowledgeContext(
         operationInput: DiagramOperationInput,
-        reporter: ProgressReporter
+        reporter: ProgressReporter,
+        settings: NotemdSettings = this.settings
     ): Promise<DiagramLocalKnowledgeContextResult> {
         const query = buildDiagramLocalKnowledgeQuery(operationInput.sourcePath, operationInput.sourceMarkdown);
         const localKnowledgeOptions = {
             currentFilePath: operationInput.sourcePath,
-            topK: this.settings.localKnowledgeTopK,
-            slidingWindowSize: this.settings.localKnowledgeSlidingWindowSize,
-            maxSnippetChars: this.settings.localKnowledgeMaxSnippetChars
+            topK: settings.localKnowledgeTopK,
+            slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+            maxSnippetChars: settings.localKnowledgeMaxSnippetChars
         };
         const emptyResult = (overrides?: Partial<Pick<
             ReturnType<typeof createEmptyLocalKnowledgeContextBuildResult>,
@@ -2966,13 +2968,13 @@ export default class NotemdPlugin extends Plugin {
             )
         });
 
-        if (!this.settings.enableLocalKnowledgeRetrieval || !this.settings.enableLocalKnowledgeForDiagramGeneration) {
+        if (!settings.enableLocalKnowledgeRetrieval || !settings.enableLocalKnowledgeForDiagramGeneration) {
             return emptyResult();
         }
 
         const retriever = await buildLocalKnowledgeBaseRetriever(
             this.app,
-            this.settings,
+            settings,
             reporter,
             'diagramGeneration'
         );
@@ -2981,7 +2983,7 @@ export default class NotemdPlugin extends Plugin {
                 indexedFileCount: 0,
                 indexedSectionCount: 0,
                 excludeCurrentFileApplied: Boolean(
-                    this.settings.localKnowledgeExcludeCurrentFile && operationInput.sourcePath
+                    settings.localKnowledgeExcludeCurrentFile && operationInput.sourcePath
                 ),
                 indexBuildMs: 0
             });

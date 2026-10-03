@@ -56,6 +56,7 @@ type MockPlugin = {
 };
 
 class FakeElement {
+    ownerDocument = { activeElement: null };
     tag: string;
     text = '';
     cls: string[] = [];

@@ -21,6 +21,7 @@ export interface DiagramTypePreviewPanelCopy extends DiagramCatalogLabelCopy {
 }
 
 export interface DiagramTypePreviewPanelController {
+    element: HTMLElement;
     setSelectedType(typeId: DiagramCatalogTypeId | undefined): void;
     destroy(): void;
 }
@@ -86,6 +87,7 @@ export function renderDiagramTypePreviewPanel(
     let layoutObserver: ResizeObserver | undefined;
 
     const controller: DiagramTypePreviewPanelController = {
+        element: panel,
         setSelectedType(typeId) {
             layoutObserver?.disconnect();
             layoutObserver = undefined;

@@ -9,12 +9,8 @@ import {
     TaskKey
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
-import {
-    getDiagramTypeSelectionValue,
-    resolvePreferredDiagramTypeId
-} from '../diagram/diagramPreferenceCompatibility';
 import { renderDiagramOutputSelector, type DiagramOutputSelectorController } from './diagramOutputSelector';
-import { renderDiagramTypePreviewPanel, resolveDiagramPreviewTypeId, type DiagramTypePreviewPanelController } from './diagramTypePreviewPanel';
+import { renderDiagramTypePreviewPanel, type DiagramTypePreviewPanelController } from './diagramTypePreviewPanel';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
     MAX_PREVIEW_EXPORT_PPI,
@@ -2745,7 +2741,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             });
 
         const typeSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.intent' })
-            .setName(experimentalDiagramI18n.intentName);
+            .setName(i18n.diagramOutputs.typesName);
         const outputSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.renderTarget' })
             .setName(i18n.diagramOutputs.name);
         this.diagramOutputController = renderDiagramOutputSelector({
@@ -2754,9 +2750,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             outputParent: outputSetting.controlEl,
             getSettings: () => this.plugin.settings,
             saveSettings: () => this.plugin.saveSettings(),
-            onTypeChanged: () => this.diagramTypePreviewController?.setSelectedType(
-                resolveDiagramPreviewTypeId(getDiagramTypeSelectionValue(resolvePreferredDiagramTypeId(this.plugin.settings)))
-            )
+            onPreviewType: typeId => this.diagramTypePreviewController?.setSelectedType(typeId),
+            getPreviewElement: () => this.diagramTypePreviewController?.element
         });
 
         const exampleSetting = this.createCatalogSetting(containerEl, {
@@ -2811,7 +2806,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             renderThumbnail: typeId => this.plugin.renderDiagramExampleThumbnail(typeId)
         });
         this.diagramTypePreviewController.setSelectedType(
-            resolveDiagramPreviewTypeId(resolvePreferredDiagramTypeId(this.plugin.settings) || 'auto')
+            this.diagramOutputController.getEditingType()
         );
 
         this.createCatalogSetting(containerEl, {

@@ -6,7 +6,7 @@ import type { DiagramGenerationResult } from './diagramGenerationService';
 import { findDefaultDiagramType, getExecutableDiagramType } from './diagramTypeCatalog';
 import { assertValidDiagramSpec } from './spec';
 import { isSupportedRenderTarget } from './types';
-import type { DiagramSpec } from './types';
+import type { DiagramSpec, DiagramCatalogTypeId } from './types';
 import { getDiagramSourceOutputId, isDiagramOutputId, resolveDiagramOutputPlan } from './diagramOutputPreferences';
 import type { DiagramOutputId, DiagramOutputPlan } from './diagramOutputPreferences';
 import { normalizeDiagramEvidenceRefs } from './diagramSpecResponseParser';
@@ -50,7 +50,7 @@ export interface DiagramExportRequest {
 
 interface SavedCompanion extends Omit<RenderArtifactCompanion, 'content'> { content: string }
 interface ExportManifest extends DiagramExportRun {
-    version: 1 | 2;
+    version: 1 | 2 | 3;
     outputStem?: string;
     generation: Omit<DiagramGenerationResult, 'artifact'> & {
         artifact: Omit<RenderArtifact, 'companions'> & { companions?: SavedCompanion[] };
@@ -62,6 +62,7 @@ interface ExportManifest extends DiagramExportRun {
 
 const MANIFEST_NAME = 'run.notemd-diagram.json';
 const activeRuns = new WeakMap<App['vault']['adapter'], Set<string>>();
+const reservedOutputStems = new WeakMap<App['vault']['adapter'], Set<string>>();
 const encoder = new TextEncoder();
 
 async function withExportRunLock<T>(app: App, manifestPath: string, operation: () => Promise<T>): Promise<T> {
@@ -135,14 +136,50 @@ function siblingExportPaths(stem: string, cacheStem: string, artifact: RenderArt
     };
 }
 
+function typeFileSuffix(typeId: DiagramCatalogTypeId): string {
+    return typeId === 'drawnix-knowledge-map' ? 'drawnix' : typeId;
+}
+
+async function reserveOutputStem(app: App, base: string, cacheFolder: string): Promise<string> {
+    const adapter = app.vault.adapter;
+    const folder = parentDirectory(base);
+    const listing = await adapter.exists(folder) || !folder ? await adapter.list(folder) : { files: [], folders: [] };
+    const cache = await adapter.exists(cacheFolder) ? await adapter.list(cacheFolder) : { files: [], folders: [] };
+    const occupied = [...listing.files, ...listing.folders].map(path => path.toLowerCase());
+    // A cancelled run may have no published files yet. Its manifest still reserves
+    // the name so a later retry cannot contend with a new run after a restart.
+    const savedNames = new Set(cache.files.map(path => path.split('/').pop()!.replace(/\.[a-f0-9-]{36}\.run\.notemd-diagram\.json$/i, '').toLowerCase()));
+    let reserved = reservedOutputStems.get(adapter);
+    if (!reserved) { reserved = new Set(); reservedOutputStems.set(adapter, reserved); }
+    for (let index = 1; ; index++) {
+        const stem = index === 1 ? base : `${base}-${index}`;
+        const key = stem.toLowerCase();
+        if (reserved.has(key) || savedNames.has(key.split('/').pop()!) || occupied.some(path => path === key || path.startsWith(`${key}.`))) continue;
+        // No await between testing and reserving: concurrent commands share this boundary.
+        reserved.add(key);
+        return stem;
+    }
+}
+
 function savedExportPaths(manifest: ExportManifest): ExportPaths {
     const suffix = manifest.version === 1 ? `/${MANIFEST_NAME}` : `.${MANIFEST_NAME}`;
     if (!manifest.manifestPath.endsWith(suffix)) throw new Error('Invalid diagram export manifest path for its version.');
     const stem = validatePath(manifest.manifestPath.slice(0, -suffix.length));
-    if (manifest.version === 2) {
+    if (manifest.version === 2 || manifest.version === 3) {
         const outputStem = validatePath(manifest.outputStem!);
-        if (outputStem.split('/').pop() !== stem.split('/').pop()) throw new Error('Invalid diagram export output stem path.');
-        return siblingExportPaths(outputStem, stem, manifest.generation.artifact);
+        if (manifest.version === 2) {
+            if (outputStem.split('/').pop() !== stem.split('/').pop()) throw new Error('Invalid diagram export output stem path.');
+            return siblingExportPaths(outputStem, stem, manifest.generation.artifact);
+        }
+        const outputName = outputStem.split('/').pop()!;
+        const base = `${manifest.sourcePath.split('/').pop()!.replace(/\.[^/.]+$/, '')}_${typeFileSuffix(manifest.plan.typeId)}`;
+        const suffix = outputName.slice(base.length);
+        if (!outputName.startsWith(base) || (suffix && (!/^-[1-9]\d*$/.test(suffix) || Number(suffix.slice(1)) < 2))
+            || !stem.split('/').pop()!.startsWith(`${outputName}.`)
+            || !/^[a-f0-9-]{36}$/i.test(stem.split('/').pop()!.slice(outputName.length + 1))) {
+            throw new Error('Invalid diagram export output stem path.');
+        }
+        return { ...siblingExportPaths(outputStem, stem, manifest.generation.artifact), source: `${outputStem}${getRenderTargetDescriptor(manifest.generation.artifact.target).sourceExtension}` };
     }
     // Recovery preserves the original v1 locations; successful files are never migrated.
     return {
@@ -191,7 +228,7 @@ function nativeFiles(artifact: RenderArtifact, paths: ExportPaths): Array<{ path
 function parseManifest(text: string, path: string): { manifest: ExportManifest; paths: ExportPaths } {
     const manifest = JSON.parse(text) as ExportManifest;
     validateManifestPath(path);
-    if (!manifest || ![1, 2].includes(manifest.version) || manifest.manifestPath !== path
+    if (!manifest || ![1, 2, 3].includes(manifest.version) || manifest.manifestPath !== path
         || !Array.isArray(manifest.outputs) || !manifest.plan || !manifest.cache || !manifest.generation
         || !Array.isArray(manifest.requestedOutputs) || !manifest.requestedOutputs.every(id => typeof id === 'string')
         || !Number.isFinite(manifest.ppi) || manifest.ppi < 72 || manifest.ppi > 600) {
@@ -445,6 +482,8 @@ export async function startDiagramExportRun(
 ): Promise<DiagramExportRun> {
     validatePath(sourcePath);
     if (!Number.isFinite(ppi) || ppi < 72 || ppi > 600) throw new Error('Diagram export PPI must be between 72 and 600.');
+    generation = structuredClone(generation);
+    requestedOutputs = [...requestedOutputs];
     const typeId = generation.plan.catalogTypeId ?? findDefaultDiagramType(generation.spec.intent).id;
     const plan = resolveDiagramOutputPlan(typeId, requestedOutputs, generation.artifact.target);
     const { outputFolder } = folders;
@@ -452,12 +491,12 @@ export async function startDiagramExportRun(
     if (outputFolder) validatePath(outputFolder);
     const destination = outputFolder === undefined ? sourcePath : `${outputFolder ? `${outputFolder}/` : ''}${sourcePath.split('/').pop()!}`;
     const base = destination.replace(/\.[^/.]+$/, '');
-    const stem = `${base}_diagram-${crypto.randomUUID()}`;
-    const cacheStem = `${cacheFolder}/${stem.split('/').pop()!}`;
-    const paths = siblingExportPaths(stem, cacheStem, generation.artifact);
+    const stem = await reserveOutputStem(app, `${base}_${typeFileSuffix(typeId)}`, cacheFolder);
+    const cacheStem = `${cacheFolder}/${stem.split('/').pop()!}.${crypto.randomUUID()}`;
+    const paths = { ...siblingExportPaths(stem, cacheStem, generation.artifact), source: `${stem}${getRenderTargetDescriptor(generation.artifact.target).sourceExtension}` };
     const artifact = scopeArtifactCompanions(generation.artifact, paths.companionScope!);
     const manifest: ExportManifest = {
-        version: 2, outputStem: stem, manifestPath: `${cacheStem}.${MANIFEST_NAME}`, sourcePath, status: 'partial',
+        version: 3, outputStem: stem, manifestPath: `${cacheStem}.${MANIFEST_NAME}`, sourcePath, status: 'partial',
         generation: { ...generation, artifact: { ...artifact, companions: artifact.companions?.map(companion => ({
             ...companion, binary: companion.content instanceof ArrayBuffer,
             content: typeof companion.content === 'string' ? companion.content : encodeBase64(new Uint8Array(companion.content))

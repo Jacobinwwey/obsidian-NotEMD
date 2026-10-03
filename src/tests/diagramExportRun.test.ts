@@ -12,6 +12,7 @@ describe('recoverable diagram multi-format export', () => {
         const files = new Map<string, ArrayBuffer>();
         const folders = new Set<string>();
         const adapter = {
+            list: jest.fn(async (folder: string) => ({ files: [...files.keys()].filter(path => path.slice(0, Math.max(0, path.lastIndexOf('/'))) === folder), folders: [...folders] })),
             stat: jest.fn(async (path: string) => folders.has(path) ? { type: 'folder' } : files.has(path) ? { type: 'file' } : null),
             exists: jest.fn(async (path: string) => files.has(path) || folders.has(path)),
             mkdir: jest.fn(async (path: string) => { folders.add(path); }),
@@ -50,6 +51,8 @@ describe('recoverable diagram multi-format export', () => {
         const test = fixture();
         const run = await startDiagramExportRun(test.app, 'Notes/中文.md', test.generation, ['source:mermaid','svg','png','pdf','html-diagram','html-summary'], 300, test.reporter, test.deps);
         expect(run.status).toBe('completed');
+        expect(run.outputs.find(output => output.id === 'pdf')!.path).toBe('Notes/中文_flowchart.pdf');
+        expect(run.outputs.find(output => output.id === 'source:mermaid')!.path).toBe('Notes/中文_flowchart.md');
         expect(run.outputs).toHaveLength(6);
         expect(run.outputs.every(output => output.status === 'completed')).toBe(true);
         expect(run.outputs.every(output => output.path.slice(0, output.path.lastIndexOf('/')) === 'Notes')).toBe(true);
@@ -78,6 +81,7 @@ describe('recoverable diagram multi-format export', () => {
         test.files.set(first.outputs[0].path, encode('user edited output'));
         const next = await startDiagramExportRun(test.app, 'Notes/中文.md', test.generation, ['svg'], 300, test.reporter, test.deps);
         expect(first.outputs[0].path).not.toBe(next.outputs[0].path);
+        expect(next.outputs[0].path).toBe('Notes/中文_flowchart-2.svg');
         expect(new TextDecoder().decode(test.files.get(first.outputs[0].path))).toBe('user edited output');
         expect(test.folders).toEqual(new Set(['Notes', 'Notes/notemd_assert']));
     });
@@ -93,6 +97,17 @@ describe('recoverable diagram multi-format export', () => {
         )));
         expect(runs.every(run => run.status === 'completed')).toBe(true);
         expect(runs[0].manifestPath).not.toBe(runs[1].manifestPath);
+    });
+
+    test('reserves case-insensitive stems across concurrent runs and all extensions', async () => {
+        const test = fixture();
+        test.files.set('Notes/TOPIC_FLOWCHART.pdf', encode('existing'));
+        test.folders.add('Notes');
+        const runs = await Promise.all(['svg', 'pdf'].map(format => startDiagramExportRun(
+            test.app, 'Notes/topic.md', test.generation, [format], 300, test.reporter, test.deps
+        )));
+        expect(runs.map(run => run.outputs[0].path).sort()).toEqual(['Notes/topic_flowchart-2.svg', 'Notes/topic_flowchart-3.pdf']);
+        expect(runs.every(run => run.status === 'completed')).toBe(true);
     });
 
     test.each(['../private', '/outside', 'E:/private', 'CON', 'Cache/../private'])('rejects unsafe cache folder %s before any writes', async cacheFolder => {
@@ -163,7 +178,7 @@ describe('recoverable diagram multi-format export', () => {
         const rename = test.adapter.rename.getMockImplementation()!;
         test.adapter.rename.mockImplementation(async (from, to) => {
             await rename(from, to);
-            if (to.endsWith('.source.md')) test.reporter.cancelled = true;
+            if (to.endsWith('_flowchart.md')) test.reporter.cancelled = true;
         });
         const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['source:mermaid'], 300, test.reporter, test.deps);
         expect(run.status).toBe('cancelled');
@@ -238,7 +253,29 @@ describe('recoverable diagram multi-format export', () => {
         expect(JSON.parse(await test.adapter.read(manifest.manifestPath)).version).toBe(1);
     });
 
-    test.each(['output', 'receipt', 'companion', 'version'])('rejects tampered v2 %s paths before writing on retry', async field => {
+    test('reads and retries legacy v2 sibling snapshots without renaming completed files', async () => {
+        const test = fixture();
+        test.deps.renderPdf.mockRejectedValueOnce(new Error('unavailable'));
+        const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['svg', 'pdf'], 300, test.reporter, test.deps);
+        const manifest = JSON.parse(await test.adapter.read(run.manifestPath));
+        manifest.version = 2;
+        manifest.outputStem = 'Notes/topic_diagram-legacy';
+        manifest.manifestPath = 'Notes/notemd_assert/topic_diagram-legacy.run.notemd-diagram.json';
+        for (const output of manifest.outputs) {
+            const oldPath = output.path;
+            output.path = `${manifest.outputStem}.${output.id}`;
+            output.files.forEach((file: { path: string }) => { file.path = output.path; });
+            if (test.files.has(oldPath)) test.files.set(output.path, test.files.get(oldPath)!);
+        }
+        test.files.set(manifest.manifestPath, encode(JSON.stringify(manifest)));
+        test.adapter.rename.mockClear();
+        const retried = await retryDiagramExportRun(test.app, manifest.manifestPath, test.reporter, test.deps);
+        expect(retried.status).toBe('completed');
+        expect(test.adapter.rename.mock.calls.map(([, to]) => to)).toEqual(['Notes/topic_diagram-legacy.pdf']);
+        expect(JSON.parse(await test.adapter.read(manifest.manifestPath)).version).toBe(2);
+    });
+
+    test.each(['output', 'receipt', 'companion', 'version'])('rejects tampered v3 %s paths before writing on retry', async field => {
         const test = fixture();
         test.generation.artifact.companions = [{ path: 'images/a.svg', content: svg, mimeType: 'image/svg+xml' }];
         const run = await startDiagramExportRun(test.app, 'topic.md', test.generation, ['source:mermaid'], 300, test.reporter, test.deps);

@@ -45,13 +45,14 @@ describe('diagram output selection in a real DOM', () => {
             const runtime = window as any;
             runtime.settings = { uiLocale: 'en', experimentalDiagramCompatibilityMode: 'best-fit', preferredDiagramTypeId: 'nested', preferredDiagramIntent: 'nested', preferredDiagramRenderTarget: 'editable-html-svg' };
             runtime.saves = 0;
-            runtime.control = runtime.DiagramSelection.renderDiagramOutputSelector({
+            runtime.options = {
                 app: { keymap: { pushScope: (scope: any) => { runtime.scope = scope; }, popScope: () => { runtime.scope = null; } } },
                 typeParent: document.querySelector('#type'), outputParent: document.querySelector('#outputs'),
                 getSettings: () => runtime.settings,
                 saveSettings: () => { runtime.saves++; return runtime.persist?.() ?? Promise.resolve(); },
-                onTypeChanged: () => undefined
-            });
+                onPreviewType: (typeId: string) => { runtime.previewType = typeId; }
+            };
+            runtime.control = runtime.DiagramSelection.renderDiagramOutputSelector(runtime.options);
         });
     });
 
@@ -61,6 +62,33 @@ describe('diagram output selection in a real DOM', () => {
         expect(await page.locator('[data-diagram-output="svg"]').isVisible()).toBe(true);
         expect(await page.locator('[data-diagram-output-trigger]').getAttribute('aria-expanded')).toBe('true');
         expect(await page.locator('.notemd-diagram-output-choice small').count()).toBe(0);
+    });
+
+    test.each([320, 900])('keeps the live preview visible while scrolling chart choices at %ipx and restores it on close', async width => {
+        await page.setViewportSize({ width, height: 600 });
+        await page.addStyleTag({ content: readFileSync(path.join(__dirname, '../../styles.css'), 'utf8') });
+        await page.evaluate(() => {
+            const runtime = window as any;
+            runtime.control.destroy();
+            const host = document.createElement('section'); host.id = 'preview-home';
+            const preview = document.createElement('div'); preview.className = 'notemd-diagram-type-preview-panel';
+            preview.innerHTML = '<h4 class="notemd-diagram-type-preview-title">Preview</h4><div class="notemd-diagram-type-preview-canvas"><svg viewBox="0 0 200 100"><rect width="200" height="100" fill="#e5e7eb"/></svg></div>';
+            host.appendChild(preview); document.body.appendChild(host);
+            runtime.control = runtime.DiagramSelection.renderDiagramOutputSelector({ ...runtime.options, getPreviewElement: () => preview });
+        });
+        await page.locator('[data-diagram-type-trigger]').click();
+        await page.locator('[data-diagram-type-check="nested"]').focus();
+        const popup = await page.locator('[data-diagram-type-popup]').boundingBox();
+        const preview = await page.locator('[data-diagram-type-popup] .notemd-diagram-type-preview-panel').boundingBox();
+        expect(preview!.y).toBeGreaterThanOrEqual(popup!.y);
+        expect(preview!.y + preview!.height).toBeLessThanOrEqual(popup!.y + popup!.height + 1);
+        expect(popup!.x + popup!.width).toBeLessThanOrEqual(width - 8);
+        expect(await page.locator('[data-diagram-type-popup]').evaluate(el => el.scrollTop)).toBe(0);
+        await page.keyboard.press('Escape');
+        expect(await page.locator('#preview-home > .notemd-diagram-type-preview-panel').count()).toBe(1);
+        await page.locator('[data-diagram-type-trigger]').click();
+        await page.evaluate(() => (window as any).control.destroy());
+        expect(await page.locator('#preview-home > .notemd-diagram-type-preview-panel').count()).toBe(1);
     });
 
     test('closes with Escape or outside focus and releases popup on destroy', async () => {
@@ -103,21 +131,35 @@ describe('diagram output selection in a real DOM', () => {
         await page.locator('[data-diagram-output-trigger]').click();
         const states = await page.locator('[data-diagram-output-state]').evaluateAll(elements => elements.map(element => element.getAttribute('data-diagram-output-state')));
         expect(states[0]).toBe('supported');
-        expect(states.indexOf('adjustable')).toBeGreaterThan(0);
+        expect(states.indexOf('unsupported')).toBeGreaterThan(0);
         expect(await page.locator('input[data-diagram-output="source:drawnix"]').count()).toBe(1);
-        expect(await page.locator('input[data-diagram-output="source:drawnix"]').isEnabled()).toBe(true);
+        expect(await page.locator('input[data-diagram-output="source:drawnix"]').isEnabled()).toBe(false);
     });
 
-    test('coordinates both directions without resetting or losing selected requests', async () => {
-        await page.locator('[data-diagram-output-trigger]').click();
-        await page.locator('input[data-diagram-output="source:drawnix"]').check();
-        expect(await page.locator('[data-diagram-type]').inputValue()).toBe('drawnixMindmap');
-        await page.locator('[data-diagram-type]').selectOption('nested');
-        await page.locator('[data-diagram-output-trigger]').click();
-        expect(await page.locator('input[data-diagram-output="source:drawnix"]').isChecked()).toBe(true);
-        expect(await page.locator('[data-diagram-output-summary]').innerText()).toContain('Drawnix');
-        await page.locator('[data-diagram-promote-output="source:drawnix"]').click();
-        expect(await page.locator('[data-diagram-type]').inputValue()).toBe('drawnixMindmap');
+    test('selects multiple types and edits their formats independently', async () => {
+        await page.locator('[data-diagram-type-trigger]').click();
+        await page.locator('[data-diagram-type-check="drawnix-knowledge-map"]').check();
+        await page.locator('[data-diagram-type-edit="drawnix-knowledge-map"]').click();
+        await page.locator('[data-diagram-output="pdf"]').check();
+        expect(await page.locator('[data-diagram-output="source:drawnix"]').isChecked()).toBe(true);
+        await page.locator('[data-diagram-type-trigger]').click();
+        expect(await page.locator('[data-diagram-type-check="nested"]').isChecked()).toBe(true);
+        await page.locator('[data-diagram-type-edit="nested"]').click();
+        expect(await page.locator('[data-diagram-output="pdf"]').isChecked()).toBe(false);
+        expect(await page.locator('[data-diagram-output="html-diagram"]').isChecked()).toBe(true);
+        expect(await page.locator('[data-diagram-output="source:drawnix"]').isEnabled()).toBe(false);
+    });
+
+    test('hover and keyboard focus preview without saving; closing restores the editing type', async () => {
+        await page.locator('[data-diagram-type-trigger]').click();
+        await page.locator('[data-diagram-type-edit="flowchart"]').hover();
+        expect(await page.evaluate(() => (window as any).previewType)).toBe('flowchart');
+        await page.locator('[data-diagram-type-check="drawnix-knowledge-map"]').focus();
+        expect(await page.evaluate(() => (window as any).previewType)).toBe('drawnix-knowledge-map');
+        expect(await page.evaluate(() => (window as any).saves)).toBe(0);
+        await page.keyboard.press('Escape');
+        expect(await page.evaluate(() => (window as any).previewType)).toBe('nested');
+        expect(await page.locator('[data-diagram-type-trigger]').evaluate(el => el === document.activeElement)).toBe(true);
     });
 
     test('keeps keyboard focus on the changed output after sorting and never steals it after saving', async () => {
@@ -152,9 +194,9 @@ describe('diagram output selection in a real DOM', () => {
             runtime.oldSettings = runtime.settings;
             runtime.settings = structuredClone(runtime.settings);
         });
-        await page.locator('input[data-diagram-output="source:drawnix"]').check();
-        expect(await page.evaluate(() => (window as any).settings.preferredDiagramTypeId)).toBe('drawnix-knowledge-map');
-        expect(await page.evaluate(() => (window as any).oldSettings.preferredDiagramTypeId)).toBe('nested');
+        await page.locator('input[data-diagram-output="pdf"]').check();
+        expect(await page.evaluate(() => (window as any).settings.diagramTypeOutputPreferences.outputsByType.nested)).toContain('pdf');
+        expect(await page.evaluate(() => (window as any).oldSettings.diagramTypeOutputPreferences)).toBeUndefined();
     });
 
     test('serializes rapid changes and persists the latest selection after a failed save', async () => {
@@ -166,7 +208,7 @@ describe('diagram output selection in a real DOM', () => {
             runtime.persist = () => {
                 runtime.activeSaves++;
                 runtime.maxActiveSaves = Math.max(runtime.maxActiveSaves, runtime.activeSaves);
-                const snapshot = structuredClone(runtime.settings.diagramOutputPreferences);
+                const snapshot = structuredClone(runtime.settings.diagramTypeOutputPreferences);
                 return new Promise<void>((resolve, reject) => {
                     runtime.finishSave = (fail: boolean) => {
                         runtime.activeSaves--;
@@ -186,6 +228,6 @@ describe('diagram output selection in a real DOM', () => {
         await page.evaluate(() => (window as any).finishSave(false));
         await page.waitForFunction(() => document.querySelector('.notemd-diagram-output-error')?.textContent === '', undefined, { timeout: 1500 });
         expect(await page.evaluate(() => (window as any).maxActiveSaves)).toBe(1);
-        expect(await page.evaluate(() => (window as any).persisted.requestedOutputs)).toEqual(['html-diagram', 'svg', 'png']);
+        expect(await page.evaluate(() => (window as any).persisted.outputsByType.nested)).toEqual(['html-diagram', 'svg', 'png']);
     });
 });
