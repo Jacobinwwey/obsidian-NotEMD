@@ -21,7 +21,25 @@ Validate the plugin and both documentation builds before pushing main. Wait for 
 - The final bundle was reloaded through the official Obsidian CLI into the open `1Knowledge` Vault. It reported version `1.9.9`, no active task and unchanged settings bytes. The loaded `main.js`, `manifest.json` and `styles.css` match the release candidate byte for byte. The separate `obsidian-cli` executable is not installed; this check used `Obsidian.com`.
 - All 272 affected website pages and 31 README editions were updated with directly authored translations. Source-review hashes were refreshed after comparison with that content. Website indexing remains limited to English and Simplified Chinese; translation authorship does not establish independent native review.
 
-Local receipts are retained under `.cache/release199-*` and `.cache/verification/{website-navigation,release199-navigation-1,release199-navigation-2}`. Remote CI, public release and Pages receipts remain pending until those operations complete.
+Local receipts are retained under `.cache/release199-*` and `.cache/verification/{website-navigation,release199-navigation-1,release199-navigation-2}`.
+
+## Publication receipts
+
+- Release source and immutable tag `1.9.9`: [`e2d696f3a39cc53eaf252ccb5c62ce6dbe4510bc`](https://github.com/Jacobinwwey/obsidian-NotEMD/commit/e2d696f3a39cc53eaf252ccb5c62ce6dbe4510bc). [Linux/Windows verification](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/37122671653) passed both jobs.
+- [Release workflow](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/37123106601) completed both publication and chronicle refresh on attempt 2. Attempt 1 created the correct empty draft, but the immediate readback did not find it. A later authenticated read verified its matching provenance; retry resumed that draft without moving the tag or creating another release.
+- [Notemd 1.9.9](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9) was published at `2026-10-03T12:42:12Z` and independently verified as public, stable and latest. All four required assets were downloaded again; their sizes and SHA-256 hashes match the publisher's provenance and GitHub asset digests.
+- The workflow's serial chronicle refresh produced [`28737855da274ea596ddf790c163faba7196f64a`](https://github.com/Jacobinwwey/obsidian-NotEMD/commit/28737855da274ea596ddf790c163faba7196f64a), fast-forwarded into the local main branch. The release's README remains the immutable tagged edition; main subsequently updates the chronicle timestamp.
+- [Initial Pages deployment](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/37122671617) succeeded from the release source. Live HTTP checks passed all 34 localized release routes, English/Chinese homepages, `llms.txt` and sitemap: 38 URLs, valid UTF-8, correct release version, canonical/alternate metadata and unchanged indexing policy.
+- [Explicit post-release Pages deployment](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/37124523550) passed build, audit, browser checks and deployment from chronicle revision `28737855da274ea596ddf790c163faba7196f64a`. All 38 live URL checks passed again after deployment. The final receipt-only documentation commit does not change the deployed website sources or the immutable release.
+
+| Asset | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `main.js` | 10136209 | `f4a34d74156c9d43108ae1cafd89d996f81576bb9b636a6f33b454d314b01b21` |
+| `manifest.json` | 406 | `f5fa1d09105ee6b1f6f63a23eca907595e8f181de6ded1f20fe3edde91ea2d8c` |
+| `styles.css` | 81537 | `f83670cf3fa12371cd252af0069b57d3071728cbd1d73523a2615ad7f532af51` |
+| `README.md` | 105757 | `f8e396c33fa9b184f86f59e9b4fa82753436cb7236d2ee381a56a4b15ea8a73a` |
+
+The published CSS uses LF; the local Windows candidate used CRLF. Their text is identical after line-ending normalization. The published JavaScript and manifest match the locally loaded candidate exactly. No public 1.9.8 assets or historical release notes were changed.
 
 ## Limits
 
