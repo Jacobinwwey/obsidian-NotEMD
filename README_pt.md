@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Comece aqui
 
 | Leitor | Entrada | Objetivo |
@@ -19,13 +19,13 @@
 | Desenvolvedor | [Guia de desenvolvimento](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/developers/overview) | Compilar, testar e ampliar os contratos existentes |
 | Agente | [Guia de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/agents/overview) | Encontrar os quatro comandos de exportação suportados |
 
-**Versão:** 1.9.8
+**Versão:** 1.9.9
 
-- **Cancelamento e recuperação:** o cancelamento permanece ativo no agendamento e nas tentativas, bloqueando gravações tardias de pesquisa e tradução. Resultados concluídos são preservados e conflitos de recuperação são informados.
-- **Histórico e exportação nativa:** a pesquisa mantém o texto e o foco do teclado. Corrigidos separadores de células mescladas PowerPoint e conexões/rótulos CircuitikZ. A consulta local em lote usa um retrato consistente.
-- **Publicação e documentação:** verifica a origem do código limpo e os arquivos baixados, com entradas por público e traduções redigidas diretamente.
+- Selecione vários tipos de diagrama numa execução e vários formatos independentes para cada tipo. Desmarcar um tipo conserva os seus formatos; sem seleção, o conteúdo é analisado automaticamente.
+- Os ficheiros selecionados são exportados automaticamente junto da nota original ou diretamente para a pasta configurada. Os nomes incluem o tipo, como `topic_drawnix.pdf` e `topic_flowchart.svg`. Em caso de colisão, acrescenta-se `-2`, `-3`, etc., sem substituir ficheiros.
+- Drawnix apresenta até seis relações dirigidas essenciais com rótulo, no máximo três por nó; as omitidas ficam nos metadados. O texto das caixas permanece visível no PDF, incluindo SVG antigos em cache. As setas entre ramos são estáticas e podem desligar-se após reorganizar no Drawnix.
 
-Os 36 presets de provedores e 33 tipos executáveis de diagramas já existiam em 1.9.7. [Guia de atualização](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/releases/1.9.8) · [Verificar o lançamento público](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+Os 36 presets de provedores e 33 tipos executáveis de diagramas já existiam em 1.9.7. [Guia de atualização](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/releases/1.9.9) · [Verificar o lançamento público](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Setas Drawnix entre ramos continuam estáticas após reorganização. Mermaid/SVG em PPTX pode usar uma imagem de reserva. Cancelar não desfaz alterações salvas nem garante interromper geração ou cobrança remota. Dispositivos móveis físicos e Obsidian 0.15.0 continuam sem verificação.
 
@@ -720,7 +720,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.8 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.9 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 
@@ -753,7 +753,12 @@ A página de configurações Notemd oferece busca por semelhança que leva em co
 - O histórico de diagramas é armazenado no escopo Vault, ordenado do mais recente para o mais antigo, sendo pesquisável e paginado em grupos de 20. A remoção de um registro de histórico não exclui os arquivos gerados.
 - A exportação da prévia do diagrama via PPI tem como padrão 300 e aceita valores entre 72 e 600. Ela controla apenas a rasterização PNG; SVG e PDF permanecem em formato vetorial.
 - A exportação completa das visualizações Mermaid, opcionalmente, grava também o código-fonte Mermaid, SVG e arquivos de manifesto associados; mesmo quando desativada, a Mermaid continua disponível nas prévias do Drawnix.
-- O tipo de diagrama preferido e o formato de fonte preferido são opções separadas.
+- Selecione vários tipos de diagrama numa execução e vários formatos independentes para cada tipo. Desmarcar um tipo conserva os seus formatos; sem seleção, o conteúdo é analisado automaticamente. A caixa inclui o tipo. Clique no nome para o selecionar e editar os formatos. Passar o ponteiro ou dar foco pelo teclado muda a pré-visualização sem guardar definições. Escape fecha o menu e devolve o foco.
+- Os ficheiros selecionados são exportados automaticamente junto da nota original ou diretamente para a pasta configurada. Os nomes incluem o tipo, como `topic_drawnix.pdf` e `topic_flowchart.svg`. Em caso de colisão, acrescenta-se `-2`, `-3`, etc., sem substituir ficheiros.
+- Defina uma pasta intermédia partilhada relativa ao Vault, ou deixe o campo vazio para usar `notemd_assert/` junto de cada original. Guarda registos de recuperação, renderizações em cache e anexos opcionais. Conserve ficheiros ainda referenciados; a alteração só afeta novas execuções.
+- O HTML de diagrama contém um gráfico com zoom; o HTML de resumo estruturado contém texto, estrutura e referências. HTML/SVG editável designa um renderizador, não um editor web. Para editar, utilize a fonte nativa. A exportação de apresentações, incluindo PPTX e MP4, mantém definições e dependências separadas.
+- Os tipos são gerados em sequência. Uma falha não bloqueia os restantes; cancelar interrompe os pendentes e preserva os ficheiros concluídos. Repita exportações pela pré-visualização ou histórico sem outro pedido ao modelo. Uma falha de geração exige gerar novamente esse tipo. Os registos v1/v2 continuam legíveis.
+- Drawnix apresenta até seis relações dirigidas essenciais com rótulo, no máximo três por nó; as omitidas ficam nos metadados. O texto das caixas permanece visível no PDF, incluindo SVG antigos em cache. As setas entre ramos são estáticas e podem desligar-se após reorganizar no Drawnix.
 - Os usuários de desktop podem abrir o ambiente de compilação nativo CircuitikZ, opcional, para reutilizar o Tectonic/pdflatex do sistema, selecionar um compilador personalizado ou instalar explicitamente a versão gerenciada e fixada do Tectonic. As prévias, SVG, PNG e as exportações de prévia PDF não exigem LaTeX.
 - A seleção avançada de arquivos em lote permite o uso de perfis de seleção salvos e visualizações de regras.
 - Uma pasta-alvo de lote ausente pode ser criada após confirmação, com a opção de lembrar a criação automática para pastas faltantes futuras.

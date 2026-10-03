@@ -39,7 +39,7 @@ export default {
             { text: 'Diagram Examples (EN)', link: '/diagram-examples/README' },
             { text: '图表示例（中文）', link: '/diagram-examples/README.zh-CN' },
             { text: 'Plans', link: '/superpowers/plans/2026-08-16-diagram-capability-catalog-and-forward-architecture.en' },
-            { text: 'Releases', link: '/releases/1.9.7' }
+            { text: 'Releases', link: '/releases/1.9.9' }
         ],
         sidebar: [
             {
@@ -69,6 +69,10 @@ export default {
                 text: 'Releases',
                 collapsed: false,
                 items: [
+                    { text: '1.9.9 (EN)', link: '/releases/1.9.9' },
+                    { text: '1.9.9 (zh-CN)', link: '/releases/1.9.9.zh-CN' },
+                    { text: '1.9.8 (EN)', link: '/releases/1.9.8' },
+                    { text: '1.9.8 (zh-CN)', link: '/releases/1.9.8.zh-CN' },
                     { text: '1.8.0 (EN)', link: '/releases/1.8.0' },
                     { text: '1.8.0 (zh-CN)', link: '/releases/1.8.0.zh-CN' },
                     { text: '1.8.1 (EN)', link: '/releases/1.8.1' },

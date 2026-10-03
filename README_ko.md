@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## 여기서 시작하세요
 
 | 대상 | 시작점 | 목표 |
@@ -19,13 +19,13 @@
 | 개발자 | [개발 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/developers/overview) | 기존 계약에 따라 빌드, 테스트, 확장하기 |
 | 에이전트 | [에이전트 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/agents/overview) | 지원되는 네 가지 내보내기 명령 확인하기 |
 
-**버전:** 1.9.8
+**버전:** 1.9.9
 
-- **취소와 복구:** 작업 예약과 재시도 중에도 취소 상태를 유지하고 조사·번역의 마지막 파일 준비 중 취소된 뒤 쓰기가 실행되지 않도록 합니다. 완료된 출력은 보존하고 복구 충돌을 알립니다.
-- **기록과 기본 형식 내보내기:** 검색 입력과 키보드 초점을 유지합니다. PowerPoint 병합 셀 아래 구분선과 CircuitikZ 배선·레이블을 수정했으며 일괄 로컬 검색은 일관된 스냅샷을 사용합니다.
-- **배포와 문서:** 변경 사항이 없는 소스의 출처와 다운로드한 배포 파일을 검증하고, 대상별 안내와 직접 작성한 번역을 제공합니다.
+- 한 번에 여러 차트 유형을 선택하고 유형마다 여러 출력 형식을 따로 지정하세요. 유형 선택을 해제해도 형식 설정은 유지됩니다. 모두 해제하면 내용을 자동으로 분석합니다.
+- 선택한 파일은 원본 노트 옆이나 설정한 출력 폴더에 직접 자동 저장됩니다. 이름에 `topic_drawnix.pdf`, `topic_flowchart.svg`처럼 유형이 포함됩니다. 충돌 시 `-2`, `-3` 등을 붙이며 기존 파일을 덮어쓰지 않습니다.
+- Drawnix 개요에는 이름이 있는 핵심 방향 관계를 최대 6개, 노드당 최대 3개 표시합니다. 생략된 관계는 메타데이터에 남습니다. PDF의 관계 상자 안 글자도 표시되며 오래된 SVG 캐시를 지원합니다. 가지 사이 화살표는 정적이므로 Drawnix에서 재배치하면 연결이 떨어질 수 있습니다.
 
-제공업체 사전 설정 36개와 실행 가능한 다이어그램 항목 33개는 1.9.7에도 있었습니다. [업그레이드 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/releases/1.9.8) · [공개 릴리스 확인](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+제공업체 사전 설정 36개와 실행 가능한 다이어그램 항목 33개는 1.9.7에도 있었습니다. [업그레이드 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/releases/1.9.9) · [공개 릴리스 확인](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Drawnix에서 가지 사이 화살표는 재배치 후에도 정적 좌표로 남습니다. PPTX의 Mermaid/SVG는 이미지로 대체될 수 있습니다. 취소는 저장된 변경의 실행 취소가 아니며 원격 생성이나 과금 중단을 보장하지 않습니다. 실제 모바일 기기와 Obsidian 0.15.0은 아직 검증하지 않았습니다.
 
@@ -720,7 +720,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.8 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.9 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 
@@ -753,7 +753,12 @@ Notemd 설정 페이지는 해당 필드에 맞는 모호 검색 기능, 대규�
 - 다이어그램 기록은 Vault 범위에 저장되며, 가장 최신 순서대로 정렬되고 20개씩 그룹화하여 검색 및 페이지 네비게이션이 가능합니다. 기록을 삭제해도 생성된 파일들은 삭제되지 않습니다.
 - 다이어그램 미리보기 내보내기의 PPI 값은 기본적으로 300으로 설정되어 있으며 72~600 사이의 값을 받아들입니다. 이 값은 PNG의 래스터화만 제어하며, SVG와 PDF는 여전히 벡터 기반으로 유지됩니다.
 - 또한 전체 Mermaid 시각 자료를 내보낼 때 선택적으로 Mermaid 소스 파일, SVG 및 매니페스트 관련 파일도 함께 저장됩니다. Mermaid가 비활성화되어 있더라도 Drawnix 미리보기에서는 계속 사용할 수 있습니다.
-- 선호하는 다이어그램 유형과 선호하는 소스 형식은 별개의 선택 항목입니다.
+- 한 번에 여러 차트 유형을 선택하고 유형마다 여러 출력 형식을 따로 지정하세요. 유형 선택을 해제해도 형식 설정은 유지됩니다. 모두 해제하면 내용을 자동으로 분석합니다. 체크박스로 생성할 유형을 포함합니다. 이름을 클릭하면 해당 유형을 선택하고 형식 설정을 엽니다. 마우스를 올리거나 키보드 포커스를 주면 설정을 저장하지 않고 미리보기만 전환합니다. Escape는 메뉴를 닫고 포커스를 돌려줍니다.
+- 선택한 파일은 원본 노트 옆이나 설정한 출력 폴더에 직접 자동 저장됩니다. 이름에 `topic_drawnix.pdf`, `topic_flowchart.svg`처럼 유형이 포함됩니다. 충돌 시 `-2`, `-3` 등을 붙이며 기존 파일을 덮어쓰지 않습니다.
+- 중간 파일 폴더를 공통 Vault 상대 경로로 지정하거나 비워 두어 각 원본 옆의 `notemd_assert/`를 사용하세요. 복구 기록, 렌더링 캐시, 선택적 첨부 파일이 저장됩니다. 기존 출력이 참조하는 파일은 유지하세요. 폴더 변경은 새 실행에만 적용됩니다.
+- 차트 HTML은 확대 가능한 그림을, 구조화된 요약 HTML은 텍스트·구조·인용을 담습니다. 편집 가능한 HTML/SVG는 렌더러 이름이며 브라우저 편집기가 아닙니다. 편집하려면 기본 소스 파일을 사용하세요. PPTX와 MP4를 포함한 프레젠테이션 내보내기는 별도 설정과 의존성을 유지합니다.
+- 유형은 순서대로 생성됩니다. 하나가 실패해도 나머지는 진행하며, 취소하면 대기 중인 유형을 중단하고 완료된 파일은 유지합니다. 내보내기 실패는 미리보기나 기록에서 모델 재요청 없이 재시도할 수 있습니다. 생성 실패는 해당 유형을 다시 생성해야 합니다. v1/v2 복구 기록도 계속 읽을 수 있습니다.
+- Drawnix 개요에는 이름이 있는 핵심 방향 관계를 최대 6개, 노드당 최대 3개 표시합니다. 생략된 관계는 메타데이터에 남습니다. PDF의 관계 상자 안 글자도 표시되며 오래된 SVG 캐시를 지원합니다. 가지 사이 화살표는 정적이므로 Drawnix에서 재배치하면 연결이 떨어질 수 있습니다.
 - 데스크톱 사용자는 선택 사항인 CircuitikZ 네이티브 컴파일 환경을 열어 시스템에 설치된 Tectonic/pdflatex를 재사용하거나, 사용자 지정 컴파일러를 선택하거나, 고정된 관리형 Tectonic 런타임을 명시적으로 설치할 수 있습니다. 미리보기, SVG, PNG 및 PDF 내보내기에는 LaTeX가 필요하지 않습니다.
 - 고급 일괄 처리 파일 선택 기능을 통해 저장된 선택 프로필과 규칙 미리보기를 활용할 수 있습니다.
 - 일괄 처리 대상 폴더가 없는 경우 확인 후 생성할 수 있으며, 앞으로도 폴더가 없을 때 자동으로 생성하도록 기억하는 옵션이 제공됩니다.

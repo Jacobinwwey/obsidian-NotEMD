@@ -13,7 +13,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrams
 
 <TLDR>
-Choose **what kind of diagram you need**, then choose its **editable source format**. Preview the complete result in Obsidian, including a Drawnix board and its embedded Mermaid visuals, and export each panel as SVG, PNG, or PDF.
+Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis.
 </TLDR>
 
 ## Understand the three choices
@@ -24,7 +24,7 @@ Choose **what kind of diagram you need**, then choose its **editable source form
 | Source format | The editable or reusable file that Notemd creates | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Export format | The image or document used for sharing | SVG, PNG, PDF |
 
-Draw.io and Drawnix are **source formats**, not diagram types. CircuitikZ is a source format designed for circuit diagrams. The same preview can be exported to several visual formats, so selecting CircuitikZ does not limit you to SVG.
+Diagram HTML contains a zoomable graphic; structured-summary HTML contains text, structure and evidence. Editable HTML/SVG is a renderer name, not an in-browser editor. Use native source for editing. Presentation export, including PPTX and MP4, keeps separate settings and dependencies.
 
 ## Choose a source format
 
@@ -36,17 +36,21 @@ Draw.io and Drawnix are **source formats**, not diagram types. CircuitikZ is a s
 | Drawnix | Hand-drawn or whiteboard-style editing | `.drawnix` |
 | CircuitikZ | Structured electrical and transistor circuits | `.tex` |
 
-Leave **Preferred source format** on **Auto** if you do not need a particular editor. Notemd chooses a compatible format for the selected diagram type.
+Supported formats appear first. Incompatible choices remain visible and disabled; existing inactive requests can be removed. Format choices stay with their chart type. If no requested format is usable, Notemd attempts the effective renderer’s default source and reports unavailable requests.
 
 ## Generate and export a diagram
 
 1. Open the supported source note. To visualize only a passage, put it in a separate note; selecting text does not narrow a file-based generation action.
-2. In Notemd's diagram settings, select a **diagram type**, or leave it on **Auto-detect**.
-3. Select a **source format**, or leave it on **Auto**. Choose **Drawnix** for a supported knowledge map with editable nodes and embedded Mermaid visuals.
+2. Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis.
+3. Use the checkbox to include a type. Click its name to select it and edit its formats. Hover or keyboard focus changes the preview without saving. Escape closes the menu and returns focus.
 4. Choose **Generate diagram** from the Notemd sidebar or command palette.
-5. Review the preview. A multi-panel result keeps the Drawnix board and every Mermaid panel in source order inside one vertically scrollable preview shell; Mermaid panels use their rendered height instead of being clipped.
-6. Choose a panel's **Export SVG**, **Export PNG**, or **Export PDF** action for one visual, or use a top-level image export for all panels. For multiple panels, choose the source folder or a custom Vault-relative folder; Notemd writes one deterministic file per panel and continues after an individual failure.
-7. Use **Save source file** when you also need the editable artifact.
+5. Selected files are exported automatically beside the source note, or directly into the configured output folder. Names include the type, such as `topic_drawnix.pdf` and `topic_flowchart.svg`; collisions add `-2`, `-3` and so on without overwriting existing files.
+6. Review the preview. A multi-panel result keeps the Drawnix board and every Mermaid panel in source order inside one vertically scrollable preview shell; Mermaid panels use their rendered height instead of being clipped.
+7. Choose a panel's **Export SVG**, **Export PNG**, or **Export PDF** action for one visual, or use a top-level image export for all panels. For multiple panels, choose the source folder or a custom Vault-relative folder; Notemd writes one deterministic file per panel and continues after an individual failure. Use **Save source file** when you also need the editable artifact.
+
+Set the diagram intermediate-files folder to a shared Vault-relative path, or leave it empty for `notemd_assert/` beside each source. Recovery records, cached renders and optional attachments stay there. Retain files still referenced by existing exports; folder changes affect new runs only.
+
+Types run sequentially. One failure does not block the others; cancellation stops pending types and preserves completed files. Retry failed exports through preview or history without another model request. A generation failure still requires generating that type again. Existing v1/v2 recovery records remain readable.
 
 The Export menu provides **Export SVG**, **Export PNG**, and **Export PDF** actions for the current visual preview. Each panel header exposes the same actions for a single Mermaid or Drawnix visual, so a large preview does not have to be exported as one opaque image.
 
@@ -72,7 +76,7 @@ Resolved image embeds receive a data-backed SVG preview when possible. Preview l
 
 The preview is intentionally a single scrollable surface: the main Drawnix canvas appears first, followed by each embedded Mermaid panel in source order. Closing and reopening a saved history entry reconstructs the same panel list, dimensions, and export actions.
 
-Drawnix previews reserve space for titles, summaries and relationship labels and route static connectors around nodes. If the requested map cannot produce a supported readable layout, generation reports a format error. Cross-branch arrows are serialized as static relationships: attachment after rearranging nodes in Drawnix is not supported by the current evidence. Inspect the artifact in the editor you intend to use.
+Drawnix overviews keep up to six labeled core directed relations, at most three per node. Omitted relations remain in source metadata. Boxed relation text stays visible in PDF, including exports from older cached SVG. Cross-branch arrows are static and may detach after rearrangement in Drawnix.
 
 ## Native export boundaries
 
@@ -96,7 +100,7 @@ Select the diagram type explicitly instead of using Auto-detect. For a circuit, 
 
 ### A source format is unsuitable
 
-Return the source format to **Auto**, or choose a format intended for that diagram type. CircuitikZ is for circuit diagrams; Draw.io and Drawnix are intended for supported structured diagrams.
+Supported formats appear first. Incompatible choices remain visible and disabled; existing inactive requests can be removed. Format choices stay with their chart type. If no requested format is usable, Notemd attempts the effective renderer’s default source and reports unavailable requests.
 
 ### The Export menu is missing
 

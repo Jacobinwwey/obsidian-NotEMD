@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diagramy
 
-<TLDR>Nejprve zvolte typ diagramu, poté editovatelný zdrojový formát. Prohlédněte celý výsledek v Obsidianu včetně tabule Drawnix a vložených vizualizací Mermaid. Každý panel lze exportovat do SVG, PNG nebo PDF.</TLDR>
+<TLDR>
+Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.
+</TLDR>
 
 ## Tři různé volby
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Zdrojový formát | Editovatelný či znovu použitelný soubor vytvořený Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Formát exportu | Obrázek nebo dokument pro sdílení | SVG, PNG, PDF |
 
-Draw.io a Drawnix jsou zdrojové formáty, nikoli typy diagramů. CircuitikZ je zdroj pro obvody. Stejný náhled má více vizuálních exportů, takže CircuitikZ neomezuje výstup na SVG.
+HTML diagramu obsahuje grafiku s přiblížením; HTML strukturovaného souhrnu obsahuje text, strukturu a zdroje. Upravitelný HTML/SVG označuje renderer, nikoli webový editor. K úpravám použijte nativní zdroj. Export prezentací včetně PPTX a MP4 má samostatná nastavení a závislosti.
 
 ## Volba zdroje
 
@@ -38,17 +40,21 @@ Draw.io a Drawnix jsou zdrojové formáty, nikoli typy diagramů. CircuitikZ je 
 | Drawnix | Ruční vzhled či editace tabule | `.drawnix` |
 | CircuitikZ | Strukturované elektrické a tranzistorové obvody | `.tex` |
 
-Pokud nepotřebujete určitý editor, ponechte **Preferred source format** na **Auto**. Notemd vybere kompatibilní formát pro typ diagramu.
+Podporované formáty jsou první; nekompatibilní zůstávají viditelné a zakázané. Existující neaktivní požadavky lze odebrat. Formáty patří ke svému typu. Pokud žádný nelze použít, zkusí se výchozí zdrojový formát použitého rendereru a nedostupné požadavky se oznámí.
 
 ## Generování a export
 
 1. Otevřete podporovanou zdrojovou poznámku. Pasáž dejte do samostatné poznámky; výběr textu neomezuje souborovou akci.
-2. Zvolte **diagram type** nebo **Auto-detect**.
-3. Zvolte **source format** nebo **Auto**. **Drawnix** použijte pro podporovanou znalostní mapu s editovatelnými uzly a vloženým Mermaid.
+2. Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.
+3. Zaškrtávací políčko zahrne typ. Kliknutím na název jej vyberete a upravíte formáty. Přejetí ukazatelem nebo zaměření klávesnicí změní náhled bez uložení nastavení. Escape zavře nabídku a vrátí zaměření.
 4. Spusťte **Generate diagram** z panelu či palety.
-5. Prohlédněte společný svisle posuvný náhled: tabule Drawnix a všechny Mermaid panely v pořadí zdroje, bez oříznutí jejich vykreslené výšky.
-6. Pro jednotlivý panel použijte **Export SVG**, **Export PNG** či **Export PDF**, pro všechny panely horní obrazový export. Vyberte složku zdroje nebo vlastní cestu relativní k trezoru. Pro každý panel vznikne deterministicky pojmenovaný soubor; jednotlivá chyba nezastaví zbytek.
-7. **Save source file** uloží editovatelný artefakt.
+5. Vybrané soubory se automaticky exportují vedle zdrojové poznámky nebo přímo do nastavené složky. Název obsahuje typ, například `topic_drawnix.pdf` a `topic_flowchart.svg`; při kolizi se přidá `-2`, `-3` atd. bez přepsání souborů.
+6. Prohlédněte společný svisle posuvný náhled: tabule Drawnix a všechny Mermaid panely v pořadí zdroje, bez oříznutí jejich vykreslené výšky.
+7. Pro jednotlivý panel použijte **Export SVG**, **Export PNG** či **Export PDF**, pro všechny panely horní obrazový export. Vyberte složku zdroje nebo vlastní cestu relativní k trezoru. Pro každý panel vznikne deterministicky pojmenovaný soubor; jednotlivá chyba nezastaví zbytek. **Save source file** uloží editovatelný artefakt.
+
+Nastavte společnou mezisložku relativně k Vault, nebo nechte pole prázdné pro `notemd_assert/` vedle každého zdroje. Obsahuje záznamy obnovy, mezipaměť vykreslení a volitelné přílohy. Zachovejte stále odkazované soubory; změna platí jen pro nové běhy.
+
+Typy se generují postupně. Chyba jednoho neblokuje ostatní; zrušení zastaví čekající typy a zachová hotové soubory. Export opakujte z náhledu či historie bez nového požadavku modelu. Chyba generování vyžaduje nové vygenerování daného typu. Záznamy v1/v2 zůstávají čitelné.
 
 Nabídka exportu i záhlaví každého panelu poskytují stejné SVG/PNG/PDF akce. Velký náhled není nutné sloučit do jediného neprůhledného obrázku.
 
@@ -74,7 +80,7 @@ Vyřešené vložené obrázky dostanou náhled SVG s vloženými daty, kde je t
 
 Jedna posuvná plocha zobrazuje nejprve Drawnix, poté Mermaid v pořadí zdroje. Znovuotevření uložené historie obnoví stejné panely, rozměry a exportní akce.
 
-Náhled rezervuje místo pro názvy, shrnutí a vztahy a vede statické spojnice kolem uzlů. Pokud nelze vytvořit podporované čitelné rozložení, generování hlásí chybu formátu. Šipky mezi větvemi jsou statické vztahy; připojení po přesunu uzlů v Drawnix není podporováno současnými doklady. Výsledek prověřte v cílovém editoru.
+Drawnix zobrazuje nejvýše šest popsaných hlavních směrovaných vztahů, maximálně tři na uzel. Vynechané vztahy zůstávají v metadatech. Text v rámečcích je viditelný v PDF i ze starších SVG v mezipaměti. Šipky mezi větvemi jsou statické a po přeuspořádání v Drawnix se mohou odpojit.
 
 ## Hranice nativního exportu
 
@@ -96,7 +102,7 @@ Zvolte typ výslovně. Pro obvod použijte **Circuit diagram** a **Generate diag
 
 ### Nevhodný zdrojový formát
 
-Vraťte volbu na **Auto** nebo vyberte formát pro daný typ. CircuitikZ je pro obvody, Draw.io a Drawnix pro podporované strukturované diagramy.
+Podporované formáty jsou první; nekompatibilní zůstávají viditelné a zakázané. Existující neaktivní požadavky lze odebrat. Formáty patří ke svému typu. Pokud žádný nelze použít, zkusí se výchozí zdrojový formát použitého rendereru a nedostupné požadavky se oznámí.
 
 ### Chybí nabídka exportu
 

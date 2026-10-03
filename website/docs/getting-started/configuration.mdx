@@ -29,6 +29,10 @@ The default active provider is DeepSeek. Its account credentials are initially e
 
 **Diagram preview export PPI** defaults to **300 PPI** and accepts **72-600**. It affects PNG rasterization; SVG/PDF retain vector geometry where supported by the selected export. **Also export complete Mermaid visuals** controls companion files, not Mermaid visibility inside a Drawnix preview.
 
+Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis.
+
+Set the diagram intermediate-files folder to a shared Vault-relative path, or leave it empty for `notemd_assert/` beside each source. Recovery records, cached renders and optional attachments stay there. Retain files still referenced by existing exports; folder changes affect new runs only.
+
 ## 1. Provider Configuration
 
 Choose the provider, enter credentials if required, retain the preset's protocol-appropriate endpoint, and select an accessible model. Use **Fetch models** when supported, followed by **Test connection**. Listing models and successfully generating a response are separate checks.
@@ -50,8 +54,7 @@ Compare providers using a representative note, output accuracy, latency and actu
 | Translation | Separate `_<language>.md` file beside the source; an existing destination can be overwritten |
 | Research | Appends a research summary to the active Markdown note |
 | Batch title generation | Writes generated content and moves eligible notes to the reported sibling `<folder>_complete` folder when that destination permits it |
-| Diagram preview/export | Choose a supported source or visual export and inspect the destination reported by that operation |
-
+| Diagram preview/export | Selected files are exported automatically beside the source note, or directly into the configured output folder. Names include the type, such as `topic_drawnix.pdf` and `topic_flowchart.svg`; collisions add `-2`, `-3` and so on without overwriting existing files. |
 The concept folder starts empty. `concepts` is a useful folder name you can choose, not a default path. Standalone concept templates are the supported minimal/full forms; there is no general note-template variable engine. [Concept notes](../features/concept-notes) describes their content.
 
 Custom add-links suffixes, processed folders, translation suffixes and translation save paths are separate settings. Check whether a destination already exists before rerunning a write operation. Recovery and conflict messages identify outputs requiring attention; cancellation does not roll back completed writes.

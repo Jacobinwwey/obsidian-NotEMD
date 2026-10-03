@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Buradan başlayın
 
 | Okuyucu | Giriş | Amaç |
@@ -19,13 +19,13 @@
 | Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
 | Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
 
-**Sürüm:** 1.9.8
+**Sürüm:** 1.9.9
 
-- **İptal ve kurtarma:** iptal, zamanlama ve yeniden denemeler boyunca etkin kalır; araştırma ve çevirinin gecikmiş yazma işlemlerini engeller. Tamamlanan çıktılar korunur ve kurtarma çakışmaları bildirilir.
-- **Geçmiş ve dışa aktarma:** arama metni ve klavye odağı korunur. PowerPoint birleşik hücre ayırıcıları ve CircuitikZ bağlantıları/etiketleri düzeltilmiştir. Toplu yerel arama tutarlı bir anlık görüntü kullanır.
-- **Yayın ve belgeler:** temiz kaynakların kökeni ve indirilen dosyalar doğrulanır; okuyuculara özel girişler ve doğrudan yazılmış çeviriler sunulur.
+- Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
+- Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir.
+- Drawnix en fazla altı etiketli temel yönlü ilişki, düğüm başına en fazla üç ilişki gösterir. Atlanan ilişkiler üst verilerde korunur. Kutulu metin eski SVG önbelleğinden de PDF’de görünür. Dallar arası oklar statiktir ve Drawnix’te yeniden düzenleme sonrasında kopabilir.
 
-36 sağlayıcı ön ayarı ve çalıştırılabilir 33 diyagram türü 1.9.7 sürümünde zaten vardı. [Yükseltme kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/releases/1.9.8) · [Herkese açık sürümü doğrulayın](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+36 sağlayıcı ön ayarı ve çalıştırılabilir 33 diyagram türü 1.9.7 sürümünde zaten vardı. [Yükseltme kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/releases/1.9.9) · [Herkese açık sürümü doğrulayın](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Drawnix dallar arası okları yeniden düzenlemeden sonra sabit kalır. PPTX içindeki Mermaid/SVG görüntüye dönüştürülebilir. İptal, kaydedilmiş değişiklikleri geri almaz; uzak üretimi veya ücretlendirmeyi durdurmayı garanti etmez. Fiziksel mobil cihazlar ve Obsidian 0.15.0 doğrulanmamıştır.
 
@@ -714,7 +714,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.8 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.9 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->
@@ -746,7 +746,12 @@ Notemd ayar sayfası, alan bilgisine dayalı bulanık arama, geniş kategori nav
 - Diyagram geçmişi, en yeni önce gelmek üzere Vault kapsamında saklanır, 20’li gruplar halinde aranabilir ve sayfalara bölünebilir. Bir geçmiş kaydının silinmesi oluşturulan dosyaları silemez.
 - Diyagram önizleme dışa aktarımı PPI varsayılan olarak 300 değerinde olup 72–600 aralığını kabul eder. Bu ayar yalnızca PNG’in tarama işlemini kontrol eder; SVG ve PDF vektör tabanlı kalır.
 - Ayrıca, tam Mermaid görsellerinin dışa aktarılması isteğe bağlı olarak Mermaid kaynağını, SVG’yı ve manifest dosyalarını da yazdırır; Mermaid devre dışı bırakıldığında bile Drawnix önizlemelerinde kullanılabilir.
-- Tercih edilen diyagram türü ile tercih edilen kaynak formatı ayrı seçeneklerdir.
+- Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir. Onay kutusu türü dahil eder. Adına tıklayarak türü seçip biçimlerini düzenleyin. İşaretçiyi üzerine getirmek veya klavye odağı, ayarları kaydetmeden önizlemeyi değiştirir. Escape menüyü kapatır ve odağı geri getirir.
+- Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir.
+- Ara dosyalar için Vault’a göre ortak bir yol belirleyin ya da her kaynağın yanındaki `notemd_assert/` için alanı boş bırakın. Kurtarma kayıtları, işleme önbelleği ve isteğe bağlı ekler burada saklanır. Hâlâ başvurulan dosyaları koruyun; klasör değişikliği yalnızca yeni çalıştırmaları etkiler.
+- Diyagram HTML’i yakınlaştırılabilir grafik; yapılandırılmış özet HTML’i metin, yapı ve kaynaklar içerir. Düzenlenebilir HTML/SVG bir oluşturucunun adıdır, web düzenleyicisi değildir. Düzenleme için yerel kaynak dosyasını kullanın. PPTX ve MP4 dahil sunum dışa aktarımı ayrı ayar ve bağımlılıklarını korur.
+- Türler sırayla oluşturulur. Bir hata diğerlerini engellemez; iptal bekleyen türleri durdurur ve tamamlanan dosyaları korur. Dışa aktarımı önizleme veya geçmişten yeni model isteği olmadan yineleyin. Oluşturma hatası, o türün yeniden oluşturulmasını gerektirir. v1/v2 kayıtları okunabilir kalır.
+- Drawnix en fazla altı etiketli temel yönlü ilişki, düğüm başına en fazla üç ilişki gösterir. Atlanan ilişkiler üst verilerde korunur. Kutulu metin eski SVG önbelleğinden de PDF’de görünür. Dallar arası oklar statiktir ve Drawnix’te yeniden düzenleme sonrasında kopabilir.
 - Masaüstü kullanıcıları, sistemdeki Tectonic/pdflatex’i yeniden kullanmak, özel bir derleyici seçmek veya sabitlenmiş yönetilen Tectonic çalışma zamanını açıkça yüklemek için isteğe bağlı CircuitikZ yerel derleme ortamını açabilirler. Önizleme, SVG, PNG ve PDF önizleme dışa aktarımları için LaTeX gerekmez.
 - Gelişmiş toplu dosya seçimi özelliği, kaydedilmiş seçim profillerini ve kural önizlemelerini mümkün kılar.
 - Eksik bir toplu işleme hedef klasörü, onaydan sonra oluşturulabilir ve gelecekteki eksik klasörler için otomatik oluşturma özelliği hatırlanabilir.

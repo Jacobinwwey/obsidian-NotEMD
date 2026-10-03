@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Begin hier
 
 | Lezer | Ingang | Doel |
@@ -19,13 +19,13 @@
 | Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
 | Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
 
-**Versie:** 1.9.8
+**Versie:** 1.9.9
 
-- **Annulering en herstel:** annulering blijft actief tijdens planning en herhaalde pogingen en blokkeert late schrijfacties bij onderzoek en vertaling. Voltooide uitvoer blijft bewaard en herstelconflicten worden gemeld.
-- **Geschiedenis en export:** zoektekst en toetsenbordfocus blijven behouden. Scheidingslijnen bij samengevoegde PowerPoint-cellen en CircuitikZ-verbindingen en labels zijn hersteld. Lokaal zoeken in batches gebruikt één consistente momentopname.
-- **Publicatie en documentatie:** herkomst van schone broncode en gedownloade bestanden worden gecontroleerd; elke doelgroep krijgt een ingang en rechtstreeks geschreven vertalingen.
+- Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
+- Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven.
+- Drawnix toont maximaal zes benoemde gerichte kernrelaties, hoogstens drie per knooppunt. Weggelaten relaties blijven in de metadata. Tekst in kaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken zijn statisch en kunnen losraken na herschikken in Drawnix.
 
-De 36 aanbiedervoorinstellingen en 33 uitvoerbare diagramtypen bestonden al in 1.9.7. [Upgradegids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/releases/1.9.8) · [Openbare release controleren](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+De 36 aanbiedervoorinstellingen en 33 uitvoerbare diagramtypen bestonden al in 1.9.7. [Upgradegids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/releases/1.9.9) · [Openbare release controleren](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Drawnix-pijlen tussen takken blijven statisch na herschikking. Mermaid/SVG in PPTX kan op een afbeelding terugvallen. Annuleren draait opgeslagen wijzigingen niet terug en garandeert geen stop van externe generatie of facturering. Fysieke mobiele apparaten en Obsidian 0.15.0 zijn niet geverifieerd.
 
@@ -714,7 +714,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.8 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.9 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 
@@ -747,7 +747,12 @@ De instellingenspagina voor Notemd biedt een op velden gebaseerde vage zoekfunct
 - De diagramgeschiedenis wordt opgeslagen binnen het bereik van Vault, gerangschikt van nieuwste naar oudste, zoekbaar en pagineerbaar in groepen van 20. Het verwijderen van een geschiedenisrecord verwijdert de gegenereerde bestanden niet.
 - De export van diagramvoorbeelden via PPI heeft standaard een resolutie van 300 en accepteert waarden tussen 72 en 600. Het beheerst alleen de rasterisatie van PNG; SVG en PDF blijven vectorgebaseerd.
 - Bij de export van volledige Mermaid-visualisaties kan optioneel ook de broncode van Mermaid, SVG en bijbehorende manifestbestanden worden opgeslagen; zelfs wanneer Mermaid is uitgeschakeld, blijft het beschikbaar in Drawnix-voorbeelden.
-- De voorkeursdiagramtype en de voorkeursbronformaat zijn aparte keuzemogelijkheden.
+- Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd. Het selectievakje neemt het type op. Klik op de naam om het te selecteren en de formaten te wijzigen. Aanwijzen of toetsenbordfocus wisselt het voorbeeld zonder instellingen op te slaan. Escape sluit het menu en herstelt de focus.
+- Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven.
+- Stel een gedeelde Vault-relatieve map voor tussenbestanden in, of laat het veld leeg voor `notemd_assert/` naast elke bron. Hier staan herstelgegevens, rendercaches en optionele bijlagen. Bewaar bestanden waarnaar nog wordt verwezen; een mapwijziging geldt alleen voor nieuwe uitvoeringen.
+- Diagram-HTML bevat een zoombare afbeelding; HTML met een gestructureerde samenvatting bevat tekst, structuur en verwijzingen. Bewerkbaar HTML/SVG is een renderer, geen webeditor. Gebruik de oorspronkelijke bron voor bewerking. Presentatie-export, waaronder PPTX en MP4, behoudt afzonderlijke instellingen en afhankelijkheden.
+- Typen worden achtereenvolgens gemaakt. Eén fout blokkeert de overige niet; annuleren stopt wachtende typen en bewaart voltooide bestanden. Herhaal exports vanuit het voorbeeld of de geschiedenis zonder nieuwe modelaanvraag. Na een generatiefout moet dat type opnieuw worden gemaakt. v1/v2-herstelgegevens blijven leesbaar.
+- Drawnix toont maximaal zes benoemde gerichte kernrelaties, hoogstens drie per knooppunt. Weggelaten relaties blijven in de metadata. Tekst in kaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken zijn statisch en kunnen losraken na herschikken in Drawnix.
 - Desktopgebruikers kunnen het optionele native compileeromgeving van CircuitikZ openen om het systeem Tectonic/pdflatex opnieuw te gebruiken, een aangepaste compiler te kiezen of expliciet de geselecteerde Tectonic-runtime te installeren. Voorbeelden, SVG, PNG en exporten van PDF vereisen geen LaTeX.
 - Geavanceerde selectiemogelijkheden voor batchbestanden stellen het gebruik van opgeslagen selectieprofielen en regelvoorbeelden mogelijk.
 - Een ontbrekende batchdoelmap kan na bevestiging worden aangemaakt, met de optie om automatische aanmaak voor toekomstige ontbrekende mappen te onthouden.

@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## 從這裡開始
 
 | 讀者 | 入口 | 可完成的任務 |
@@ -19,13 +19,13 @@
 | 開發者 | [開發指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/developers/overview) | 建置、測試並擴充現有契約 |
 | Agent | [整合指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/agents/overview) | 探索四個受支援的匯出指令 |
 
-**版本:** 1.9.8
+**版本:** 1.9.9
 
-- **取消與復原：** 取消狀態貫穿排程與重試，在研究或翻譯的最終檔案準備期間取消後，阻止繼續寫入；保留已完成產物並回報復原衝突。
-- **歷史與原生匯出：** 歷史抽屜保留連續搜尋輸入與鍵盤焦點；修正 PowerPoint 合併儲存格下的分隔線，以及 CircuitikZ 配線與標籤。批次本地檢索使用一致的快照。
-- **發布與文件：** 驗證乾淨原始碼來源及下載資產，提供清楚的讀者入口與直接撰寫的多語指南。
+- 一次勾選多種圖表，每種類型獨立選擇多種輸出格式。取消勾選仍保留該類型的格式偏好；全部取消則自動分析原文。
+- 所選檔案自動匯出至原筆記所在目錄，或直接儲存至設定的輸出目錄。名稱包含圖表類型，例如 `topic_drawnix.pdf`、`topic_flowchart.svg`；重名追加 `-2`、`-3` 等序號，不覆寫現有檔案。
+- Drawnix 概覽最多保留六條附標籤的核心有向關係，每個節點最多三條；省略關係保存在原始檔中繼資料中。PDF 關係方框文字正常顯示，也相容舊 SVG 快取。跨分支箭頭仍為靜態關係，在 Drawnix 重新排列後可能脫離節點。
 
-36 個供應商預設與 33 項可執行圖表在 1.9.7 已存在。 [升級指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/releases/1.9.8) · [確認公開發布狀態](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+36 個供應商預設與 33 項可執行圖表在 1.9.7 已存在。 [升級指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/releases/1.9.9) · [確認公開發布狀態](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Drawnix 跨分支箭頭重新排列後仍有靜態座標限制；PPTX 中的 Mermaid／SVG 可能使用圖片替代。取消不等於復原已儲存變更，也不保證遠端生成或計費停止。實體行動裝置與 Obsidian 0.15.0 仍未驗證。
 
@@ -785,7 +785,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.8 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.9 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->
@@ -817,7 +817,12 @@ Notemd 的設定頁面提供針對欄位優化的模糊搜尋功能、大型類�
 - 圖表歷史記錄儲存在 Vault 的範圍內，依最新順序排列，可進行搜尋並以 20 個為一組分頁顯示。移除某個歷史紀錄並不會刪除已生成的檔案。
 - 圖表預覽的匯出格式 PPI 預設為 300，且可接受 72–600 的值。它僅控制 PNG 的光柵化處理；SVG 與 PDF 仍保持向量格式。
 - 另外，若選擇匯出完整的 Mermaid 圖形，還可以同時寫入 Mermaid 的原始碼、SVG 與相關的清單檔案；即便停用 Mermaid，它仍可在 Drawnix 預覽中查看。
-- 所偏好的圖表類型與所偏好的原始格式是兩個獨立的選項。
+- 一次勾選多種圖表，每種類型獨立選擇多種輸出格式。取消勾選仍保留該類型的格式偏好；全部取消則自動分析原文。 核取方塊控制是否產生該類型；按一下名稱會選取該類型並開啟其格式設定。滑鼠停留或鍵盤聚焦會切換預覽，不儲存設定。Escape 關閉選單並返回焦點。
+- 所選檔案自動匯出至原筆記所在目錄，或直接儲存至設定的輸出目錄。名稱包含圖表類型，例如 `topic_drawnix.pdf`、`topic_flowchart.svg`；重名追加 `-2`、`-3` 等序號，不覆寫現有檔案。
+- 圖形中間檔案目錄可設為統一的 Vault 相對路徑；留空則使用各原文旁的 `notemd_assert/`。復原記錄、渲染快取及選用附件存放於此。保留仍被既有產物引用的檔案；目錄變更僅影響新工作。
+- 圖形 HTML 包含可縮放的圖形；結構化摘要 HTML 顯示文字、結構與引文。可編輯 HTML/SVG 是渲染器名稱，不代表網頁內編輯器；編輯請使用原生原始檔。PPTX、MP4 等簡報匯出保留獨立設定與相依元件。
+- 各類型依序產生，一種失敗不阻斷其他類型；取消會停止後續類型並保留已完成檔案。匯出失敗可從預覽或歷史重試，無須再次請求模型；產生階段失敗仍須重新產生該類型。舊版 v1/v2 復原記錄繼續可讀。
+- Drawnix 概覽最多保留六條附標籤的核心有向關係，每個節點最多三條；省略關係保存在原始檔中繼資料中。PDF 關係方框文字正常顯示，也相容舊 SVG 快取。跨分支箭頭仍為靜態關係，在 Drawnix 重新排列後可能脫離節點。
 - 桌面端使用者可以開啟可選的 CircuitikZ 本機編譯環境，以便重複使用系統中的 Tectonic/pdflatex、選擇自訂編譯器，或明確安裝已固定的管理型 Tectonic 執行環境。預覽、SVG、PNG 以及預覽 PDF 的匯出功能均不需要 LaTeX。
 - 進階的批次檔案選擇功能可讓使用者使用已儲存的選項設定檔與規則預覽。
 - 若缺少批次處理目標資料夾，可在確認後建立該資料夾，並可選擇將此自動建立的功能記住，以便日後再遇到缺失的資料夾時自動處理。

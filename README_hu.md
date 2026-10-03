@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Kezdje itt
 
 | Olvasó | Belépés | Cél |
@@ -19,13 +19,13 @@
 | Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
 | Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
 
-**Verzió:** 1.9.8
+**Verzió:** 1.9.9
 
-- **Megszakítás és helyreállítás:** a megszakítás az ütemezés és újrapróbálkozás alatt is érvényes, és megakadályozza a kutatás és fordítás késői írásait. Az elkészült kimenetek megmaradnak, a helyreállítási ütközések láthatók.
-- **Előzmények és export:** megmarad a keresési szöveg és a billentyűzetfókusz. Javítva a PowerPoint egyesített celláinak elválasztói és a CircuitikZ bekötései, feliratai. A kötegelt helyi keresés egységes pillanatképet használ.
-- **Kiadás és dokumentáció:** tiszta források eredetének és letöltött fájloknak az ellenőrzése, külön olvasói belépési pontok és közvetlenül írt fordítások.
+- Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
+- A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás.
+- A Drawnix legfeljebb hat feliratozott, irányított fő kapcsolatot mutat, csomópontonként legfeljebb hármat. A kihagyott kapcsolatok megmaradnak a metaadatokban. A keretes szöveg régi SVG-gyorsítótárból is látszik PDF-ben. Az ágak közötti nyilak statikusak, és átrendezéskor leválhatnak a Drawnixban.
 
-A 36 szolgáltatói előbeállítás és 33 végrehajtható diagramtípus már az 1.9.7-ben is létezett. [Frissítési útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/releases/1.9.8) · [Nyilvános kiadás ellenőrzése](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+A 36 szolgáltatói előbeállítás és 33 végrehajtható diagramtípus már az 1.9.7-ben is létezett. [Frissítési útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/releases/1.9.9) · [Nyilvános kiadás ellenőrzése](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 A Drawnix ágak közötti nyilai átrendezés után statikusak maradnak. A PPTX Mermaid/SVG tartalma képként jelenhet meg. A megszakítás nem vonja vissza a mentett módosításokat, és nem garantálja a távoli generálás vagy számlázás leállását. Fizikai mobileszközök és az Obsidian 0.15.0 nincsenek ellenőrizve.
 
@@ -711,7 +711,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.8 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.9 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->
@@ -743,7 +743,12 @@ A Notemd beállítások oldala biztonsági szempontból fontos adatokat tartalma
 - A diagramok története Vault kereteben tárolódik, újabbakból kezdve sorrendben, és 20-es csoportokban kereshető és oldaltávolításra alkalmas. Egy történelmi leírás törölése nem törli a létrehozott fájlokat.
 - A diagramok előnézetének exportálása esetén PPI alapértelmezett értéke 300, de lehetőség van 72–600 között is használni. Ez csak PNG rasterizációját kontrollál; SVG és PDF továbbra is vektortípusú maradnak.
 - Kéreményelésre lehetővé teszi a teljes Mermaid visuális elemek exportálását, amely kiegészítően írja le a Mermaid forráskódot, SVG-t és a manifest-fájlokat; ha ez nem használható, a Mermaid továbbra is elérhető a Drawnix előnézetekben.
-- A preferált diagramtípus és a preferált forráskódformátum külön választásokként állnak rendelkezésre.
+- Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus. A jelölőnégyzet kapcsolja be a típust. A névre kattintva kijelölheti és módosíthatja a formátumait. Az egérmutató vagy a billentyűzetfókusz mentés nélkül váltja az előnézetet. Az Escape bezárja a menüt és visszaadja a fókuszt.
+- A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás.
+- Állítson be közös, Vault-relatív mappát a köztes fájloknak, vagy hagyja üresen a mezőt a források melletti `notemd_assert/` használatához. Itt tárolódnak a helyreállítási rekordok, gyorsítótárak és választható mellékletek. A hivatkozott fájlokat őrizze meg; a módosítás csak új futtatásokra érvényes.
+- A diagram-HTML nagyítható grafikát, a strukturált összefoglaló HTML szöveget, szerkezetet és hivatkozásokat tartalmaz. A szerkeszthető HTML/SVG egy megjelenítő neve, nem webes szerkesztő. Szerkesztéshez használja a natív forrást. A prezentációk, köztük a PPTX és MP4 exportja külön beállításokat és függőségeket használ.
+- A típusok egymás után készülnek. Egy hiba nem állítja le a többit; a megszakítás leállítja a várakozó típusokat és megőrzi a kész fájlokat. Az export az előnézetből vagy előzményekből új modellkérés nélkül ismételhető. Generálási hiba esetén a típust újra kell generálni. A v1/v2 rekordok olvashatók maradnak.
+- A Drawnix legfeljebb hat feliratozott, irányított fő kapcsolatot mutat, csomópontonként legfeljebb hármat. A kihagyott kapcsolatok megmaradnak a metaadatokban. A keretes szöveg régi SVG-gyorsítótárból is látszik PDF-ben. Az ágak közötti nyilak statikusak, és átrendezéskor leválhatnak a Drawnixban.
 - Aszintális használók lehetőségük van nyitni a CircuitikZ natív kompilációs környezetét, hogy újrahasználhassák a rendszeri Tectonic/pdflatex-t, választhassák egy személyre szabott kompilátort, vagy kifejezetten telepíthessék a beállított Tectonic futtatóprogramot. Az előnézetek, SVG, PNG és PDF exportálásai nem igényelnek LaTeX-t.
 - A fejlett partnélküli fájl választása lehetőséget ad a mentett választási profillerek és szabályok előnézetére.
 - Ha egy partnélküli célmappa nincs, ezt az bizonyítás után hozható létre, és lehetőség van jövőbeni hiányzó mappák automatikus létrehozását emlékeztetni.

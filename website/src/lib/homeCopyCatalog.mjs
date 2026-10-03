@@ -57,8 +57,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "موثوقية تستند إلى التحقق",
-    "releaseBody": "تحسين الإلغاء والاسترداد وتفاعل التاريخ، وتصحيح التصدير الأصلي، ووثائق تطابق الإعدادات والأوامر الفعلية.",
+    "releaseHeading": "رسوم متعددة وتصدير مستقل",
+    "releaseBody": "اختر عدة أنواع من الرسوم في تشغيل واحد، وعدة صيغ إخراج لكل نوع بصورة مستقلة. إلغاء تحديد النوع يحفظ صيغه؛ وإذا لم تحدد أي نوع يُحلّل المحتوى تلقائيًا.",
     "releaseLink": "اقرأ دليل الترقية",
     "retrievalHeading": "المراجع والدعم",
     "retrievalLead": "إعداد المزوّدين واستكشاف الأخطاء وفهرس مختصر للعملاء الآليين.",
@@ -139,8 +139,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "যাচাইযোগ্য নির্ভরযোগ্যতা",
-    "releaseBody": "বাতিলকরণ, পুনরুদ্ধার ও ইতিহাসের উন্নতি; PowerPoint ও CircuitikZ আউটপুট সংশোধন এবং প্রকৃত সেটিংস ও কমান্ডের সঙ্গে মেলানো নির্দেশিকা।",
+    "releaseHeading": "একাধিক চিত্র, স্বতন্ত্র রপ্তানি",
+    "releaseBody": "একবার চালিয়ে একাধিক চিত্রের ধরন এবং প্রতিটি ধরনের জন্য আলাদাভাবে একাধিক আউটপুট ফরম্যাট বেছে নিন। ধরন অনির্বাচিত করলেও তার ফরম্যাট থাকে; কিছু না বাছলে বিষয়বস্তু স্বয়ংক্রিয়ভাবে বিশ্লেষণ হয়।",
     "releaseLink": "আপগ্রেড নির্দেশিকা পড়ুন",
     "retrievalHeading": "তথ্যসূত্র ও সহায়তা",
     "retrievalLead": "প্রদানকারী প্রস্তুত করুন, সমস্যা পুনরুত্পাদন করুন অথবা স্বয়ংক্রিয় ক্লায়েন্টের জন্য পাঠতালিকা দেখুন।",
@@ -221,8 +221,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Doložitelná spolehlivost",
-    "releaseBody": "Lepší zrušení, obnova a historie, opravené výstupy PowerPoint/CircuitikZ a návody odpovídající skutečným nastavením a příkazům.",
+    "releaseHeading": "Více diagramů, nezávislé exporty",
+    "releaseBody": "Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.",
     "releaseLink": "Přečtěte průvodce upgradem",
     "retrievalHeading": "Reference a pomoc",
     "retrievalLead": "Připravte poskytovatele, reprodukujte problém nebo najděte mapu dokumentace pro automatizované klienty.",
@@ -303,8 +303,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Efterprøvelig pålidelighed",
-    "releaseBody": "Forbedringer i annullering, genoprettelse og historik; rettet PowerPoint-/CircuitikZ-output og vejledninger, der matcher faktiske indstillinger og kommandoer.",
+    "releaseHeading": "Flere diagrammer, uafhængige eksporter",
+    "releaseBody": "Vælg flere diagramtyper i samme kørsel og flere outputformater for hver type. Fravalg bevarer typens formater; uden valgte typer analyseres indholdet automatisk.",
     "releaseLink": "Læs opgraderingsguiden",
     "retrievalHeading": "Referencer og hjælp",
     "retrievalLead": "Forbered udbyderen, reproducér et problem eller find læselisten til automatiserede klienter.",
@@ -385,8 +385,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Zuverlässigkeit mit Nachweisen",
-    "releaseBody": "Verbesserte Abbrüche, Wiederherstellung und Historie, korrigierte native Exporte und Dokumentation zu den tatsächlichen Einstellungen und Befehlen.",
+    "releaseHeading": "Mehrere Diagramme, unabhängige Exporte",
+    "releaseBody": "Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert.",
     "releaseLink": "Aktualisierungsleitfaden lesen",
     "retrievalHeading": "Referenzen und Hilfe",
     "retrievalLead": "Anbieter einrichten, Fehler reproduzieren oder den kompakten Index für automatisierte Clients nutzen.",
@@ -467,8 +467,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Αξιοπιστία με τεκμηρίωση",
-    "releaseBody": "Βελτιωμένη ακύρωση, ανάκτηση και ιστορικό, διορθωμένες εξαγωγές PowerPoint/CircuitikZ και οδηγοί που συμφωνούν με τις πραγματικές ρυθμίσεις και εντολές.",
+    "releaseHeading": "Πολλά διαγράμματα, ανεξάρτητες εξαγωγές",
+    "releaseBody": "Επιλέξτε πολλούς τύπους διαγράμματος σε μία εκτέλεση και πολλές μορφές εξόδου για κάθε τύπο. Η αποεπιλογή διατηρεί τις μορφές του τύπου· χωρίς επιλογές το περιεχόμενο αναλύεται αυτόματα.",
     "releaseLink": "Διαβάστε τον οδηγό αναβάθμισης",
     "retrievalHeading": "Αναφορές και βοήθεια",
     "retrievalLead": "Ρυθμίστε πάροχο, αναπαραγάγετε πρόβλημα ή βρείτε οδηγούς για αυτοματοποιημένους πελάτες.",
@@ -549,8 +549,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Fiabilidad con evidencia",
-    "releaseBody": "Mejoras de cancelación, recuperación e historial, exportaciones nativas corregidas y documentación acorde a ajustes y comandos reales.",
+    "releaseHeading": "Varios diagramas, exportaciones independientes",
+    "releaseBody": "Selecciona varios tipos de diagrama en una ejecución y varios formatos independientes por tipo. Al desmarcar un tipo se conservan sus formatos; sin tipos seleccionados se analiza el contenido automáticamente.",
     "releaseLink": "Leer la guía de actualización",
     "retrievalHeading": "Referencias y ayuda",
     "retrievalLead": "Prepara un proveedor, reproduce un fallo o consulta el índice para clientes automatizados.",
@@ -631,8 +631,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "پایداری قابل بررسی",
-    "releaseBody": "لغو، بازیابی و تاریخچه بهبود یافته‌اند؛ خروجی بومی اصلاح و مستندات با تنظیم و فرمان واقعی هماهنگ شده است.",
+    "releaseHeading": "چند نمودار با خروجی‌های مستقل",
+    "releaseBody": "در یک اجرا چند نوع نمودار و برای هر نوع چند قالب خروجی مستقل انتخاب کنید. برداشتن تیک، قالب‌های آن نوع را حفظ می‌کند؛ بدون انتخاب، محتوا خودکار تحلیل می‌شود.",
     "releaseLink": "راهنمای ارتقا را بخوانید",
     "retrievalHeading": "مرجع و پشتیبانی",
     "retrievalLead": "ارائه‌دهنده را آماده کنید، خطا را بازتولید یا فهرست مطالعهٔ کلاینت خودکار را مرور کنید.",
@@ -713,8 +713,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Todennettava luotettavuus",
-    "releaseBody": "Parannuksia peruutukseen, palautumiseen ja historiaan; PowerPoint- ja CircuitikZ-tulosten korjauksia sekä ohjeet, jotka vastaavat todellisia asetuksia ja komentoja.",
+    "releaseHeading": "Useita kaavioita, erilliset viennit",
+    "releaseBody": "Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti.",
     "releaseLink": "Lue päivitysopas",
     "retrievalHeading": "Viitteet ja tuki",
     "retrievalLead": "Valmistele tarjoaja, toista ongelma tai löydä automaattisten asiakkaiden lukulista.",
@@ -795,8 +795,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Une fiabilité vérifiée",
-    "releaseBody": "Annulation, récupération et historique renforcés, exports natifs corrigés et documentation alignée sur les paramètres et commandes réels.",
+    "releaseHeading": "Plusieurs diagrammes, exports indépendants",
+    "releaseBody": "Sélectionnez plusieurs types de diagramme par exécution et plusieurs formats indépendants pour chacun. Décocher un type conserve ses formats ; sans sélection, le contenu est analysé automatiquement.",
     "releaseLink": "Lire le guide de mise à niveau",
     "retrievalHeading": "Références et assistance",
     "retrievalLead": "Préparez un fournisseur, diagnostiquez un problème ou consultez l’index destiné aux clients automatisés.",
@@ -877,8 +877,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "אמינות שאפשר לאמת",
-    "releaseBody": "שיפורים בביטול, שחזור והיסטוריה; תיקוני פלט PowerPoint/CircuitikZ ותיעוד התואם להגדרות ולפקודות האמיתיות.",
+    "releaseHeading": "תרשימים מרובים, ייצוא נפרד",
+    "releaseBody": "בחרו כמה סוגי תרשימים בהרצה אחת וכמה פורמטים נפרדים לכל סוג. ביטול סימון שומר את הפורמטים של הסוג; ללא בחירה התוכן מנותח אוטומטית.",
     "releaseLink": "קראו את מדריך השדרוג",
     "retrievalHeading": "מקורות ועזרה",
     "retrievalLead": "הכינו ספק, שחזרו תקלה או מצאו רשימת קריאה ללקוחות אוטומטיים.",
@@ -959,8 +959,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "जाँचने योग्य विश्वसनीयता",
-    "releaseBody": "रद्द करने, पुनर्प्राप्ति और इतिहास में सुधार; PowerPoint तथा CircuitikZ के आउटपुट और वास्तविक सेटिंग्स व कमांड से मिलाए गए दस्तावेज़।",
+    "releaseHeading": "कई आरेख, स्वतंत्र निर्यात",
+    "releaseBody": "एक बार में कई आरेख प्रकार चुनें और हर प्रकार के लिए अलग-अलग कई आउटपुट प्रारूप तय करें। प्रकार का चयन हटाने पर उसके प्रारूप सुरक्षित रहते हैं; कोई प्रकार न चुना हो तो सामग्री का अपने-आप विश्लेषण होता है।",
     "releaseLink": "अपग्रेड गाइड पढ़ें",
     "retrievalHeading": "संदर्भ और सहायता",
     "retrievalLead": "प्रदाता तैयार करें, समस्या दोहराएँ या स्वचालित क्लाइंट के लिए पढ़ने की सूची देखें।",
@@ -1041,8 +1041,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Bizonyítékokra épülő megbízhatóság",
-    "releaseBody": "Javított megszakítás, helyreállítás és előzménykezelés; pontosabb PowerPoint/CircuitikZ-export és valódi beállításokat, parancsokat követő útmutatók.",
+    "releaseHeading": "Több diagram, külön exportbeállítások",
+    "releaseBody": "Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.",
     "releaseLink": "Olvassa el a frissítési útmutatót",
     "retrievalHeading": "Hivatkozások és segítség",
     "retrievalLead": "Készítsen elő szolgáltatót, reprodukáljon hibát, vagy keresse meg az automatizált kliensek olvasási térképét.",
@@ -1123,8 +1123,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Keandalan dengan bukti",
-    "releaseBody": "Pembatalan, pemulihan, dan riwayat diperbaiki; keluaran PowerPoint/CircuitikZ dikoreksi; panduan diselaraskan dengan pengaturan dan perintah nyata.",
+    "releaseHeading": "Banyak diagram, ekspor independen",
+    "releaseBody": "Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.",
     "releaseLink": "Baca panduan peningkatan",
     "retrievalHeading": "Sumber dan bantuan",
     "retrievalLead": "Siapkan penyedia, reproduksi masalah, atau temukan peta dokumen untuk alat otomatis.",
@@ -1205,8 +1205,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Affidabilità verificabile",
-    "releaseBody": "Annullamento, recupero e cronologia migliorati, export nativi corretti e guide allineate a impostazioni e comandi reali.",
+    "releaseHeading": "Più diagrammi, esportazioni indipendenti",
+    "releaseBody": "Seleziona più tipi di diagramma in un’esecuzione e più formati indipendenti per ciascun tipo. Deselezionare un tipo conserva i suoi formati; senza selezioni il contenuto viene analizzato automaticamente.",
     "releaseLink": "Leggi la guida di aggiornamento",
     "retrievalHeading": "Riferimenti e supporto",
     "retrievalLead": "Prepara un provider, riproduci un errore o consulta l’indice per client automatizzati.",
@@ -1287,8 +1287,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "検証できる信頼性",
-    "releaseBody": "キャンセル、復旧、履歴操作とネイティブ出力を改善し、実際の既定値と対応コマンドに文書を合わせました。",
+    "releaseHeading": "複数の図表を個別の形式で出力",
+    "releaseBody": "1 回の実行で複数の図表タイプを選び、タイプごとに複数の出力形式を指定できます。選択を解除しても形式の設定は保持されます。すべて解除すると、本文を自動解析します。",
     "releaseLink": "更新ガイドを読む",
     "retrievalHeading": "参照とサポート",
     "retrievalLead": "モデル設定、問題の切り分け、自動化クライアント用の文書索引を確認できます。",
@@ -1369,8 +1369,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "검증할 수 있는 안정성",
-    "releaseBody": "취소·복구·히스토리를 개선하고 네이티브 출력을 수정했으며 실제 기본값과 지원 명령에 맞춰 문서를 정리했습니다.",
+    "releaseHeading": "여러 차트, 독립적인 내보내기",
+    "releaseBody": "한 번에 여러 차트 유형을 선택하고 유형마다 여러 출력 형식을 따로 지정하세요. 유형 선택을 해제해도 형식 설정은 유지됩니다. 모두 해제하면 내용을 자동으로 분석합니다.",
     "releaseLink": "업데이트 안내 읽기",
     "retrievalHeading": "참고와 지원",
     "retrievalLead": "모델을 준비하고 오류를 재현하거나 자동화 클라이언트용 읽기 목록을 확인하세요.",
@@ -1451,8 +1451,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Kebolehpercayaan dengan bukti",
-    "releaseBody": "Pembatalan, pemulihan dan sejarah diperbaik; hasil PowerPoint/CircuitikZ diperbetul; panduan diselaraskan dengan tetapan serta arahan sebenar.",
+    "releaseHeading": "Pelbagai rajah, eksport berasingan",
+    "releaseBody": "Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.",
     "releaseLink": "Baca panduan naik taraf",
     "retrievalHeading": "Rujukan dan bantuan",
     "retrievalLead": "Sediakan penyedia, hasilkan semula masalah atau temui peta dokumen untuk alat automatik.",
@@ -1533,8 +1533,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Controleerbare betrouwbaarheid",
-    "releaseBody": "Verbeterde annulering, herstel en geschiedenis, gecorrigeerde native export en documentatie die aansluit op echte instellingen en opdrachten.",
+    "releaseHeading": "Meerdere diagrammen, onafhankelijke exports",
+    "releaseBody": "Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.",
     "releaseLink": "Lees de upgradegids",
     "retrievalHeading": "Naslag en ondersteuning",
     "retrievalLead": "Stel een provider in, reproduceer een fout of gebruik de compacte index voor geautomatiseerde clients.",
@@ -1615,8 +1615,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Etterprøvbar pålitelighet",
-    "releaseBody": "Forbedringer i avbrudd, gjenoppretting og historikk; rettede PowerPoint-/CircuitikZ-resultater og veiledninger som samsvarer med faktiske innstillinger og kommandoer.",
+    "releaseHeading": "Flere diagrammer, uavhengige eksporter",
+    "releaseBody": "Velg flere diagramtyper i samme kjøring og flere utdataformater for hver type. Når du fjerner avkrysningen, beholdes typens formater. Uten valgte typer analyseres innholdet automatisk.",
     "releaseLink": "Les oppgraderingsguiden",
     "retrievalHeading": "Referanser og hjelp",
     "retrievalLead": "Klargjør leverandøren, gjenskap et problem eller finn leselisten for automatiserte klienter.",
@@ -1697,8 +1697,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Niezawodność, którą można zweryfikować",
-    "releaseBody": "Poprawki anulowania, odzyskiwania i historii; skorygowane wyniki PowerPoint/CircuitikZ oraz instrukcje zgodne z rzeczywistymi ustawieniami i poleceniami.",
+    "releaseHeading": "Wiele diagramów, niezależne eksporty",
+    "releaseBody": "Wybierz wiele typów diagramów w jednym uruchomieniu i osobne zestawy formatów dla każdego typu. Odznaczenie typu zachowuje jego formaty; brak wyboru oznacza automatyczną analizę treści.",
     "releaseLink": "Przeczytaj instrukcję aktualizacji",
     "retrievalHeading": "Materiały i pomoc",
     "retrievalLead": "Przygotuj dostawcę, odtwórz problem lub znajdź listę lektur dla klientów automatycznych.",
@@ -1779,8 +1779,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Fiabilidade apoiada em testes",
-    "releaseBody": "Cancelamento, recuperação e histórico melhorados, exportações nativas corrigidas e documentação alinhada com ajustes e comandos reais.",
+    "releaseHeading": "Vários diagramas, exportações independentes",
+    "releaseBody": "Selecione vários tipos de diagrama numa execução e vários formatos independentes para cada tipo. Desmarcar um tipo conserva os seus formatos; sem seleção, o conteúdo é analisado automaticamente.",
     "releaseLink": "Ler o guia de atualização",
     "retrievalHeading": "Referências e apoio",
     "retrievalLead": "Preparar um fornecedor, reproduzir uma falha ou consultar o índice para clientes automatizados.",
@@ -1861,8 +1861,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Fiabilidade apoiada em testes",
-    "releaseBody": "Cancelamento, recuperação e histórico melhorados, exportações nativas corrigidas e documentação alinhada com ajustes e comandos reais.",
+    "releaseHeading": "Vários diagramas, exportações independentes",
+    "releaseBody": "Selecione vários tipos de diagrama em uma execução e vários formatos independentes para cada tipo. Desmarcar um tipo mantém seus formatos; sem seleção, o conteúdo é analisado automaticamente.",
     "releaseLink": "Ler o guia de atualização",
     "retrievalHeading": "Referências e apoio",
     "retrievalLead": "Preparar um fornecedor, reproduzir uma falha ou consultar o índice para clientes automatizados.",
@@ -1943,8 +1943,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Fiabilitate susținută de dovezi",
-    "releaseBody": "Anulare, recuperare și istoric îmbunătățite, exporturi PowerPoint/CircuitikZ corectate și ghiduri aliniate cu setările și comenzile reale.",
+    "releaseHeading": "Mai multe diagrame, exporturi independente",
+    "releaseBody": "Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.",
     "releaseLink": "Citiți ghidul de actualizare",
     "retrievalHeading": "Referințe și ajutor",
     "retrievalLead": "Pregătiți furnizorul, reproduceți o problemă sau găsiți harta documentelor pentru clienți automatizați.",
@@ -2025,8 +2025,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Проверяемая надёжность",
-    "releaseBody": "Улучшены отмена, восстановление и история; исправлен нативный экспорт, документация согласована с действительными настройками и командами.",
+    "releaseHeading": "Несколько диаграмм, независимый экспорт",
+    "releaseBody": "Выберите несколько типов диаграмм за один запуск и несколько форматов для каждого типа отдельно. Снятие отметки сохраняет форматы типа; без выбранных типов содержимое анализируется автоматически.",
     "releaseLink": "Прочитать об обновлении",
     "retrievalHeading": "Справка и поддержка",
     "retrievalLead": "Настройте провайдера, воспроизведите ошибку или найдите индекс для автоматизированных клиентов.",
@@ -2107,8 +2107,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Verifierbar tillförlitlighet",
-    "releaseBody": "Förbättringar i avbrott, återställning och historik; rättad PowerPoint- och CircuitikZ-utdata samt guider som stämmer med faktiska inställningar och kommandon.",
+    "releaseHeading": "Flera diagram, oberoende exporter",
+    "releaseBody": "Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.",
     "releaseLink": "Läs uppgraderingsguiden",
     "retrievalHeading": "Referenser och hjälp",
     "retrievalLead": "Förbered leverantören, reproducera ett problem eller hitta läslistan för automatiserade klienter.",
@@ -2189,8 +2189,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "ความน่าเชื่อถือที่ตรวจสอบได้",
-    "releaseBody": "ปรับปรุงการยกเลิก การกู้คืน และประวัติ แก้ผลลัพธ์ PowerPoint/CircuitikZ และปรับคู่มือให้ตรงกับการตั้งค่าและคำสั่งจริง",
+    "releaseHeading": "หลายแผนภาพ ส่งออกแยกตามประเภท",
+    "releaseBody": "เลือกแผนภาพหลายประเภทในการทำงานครั้งเดียว และเลือกหลายรูปแบบผลลัพธ์แยกกันสำหรับแต่ละประเภท ยกเลิกการเลือกแล้วค่ารูปแบบยังคงอยู่ หากไม่เลือกเลย ระบบจะวิเคราะห์เนื้อหาอัตโนมัติ",
     "releaseLink": "อ่านคู่มืออัปเกรด",
     "retrievalHeading": "แหล่งอ้างอิงและความช่วยเหลือ",
     "retrievalLead": "เตรียมผู้ให้บริการ ทำซ้ำปัญหา หรือดูรายการอ่านสำหรับไคลเอนต์อัตโนมัติ",
@@ -2271,8 +2271,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Doğrulanabilir güvenilirlik",
-    "releaseBody": "İptal, kurtarma ve geçmiş iyileştirmeleri; düzeltilmiş PowerPoint/CircuitikZ çıktıları ve gerçek ayarlarla komutları izleyen belgeler.",
+    "releaseHeading": "Birden çok diyagram, bağımsız dışa aktarımlar",
+    "releaseBody": "Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.",
     "releaseLink": "Yükseltme rehberini okuyun",
     "retrievalHeading": "Başvuru ve destek",
     "retrievalLead": "Sağlayıcıyı hazırlayın, hatayı tekrarlayın veya otomatik istemciler için okuma listesini bulun.",
@@ -2353,8 +2353,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Надійність із доказами",
-    "releaseBody": "Покращені скасування, відновлення та історія, виправлені експорти PowerPoint/CircuitikZ і посібники, узгоджені зі справжніми параметрами й командами.",
+    "releaseHeading": "Кілька діаграм, незалежний експорт",
+    "releaseBody": "Виберіть кілька типів діаграм за один запуск і кілька форматів для кожного типу окремо. Зняття позначки зберігає формати типу; без вибраних типів вміст аналізується автоматично.",
     "releaseLink": "Прочитайте посібник оновлення",
     "retrievalHeading": "Джерела й допомога",
     "retrievalLead": "Підготуйте провайдера, відтворіть проблему або знайдіть карту документів для автоматизованих клієнтів.",
@@ -2435,8 +2435,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "Độ tin cậy có bằng chứng",
-    "releaseBody": "Cải thiện hủy, khôi phục và lịch sử; sửa đầu ra PowerPoint/CircuitikZ; đồng bộ hướng dẫn với cài đặt và lệnh thực tế.",
+    "releaseHeading": "Nhiều sơ đồ, xuất độc lập",
+    "releaseBody": "Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.",
     "releaseLink": "Đọc hướng dẫn nâng cấp",
     "retrievalHeading": "Nguồn và hỗ trợ",
     "retrievalLead": "Chuẩn bị nhà cung cấp, tái hiện lỗi hoặc tìm bản đồ tài liệu dành cho công cụ tự động.",
@@ -2517,8 +2517,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "有證據的可靠性改進",
-    "releaseBody": "完善取消、復原與歷史互動，修正原生匯出，依實際預設及支援命令整理文件。",
+    "releaseHeading": "多種圖表，獨立匯出",
+    "releaseBody": "一次勾選多種圖表，每種類型獨立選擇多種輸出格式。取消勾選仍保留該類型的格式偏好；全部取消則自動分析原文。",
     "releaseLink": "閱讀升級指南",
     "retrievalHeading": "參考資料與支援",
     "retrievalLead": "查閱模型設定、疑難排解，以及供自動化客戶端使用的閱讀索引。",
@@ -2599,8 +2599,8 @@ export const homeCopyOverrides = {
         "value": "{version}"
       }
     ],
-    "releaseHeading": "有證據的可靠性改進",
-    "releaseBody": "完善取消、復原與歷史互動，修正原生匯出，依實際預設及支援命令整理文件。",
+    "releaseHeading": "多種圖表，獨立匯出",
+    "releaseBody": "一次勾選多種圖表，每種類型獨立選擇多種輸出格式。取消勾選仍保留該類型的格式偏好；全部取消則自動分析原文。",
     "releaseLink": "閱讀升級指南",
     "retrievalHeading": "參考資料與支援",
     "retrievalLead": "查閱模型設定、疑難排解，以及供自動化客戶端使用的閱讀索引。",

@@ -33,6 +33,10 @@ Penyedia aktif bawaan adalah DeepSeek dengan kredensial awal kosong. Memilih pre
 
 **Diagram preview export PPI** bawaan **300 PPI**, rentang **72-600**. Ini memengaruhi rasterisasi PNG; SVG/PDF mempertahankan geometri vektor pada ekspor yang mendukungnya. **Also export complete Mermaid visuals** mengatur berkas pendamping, bukan visibilitas Mermaid dalam pratinjau Drawnix.
 
+Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
+
+Atur folder perantara bersama relatif terhadap Vault, atau kosongkan untuk memakai `notemd_assert/` di samping tiap sumber. Catatan pemulihan, cache render, dan lampiran opsional disimpan di sana. Pertahankan file yang masih dirujuk; perubahan folder hanya berlaku untuk proses baru.
+
 ## 1. Penyedia
 
 Pilih penyedia, masukkan kredensial bila perlu, pertahankan endpoint sesuai protokol, dan pilih model yang dapat diakses. Gunakan **Fetch models** jika didukung, lalu **Uji koneksi**. Berhasil mendaftar model dan menghasilkan respons adalah dua pemeriksaan berbeda.
@@ -54,8 +58,7 @@ Bandingkan menggunakan catatan representatif, ketepatan hasil, latensi, dan harg
 | Terjemahan | Berkas `_<language>.md` di samping sumber; tujuan yang ada dapat ditimpa |
 | Riset | Menambahkan ringkasan ke catatan Markdown aktif |
 | Generasi batch dari judul | Menulis isi dan memindahkan catatan yang memenuhi syarat ke `<folder>_complete` sejajar yang dilaporkan jika tujuan memungkinkan |
-| Pratinjau/ekspor diagram | Pilih sumber/ekspor yang didukung dan periksa tujuan yang dilaporkan |
-
+| Pratinjau/ekspor diagram | File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file. |
 Folder konsep awalnya kosong. `concepts` adalah nama yang dapat dipilih, bukan lokasi bawaan. Ekstraksi mandiri memakai bentuk minimal/penuh yang didukung, bukan mesin variabel templat umum. Lihat [catatan konsep](../features/concept-notes).
 
 Sufiks tambah tautan, folder hasil, sufiks terjemahan, dan tujuan terjemahan adalah pengaturan terpisah. Periksa tujuan sebelum mengulang penulisan. Pesan pemulihan/konflik menunjukkan hasil yang perlu diperiksa; pembatalan tidak mengembalikan penulisan selesai.

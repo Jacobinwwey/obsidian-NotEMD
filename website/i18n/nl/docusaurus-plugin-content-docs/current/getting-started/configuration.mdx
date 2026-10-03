@@ -27,6 +27,10 @@ DeepSeek is de standaardprovider, met lege inloggegevens. Een profiel maakt geen
 
 **Diagram preview export PPI** is standaard 300, geldig van 72–600 en beïnvloedt alleen PNG-rastering. SVG/PDF behouden ondersteunde vectorgeometrie. **Also export complete Mermaid visuals** regelt bijbestanden, niet Mermaid-zichtbaarheid in Drawnix.
 
+Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
+
+Stel een gedeelde Vault-relatieve map voor tussenbestanden in, of laat het veld leeg voor `notemd_assert/` naast elke bron. Hier staan herstelgegevens, rendercaches en optionele bijlagen. Bewaar bestanden waarnaar nog wordt verwezen; een mapwijziging geldt alleen voor nieuwe uitvoeringen.
+
 ## 1. Provider
 
 Kies passend protocol/endpoint, benodigde sleutel en beschikbaar model. Gebruik de modellijst waar ondersteund en test daarna generatie. Lokaal vereist model plus server; cloud en gateways ontvangen taakinhoud. Controleer ook providers per taak voor privémateriaal.
@@ -44,8 +48,7 @@ Kies passend protocol/endpoint, benodigde sleutel en beschikbaar model. Gebruik 
 | Vertaling | Apart `_<language>.md`; bestaande uitvoer kan worden overschreven |
 | Onderzoek | Onderzoekssamenvatting toevoegen aan actieve Markdown |
 | Batchgeneratie vanuit titels | Inhoud schrijven en geschikte notities naar aangrenzende `<folder>_complete` verplaatsen als de bestemming dat toestaat |
-| Diagramvoorbeeld/export | Ondersteunde bron/visuele export kiezen en gemeld pad controleren |
-
+| Diagramvoorbeeld/export | Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven. |
 De conceptmap begint leeg. `concepts` is een keuze, geen standaard. Extractie gebruikt minimale/volledige vormen, geen algemene sjabloonvariabelen. [Concepten](../features/concept-notes). Verwerkingsmappen, linksuffixen, vertaalsuffixen en vertaalpaden zijn aparte instellingen. Controleer bestaande doelen en herstelconflicten; annuleren wist voltooide uitvoer niet.
 
 ## 4. Talen

@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Sơ đồ
 
-<TLDR>Chọn **loại sơ đồ cần dùng**, rồi chọn **định dạng nguồn có thể chỉnh sửa**. Xem toàn bộ kết quả trong Obsidian, gồm bảng Drawnix và các hình Mermaid nhúng, rồi xuất từng bảng thành SVG, PNG hoặc PDF.</TLDR>
+<TLDR>
+Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.
+</TLDR>
 
 ## Phân biệt ba lựa chọn
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Định dạng nguồn | Tệp có thể sửa hoặc tái dùng mà Notemd tạo | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Định dạng xuất | Ảnh hoặc tài liệu để chia sẻ | SVG, PNG, PDF |
 
-Draw.io và Drawnix là **định dạng nguồn**, không phải loại sơ đồ. CircuitikZ là nguồn dành cho mạch. Cùng bản xem trước có thể xuất nhiều định dạng hình, nên chọn CircuitikZ không giới hạn ở SVG.
+HTML sơ đồ chứa hình có thể thu phóng; HTML tóm tắt có cấu trúc chứa văn bản, cấu trúc và trích dẫn. HTML/SVG có thể chỉnh sửa là tên bộ kết xuất, không phải trình sửa trên web. Dùng nguồn gốc để chỉnh sửa. Xuất bản trình bày, gồm PPTX và MP4, có cài đặt và thư viện phụ thuộc riêng.
 
 ## Chọn định dạng nguồn
 
@@ -38,17 +40,21 @@ Draw.io và Drawnix là **định dạng nguồn**, không phải loại sơ đ�
 | Drawnix | Chỉnh sửa dạng bảng trắng hoặc vẽ tay | `.drawnix` |
 | CircuitikZ | Mạch điện và transistor có cấu trúc | `.tex` |
 
-Giữ **Preferred source format** ở **Auto** nếu không cần trình sửa cụ thể. Notemd chọn định dạng tương thích với loại sơ đồ.
+Định dạng được hỗ trợ xuất hiện trước; lựa chọn không tương thích vẫn hiển thị nhưng bị vô hiệu hóa. Có thể xóa yêu cầu không hoạt động đã lưu. Mỗi loại giữ định dạng riêng. Nếu không định dạng nào dùng được, hệ thống thử nguồn mặc định của bộ kết xuất đang dùng và báo yêu cầu không khả dụng.
 
 ## Tạo và xuất sơ đồ
 
 1. Mở nguồn hỗ trợ. Muốn trực quan hóa một đoạn, đặt nó trong ghi chú riêng; chọn văn bản không thu hẹp tác vụ dựa trên tệp.
-2. Chọn **diagram type** trong cài đặt hoặc để **Auto-detect**.
-3. Chọn **source format** hoặc **Auto**. Chọn **Drawnix** cho bản đồ kiến thức hỗ trợ có nút sửa được và hình Mermaid nhúng.
+2. Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.
+3. Ô đánh dấu đưa loại vào quá trình tạo. Nhấp tên để chọn loại và sửa định dạng. Di chuột hoặc đặt tiêu điểm bàn phím sẽ đổi bản xem trước mà không lưu cài đặt. Escape đóng menu và trả lại tiêu điểm.
 4. Chạy **Tao so do** từ thanh bên hoặc bảng lệnh.
-5. Xem kết quả. Nhiều bảng giữ Drawnix và Mermaid theo thứ tự nguồn trong một khung cuộn dọc; bảng Mermaid dùng chiều cao dựng thực tế thay vì bị cắt.
-6. Chọn **Xuất SVG**, **Xuất PNG**, **Export PDF** trên một bảng, hoặc xuất ảnh cấp trên cho tất cả. Với nhiều bảng, chọn thư mục nguồn hoặc đích tương đối với kho; mỗi bảng có tên tệp xác định, lỗi riêng không dừng toàn bộ.
-7. Dùng **Lưu tệp nguồn** khi cần sản phẩm chỉnh sửa được.
+5. Tệp đã chọn tự động xuất cạnh ghi chú nguồn hoặc trực tiếp vào thư mục đầu ra đã đặt. Tên chứa loại, chẳng hạn `topic_drawnix.pdf` và `topic_flowchart.svg`. Khi trùng tên, thêm `-2`, `-3`… mà không ghi đè tệp.
+6. Xem kết quả. Nhiều bảng giữ Drawnix và Mermaid theo thứ tự nguồn trong một khung cuộn dọc; bảng Mermaid dùng chiều cao dựng thực tế thay vì bị cắt.
+7. Chọn **Xuất SVG**, **Xuất PNG**, **Export PDF** trên một bảng, hoặc xuất ảnh cấp trên cho tất cả. Với nhiều bảng, chọn thư mục nguồn hoặc đích tương đối với kho; mỗi bảng có tên tệp xác định, lỗi riêng không dừng toàn bộ. Dùng **Lưu tệp nguồn** khi cần sản phẩm chỉnh sửa được.
+
+Đặt thư mục trung gian dùng chung bằng đường dẫn tương đối trong Vault, hoặc để trống để dùng `notemd_assert/` cạnh từng nguồn. Nơi này lưu bản ghi khôi phục, bộ nhớ đệm kết xuất và tệp đính kèm tùy chọn. Giữ tệp còn được tham chiếu; đổi thư mục chỉ tác động lần chạy mới.
+
+Các loại được tạo tuần tự. Một loại lỗi không chặn các loại khác; hủy sẽ dừng loại đang chờ và giữ tệp đã hoàn tất. Thử xuất lại từ xem trước hoặc lịch sử mà không gửi yêu cầu mới đến mô hình. Lỗi tạo cần tạo lại loại đó. Bản ghi v1/v2 vẫn đọc được.
 
 Menu Export có **Xuất SVG**, **Xuất PNG**, **Export PDF** cho hình đang xem. Đầu mỗi bảng có cùng hành động cho một hình Mermaid/Drawnix; không cần biến cả bản xem lớn thành một ảnh duy nhất.
 
@@ -74,7 +80,7 @@ Khi sản phẩm Drawnix chứa Mermaid, Notemd làm sạch SVG đã dựng và 
 
 Bản xem là một vùng cuộn: canvas Drawnix trước, từng bảng Mermaid sau theo thứ tự nguồn. Đóng và mở lại lịch sử dựng cùng danh sách bảng, kích thước và hành động xuất.
 
-Bản xem chừa chỗ cho tiêu đề, tóm tắt và nhãn quan hệ, định tuyến đường nối tĩnh quanh nút. Nếu không tạo được bố cục hỗ trợ dễ đọc, sinh báo lỗi định dạng. Mũi tên giữa nhánh được lưu như quan hệ tĩnh; bằng chứng hiện tại không hỗ trợ cam kết gắn sau khi đổi vị trí nút trong Drawnix. Kiểm tra trong trình sửa sẽ dùng.
+Drawnix hiển thị tối đa sáu quan hệ cốt lõi có hướng và nhãn, tối đa ba quan hệ mỗi nút. Quan hệ bị lược bỏ vẫn nằm trong siêu dữ liệu. Chữ trong khung hiển thị trong PDF, kể cả từ SVG cũ trong bộ nhớ đệm. Mũi tên giữa các nhánh là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
 
 ## Giới hạn xuất gốc
 
@@ -98,7 +104,7 @@ Chọn rõ loại thay vì Auto-detect. Với mạch, chọn **Circuit diagram**
 
 ### Nguồn không phù hợp
 
-Đưa về **Auto** hoặc chọn định dạng dành cho loại đó. CircuitikZ dành mạch; Draw.io/Drawnix dành sơ đồ cấu trúc được hỗ trợ.
+Định dạng được hỗ trợ xuất hiện trước; lựa chọn không tương thích vẫn hiển thị nhưng bị vô hiệu hóa. Có thể xóa yêu cầu không hoạt động đã lưu. Mỗi loại giữ định dạng riêng. Nếu không định dạng nào dùng được, hệ thống thử nguồn mặc định của bộ kết xuất đang dùng và báo yêu cầu không khả dụng.
 
 ### Không thấy menu Export
 

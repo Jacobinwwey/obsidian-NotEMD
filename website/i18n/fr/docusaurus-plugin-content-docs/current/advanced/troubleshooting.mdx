@@ -68,7 +68,9 @@ Les écritures terminées restent et les opérations déjà acceptées peuvent f
 
 ### Diagramme ou export natif en échec
 
-Choisissez une combinaison type/source compatible. Lancez le contrôle de l’environnement de diapositives ou CircuitikZ et lisez les erreurs. Si seul le texte existe, utilisez l’outil externe approprié. Voir les [diagrammes](../features/diagrams).
+Les types sont générés successivement. Un échec ne bloque pas les autres ; l’annulation arrête les types en attente et conserve les fichiers terminés. Relancez les exports depuis l’aperçu ou l’historique sans nouvelle requête au modèle. Un échec de génération nécessite de régénérer ce type. Les enregistrements v1/v2 restent lisibles.
+
+Le HTML du diagramme contient un graphique avec zoom ; le HTML de synthèse structurée contient texte, structure et références. HTML/SVG éditable désigne un moteur de rendu, pas un éditeur web. Utilisez la source native pour modifier le diagramme. Les présentations, dont PPTX et MP4, gardent leurs réglages et dépendances distincts. [Manuel des diagrammes](../features/diagrams).
 
 ## Signaler un problème
 

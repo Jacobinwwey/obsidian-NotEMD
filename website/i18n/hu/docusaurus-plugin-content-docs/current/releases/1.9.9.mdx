@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Több diagram, külön exportbeállítások"
+description: "Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Több diagram, külön exportbeállítások
+
+<TLDR>
+Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
+</TLDR>
+
+## Több diagram, külön exportbeállítások
+
+A jelölőnégyzet kapcsolja be a típust. A névre kattintva kijelölheti és módosíthatja a formátumait. Az egérmutató vagy a billentyűzetfókusz mentés nélkül váltja az előnézetet. Az Escape bezárja a menüt és visszaadja a fókuszt.
+
+A támogatott formátumok jelennek meg először; az inkompatibilisek láthatók, de letiltottak. A meglévő inaktív kérések eltávolíthatók. Minden típus saját formátumokat használ. Ha egyik sem használható, a rendszer megpróbálja az aktuális megjelenítő alapértelmezett forrásformátumát, és jelzi az elérhetetlen kéréseket.
+
+A diagram-HTML nagyítható grafikát, a strukturált összefoglaló HTML szöveget, szerkezetet és hivatkozásokat tartalmaz. A szerkeszthető HTML/SVG egy megjelenítő neve, nem webes szerkesztő. Szerkesztéshez használja a natív forrást. A prezentációk, köztük a PPTX és MP4 exportja külön beállításokat és függőségeket használ.
+
+A Drawnix legfeljebb hat feliratozott, irányított fő kapcsolatot mutat, csomópontonként legfeljebb hármat. A kihagyott kapcsolatok megmaradnak a metaadatokban. A keretes szöveg régi SVG-gyorsítótárból is látszik PDF-ben. Az ágak közötti nyilak statikusak, és átrendezéskor leválhatnak a Drawnixban.
+
+## Fájlok és helyreállítás
+
+A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás.
+
+Állítson be közös, Vault-relatív mappát a köztes fájloknak, vagy hagyja üresen a mezőt a források melletti `notemd_assert/` használatához. Itt tárolódnak a helyreállítási rekordok, gyorsítótárak és választható mellékletek. A hivatkozott fájlokat őrizze meg; a módosítás csak új futtatásokra érvényes.
+
+A típusok egymás után készülnek. Egy hiba nem állítja le a többit; a megszakítás leállítja a várakozó típusokat és megőrzi a kész fájlokat. Az export az előnézetből vagy előzményekből új modellkérés nélkül ismételhető. Generálási hiba esetén a típust újra kell generálni. A v1/v2 rekordok olvashatók maradnak.
+
+## Frissítés
+
+Állítsa le a feladatokat és mentse a Vault tartalmát. Ugyanabból az 1.9.9 kiadásból telepítse a `main.js`, `manifest.json` és `styles.css` fájlokat, őrizze meg beállításait és fájljait, majd töltse újra az Obsidiant. Nagy köteg előtt ellenőrizzen egy jegyzetet. A régi beállítások szerkesztéskor migrálódnak. A fordítások közvetlenül készültek, fordítási API és LM Studio nélkül.
+
+## Hivatkozások
+
+- [Diagramkézikönyv](../features/diagrams)
+- [Kiadás és letöltések](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

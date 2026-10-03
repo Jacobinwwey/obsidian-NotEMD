@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Börja här
 
 | Läsare | Ingång | Mål |
@@ -19,13 +19,13 @@
 | Utvecklare | [Utvecklarguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/developers/overview) | Bygg, testa och utöka befintliga kontrakt |
 | Agent | [Agentguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/agents/overview) | Hitta fyra stödda exportkommandon |
 
-**Version:** 1.9.8
+**Version:** 1.9.9
 
-- **Avbrytning och återställning:** avbrytning gäller även under schemaläggning och nya försök och stoppar sena skrivningar från forskning och översättning. Färdiga resultat bevaras och återställningskonflikter rapporteras.
-- **Historik och export:** söktext och tangentbordsfokus bevaras. Avskiljare under sammanfogade PowerPoint-celler samt CircuitikZ-ledningar och etiketter har rättats. Lokal sökning i grupper använder en enhetlig ögonblicksbild.
-- **Utgivning och dokumentation:** källornas ursprung och hämtade filer kontrolleras; läsarna får egna ingångar och direkt skrivna översättningar.
+- Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.
+- Valda filer exporteras automatiskt bredvid källanteckningen eller direkt till den angivna mappen. Namnen innehåller typen, exempelvis `topic_drawnix.pdf` och `topic_flowchart.svg`. Vid namnkonflikter läggs `-2`, `-3` och så vidare till utan överskrivning.
+- Drawnix visar högst sex namngivna riktade kärnrelationer, högst tre per nod. Utelämnade relationer finns kvar i metadata. Text i rutor syns i PDF även från äldre cachade SVG-filer. Pilar mellan grenar är statiska och kan lossna när noder flyttas i Drawnix.
 
-De 36 leverantörsförvalen och 33 körbara diagramtyperna fanns redan i 1.9.7. [Uppgraderingsguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/releases/1.9.8) · [Kontrollera offentlig utgåva](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+De 36 leverantörsförvalen och 33 körbara diagramtyperna fanns redan i 1.9.7. [Uppgraderingsguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/releases/1.9.9) · [Kontrollera offentlig utgåva](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Drawnix-pilar mellan grenar förblir statiska efter omflyttning. Mermaid/SVG i PPTX kan ersättas med bilder. Avbrytning ångrar inte sparade ändringar och garanterar inte att fjärrgenerering eller debitering stoppas. Fysiska mobila enheter och Obsidian 0.15.0 är inte verifierade.
 
@@ -714,7 +714,7 @@ MIT License - Se filen [LICENSE](LICENSE) för detaljer.
 ---
 
 
-*Notemd v1.9.8 - Förbättra din Obsidian-kunskapsgraf med AI.*
+*Notemd v1.9.9 - Förbättra din Obsidian-kunskapsgraf med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -746,7 +746,12 @@ Notemd-inställningssidan erbjuder suddjupssökning som känner till fält, navi
 - Diagramhistoriken lagras i Vault-scope, ordnad nyaste först, sökbart och paginerad i grupper på 20. Att ta bort en historikpost tar inte bort de genererade filerna.
 - Export av diagramförhandsvisning med PPI standardiseras till 300 och accepterar värden mellan 72 och 600. Det styr endast rasteriseringen av PNG; SVG och PDF förblir vektorbaserade.
 - Export av kompletta Mermaid-visuella kan valfritt skriva ut Mermaid-källkoden, SVG samt manifestfiler; Mermaid förblir tillgängligt i Drawnix-förhandsvisningar även när det är inaktiverat.
-- Föredragna diagramtyp och föredragna källformat är separata val.
+- Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt. Kryssrutan tar med typen. Klicka på namnet för att välja den och ändra formaten. Pekarhovring eller tangentbordsfokus växlar förhandsvisning utan att spara inställningar. Escape stänger menyn och återställer fokus.
+- Valda filer exporteras automatiskt bredvid källanteckningen eller direkt till den angivna mappen. Namnen innehåller typen, exempelvis `topic_drawnix.pdf` och `topic_flowchart.svg`. Vid namnkonflikter läggs `-2`, `-3` och så vidare till utan överskrivning.
+- Ange en gemensam Vault-relativ mapp för mellanfiler, eller lämna tomt för `notemd_assert/` bredvid varje källa. Där lagras återställningsposter, renderingscache och valfria bilagor. Behåll filer som fortfarande refereras; mappändringar gäller bara nya körningar.
+- Diagram-HTML innehåller en zoombar bild; HTML för strukturerad sammanfattning innehåller text, struktur och belägg. Redigerbar HTML/SVG är en renderare, inte en webbredigerare. Använd den ursprungliga källfilen för redigering. Presentationsexport, inklusive PPTX och MP4, har separata inställningar och beroenden.
+- Typer genereras i följd. Ett fel stoppar inte de andra; avbrytning stoppar väntande typer och behåller färdiga filer. Försök exportera igen via förhandsvisning eller historik utan en ny modellförfrågan. Genereringsfel kräver att typen genereras igen. Återställningsposter v1/v2 kan fortfarande läsas.
+- Drawnix visar högst sex namngivna riktade kärnrelationer, högst tre per nod. Utelämnade relationer finns kvar i metadata. Text i rutor syns i PDF även från äldre cachade SVG-filer. Pilar mellan grenar är statiska och kan lossna när noder flyttas i Drawnix.
 - Desktop-användare kan öppna det valfria CircuitikZ-nativa kompileringsmiljön för att återanvända systemets Tectonic/pdflatex, välja en anpassad kompilerare eller explicit installera den fixade, hanterade Tectonic-körmiljön. Förhandsvisning, SVG, PNG samt export av förhandsvisning med PDF kräver inget LaTeX.
 - Avancerad val av batchfiler möjliggör sparade valprofiler och regelförhandsvisningar.
 - En saknad batchmålsmapp kan skapas efter bekräftelse, med möjlighet att komma ihåg den automatiska skapandet för framtida saknade mappar.

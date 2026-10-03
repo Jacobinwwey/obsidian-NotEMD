@@ -27,6 +27,10 @@ Standardleverandøren er DeepSeek uten påloggingsopplysninger. En profil oppret
 
 **Diagram preview export PPI** starter på 300, område 72–600, og påvirker bare PNG. SVG/PDF bevarer støttet vektorgeometri. **Also export complete Mermaid visuals** styrer følgefiler, ikke om Mermaid vises i Drawnix-forhåndsvisningen.
 
+Velg flere diagramtyper i samme kjøring og flere utdataformater for hver type. Når du fjerner avkrysningen, beholdes typens formater. Uten valgte typer analyseres innholdet automatisk.
+
+Angi en felles Vault-relativ mappe for mellomfiler, eller la feltet stå tomt for `notemd_assert/` ved hver kilde. Her lagres gjenopprettingsposter, rendringscache og valgfrie vedlegg. Behold filer som fortsatt refereres; endringer gjelder bare nye kjøringer.
+
 ## 1. Leverandør
 
 Angi endepunkt med rett protokoll, nødvendig nøkkel og tilgjengelig modell. Liste og vellykket generering er to tester. Klargjør lokal server/modell; sky/gateway mottar innhold. Kontroller også oppgavespesifikke ruter før privat materiale.
@@ -44,8 +48,7 @@ Angi endepunkt med rett protokoll, nødvendig nøkkel og tilgjengelig modell. Li
 | Oversettelse | Ved siden av som `_<language>.md`; eksisterende mål kan overskrives |
 | Undersøkelse | Oppsummering legges til i aktiv Markdown |
 | Batchgenerering fra titler | Skriver egnede kilder og flytter til tilstøtende `<folder>_complete` hvis målet tillater det |
-| Diagramforhåndsvisning/eksport | Velg støttet kilde eller visuell eksport og kontroller rapportert sti |
-
+| Diagramforhåndsvisning/eksport | Valgte filer eksporteres automatisk ved siden av kildenotatet eller rett til den angitte utdatamappen. Navnene inneholder typen, for eksempel `topic_drawnix.pdf` og `topic_flowchart.svg`. Navnekollisjoner får `-2`, `-3` osv. uten å overskrive filer. |
 Begrepsmappen er tom fra start; `concepts` er et eksempel. Selvstendige notater har minimal/full form, ingen generell malmotor. [Begreper](../features/concept-notes). Behandling og oversettelse har egne suffikser/mapper. Kontroller mål og gjenopprettingskonflikter; avbrudd angrer ikke ferdige skrivninger.
 
 ## 4. Språk

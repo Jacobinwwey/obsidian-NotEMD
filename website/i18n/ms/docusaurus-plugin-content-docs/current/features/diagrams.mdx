@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Rajah
 
-<TLDR>Pilih **jenis rajah yang diperlukan**, kemudian **format sumber boleh sunting**. Semak hasil lengkap dalam Obsidian, termasuk papan Drawnix dan visual Mermaid terbenam, lalu eksport setiap panel sebagai SVG, PNG atau PDF.</TLDR>
+<TLDR>
+Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.
+</TLDR>
 
 ## Fahami tiga pilihan
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Format sumber | Fail boleh sunting atau guna semula yang dicipta Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Format eksport | Imej atau dokumen untuk perkongsian | SVG, PNG, PDF |
 
-Draw.io dan Drawnix ialah **format sumber**, bukan jenis rajah. CircuitikZ direka untuk litar. Pratonton sama boleh dieksport ke beberapa format visual; memilih CircuitikZ tidak mengehadkan eksport kepada SVG.
+HTML rajah mengandungi grafik yang boleh dizum; HTML ringkasan berstruktur mengandungi teks, struktur dan rujukan. HTML/SVG boleh sunting ialah nama pemapar, bukan penyunting web. Gunakan sumber asal untuk menyunting. Eksport persembahan, termasuk PPTX dan MP4, mengekalkan tetapan serta kebergantungan berasingan.
 
 ## Pilih format sumber
 
@@ -38,17 +40,21 @@ Draw.io dan Drawnix ialah **format sumber**, bukan jenis rajah. CircuitikZ direk
 | Drawnix | Suntingan gaya lukisan tangan atau papan putih | `.drawnix` |
 | CircuitikZ | Litar elektrik dan transistor berstruktur | `.tex` |
 
-Biarkan **Preferred source format** pada **Auto** jika tiada editor tertentu diperlukan. Notemd memilih format serasi dengan jenis rajah.
+Format yang disokong dipaparkan dahulu; pilihan tidak serasi kekal kelihatan tetapi dinyahdayakan. Permintaan tidak aktif yang sedia ada boleh dibuang. Setiap jenis mempunyai format sendiri. Jika semuanya tidak boleh digunakan, sumber lalai pemapar aktif dicuba dan permintaan tidak tersedia dilaporkan.
 
 ## Jana dan eksport rajah
 
 1. Buka nota sumber disokong. Untuk satu petikan, letakkan dalam nota berasingan; pilihan teks tidak mengehadkan tindakan berasaskan fail.
-2. Dalam tetapan rajah, pilih **diagram type** atau **Auto-detect**.
-3. Pilih **source format** atau **Auto**. Pilih **Drawnix** untuk peta pengetahuan disokong dengan nod boleh sunting dan Mermaid terbenam.
+2. Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.
+3. Kotak semak menyertakan jenis. Klik namanya untuk memilih dan mengubah format. Menghalakan penuding atau fokus papan kekunci menukar pratonton tanpa menyimpan tetapan. Escape menutup menu dan mengembalikan fokus.
 4. Jalankan **Generate diagram** melalui bar sisi atau palet arahan.
-5. Semak pratonton. Papan Drawnix dan semua panel Mermaid tersusun mengikut sumber dalam satu kawasan tatal menegak; panel Mermaid menggunakan ketinggian terpapar tanpa dipotong.
-6. Pilih **Export SVG**, **Export PNG** atau **Export PDF** pada panel untuk satu visual, atau eksport imej peringkat atas untuk semua panel. Bagi beberapa panel, pilih folder sumber atau folder tersuai relatif kepada Vault. Satu fail deterministik ditulis setiap panel dan proses diteruskan selepas kegagalan individu.
-7. Gunakan **Save source file** jika artifak boleh sunting diperlukan.
+5. Fail terpilih dieksport secara automatik di sebelah nota sumber atau terus ke folder output yang ditetapkan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Konflik nama menambah `-2`, `-3` dan seterusnya tanpa menulis ganti fail.
+6. Semak pratonton. Papan Drawnix dan semua panel Mermaid tersusun mengikut sumber dalam satu kawasan tatal menegak; panel Mermaid menggunakan ketinggian terpapar tanpa dipotong.
+7. Pilih **Export SVG**, **Export PNG** atau **Export PDF** pada panel untuk satu visual, atau eksport imej peringkat atas untuk semua panel. Bagi beberapa panel, pilih folder sumber atau folder tersuai relatif kepada Vault. Satu fail deterministik ditulis setiap panel dan proses diteruskan selepas kegagalan individu. Gunakan **Save source file** jika artifak boleh sunting diperlukan.
+
+Tetapkan folder perantaraan bersama relatif kepada Vault, atau kosongkan untuk menggunakan `notemd_assert/` di sebelah setiap sumber. Rekod pemulihan, cache pemaparan dan lampiran pilihan disimpan di situ. Kekalkan fail yang masih dirujuk; perubahan folder hanya terpakai pada pelaksanaan baharu.
+
+Jenis dijana mengikut turutan. Kegagalan satu jenis tidak menyekat yang lain; pembatalan menghentikan jenis menunggu dan mengekalkan fail siap. Cuba semula eksport melalui pratonton atau sejarah tanpa permintaan model baharu. Kegagalan penjanaan memerlukan jenis itu dijana semula. Rekod v1/v2 masih boleh dibaca.
 
 Menu Export menawarkan **Export SVG**, **Export PNG** dan **Export PDF** bagi pratonton semasa. Pengepala setiap panel menawarkan tindakan sama untuk satu visual Mermaid/Drawnix, jadi pratonton besar tidak perlu menjadi satu imej yang sukar diubah.
 
@@ -74,7 +80,7 @@ Imej terbenam yang diselesaikan menerima pratonton SVG berasaskan data apabila b
 
 Pratonton ialah satu kawasan tatal: kanvas Drawnix dahulu, kemudian panel Mermaid mengikut susunan sumber. Membuka semula entri sejarah memulihkan senarai panel, dimensi dan tindakan eksport yang sama.
 
-Pratonton menyediakan ruang tajuk, ringkasan dan label hubungan serta menghalakan penyambung statik mengelilingi nod. Permintaan yang tidak dapat menghasilkan susun atur boleh baca disokong melaporkan ralat format. Anak panah rentas cabang disirikan sebagai hubungan statik; keterikatan selepas nod disusun semula dalam Drawnix belum disokong bukti semasa. Periksa artifak dalam editor sasaran.
+Drawnix memaparkan sehingga enam hubungan teras berarah dan berlabel, maksimum tiga bagi setiap nod. Hubungan yang digugurkan kekal dalam metadata. Teks dalam kotak kelihatan dalam PDF, termasuk daripada cache SVG lama. Anak panah antara cabang adalah statik dan mungkin terpisah selepas susunan semula dalam Drawnix.
 
 ## Batas eksport natif
 
@@ -98,7 +104,7 @@ Pilih jenis secara jelas, bukan Auto-detect. Untuk litar, pilih **Circuit diagra
 
 ### Format sumber tidak sesuai
 
-Kembalikan ke **Auto** atau pilih format bagi jenis tersebut. CircuitikZ untuk litar; Draw.io/Drawnix untuk rajah berstruktur disokong.
+Format yang disokong dipaparkan dahulu; pilihan tidak serasi kekal kelihatan tetapi dinyahdayakan. Permintaan tidak aktif yang sedia ada boleh dibuang. Setiap jenis mempunyai format sendiri. Jika semuanya tidak boleh digunakan, sumber lalai pemapar aktif dicuba dan permintaan tidak tersedia dilaporkan.
 
 ### Menu Export tiada
 

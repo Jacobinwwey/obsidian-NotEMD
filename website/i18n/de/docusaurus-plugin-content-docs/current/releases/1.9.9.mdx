@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Mehrere Diagramme, unabhängige Exporte"
+description: "Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Mehrere Diagramme, unabhängige Exporte
+
+<TLDR>
+Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert.
+</TLDR>
+
+## Mehrere Diagramme, unabhängige Exporte
+
+Das Kontrollkästchen nimmt einen Typ auf. Ein Klick auf den Namen wählt ihn aus und öffnet seine Formate. Darüberfahren oder Tastaturfokus wechselt die Vorschau, ohne Einstellungen zu speichern. Escape schließt das Menü und setzt den Fokus zurück.
+
+Unterstützte Formate stehen zuerst; inkompatible bleiben sichtbar und deaktiviert. Bestehende inaktive Anforderungen lassen sich entfernen. Die Formate gehören jeweils zu ihrem Diagrammtyp. Ist keines nutzbar, wird das Standardquellformat des verwendeten Renderers versucht; nicht verfügbare Anforderungen werden gemeldet.
+
+Diagramm-HTML enthält eine zoombare Grafik; strukturiertes Zusammenfassungs-HTML enthält Text, Struktur und Belege. Editierbares HTML/SVG bezeichnet einen Renderer, keinen Webeditor. Zum Bearbeiten dient die native Quelldatei. Präsentationsexporte einschließlich PPTX und MP4 behalten eigene Einstellungen und Abhängigkeiten.
+
+Drawnix zeigt höchstens sechs beschriftete zentrale gerichtete Beziehungen, maximal drei je Knoten. Ausgelassene Beziehungen bleiben in den Metadaten. Eingerahmter Text bleibt im PDF sichtbar, auch bei älteren SVG-Caches. Zweigübergreifende Pfeile sind statisch und können sich nach einer Neuanordnung in Drawnix lösen.
+
+## Dateien und Wiederherstellung
+
+Ausgewählte Dateien werden automatisch neben der Quellnotiz oder direkt im konfigurierten Ausgabeordner gespeichert. Der Name enthält den Typ, etwa `topic_drawnix.pdf` oder `topic_flowchart.svg`. Bei Kollisionen folgen `-2`, `-3` usw.; vorhandene Dateien werden nicht überschrieben.
+
+Für Zwischendateien lässt sich ein gemeinsamer Vault-relativer Ordner festlegen. Ein leeres Feld verwendet `notemd_assert/` neben jeder Quelle. Dort liegen Wiederherstellungsprotokolle, Render-Caches und optionale Anhänge. Weiterhin referenzierte Dateien behalten; Ordneränderungen gelten nur für neue Durchläufe.
+
+Typen werden nacheinander erzeugt. Ein Fehler blockiert die anderen nicht. Abbrechen stoppt ausstehende Typen und erhält fertige Dateien. Exporte lassen sich in Vorschau oder Verlauf ohne neue Modellanfrage wiederholen. Bei einem Generierungsfehler muss dieser Typ neu erzeugt werden. v1/v2-Protokolle bleiben lesbar.
+
+## Aktualisieren
+
+Stoppe Aufgaben und sichere den Vault. Installiere `main.js`, `manifest.json` und `styles.css` aus derselben Release 1.9.9, behalte Einstellungen und Dateien und lade Obsidian neu. Prüfe vor großen Stapeln eine Notiz. Alte Präferenzen werden beim Bearbeiten migriert. Übersetzungen wurden direkt verfasst, ohne Übersetzungs-API oder LM Studio.
+
+## Referenzen
+
+- [Diagrammhandbuch](../features/diagrams)
+- [Version und Downloads](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

@@ -27,6 +27,10 @@ Początkowym dostawcą jest DeepSeek bez danych uwierzytelniających. Wybranie p
 
 **Diagram preview export PPI** zaczyna od 300, zakres 72–600, i wpływa wyłącznie na PNG. SVG/PDF zachowują obsługiwaną geometrię wektorową. **Also export complete Mermaid visuals** steruje plikami towarzyszącymi, nie widocznością Mermaid w podglądzie Drawnix.
 
+Wybierz wiele typów diagramów w jednym uruchomieniu i osobne zestawy formatów dla każdego typu. Odznaczenie typu zachowuje jego formaty; brak wyboru oznacza automatyczną analizę treści.
+
+Ustaw wspólny folder pośredni względem Vault albo pozostaw pole puste, aby używać `notemd_assert/` obok każdego źródła. Trafiają tam rekordy odzyskiwania, pamięć podręczna renderowania i opcjonalne załączniki. Zachowaj nadal używane pliki; zmiana dotyczy tylko nowych uruchomień.
+
 ## 1. Dostawca
 
 Podaj endpoint właściwego protokołu, potrzebny klucz i dostępny model. Lista modeli i udane generowanie są odrębnymi testami. Przygotuj lokalny serwer/model; chmura i gateway otrzymują treść. Sprawdź też trasy poszczególnych zadań przed użyciem prywatnych danych.
@@ -44,8 +48,7 @@ Podaj endpoint właściwego protokołu, potrzebny klucz i dostępny model. Lista
 | Tłumaczenie | Obok jako `_<language>.md`; istniejący cel może zostać zastąpiony |
 | Badanie | Podsumowanie dopisywane do aktywnego Markdown |
 | Generowanie wsadowe z tytułów | Zapis odpowiednich źródeł, potem przeniesienie do sąsiedniego `<folder>_complete`, jeśli cel pozwala |
-| Podgląd/eksport diagramów | Wybór obsługiwanego źródła lub eksportu wizualnego; kontrola raportowanej ścieżki |
-
+| Podgląd/eksport diagramów | Wybrane pliki są automatycznie eksportowane obok notatki źródłowej lub bezpośrednio do wskazanego folderu. Nazwy zawierają typ, np. `topic_drawnix.pdf` i `topic_flowchart.svg`. Konflikty dodają `-2`, `-3` itd., bez nadpisywania plików. |
 Folder pojęć jest początkowo pusty; `concepts` to przykład. Samodzielne notatki mają formę minimalną/pełną, bez ogólnego silnika szablonów. [Pojęcia](../features/concept-notes). Przetwarzanie i tłumaczenie mają oddzielne sufiksy oraz foldery. Sprawdź cele i konflikty odzyskiwania; anulowanie nie cofa ukończonych zapisów.
 
 ## 4. Języki

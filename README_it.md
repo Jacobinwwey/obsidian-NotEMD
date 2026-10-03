@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Inizia qui
 
 | Lettore | Punto di partenza | Obiettivo |
@@ -19,13 +19,13 @@
 | Sviluppatore | [Guida per sviluppatori](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/developers/overview) | Compilare, testare ed estendere i contratti esistenti |
 | Agente | [Guida per agenti](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/agents/overview) | Scoprire i quattro comandi di esportazione supportati |
 
-**Versione:** 1.9.8
+**Versione:** 1.9.9
 
-- **Annullamento e recupero:** l’annullamento resta attivo durante pianificazione e tentativi successivi e blocca scritture tardive di ricerca e traduzione. I risultati completati vengono conservati e i conflitti di recupero segnalati.
-- **Cronologia ed esportazioni native:** ricerca e focus della tastiera restano nella cronologia. Corretti i separatori delle celle unite PowerPoint e i collegamenti/le etichette CircuitikZ. La ricerca locale in batch usa un’istantanea coerente.
-- **Pubblicazione e documentazione:** verifica della provenienza dei sorgenti puliti e dei file scaricati, percorsi per i diversi lettori e traduzioni redatte direttamente.
+- Seleziona più tipi di diagramma in un’esecuzione e più formati indipendenti per ciascun tipo. Deselezionare un tipo conserva i suoi formati; senza selezioni il contenuto viene analizzato automaticamente.
+- I file selezionati vengono esportati automaticamente accanto alla nota originale o direttamente nella cartella configurata. Il nome include il tipo, come `topic_drawnix.pdf` o `topic_flowchart.svg`; le collisioni aggiungono `-2`, `-3` e così via senza sovrascrivere file.
+- Drawnix mostra fino a sei relazioni dirette essenziali con etichetta, al massimo tre per nodo; quelle omesse restano nei metadati. Il testo nei riquadri è visibile nel PDF anche da vecchi SVG in cache. Le frecce tra rami sono statiche e possono staccarsi dopo una riorganizzazione in Drawnix.
 
-I 36 preset dei fornitori e i 33 tipi di diagramma eseguibili esistevano già nella versione 1.9.7. [Guida all’aggiornamento](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/releases/1.9.8) · [Verifica la pubblicazione pubblica](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+I 36 preset dei fornitori e i 33 tipi di diagramma eseguibili esistevano già nella versione 1.9.7. [Guida all’aggiornamento](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/releases/1.9.9) · [Verifica la pubblicazione pubblica](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Le frecce Drawnix tra rami rimangono statiche dopo il riordino. Mermaid/SVG nei PPTX può essere esportato come immagine. Annullare non ripristina le modifiche salvate né garantisce l’arresto della generazione o fatturazione remota. Dispositivi mobili fisici e Obsidian 0.15.0 restano non verificati.
 
@@ -720,7 +720,7 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 ---
 
 
-*Notemd v1.9.8 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+*Notemd v1.9.9 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
 
 
 
@@ -753,7 +753,12 @@ La pagina delle impostazioni Notemd offre una ricerca sfocata consapevole dei ca
 - La storia dei diagrammi viene memorizzata nell’ambito di Vault, ordinata dal più recente al più vecchio, cercabile e paginata in gruppi da 20 elementi. La rimozione di un record storico non elimina i file generati.
 - L’esportazione della anteprima del diagramma con PPI predefinisce una risoluzione di 300 e accetta valori compresi tra 72 e 600. Questo parametro controlla soltanto la rasterizzazione tramite PNG; SVG e PDF rimangono in formato vettoriale.
 - L’esportazione completa delle visualizzazioni Mermaid consente, opzionalmente, di salvare anche il codice sorgente di Mermaid, SVG e i file di manifestazione; Mermaid rimane comunque disponibile nelle anteprime di Drawnix anche quando è disattivato.
-- Il tipo di diagramma preferito e il formato di origine preferito sono opzioni separate.
+- Seleziona più tipi di diagramma in un’esecuzione e più formati indipendenti per ciascun tipo. Deselezionare un tipo conserva i suoi formati; senza selezioni il contenuto viene analizzato automaticamente. La casella include il tipo. Fai clic sul nome per selezionarlo e modificarne i formati. Il passaggio del puntatore o il focus da tastiera cambia l’anteprima senza salvare impostazioni. Escape chiude il menu e ripristina il focus.
+- I file selezionati vengono esportati automaticamente accanto alla nota originale o direttamente nella cartella configurata. Il nome include il tipo, come `topic_drawnix.pdf` o `topic_flowchart.svg`; le collisioni aggiungono `-2`, `-3` e così via senza sovrascrivere file.
+- Imposta una cartella intermedia condivisa relativa al Vault, oppure lascia il campo vuoto per usare `notemd_assert/` accanto a ogni originale. Contiene registri di ripristino, rendering in cache e allegati facoltativi. Conserva i file ancora referenziati; la modifica riguarda solo nuove esecuzioni.
+- L’HTML del diagramma contiene una grafica ingrandibile; l’HTML del riepilogo strutturato contiene testo, struttura e riferimenti. HTML/SVG modificabile è il nome di un renderer, non di un editor web. Per modificare usa il sorgente nativo. Le presentazioni, inclusi PPTX e MP4, mantengono impostazioni e dipendenze separate.
+- I tipi vengono generati in sequenza. Un errore non blocca gli altri; l’annullamento ferma quelli in attesa e conserva i file completati. Ripeti le esportazioni da anteprima o cronologia senza un’altra richiesta al modello. Un errore di generazione richiede di rigenerare quel tipo. I registri v1/v2 restano leggibili.
+- Drawnix mostra fino a sei relazioni dirette essenziali con etichetta, al massimo tre per nodo; quelle omesse restano nei metadati. Il testo nei riquadri è visibile nel PDF anche da vecchi SVG in cache. Le frecce tra rami sono statiche e possono staccarsi dopo una riorganizzazione in Drawnix.
 - Gli utenti desktop possono aprire l’ambiente di compilazione nativo CircuitikZ, opzionale, per riutilizzare Tectonic/pdflatex del sistema, selezionare un compilatore personalizzato o installare esplicitamente l’ambiente runtime Tectonic gestito. Le anteprime, SVG, PNG e le esportazioni di anteprima con PDF non richiedono LaTeX.
 - La selezione avanzata dei file di lotto permette di utilizzare profili di selezione salvati e anteprime delle regole.
 - Una cartella di destinazione del lotto assente può essere creata dopo conferma, con l’opzione di memorizzare la creazione automatica per eventuali cartelle mancanti future.

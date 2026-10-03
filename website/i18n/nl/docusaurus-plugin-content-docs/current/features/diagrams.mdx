@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diagrammen
 
-<TLDR>Kies eerst het diagramtype en daarna het bewerkbare bronformaat. Bekijk het geheel in Obsidian, inclusief Drawnix en ingesloten Mermaid-panelen. Exporteer ieder paneel als SVG, PNG of PDF.</TLDR>
+<TLDR>
+Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
+</TLDR>
 
 ## Drie keuzes
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Bronformaat | Het bewerkbare of herbruikbare bestand | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Exportformaat | De afbeelding of het document om te delen | SVG, PNG, PDF |
 
-Draw.io en Drawnix zijn bronnen, geen diagramtypen. CircuitikZ is een bronformaat voor schakelingen en beperkt visuele export niet tot SVG.
+Diagram-HTML bevat een zoombare afbeelding; HTML met een gestructureerde samenvatting bevat tekst, structuur en verwijzingen. Bewerkbaar HTML/SVG is een renderer, geen webeditor. Gebruik de oorspronkelijke bron voor bewerking. Presentatie-export, waaronder PPTX en MP4, behoudt afzonderlijke instellingen en afhankelijkheden.
 
 ## Bron kiezen
 
@@ -38,17 +40,21 @@ Draw.io en Drawnix zijn bronnen, geen diagramtypen. CircuitikZ is een bronformaa
 | Drawnix | Handgetekende of whiteboardbewerking | `.drawnix` |
 | CircuitikZ | Gestructureerde elektrische en transistorschakelingen | `.tex` |
 
-Laat **Preferred source format** op **Auto** als je geen specifieke editor nodig hebt. Notemd kiest een compatibele bron.
+Ondersteunde formaten staan bovenaan; incompatibele opties blijven zichtbaar en uitgeschakeld. Bestaande inactieve aanvragen kun je verwijderen. Elk type behoudt zijn formaten. Is geen formaat bruikbaar, dan probeert Notemd het standaardbronformaat van de gebruikte renderer en meldt het onbeschikbare aanvragen.
 
 ## Genereren en exporteren
 
 1. Open een ondersteunde bronnotitie. Zet passages in een aparte notitie: selectie vernauwt een bestandstaak niet.
-2. Kies een type of **Auto-detect**.
-3. Kies bron of **Auto**. Drawnix ondersteunt kenniskaarten met bewerkbare knopen en Mermaid.
+2. Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
+3. Het selectievakje neemt het type op. Klik op de naam om het te selecteren en de formaten te wijzigen. Aanwijzen of toetsenbordfocus wisselt het voorbeeld zonder instellingen op te slaan. Escape sluit het menu en herstelt de focus.
 4. Kies **Diagram genereren**.
-5. Controleer bord en Mermaid-panelen in bronvolgorde binnen één verticaal scrollbare voorvertoning. De panelen gebruiken hun werkelijke hoogte.
-6. Kies **SVG exporteren**, **PNG exporteren** of **Export PDF** per paneel of exporteer bovenaan alle panelen. Kies bronmap of eigen Vault-relatieve map; uitvoernamen zijn deterministisch per paneel en een fout stopt andere panelen niet.
-7. Bewaar het bewerkbare bestand via **Bronbestand opslaan**.
+5. Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven.
+6. Controleer bord en Mermaid-panelen in bronvolgorde binnen één verticaal scrollbare voorvertoning. De panelen gebruiken hun werkelijke hoogte.
+7. Kies **SVG exporteren**, **PNG exporteren** of **Export PDF** per paneel of exporteer bovenaan alle panelen. Kies bronmap of eigen Vault-relatieve map; uitvoernamen zijn deterministisch per paneel en een fout stopt andere panelen niet. Bewaar het bewerkbare bestand via **Bronbestand opslaan**.
+
+Stel een gedeelde Vault-relatieve map voor tussenbestanden in, of laat het veld leeg voor `notemd_assert/` naast elke bron. Hier staan herstelgegevens, rendercaches en optionele bijlagen. Bewaar bestanden waarnaar nog wordt verwezen; een mapwijziging geldt alleen voor nieuwe uitvoeringen.
+
+Typen worden achtereenvolgens gemaakt. Eén fout blokkeert de overige niet; annuleren stopt wachtende typen en bewaart voltooide bestanden. Herhaal exports vanuit het voorbeeld of de geschiedenis zonder nieuwe modelaanvraag. Na een generatiefout moet dat type opnieuw worden gemaakt. v1/v2-herstelgegevens blijven leesbaar.
 
 Exportmenu en paneelkoppen bieden dezelfde drie acties. **History** opent zoeken, filters, heropenen en opgeslagen bestanden zonder het voorbeeld te verbergen. Geschiedenis is ook via palet/zijbalk beschikbaar zonder actieve notitie.
 
@@ -68,7 +74,7 @@ Notemd reinigt SVG en bewaart Mermaid-bron in `.drawnix`-metadata. Preview werkt
 
 Afbeeldingen krijgen waar mogelijk een preview met ingesloten data. Eerst worden embedded data gebruikt, dan oude bijbestanden, dan beschikbare brontekst. Bewaar nog gerefereerde bestanden: een nieuwe zelfstandige export bewijst niet dat een oude gedeelde map overbodig is.
 
-De scrollbare weergave toont eerst Drawnix, daarna Mermaid in bronvolgorde. Een geschiedenisitem herstelt panelen, afmetingen en exportacties. Titels, samenvattingen en relaties krijgen ruimte; een niet-ondersteunde leesbare layout geeft een formaatfout. Pijlen tussen takken zijn statisch: bevestiging na herschikken in Drawnix wordt niet door de huidige bewijzen ondersteund. Test de bedoelde editor.
+Drawnix toont maximaal zes benoemde gerichte kernrelaties, hoogstens drie per knooppunt. Weggelaten relaties blijven in de metadata. Tekst in kaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken zijn statisch en kunnen losraken na herschikken in Drawnix.
 
 ## Native exportgrenzen
 
@@ -88,7 +94,7 @@ Selecteer het type expliciet. Gebruik voor schakelingen **Circuit diagram** met 
 
 ### Ongeschikte bron
 
-Keer terug naar **Auto** of kies een formaat voor dit type. CircuitikZ is voor schakelingen; Draw.io/Drawnix voor ondersteunde structuren.
+Ondersteunde formaten staan bovenaan; incompatibele opties blijven zichtbaar en uitgeschakeld. Bestaande inactieve aanvragen kun je verwijderen. Elk type behoudt zijn formaten. Is geen formaat bruikbaar, dan probeert Notemd het standaardbronformaat van de gebruikte renderer en meldt het onbeschikbare aanvragen.
 
 ### Exportmenu ontbreekt
 

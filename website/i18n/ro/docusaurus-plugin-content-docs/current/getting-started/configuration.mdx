@@ -29,6 +29,10 @@ Furnizorul inițial este DeepSeek cu autentificare necompletată. Selectarea pro
 
 **Diagram preview export PPI** are implicit 300, interval 72–600, și afectează numai PNG. SVG/PDF păstrează geometria vectorială suportată. **Also export complete Mermaid visuals** controlează fișierele însoțitoare, nu afișarea Mermaid în previzualizarea Drawnix.
 
+Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
+
+Configurează un dosar intermediar comun relativ la Vault sau lasă câmpul gol pentru `notemd_assert/` lângă fiecare sursă. Aici se păstrează înregistrări de recuperare, randări în cache și atașamente opționale. Păstrează fișierele încă referite; schimbarea afectează numai execuțiile noi.
+
 ## 1. Furnizor
 
 Introduceți endpoint-ul protocolului corect, cheia cerută și modelul disponibil. Verificați separat listarea și generarea. Serverul/modelul local trebuie pregătite; cloud-ul și gateway-ul primesc conținut. Înainte de date private, verificați și rutarea fiecărei sarcini.
@@ -46,8 +50,7 @@ Introduceți endpoint-ul protocolului corect, cheia cerută și modelul disponib
 | Traducere | Lângă sursă ca `_<language>.md`; destinația existentă poate fi suprascrisă |
 | Cercetare | Rezumat adăugat notei Markdown active |
 | Generare în lot din titluri | Scrie sursele eligibile și le mută în `<folder>_complete` alăturat dacă destinația permite |
-| Previzualizare/export de diagramă | Alegeți sursă sau export vizual suportat și verificați calea raportată |
-
+| Previzualizare/export de diagramă | Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere. |
 Folderul de concepte este inițial gol; `concepts` este un exemplu. Notele independente au variantă minimă/completă, nu un motor general de șabloane. [Concepte](../features/concept-notes). Procesarea și traducerea au sufixe/foldere separate. Verificați coliziunile; anularea nu revine asupra scrierilor finalizate.
 
 ## 4. Limbi

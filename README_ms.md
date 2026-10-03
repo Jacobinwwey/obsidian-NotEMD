@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Mulakan di sini
 
 | Pembaca | Pintu masuk | Matlamat |
@@ -19,13 +19,13 @@
 | Pembangun | [Panduan pembangun](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/developers/overview) | Bina, uji dan perluaskan kontrak sedia ada |
 | Ejen | [Panduan ejen](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/agents/overview) | Temui empat perintah eksport yang disokong |
 
-**Versi:** 1.9.8
+**Versi:** 1.9.9
 
-- **Pembatalan dan pemulihan:** pembatalan kekal aktif semasa penjadualan dan percubaan semula, serta menghalang penulisan lewat penyelidikan dan terjemahan. Hasil yang telah selesai dikekalkan dan konflik pemulihan dilaporkan.
-- **Sejarah dan eksport asli:** teks carian dan fokus papan kekunci dikekalkan. Pemisah sel bercantum PowerPoint serta sambungan/label CircuitikZ dibetulkan. Carian setempat secara kelompok menggunakan petikan keadaan yang konsisten.
-- **Keluaran dan dokumentasi:** asal sumber bersih dan fail yang dimuat turun disahkan, dengan laluan untuk setiap pembaca dan terjemahan yang ditulis terus.
+- Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.
+- Fail terpilih dieksport secara automatik di sebelah nota sumber atau terus ke folder output yang ditetapkan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Konflik nama menambah `-2`, `-3` dan seterusnya tanpa menulis ganti fail.
+- Drawnix memaparkan sehingga enam hubungan teras berarah dan berlabel, maksimum tiga bagi setiap nod. Hubungan yang digugurkan kekal dalam metadata. Teks dalam kotak kelihatan dalam PDF, termasuk daripada cache SVG lama. Anak panah antara cabang adalah statik dan mungkin terpisah selepas susunan semula dalam Drawnix.
 
-36 pratetap penyedia dan 33 jenis rajah yang boleh dijalankan sudah tersedia dalam 1.9.7. [Panduan naik taraf](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/releases/1.9.8) · [Semak keluaran awam](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+36 pratetap penyedia dan 33 jenis rajah yang boleh dijalankan sudah tersedia dalam 1.9.7. [Panduan naik taraf](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/releases/1.9.9) · [Semak keluaran awam](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Anak panah Drawnix antara cabang kekal statik selepas penyusunan semula. Mermaid/SVG dalam PPTX mungkin menggunakan imej gantian. Pembatalan tidak membuat asal perubahan tersimpan atau menjamin penghentian penjanaan atau bil jauh. Peranti mudah alih fizikal dan Obsidian 0.15.0 belum disahkan.
 
@@ -714,7 +714,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.8 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.9 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 
@@ -747,7 +747,12 @@ Halaman tetapan Notemd menyediakan carian kabur yang mengambil kira medan terten
 - Sejarah diagram disimpan dalam skop Vault, dikelaskan mengikut urutan terbaru dahulu, boleh dicari dan dipaparkan secara berhalaman dalam kumpulan 20. Memadam rekod sejarah tidak akan memusnahkan fail yang telah dijana.
 - Eksport pratonton diagram PPI menggunakan resolusi lalai 300 dan menerima nilai antara 72 hingga 600. Ia hanya mengawal proses rasterisasi PNG; SVG dan PDF tetap berbentuk vektor.
 - Eksport visual lengkap Mermaid secara pilihan juga akan menulis sumber Mermaid, SVG, serta fail manifest yang berkaitan; Mermaid masih boleh dilihat dalam pratonton Drawnix walaupun ia dimatikan.
-- Jenis diagram kegemaran dan format sumber kegemaran merupakan pilihan yang berasingan.
+- Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik. Kotak semak menyertakan jenis. Klik namanya untuk memilih dan mengubah format. Menghalakan penuding atau fokus papan kekunci menukar pratonton tanpa menyimpan tetapan. Escape menutup menu dan mengembalikan fokus.
+- Fail terpilih dieksport secara automatik di sebelah nota sumber atau terus ke folder output yang ditetapkan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Konflik nama menambah `-2`, `-3` dan seterusnya tanpa menulis ganti fail.
+- Tetapkan folder perantaraan bersama relatif kepada Vault, atau kosongkan untuk menggunakan `notemd_assert/` di sebelah setiap sumber. Rekod pemulihan, cache pemaparan dan lampiran pilihan disimpan di situ. Kekalkan fail yang masih dirujuk; perubahan folder hanya terpakai pada pelaksanaan baharu.
+- HTML rajah mengandungi grafik yang boleh dizum; HTML ringkasan berstruktur mengandungi teks, struktur dan rujukan. HTML/SVG boleh sunting ialah nama pemapar, bukan penyunting web. Gunakan sumber asal untuk menyunting. Eksport persembahan, termasuk PPTX dan MP4, mengekalkan tetapan serta kebergantungan berasingan.
+- Jenis dijana mengikut turutan. Kegagalan satu jenis tidak menyekat yang lain; pembatalan menghentikan jenis menunggu dan mengekalkan fail siap. Cuba semula eksport melalui pratonton atau sejarah tanpa permintaan model baharu. Kegagalan penjanaan memerlukan jenis itu dijana semula. Rekod v1/v2 masih boleh dibaca.
+- Drawnix memaparkan sehingga enam hubungan teras berarah dan berlabel, maksimum tiga bagi setiap nod. Hubungan yang digugurkan kekal dalam metadata. Teks dalam kotak kelihatan dalam PDF, termasuk daripada cache SVG lama. Anak panah antara cabang adalah statik dan mungkin terpisah selepas susunan semula dalam Drawnix.
 - Pengguna desktop boleh membuka persekitaran kompilasi asli CircuitikZ secara pilihan untuk menggunakan Tectonic/pdflatex sistem, memilih kompiler khusus, atau memasang runtime Tectonic yang diuruskan secara eksplisit. Pratonton, SVG, PNG, dan eksport pratonton PDF tidak memerlukan LaTeX.
 - Pemilihan fail kumpulan lanjutan membolehkan pengguna menggunakan profil pemilihan yang telah disimpan serta melihat pratonton peraturan.
 - Folder sasaran kumpulan yang hilang boleh dibuat selepas pengesahan, dengan pilihan untuk menyimpan penghasilannya secara automatik bagi folder yang hilang pada masa akan datang.

@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Nhiều sơ đồ, xuất độc lập"
+description: "Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Nhiều sơ đồ, xuất độc lập
+
+<TLDR>
+Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.
+</TLDR>
+
+## Nhiều sơ đồ, xuất độc lập
+
+Ô đánh dấu đưa loại vào quá trình tạo. Nhấp tên để chọn loại và sửa định dạng. Di chuột hoặc đặt tiêu điểm bàn phím sẽ đổi bản xem trước mà không lưu cài đặt. Escape đóng menu và trả lại tiêu điểm.
+
+Định dạng được hỗ trợ xuất hiện trước; lựa chọn không tương thích vẫn hiển thị nhưng bị vô hiệu hóa. Có thể xóa yêu cầu không hoạt động đã lưu. Mỗi loại giữ định dạng riêng. Nếu không định dạng nào dùng được, hệ thống thử nguồn mặc định của bộ kết xuất đang dùng và báo yêu cầu không khả dụng.
+
+HTML sơ đồ chứa hình có thể thu phóng; HTML tóm tắt có cấu trúc chứa văn bản, cấu trúc và trích dẫn. HTML/SVG có thể chỉnh sửa là tên bộ kết xuất, không phải trình sửa trên web. Dùng nguồn gốc để chỉnh sửa. Xuất bản trình bày, gồm PPTX và MP4, có cài đặt và thư viện phụ thuộc riêng.
+
+Drawnix hiển thị tối đa sáu quan hệ cốt lõi có hướng và nhãn, tối đa ba quan hệ mỗi nút. Quan hệ bị lược bỏ vẫn nằm trong siêu dữ liệu. Chữ trong khung hiển thị trong PDF, kể cả từ SVG cũ trong bộ nhớ đệm. Mũi tên giữa các nhánh là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
+
+## Tệp và khôi phục
+
+Tệp đã chọn tự động xuất cạnh ghi chú nguồn hoặc trực tiếp vào thư mục đầu ra đã đặt. Tên chứa loại, chẳng hạn `topic_drawnix.pdf` và `topic_flowchart.svg`. Khi trùng tên, thêm `-2`, `-3`… mà không ghi đè tệp.
+
+Đặt thư mục trung gian dùng chung bằng đường dẫn tương đối trong Vault, hoặc để trống để dùng `notemd_assert/` cạnh từng nguồn. Nơi này lưu bản ghi khôi phục, bộ nhớ đệm kết xuất và tệp đính kèm tùy chọn. Giữ tệp còn được tham chiếu; đổi thư mục chỉ tác động lần chạy mới.
+
+Các loại được tạo tuần tự. Một loại lỗi không chặn các loại khác; hủy sẽ dừng loại đang chờ và giữ tệp đã hoàn tất. Thử xuất lại từ xem trước hoặc lịch sử mà không gửi yêu cầu mới đến mô hình. Lỗi tạo cần tạo lại loại đó. Bản ghi v1/v2 vẫn đọc được.
+
+## Nâng cấp
+
+Dừng tác vụ và sao lưu Vault. Cài `main.js`, `manifest.json` và `styles.css` từ cùng Release 1.9.9, giữ cài đặt và tệp rồi tải lại Obsidian. Kiểm tra một ghi chú trước khi chạy lô lớn. Tùy chọn cũ được chuyển đổi khi chỉnh sửa. Bản dịch được viết trực tiếp, không dùng API dịch hay LM Studio.
+
+## Tham khảo
+
+- [Hướng dẫn sơ đồ](../features/diagrams)
+- [Bản phát hành và tải xuống](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

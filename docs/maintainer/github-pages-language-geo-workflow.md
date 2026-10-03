@@ -2,12 +2,12 @@
 
 Language: **English** | [简体中文](./github-pages-language-geo-workflow.zh-CN.md)
 
-This is the current publication procedure for `website/`, reviewed on 2026-09-14. Plugin UI localization and native export acceptance have separate contracts. The [1.9.8 plan](../plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md) records implementation status; this procedure does not assert that a candidate is already published.
+This is the current publication procedure for `website/`, reviewed on 2026-10-03. Plugin UI localization and native export acceptance have separate contracts. The [1.9.9 acceptance record](./release-1.9.9-acceptance.md) records execution status; this procedure does not assert that a candidate is already published.
 
 ## Publication Contract
 
 - English is the canonical complete source at `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`.
-- Every locale declared in `website/src/lib/publishedLocales.mjs` must expose the full docs route set. The 1.9.8 candidate has 24 canonical routes, so admission requires 816 documents across 34 locales.
+- Every locale declared in `website/src/lib/publishedLocales.mjs` must expose the full docs route set. Version 1.9.9 has 25 canonical routes, including the retained 1.9.8 guide, so admission requires 850 documents across 34 locales.
 - The localized matrix is `zh-CN`, `zh-Hant`, `zh-TW`, `ja`, `fr`, `de`, `es`, `ko`, `it`, `pt`, `pt-BR`, `ru`, `ar`, `fa`, `hi`, `bn`, `nl`, `sv`, `fi`, `da`, `no`, `pl`, `tr`, `he`, `th`, `el`, `cs`, `hu`, `ro`, `uk`, `vi`, `id`, `ms`. Adding a locale or source route requires all counterparts in the same change.
 - Only English and zh-CN are currently indexable. Other languages remain accessible with an explicit publication label and `noindex,follow`; omit them from sitemap and eligible search alternates until independently qualified. Direct AI authoring is not native-human review and does not automatically promote indexing.
 - Newcomers, users, developers and Agents must each reach a complete task guide. A navigation label or placeholder is insufficient.
@@ -42,7 +42,7 @@ Tools may enumerate, format, hash and render already-authored text. They may cop
 | Machine-readable guide map | `website/plugins/documentation-map.cjs`, generating canonical `website/build/llms.txt` from release and route owners |
 | Build / navigation / release admission | `website/scripts/audit-build.cjs`, `website/scripts/audit-navigation.cjs`, `website/scripts/verify-published-release.cjs` |
 
-The complete route set is derived from `website/docs/`. Important entries include `/docs/intro`, `/docs/getting-started/quick-start`, `/docs/providers/overview`, `/docs/faq`, `/docs/developers/overview`, `/docs/agents/overview` and `/docs/releases/1.9.8`. Keep existing public routes and useful anchors stable.
+The complete route set is derived from `website/docs/`. Important entries include `/docs/intro`, `/docs/getting-started/quick-start`, `/docs/providers/overview`, `/docs/faq`, `/docs/developers/overview`, `/docs/agents/overview` and `/docs/releases/1.9.9`. Keep existing public routes and useful anchors stable.
 
 ## Local Verification
 

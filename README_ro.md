@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Începe aici
 
 | Cititor | Intrare | Obiectiv |
@@ -19,13 +19,13 @@
 | Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
 | Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
 
-**Versiune:** 1.9.8
+**Versiune:** 1.9.9
 
-- **Anulare și recuperare:** anularea rămâne activă în timpul programării și reîncercărilor și blochează scrierile târzii de cercetare și traducere. Rezultatele finalizate sunt păstrate, iar conflictele de recuperare sunt raportate.
-- **Istoric și export:** se păstrează textul căutării și focalizarea tastaturii. S-au corectat separatorii celulelor îmbinate PowerPoint și conexiunile/etichetele CircuitikZ. Căutarea locală în lot folosește un instantaneu coerent.
-- **Publicare și documentație:** se verifică proveniența surselor curate și a fișierelor descărcate, cu intrări pentru fiecare public și traduceri redactate direct.
+- Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
+- Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere.
+- Drawnix afișează cel mult șase relații direcționate esențiale cu etichete, maximum trei pe nod. Cele omise rămân în metadate. Textul încadrat apare în PDF inclusiv din SVG vechi în cache. Săgețile dintre ramuri sunt statice și se pot desprinde după rearanjarea în Drawnix.
 
-Cele 36 de presetări de furnizori și 33 de tipuri executabile de diagrame existau deja în 1.9.7. [Ghid de actualizare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/releases/1.9.8) · [Verifică versiunea publicată](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+Cele 36 de presetări de furnizori și 33 de tipuri executabile de diagrame existau deja în 1.9.7. [Ghid de actualizare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/releases/1.9.9) · [Verifică versiunea publicată](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Săgețile Drawnix între ramuri rămân statice după rearanjare. Mermaid/SVG în PPTX poate folosi imagini de rezervă. Anularea nu revine asupra modificărilor salvate și nu garantează oprirea generării sau facturării la distanță. Dispozitivele mobile fizice și Obsidian 0.15.0 rămân neverificate.
 
@@ -711,7 +711,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.8 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.9 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -743,7 +743,12 @@ Pagina de setări Notemd oferă o căutare fuzzy care ține cont de câmpurile s
 - Istoricul diagramelor este stocat la nivelul Vault, ordonat din cel mai recent înainte, fiind căutabil și paginat în grupuri de 20. Ștergerea unei înregistrări din istoric nu ștearde fișierele generate.
 - Exportul vizualizării preliminare a diagramelor prin PPI are ca valoare implicită 300 și accepte valori între 72 și 600. Acesta controlează doar rasterizarea PNG; SVG și PDF rămân bazate pe vector.
 - Exportul complet al vizualizărilor Mermaid poate scrie, opțional, sursa Mermaid, SVG și fișierele de manifest; Mermaid rămâne disponibil în vizualizările Drawnix chiar dacă este dezactivat.
-- Tipul preferat de diagramă și formatul preferat de sursă sunt alegeri separate.
+- Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat. Caseta include tipul. Apasă pe nume pentru a-l selecta și a-i modifica formatele. Trecerea cursorului sau focalizarea din tastatură schimbă previzualizarea fără salvarea setărilor. Escape închide meniul și restabilește focalizarea.
+- Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere.
+- Configurează un dosar intermediar comun relativ la Vault sau lasă câmpul gol pentru `notemd_assert/` lângă fiecare sursă. Aici se păstrează înregistrări de recuperare, randări în cache și atașamente opționale. Păstrează fișierele încă referite; schimbarea afectează numai execuțiile noi.
+- HTML-ul diagramei conține grafică cu zoom; HTML-ul rezumatului structurat conține text, structură și referințe. HTML/SVG editabil denumește un motor de randare, nu un editor web. Folosește sursa nativă pentru editare. Exportul prezentărilor, inclusiv PPTX și MP4, păstrează setări și dependențe separate.
+- Tipurile se generează succesiv. O eroare nu le blochează pe celelalte; anularea oprește tipurile în așteptare și păstrează fișierele finalizate. Reîncearcă exportul din previzualizare sau istoric fără altă cerere către model. Eșecul generării necesită regenerarea acelui tip. Înregistrările v1/v2 rămân lizibile.
+- Drawnix afișează cel mult șase relații direcționate esențiale cu etichete, maximum trei pe nod. Cele omise rămân în metadate. Textul încadrat apare în PDF inclusiv din SVG vechi în cache. Săgețile dintre ramuri sunt statice și se pot desprinde după rearanjarea în Drawnix.
 - Utilizatorii desktop pot deschide mediul de compilare nativ CircuitikZ, opțional, pentru a reutiliza Tectonic/pdflatex din sistem, a selecta un compiler personal sau a instala explicit runtime-ul Tectonic gestionat. Vizualizările preliminare, SVG, PNG și exporturile preliminare PDF nu necesită LaTeX.
 - Selectarea avansată a fișierelor de lot permite utilizarea profilurilor de selecție salvate și a vizualizărilor regulelor.
 - O foldere țintă pentru loturi lipsită poate fi creată după confirmare, cu opțiunea de a memora crearea automată pentru folderele lipsite viitoare.

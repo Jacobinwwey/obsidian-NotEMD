@@ -34,6 +34,10 @@ DeepSeek ist standardmäßig aktiv, Zugangsdaten sind leer. Ein Profil erstellt 
 
 **Diagram preview export PPI**: Standard **300**, Bereich **72–600**. Betrifft PNG-Rasterung; SVG/PDF behalten unterstützte Vektorgeometrie. **Also export complete Mermaid visuals** steuert Begleitdateien, nicht Mermaid-Sichtbarkeit in Drawnix.
 
+Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert.
+
+Für Zwischendateien lässt sich ein gemeinsamer Vault-relativer Ordner festlegen. Ein leeres Feld verwendet `notemd_assert/` neben jeder Quelle. Dort liegen Wiederherstellungsprotokolle, Render-Caches und optionale Anhänge. Weiterhin referenzierte Dateien behalten; Ordneränderungen gelten nur für neue Durchläufe.
+
 ## 1. Anbieter
 
 Wähle Profil, protokollgerechte Adresse, Zugangsdaten und verfügbares Modell. Verwende **Fetch models**, sofern unterstützt, und **Verbindung testen**. Modellliste und Generierung sind verschiedene Prüfungen.
@@ -55,8 +59,7 @@ Vergleiche Genauigkeit, Laufzeit und tatsächliche Kontopreise an einer repräse
 | Übersetzung | Separate `_<language>.md`; vorhandene Zieldatei kann überschrieben werden |
 | Recherche | Zusammenfassung an aktive Markdown-Notiz anhängen |
 | Inhalte aus Titeln im Stapel | Inhalt schreiben und geeignete Notizen bei freiem Ziel in den gemeldeten Nachbarordner `<folder>_complete` verschieben |
-| Diagrammvorschau/-export | Unterstützte Quelle oder visuelle Ausgabe wählen und gemeldetes Ziel prüfen |
-
+| Diagrammvorschau/-export | Ausgewählte Dateien werden automatisch neben der Quellnotiz oder direkt im konfigurierten Ausgabeordner gespeichert. Der Name enthält den Typ, etwa `topic_drawnix.pdf` oder `topic_flowchart.svg`. Bei Kollisionen folgen `-2`, `-3` usw.; vorhandene Dateien werden nicht überschrieben. |
 Der Konzeptpfad startet leer; `concepts` ist ein möglicher eigener Name. Unterstützt werden minimale/vollständige [Konzeptvorlagen](../features/concept-notes), kein allgemeines Dateivorlagensystem mit Variablen.
 
 Suffixe und Ordner für verarbeitete Notizen und Übersetzungen sind getrennte Einstellungen. Prüfe vorhandene Ziele und Wiederherstellungsmeldungen. Abbruch rollt fertige Schreibvorgänge nicht zurück.

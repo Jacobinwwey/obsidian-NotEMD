@@ -2,7 +2,7 @@
 
 Docusaurus serves the public user, developer and Agent guides. The repository's VitePress site under `docs/` retains engineering procedures and dated evidence.
 
-Current publication rules: [English](../docs/maintainer/github-pages-language-geo-workflow.md) · [简体中文](../docs/maintainer/github-pages-language-geo-workflow.zh-CN.md). Execution status: [1.9.8 plan](../docs/plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md). Local builds do not establish that the candidate has been published.
+Current publication rules: [English](../docs/maintainer/github-pages-language-geo-workflow.md) · [简体中文](../docs/maintainer/github-pages-language-geo-workflow.zh-CN.md). Execution status: [1.9.9 acceptance](../docs/maintainer/release-1.9.9-acceptance.md). Local builds do not establish that the candidate has been published.
 
 ## Develop And Verify
 
@@ -35,7 +35,7 @@ Exactly one `--locale` disables the automatic locale prefix in this Docusaurus C
 
 ## Content And Locale Contract
 
-The registry declares English plus full docs routes for Simplified Chinese (`zh-CN`) and 32 other localized route sets. The 1.9.8 candidate has 24 canonical guides; all 34 locales require 816 documents before deployment. Consult the plan for actual completion, not just directory presence.
+The registry declares English plus full docs routes for Simplified Chinese (`zh-CN`) and 32 other localized route sets. Version 1.9.9 has 25 canonical guides, retaining the 1.9.8 upgrade page; all 34 locales require 850 documents before deployment. Consult the acceptance record for actual completion, not just directory presence.
 
 Only English and zh-CN are currently indexable. Other languages remain reachable for review with `noindex,follow` and are excluded from sitemap and eligible search alternates. Website languages, plugin UI languages and a model's translation ability are separate contracts.
 

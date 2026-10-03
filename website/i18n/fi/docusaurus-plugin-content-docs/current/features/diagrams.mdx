@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Kaaviot
 
-<TLDR>Valitse ensin kaaviotyyppi ja sitten muokattava lähdemuoto. Tarkista kokonaisuus Obsidianissa, myös Drawnix ja upotetut Mermaid-paneelit. Vie kukin paneeli SVG-, PNG- tai PDF-muotoon.</TLDR>
+<TLDR>
+Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti.
+</TLDR>
 
 ## Kolme eri valintaa
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Lähdemuoto | Muokattavan tai uudelleenkäytettävän tiedoston | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Vientimuoto | Jaettavan kuvan tai dokumentin | SVG, PNG, PDF |
 
-Draw.io ja Drawnix ovat lähdemuotoja, eivät kaaviotyyppejä. CircuitikZ on piirien lähdemuoto eikä rajaa visuaalista vientiä SVG:hen.
+Kaavio-HTML sisältää zoomattavan kuvan; rakenteisen yhteenvedon HTML sisältää tekstin, rakenteen ja lähdeviitteet. Muokattava HTML/SVG tarkoittaa hahmonninta, ei verkkoselaimen editoria. Käytä muokkaukseen alkuperäistä lähdetiedostoa. Esitysviennillä, myös PPTX- ja MP4-muodoilla, on erilliset asetukset ja riippuvuudet.
 
 ## Lähteen valinta
 
@@ -38,17 +40,21 @@ Draw.io ja Drawnix ovat lähdemuotoja, eivät kaaviotyyppejä. CircuitikZ on pii
 | Drawnix | Käsinpiirretty/valkotaulumuokkaus | `.drawnix` |
 | CircuitikZ | Rakenteiset sähkö- ja transistoripiirit | `.tex` |
 
-Pidä **Preferred source format** arvossa **Auto**, ellet tarvitse tiettyä editoria. Notemd valitsee yhteensopivan lähteen.
+Tuetut muodot näytetään ensin; yhteensopimattomat pysyvät näkyvissä mutta poissa käytöstä. Aiemmat passiiviset pyynnöt voi poistaa. Kukin tyyppi säilyttää omat muotonsa. Jos mikään ei kelpaa, kokeillaan käytetyn hahmontimen oletuslähdemuotoa ja ilmoitetaan puuttuvista vaihtoehdoista.
 
 ## Generointi ja vienti
 
 1. Avaa tuettu lähdemuistiinpano. Siirrä katkelmat erilliseen tiedostoon: valinta ei rajaa tiedostotehtävää.
-2. Valitse tyyppi tai **Auto-detect**.
-3. Valitse lähde tai **Auto**. Drawnix tukee tietokarttoja muokattavilla solmuilla ja Mermaidilla.
+2. Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti.
+3. Valintaruutu ottaa tyypin mukaan. Nimen napsautus valitsee tyypin ja avaa sen muotoasetukset. Osoittimen vieminen päälle tai näppäimistökohdistus vaihtaa esikatselua tallentamatta asetuksia. Escape sulkee valikon ja palauttaa kohdistuksen.
 4. Valitse **Generate diagram**.
-5. Tarkista taulu ja Mermaid-paneelit lähdejärjestyksessä yhdessä pystysuunnassa vieritettävässä esikatselussa. Paneelit käyttävät todellista korkeuttaan.
-6. Käytä paneelin **Export SVG**, **Export PNG** tai **Export PDF**, tai vie kaikki yläpalkista. Valitse lähdekansio tai oma holvisuhteinen kansio; nimet ovat paneelikohtaisesti deterministisiä eikä yhden paneelin virhe pysäytä muita.
-7. Säilytä muokattava tiedosto toiminnolla **Save source file**.
+5. Valitut tiedostot viedään automaattisesti lähdemuistiinpanon viereen tai suoraan määritettyyn tuloskansioon. Nimi sisältää tyypin, kuten `topic_drawnix.pdf` tai `topic_flowchart.svg`. Nimiristiriidoissa lisätään `-2`, `-3` jne. korvaamatta vanhoja tiedostoja.
+6. Tarkista taulu ja Mermaid-paneelit lähdejärjestyksessä yhdessä pystysuunnassa vieritettävässä esikatselussa. Paneelit käyttävät todellista korkeuttaan.
+7. Käytä paneelin **Export SVG**, **Export PNG** tai **Export PDF**, tai vie kaikki yläpalkista. Valitse lähdekansio tai oma holvisuhteinen kansio; nimet ovat paneelikohtaisesti deterministisiä eikä yhden paneelin virhe pysäytä muita. Säilytä muokattava tiedosto toiminnolla **Save source file**.
+
+Määritä välitiedostoille yhteinen Vault-suhteinen kansio tai jätä kenttä tyhjäksi, jolloin käytetään kunkin lähteen viereistä `notemd_assert/`-kansiota. Sinne tallentuvat palautustietueet, hahmonnusvälimuisti ja valinnaiset liitteet. Säilytä edelleen viitatut tiedostot; muutos koskee vain uusia ajoja.
+
+Tyypit luodaan peräkkäin. Yhden virhe ei estä muita. Peruutus pysäyttää odottavat tyypit ja säilyttää valmiit tiedostot. Viennin voi uusia esikatselusta tai historiasta ilman uutta mallipyyntöä. Luontivirhe vaatii kyseisen tyypin luomisen uudelleen. v1/v2-palautustietueet ovat edelleen luettavissa.
 
 Vientivalikko ja paneeliotsikot tarjoavat samat kolme toimintoa. **History** näyttää haun, suodattimet, uudelleenavauksen ja tallennetut tiedostot peittämättä esikatselua. Historia aukeaa myös paletista/sivupaneelista ilman aktiivista muistiinpanoa.
 
@@ -68,7 +74,7 @@ Notemd puhdistaa SVG:n ja säilyttää Mermaid-lähteen `.drawnix`-metadatassa. 
 
 Kuvat saavat mahdollisuuksien mukaan upotetun esikatselun. Järjestys on upotetut tiedot, vanhat oheistiedostot, saatavilla oleva lähdeteksti. Säilytä edelleen viitatut tiedostot: uusi itsenäinen vienti ei todista vanhaa jaettua kansiota tarpeettomaksi.
 
-Vieritettävä näkymä näyttää ensin Drawnixin, sitten Mermaidin lähdejärjestyksessä. Historia palauttaa paneelit, mitat ja vientitoiminnot. Otsikoille, yhteenvedoille ja suhteille varataan tilaa; tukematon luettava asettelu tuottaa muotovirheen. Haarojen väliset nuolet ovat staattisia: nykyinen näyttö ei todista kiinnityksiä uudelleenjärjestelyn jälkeen Drawnixissa. Testaa oma kohde-editori.
+Drawnix näyttää enintään kuusi nimettyä, suunnattua ydinsuhdetta, korkeintaan kolme solmua kohti. Pois jätetyt suhteet säilyvät metatiedoissa. Laatikoiden teksti näkyy PDF:ssä myös vanhoista SVG-välimuisteista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa uudelleen järjestettäessä.
 
 ## Natiiviviennin rajat
 
@@ -88,7 +94,7 @@ Valitse tyyppi itse. Piireille käytä **Circuit diagram** ja **Generate diagram
 
 ### Sopimaton lähde
 
-Palaa **Auto**-valintaan tai valitse tyypille sopiva muoto. CircuitikZ on piireille, Draw.io/Drawnix tuetuille rakenteille.
+Tuetut muodot näytetään ensin; yhteensopimattomat pysyvät näkyvissä mutta poissa käytöstä. Aiemmat passiiviset pyynnöt voi poistaa. Kukin tyyppi säilyttää omat muotonsa. Jos mikään ei kelpaa, kokeillaan käytetyn hahmontimen oletuslähdemuotoa ja ilmoitetaan puuttuvista vaihtoehdoista.
 
 ### Vientivalikko puuttuu
 

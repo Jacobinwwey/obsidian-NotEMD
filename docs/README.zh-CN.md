@@ -13,7 +13,9 @@
 
 ## 当前真值与布局入口
 
-- [1.9.8 发布、文档与可发现性实施方案（执行中）](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.zh-CN.md)
+- [1.9.9 实施与验收](./maintainer/release-1.9.9-acceptance.zh-CN.md)
+- [多图表类型与独立输出](./multiple-diagrams-implementation.zh-CN.md)
+- [1.9.8 文档实施方案（历史）](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.zh-CN.md)
 - [当前 Main 进度与后续推进计划](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.zh-CN.md)
 - [项目计划进度与工程评估](./maintainer/project-plan-status.zh-CN.md)
 - [主线可靠性与证据推进计划](./plans/2026-09-12-mainline-reliability-and-evidence.zh-CN.md)
@@ -41,7 +43,8 @@
 - [circuitikz UI、导出与文档同步方案](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.zh-CN.md)
 - [章节拆分 + TOC 提取](./chapter-split-toc.zh-CN.md)
 - [发布流程](./maintainer/release-workflow.zh-CN.md)
-- [1.9.8 发布说明（候选）](./releases/1.9.8.zh-CN.md)
+- [1.9.9 发布说明](./releases/1.9.9.zh-CN.md)
+- [1.9.8 发布说明](./releases/1.9.8.zh-CN.md)
 - [1.9.7 发布说明](./releases/1.9.7.zh-CN.md)
 - [1.9.6 发布说明](./releases/1.9.6.zh-CN.md)
 - [1.9.5 发布说明](./releases/1.9.5.zh-CN.md)

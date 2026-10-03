@@ -27,6 +27,10 @@ import TLDR from '@site/src/components/TLDR';
 
 **Diagram preview export PPI** প্রথমে 300, সীমা 72–600; কেবল PNG rasterization বদলায়। SVG/PDF সমর্থিত vector geometry রাখে। **Also export complete Mermaid visuals** companion files নিয়ন্ত্রণ করে, Drawnix-এ Mermaid দেখা যাবে কি না তা নয়।
 
+একবার চালিয়ে একাধিক চিত্রের ধরন এবং প্রতিটি ধরনের জন্য আলাদাভাবে একাধিক আউটপুট ফরম্যাট বেছে নিন। ধরন অনির্বাচিত করলেও তার ফরম্যাট থাকে; কিছু না বাছলে বিষয়বস্তু স্বয়ংক্রিয়ভাবে বিশ্লেষণ হয়।
+
+মধ্যবর্তী ফাইলের জন্য Vault-এর সাপেক্ষে একটি যৌথ ফোল্ডার নির্ধারণ করুন, অথবা প্রতিটি সোর্সের পাশে `notemd_assert/` ব্যবহারে ঘরটি ফাঁকা রাখুন। পুনরুদ্ধার রেকর্ড, রেন্ডার ক্যাশ ও ঐচ্ছিক সংযুক্তি সেখানে থাকে। এখনও ব্যবহৃত রেফারেন্সের ফাইল রাখুন; ফোল্ডার পরিবর্তন শুধু নতুন রানকে প্রভাবিত করে।
+
 ## ১. প্রদানকারী
 
 সঠিক protocol-এর endpoint, প্রয়োজনীয় key ও উপলব্ধ model দিন। List এবং সফল generation আলাদা পরীক্ষা। Local server/model প্রস্তুত থাকতে হবে; cloud/gateway content নেয়। ব্যক্তিগত কাজের আগে task-specific routes-ও দেখুন।
@@ -44,8 +48,7 @@ import TLDR from '@site/src/components/TLDR';
 | Translation | পাশে `_<language>.md`; বিদ্যমান target overwrite হতে পারে |
 | Research | সক্রিয় Markdown-এ summary যোগ |
 | Title থেকে batch generation | যোগ্য উৎসে লিখে গন্তব্য অনুমতি দিলে পাশের `<folder>_complete`-এ সরানো |
-| Diagram preview/export | সমর্থিত source বা visual export বেছে reported path দেখা |
-
+| Diagram preview/export | বাছাই করা ফাইল স্বয়ংক্রিয়ভাবে মূল নোটের পাশে বা সরাসরি নির্ধারিত আউটপুট ফোল্ডারে রপ্তানি হয়। নামে ধরন থাকে, যেমন `topic_drawnix.pdf` ও `topic_flowchart.svg`। নাম মিলে গেলে `-2`, `-3` ইত্যাদি যোগ হয়; পুরোনো ফাইল ওভাররাইট হয় না। |
 Concept folder শুরুতে ফাঁকা। `concepts` আপনার উদাহরণ নির্বাচন। স্বাধীন নোটে minimal/full form আছে, সাধারণ template-variable engine নেই। [Concepts](../features/concept-notes)। Processing ও translation-এর suffix ও folders আলাদা। বিদ্যমান target ও recovery conflicts দেখুন; cancel সম্পন্ন লেখা ফেরত নেয় না।
 
 ## ৪. ভাষা

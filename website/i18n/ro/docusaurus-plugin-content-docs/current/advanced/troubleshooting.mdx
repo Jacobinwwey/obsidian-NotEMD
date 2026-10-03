@@ -64,7 +64,9 @@ Scrierile finalizate rămân și cererile acceptate pot termina. Verificați fi�
 
 ### Diagramă sau export în aplicație
 
-Folosiți tip/sursă suportată și verificați mediul prezentărilor/CircuitikZ. Previzualizarea nu este test al aplicației țintă. Fără previzualizare vizuală, păstrați textul sursă pentru instrumentul extern potrivit. [Diagrame](../features/diagrams).
+Tipurile se generează succesiv. O eroare nu le blochează pe celelalte; anularea oprește tipurile în așteptare și păstrează fișierele finalizate. Reîncearcă exportul din previzualizare sau istoric fără altă cerere către model. Eșecul generării necesită regenerarea acelui tip. Înregistrările v1/v2 rămân lizibile.
+
+HTML-ul diagramei conține grafică cu zoom; HTML-ul rezumatului structurat conține text, structură și referințe. HTML/SVG editabil denumește un motor de randare, nu un editor web. Folosește sursa nativă pentru editare. Exportul prezentărilor, inclusiv PPTX și MP4, păstrează setări și dependențe separate. [Manualul diagramelor](../features/diagrams).
 
 ## Raportarea problemei
 

@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # চিত্র ও ডায়াগ্রাম
 
-<TLDR>আগে diagram type, পরে editable source format বাছুন। Obsidian-এ Drawnix board ও embedded Mermaid-সহ পুরো preview দেখুন। প্রতিটি panel SVG, PNG বা PDF-এ export করা যায়।</TLDR>
+<TLDR>
+একবার চালিয়ে একাধিক চিত্রের ধরন এবং প্রতিটি ধরনের জন্য আলাদাভাবে একাধিক আউটপুট ফরম্যাট বেছে নিন। ধরন অনির্বাচিত করলেও তার ফরম্যাট থাকে; কিছু না বাছলে বিষয়বস্তু স্বয়ংক্রিয়ভাবে বিশ্লেষণ হয়।
+</TLDR>
 
 ## তিনটি নির্বাচন
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Source format | Editable বা reusable file | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Export format | শেয়ারের image/document | SVG, PNG, PDF |
 
-Draw.io ও Drawnix source formats, diagram types নয়। CircuitikZ circuit-এর source; সেটি বাছলে visual export কেবল SVG-তে আটকে যায় না।
+চিত্রের HTML-এ জুমযোগ্য গ্রাফিক থাকে; কাঠামোবদ্ধ সারাংশের HTML-এ লেখা, কাঠামো ও তথ্যসূত্র থাকে। সম্পাদনাযোগ্য HTML/SVG রেন্ডারারের নাম, ব্রাউজার এডিটর নয়। সম্পাদনায় মূল সোর্স ব্যবহার করুন। PPTX ও MP4-সহ উপস্থাপনা রপ্তানির সেটিং ও নির্ভরতা আলাদা থাকে।
 
 ## Source format বাছা
 
@@ -38,17 +40,21 @@ Draw.io ও Drawnix source formats, diagram types নয়। CircuitikZ circui
 | Drawnix | হাতে আঁকা/whiteboard-style সম্পাদনা | `.drawnix` |
 | CircuitikZ | Structured electrical/transistor circuits | `.tex` |
 
-নির্দিষ্ট editor না চাইলে **Preferred source format**-এ **Auto** রাখুন। Notemd type অনুযায়ী compatible format নেয়।
+সমর্থিত ফরম্যাট আগে দেখায়; অসামঞ্জস্যপূর্ণ বিকল্প দৃশ্যমান কিন্তু নিষ্ক্রিয় থাকে। আগে সংরক্ষিত নিষ্ক্রিয় অনুরোধ সরানো যায়। প্রতিটি ধরন নিজস্ব ফরম্যাট রাখে। কোনো অনুরোধ ব্যবহারযোগ্য না হলে সক্রিয় রেন্ডারারের ডিফল্ট সোর্স ফরম্যাট চেষ্টা করা হয় এবং অনুপলব্ধ অনুরোধ জানানো হয়।
 
 ## তৈরি ও export
 
 1. Supported source note খুলুন। শুধু passage চাইলে আলাদা note বানান; selection file action ছোট করে না।
-2. Type বা **Auto-detect** নিন।
-3. Source বা **Auto** নিন; Drawnix supported map-এ editable nodes ও Mermaid রাখে।
+2. একবার চালিয়ে একাধিক চিত্রের ধরন এবং প্রতিটি ধরনের জন্য আলাদাভাবে একাধিক আউটপুট ফরম্যাট বেছে নিন। ধরন অনির্বাচিত করলেও তার ফরম্যাট থাকে; কিছু না বাছলে বিষয়বস্তু স্বয়ংক্রিয়ভাবে বিশ্লেষণ হয়।
+3. চেকবক্স ধরনটিকে তৈরির তালিকায় রাখে। নাম ক্লিক করে ধরন নির্বাচন ও ফরম্যাট সম্পাদনা করুন। মাউস রাখলে বা কিবোর্ড ফোকাস দিলে সেটিং না সেভ করেই প্রিভিউ বদলায়। Escape মেনু বন্ধ করে ফোকাস ফেরায়।
 4. **Generate diagram** চালান।
-5. একই vertical scroll preview-এ board ও source-order Mermaid panels দেখুন; panels প্রকৃত rendered height ব্যবহার করে।
-6. Panel-এর **Export SVG**, **Export PNG**, **Export PDF** অথবা উপরের all-panel export নিন। Source/custom Vault-relative folder দিন; প্রতি panel deterministic file হয় এবং individual failure-এর পরে চলতে থাকে।
-7. **Save source file** দিয়ে editable artifact রাখুন।
+5. বাছাই করা ফাইল স্বয়ংক্রিয়ভাবে মূল নোটের পাশে বা সরাসরি নির্ধারিত আউটপুট ফোল্ডারে রপ্তানি হয়। নামে ধরন থাকে, যেমন `topic_drawnix.pdf` ও `topic_flowchart.svg`। নাম মিলে গেলে `-2`, `-3` ইত্যাদি যোগ হয়; পুরোনো ফাইল ওভাররাইট হয় না।
+6. একই vertical scroll preview-এ board ও source-order Mermaid panels দেখুন; panels প্রকৃত rendered height ব্যবহার করে।
+7. Panel-এর **Export SVG**, **Export PNG**, **Export PDF** অথবা উপরের all-panel export নিন। Source/custom Vault-relative folder দিন; প্রতি panel deterministic file হয় এবং individual failure-এর পরে চলতে থাকে। **Save source file** দিয়ে editable artifact রাখুন।
+
+মধ্যবর্তী ফাইলের জন্য Vault-এর সাপেক্ষে একটি যৌথ ফোল্ডার নির্ধারণ করুন, অথবা প্রতিটি সোর্সের পাশে `notemd_assert/` ব্যবহারে ঘরটি ফাঁকা রাখুন। পুনরুদ্ধার রেকর্ড, রেন্ডার ক্যাশ ও ঐচ্ছিক সংযুক্তি সেখানে থাকে। এখনও ব্যবহৃত রেফারেন্সের ফাইল রাখুন; ফোল্ডার পরিবর্তন শুধু নতুন রানকে প্রভাবিত করে।
+
+ধরনগুলো পর্যায়ক্রমে তৈরি হয়। একটির ব্যর্থতা অন্যগুলোকে আটকায় না; বাতিল করলে অপেক্ষমাণ ধরন থামে এবং সম্পূর্ণ ফাইল থাকে। প্রিভিউ বা ইতিহাস থেকে মডেলে নতুন অনুরোধ ছাড়াই রপ্তানি আবার চেষ্টা করুন। তৈরির ব্যর্থতায় সেই ধরন আবার তৈরি করতে হবে। v1/v2 রেকর্ড এখনও পড়া যায়।
 
 Export menu ও panel header একই তিনটি action দেয়। **History** preview না সরিয়ে search/filter, reopen ও saved artifact খোলে। Active note না থাকলেও palette/sidebar-এ history আছে।
 
@@ -68,7 +74,7 @@ SVG sanitise করে Mermaid source `.drawnix` metadata-তে রাখা �
 
 Resolved image embeds সম্ভব হলে data-backed SVG পায়। আগে embedded data, তারপর legacy files, শেষে available source rebuild ব্যবহার হয়। পুরোনো referenced companions রাখুন; নতুন self-contained export পুরোনো shared folder অপ্রয়োজনীয় প্রমাণ করে না।
 
-এক scroll surface-এ আগে Drawnix, পরে source-order Mermaid। History reopen panels, dimensions ও export actions পুনর্গঠন করে। Titles, summaries ও relations-এর স্থান সংরক্ষিত; supported readable layout না হলে format error। Cross-branch arrows static relations, native rearrangement-এর পরে attachment বর্তমান evidence-এ supported নয়। Target editor-এ দেখুন।
+Drawnix সর্বোচ্চ ছয়টি নামযুক্ত প্রধান নির্দেশিত সম্পর্ক দেখায়, প্রতি নোডে সর্বোচ্চ তিনটি। বাদ দেওয়া সম্পর্ক মেটাডেটায় থাকে। পুরোনো SVG ক্যাশ থেকেও PDF-এ বাক্সের লেখা দেখা যায়। শাখার মধ্যের তীর স্থির এবং Drawnix-এ পুনর্বিন্যাসের পর বিচ্ছিন্ন হতে পারে।
 
 ## Native export সীমা
 
@@ -88,7 +94,7 @@ Type স্পষ্ট বাছুন। Circuit-এ **Circuit diagram** ও *
 
 ### অনুপযুক্ত source
 
-**Auto** বা type-এর compatible source-এ ফিরুন। CircuitikZ circuits-এর, Draw.io/Drawnix supported structures-এর জন্য।
+সমর্থিত ফরম্যাট আগে দেখায়; অসামঞ্জস্যপূর্ণ বিকল্প দৃশ্যমান কিন্তু নিষ্ক্রিয় থাকে। আগে সংরক্ষিত নিষ্ক্রিয় অনুরোধ সরানো যায়। প্রতিটি ধরন নিজস্ব ফরম্যাট রাখে। কোনো অনুরোধ ব্যবহারযোগ্য না হলে সক্রিয় রেন্ডারারের ডিফল্ট সোর্স ফরম্যাট চেষ্টা করা হয় এবং অনুপলব্ধ অনুরোধ জানানো হয়।
 
 ### Export menu নেই
 

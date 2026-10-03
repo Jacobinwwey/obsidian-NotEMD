@@ -34,6 +34,10 @@ DeepSeek es el proveedor activo inicial, sin credenciales. Un perfil no crea cue
 
 **Diagram preview export PPI**: **300** por defecto, rango **72–600**. Afecta a PNG; SVG/PDF mantienen geometría vectorial cuando se admite. **Also export complete Mermaid visuals** controla archivos acompañantes, no visibilidad de Mermaid en Drawnix.
 
+Selecciona varios tipos de diagrama en una ejecución y varios formatos independientes por tipo. Al desmarcar un tipo se conservan sus formatos; sin tipos seleccionados se analiza el contenido automáticamente.
+
+Configura una ruta compartida relativa al Vault para archivos intermedios, o déjala vacía para usar `notemd_assert/` junto a cada original. Allí se guardan registros de recuperación, cachés y adjuntos opcionales. Conserva los archivos aún referenciados; cambiar la carpeta solo afecta a nuevas ejecuciones.
+
 ## 1. Proveedor
 
 Elige perfil, dirección adecuada al protocolo, credenciales y modelo accesible. Usa **Fetch models** cuando exista y luego **Probar conexión**. Listar y generar son comprobaciones separadas.
@@ -55,8 +59,7 @@ Compara precisión, latencia y precio real con una nota representativa; no se ga
 | Traducción | Archivo vecino `_<language>.md`; puede sobrescribir el destino |
 | Investigación | Resumen añadido a la nota Markdown activa |
 | Generación desde títulos por lotes | Escribe contenido y mueve notas aptas a `<folder>_complete` cuando el destino lo permite |
-| Vista previa/exportación | Elegir fuente o salida visual compatible y comprobar la ruta anunciada |
-
+| Vista previa/exportación | Los archivos seleccionados se exportan automáticamente junto a la nota original o directamente a la carpeta configurada. El nombre incluye el tipo, como `topic_drawnix.pdf` o `topic_flowchart.svg`; las colisiones añaden `-2`, `-3`, etc., sin sobrescribir archivos. |
 La carpeta de conceptos empieza vacía; `concepts` es una elección posible. Sus [plantillas](../features/concept-notes) son mínima/completa, sin motor general de variables para archivos.
 
 Sufijos y carpetas de procesados y traducciones son independientes. Revisa destinos existentes y avisos de recuperación. Cancelar no revierte escrituras terminadas.

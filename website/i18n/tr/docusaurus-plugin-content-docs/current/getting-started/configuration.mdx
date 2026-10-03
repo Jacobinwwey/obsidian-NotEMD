@@ -27,6 +27,10 @@ Başlangıç sağlayıcısı DeepSeek’tir; kimlik bilgileri boştur. Profil se
 
 **Diagram preview export PPI** başlangıçta 300, aralık 72–600’dür; yalnız PNG’yi etkiler. SVG/PDF desteklenen vektör geometrisini korur. **Also export complete Mermaid visuals** eşlikçi dosyaları yönetir; Drawnix içinde Mermaid’in görünmesini değil.
 
+Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
+
+Ara dosyalar için Vault’a göre ortak bir yol belirleyin ya da her kaynağın yanındaki `notemd_assert/` için alanı boş bırakın. Kurtarma kayıtları, işleme önbelleği ve isteğe bağlı ekler burada saklanır. Hâlâ başvurulan dosyaları koruyun; klasör değişikliği yalnızca yeni çalıştırmaları etkiler.
+
 ## 1. Sağlayıcı
 
 Doğru protokolün uç noktasını, gerekli anahtarı ve erişilebilir modeli girin. Liste ve başarılı üretim ayrı kontrollerdir. Yerel sunucu/model hazır olmalıdır; bulut/geçit içerik alır. Özel veri kullanmadan görev bazlı rotaları da kontrol edin.
@@ -44,8 +48,7 @@ Doğru protokolün uç noktasını, gerekli anahtarı ve erişilebilir modeli gi
 | Çeviri | Yanında `_<language>.md`; mevcut hedefin üzerine yazılabilir |
 | Araştırma | Etkin Markdown’a özet eklenir |
 | Başlıklardan toplu üretim | Uygun kaynaklara yazar, hedef izin verirse komşu `<folder>_complete` klasörüne taşır |
-| Diyagram önizleme/dışa aktarma | Desteklenen kaynak veya görsel çıktıyı seçip bildirilen yolu kontrol edin |
-
+| Diyagram önizleme/dışa aktarma | Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir. |
 Kavram klasörü başlangıçta boştur; `concepts` örnek seçimdir. Bağımsız notlar asgari/tam biçim sunar, genel bir şablon motoru değil. [Kavramlar](../features/concept-notes). İşleme ve çevirinin son ekleri/klasörleri ayrıdır. Hedefleri ve kurtarma çakışmalarını inceleyin; iptal bitmiş yazmaları geri almaz.
 
 ## 4. Diller

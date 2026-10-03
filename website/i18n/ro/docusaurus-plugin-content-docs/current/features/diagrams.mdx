@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diagrame
 
-<TLDR>Alegeți tipul diagramei, apoi formatul sursă editabil. Examinați rezultatul complet în Obsidian, inclusiv tabla Drawnix și vizualizările Mermaid încorporate. Exportați fiecare panou în SVG, PNG sau PDF.</TLDR>
+<TLDR>
+Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
+</TLDR>
 
 ## Trei alegeri distincte
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Formatul sursă | Fișierul editabil sau reutilizabil creat de Notemd | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Formatul de export | Imaginea sau documentul pentru partajare | SVG, PNG, PDF |
 
-Draw.io și Drawnix sunt formate sursă, nu tipuri de diagrame. CircuitikZ este un format sursă pentru circuite. Aceeași previzualizare are mai multe exporturi; alegerea CircuitikZ nu limitează rezultatul la SVG.
+HTML-ul diagramei conține grafică cu zoom; HTML-ul rezumatului structurat conține text, structură și referințe. HTML/SVG editabil denumește un motor de randare, nu un editor web. Folosește sursa nativă pentru editare. Exportul prezentărilor, inclusiv PPTX și MP4, păstrează setări și dependențe separate.
 
 ## Alegerea sursei
 
@@ -38,17 +40,21 @@ Draw.io și Drawnix sunt formate sursă, nu tipuri de diagrame. CircuitikZ este 
 | Drawnix | Editare de tablă sau cu aspect desenat manual | `.drawnix` |
 | CircuitikZ | Circuite electrice și cu tranzistoare structurate | `.tex` |
 
-Păstrați **Preferred source format** pe **Auto** dacă nu aveți nevoie de un anumit editor. Notemd alege un format compatibil cu tipul.
+Formatele acceptate apar primele; cele incompatibile rămân vizibile și dezactivate. Cererile inactive existente pot fi eliminate. Fiecare tip își păstrează formatele. Dacă niciunul nu este utilizabil, se încearcă sursa implicită a motorului de randare folosit și se raportează cererile indisponibile.
 
 ## Generare și export
 
 1. Deschideți nota sursă suportată. Pentru un pasaj folosiți o notă separată; selecția textului nu restrânge acțiunea pe fișier.
-2. Alegeți **diagram type** sau **Auto-detect**.
-3. Alegeți **source format** sau **Auto**. **Drawnix** oferă hărți suportate cu noduri editabile și Mermaid încorporat.
+2. Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
+3. Caseta include tipul. Apasă pe nume pentru a-l selecta și a-i modifica formatele. Trecerea cursorului sau focalizarea din tastatură schimbă previzualizarea fără salvarea setărilor. Escape închide meniul și restabilește focalizarea.
 4. Rulați **Generate diagram** din panou sau paletă.
-5. Verificați spațiul comun derulabil vertical: Drawnix urmat de toate panourile Mermaid în ordinea sursei, cu înălțimea randată completă.
-6. Folosiți **Export SVG**, **Export PNG** ori **Export PDF** per panou sau exportul de imagini superior pentru toate. La mai multe panouri, alegeți folderul sursei ori unul relativ la vault. Se scrie un fișier cu nume determinist per panou și se continuă după o eroare individuală.
-7. **Save source file** păstrează artefactul editabil.
+5. Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere.
+6. Verificați spațiul comun derulabil vertical: Drawnix urmat de toate panourile Mermaid în ordinea sursei, cu înălțimea randată completă.
+7. Folosiți **Export SVG**, **Export PNG** ori **Export PDF** per panou sau exportul de imagini superior pentru toate. La mai multe panouri, alegeți folderul sursei ori unul relativ la vault. Se scrie un fișier cu nume determinist per panou și se continuă după o eroare individuală. **Save source file** păstrează artefactul editabil.
+
+Configurează un dosar intermediar comun relativ la Vault sau lasă câmpul gol pentru `notemd_assert/` lângă fiecare sursă. Aici se păstrează înregistrări de recuperare, randări în cache și atașamente opționale. Păstrează fișierele încă referite; schimbarea afectează numai execuțiile noi.
+
+Tipurile se generează succesiv. O eroare nu le blochează pe celelalte; anularea oprește tipurile în așteptare și păstrează fișierele finalizate. Reîncearcă exportul din previzualizare sau istoric fără altă cerere către model. Eșecul generării necesită regenerarea acelui tip. Înregistrările v1/v2 rămân lizibile.
 
 Meniul Export și antetul fiecărui panou oferă aceleași acțiuni SVG/PNG/PDF. O previzualizare mare nu trebuie redusă la o singură imagine opacă.
 
@@ -74,7 +80,7 @@ Imaginile încorporate rezolvate primesc previzualizare SVG cu date incluse cân
 
 Suprafața unică derulabilă arată întâi Drawnix și apoi Mermaid în ordinea sursei. Redeschiderea istoricului reconstruiește lista, dimensiunile și acțiunile de export.
 
-Previzualizarea rezervă loc pentru titluri, rezumate și relații și ocolește nodurile cu conectori statici. Dacă nu poate produce o aranjare lizibilă suportată, generarea raportează eroare de format. Săgețile dintre ramuri sunt relații statice; atașarea după mutarea nodurilor nu este susținută de dovezile actuale. Verificați în editorul țintă.
+Drawnix afișează cel mult șase relații direcționate esențiale cu etichete, maximum trei pe nod. Cele omise rămân în metadate. Textul încadrat apare în PDF inclusiv din SVG vechi în cache. Săgețile dintre ramuri sunt statice și se pot desprinde după rearanjarea în Drawnix.
 
 ## Limitele exportului nativ
 
@@ -96,7 +102,7 @@ Selectați tipul explicit. Pentru circuit, **Circuit diagram** și **Generate di
 
 ### Format sursă nepotrivit
 
-Reveniți la **Auto** sau alegeți formatul pentru acel tip. CircuitikZ este pentru circuite; Draw.io și Drawnix pentru diagrame structurate suportate.
+Formatele acceptate apar primele; cele incompatibile rămân vizibile și dezactivate. Cererile inactive existente pot fi eliminate. Fiecare tip își păstrează formatele. Dacă niciunul nu este utilizabil, se încearcă sursa implicită a motorului de randare folosit și se raportează cererile indisponibile.
 
 ### Meniul Export lipsește
 

@@ -29,6 +29,10 @@ A **Search settings** névben, leírásban, aliasokban és látható kategóriá
 
 A **Diagram preview export PPI** alapértéke 300, tartománya 72–600, és csak PNG-re vonatkozik. Az SVG/PDF megőrzi a támogatott vektorgeometriát. Az **Also export complete Mermaid visuals** a kísérőfájlokat szabályozza, nem a Mermaid megjelenését a Drawnix-előnézetben.
 
+Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
+
+Állítson be közös, Vault-relatív mappát a köztes fájloknak, vagy hagyja üresen a mezőt a források melletti `notemd_assert/` használatához. Itt tárolódnak a helyreállítási rekordok, gyorsítótárak és választható mellékletek. A hivatkozott fájlokat őrizze meg; a módosítás csak új futtatásokra érvényes.
+
 ## 1. Szolgáltató
 
 Adja meg a megfelelő protokoll végpontját, a szükséges kulcsot és az elérhető modellt. A modelllistát és generálást külön ellenőrizze. A helyi szervernek/modellnek készen kell állnia; a felhő és átjáró megkapja a tartalmat. Magánadatok előtt a feladatonkénti útvonalakat is nézze át.
@@ -46,8 +50,7 @@ A `useMultiModelSettings` külön profilt/modellt enged hivatkozáshoz, címgene
 | Fordítás | A forrás mellett `_<language>.md`; a létező cél felülírható |
 | Kutatás | Összefoglaló az aktív Markdown végére |
 | Kötegelt generálás címekből | Alkalmas források írása, majd áthelyezés a szomszédos `<folder>_complete` mappába, ha a cél engedi |
-| Diagramelőnézet/export | Támogatott forrás vagy vizuális export; ellenőrizze a jelentett útvonalat |
-
+| Diagramelőnézet/export | A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás. |
 A fogalommappa üresen indul; a `concepts` példa. Az önálló fogalomjegyzet minimális/teljes változata nem általános sablonmotor. [Fogalmak](../features/concept-notes). Feldolgozás és fordítás saját utótaggal/mappával dolgozik. Ellenőrizze a célokat; megszakítás nem vonja vissza a kész írásokat.
 
 ## 4. Nyelvek

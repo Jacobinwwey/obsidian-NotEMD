@@ -27,6 +27,10 @@ Standardudbyderen er DeepSeek uden legitimationsoplysninger. En profil opretter 
 
 **Diagram preview export PPI** er oprindeligt 300, interval 72–600, og påvirker kun PNG. SVG/PDF bevarer understøttet vektorgeometri. **Also export complete Mermaid visuals** styrer ledsagefiler, ikke om Mermaid vises i Drawnix-preview.
 
+Vælg flere diagramtyper i samme kørsel og flere outputformater for hver type. Fravalg bevarer typens formater; uden valgte typer analyseres indholdet automatisk.
+
+Angiv en fælles Vault-relativ mappe til mellemfiler, eller lad feltet stå tomt for `notemd_assert/` ved hver kilde. Her ligger gendannelsesposter, renderingscache og valgfrie bilag. Bevar filer, som stadig refereres; ændringer gælder kun nye kørsler.
+
 ## 1. Udbyder
 
 Angiv endpoint til korrekt protokol, krævet nøgle og tilgængelig model. Modelliste og generering er separate kontroller. Lokal server/model skal være klar; cloud/gateway modtager indhold. Kontrollér også opgavespecifikke ruter før privat materiale.
@@ -44,8 +48,7 @@ Angiv endpoint til korrekt protokol, krævet nøgle og tilgængelig model. Model
 | Oversættelse | Ved siden af som `_<language>.md`; eksisterende mål kan overskrives |
 | Research | Opsummering føjes til aktiv Markdown |
 | Batchgenerering fra titler | Skriver egnede kilder og flytter til tilstødende `<folder>_complete`, hvis målet tillader det |
-| Diagram-preview/eksport | Vælg understøttet kilde eller visuel eksport og kontrollér rapporteret sti |
-
+| Diagram-preview/eksport | Valgte filer eksporteres automatisk ved siden af kildenoten eller direkte til den angivne outputmappe. Navnene indeholder typen, eksempelvis `topic_drawnix.pdf` og `topic_flowchart.svg`; ved konflikter tilføjes `-2`, `-3` osv. uden overskrivning. |
 Begrebsmappen starter tom; `concepts` er et eksempel. Selvstændige noter har minimal/fuld form, ingen generel skabelonmotor. [Begreber](../features/concept-notes). Behandling og oversættelse har hver deres suffikser/mapper. Kontrollér mål og genoprettelseskonflikter; annullering ruller ikke færdige skrivninger tilbage.
 
 ## 4. Sprog

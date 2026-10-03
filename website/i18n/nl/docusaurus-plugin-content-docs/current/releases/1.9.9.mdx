@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Meerdere diagrammen, onafhankelijke exports"
+description: "Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Meerdere diagrammen, onafhankelijke exports
+
+<TLDR>
+Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
+</TLDR>
+
+## Meerdere diagrammen, onafhankelijke exports
+
+Het selectievakje neemt het type op. Klik op de naam om het te selecteren en de formaten te wijzigen. Aanwijzen of toetsenbordfocus wisselt het voorbeeld zonder instellingen op te slaan. Escape sluit het menu en herstelt de focus.
+
+Ondersteunde formaten staan bovenaan; incompatibele opties blijven zichtbaar en uitgeschakeld. Bestaande inactieve aanvragen kun je verwijderen. Elk type behoudt zijn formaten. Is geen formaat bruikbaar, dan probeert Notemd het standaardbronformaat van de gebruikte renderer en meldt het onbeschikbare aanvragen.
+
+Diagram-HTML bevat een zoombare afbeelding; HTML met een gestructureerde samenvatting bevat tekst, structuur en verwijzingen. Bewerkbaar HTML/SVG is een renderer, geen webeditor. Gebruik de oorspronkelijke bron voor bewerking. Presentatie-export, waaronder PPTX en MP4, behoudt afzonderlijke instellingen en afhankelijkheden.
+
+Drawnix toont maximaal zes benoemde gerichte kernrelaties, hoogstens drie per knooppunt. Weggelaten relaties blijven in de metadata. Tekst in kaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken zijn statisch en kunnen losraken na herschikken in Drawnix.
+
+## Bestanden en herstel
+
+Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven.
+
+Stel een gedeelde Vault-relatieve map voor tussenbestanden in, of laat het veld leeg voor `notemd_assert/` naast elke bron. Hier staan herstelgegevens, rendercaches en optionele bijlagen. Bewaar bestanden waarnaar nog wordt verwezen; een mapwijziging geldt alleen voor nieuwe uitvoeringen.
+
+Typen worden achtereenvolgens gemaakt. Eén fout blokkeert de overige niet; annuleren stopt wachtende typen en bewaart voltooide bestanden. Herhaal exports vanuit het voorbeeld of de geschiedenis zonder nieuwe modelaanvraag. Na een generatiefout moet dat type opnieuw worden gemaakt. v1/v2-herstelgegevens blijven leesbaar.
+
+## Bijwerken
+
+Stop taken en maak een back-up van de Vault. Installeer `main.js`, `manifest.json` en `styles.css` uit dezelfde Release 1.9.9, behoud instellingen en bestanden en herlaad Obsidian. Controleer één notitie vóór grote batches. Oude voorkeuren migreren bij bewerking. Vertalingen zijn rechtstreeks geschreven, zonder vertaal-API’s of LM Studio.
+
+## Naslag
+
+- [Diagramhandleiding](../features/diagrams)
+- [Versie en downloads](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

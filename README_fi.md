@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Aloita tästä
 
 | Lukija | Aloitus | Tavoite |
@@ -19,13 +19,13 @@
 | Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
 | Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
 
-**Versio:** 1.9.8
+**Versio:** 1.9.9
 
-- **Peruutus ja palautus:** peruutus pysyy voimassa ajoituksen ja uusintayritysten aikana ja estää tutkimuksen ja käännöksen myöhäiset kirjoitukset. Valmiit tulokset säilyvät ja palautusristiriidat ilmoitetaan.
-- **Historia ja vienti:** hakuteksti ja näppäimistökohdistus säilyvät. PowerPointin yhdistettyjen solujen erotinviivat sekä CircuitikZ-yhteydet ja selitteet on korjattu. Paikallinen erähaku käyttää yhtenäistä tilannekuvaa.
-- **Julkaisu ja dokumentaatio:** puhtaiden lähteiden alkuperä ja ladatut tiedostot tarkistetaan; eri lukijat saavat omat aloituspolut ja suoraan kirjoitetut käännökset.
+- Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti.
+- Valitut tiedostot viedään automaattisesti lähdemuistiinpanon viereen tai suoraan määritettyyn tuloskansioon. Nimi sisältää tyypin, kuten `topic_drawnix.pdf` tai `topic_flowchart.svg`. Nimiristiriidoissa lisätään `-2`, `-3` jne. korvaamatta vanhoja tiedostoja.
+- Drawnix näyttää enintään kuusi nimettyä, suunnattua ydinsuhdetta, korkeintaan kolme solmua kohti. Pois jätetyt suhteet säilyvät metatiedoissa. Laatikoiden teksti näkyy PDF:ssä myös vanhoista SVG-välimuisteista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa uudelleen järjestettäessä.
 
-36 tarjoajaesiasetusta ja 33 suoritettavaa kaaviotyyppiä olivat mukana jo versiossa 1.9.7. [Päivitysopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/releases/1.9.8) · [Tarkista julkinen julkaisu](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+36 tarjoajaesiasetusta ja 33 suoritettavaa kaaviotyyppiä olivat mukana jo versiossa 1.9.7. [Päivitysopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/releases/1.9.9) · [Tarkista julkinen julkaisu](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Drawnixin haarojen väliset nuolet pysyvät staattisina uudelleenjärjestelyn jälkeen. PPTX:n Mermaid/SVG voi käyttää kuvavaraesitystä. Peruutus ei kumoa tallennettuja muutoksia eikä takaa etägeneroinnin tai laskutuksen loppumista. Fyysisiä mobiililaitteita ja Obsidian 0.15.0:aa ei ole varmennettu.
 
@@ -714,7 +714,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.8 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.9 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->
@@ -746,7 +746,12 @@ Notemd -asetuksensivu tarjoaa alueita tunnistavaa hämävyysotsintaa, laajoja ka
 - Diagrammin historia tallennetaan Vault -sävelissä, järjestetty uusimmista alhaampaan; se on hakettavaa ja sijoitettava 20:stä ryhmistä. Historiallisen kirjeen poistaminen ei poista luotuja failia.
 - Diagrammin etukatsausluoden PPI -arvo on vaihtoehtoisesti 300, mutta se hyväksyy myös arvon 72–600. Se hallitsee vain PNG -rasterointia; SVG ja PDF jäävät vektoripohiseiksi.
 - Täydellisten Mermaid -visuaalien eksportoinnin aikana voidaan valita mahdollisuus kirjoittaa myös Mermaid -lähteet, SVG ja manifestit; Mermaid on edelleen käytettävissä Drawnix -etukatsauksissa, joka on poistetaan.
-- Ehdotuksiin mukainen diagrammityyppi ja ehdotuksiin mukainen lähteenvormattelu ovat erilliset valintat.
+- Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti. Valintaruutu ottaa tyypin mukaan. Nimen napsautus valitsee tyypin ja avaa sen muotoasetukset. Osoittimen vieminen päälle tai näppäimistökohdistus vaihtaa esikatselua tallentamatta asetuksia. Escape sulkee valikon ja palauttaa kohdistuksen.
+- Valitut tiedostot viedään automaattisesti lähdemuistiinpanon viereen tai suoraan määritettyyn tuloskansioon. Nimi sisältää tyypin, kuten `topic_drawnix.pdf` tai `topic_flowchart.svg`. Nimiristiriidoissa lisätään `-2`, `-3` jne. korvaamatta vanhoja tiedostoja.
+- Määritä välitiedostoille yhteinen Vault-suhteinen kansio tai jätä kenttä tyhjäksi, jolloin käytetään kunkin lähteen viereistä `notemd_assert/`-kansiota. Sinne tallentuvat palautustietueet, hahmonnusvälimuisti ja valinnaiset liitteet. Säilytä edelleen viitatut tiedostot; muutos koskee vain uusia ajoja.
+- Kaavio-HTML sisältää zoomattavan kuvan; rakenteisen yhteenvedon HTML sisältää tekstin, rakenteen ja lähdeviitteet. Muokattava HTML/SVG tarkoittaa hahmonninta, ei verkkoselaimen editoria. Käytä muokkaukseen alkuperäistä lähdetiedostoa. Esitysviennillä, myös PPTX- ja MP4-muodoilla, on erilliset asetukset ja riippuvuudet.
+- Tyypit luodaan peräkkäin. Yhden virhe ei estä muita. Peruutus pysäyttää odottavat tyypit ja säilyttää valmiit tiedostot. Viennin voi uusia esikatselusta tai historiasta ilman uutta mallipyyntöä. Luontivirhe vaatii kyseisen tyypin luomisen uudelleen. v1/v2-palautustietueet ovat edelleen luettavissa.
+- Drawnix näyttää enintään kuusi nimettyä, suunnattua ydinsuhdetta, korkeintaan kolme solmua kohti. Pois jätetyt suhteet säilyvät metatiedoissa. Laatikoiden teksti näkyy PDF:ssä myös vanhoista SVG-välimuisteista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa uudelleen järjestettäessä.
 - Tietokonekäyttäjät voivat avata valintaista CircuitikZ -natiivisen kompiloimisympäristön, jotta voivat käyttää sistemin Tectonic/pdflatex -sovelluksia, valita omakustannuselisen kompilaatorin tai asentaa suoraan hallitsevan Tectonic -järjestelmän. Etukatsaus, SVG, PNG sekä PDF -etukatsausluodot eivät vaadi LaTeXia.
 - Edistynyt paketityyppien valinta mahdollistaa salvestettujen valintaprofiilien ja sääntöjen etukatsauksien käyttöä.
 - Puuttuvan paketitiedon siirtokytkälän kanssa on mahdollista luoda se vahvistuksen jälkeen, ja on mahdollisuus muistaa automaattisen luomisen tuleviin puutteville tiedostoille.

@@ -64,7 +64,9 @@ Färdiga skrivningar bevaras; accepterade anrop kan avslutas. Granska filer och 
 
 ### Diagram eller inbyggd export
 
-Välj stödd typ/källkombination och kontrollera bildspels-/CircuitikZ-miljö. Förhandsvisning är inget native-test. Spara textkälla för externt verktyg om visuell förhandsvisning saknas. [Diagram](../features/diagrams).
+Typer genereras i följd. Ett fel stoppar inte de andra; avbrytning stoppar väntande typer och behåller färdiga filer. Försök exportera igen via förhandsvisning eller historik utan en ny modellförfrågan. Genereringsfel kräver att typen genereras igen. Återställningsposter v1/v2 kan fortfarande läsas.
+
+Diagram-HTML innehåller en zoombar bild; HTML för strukturerad sammanfattning innehåller text, struktur och belägg. Redigerbar HTML/SVG är en renderare, inte en webbredigerare. Använd den ursprungliga källfilen för redigering. Presentationsexport, inklusive PPTX och MP4, har separata inställningar och beroenden. [Diagramhandbok](../features/diagrams).
 
 ## Rapportera fel
 

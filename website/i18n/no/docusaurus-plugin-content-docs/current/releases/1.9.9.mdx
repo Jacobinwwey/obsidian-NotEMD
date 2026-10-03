@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Flere diagrammer, uavhengige eksporter"
+description: "Velg flere diagramtyper i samme kjøring og flere utdataformater for hver type. Når du fjerner avkrysningen, beholdes typens formater. Uten valgte typer analyseres innholdet automatisk."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Flere diagrammer, uavhengige eksporter
+
+<TLDR>
+Velg flere diagramtyper i samme kjøring og flere utdataformater for hver type. Når du fjerner avkrysningen, beholdes typens formater. Uten valgte typer analyseres innholdet automatisk.
+</TLDR>
+
+## Flere diagrammer, uavhengige eksporter
+
+Avkrysningsboksen tar med typen. Klikk på navnet for å velge den og redigere formatene. Pekeren over typen eller tastaturfokus bytter forhåndsvisning uten å lagre innstillinger. Escape lukker menyen og gjenoppretter fokus.
+
+Støttede formater vises først; inkompatible valg forblir synlige og deaktiverte. Eksisterende inaktive ønsker kan fjernes. Hver type beholder sine formater. Hvis ingen kan brukes, forsøkes standardkilden til den aktive rendereren, og utilgjengelige ønsker rapporteres.
+
+Diagram-HTML inneholder grafikk med zoom; HTML med strukturert sammendrag inneholder tekst, struktur og referanser. Redigerbar HTML/SVG er en renderer, ikke en nettredigerer. Bruk den opprinnelige kildefilen for redigering. Presentasjonseksport, inkludert PPTX og MP4, har egne innstillinger og avhengigheter.
+
+Drawnix viser opptil seks navngitte, rettede hovedrelasjoner, maksimalt tre per node. Utelatte relasjoner beholdes i metadata. Tekst i bokser vises i PDF også fra eldre SVG-cache. Piler mellom grener er statiske og kan løsne ved omorganisering i Drawnix.
+
+## Filer og gjenoppretting
+
+Valgte filer eksporteres automatisk ved siden av kildenotatet eller rett til den angitte utdatamappen. Navnene inneholder typen, for eksempel `topic_drawnix.pdf` og `topic_flowchart.svg`. Navnekollisjoner får `-2`, `-3` osv. uten å overskrive filer.
+
+Angi en felles Vault-relativ mappe for mellomfiler, eller la feltet stå tomt for `notemd_assert/` ved hver kilde. Her lagres gjenopprettingsposter, rendringscache og valgfrie vedlegg. Behold filer som fortsatt refereres; endringer gjelder bare nye kjøringer.
+
+Typer genereres etter hverandre. Én feil stopper ikke de andre. Avbryting stopper ventende typer og beholder ferdige filer. Prøv eksport på nytt fra forhåndsvisning eller historikk uten en ny modellforespørsel. Genereringsfeil krever at typen genereres på nytt. v1/v2-poster kan fortsatt leses.
+
+## Oppgradering
+
+Stopp oppgaver og sikkerhetskopier Vault. Installer `main.js`, `manifest.json` og `styles.css` fra samme Release 1.9.9, behold innstillinger og filer, og last Obsidian på nytt. Kontroller ett notat før store kjøringer. Gamle innstillinger migreres ved redigering. Oversettelsene er skrevet direkte uten oversettelses-API eller LM Studio.
+
+## Referanser
+
+- [Diagramhåndbok](../features/diagrams)
+- [Versjon og nedlastinger](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

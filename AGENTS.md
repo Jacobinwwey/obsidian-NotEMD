@@ -135,7 +135,7 @@ If you touch Mermaid-related behavior:
 
 Documentation is part of the feature. If behavior, provider support, or release workflow changes, update the docs in the same branch.
 
-For the 1.9.8 documentation program, author translations directly and review every affected locale against the corrected English source. Do not call LM Studio or translation APIs, or run legacy translation write scripts. Preserve executable syntax and translate instructional prose. This does not change LM Studio support inside the plugin.
+For documentation updates, author translations directly and review every affected locale against the corrected English source. Do not call LM Studio or translation APIs, or run legacy translation write scripts. Preserve executable syntax and translate instructional prose. This does not change LM Studio support inside the plugin.
 
 At minimum, evaluate whether these files need updates:
 

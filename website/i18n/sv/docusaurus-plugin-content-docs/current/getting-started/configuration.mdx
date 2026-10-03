@@ -27,6 +27,10 @@ Standardleverantören är DeepSeek utan autentiseringsuppgifter. Att välja prof
 
 **Diagram preview export PPI** börjar på 300, tillåter 72–600 och påverkar bara PNG. SVG/PDF bevarar stödd vektorgeometri. **Also export complete Mermaid visuals** styr följeslagarfiler, inte om Mermaid visas i Drawnix-förhandsvisningen.
 
+Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.
+
+Ange en gemensam Vault-relativ mapp för mellanfiler, eller lämna tomt för `notemd_assert/` bredvid varje källa. Där lagras återställningsposter, renderingscache och valfria bilagor. Behåll filer som fortfarande refereras; mappändringar gäller bara nya körningar.
+
 ## 1. Leverantör
 
 Ange endpoint för rätt protokoll, nödvändig nyckel och tillgänglig modell. Modellista och lyckad generering är skilda kontroller. Förbered lokal server/modell; moln/gateway tar emot innehåll. Kontrollera även uppgiftsspecifika vägar innan privat material används.
@@ -44,8 +48,7 @@ Ange endpoint för rätt protokoll, nödvändig nyckel och tillgänglig modell. 
 | Översättning | Intilliggande `_<language>.md`; befintligt mål kan skrivas över |
 | Forskning | Sammanfattning läggs till i aktiv Markdown |
 | Batchgenerering från titlar | Skriver lämpliga källor och flyttar till intilliggande `<folder>_complete` om målet tillåter |
-| Diagramförhandsvisning/export | Välj stödd källa eller visuell export och kontrollera rapporterad sökväg |
-
+| Diagramförhandsvisning/export | Valda filer exporteras automatiskt bredvid källanteckningen eller direkt till den angivna mappen. Namnen innehåller typen, exempelvis `topic_drawnix.pdf` och `topic_flowchart.svg`. Vid namnkonflikter läggs `-2`, `-3` och så vidare till utan överskrivning. |
 Begreppsmappen är tom från början; `concepts` är ett exempel. Fristående extraktion har minimal/full form, ingen generell mallmotor. [Begrepp](../features/concept-notes). Bearbetning och översättning har separata suffix och mappar. Kontrollera mål och återställningskonflikter; avbrott ångrar inte slutförda skrivningar.
 
 ## 4. Språk

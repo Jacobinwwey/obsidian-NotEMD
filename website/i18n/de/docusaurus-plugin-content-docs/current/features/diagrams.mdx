@@ -17,7 +17,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagramme
 
 <TLDR>
-Wähle zuerst den Diagrammtyp, dann das bearbeitbare Quellformat. Prüfe das gesamte Ergebnis in Obsidian, einschließlich Drawnix und eingebetteter Mermaid-Ansichten. Exportiere einzelne Panels als SVG, PNG oder PDF.
+Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert.
 </TLDR>
 
 ## Drei unterschiedliche Entscheidungen
@@ -28,7 +28,7 @@ Wähle zuerst den Diagrammtyp, dann das bearbeitbare Quellformat. Prüfe das ges
 | Quellformat | Bearbeitbare oder wiederverwendbare Datei | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Exportformat | Bild oder Dokument zur Weitergabe | SVG, PNG, PDF |
 
-Draw.io und Drawnix sind **Quellformate**, keine Diagrammtypen. CircuitikZ ist eine Schaltungsquelle, schränkt visuelle Exporte aber nicht auf SVG ein.
+Diagramm-HTML enthält eine zoombare Grafik; strukturiertes Zusammenfassungs-HTML enthält Text, Struktur und Belege. Editierbares HTML/SVG bezeichnet einen Renderer, keinen Webeditor. Zum Bearbeiten dient die native Quelldatei. Präsentationsexporte einschließlich PPTX und MP4 behalten eigene Einstellungen und Abhängigkeiten.
 
 ## Quellformat wählen
 
@@ -40,17 +40,21 @@ Draw.io und Drawnix sind **Quellformate**, keine Diagrammtypen. CircuitikZ ist e
 | Drawnix | Whiteboard- und handgezeichneter Stil | `.drawnix` |
 | CircuitikZ | Strukturierte elektrische und Transistorschaltungen | `.tex` |
 
-Ohne festes Zielprogramm **Preferred source format: Auto** verwenden; Notemd wählt ein kompatibles Format.
+Unterstützte Formate stehen zuerst; inkompatible bleiben sichtbar und deaktiviert. Bestehende inaktive Anforderungen lassen sich entfernen. Die Formate gehören jeweils zu ihrem Diagrammtyp. Ist keines nutzbar, wird das Standardquellformat des verwendeten Renderers versucht; nicht verfügbare Anforderungen werden gemeldet.
 
 ## Erzeugen und exportieren
 
 1. Unterstützte Notiz öffnen; für einen Ausschnitt eine eigene Notiz anlegen, da Auswahl eine Dateiaktion nicht einschränkt.
-2. Diagrammtyp oder **Auto-detect** wählen.
-3. Quellformat oder **Auto** wählen; Drawnix für unterstützte Wissenskarten mit bearbeitbaren Knoten und Mermaid.
+2. Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert.
+3. Das Kontrollkästchen nimmt einen Typ auf. Ein Klick auf den Namen wählt ihn aus und öffnet seine Formate. Darüberfahren oder Tastaturfokus wechselt die Vorschau, ohne Einstellungen zu speichern. Escape schließt das Menü und setzt den Fokus zurück.
 4. **Diagramm generieren** starten.
-5. Vorschau prüfen: Drawnix und Mermaid-Panels bleiben in Quellreihenfolge in einer vertikal scrollbaren Hülle, mit tatsächlich gerenderter Höhe.
-6. **SVG exportieren**, **PNG exportieren** oder **Export PDF** je Panel bzw. oberen Export für alle nutzen. Bei mehreren Panels Quellordner oder eigenes Vault-relatives Ziel wählen. Pro Panel entsteht eine deterministisch benannte Datei; Einzelfehler stoppen andere nicht.
-7. **Quelldatei speichern** sichert die bearbeitbare Quelle.
+5. Ausgewählte Dateien werden automatisch neben der Quellnotiz oder direkt im konfigurierten Ausgabeordner gespeichert. Der Name enthält den Typ, etwa `topic_drawnix.pdf` oder `topic_flowchart.svg`. Bei Kollisionen folgen `-2`, `-3` usw.; vorhandene Dateien werden nicht überschrieben.
+6. Vorschau prüfen: Drawnix und Mermaid-Panels bleiben in Quellreihenfolge in einer vertikal scrollbaren Hülle, mit tatsächlich gerenderter Höhe.
+7. **SVG exportieren**, **PNG exportieren** oder **Export PDF** je Panel bzw. oberen Export für alle nutzen. Bei mehreren Panels Quellordner oder eigenes Vault-relatives Ziel wählen. Pro Panel entsteht eine deterministisch benannte Datei; Einzelfehler stoppen andere nicht. **Quelldatei speichern** sichert die bearbeitbare Quelle.
+
+Für Zwischendateien lässt sich ein gemeinsamer Vault-relativer Ordner festlegen. Ein leeres Feld verwendet `notemd_assert/` neben jeder Quelle. Dort liegen Wiederherstellungsprotokolle, Render-Caches und optionale Anhänge. Weiterhin referenzierte Dateien behalten; Ordneränderungen gelten nur für neue Durchläufe.
+
+Typen werden nacheinander erzeugt. Ein Fehler blockiert die anderen nicht. Abbrechen stoppt ausstehende Typen und erhält fertige Dateien. Exporte lassen sich in Vorschau oder Verlauf ohne neue Modellanfrage wiederholen. Bei einem Generierungsfehler muss dieser Typ neu erzeugt werden. v1/v2-Protokolle bleiben lesbar.
 
 Exportmenü und Panelkopf bieten die drei Formate. Große Vorschauen müssen nicht als ein einziges undurchsichtiges Bild ausgegeben werden.
 
@@ -76,7 +80,7 @@ Bilder verwenden wenn möglich dateneingebettete SVG-Vorschau. Laden priorisiert
 
 Das Hauptboard steht vor Mermaid-Panels in Quellreihenfolge. Gespeicherte Historieneinträge rekonstruieren dieselben Panels, Größen und Exportaktionen.
 
-Layout reserviert Titel, Zusammenfassung und Beziehungslabels; statische Verbindungen umgehen Knoten. Ist keine unterstützte lesbare Anordnung möglich, meldet die Generierung einen Formatfehler. Astübergreifende Pfeile bleiben statisch; Anheftung nach Umordnung in Drawnix ist nicht belegt. Im Zielprogramm prüfen.
+Drawnix zeigt höchstens sechs beschriftete zentrale gerichtete Beziehungen, maximal drei je Knoten. Ausgelassene Beziehungen bleiben in den Metadaten. Eingerahmter Text bleibt im PDF sichtbar, auch bei älteren SVG-Caches. Zweigübergreifende Pfeile sind statisch und können sich nach einer Neuanordnung in Drawnix lösen.
 
 ## Native Exportgrenzen
 
@@ -100,7 +104,7 @@ Typ ausdrücklich wählen. Für Schaltungen **Circuit diagram** mit **Diagramm g
 
 ### Unpassendes Quellformat
 
-**Auto** oder ein passendes Format wählen. CircuitikZ für Schaltungen, Draw.io/Drawnix für unterstützte strukturierte Diagramme.
+Unterstützte Formate stehen zuerst; inkompatible bleiben sichtbar und deaktiviert. Bestehende inaktive Anforderungen lassen sich entfernen. Die Formate gehören jeweils zu ihrem Diagrammtyp. Ist keines nutzbar, wird das Standardquellformat des verwendeten Renderers versucht; nicht verfügbare Anforderungen werden gemeldet.
 
 ### Exportmenü fehlt
 

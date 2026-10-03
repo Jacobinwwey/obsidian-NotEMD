@@ -68,7 +68,9 @@ Se conservan escrituras terminadas y las ya aceptadas pueden concluir. Revisa re
 
 ### Diagrama o exportación nativa fallidos
 
-Elige combinación soportada de tipo/fuente. Vista previa no valida consumidor nativo. Comprueba entorno de diapositivas o CircuitikZ y sus errores. Si solo hay código fuente, úsalo en la herramienta externa apropiada. Véase [diagramas](../features/diagrams).
+Los tipos se generan en secuencia. Un fallo no bloquea los demás; cancelar detiene los pendientes y conserva los archivos completados. Reintenta exportaciones desde la vista previa o el historial sin otra solicitud al modelo. Si falla la generación, genera de nuevo ese tipo. Los registros v1/v2 siguen siendo legibles.
+
+El HTML de diagrama contiene un gráfico ampliable; el HTML de resumen estructurado contiene texto, estructura y referencias. HTML/SVG editable nombra un renderizador, no un editor web. Para editar, usa el archivo fuente nativo. Las presentaciones, incluidos PPTX y MP4, mantienen ajustes y dependencias separados. [Manual de diagramas](../features/diagrams).
 
 ## Informar un problema
 

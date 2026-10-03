@@ -29,6 +29,10 @@ Výchozí poskytovatel je DeepSeek s prázdnými přihlašovacími údaji. Volba
 
 **Diagram preview export PPI** má výchozí hodnotu 300 a rozsah 72–600, pouze pro PNG. SVG/PDF zachovávají podporovanou vektorovou geometrii. **Also export complete Mermaid visuals** řídí doprovodné soubory, nikoli zobrazení Mermaid v náhledu Drawnix.
 
+Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.
+
+Nastavte společnou mezisložku relativně k Vault, nebo nechte pole prázdné pro `notemd_assert/` vedle každého zdroje. Obsahuje záznamy obnovy, mezipaměť vykreslení a volitelné přílohy. Zachovejte stále odkazované soubory; změna platí jen pro nové běhy.
+
 ## 1. Poskytovatel
 
 Zadejte endpoint správného protokolu, vyžadovaný klíč a dostupný model. Seznam modelů a generování ověřujte zvlášť. Lokální server/model musí být připraven; cloud i brána obdrží obsah. Před soukromými daty ověřte i směrování jednotlivých úloh.
@@ -46,8 +50,7 @@ Zadejte endpoint správného protokolu, vyžadovaný klíč a dostupný model. S
 | Překlad | Vedle zdroje jako `_<language>.md`; existující cíl lze přepsat |
 | Rešerše | Shrnutí se připojí k aktivnímu Markdownu |
 | Dávkové generování podle názvů | Zapíše způsobilé zdroje a přesune do sousední `<folder>_complete`, dovolí-li to cíl |
-| Náhled/export diagramu | Vyberte podporovaný zdroj či vizuální export a ověřte hlášenou cestu |
-
+| Náhled/export diagramu | Vybrané soubory se automaticky exportují vedle zdrojové poznámky nebo přímo do nastavené složky. Název obsahuje typ, například `topic_drawnix.pdf` a `topic_flowchart.svg`; při kolizi se přidá `-2`, `-3` atd. bez přepsání souborů. |
 Složka pojmů je původně prázdná; `concepts` je příklad. Samostatné poznámky mají minimální/plnou variantu, nikoli obecný šablonovací systém. [Pojmy](../features/concept-notes). Zpracování a překlad mají vlastní přípony a složky. Zkontrolujte kolize; zrušení nevrací dokončené zápisy.
 
 ## 4. Jazyky

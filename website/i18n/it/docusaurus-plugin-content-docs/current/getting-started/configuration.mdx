@@ -34,6 +34,10 @@ DeepSeek è il provider iniziale, con credenziali vuote. Un profilo non crea acc
 
 **Diagram preview export PPI**: **300** iniziali, intervallo **72–600**. Riguarda PNG; SVG/PDF mantengono geometria vettoriale dove supportata. **Also export complete Mermaid visuals** controlla i file accessori, non la visibilità di Mermaid in Drawnix.
 
+Seleziona più tipi di diagramma in un’esecuzione e più formati indipendenti per ciascun tipo. Deselezionare un tipo conserva i suoi formati; senza selezioni il contenuto viene analizzato automaticamente.
+
+Imposta una cartella intermedia condivisa relativa al Vault, oppure lascia il campo vuoto per usare `notemd_assert/` accanto a ogni originale. Contiene registri di ripristino, rendering in cache e allegati facoltativi. Conserva i file ancora referenziati; la modifica riguarda solo nuove esecuzioni.
+
 ## 1. Provider
 
 Scegli profilo, endpoint adatto al protocollo, credenziali e modello accessibile. Usa **Fetch models** quando disponibile e poi **Testa connessione**. Elenco e generazione sono verifiche diverse.
@@ -55,8 +59,7 @@ Confronta precisione, latenza e prezzo reale con una nota rappresentativa. Non s
 | Traduzione | File separato `_<language>.md`; può sovrascrivere un output esistente |
 | Ricerca | Sintesi aggiunta alla nota Markdown attiva |
 | Generazione da titoli in lotto | Scrive contenuto e sposta note idonee nella cartella adiacente `<folder>_complete` quando consentito |
-| Anteprima/esportazione | Scegliere sorgente o visuale compatibile e controllare il percorso indicato |
-
+| Anteprima/esportazione | I file selezionati vengono esportati automaticamente accanto alla nota originale o direttamente nella cartella configurata. Il nome include il tipo, come `topic_drawnix.pdf` o `topic_flowchart.svg`; le collisioni aggiungono `-2`, `-3` e così via senza sovrascrivere file. |
 La cartella dei concetti parte vuota; `concepts` è una scelta possibile. I [modelli di nota](../features/concept-notes) sono minimo/completo, senza motore generale di variabili per file.
 
 Suffissi e cartelle di elaborati e traduzioni sono distinti. Controlla destinazioni esistenti e messaggi di recupero. Annullare non ripristina le scritture concluse.

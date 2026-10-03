@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diagram
 
-<TLDR>Pilih **jenis diagram**, lalu **format sumber yang dapat disunting**. Tinjau hasil lengkap di Obsidian, termasuk papan Drawnix dan visual Mermaid tertanam, lalu ekspor tiap panel ke SVG, PNG, atau PDF.</TLDR>
+<TLDR>
+Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
+</TLDR>
 
 ## Tiga pilihan yang berbeda
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Format sumber | Berkas yang dapat disunting/digunakan ulang | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Format ekspor | Gambar atau dokumen untuk berbagi | SVG, PNG, PDF |
 
-Draw.io/Drawnix adalah **format sumber**, bukan jenis diagram. CircuitikZ adalah sumber untuk sirkuit. Pratinjau sama dapat diekspor ke beberapa format visual; CircuitikZ tidak membatasi hasil hanya SVG.
+HTML diagram berisi gambar yang dapat diperbesar; HTML ringkasan terstruktur berisi teks, struktur, dan rujukan. HTML/SVG yang dapat diedit adalah nama perender, bukan editor web. Gunakan sumber asli untuk mengedit. Ekspor presentasi, termasuk PPTX dan MP4, memiliki pengaturan dan dependensi terpisah.
 
 ## Pilih format sumber
 
@@ -38,17 +40,21 @@ Draw.io/Drawnix adalah **format sumber**, bukan jenis diagram. CircuitikZ adalah
 | Drawnix | Penyuntingan gaya papan tulis/sketsa | `.drawnix` |
 | CircuitikZ | Sirkuit listrik/transistor terstruktur | `.tex` |
 
-Biarkan **Preferred source format** pada **Auto** bila tidak membutuhkan editor tertentu. Notemd memilih format kompatibel dengan jenis diagram.
+Format yang didukung tampil dahulu; pilihan yang tidak kompatibel tetap terlihat tetapi dinonaktifkan. Permintaan tidak aktif yang sudah tersimpan dapat dihapus. Setiap jenis memiliki formatnya sendiri. Jika semuanya tidak dapat digunakan, sumber bawaan perender aktif dicoba dan permintaan yang tidak tersedia dilaporkan.
 
 ## Hasilkan dan ekspor
 
 1. Buka sumber yang didukung. Untuk satu bagian, taruh dalam catatan terpisah; sorotan teks tidak membatasi tindakan berbasis berkas.
-2. Pilih **diagram type** atau **Auto-detect**.
-3. Pilih **source format** atau **Auto**. **Drawnix** cocok untuk peta pengetahuan didukung dengan node editable dan Mermaid tertanam.
+2. Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
+3. Kotak centang menyertakan jenis. Klik namanya untuk memilih dan mengatur format. Arahkan penunjuk atau fokus keyboard untuk mengganti pratinjau tanpa menyimpan pengaturan. Escape menutup menu dan mengembalikan fokus.
 4. Jalankan **Buat diagram** dari bilah samping/palet.
-5. Tinjau pratinjau. Hasil multipanel mempertahankan papan Drawnix dan setiap Mermaid dalam urutan sumber pada satu permukaan gulir vertikal; tinggi Mermaid mengikuti hasil render agar tidak terpotong.
-6. Gunakan **Ekspor SVG**, **Ekspor PNG**, atau **Export PDF** per panel, atau ekspor gambar tingkat atas untuk semua panel. Pilih folder sumber/tujuan relatif Vault; satu nama deterministik per panel ditulis dan kegagalan individual tidak menghentikan sisanya.
-7. Gunakan **Simpan file sumber** untuk artefak editable.
+5. File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file.
+6. Tinjau pratinjau. Hasil multipanel mempertahankan papan Drawnix dan setiap Mermaid dalam urutan sumber pada satu permukaan gulir vertikal; tinggi Mermaid mengikuti hasil render agar tidak terpotong.
+7. Gunakan **Ekspor SVG**, **Ekspor PNG**, atau **Export PDF** per panel, atau ekspor gambar tingkat atas untuk semua panel. Pilih folder sumber/tujuan relatif Vault; satu nama deterministik per panel ditulis dan kegagalan individual tidak menghentikan sisanya. Gunakan **Simpan file sumber** untuk artefak editable.
+
+Atur folder perantara bersama relatif terhadap Vault, atau kosongkan untuk memakai `notemd_assert/` di samping tiap sumber. Catatan pemulihan, cache render, dan lampiran opsional disimpan di sana. Pertahankan file yang masih dirujuk; perubahan folder hanya berlaku untuk proses baru.
+
+Jenis dibuat berurutan. Kegagalan satu jenis tidak menghentikan lainnya; pembatalan menghentikan jenis yang menunggu dan mempertahankan file selesai. Ulangi ekspor dari pratinjau atau riwayat tanpa permintaan model baru. Kegagalan pembuatan memerlukan pembuatan ulang jenis tersebut. Catatan v1/v2 tetap dapat dibaca.
 
 Menu Export menyediakan ketiga format untuk visual aktif. Header tiap panel menyediakan tindakan sama bagi satu visual, sehingga pratinjau besar tidak harus menjadi satu gambar yang sulit diolah.
 
@@ -74,7 +80,7 @@ Embed gambar terselesaikan menerima pratinjau SVG berbasis data bila memungkinka
 
 Permukaan gulir tunggal menampilkan canvas utama dahulu lalu panel Mermaid sesuai urutan sumber. Membuka kembali riwayat memulihkan daftar, ukuran, dan tindakan ekspor yang sama.
 
-Pratinjau mencadangkan tempat untuk judul, ringkasan, label hubungan dan merutekan konektor statis mengitari node. Jika layout terbaca yang didukung tak dapat dihasilkan, generasi melaporkan kesalahan format. Panah lintas cabang diserialisasi statis; kelekatan setelah node ditata ulang dalam Drawnix tidak didukung bukti saat ini. Periksa dalam editor tujuan.
+Drawnix menampilkan hingga enam hubungan inti berarah dan berlabel, maksimal tiga per simpul. Hubungan yang dihilangkan tetap ada dalam metadata. Teks kotak terlihat dalam PDF, termasuk dari cache SVG lama. Panah antarcabang bersifat statis dan dapat terlepas setelah penataan ulang di Drawnix.
 
 ## Batas ekspor native
 
@@ -98,7 +104,7 @@ Pilih jenis eksplisit, bukan Auto-detect. Untuk sirkuit gunakan **Circuit diagra
 
 ### Format sumber tidak cocok
 
-Kembalikan ke **Auto** atau pilih format untuk jenis itu. CircuitikZ untuk sirkuit; Draw.io/Drawnix untuk diagram terstruktur yang didukung.
+Format yang didukung tampil dahulu; pilihan yang tidak kompatibel tetap terlihat tetapi dinonaktifkan. Permintaan tidak aktif yang sudah tersimpan dapat dihapus. Setiap jenis memiliki formatnya sendiri. Jika semuanya tidak dapat digunakan, sumber bawaan perender aktif dicoba dan permintaan yang tidak tersedia dilaporkan.
 
 ### Menu Export hilang
 

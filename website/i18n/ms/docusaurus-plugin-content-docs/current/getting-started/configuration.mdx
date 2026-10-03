@@ -33,6 +33,10 @@ Penyedia aktif lalai ialah DeepSeek dengan kelayakan awal kosong. Memilih pratet
 
 **Diagram preview export PPI** lalai **300 PPI**, julat **72-600**. Ia mempengaruhi raster PNG; SVG/PDF mengekalkan geometri vektor apabila disokong. **Also export complete Mermaid visuals** mengawal fail pendamping, bukan keterlihatan Mermaid dalam pratonton Drawnix.
 
+Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.
+
+Tetapkan folder perantaraan bersama relatif kepada Vault, atau kosongkan untuk menggunakan `notemd_assert/` di sebelah setiap sumber. Rekod pemulihan, cache pemaparan dan lampiran pilihan disimpan di situ. Kekalkan fail yang masih dirujuk; perubahan folder hanya terpakai pada pelaksanaan baharu.
+
 ## 1. Penyedia
 
 Pilih penyedia, isi kelayakan jika perlu, kekalkan titik akhir sesuai protokol dan pilih model boleh dicapai. Gunakan **Fetch models** jika tersedia, kemudian **Test connection**. Senarai model dan kejayaan penjanaan ialah pemeriksaan berasingan.
@@ -54,8 +58,7 @@ Bandingkan dengan nota perwakilan, ketepatan hasil, kependaman dan harga akaun s
 | Terjemahan | Fail `_<language>.md` di sebelah sumber; destinasi sedia ada boleh ditulis ganti |
 | Penyelidikan | Menambah ringkasan ke Markdown aktif |
 | Penjanaan tajuk berkelompok | Menulis kandungan dan memindahkan nota layak ke `<folder>_complete` sejajar yang dilaporkan jika destinasi mengizinkan |
-| Pratonton/eksport rajah | Pilih sumber/visual disokong dan periksa destinasi operasi |
-
+| Pratonton/eksport rajah | Fail terpilih dieksport secara automatik di sebelah nota sumber atau terus ke folder output yang ditetapkan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Konflik nama menambah `-2`, `-3` dan seterusnya tanpa menulis ganti fail. |
 Folder konsep awalnya kosong. `concepts` ialah contoh nama, bukan lalai. Ekstraksi kendiri menyokong bentuk minimum/penuh, bukan enjin pemboleh ubah templat umum. Lihat [konsep](../features/concept-notes).
 
 Akhiran pautan, folder hasil, akhiran terjemahan dan laluan terjemahan ialah tetapan berasingan. Periksa destinasi sebelum mengulang penulisan. Mesej pemulihan/konflik mengenal pasti hasil yang perlu diperiksa; pembatalan tidak mengundur penulisan selesai.

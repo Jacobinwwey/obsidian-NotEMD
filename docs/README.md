@@ -13,7 +13,9 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Current Truth And Layout
 
-- [Release 1.9.8, Documentation, And Discoverability Plan (active)](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md)
+- [Release 1.9.9 Implementation And Acceptance](./maintainer/release-1.9.9-acceptance.md)
+- [Multiple Diagram Types And Independent Outputs](./multiple-diagrams-implementation.md)
+- [Release 1.9.8 Documentation Plan (historical)](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md)
 - [Current Main Progress And Forward Plan](./brainstorms/2026-09-02-current-main-progress-and-forward-plan.md)
 - [Project Plan Status And Engineering Assessment](./maintainer/project-plan-status.md)
 - [Mainline Reliability And Evidence Implementation Plan](./plans/2026-09-12-mainline-reliability-and-evidence.en.md)
@@ -41,7 +43,8 @@ This directory contains repository-level documentation for maintainers and contr
 - [circuitikz UI, Export, And Docs Sync Plan](./maintainer/circuitikz-ui-export-and-docs-sync-2026-07-10.md)
 - [Chapter Split + TOC Extraction](./chapter-split-toc.md)
 - [Release Workflow](./maintainer/release-workflow.md)
-- [Release Notes 1.9.8 (candidate)](./releases/1.9.8.md)
+- [Release Notes 1.9.9](./releases/1.9.9.md)
+- [Release Notes 1.9.8](./releases/1.9.8.md)
 - [Release Notes 1.9.7](./releases/1.9.7.md)
 - [Release Notes 1.9.6](./releases/1.9.6.md)
 - [Release Notes 1.9.5](./releases/1.9.5.md)

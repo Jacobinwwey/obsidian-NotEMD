@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.9',
+        highlights: [
+            'Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis.',
+            'Selected files are exported automatically beside the source note, or directly into the configured output folder. Names include the type, such as `topic_drawnix.pdf` and `topic_flowchart.svg`; collisions add `-2`, `-3` and so on without overwriting existing files.',
+            'Drawnix overviews keep up to six labeled core directed relations, at most three per node. Omitted relations remain in source metadata. Boxed relation text stays visible in PDF, including exports from older cached SVG. Cross-branch arrows are static and may detach after rearrangement in Drawnix.'
+        ]
+    },
+    {
         version: '1.9.8',
         highlights: [
             'Cancellation reaches queued work, provider transports and retries; overlapping diagram saves preserve conflicting edits and report recovery outputs.',
@@ -102,6 +110,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.9',
+        highlights: [
+            '一次勾选多种图表，每种类型独立选择多种输出格式。取消勾选仍保留该类型的格式偏好；全部取消则自动分析原文。',
+            '所选文件自动导出到原笔记所在目录，或直接保存到配置的输出目录。名称包含图表类型，如 `topic_drawnix.pdf`、`topic_flowchart.svg`；重名追加 `-2`、`-3` 等序号，不覆盖已有文件。',
+            'Drawnix 概览最多保留六条带标签的核心有向关系，每节点最多三条；省略关系保存在源文件元数据中。PDF 关系方框文字正常显示，也兼容旧 SVG 缓存。跨分支箭头仍为静态关系，在 Drawnix 重排后可能脱离节点。'
+        ]
+    },
+    {
         version: '1.9.8',
         highlights: [
             '取消信号贯穿排队任务、provider 传输与重试；重叠图表保存会保留冲突编辑，并报告恢复产物。',
@@ -192,6 +208,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.9',
+        highlights: [
+            '一次勾選多種圖表，每種類型獨立選擇多種輸出格式。取消勾選仍保留該類型的格式偏好；全部取消則自動分析原文。',
+            '所選檔案自動匯出至原筆記所在目錄，或直接儲存至設定的輸出目錄。名稱包含圖表類型，例如 `topic_drawnix.pdf`、`topic_flowchart.svg`；重名追加 `-2`、`-3` 等序號，不覆寫現有檔案。',
+            'Drawnix 概覽最多保留六條附標籤的核心有向關係，每個節點最多三條；省略關係保存在原始檔中繼資料中。PDF 關係方框文字正常顯示，也相容舊 SVG 快取。跨分支箭頭仍為靜態關係，在 Drawnix 重新排列後可能脫離節點。'
+        ]
+    },
     {
         version: '1.9.8',
         highlights: [

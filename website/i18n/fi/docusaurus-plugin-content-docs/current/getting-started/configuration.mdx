@@ -27,6 +27,10 @@ Oletuspalveluntarjoaja on DeepSeek ilman tunnistetietoja. Profiilin valinta ei l
 
 **Diagram preview export PPI** on aluksi 300, alue 72–600, ja vaikuttaa vain PNG:hen. SVG/PDF säilyttävät tuetun vektorigeometrian. **Also export complete Mermaid visuals** ohjaa oheistiedostoja, ei Mermaidin näkymistä Drawnix-esikatselussa.
 
+Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti.
+
+Määritä välitiedostoille yhteinen Vault-suhteinen kansio tai jätä kenttä tyhjäksi, jolloin käytetään kunkin lähteen viereistä `notemd_assert/`-kansiota. Sinne tallentuvat palautustietueet, hahmonnusvälimuisti ja valinnaiset liitteet. Säilytä edelleen viitatut tiedostot; muutos koskee vain uusia ajoja.
+
 ## 1. Palveluntarjoaja
 
 Anna oikean protokollan osoite, vaadittu avain ja saatavilla oleva malli. Luettelo ja onnistunut generointi ovat eri tarkistuksia. Paikallinen palvelin/malli valmistellaan erikseen; pilvi/yhdyskäytävä vastaanottaa sisällön. Tarkista myös tehtäväkohtaiset reitit ennen yksityistä aineistoa.
@@ -44,8 +48,7 @@ Anna oikean protokollan osoite, vaadittu avain ja saatavilla oleva malli. Luette
 | Käännös | Viereinen `_<language>.md`; nykyinen kohde voidaan korvata |
 | Tutkimus | Yhteenveto lisätään aktiiviseen Markdowniin |
 | Erägenerointi otsikoista | Kirjoittaa sopiviin lähteisiin ja siirtää viereiseen `<folder>_complete`-kansioon, jos kohde sallii |
-| Kaavion esikatselu/vienti | Valitse tuettu lähde tai visuaalinen vienti ja tarkista raportoitu polku |
-
+| Kaavion esikatselu/vienti | Valitut tiedostot viedään automaattisesti lähdemuistiinpanon viereen tai suoraan määritettyyn tuloskansioon. Nimi sisältää tyypin, kuten `topic_drawnix.pdf` tai `topic_flowchart.svg`. Nimiristiriidoissa lisätään `-2`, `-3` jne. korvaamatta vanhoja tiedostoja. |
 Käsitekansio alkaa tyhjänä; `concepts` on esimerkkivalinta. Erillisissä muistiinpanoissa on suppea/täysi muoto, ei yleistä mallipohjamoottoria. [Käsitteet](../features/concept-notes). Käsittelyllä ja käännöksellä on omat jälkiliitteet ja kansiot. Tarkista kohteet ja palautusristiriidat; peruutus ei kumoa valmiita kirjoituksia.
 
 ## 4. Kielet

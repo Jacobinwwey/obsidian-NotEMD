@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Mai multe diagrame, exporturi independente"
+description: "Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Mai multe diagrame, exporturi independente
+
+<TLDR>
+Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
+</TLDR>
+
+## Mai multe diagrame, exporturi independente
+
+Caseta include tipul. Apasă pe nume pentru a-l selecta și a-i modifica formatele. Trecerea cursorului sau focalizarea din tastatură schimbă previzualizarea fără salvarea setărilor. Escape închide meniul și restabilește focalizarea.
+
+Formatele acceptate apar primele; cele incompatibile rămân vizibile și dezactivate. Cererile inactive existente pot fi eliminate. Fiecare tip își păstrează formatele. Dacă niciunul nu este utilizabil, se încearcă sursa implicită a motorului de randare folosit și se raportează cererile indisponibile.
+
+HTML-ul diagramei conține grafică cu zoom; HTML-ul rezumatului structurat conține text, structură și referințe. HTML/SVG editabil denumește un motor de randare, nu un editor web. Folosește sursa nativă pentru editare. Exportul prezentărilor, inclusiv PPTX și MP4, păstrează setări și dependențe separate.
+
+Drawnix afișează cel mult șase relații direcționate esențiale cu etichete, maximum trei pe nod. Cele omise rămân în metadate. Textul încadrat apare în PDF inclusiv din SVG vechi în cache. Săgețile dintre ramuri sunt statice și se pot desprinde după rearanjarea în Drawnix.
+
+## Fișiere și recuperare
+
+Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere.
+
+Configurează un dosar intermediar comun relativ la Vault sau lasă câmpul gol pentru `notemd_assert/` lângă fiecare sursă. Aici se păstrează înregistrări de recuperare, randări în cache și atașamente opționale. Păstrează fișierele încă referite; schimbarea afectează numai execuțiile noi.
+
+Tipurile se generează succesiv. O eroare nu le blochează pe celelalte; anularea oprește tipurile în așteptare și păstrează fișierele finalizate. Reîncearcă exportul din previzualizare sau istoric fără altă cerere către model. Eșecul generării necesită regenerarea acelui tip. Înregistrările v1/v2 rămân lizibile.
+
+## Actualizare
+
+Oprește sarcinile și salvează o copie a Vault. Instalează `main.js`, `manifest.json` și `styles.css` din aceeași versiune 1.9.9, păstrează setările și fișierele și reîncarcă Obsidian. Verifică o notă înainte de loturi mari. Preferințele vechi migrează la editare. Traducerile au fost redactate direct, fără API de traducere sau LM Studio.
+
+## Referințe
+
+- [Manualul diagramelor](../features/diagrams)
+- [Versiune și descărcări](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

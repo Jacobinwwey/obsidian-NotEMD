@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diagrammi
 
-<TLDR>Scegli prima il tipo di diagramma, poi il formato della fonte modificabile. Controlla il risultato completo in Obsidian, inclusa lavagna Drawnix e visualizzazioni Mermaid integrate; esporta ogni pannello in SVG, PNG o PDF.</TLDR>
+<TLDR>
+Seleziona più tipi di diagramma in un’esecuzione e più formati indipendenti per ciascun tipo. Deselezionare un tipo conserva i suoi formati; senza selezioni il contenuto viene analizzato automaticamente.
+</TLDR>
 
 ## Tre scelte distinte
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Formato fonte | File modificabile o riutilizzabile | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Formato export | Immagine o documento da condividere | SVG, PNG, PDF |
 
-Draw.io e Drawnix sono formati di fonte, non tipi. CircuitikZ è una fonte per circuiti; non limita l’export visivo al solo SVG.
+L’HTML del diagramma contiene una grafica ingrandibile; l’HTML del riepilogo strutturato contiene testo, struttura e riferimenti. HTML/SVG modificabile è il nome di un renderer, non di un editor web. Per modificare usa il sorgente nativo. Le presentazioni, inclusi PPTX e MP4, mantengono impostazioni e dipendenze separate.
 
 ## Scegliere la fonte
 
@@ -38,17 +40,21 @@ Draw.io e Drawnix sono formati di fonte, non tipi. CircuitikZ è una fonte per c
 | Drawnix | Modifica a lavagna o disegno libero | `.drawnix` |
 | CircuitikZ | Circuiti elettrici e a transistor strutturati | `.tex` |
 
-Lascia **Preferred source format** su **Auto** se non serve un editor preciso. Notemd sceglie un formato compatibile con il tipo.
+I formati supportati appaiono per primi; quelli incompatibili restano visibili e disabilitati. Le richieste inattive già presenti si possono rimuovere. Ogni tipo conserva i propri formati. Se nessuno è utilizzabile, si tenta il sorgente predefinito del renderer effettivo e si segnalano le richieste indisponibili.
 
 ## Generare ed esportare
 
 1. Apri una nota supportata. Per un passo crea una nota separata: selezionare testo non restringe l’azione sul file.
-2. Scegli tipo o **Auto-detect** nelle impostazioni.
-3. Scegli fonte o **Auto**; Drawnix supporta mappe con nodi modificabili e Mermaid integrato.
+2. Seleziona più tipi di diagramma in un’esecuzione e più formati indipendenti per ciascun tipo. Deselezionare un tipo conserva i suoi formati; senza selezioni il contenuto viene analizzato automaticamente.
+3. La casella include il tipo. Fai clic sul nome per selezionarlo e modificarne i formati. Il passaggio del puntatore o il focus da tastiera cambia l’anteprima senza salvare impostazioni. Escape chiude il menu e ripristina il focus.
 4. Avvia **Genera diagramma** da barra laterale o palette.
-5. Controlla anteprima: lavagna e pannelli Mermaid sono nell’ordine della fonte in un’area verticale scorrevole, con altezza effettiva.
-6. Usa **Esporta SVG**, **Esporta PNG** o **Export PDF** sul pannello, oppure export superiore per tutti. Per più pannelli scegli cartella fonte o relativa al Vault: un file deterministico per pannello, continuando dopo singoli errori.
-7. Usa **Salva file sorgente** per conservare l’artefatto modificabile.
+5. I file selezionati vengono esportati automaticamente accanto alla nota originale o direttamente nella cartella configurata. Il nome include il tipo, come `topic_drawnix.pdf` o `topic_flowchart.svg`; le collisioni aggiungono `-2`, `-3` e così via senza sovrascrivere file.
+6. Controlla anteprima: lavagna e pannelli Mermaid sono nell’ordine della fonte in un’area verticale scorrevole, con altezza effettiva.
+7. Usa **Esporta SVG**, **Esporta PNG** o **Export PDF** sul pannello, oppure export superiore per tutti. Per più pannelli scegli cartella fonte o relativa al Vault: un file deterministico per pannello, continuando dopo singoli errori. Usa **Salva file sorgente** per conservare l’artefatto modificabile.
+
+Imposta una cartella intermedia condivisa relativa al Vault, oppure lascia il campo vuoto per usare `notemd_assert/` accanto a ogni originale. Contiene registri di ripristino, rendering in cache e allegati facoltativi. Conserva i file ancora referenziati; la modifica riguarda solo nuove esecuzioni.
+
+I tipi vengono generati in sequenza. Un errore non blocca gli altri; l’annullamento ferma quelli in attesa e conserva i file completati. Ripeti le esportazioni da anteprima o cronologia senza un’altra richiesta al modello. Un errore di generazione richiede di rigenerare quel tipo. I registri v1/v2 restano leggibili.
 
 Il menu Export e le intestazioni dei pannelli offrono le stesse tre azioni. **History** apre la cronologia nel cassetto senza nascondere l’anteprima: ricerca, filtri, riapertura e accesso agli artefatti. Cronologia disponibile anche da palette/barra senza nota attiva.
 
@@ -70,7 +76,7 @@ Notemd sanitizza SVG e mantiene la fonte Mermaid nei metadati `.drawnix`. Antepr
 
 Le immagini risolte usano dati incorporati quando possibile. L’ordine è dati embedded, file companion precedenti, ricostruzione dalla fonte. Mantieni file ancora referenziati: un nuovo export autonomo non prova inutilità di directory condivise.
 
-La superficie scorrevole mostra prima Drawnix e poi Mermaid in ordine. Riaprire una voce ricostruisce pannelli, dimensioni e azioni. Titoli/sintesi/relazioni hanno spazio riservato; layout non supportati producono errore di formato. Le frecce tra rami sono statiche: non è supportato il loro attacco dopo riordino nel consumer. Verifica nell’editor finale.
+Drawnix mostra fino a sei relazioni dirette essenziali con etichetta, al massimo tre per nodo; quelle omesse restano nei metadati. Il testo nei riquadri è visibile nel PDF anche da vecchi SVG in cache. Le frecce tra rami sono statiche e possono staccarsi dopo una riorganizzazione in Drawnix.
 
 ## Limiti dell’export nativo
 
@@ -90,7 +96,7 @@ Scegli il tipo esplicitamente. Per circuiti usa **Circuit diagram** con **Genera
 
 ### Fonte inadatta
 
-Torna ad **Auto** o scegli un formato del tipo. CircuitikZ è per circuiti; Draw.io/Drawnix per strutture supportate.
+I formati supportati appaiono per primi; quelli incompatibili restano visibili e disabilitati. Le richieste inattive già presenti si possono rimuovere. Ogni tipo conserva i propri formati. Se nessuno è utilizzabile, si tenta il sorgente predefinito del renderer effettivo e si segnalano le richieste indisponibili.
 
 ### Menu Export assente
 

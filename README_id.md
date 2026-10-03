@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Mulai di sini
 
 | Pembaca | Pintu masuk | Tujuan |
@@ -19,13 +19,13 @@
 | Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
 | Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
 
-**Versi:** 1.9.8
+**Versi:** 1.9.9
 
-- **Pembatalan dan pemulihan:** pembatalan tetap aktif selama penjadwalan dan percobaan ulang, serta menghalangi penulisan terlambat pada riset dan terjemahan. Keluaran yang selesai dipertahankan dan konflik pemulihan dilaporkan.
-- **Riwayat dan ekspor asli:** teks pencarian dan fokus papan ketik tetap terjaga. Pemisah sel gabungan PowerPoint serta sambungan/label CircuitikZ diperbaiki. Pencarian lokal berkelompok memakai cuplikan yang konsisten.
-- **Rilis dan dokumentasi:** asal sumber bersih dan berkas unduhan diverifikasi, dengan jalur tiap pembaca serta terjemahan yang ditulis langsung.
+- Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
+- File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file.
+- Drawnix menampilkan hingga enam hubungan inti berarah dan berlabel, maksimal tiga per simpul. Hubungan yang dihilangkan tetap ada dalam metadata. Teks kotak terlihat dalam PDF, termasuk dari cache SVG lama. Panah antarcabang bersifat statis dan dapat terlepas setelah penataan ulang di Drawnix.
 
-36 preset penyedia dan 33 jenis diagram yang dapat dijalankan sudah ada pada 1.9.7. [Panduan peningkatan](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/releases/1.9.8) · [Periksa rilis publik](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+36 preset penyedia dan 33 jenis diagram yang dapat dijalankan sudah ada pada 1.9.7. [Panduan peningkatan](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/releases/1.9.9) · [Periksa rilis publik](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Panah Drawnix antarcabang tetap statis setelah penataan ulang. Mermaid/SVG dalam PPTX dapat memakai gambar pengganti. Pembatalan tidak membatalkan perubahan tersimpan maupun menjamin penghentian generasi atau tagihan jarak jauh. Perangkat seluler fisik dan Obsidian 0.15.0 belum diverifikasi.
 
@@ -723,7 +723,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.8 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.9 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -755,7 +755,12 @@ Halaman pengaturan Notemd menyediakan fitur pencarian kabur berbasis bidang, nav
 - Riwayat diagram disimpan dalam skop Vault, dikelompokkan berdasarkan urutan terbaru ke lama, dapat dicari, dan dipaginasi dalam kelompok 20 entri. Menghapus catatan riwayat tidak akan menghapus file yang telah dihasilkan.
 - Ekspor pratinjau diagram dengan PPI memiliki resolusi default 300 dan menerima nilai antara 72 hingga 600. Fitur ini hanya mengontrol proses rasterisasi PNG; SVG dan PDF tetap berbentuk vektor.
 - Ekspor visual lengkap menggunakan Mermaid secara opsional juga menulis sumber kode Mermaid, SVG, serta file manifest pendampingnya; Mermaid tetap dapat dilihat dalam pratinjau Drawnix meskipun fiturnya dinonaktifkan.
-- Jenis diagram favorit dan format sumber favorit merupakan pilihan yang terpisah.
+- Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis. Kotak centang menyertakan jenis. Klik namanya untuk memilih dan mengatur format. Arahkan penunjuk atau fokus keyboard untuk mengganti pratinjau tanpa menyimpan pengaturan. Escape menutup menu dan mengembalikan fokus.
+- File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file.
+- Atur folder perantara bersama relatif terhadap Vault, atau kosongkan untuk memakai `notemd_assert/` di samping tiap sumber. Catatan pemulihan, cache render, dan lampiran opsional disimpan di sana. Pertahankan file yang masih dirujuk; perubahan folder hanya berlaku untuk proses baru.
+- HTML diagram berisi gambar yang dapat diperbesar; HTML ringkasan terstruktur berisi teks, struktur, dan rujukan. HTML/SVG yang dapat diedit adalah nama perender, bukan editor web. Gunakan sumber asli untuk mengedit. Ekspor presentasi, termasuk PPTX dan MP4, memiliki pengaturan dan dependensi terpisah.
+- Jenis dibuat berurutan. Kegagalan satu jenis tidak menghentikan lainnya; pembatalan menghentikan jenis yang menunggu dan mempertahankan file selesai. Ulangi ekspor dari pratinjau atau riwayat tanpa permintaan model baru. Kegagalan pembuatan memerlukan pembuatan ulang jenis tersebut. Catatan v1/v2 tetap dapat dibaca.
+- Drawnix menampilkan hingga enam hubungan inti berarah dan berlabel, maksimal tiga per simpul. Hubungan yang dihilangkan tetap ada dalam metadata. Teks kotak terlihat dalam PDF, termasuk dari cache SVG lama. Panah antarcabang bersifat statis dan dapat terlepas setelah penataan ulang di Drawnix.
 - Pengguna desktop dapat membuka lingkungan kompilasi bawaan CircuitikZ jika diinginkan, untuk memanfaatkan Tectonic/pdflatex yang sudah ada di sistem, memilih kompiler khusus, atau secara eksplisit menginstal runtime Tectonic yang telah ditentukan. Pratinjau, SVG, PNG, dan ekspor pratinjau PDF tidak memerlukan LaTeX.
 - Fitur pemilihan file batch tingkat lanjut memungkinkan penggunaan profil pilihan yang telah disimpan serta pratinjau aturan.
 - Folder target batch yang hilang dapat dibuat setelah mendapat konfirmasi, dengan opsi untuk mengingat pembuatan otomatisnya bagi folder yang hilang di masa depan.

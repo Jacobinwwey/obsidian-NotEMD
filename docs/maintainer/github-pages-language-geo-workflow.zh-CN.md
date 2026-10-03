@@ -2,12 +2,12 @@
 
 语言：**简体中文** | [English](./github-pages-language-geo-workflow.md)
 
-这是 `website/` 的当前发布流程，复核日期为 2026-09-14。插件 UI 国际化与原生导出验收各有独立契约。[1.9.8 计划](../plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.zh-CN.md)记录实际进度；本流程不代表候选版已经发布。
+这是 `website/` 的当前发布流程，复核日期为 2026-10-03。插件 UI 国际化与原生导出验收各有独立契约。[1.9.9 验收记录](./release-1.9.9-acceptance.zh-CN.md)记录执行状态；本流程不代表候选版已经发布。
 
 ## 发布契约
 
 - 英文是完整 canonical 源文档，位于 `https://jacobinwwey.github.io/obsidian-NotEMD/docs/...`。
-- `website/src/lib/publishedLocales.mjs` 中每种语言都必须具备完整 docs 路由集。1.9.8 候选新增后为 24 条 canonical 路由，因此准入要求 34 种语言共 816 篇文档。
+- `website/src/lib/publishedLocales.mjs` 中每种语言都必须具备完整 docs 路由集。1.9.9 包含 25 条 canonical 路由（保留 1.9.8 指南），因此准入要求 34 种语言共 850 篇文档。
 - 本地化矩阵为 `zh-CN`、`zh-Hant`、`zh-TW`、`ja`、`fr`、`de`、`es`、`ko`、`it`、`pt`、`pt-BR`、`ru`、`ar`、`fa`、`hi`、`bn`、`nl`、`sv`、`fi`、`da`、`no`、`pl`、`tr`、`he`、`th`、`el`、`cs`、`hu`、`ro`、`uk`、`vi`、`id`、`ms`。新增语言或源路由须在同一变更补齐所有对应内容。
 - 当前只有英文与 zh-CN 可索引。其他语言保留访问入口、明确发布标签和 `noindex,follow`，在获得独立准入证据前，不进入 sitemap 与可索引语言替代链接。AI 直接撰写不是母语者独立审核，也不会自动获得索引资格。
 - 新人、用户、开发者和 Agent 均须可达完整任务指南；只有导航标签或占位页面不算完成。
@@ -42,7 +42,7 @@
 | 机器可读指南索引 | `website/plugins/documentation-map.cjs` 从发行与路由归属生成 canonical `website/build/llms.txt` |
 | 构建／导航／版本准入 | `website/scripts/audit-build.cjs`、`website/scripts/audit-navigation.cjs`、`website/scripts/verify-published-release.cjs` |
 
-完整路由集由 `website/docs/` 派生。主要入口包括 `/docs/intro`、`/docs/getting-started/quick-start`、`/docs/providers/overview`、`/docs/faq`、`/docs/developers/overview`、`/docs/agents/overview`、`/docs/releases/1.9.8`。保留已有公开 URL 和有用锚点。
+完整路由集由 `website/docs/` 派生。主要入口包括 `/docs/intro`、`/docs/getting-started/quick-start`、`/docs/providers/overview`、`/docs/faq`、`/docs/developers/overview`、`/docs/agents/overview`、`/docs/releases/1.9.9`。保留已有公开 URL 和有用锚点。
 
 ## 本地验证
 

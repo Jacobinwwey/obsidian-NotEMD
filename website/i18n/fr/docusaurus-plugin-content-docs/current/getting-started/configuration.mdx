@@ -34,6 +34,10 @@ DeepSeek est le fournisseur actif par défaut, sans identifiants renseignés. Un
 
 **Diagram preview export PPI** vaut **300**, avec une plage de **72–600**. Il règle la rastérisation PNG ; SVG/PDF conservent la géométrie vectorielle lorsque l’export le permet. **Also export complete Mermaid visuals** contrôle les fichiers compagnons, pas la visibilité de Mermaid dans la prévisualisation Drawnix.
 
+Sélectionnez plusieurs types de diagramme par exécution et plusieurs formats indépendants pour chacun. Décocher un type conserve ses formats ; sans sélection, le contenu est analysé automatiquement.
+
+Définissez un dossier intermédiaire partagé relatif au Vault, ou laissez le champ vide pour utiliser `notemd_assert/` près de chaque source. Il contient les enregistrements de reprise, rendus en cache et pièces jointes facultatives. Conservez les fichiers encore référencés ; le changement concerne seulement les nouvelles exécutions.
+
 ## 1. Fournisseur
 
 Choisissez fournisseur, adresse adaptée au protocole, identifiants requis et modèle accessible. **Fetch models** découvre les modèles ; **Tester la connexion** teste la connexion. La liste et la génération sont deux vérifications distinctes.
@@ -55,8 +59,7 @@ Comparez exactitude, latence et tarif réel sur une note représentative. Aucun 
 | Traduction | Fichier voisin `_<language>.md` ; la destination existante peut être écrasée |
 | Recherche | Synthèse ajoutée à la note Markdown active |
 | Génération par lot depuis les titres | Écriture du contenu puis déplacement des notes admissibles vers le dossier voisin `<folder>_complete` lorsque possible |
-| Prévisualisation/export | Choisir une source ou un export visuel pris en charge et contrôler le chemin annoncé |
-
+| Prévisualisation/export | Les fichiers choisis sont exportés automatiquement à côté de la note source ou directement dans le dossier configuré. Leur nom indique le type, comme `topic_drawnix.pdf` ou `topic_flowchart.svg` ; les conflits ajoutent `-2`, `-3`, etc., sans écraser les fichiers existants. |
 Le dossier de concepts est initialement vide. `concepts` est un choix possible. Les [modèles de notes de concepts](../features/concept-notes) sont limités aux formes minimale et complète ; aucun moteur général de variables de modèle n’est fourni.
 
 Suffixe de traitement, dossier traité, suffixe de traduction et dossier de traduction sont indépendants. Vérifiez les destinations existantes et les conflits de récupération. Annuler ne restaure pas les écritures terminées.

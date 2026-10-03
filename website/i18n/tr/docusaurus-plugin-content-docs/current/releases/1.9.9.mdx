@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Birden çok diyagram, bağımsız dışa aktarımlar"
+description: "Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Birden çok diyagram, bağımsız dışa aktarımlar
+
+<TLDR>
+Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
+</TLDR>
+
+## Birden çok diyagram, bağımsız dışa aktarımlar
+
+Onay kutusu türü dahil eder. Adına tıklayarak türü seçip biçimlerini düzenleyin. İşaretçiyi üzerine getirmek veya klavye odağı, ayarları kaydetmeden önizlemeyi değiştirir. Escape menüyü kapatır ve odağı geri getirir.
+
+Desteklenen biçimler önce gösterilir; uyumsuz seçenekler görünür fakat devre dışıdır. Mevcut etkin olmayan istekler kaldırılabilir. Her tür kendi biçimlerini korur. Hiçbiri kullanılamıyorsa geçerli oluşturucunun varsayılan kaynak biçimi denenir ve kullanılamayan istekler bildirilir.
+
+Diyagram HTML’i yakınlaştırılabilir grafik; yapılandırılmış özet HTML’i metin, yapı ve kaynaklar içerir. Düzenlenebilir HTML/SVG bir oluşturucunun adıdır, web düzenleyicisi değildir. Düzenleme için yerel kaynak dosyasını kullanın. PPTX ve MP4 dahil sunum dışa aktarımı ayrı ayar ve bağımlılıklarını korur.
+
+Drawnix en fazla altı etiketli temel yönlü ilişki, düğüm başına en fazla üç ilişki gösterir. Atlanan ilişkiler üst verilerde korunur. Kutulu metin eski SVG önbelleğinden de PDF’de görünür. Dallar arası oklar statiktir ve Drawnix’te yeniden düzenleme sonrasında kopabilir.
+
+## Dosyalar ve kurtarma
+
+Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir.
+
+Ara dosyalar için Vault’a göre ortak bir yol belirleyin ya da her kaynağın yanındaki `notemd_assert/` için alanı boş bırakın. Kurtarma kayıtları, işleme önbelleği ve isteğe bağlı ekler burada saklanır. Hâlâ başvurulan dosyaları koruyun; klasör değişikliği yalnızca yeni çalıştırmaları etkiler.
+
+Türler sırayla oluşturulur. Bir hata diğerlerini engellemez; iptal bekleyen türleri durdurur ve tamamlanan dosyaları korur. Dışa aktarımı önizleme veya geçmişten yeni model isteği olmadan yineleyin. Oluşturma hatası, o türün yeniden oluşturulmasını gerektirir. v1/v2 kayıtları okunabilir kalır.
+
+## Yükseltme
+
+Görevleri durdurup Vault’u yedekleyin. `main.js`, `manifest.json` ve `styles.css` dosyalarını aynı 1.9.9 sürümünden yükleyin, ayar ve dosyaları koruyup Obsidian’ı yeniden yükleyin. Büyük işlemden önce bir notu doğrulayın. Eski tercihler düzenlenirken taşınır. Çeviriler çeviri API’si veya LM Studio kullanılmadan doğrudan yazılmıştır.
+
+## Başvurular
+
+- [Diyagram kılavuzu](../features/diagrams)
+- [Sürüm ve indirmeler](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

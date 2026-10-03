@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Více diagramů, nezávislé exporty"
+description: "Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Více diagramů, nezávislé exporty
+
+<TLDR>
+Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.
+</TLDR>
+
+## Více diagramů, nezávislé exporty
+
+Zaškrtávací políčko zahrne typ. Kliknutím na název jej vyberete a upravíte formáty. Přejetí ukazatelem nebo zaměření klávesnicí změní náhled bez uložení nastavení. Escape zavře nabídku a vrátí zaměření.
+
+Podporované formáty jsou první; nekompatibilní zůstávají viditelné a zakázané. Existující neaktivní požadavky lze odebrat. Formáty patří ke svému typu. Pokud žádný nelze použít, zkusí se výchozí zdrojový formát použitého rendereru a nedostupné požadavky se oznámí.
+
+HTML diagramu obsahuje grafiku s přiblížením; HTML strukturovaného souhrnu obsahuje text, strukturu a zdroje. Upravitelný HTML/SVG označuje renderer, nikoli webový editor. K úpravám použijte nativní zdroj. Export prezentací včetně PPTX a MP4 má samostatná nastavení a závislosti.
+
+Drawnix zobrazuje nejvýše šest popsaných hlavních směrovaných vztahů, maximálně tři na uzel. Vynechané vztahy zůstávají v metadatech. Text v rámečcích je viditelný v PDF i ze starších SVG v mezipaměti. Šipky mezi větvemi jsou statické a po přeuspořádání v Drawnix se mohou odpojit.
+
+## Soubory a obnova
+
+Vybrané soubory se automaticky exportují vedle zdrojové poznámky nebo přímo do nastavené složky. Název obsahuje typ, například `topic_drawnix.pdf` a `topic_flowchart.svg`; při kolizi se přidá `-2`, `-3` atd. bez přepsání souborů.
+
+Nastavte společnou mezisložku relativně k Vault, nebo nechte pole prázdné pro `notemd_assert/` vedle každého zdroje. Obsahuje záznamy obnovy, mezipaměť vykreslení a volitelné přílohy. Zachovejte stále odkazované soubory; změna platí jen pro nové běhy.
+
+Typy se generují postupně. Chyba jednoho neblokuje ostatní; zrušení zastaví čekající typy a zachová hotové soubory. Export opakujte z náhledu či historie bez nového požadavku modelu. Chyba generování vyžaduje nové vygenerování daného typu. Záznamy v1/v2 zůstávají čitelné.
+
+## Aktualizace
+
+Zastavte úlohy a zálohujte Vault. Nainstalujte `main.js`, `manifest.json` a `styles.css` ze stejného vydání 1.9.9, zachovejte nastavení i soubory a znovu načtěte Obsidian. Před velkou dávkou ověřte jednu poznámku. Staré předvolby se migrují při úpravě. Překlady vznikly přímo, bez překladových API či LM Studio.
+
+## Odkazy
+
+- [Příručka diagramů](../features/diagrams)
+- [Vydání a stažení](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

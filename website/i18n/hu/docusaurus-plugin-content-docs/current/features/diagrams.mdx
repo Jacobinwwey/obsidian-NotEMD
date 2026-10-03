@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diagramok
 
-<TLDR>Előbb a diagram típusát, majd szerkeszthető forrásformátumát válassza ki. Az Obsidianban a teljes eredményt ellenőrizheti, a Drawnix-táblával és beágyazott Mermaid-ábrákkal együtt. Minden panel exportálható SVG, PNG vagy PDF formátumba.</TLDR>
+<TLDR>
+Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
+</TLDR>
 
 ## Három külön választás
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Forrásformátum | A Notemd által létrehozott szerkeszthető vagy újrahasználható fájl | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Exportformátum | Megosztott kép vagy dokumentum | SVG, PNG, PDF |
 
-Draw.io és Drawnix forrásformátum, nem diagramtípus. CircuitikZ áramkörökre készült forrás. Ugyanaz az előnézet több vizuális formára exportálható; CircuitikZ választásával sem csak SVG készülhet.
+A diagram-HTML nagyítható grafikát, a strukturált összefoglaló HTML szöveget, szerkezetet és hivatkozásokat tartalmaz. A szerkeszthető HTML/SVG egy megjelenítő neve, nem webes szerkesztő. Szerkesztéshez használja a natív forrást. A prezentációk, köztük a PPTX és MP4 exportja külön beállításokat és függőségeket használ.
 
 ## Forrás választása
 
@@ -38,17 +40,21 @@ Draw.io és Drawnix forrásformátum, nem diagramtípus. CircuitikZ áramkörök
 | Drawnix | Kézi rajzú vagy fehértáblás szerkesztés | `.drawnix` |
 | CircuitikZ | Strukturált elektromos és tranzisztoros áramkörök | `.tex` |
 
-Ha nincs kijelölt szerkesztő, a **Preferred source format** maradjon **Auto**. A Notemd a típushoz kompatibilis formát választ.
+A támogatott formátumok jelennek meg először; az inkompatibilisek láthatók, de letiltottak. A meglévő inaktív kérések eltávolíthatók. Minden típus saját formátumokat használ. Ha egyik sem használható, a rendszer megpróbálja az aktuális megjelenítő alapértelmezett forrásformátumát, és jelzi az elérhetetlen kéréseket.
 
 ## Generálás és export
 
 1. Nyisson támogatott forrásjegyzetet. Egy részletet külön jegyzetbe másoljon; a kijelölés nem szűkíti a fájlműveletet.
-2. Válasszon **diagram type** értéket vagy **Auto-detect** módot.
-3. Válasszon **source format** értéket vagy **Auto** módot. A **Drawnix** támogatott tudástérképhez szerkeszthető csomópontokat és Mermaid-ábrákat ad.
+2. Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
+3. A jelölőnégyzet kapcsolja be a típust. A névre kattintva kijelölheti és módosíthatja a formátumait. Az egérmutató vagy a billentyűzetfókusz mentés nélkül váltja az előnézetet. Az Escape bezárja a menüt és visszaadja a fókuszt.
 4. Indítsa a **Generate diagram** műveletet a panelből vagy palettáról.
-5. Nézze át a függőlegesen görgethető közös előnézetet: Drawnix után minden Mermaid-panel a forrás sorrendjében, teljes renderelt magassággal jelenik meg.
-6. Panelenként használja az **Export SVG**, **Export PNG**, **Export PDF** gombot, vagy felül az összes panel képexportját. Több panelnél forrásmappát vagy egyedi vault-relatív mappát válasszon. Panelenként kiszámítható nevű fájl készül; egyedi hibánál a többi folytatódik.
-7. A **Save source file** menti a szerkeszthető forrást.
+5. A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás.
+6. Nézze át a függőlegesen görgethető közös előnézetet: Drawnix után minden Mermaid-panel a forrás sorrendjében, teljes renderelt magassággal jelenik meg.
+7. Panelenként használja az **Export SVG**, **Export PNG**, **Export PDF** gombot, vagy felül az összes panel képexportját. Több panelnél forrásmappát vagy egyedi vault-relatív mappát válasszon. Panelenként kiszámítható nevű fájl készül; egyedi hibánál a többi folytatódik. A **Save source file** menti a szerkeszthető forrást.
+
+Állítson be közös, Vault-relatív mappát a köztes fájloknak, vagy hagyja üresen a mezőt a források melletti `notemd_assert/` használatához. Itt tárolódnak a helyreállítási rekordok, gyorsítótárak és választható mellékletek. A hivatkozott fájlokat őrizze meg; a módosítás csak új futtatásokra érvényes.
+
+A típusok egymás után készülnek. Egy hiba nem állítja le a többit; a megszakítás leállítja a várakozó típusokat és megőrzi a kész fájlokat. Az export az előnézetből vagy előzményekből új modellkérés nélkül ismételhető. Generálási hiba esetén a típust újra kell generálni. A v1/v2 rekordok olvashatók maradnak.
 
 Az Export menü és a panel fejléce azonos SVG/PNG/PDF műveleteket kínál. Nagy előnézetet nem kell egyetlen nehezen kezelhető képpé összevonni.
 
@@ -74,7 +80,7 @@ Feloldott képek lehetőség szerint beágyazott adatú SVG-előnézetet kapnak.
 
 Az egyetlen görgethető felületen előbb a Drawnix-tábla, majd forrássorrendben a Mermaid-panelek jelennek meg. Mentett előzmény újranyitása ugyanazt a panellistát, méreteket és exportműveleteket állítja vissza.
 
-A Drawnix-előnézet helyet tart címeknek, összefoglalónak és kapcsolatfeliratoknak, statikus vonalait a csomópontok körül vezeti. Nem előállítható támogatott, olvasható elrendezés formátumhibát ad. Ágközi nyilak statikus kapcsolatokként tárolódnak; átrendezés utáni csatlakozásuk nem támogatott a jelenlegi bizonyíték szerint. Vizsgálja a célként használt szerkesztőben.
+A Drawnix legfeljebb hat feliratozott, irányított fő kapcsolatot mutat, csomópontonként legfeljebb hármat. A kihagyott kapcsolatok megmaradnak a metaadatokban. A keretes szöveg régi SVG-gyorsítótárból is látszik PDF-ben. Az ágak közötti nyilak statikusak, és átrendezéskor leválhatnak a Drawnixban.
 
 ## Natív export határai
 
@@ -96,7 +102,7 @@ Válasszon típust kifejezetten. Áramkörhöz **Circuit diagram** és **Generat
 
 ### Nem megfelelő forrás
 
-Állítsa vissza **Auto** módra, vagy válasszon a típushoz való formát. CircuitikZ áramkörökre, Draw.io/Drawnix támogatott strukturált diagramokra készült.
+A támogatott formátumok jelennek meg először; az inkompatibilisek láthatók, de letiltottak. A meglévő inaktív kérések eltávolíthatók. Minden típus saját formátumokat használ. Ha egyik sem használható, a rendszer megpróbálja az aktuális megjelenítő alapértelmezett forrásformátumát, és jelzi az elérhetetlen kéréseket.
 
 ### Hiányzik az Export menü
 

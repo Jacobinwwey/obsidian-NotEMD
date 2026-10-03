@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Banyak diagram, ekspor independen"
+description: "Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Banyak diagram, ekspor independen
+
+<TLDR>
+Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
+</TLDR>
+
+## Banyak diagram, ekspor independen
+
+Kotak centang menyertakan jenis. Klik namanya untuk memilih dan mengatur format. Arahkan penunjuk atau fokus keyboard untuk mengganti pratinjau tanpa menyimpan pengaturan. Escape menutup menu dan mengembalikan fokus.
+
+Format yang didukung tampil dahulu; pilihan yang tidak kompatibel tetap terlihat tetapi dinonaktifkan. Permintaan tidak aktif yang sudah tersimpan dapat dihapus. Setiap jenis memiliki formatnya sendiri. Jika semuanya tidak dapat digunakan, sumber bawaan perender aktif dicoba dan permintaan yang tidak tersedia dilaporkan.
+
+HTML diagram berisi gambar yang dapat diperbesar; HTML ringkasan terstruktur berisi teks, struktur, dan rujukan. HTML/SVG yang dapat diedit adalah nama perender, bukan editor web. Gunakan sumber asli untuk mengedit. Ekspor presentasi, termasuk PPTX dan MP4, memiliki pengaturan dan dependensi terpisah.
+
+Drawnix menampilkan hingga enam hubungan inti berarah dan berlabel, maksimal tiga per simpul. Hubungan yang dihilangkan tetap ada dalam metadata. Teks kotak terlihat dalam PDF, termasuk dari cache SVG lama. Panah antarcabang bersifat statis dan dapat terlepas setelah penataan ulang di Drawnix.
+
+## File dan pemulihan
+
+File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file.
+
+Atur folder perantara bersama relatif terhadap Vault, atau kosongkan untuk memakai `notemd_assert/` di samping tiap sumber. Catatan pemulihan, cache render, dan lampiran opsional disimpan di sana. Pertahankan file yang masih dirujuk; perubahan folder hanya berlaku untuk proses baru.
+
+Jenis dibuat berurutan. Kegagalan satu jenis tidak menghentikan lainnya; pembatalan menghentikan jenis yang menunggu dan mempertahankan file selesai. Ulangi ekspor dari pratinjau atau riwayat tanpa permintaan model baru. Kegagalan pembuatan memerlukan pembuatan ulang jenis tersebut. Catatan v1/v2 tetap dapat dibaca.
+
+## Pembaruan
+
+Hentikan tugas dan cadangkan Vault. Pasang `main.js`, `manifest.json`, dan `styles.css` dari Release 1.9.9 yang sama, pertahankan pengaturan dan file, lalu muat ulang Obsidian. Periksa satu catatan sebelum batch besar. Preferensi lama dimigrasikan saat diedit. Terjemahan ditulis langsung tanpa API terjemahan atau LM Studio.
+
+## Rujukan
+
+- [Panduan diagram](../features/diagrams)
+- [Rilis dan unduhan](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

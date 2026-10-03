@@ -17,7 +17,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagramas
 
 <TLDR>
-Escolher tipo de diagrama e depois formato fonte editável. Rever o resultado completo no Obsidian, incluindo Drawnix e Mermaid incorporado. Exportar cada painel em SVG, PNG ou PDF.
+Selecione vários tipos de diagrama em uma execução e vários formatos independentes para cada tipo. Desmarcar um tipo mantém seus formatos; sem seleção, o conteúdo é analisado automaticamente.
 </TLDR>
 
 ## Três escolhas diferentes
@@ -28,7 +28,7 @@ Escolher tipo de diagrama e depois formato fonte editável. Rever o resultado co
 | Formato fonte | Documento editável ou reutilizável criado | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Formato de exportação | Imagem ou documento para partilhar | SVG, PNG, PDF |
 
-Draw.io e Drawnix são **formatos fonte**, não tipos de diagrama. CircuitikZ serve circuitos e não limita exportação visual a SVG.
+O HTML de diagrama contém uma imagem com zoom; o HTML de resumo estruturado contém texto, estrutura e referências. HTML/SVG editável é o nome de um renderizador, não de um editor web. Use a fonte nativa para editar. A exportação de apresentações, incluindo PPTX e MP4, mantém configurações e dependências separadas.
 
 ## Escolher fonte
 
@@ -40,17 +40,21 @@ Draw.io e Drawnix são **formatos fonte**, não tipos de diagrama. CircuitikZ se
 | Drawnix | Estilo de quadro branco ou desenho manual | `.drawnix` |
 | CircuitikZ | Circuitos elétricos e de transístores estruturados | `.tex` |
 
-Manter **Preferred source format: Auto** se não for necessário um editor específico; Notemd escolhe formato compatível.
+Os formatos compatíveis aparecem primeiro; os incompatíveis continuam visíveis e desativados. Solicitações inativas existentes podem ser removidas. Cada tipo mantém seus formatos. Se nenhum puder ser usado, tenta-se a fonte padrão do renderizador efetivo e são informadas as solicitações indisponíveis.
 
 ## Gerar e exportar
 
 1. Abrir nota suportada. Para um trecho, usar nota separada; seleção não limita ação de documento.
-2. Escolher tipo ou **Auto-detect**.
-3. Escolher fonte ou **Auto**; Drawnix para mapas suportados com nós editáveis e Mermaid.
+2. Selecione vários tipos de diagrama em uma execução e vários formatos independentes para cada tipo. Desmarcar um tipo mantém seus formatos; sem seleção, o conteúdo é analisado automaticamente.
+3. A caixa de seleção inclui o tipo. Clique no nome para selecioná-lo e editar os formatos. Passar o ponteiro ou usar o foco do teclado muda a prévia sem salvar configurações. Escape fecha o menu e devolve o foco.
 4. Executar **Gerar diagrama**.
-5. Rever painéis na ordem da fonte, num único espaço vertical; Mermaid usa a altura renderizada sem corte.
-6. Usar **Exportar SVG**, **Exportar PNG** ou **Export PDF** por painel, ou exportação superior para todos. Escolher pasta da origem ou destino relativo ao cofre. Cada painel recebe nome determinista e falha individual não impede os restantes.
-7. **Salvar arquivo-fonte** preserva a fonte editável.
+5. Os arquivos selecionados são exportados automaticamente ao lado da nota original ou diretamente para a pasta configurada. O nome inclui o tipo, como `topic_drawnix.pdf` e `topic_flowchart.svg`. Em caso de conflito, são acrescentados `-2`, `-3` etc., sem sobrescrever arquivos.
+6. Rever painéis na ordem da fonte, num único espaço vertical; Mermaid usa a altura renderizada sem corte.
+7. Usar **Exportar SVG**, **Exportar PNG** ou **Export PDF** por painel, ou exportação superior para todos. Escolher pasta da origem ou destino relativo ao cofre. Cada painel recebe nome determinista e falha individual não impede os restantes. **Salvar arquivo-fonte** preserva a fonte editável.
+
+Defina uma pasta intermediária compartilhada relativa ao Vault ou deixe o campo vazio para usar `notemd_assert/` ao lado de cada original. Ela guarda registros de recuperação, renderizações em cache e anexos opcionais. Preserve arquivos ainda referenciados; a mudança afeta apenas novas execuções.
+
+Os tipos são gerados em sequência. Uma falha não bloqueia os demais; cancelar interrompe os tipos pendentes e preserva arquivos concluídos. Tente exportar novamente pela prévia ou pelo histórico sem outra solicitação ao modelo. Falha de geração exige gerar aquele tipo de novo. Os registros v1/v2 continuam legíveis.
 
 Menu e cabeçalho de cada painel permitem exportar uma vista, sem obrigar uma imagem única opaca para resultados grandes.
 
@@ -76,7 +80,7 @@ Imagens resolvidas usam SVG com dados incorporados quando possível. Ordem: dado
 
 O quadro principal precede painéis Mermaid pela ordem da fonte. Reabrir histórico reconstrói painéis, dimensões e ações.
 
-A disposição reserva títulos, resumos e rótulos e encaminha ligações estáticas em redor dos nós. Se não houver disposição legível suportada, a geração informa erro de formato. Setas entre ramos são estáticas; não há prova de ligação persistente após reorganizar no Drawnix. Testar o editor destino.
+Drawnix mostra até seis relações direcionadas essenciais com rótulos, no máximo três por nó. As omitidas ficam nos metadados. O texto das caixas permanece visível no PDF, inclusive de SVG antigos em cache. As setas entre ramos são estáticas e podem se soltar após reorganizar no Drawnix.
 
 ## Limites de exportação nativa
 
@@ -100,7 +104,7 @@ Selecionar explicitamente o tipo. Para circuitos usar **Circuit diagram** e **Ge
 
 ### Fonte inadequada
 
-Voltar a **Auto** ou escolher formato destinado ao tipo. CircuitikZ para circuitos, Draw.io/Drawnix para estruturas suportadas.
+Os formatos compatíveis aparecem primeiro; os incompatíveis continuam visíveis e desativados. Solicitações inativas existentes podem ser removidas. Cada tipo mantém seus formatos. Se nenhum puder ser usado, tenta-se a fonte padrão do renderizador efetivo e são informadas as solicitações indisponíveis.
 
 ### Falta o menu Export
 

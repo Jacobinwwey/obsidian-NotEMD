@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Wiele diagramów, niezależne eksporty"
+description: "Wybierz wiele typów diagramów w jednym uruchomieniu i osobne zestawy formatów dla każdego typu. Odznaczenie typu zachowuje jego formaty; brak wyboru oznacza automatyczną analizę treści."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Wiele diagramów, niezależne eksporty
+
+<TLDR>
+Wybierz wiele typów diagramów w jednym uruchomieniu i osobne zestawy formatów dla każdego typu. Odznaczenie typu zachowuje jego formaty; brak wyboru oznacza automatyczną analizę treści.
+</TLDR>
+
+## Wiele diagramów, niezależne eksporty
+
+Pole wyboru włącza typ. Kliknięcie nazwy wybiera go i otwiera formaty. Najechanie kursorem lub fokus klawiatury zmienia podgląd bez zapisu ustawień. Escape zamyka menu i przywraca fokus.
+
+Obsługiwane formaty są pierwsze, a niezgodne pozostają widoczne i wyłączone. Istniejące nieaktywne żądania można usunąć. Każdy typ zachowuje swoje formaty. Gdy żaden nie jest dostępny, Notemd próbuje domyślnego formatu źródłowego używanego renderera i zgłasza niedostępne żądania.
+
+HTML diagramu zawiera grafikę z powiększaniem; HTML uporządkowanego podsumowania zawiera tekst, strukturę i źródła. Edytowalny HTML/SVG to nazwa renderera, nie edytor internetowy. Do edycji użyj natywnego pliku źródłowego. Eksport prezentacji, w tym PPTX i MP4, ma osobne ustawienia i zależności.
+
+Drawnix pokazuje maksymalnie sześć podpisanych głównych relacji skierowanych, najwyżej trzy na węzeł. Pominięte relacje pozostają w metadanych. Tekst w ramkach jest widoczny w PDF również ze starszych SVG w pamięci podręcznej. Strzałki między gałęziami są statyczne i mogą odłączyć się po zmianie układu w Drawnix.
+
+## Pliki i odzyskiwanie
+
+Wybrane pliki są automatycznie eksportowane obok notatki źródłowej lub bezpośrednio do wskazanego folderu. Nazwy zawierają typ, np. `topic_drawnix.pdf` i `topic_flowchart.svg`. Konflikty dodają `-2`, `-3` itd., bez nadpisywania plików.
+
+Ustaw wspólny folder pośredni względem Vault albo pozostaw pole puste, aby używać `notemd_assert/` obok każdego źródła. Trafiają tam rekordy odzyskiwania, pamięć podręczna renderowania i opcjonalne załączniki. Zachowaj nadal używane pliki; zmiana dotyczy tylko nowych uruchomień.
+
+Typy są generowane kolejno. Błąd jednego nie blokuje innych; anulowanie zatrzymuje oczekujące typy i zachowuje gotowe pliki. Ponów eksport z podglądu lub historii bez nowego żądania do modelu. Błąd generowania wymaga ponownego wygenerowania typu. Rekordy v1/v2 pozostają czytelne.
+
+## Aktualizacja
+
+Zatrzymaj zadania i wykonaj kopię Vault. Zainstaluj `main.js`, `manifest.json` i `styles.css` z tego samego wydania 1.9.9, zachowaj ustawienia i pliki, a następnie przeładuj Obsidian. Sprawdź jedną notatkę przed dużą partią. Stare preferencje migrują podczas edycji. Tłumaczenia napisano bezpośrednio, bez API tłumaczeniowych ani LM Studio.
+
+## Materiały
+
+- [Podręcznik diagramów](../features/diagrams)
+- [Wydanie i pobieranie](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

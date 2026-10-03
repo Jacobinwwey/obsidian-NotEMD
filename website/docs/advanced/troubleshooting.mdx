@@ -63,7 +63,9 @@ Cancellation stops further work where supported; completed writes are retained a
 
 ### Diagram Or Native Export Failed
 
-Choose a diagram/source combination supported by the selector. A preview is not native-consumer verification. Run the relevant slide or CircuitikZ environment check for desktop exports, then inspect its errors. If only source text is available, save it and use the matching external tool. See [diagrams](../features/diagrams) for explicit format limits.
+Types run sequentially. One failure does not block the others; cancellation stops pending types and preserves completed files. Retry failed exports through preview or history without another model request. A generation failure still requires generating that type again. Existing v1/v2 recovery records remain readable.
+
+Diagram HTML contains a zoomable graphic; structured-summary HTML contains text, structure and evidence. Editable HTML/SVG is a renderer name, not an in-browser editor. Use native source for editing. Presentation export, including PPTX and MP4, keeps separate settings and dependencies. [Diagram manual](../features/diagrams).
 
 ## How to Report Issues
 

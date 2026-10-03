@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diagram
 
-<TLDR>Välj diagramtyp och sedan redigerbart källformat. Granska hela resultatet i Obsidian, inklusive Drawnix och inbäddade Mermaid-paneler. Exportera panelerna som SVG, PNG eller PDF.</TLDR>
+<TLDR>
+Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.
+</TLDR>
 
 ## Tre skilda val
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Källformat | Redigerbar eller återanvändbar fil | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Exportformat | Bild eller dokument att dela | SVG, PNG, PDF |
 
-Draw.io och Drawnix är källformat, inga diagramtyper. CircuitikZ är källformat för kretsar och begränsar inte visuell export till SVG.
+Diagram-HTML innehåller en zoombar bild; HTML för strukturerad sammanfattning innehåller text, struktur och belägg. Redigerbar HTML/SVG är en renderare, inte en webbredigerare. Använd den ursprungliga källfilen för redigering. Presentationsexport, inklusive PPTX och MP4, har separata inställningar och beroenden.
 
 ## Välj källa
 
@@ -38,17 +40,21 @@ Draw.io och Drawnix är källformat, inga diagramtyper. CircuitikZ är källform
 | Drawnix | Handritad/whiteboardredigering | `.drawnix` |
 | CircuitikZ | Strukturerade elektriska kretsar och transistorkretsar | `.tex` |
 
-Lämna **Preferred source format** på **Auto** om du inte behöver viss editor. Notemd väljer kompatibel källa.
+Format som stöds visas först; inkompatibla alternativ är synliga men inaktiverade. Befintliga inaktiva önskemål kan tas bort. Varje typ behåller sina format. Om inget kan användas försöker Notemd med den aktuella renderarens standardkälla och redovisar otillgängliga önskemål.
 
 ## Generera och exportera
 
 1. Öppna stödd källanteckning. Lägg passager i separat fil; markering avgränsar inte filuppgift.
-2. Välj typ eller **Auto-detect**.
-3. Välj källformat eller **Auto**; Drawnix stöder kunskapskartor med redigerbara noder och Mermaid.
+2. Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.
+3. Kryssrutan tar med typen. Klicka på namnet för att välja den och ändra formaten. Pekarhovring eller tangentbordsfokus växlar förhandsvisning utan att spara inställningar. Escape stänger menyn och återställer fokus.
 4. Kör **Generate diagram**.
-5. Granska tavla och Mermaid-paneler i källordning i en vertikalt rullbar vy. Paneler använder verklig höjd.
-6. Välj **Export SVG**, **Export PNG** eller **Export PDF** per panel, eller exportera alla ovanifrån. Välj källmapp eller egen valvrelativ mapp. Namn är deterministiska per panel och ett fel stoppar inte övriga paneler.
-7. Spara redigerbar fil med **Save source file**.
+5. Valda filer exporteras automatiskt bredvid källanteckningen eller direkt till den angivna mappen. Namnen innehåller typen, exempelvis `topic_drawnix.pdf` och `topic_flowchart.svg`. Vid namnkonflikter läggs `-2`, `-3` och så vidare till utan överskrivning.
+6. Granska tavla och Mermaid-paneler i källordning i en vertikalt rullbar vy. Paneler använder verklig höjd.
+7. Välj **Export SVG**, **Export PNG** eller **Export PDF** per panel, eller exportera alla ovanifrån. Välj källmapp eller egen valvrelativ mapp. Namn är deterministiska per panel och ett fel stoppar inte övriga paneler. Spara redigerbar fil med **Save source file**.
+
+Ange en gemensam Vault-relativ mapp för mellanfiler, eller lämna tomt för `notemd_assert/` bredvid varje källa. Där lagras återställningsposter, renderingscache och valfria bilagor. Behåll filer som fortfarande refereras; mappändringar gäller bara nya körningar.
+
+Typer genereras i följd. Ett fel stoppar inte de andra; avbrytning stoppar väntande typer och behåller färdiga filer. Försök exportera igen via förhandsvisning eller historik utan en ny modellförfrågan. Genereringsfel kräver att typen genereras igen. Återställningsposter v1/v2 kan fortfarande läsas.
 
 Exportmeny och panelhuvud erbjuder samma tre åtgärder. **History** visar sökning, filter, återöppning och sparade filer utan att dölja förhandsvisningen. Historik kan även öppnas från palett/sidopanel utan aktiv anteckning.
 
@@ -68,7 +74,7 @@ Notemd sanerar SVG och bevarar Mermaid-källa i `.drawnix`-metadata. Förhandsvi
 
 Bilder får där möjligt förhandsvisning med inbäddade data. Prioritet: inbäddat, äldre följeslagarfiler, tillgänglig källtext. Behåll filer som fortfarande refereras: ny fristående export bevisar inte att en gammal delad mapp är överflödig.
 
-Rullvyn visar Drawnix först, därefter Mermaid i källordning. Historik återställer paneler, mått och exportåtgärder. Titlar, sammanfattningar och relationer får utrymme; ostödd läsbar layout ger formatfel. Pilar mellan grenar är statiska; bevisen garanterar inte fästen efter ommöblering i Drawnix. Testa avsedd editor.
+Drawnix visar högst sex namngivna riktade kärnrelationer, högst tre per nod. Utelämnade relationer finns kvar i metadata. Text i rutor syns i PDF även från äldre cachade SVG-filer. Pilar mellan grenar är statiska och kan lossna när noder flyttas i Drawnix.
 
 ## Native exportgränser
 
@@ -88,7 +94,7 @@ Välj typ uttryckligen. För kretsar: **Circuit diagram** och **Generate diagram
 
 ### Olämplig källa
 
-Återgå till **Auto** eller välj kompatibelt format. CircuitikZ gäller kretsar; Draw.io/Drawnix stödda strukturer.
+Format som stöds visas först; inkompatibla alternativ är synliga men inaktiverade. Befintliga inaktiva önskemål kan tas bort. Varje typ behåller sina format. Om inget kan användas försöker Notemd med den aktuella renderarens standardkälla och redovisar otillgängliga önskemål.
 
 ### Exportmeny saknas
 

@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Bắt đầu tại đây
 
 | Người đọc | Lối vào | Mục tiêu |
@@ -19,13 +19,13 @@
 | Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
 | Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
 
-**Phiên bản:** 1.9.8
+**Phiên bản:** 1.9.9
 
-- **Hủy và khôi phục:** trạng thái hủy có hiệu lực xuyên suốt lập lịch và thử lại, chặn ghi muộn của nghiên cứu và dịch. Đầu ra hoàn thành được giữ lại, xung đột khôi phục được báo rõ.
-- **Lịch sử và xuất định dạng gốc:** giữ nội dung tìm kiếm và tiêu điểm bàn phím. Sửa đường phân cách ô gộp PowerPoint cùng dây nối/nhãn CircuitikZ. Truy vấn cục bộ hàng loạt dùng ảnh chụp dữ liệu nhất quán.
-- **Phát hành và tài liệu:** kiểm tra nguồn gốc mã nguồn sạch và tệp tải xuống; có lối vào theo đối tượng và bản dịch được viết trực tiếp.
+- Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.
+- Tệp đã chọn tự động xuất cạnh ghi chú nguồn hoặc trực tiếp vào thư mục đầu ra đã đặt. Tên chứa loại, chẳng hạn `topic_drawnix.pdf` và `topic_flowchart.svg`. Khi trùng tên, thêm `-2`, `-3`… mà không ghi đè tệp.
+- Drawnix hiển thị tối đa sáu quan hệ cốt lõi có hướng và nhãn, tối đa ba quan hệ mỗi nút. Quan hệ bị lược bỏ vẫn nằm trong siêu dữ liệu. Chữ trong khung hiển thị trong PDF, kể cả từ SVG cũ trong bộ nhớ đệm. Mũi tên giữa các nhánh là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
 
-36 cấu hình nhà cung cấp và 33 loại sơ đồ có thể thực thi đã tồn tại từ 1.9.7. [Hướng dẫn nâng cấp](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/releases/1.9.8) · [Kiểm tra bản phát hành công khai](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+36 cấu hình nhà cung cấp và 33 loại sơ đồ có thể thực thi đã tồn tại từ 1.9.7. [Hướng dẫn nâng cấp](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/releases/1.9.9) · [Kiểm tra bản phát hành công khai](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Mũi tên Drawnix giữa các nhánh vẫn có tọa độ tĩnh sau khi sắp xếp lại. Mermaid/SVG trong PPTX có thể dùng ảnh thay thế. Hủy không hoàn tác thay đổi đã lưu và không bảo đảm dừng tạo nội dung hay tính phí từ xa. Thiết bị di động thật và Obsidian 0.15.0 chưa được xác minh.
 
@@ -715,7 +715,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.8 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.9 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 
@@ -748,7 +748,12 @@ Trang cài đặt Notemd cung cấp chức năng tìm kiếm mờ dựa trên t�
 - Lịch sử sơ đồ được lưu ở phạm vi Vault, được sắp xếp theo thứ tự từ mới nhất đến cũ nhất, có thể tìm kiếm và hiển thị theo trang với mỗi trang chứa 20 mục. Việc xóa một bản ghi lịch sử không làm xóa các tập tin đã được tạo ra.
 - Tùy chọn xuất bản xem trước sơ đồ PPI mặc định ở độ phân giải 300 và chấp nhận các giá trị từ 72 đến 600. Tùy chọn này chỉ điều khiển việc raster hóa của PNG; SVG và PDF vẫn duy trì dạng vector.
 - Ngoài ra, việc xuất toàn bộ nội dung hình ảnh Mermaid có thể chọn lựa việc ghi lại mã nguồn của Mermaid, SVG và các tập tin mô tả đi kèm; ngay cả khi tính năng này bị vô hiệu hóa, Mermaid vẫn có thể được xem trước trong Drawnix.
-- Loại sơ đồ ưu tiên và định dạng nguồn ưu tiên là hai tùy chọn riêng biệt.
+- Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động. Ô đánh dấu đưa loại vào quá trình tạo. Nhấp tên để chọn loại và sửa định dạng. Di chuột hoặc đặt tiêu điểm bàn phím sẽ đổi bản xem trước mà không lưu cài đặt. Escape đóng menu và trả lại tiêu điểm.
+- Tệp đã chọn tự động xuất cạnh ghi chú nguồn hoặc trực tiếp vào thư mục đầu ra đã đặt. Tên chứa loại, chẳng hạn `topic_drawnix.pdf` và `topic_flowchart.svg`. Khi trùng tên, thêm `-2`, `-3`… mà không ghi đè tệp.
+- Đặt thư mục trung gian dùng chung bằng đường dẫn tương đối trong Vault, hoặc để trống để dùng `notemd_assert/` cạnh từng nguồn. Nơi này lưu bản ghi khôi phục, bộ nhớ đệm kết xuất và tệp đính kèm tùy chọn. Giữ tệp còn được tham chiếu; đổi thư mục chỉ tác động lần chạy mới.
+- HTML sơ đồ chứa hình có thể thu phóng; HTML tóm tắt có cấu trúc chứa văn bản, cấu trúc và trích dẫn. HTML/SVG có thể chỉnh sửa là tên bộ kết xuất, không phải trình sửa trên web. Dùng nguồn gốc để chỉnh sửa. Xuất bản trình bày, gồm PPTX và MP4, có cài đặt và thư viện phụ thuộc riêng.
+- Các loại được tạo tuần tự. Một loại lỗi không chặn các loại khác; hủy sẽ dừng loại đang chờ và giữ tệp đã hoàn tất. Thử xuất lại từ xem trước hoặc lịch sử mà không gửi yêu cầu mới đến mô hình. Lỗi tạo cần tạo lại loại đó. Bản ghi v1/v2 vẫn đọc được.
+- Drawnix hiển thị tối đa sáu quan hệ cốt lõi có hướng và nhãn, tối đa ba quan hệ mỗi nút. Quan hệ bị lược bỏ vẫn nằm trong siêu dữ liệu. Chữ trong khung hiển thị trong PDF, kể cả từ SVG cũ trong bộ nhớ đệm. Mũi tên giữa các nhánh là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
 - Người dùng máy tính để bàn có thể mở môi trường biên dịch gốc CircuitikZ (nếu có) để tái sử dụng các công cụ Tectonic/pdflatex của hệ thống, chọn trình biên dịch tùy chỉnh, hoặc cài đặt phiên bản Tectonic được quản lý một cách cố định. Các chức năng xem trước, SVG, PNG và việc xuất bản xem trước PDF không yêu cầu sử dụng LaTeX.
 - Tính năng chọn tập tin xử lý theo nhóm nâng cao cho phép sử dụng các thiết lập lựa chọn đã lưu và xem trước các quy tắc liên quan.
 - Nếu thư mục đích của nhóm xử lý bị thiếu, người dùng có thể tạo thư mục đó sau khi xác nhận, với tùy chọn để hệ thống tự động tạo thư mục khi gặp trường hợp tương tự trong tương lai.

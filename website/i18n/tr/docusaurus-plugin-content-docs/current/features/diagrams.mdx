@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 
 # Diyagramlar
 
-<TLDR>Önce diyagram türünü, sonra düzenlenebilir kaynak biçimini seçin. Drawnix ve gömülü Mermaid panelleri dahil bütün sonucu Obsidian’da inceleyin. Her paneli SVG, PNG veya PDF olarak dışa aktarın.</TLDR>
+<TLDR>
+Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
+</TLDR>
 
 ## Üç ayrı seçim
 
@@ -26,7 +28,7 @@ import TLDR from '@site/src/components/TLDR';
 | Kaynak biçimi | Düzenlenebilir veya tekrar kullanılabilir dosya | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Çıktı biçimi | Paylaşılacak resim veya belge | SVG, PNG, PDF |
 
-Draw.io ve Drawnix kaynak biçimidir, diyagram türü değildir. CircuitikZ devre kaynak biçimidir; görsel çıktıyı SVG ile sınırlamaz.
+Diyagram HTML’i yakınlaştırılabilir grafik; yapılandırılmış özet HTML’i metin, yapı ve kaynaklar içerir. Düzenlenebilir HTML/SVG bir oluşturucunun adıdır, web düzenleyicisi değildir. Düzenleme için yerel kaynak dosyasını kullanın. PPTX ve MP4 dahil sunum dışa aktarımı ayrı ayar ve bağımlılıklarını korur.
 
 ## Kaynak seçimi
 
@@ -38,17 +40,21 @@ Draw.io ve Drawnix kaynak biçimidir, diyagram türü değildir. CircuitikZ devr
 | Drawnix | El çizimi/beyaz tahta düzenleme | `.drawnix` |
 | CircuitikZ | Yapılandırılmış elektrik ve transistör devreleri | `.tex` |
 
-Belirli editör gerekmiyorsa **Preferred source format** ayarını **Auto** bırakın. Notemd uyumlu kaynak seçer.
+Desteklenen biçimler önce gösterilir; uyumsuz seçenekler görünür fakat devre dışıdır. Mevcut etkin olmayan istekler kaldırılabilir. Her tür kendi biçimlerini korur. Hiçbiri kullanılamıyorsa geçerli oluşturucunun varsayılan kaynak biçimi denenir ve kullanılamayan istekler bildirilir.
 
 ## Üretim ve dışa aktarma
 
 1. Desteklenen kaynak notu açın. Parçaları ayrı nota koyun; seçim dosya görevini daraltmaz.
-2. Tür veya **Auto-detect** seçin.
-3. Kaynak veya **Auto** seçin. Drawnix düzenlenebilir düğümlü bilgi haritalarını ve Mermaid’i destekler.
+2. Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
+3. Onay kutusu türü dahil eder. Adına tıklayarak türü seçip biçimlerini düzenleyin. İşaretçiyi üzerine getirmek veya klavye odağı, ayarları kaydetmeden önizlemeyi değiştirir. Escape menüyü kapatır ve odağı geri getirir.
 4. **Diyagram olustur** çalıştırın.
-5. Tahtayı ve Mermaid panellerini kaynak sırasıyla, gerçek panel yüksekliklerini kullanan tek dikey kaydırılabilir önizlemede kontrol edin.
-6. Panel başına **SVG dışa aktar**, **PNG dışa aktar**, **Export PDF** seçin veya üstten hepsini aktarın. Kaynak ya da özel kasa göreli klasör seçin. Adlar panel bazında deterministiktir; bir panelin hatası diğerlerini durdurmaz.
-7. Düzenlenebilir dosyayı **Kaynak dosyayı kaydet** ile saklayın.
+5. Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir.
+6. Tahtayı ve Mermaid panellerini kaynak sırasıyla, gerçek panel yüksekliklerini kullanan tek dikey kaydırılabilir önizlemede kontrol edin.
+7. Panel başına **SVG dışa aktar**, **PNG dışa aktar**, **Export PDF** seçin veya üstten hepsini aktarın. Kaynak ya da özel kasa göreli klasör seçin. Adlar panel bazında deterministiktir; bir panelin hatası diğerlerini durdurmaz. Düzenlenebilir dosyayı **Kaynak dosyayı kaydet** ile saklayın.
+
+Ara dosyalar için Vault’a göre ortak bir yol belirleyin ya da her kaynağın yanındaki `notemd_assert/` için alanı boş bırakın. Kurtarma kayıtları, işleme önbelleği ve isteğe bağlı ekler burada saklanır. Hâlâ başvurulan dosyaları koruyun; klasör değişikliği yalnızca yeni çalıştırmaları etkiler.
+
+Türler sırayla oluşturulur. Bir hata diğerlerini engellemez; iptal bekleyen türleri durdurur ve tamamlanan dosyaları korur. Dışa aktarımı önizleme veya geçmişten yeni model isteği olmadan yineleyin. Oluşturma hatası, o türün yeniden oluşturulmasını gerektirir. v1/v2 kayıtları okunabilir kalır.
 
 Dışa aktarma menüsü ve panel başlıkları aynı üç işlemi sunar. **History** önizlemeyi gizlemeden arama, filtre, yeniden açma ve kaydedilmiş dosyalara erişim sağlar. Geçmiş, etkin not olmadan palet/yan panelden de açılır.
 
@@ -68,7 +74,7 @@ Notemd SVG’yi temizler, Mermaid kaynağını `.drawnix` üstverisinde saklar. 
 
 Mümkünse resimler gömülü verili önizleme alır. Öncelik sırası gömülü veri, eski eşlikçi dosya, mevcut kaynak metnidir. Hâlâ başvurulan dosyaları saklayın: yeni bağımsız çıktı, eski ortak klasörün gereksizliğini kanıtlamaz.
 
-Kaydırılabilir görünüm önce Drawnix’i, sonra kaynak sırasındaki Mermaid’i gösterir. Geçmiş panel, ölçü ve dışa aktarma eylemlerini geri kurar. Başlık, özet ve ilişkiler için alan ayrılır; desteklenmeyen okunabilir yerleşim biçim hatası verir. Dallar arası oklar statiktir; mevcut kanıt yeniden düzenleme sonrası Drawnix’te bağlı kalmayı doğrulamaz. Hedef editörü test edin.
+Drawnix en fazla altı etiketli temel yönlü ilişki, düğüm başına en fazla üç ilişki gösterir. Atlanan ilişkiler üst verilerde korunur. Kutulu metin eski SVG önbelleğinden de PDF’de görünür. Dallar arası oklar statiktir ve Drawnix’te yeniden düzenleme sonrasında kopabilir.
 
 ## Hedef uygulamaya aktarım sınırları
 
@@ -88,7 +94,7 @@ Türü açıkça seçin. Devreler için eski **Mermaid diyagramı olarak özetle
 
 ### Uygun olmayan kaynak
 
-**Auto** seçimine dönün veya türe uygun biçim seçin. CircuitikZ devreler, Draw.io/Drawnix desteklenen yapılar içindir.
+Desteklenen biçimler önce gösterilir; uyumsuz seçenekler görünür fakat devre dışıdır. Mevcut etkin olmayan istekler kaldırılabilir. Her tür kendi biçimlerini korur. Hiçbiri kullanılamıyorsa geçerli oluşturucunun varsayılan kaynak biçimi denenir ve kullanılamayan istekler bildirilir.
 
 ### Dışa aktarma menüsü yok
 

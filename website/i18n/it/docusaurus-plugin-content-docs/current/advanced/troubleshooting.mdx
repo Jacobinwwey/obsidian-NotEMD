@@ -68,7 +68,9 @@ Le scritture concluse restano e quelle accettate possono terminare. Rivedi risul
 
 ### Diagramma o export nativo
 
-Scegli combinazioni supportate. Anteprima non significa verifica nativa. Controlla ambiente slide/CircuitikZ e leggi gli errori. Con solo testo fonte, apri lo strumento esterno appropriato. Vedi [diagrammi](../features/diagrams).
+I tipi vengono generati in sequenza. Un errore non blocca gli altri; l’annullamento ferma quelli in attesa e conserva i file completati. Ripeti le esportazioni da anteprima o cronologia senza un’altra richiesta al modello. Un errore di generazione richiede di rigenerare quel tipo. I registri v1/v2 restano leggibili.
+
+L’HTML del diagramma contiene una grafica ingrandibile; l’HTML del riepilogo strutturato contiene testo, struttura e riferimenti. HTML/SVG modificabile è il nome di un renderer, non di un editor web. Per modificare usa il sorgente nativo. Le presentazioni, inclusi PPTX e MP4, mantengono impostazioni e dipendenze separate. [Manuale dei diagrammi](../features/diagrams).
 
 ## Segnalare un errore
 

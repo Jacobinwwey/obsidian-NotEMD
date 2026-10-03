@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Multiple diagrams, independent exports"
+description: "Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Multiple diagrams, independent exports
+
+<TLDR>
+Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis.
+</TLDR>
+
+## Multiple diagrams, independent exports
+
+Use the checkbox to include a type. Click its name to select it and edit its formats. Hover or keyboard focus changes the preview without saving. Escape closes the menu and returns focus.
+
+Supported formats appear first. Incompatible choices remain visible and disabled; existing inactive requests can be removed. Format choices stay with their chart type. If no requested format is usable, Notemd attempts the effective renderer’s default source and reports unavailable requests.
+
+Diagram HTML contains a zoomable graphic; structured-summary HTML contains text, structure and evidence. Editable HTML/SVG is a renderer name, not an in-browser editor. Use native source for editing. Presentation export, including PPTX and MP4, keeps separate settings and dependencies.
+
+Drawnix overviews keep up to six labeled core directed relations, at most three per node. Omitted relations remain in source metadata. Boxed relation text stays visible in PDF, including exports from older cached SVG. Cross-branch arrows are static and may detach after rearrangement in Drawnix.
+
+## Files and recovery
+
+Selected files are exported automatically beside the source note, or directly into the configured output folder. Names include the type, such as `topic_drawnix.pdf` and `topic_flowchart.svg`; collisions add `-2`, `-3` and so on without overwriting existing files.
+
+Set the diagram intermediate-files folder to a shared Vault-relative path, or leave it empty for `notemd_assert/` beside each source. Recovery records, cached renders and optional attachments stay there. Retain files still referenced by existing exports; folder changes affect new runs only.
+
+Types run sequentially. One failure does not block the others; cancellation stops pending types and preserves completed files. Retry failed exports through preview or history without another model request. A generation failure still requires generating that type again. Existing v1/v2 recovery records remain readable.
+
+## Upgrade
+
+Stop active tasks and back up your Vault. Install `main.js`, `manifest.json` and `styles.css` from the same 1.9.9 Release, preserve settings and generated files, then reload Obsidian. Verify one note before a large batch. Old preferences migrate when edited; translation was authored directly without translation APIs or LM Studio.
+
+## Reference
+
+- [Diagram manual](../features/diagrams)
+- [Release and downloads](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

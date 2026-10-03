@@ -17,7 +17,7 @@ import TLDR from '@site/src/components/TLDR';
 # Diagrammes
 
 <TLDR>
-Choisissez le type de diagramme, puis son format source réutilisable. Examinez le résultat dans Obsidian, y compris le tableau Drawnix et les panneaux Mermaid intégrés, puis exportez chaque panneau en SVG, PNG ou PDF.
+Sélectionnez plusieurs types de diagramme par exécution et plusieurs formats indépendants pour chacun. Décocher un type conserve ses formats ; sans sélection, le contenu est analysé automatiquement.
 </TLDR>
 
 ## Distinguer les trois choix
@@ -28,7 +28,7 @@ Choisissez le type de diagramme, puis son format source réutilisable. Examinez 
 | Format source | Fichier modifiable ou réutilisable créé | Mermaid, JSON Canvas, Draw.io, Drawnix, CircuitikZ |
 | Format d’export | Image ou document de partage | SVG, PNG, PDF |
 
-Draw.io et Drawnix sont des **formats source**, pas des types de diagramme. CircuitikZ vise les circuits. Une même prévisualisation peut produire plusieurs exports ; CircuitikZ ne limite pas la sortie au SVG.
+Le HTML du diagramme contient un graphique avec zoom ; le HTML de synthèse structurée contient texte, structure et références. HTML/SVG éditable désigne un moteur de rendu, pas un éditeur web. Utilisez la source native pour modifier le diagramme. Les présentations, dont PPTX et MP4, gardent leurs réglages et dépendances distincts.
 
 ## Choisir le format source
 
@@ -40,17 +40,21 @@ Draw.io et Drawnix sont des **formats source**, pas des types de diagramme. Circ
 | Drawnix | Édition de tableau blanc | `.drawnix` |
 | CircuitikZ | Circuits électriques et à transistors structurés | `.tex` |
 
-Laissez **Preferred source format** sur **Auto** sans besoin d’éditeur particulier ; Notemd choisit un format compatible avec le type.
+Les formats compatibles apparaissent en premier ; les autres restent visibles et désactivés. Les demandes inactives existantes peuvent être retirées. Chaque type conserve ses formats. Si aucun n’est utilisable, le format source par défaut du moteur effectif est tenté et les demandes indisponibles sont signalées.
 
 ## Générer et exporter
 
 1. Ouvrez une source prise en charge. Pour un passage seul, créez une note séparée : la sélection ne restreint pas l’action sur fichier.
-2. Choisissez le type ou **Auto-detect**.
-3. Choisissez la source ou **Auto** ; Drawnix convient aux cartes compatibles à nœuds modifiables et visuels Mermaid.
+2. Sélectionnez plusieurs types de diagramme par exécution et plusieurs formats indépendants pour chacun. Décocher un type conserve ses formats ; sans sélection, le contenu est analysé automatiquement.
+3. La case inclut le type. Cliquez sur son nom pour le sélectionner et modifier ses formats. Le survol ou le focus clavier change l’aperçu sans enregistrer les réglages. Échap ferme le menu et restitue le focus.
 4. Lancez **Generer un diagramme**.
-5. Relisez les panneaux dans leur ordre source : un conteneur vertical garde Drawnix et les visuels Mermaid à leur hauteur rendue.
-6. Utilisez **Exporter en SVG**, **Exporter en PNG** ou **Export PDF** par panneau, ou l’export supérieur pour tous. En multipanneau, choisissez dossier source ou dossier relatif au coffre ; un fichier déterministe est écrit par panneau et un échec isolé n’arrête pas les autres.
-7. **Enregistrer le fichier source** conserve aussi l’artefact modifiable.
+5. Les fichiers choisis sont exportés automatiquement à côté de la note source ou directement dans le dossier configuré. Leur nom indique le type, comme `topic_drawnix.pdf` ou `topic_flowchart.svg` ; les conflits ajoutent `-2`, `-3`, etc., sans écraser les fichiers existants.
+6. Relisez les panneaux dans leur ordre source : un conteneur vertical garde Drawnix et les visuels Mermaid à leur hauteur rendue.
+7. Utilisez **Exporter en SVG**, **Exporter en PNG** ou **Export PDF** par panneau, ou l’export supérieur pour tous. En multipanneau, choisissez dossier source ou dossier relatif au coffre ; un fichier déterministe est écrit par panneau et un échec isolé n’arrête pas les autres. **Enregistrer le fichier source** conserve aussi l’artefact modifiable.
+
+Définissez un dossier intermédiaire partagé relatif au Vault, ou laissez le champ vide pour utiliser `notemd_assert/` près de chaque source. Il contient les enregistrements de reprise, rendus en cache et pièces jointes facultatives. Conservez les fichiers encore référencés ; le changement concerne seulement les nouvelles exécutions.
+
+Les types sont générés successivement. Un échec ne bloque pas les autres ; l’annulation arrête les types en attente et conserve les fichiers terminés. Relancez les exports depuis l’aperçu ou l’historique sans nouvelle requête au modèle. Un échec de génération nécessite de régénérer ce type. Les enregistrements v1/v2 restent lisibles.
 
 Le menu Export et l’en-tête de chaque panneau proposent les exports visuels ; il n’est pas nécessaire de fusionner toute la prévisualisation en image opaque.
 
@@ -76,7 +80,7 @@ Les images résolues reçoivent lorsque possible une prévisualisation SVG avec 
 
 Le tableau principal précède les panneaux Mermaid, dans un seul conteneur déroulant. Rouvrir une entrée enregistrée reconstruit panneaux, dimensions et actions d’export.
 
-La disposition réserve titres, résumés et étiquettes, et contourne les nœuds. Une carte incompatible avec une disposition lisible prise en charge échoue avec une erreur de format. Les flèches entre branches sont statiques : leur attachement après déplacement dans Drawnix n’est pas établi. Vérifiez dans l’éditeur cible.
+Drawnix affiche au plus six relations dirigées essentielles et libellées, trois par nœud ; les autres restent dans les métadonnées. Le texte encadré reste visible en PDF, y compris avec les anciens SVG en cache. Les flèches entre branches sont statiques et peuvent se détacher après réorganisation dans Drawnix.
 
 ## Limites des exports natifs
 
@@ -100,7 +104,7 @@ Choisissez explicitement le type. Pour un circuit, utilisez **Generer un diagram
 
 ### Source inadaptée
 
-Revenez à **Auto** ou choisissez un format prévu pour le type. CircuitikZ vise les circuits ; Draw.io/Drawnix les diagrammes structurés compatibles.
+Les formats compatibles apparaissent en premier ; les autres restent visibles et désactivés. Les demandes inactives existantes peuvent être retirées. Chaque type conserve ses formats. Si aucun n’est utilisable, le format source par défaut du moteur effectif est tenté et les demandes indisponibles sont signalées.
 
 ### Menu Export absent
 

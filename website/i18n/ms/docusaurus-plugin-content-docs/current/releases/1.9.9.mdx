@@ -1,0 +1,44 @@
+---
+id: 1.9.9
+title: "Notemd 1.9.9 — Pelbagai rajah, eksport berasingan"
+description: "Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik."
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.9, Drawnix, HTML, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.9 — Pelbagai rajah, eksport berasingan
+
+<TLDR>
+Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.
+</TLDR>
+
+## Pelbagai rajah, eksport berasingan
+
+Kotak semak menyertakan jenis. Klik namanya untuk memilih dan mengubah format. Menghalakan penuding atau fokus papan kekunci menukar pratonton tanpa menyimpan tetapan. Escape menutup menu dan mengembalikan fokus.
+
+Format yang disokong dipaparkan dahulu; pilihan tidak serasi kekal kelihatan tetapi dinyahdayakan. Permintaan tidak aktif yang sedia ada boleh dibuang. Setiap jenis mempunyai format sendiri. Jika semuanya tidak boleh digunakan, sumber lalai pemapar aktif dicuba dan permintaan tidak tersedia dilaporkan.
+
+HTML rajah mengandungi grafik yang boleh dizum; HTML ringkasan berstruktur mengandungi teks, struktur dan rujukan. HTML/SVG boleh sunting ialah nama pemapar, bukan penyunting web. Gunakan sumber asal untuk menyunting. Eksport persembahan, termasuk PPTX dan MP4, mengekalkan tetapan serta kebergantungan berasingan.
+
+Drawnix memaparkan sehingga enam hubungan teras berarah dan berlabel, maksimum tiga bagi setiap nod. Hubungan yang digugurkan kekal dalam metadata. Teks dalam kotak kelihatan dalam PDF, termasuk daripada cache SVG lama. Anak panah antara cabang adalah statik dan mungkin terpisah selepas susunan semula dalam Drawnix.
+
+## Fail dan pemulihan
+
+Fail terpilih dieksport secara automatik di sebelah nota sumber atau terus ke folder output yang ditetapkan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Konflik nama menambah `-2`, `-3` dan seterusnya tanpa menulis ganti fail.
+
+Tetapkan folder perantaraan bersama relatif kepada Vault, atau kosongkan untuk menggunakan `notemd_assert/` di sebelah setiap sumber. Rekod pemulihan, cache pemaparan dan lampiran pilihan disimpan di situ. Kekalkan fail yang masih dirujuk; perubahan folder hanya terpakai pada pelaksanaan baharu.
+
+Jenis dijana mengikut turutan. Kegagalan satu jenis tidak menyekat yang lain; pembatalan menghentikan jenis menunggu dan mengekalkan fail siap. Cuba semula eksport melalui pratonton atau sejarah tanpa permintaan model baharu. Kegagalan penjanaan memerlukan jenis itu dijana semula. Rekod v1/v2 masih boleh dibaca.
+
+## Naik taraf
+
+Hentikan tugas dan sandarkan Vault. Pasang `main.js`, `manifest.json` dan `styles.css` daripada Release 1.9.9 yang sama, kekalkan tetapan serta fail, kemudian muat semula Obsidian. Semak satu nota sebelum kelompok besar. Keutamaan lama dipindahkan semasa disunting. Terjemahan ditulis terus tanpa API terjemahan atau LM Studio.
+
+## Rujukan
+
+- [Manual rajah](../features/diagrams)
+- [Keluaran dan muat turun](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9)
+- [1.9.8](./1.9.8)

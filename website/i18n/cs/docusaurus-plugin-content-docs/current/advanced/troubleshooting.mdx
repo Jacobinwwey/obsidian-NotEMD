@@ -64,7 +64,9 @@ Dokončené zápisy zůstávají a přijaté požadavky mohou doběhnout. Před 
 
 ### Diagram nebo export do aplikace
 
-Použijte podporovaný typ/zdroj a prověřte prostředí snímků či CircuitikZ. Náhled není test cílové aplikace. Bez vizuálního náhledu uchovejte textový zdroj pro odpovídající externí nástroj. [Diagramy](../features/diagrams).
+Typy se generují postupně. Chyba jednoho neblokuje ostatní; zrušení zastaví čekající typy a zachová hotové soubory. Export opakujte z náhledu či historie bez nového požadavku modelu. Chyba generování vyžaduje nové vygenerování daného typu. Záznamy v1/v2 zůstávají čitelné.
+
+HTML diagramu obsahuje grafiku s přiblížením; HTML strukturovaného souhrnu obsahuje text, strukturu a zdroje. Upravitelný HTML/SVG označuje renderer, nikoli webový editor. K úpravám použijte nativní zdroj. Export prezentací včetně PPTX a MP4 má samostatná nastavení a závislosti. [Příručka diagramů](../features/diagrams).
 
 ## Hlášení problému
 

@@ -9,7 +9,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-<!-- notemd-release-entry-1.9.8 -->
+<!-- notemd-release-entry-1.9.9 -->
 ## Začněte zde
 
 | Čtenář | Vstup | Cíl |
@@ -19,13 +19,13 @@
 | Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
 | Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
 
-**Verze:** 1.9.8
+**Verze:** 1.9.9
 
-- **Zrušení a obnova:** zrušení zůstává účinné při plánování i opakování a blokuje pozdní zápisy průzkumu a překladu. Dokončené výstupy se zachovají a konflikty obnovy se oznámí.
-- **Historie a export:** zachovává se vyhledávací text i zaměření klávesnice. Opraveny oddělovače sloučených buněk PowerPointu a spoje/popisky CircuitikZ. Dávkové místní vyhledávání používá konzistentní snímek.
-- **Vydání a dokumentace:** ověřuje se původ čistých zdrojů a stažené soubory; přibyly vstupy pro různé čtenáře a přímo napsané překlady.
+- Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.
+- Vybrané soubory se automaticky exportují vedle zdrojové poznámky nebo přímo do nastavené složky. Název obsahuje typ, například `topic_drawnix.pdf` a `topic_flowchart.svg`; při kolizi se přidá `-2`, `-3` atd. bez přepsání souborů.
+- Drawnix zobrazuje nejvýše šest popsaných hlavních směrovaných vztahů, maximálně tři na uzel. Vynechané vztahy zůstávají v metadatech. Text v rámečcích je viditelný v PDF i ze starších SVG v mezipaměti. Šipky mezi větvemi jsou statické a po přeuspořádání v Drawnix se mohou odpojit.
 
-36 předvoleb poskytovatelů a 33 spustitelných typů diagramů existovalo už v 1.9.7. [Průvodce aktualizací](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/releases/1.9.8) · [Ověřit veřejné vydání](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.8).
+36 předvoleb poskytovatelů a 33 spustitelných typů diagramů existovalo už v 1.9.7. [Průvodce aktualizací](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/releases/1.9.9) · [Ověřit veřejné vydání](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
 Šipky Drawnix mezi větvemi zůstávají po přeskupení statické. Mermaid/SVG v PPTX může použít náhradní obrázek. Zrušení nevrací uložené změny a nezaručuje zastavení vzdáleného generování ani účtování. Fyzická mobilní zařízení a Obsidian 0.15.0 nejsou ověřeny.
 
@@ -714,7 +714,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.8 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.9 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 
@@ -747,7 +747,12 @@ Stránka s nastaveními Notemd nabízí fuzzy vyhledávání s ohledem na konkr�
 - Historie diagramů je uložena v rámci rozsahu Vault, seřazena nejnovějšími prvními, vyhledatelná a stránkovatelná ve skupinách po 20 položkách. Odstranění záznamu z historie neodstraňuje vytvořené soubory.
 - Export náhledu diagramu PPI má jako výchozí hodnotu 300 a přijímá hodnoty od 72 do 600. Ovlivňuje pouze rasterizaci PNG; SVG a PDF zůstávají vektorové.
 - Při exportu kompletních vizuálů Mermaid lze volitelně uložit také zdrojový kód Mermaid, SVG a doplňkové soubory manifestu; i když je Mermaid vypnut, zůstává dostupný v náhledech Drawnix.
-- Preferovaný typ diagramu a preferovaný formát zdroje jsou samostatné volby.
+- Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky. Zaškrtávací políčko zahrne typ. Kliknutím na název jej vyberete a upravíte formáty. Přejetí ukazatelem nebo zaměření klávesnicí změní náhled bez uložení nastavení. Escape zavře nabídku a vrátí zaměření.
+- Vybrané soubory se automaticky exportují vedle zdrojové poznámky nebo přímo do nastavené složky. Název obsahuje typ, například `topic_drawnix.pdf` a `topic_flowchart.svg`; při kolizi se přidá `-2`, `-3` atd. bez přepsání souborů.
+- Nastavte společnou mezisložku relativně k Vault, nebo nechte pole prázdné pro `notemd_assert/` vedle každého zdroje. Obsahuje záznamy obnovy, mezipaměť vykreslení a volitelné přílohy. Zachovejte stále odkazované soubory; změna platí jen pro nové běhy.
+- HTML diagramu obsahuje grafiku s přiblížením; HTML strukturovaného souhrnu obsahuje text, strukturu a zdroje. Upravitelný HTML/SVG označuje renderer, nikoli webový editor. K úpravám použijte nativní zdroj. Export prezentací včetně PPTX a MP4 má samostatná nastavení a závislosti.
+- Typy se generují postupně. Chyba jednoho neblokuje ostatní; zrušení zastaví čekající typy a zachová hotové soubory. Export opakujte z náhledu či historie bez nového požadavku modelu. Chyba generování vyžaduje nové vygenerování daného typu. Záznamy v1/v2 zůstávají čitelné.
+- Drawnix zobrazuje nejvýše šest popsaných hlavních směrovaných vztahů, maximálně tři na uzel. Vynechané vztahy zůstávají v metadatech. Text v rámečcích je viditelný v PDF i ze starších SVG v mezipaměti. Šipky mezi větvemi jsou statické a po přeuspořádání v Drawnix se mohou odpojit.
 - Uživatelé na desktopu mohou otevřít volitelné nativní prostředí kompilace CircuitikZ, aby znovu využili systémové nástroje Tectonic/pdflatex, vybrali si vlastní kompilátor nebo explicitně nainstalovali spravovaný provozní prostředí Tectonic. Náhledy, SVG, PNG a exporty náhledů PDF nevyžadují LaTeX.
 - Pokročilé možnosti výběru souborů pro hromadnou práci umožňují použití uložených profilů výběru a náhledy pravidel.
 - Chybějící cílovou složku pro hromadnou práci lze po potvrzení vytvořit, přičemž existuje možnost zapamatovat si automatické vytváření pro budoucí chybějící složky.
