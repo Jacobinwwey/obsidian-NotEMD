@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd doplněk pro Obsidian
 
 > Notemd je doplněk Obsidianu s licencí MIT pro propojený Markdown, poznámky k pojmům, shrnutí, překlady a diagramy. Soubory zůstávají v trezoru; cloudové úlohy odesílají obsah vybranému poskytovateli a webový průzkum používá síť.
@@ -25,13 +26,19 @@ Každý náhled diagramu má samostatné přiblížení, posun, přizpůsobení 
 | Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
 | Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
 
-**Verze:** 1.9.9
+**Verze:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Bezpečné náhledy a místní nastavení Vault
+
+Importované náhledy SVG odstraňují aktivní obsah a externí zdroje, zachovávají však čínské popisky a styly panelů. Místní poskytovatelé jsou odděleni podle Vault; starý seznam výslovně importujte v nastavení se zachováním seznamu a stávajících konfigurací. Prezentace používají loopback server se správou sdílených uživatelů. Chyby ukládání oblíbených a kopírování se zobrazí; mazání respektuje nastavení Vault. Kompatibilita PNG zůstává zapnutá: originál se zachová a ověřená kopie s nižším PPI přibude jen podle potřeby. Drawnix nemá pevný limit vztahů; prezentace mají samostatné nastavení. Nainstalujte soubory stejné verze, načtěte znovu a před dávkou otestujte jednu poznámku.
 
 - Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.
 - Vybrané soubory se automaticky exportují vedle zdrojové poznámky nebo přímo do nastavené složky. Název obsahuje typ, například `topic_drawnix.pdf` a `topic_flowchart.svg`; při kolizi se přidá `-2`, `-3` atd. bez přepsání souborů.
 - Drawnix zachovává všechny výslovné orientované vztahy bez pevného celkového limitu nebo limitu na uzel. Odstraňuje pouze shodná tvrzení; různé predikáty a opačné směry zůstávají. Překrývající se vnější trasy dostávají oddělené dráhy, oddělené trasy dráhy znovu využívají. Popisky mají řádky podle rozměrů a plátno se podle potřeby rozšiřuje. Šipky bez popisku, obecné vazby a opakování hierarchie zůstávají v metadatech s důvodem. Text v rámečcích vztahů je viditelný v PDF i ze starší mezipaměti SVG. Šipky mezi větvemi jsou statické a po změně uspořádání v Drawnix se mohou odpojit.
 
-36 předvoleb poskytovatelů a 33 spustitelných typů diagramů existovalo už v 1.9.7. [Průvodce aktualizací](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/releases/1.9.9) · [Ověřit veřejné vydání](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+36 předvoleb poskytovatelů a 33 spustitelných typů diagramů existovalo už v 1.9.7. [Průvodce aktualizací](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/releases/1.9.10) · [Ověřit veřejné vydání](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Šipky Drawnix mezi větvemi zůstávají po přeskupení statické. Mermaid/SVG v PPTX může použít náhradní obrázek. Zrušení nevrací uložené změny a nezaručuje zastavení vzdáleného generování ani účtování. Fyzická mobilní zařízení a Obsidian 0.15.0 nejsou ověřeny.
 
@@ -172,7 +179,7 @@ Webový průzkum a tvorba diagramů jsou samostatné akce. Po zrušení počkejt
 
 - **Check for Duplicates in Current File**: tento příkaz pomáhá identifikovat potenciálně duplicitní výrazy v aktivním souboru.
 - **Duplicate Detection**: základní kontrola duplicitních slov v obsahu právě zpracovávaného souboru, výsledky se zapisují do console.
-- **Check and Remove Duplicate Concept Notes**: identifikuje potenciální duplicitní poznámky v nakonfigurované **Concept Note Folder** na základě přesné shody názvu, plurálů, normalizace a containment jednoho slova ve srovnání s poznámkami mimo složku. Rozsah porovnání, tedy které poznámky mimo concept folder se mají kontrolovat, lze nastavit na **celý vault**, **jen konkrétní zahrnuté složky** nebo **všechny složky kromě konkrétně vyloučených**. Zobrazuje podrobný seznam s důvody a konfliktními soubory a poté žádá potvrzení před přesunutím nalezených duplicit do system trash. Během mazání zobrazuje průběh.
+- **Check and Remove Duplicate Concept Notes**: identifikuje potenciální duplicitní poznámky v nakonfigurované **Concept Note Folder** na základě přesné shody názvu, plurálů, normalizace a containment jednoho slova ve srovnání s poznámkami mimo složku. Rozsah porovnání, tedy které poznámky mimo concept folder se mají kontrolovat, lze nastavit na **celý vault**, **jen konkrétní zahrnuté složky** nebo **všechny složky kromě konkrétně vyloučených**. Zobrazuje podrobný seznam s důvody a konfliktními soubory a poté žádá potvrzení před smazáním nalezených duplicit podle nastavení mazání vaultu. Během mazání zobrazuje průběh.
 - **Batch Mermaid Fix**: aplikuje opravy syntaxe Mermaid a LaTeX na všechny Markdown soubory ve složce vybrané uživatelem.
   - **Připraveno pro workflow**: může být použito jako samostatný nástroj nebo jako krok uvnitř vlastního one-click workflow tlačítka.
   - **Hlášení chyb**: generuje report `mermaid_error_{foldername}.md`, který vypisuje soubory, jež po zpracování stále obsahují potenciální chyby Mermaid.
@@ -547,7 +554,7 @@ Toto je základní funkcionalita zaměřená na identifikaci konceptů a přidá
    - Spusťte `Notemd: Check and Remove Duplicate Concept Notes` přes paletu příkazů nebo tlačítko v sidebaru.
    - Plugin prohledá concept note folder a porovná názvy souborů s poznámkami mimo tuto složku pomocí několika pravidel, jako exact match, plurály, normalizace a containment.
    - Pokud jsou nalezeny potenciální duplicity, objeví se modal okno se seznamem souborů, důvodem označení a konfliktními soubory.
-   - Seznam pečlivě zkontrolujte. Klikněte na **"Delete Files"**, pokud chcete uvedené soubory přesunout do system trash, nebo na **"Cancel"**, pokud nechcete nic měnit.
+   - Seznam pečlivě zkontrolujte. Klikněte na **"Delete Files"**, pokud chcete uvedené soubory smazat podle nastavení mazání vaultu, nebo na **"Cancel"**, pokud nechcete nic měnit.
    - Průběh a výsledky se zobrazují v logu sidebaru nebo modal okna.
 
 7. **Extract Concepts (Pure Mode)**:
@@ -651,7 +658,7 @@ Notemd běží lokálně uvnitř Obsidianu, ale některé funkce odesílají odc
 
 ### Lokální úložiště
 
-- Konfigurace pluginu je uložena v `.obsidian/plugins/notemd/data.json`.
+- Běžná nastavení zůstávají v `data.json`. Poskytovatelé local-only používají místní úložiště Obsidianu pro aktuální vault; starý seznam sdílený v zařízení lze importovat pouze výslovnou akcí.
 - Vygenerované soubory, reporty a volitelné logy se ukládají do vašeho vaultu podle nastavení.
 
 ## Řešení problémů
@@ -720,7 +727,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.9 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.10 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 
@@ -758,7 +765,7 @@ Stránka s nastaveními Notemd nabízí fuzzy vyhledávání s ohledem na konkr�
 - Nastavte společnou mezisložku relativně k Vault, nebo nechte pole prázdné pro `notemd_assert/` vedle každého zdroje. Obsahuje záznamy obnovy, mezipaměť vykreslení a volitelné přílohy. Zachovejte stále odkazované soubory; změna platí jen pro nové běhy.
 - HTML diagramu obsahuje grafiku s přiblížením; HTML strukturovaného souhrnu obsahuje text, strukturu a zdroje. Upravitelný HTML/SVG označuje renderer, nikoli webový editor. K úpravám použijte nativní zdroj. Export prezentací včetně PPTX a MP4 má samostatná nastavení a závislosti.
 - Typy se generují postupně. Chyba jednoho neblokuje ostatní; zrušení zastaví čekající typy a zachová hotové soubory. Export opakujte z náhledu či historie bez nového požadavku modelu. Chyba generování vyžaduje nové vygenerování daného typu. Záznamy v1/v2 zůstávají čitelné.
-- Drawnix zobrazuje nejvýše šest popsaných hlavních směrovaných vztahů, maximálně tři na uzel. Vynechané vztahy zůstávají v metadatech. Text v rámečcích je viditelný v PDF i ze starších SVG v mezipaměti. Šipky mezi větvemi jsou statické a po přeuspořádání v Drawnix se mohou odpojit.
+- Drawnix zachovává všechny výslovné orientované vztahy bez pevného celkového limitu nebo limitu na uzel. Odstraňuje pouze shodná tvrzení; různé predikáty a opačné směry zůstávají. Překrývající se vnější trasy dostávají oddělené dráhy, oddělené trasy dráhy znovu využívají. Popisky mají řádky podle rozměrů a plátno se podle potřeby rozšiřuje. Šipky bez popisku, obecné vazby a opakování hierarchie zůstávají v metadatech s důvodem. Text v rámečcích vztahů je viditelný v PDF i ze starší mezipaměti SVG. Šipky mezi větvemi jsou statické a po změně uspořádání v Drawnix se mohou odpojit.
 - Uživatelé na desktopu mohou otevřít volitelné nativní prostředí kompilace CircuitikZ, aby znovu využili systémové nástroje Tectonic/pdflatex, vybrali si vlastní kompilátor nebo explicitně nainstalovali spravovaný provozní prostředí Tectonic. Náhledy, SVG, PNG a exporty náhledů PDF nevyžadují LaTeX.
 - Pokročilé možnosti výběru souborů pro hromadnou práci umožňují použití uložených profilů výběru a náhledy pravidel.
 - Chybějící cílovou složku pro hromadnou práci lze po potvrzení vytvořit, přičemž existuje možnost zapamatovat si automatické vytváření pro budoucí chybějící složky.

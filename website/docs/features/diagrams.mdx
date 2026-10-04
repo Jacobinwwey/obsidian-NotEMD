@@ -115,3 +115,9 @@ SVG, PNG, and PDF require a visual preview. If only source text is available, sa
 ### A CircuitikZ file does not compile externally
 
 Open **CircuitikZ native compile environment** and run the environment check. Repair the managed runtime or verify that your custom/system compiler can obtain the `circuitikz` package. Notemd does not bundle a complete TeX distribution inside the plugin file.
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Safer previews and Vault-local settings
+
+Imported SVG previews remove active content and external resources while preserving Chinese labels and panel styles. Device-only providers are now isolated by Vault; use the explicit legacy import action in settings, which preserves the old list and existing configurations. Presentation previews use a loopback server with shared-consumer lifecycle control. Failed favorites saves and clipboard writes report errors; deletion follows Vault preferences. PNG compatibility stays enabled by default, preserving the requested original and adding a verified lower-PPI copy only when needed. Drawnix has no fixed relation quota; presentation exports keep separate settings. Install matching release files, reload, and test one note before batching.

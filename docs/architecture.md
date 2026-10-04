@@ -390,3 +390,9 @@ The lane-grid layout follows the same boundary: summary text is measured and wra
 - `npm run lint` — Static quality gate
 - `npm run verify:vault-bundle -- --vault <vault-path>` — Source/Vault bundle hashes and manifest version agree
 - `git diff --check` — Whitespace hygiene
+
+## 1.9.10 — Safer previews and Vault-local settings
+
+Imported SVG previews remove active content and external resources while preserving Chinese labels and panel styles. Device-only providers are now isolated by Vault; use the explicit legacy import action in settings, which preserves the old list and existing configurations. Presentation previews use a loopback server with shared-consumer lifecycle control. Failed favorites saves and clipboard writes report errors; deletion follows Vault preferences. PNG compatibility stays enabled by default, preserving the requested original and adding a verified lower-PPI copy only when needed. Drawnix has no fixed relation quota; presentation exports keep separate settings. Install matching release files, reload, and test one note before batching.
+
+[Architecture audit](./audits/2026-10-04-community-ponytail.md)

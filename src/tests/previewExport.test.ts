@@ -573,7 +573,7 @@ describe('diagram preview export helpers', () => {
         });
 
         expect(initialize).toHaveBeenCalledTimes(1);
-        expect(initialize.mock.calls[0][0]).not.toEqual(expect.objectContaining({ htmlLabels: false }));
+        expect(initialize.mock.calls[0][0]).toEqual(expect.objectContaining({ htmlLabels: false, securityLevel: 'strict' }));
     });
 
     test('keeps the vector PDF page size independent from the configured PPI', async () => {

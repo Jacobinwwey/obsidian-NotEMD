@@ -102,3 +102,9 @@ Test nøyaktig leverandør/modell på et lite notat. Mangler et felt, kontroller
 - [Batcher](../advanced/batch-processing).
 - [Egne instruksjoner](../advanced/custom-prompts).
 - [Feilsøking](../advanced/troubleshooting).
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Sikre forhåndsvisninger og Vault-lokale innstillinger
+
+Importerte SVG-visninger fjerner aktivt innhold og eksterne ressurser, men beholder kinesiske etiketter og panelstiler. Lokale leverandører isoleres per Vault; importer den gamle listen uttrykkelig i innstillingene, slik at listen og eksisterende oppsett bevares. Presentasjoner bruker en loopback-server som håndterer delte brukere. Feil ved lagring av favoritter og kopiering vises; sletting følger Vault-valgene. PNG-kompatibilitet er fortsatt aktiv: originalen beholdes, og en kontrollert kopi med lavere PPI legges bare til ved behov. Drawnix har ingen fast relasjonsgrense; presentasjoner beholder egne innstillinger. Installer filer fra samme versjon, last inn på nytt og test én note før satsvis behandling.

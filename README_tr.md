@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Obsidian için Notemd Eklentisi
 
 > Notemd; bağlantılı Markdown, kavram notları, özetler, çeviriler ve diyagramlar için MIT lisanslı bir Obsidian eklentisidir. Dosyalar kasada kalır; bulut görevleri seçilen sağlayıcıya içerik gönderir ve web araştırması ağı kullanır.
@@ -25,13 +26,19 @@ Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma
 | Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
 | Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
 
-**Sürüm:** 1.9.9
+**Sürüm:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Güvenli önizlemeler ve Vault yerel ayarları
+
+İçe aktarılan SVG önizlemeleri etkin içeriği ve dış kaynakları kaldırırken Çince etiketleri ve panel stillerini korur. Yerel sağlayıcılar Vault bazında ayrılır; eski listeyi ayarlardan açıkça içe aktarın, özgün liste ve mevcut yapılandırmalar korunsun. Sunumlar ortak kullanıcıların yaşam döngüsünü yöneten loopback sunucusunu kullanır. Favori kaydetme ve kopyalama hataları bildirilir; silme Vault tercihlerine uyar. PNG uyumluluğu açık kalır: istenen özgün dosya korunur ve yalnız gerektiğinde doğrulanmış düşük PPI kopyası eklenir. Drawnix ilişkilerinin sabit sınırı yoktur; sunum ayarları ayrı kalır. Aynı sürüm dosyalarını kurun, yeniden yükleyin ve toplu işlemden önce bir notu deneyin.
 
 - Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
 - Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir.
 - Drawnix tüm açık yönlü ilişkileri korur; toplam sayı veya düğüm başına sabit sınır uygulamaz. Yalnızca aynı iddialar tekilleştirilir; farklı yüklemler ve ters yönler korunur. Çakışan dış yollar ayrı hatlar kullanır, ayrık yollar hatları yeniden kullanır. Etiketlere ölçülerine uygun satırlar ayrılır ve tuval gerektiğinde genişler. Etiketsiz, genel veya hiyerarşiyi tekrarlayan oklar nedenleriyle birlikte meta veride kalır. İlişki kutusu metni, eski SVG önbellekleri dahil PDF çıktısında görünür. Dallar arası oklar statiktir ve Drawnix içinde yeniden düzenlemeden sonra ayrılabilir.
 
-36 sağlayıcı ön ayarı ve çalıştırılabilir 33 diyagram türü 1.9.7 sürümünde zaten vardı. [Yükseltme kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/releases/1.9.9) · [Herkese açık sürümü doğrulayın](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+36 sağlayıcı ön ayarı ve çalıştırılabilir 33 diyagram türü 1.9.7 sürümünde zaten vardı. [Yükseltme kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/releases/1.9.10) · [Herkese açık sürümü doğrulayın](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Drawnix dallar arası okları yeniden düzenlemeden sonra sabit kalır. PPTX içindeki Mermaid/SVG görüntüye dönüştürülebilir. İptal, kaydedilmiş değişiklikleri geri almaz; uzak üretimi veya ücretlendirmeyi durdurmayı garanti etmez. Fiziksel mobil cihazlar ve Obsidian 0.15.0 doğrulanmamıştır.
 
@@ -172,7 +179,7 @@ Web araştırması ve diyagram üretimi ayrı işlemlerdir. İptalden sonra etki
 
 - **Check for Duplicates in Current File**: Bu komut, etkin dosyadaki potansiyel yinelenen terimleri belirlemenize yardımcı olur.
 - **Duplicate Detection**: O anda işlenmekte olan dosya içeriğindeki yinelenen sözcükler için temel bir kontrol yapar. Sonuçlar konsola yazılır.
-- **Check and Remove Duplicate Concept Notes**: Yapılandırılmış **Concept Note Folder** içindeki potansiyel yinelenen notları, klasör dışındaki notalarla tam ad eşleşmeleri, çoğul biçimler, normalizasyon ve tek kelime içerme karşılaştırmalarına göre belirler. Karşılaştırmanın kapsamı **tüm vault**, **yalnızca belirli dahil klasörler** veya **belirli klasörler hariç tüm klasörler** olarak ayarlanabilir. Nedenleri ve çakışan dosyaları içeren ayrıntılı bir liste gösterir; ardından belirlenen yinelenen notları sistem çöp kutusuna taşımadan önce onay ister. Silme sırasında ilerlemeyi gösterir.
+- **Check and Remove Duplicate Concept Notes**: Yapılandırılmış **Concept Note Folder** içindeki potansiyel yinelenen notları, klasör dışındaki notalarla tam ad eşleşmeleri, çoğul biçimler, normalizasyon ve tek kelime içerme karşılaştırmalarına göre belirler. Karşılaştırmanın kapsamı **tüm vault**, **yalnızca belirli dahil klasörler** veya **belirli klasörler hariç tüm klasörler** olarak ayarlanabilir. Nedenleri ve çakışan dosyaları içeren ayrıntılı bir liste gösterir; ardından belirlenen yinelenen notları vault silme tercihine göre silmeden önce onay ister. Silme sırasında ilerlemeyi gösterir.
 - **Toplu Mermaid Düzeltmesi**: Kullanıcının seçtiği klasördeki tüm Markdown dosyalarına Mermaid ve LaTeX söz dizimi düzeltmeleri uygular.
   - **İş Akışına Hazır**: Tek başına yardımcı araç olarak ya da özel bir tek tık iş akışı düğmesinde adım olarak kullanılabilir.
   - **Hata Raporlama**: İşlemden sonra hâlâ potansiyel Mermaid hataları içeren dosyaları listeleyen `mermaid_error_{foldername}.md` raporu üretir.
@@ -547,7 +554,7 @@ Bu, kavramları tanımlamaya ve `[[wiki-links]]` eklemeye odaklanan temel işlev
    - `Notemd: Check and Remove Duplicate Concept Notes` komutunu çalıştırın (komut paleti veya kenar çubuğu düğmesiyle).
    - Eklenti kavram notu klasörünü tarar ve dosya adlarını klasör dışındaki notlarla tam eşleşme, çoğul biçim, normalizasyon ve içerme gibi çeşitli kurallara göre karşılaştırır.
    - Potansiyel yinelenenler bulunursa dosyaları, işaretlenme nedenlerini ve çakışan dosyaları listeleyen bir modal pencere açılır.
-   - Listeyi dikkatlice inceleyin. Listelenen dosyaları sistem çöp kutusuna taşımak için **"Delete Files"**, hiçbir işlem yapmamak için **"Cancel"** düğmesini kullanın.
+   - Listeyi dikkatlice inceleyin. Listelenen dosyaları vault silme tercihine göre silmek için **"Delete Files"**, hiçbir işlem yapmamak için **"Cancel"** düğmesini kullanın.
    - İlerleme ve sonuçlar kenar çubuğu veya modal günlüğünde gösterilir.
 
 7. **Extract Concepts (Pure Mode)**:
@@ -651,7 +658,7 @@ Notemd, Obsidian içinde yerel olarak çalışır; ancak bazı özellikler dış
 
 ### Yerel Depolama
 
-- Eklenti yapılandırması `.obsidian/plugins/notemd/data.json` dosyasında saklanır.
+- Genel ayarlar `data.json` içinde kalır. Local-only sağlayıcılar geçerli vault için Obsidian yerel depolamasını kullanır; eski cihaz genelindeki liste yalnızca açık bir içe aktarma işlemiyle taşınır.
 - Oluşturulan dosyalar, raporlar ve isteğe bağlı günlükler vault içinde ayarlarınıza göre saklanır.
 
 ## Sorun Giderme
@@ -720,7 +727,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.9 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.10 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->
@@ -757,7 +764,7 @@ Notemd ayar sayfası, alan bilgisine dayalı bulanık arama, geniş kategori nav
 - Ara dosyalar için Vault’a göre ortak bir yol belirleyin ya da her kaynağın yanındaki `notemd_assert/` için alanı boş bırakın. Kurtarma kayıtları, işleme önbelleği ve isteğe bağlı ekler burada saklanır. Hâlâ başvurulan dosyaları koruyun; klasör değişikliği yalnızca yeni çalıştırmaları etkiler.
 - Diyagram HTML’i yakınlaştırılabilir grafik; yapılandırılmış özet HTML’i metin, yapı ve kaynaklar içerir. Düzenlenebilir HTML/SVG bir oluşturucunun adıdır, web düzenleyicisi değildir. Düzenleme için yerel kaynak dosyasını kullanın. PPTX ve MP4 dahil sunum dışa aktarımı ayrı ayar ve bağımlılıklarını korur.
 - Türler sırayla oluşturulur. Bir hata diğerlerini engellemez; iptal bekleyen türleri durdurur ve tamamlanan dosyaları korur. Dışa aktarımı önizleme veya geçmişten yeni model isteği olmadan yineleyin. Oluşturma hatası, o türün yeniden oluşturulmasını gerektirir. v1/v2 kayıtları okunabilir kalır.
-- Drawnix en fazla altı etiketli temel yönlü ilişki, düğüm başına en fazla üç ilişki gösterir. Atlanan ilişkiler üst verilerde korunur. Kutulu metin eski SVG önbelleğinden de PDF’de görünür. Dallar arası oklar statiktir ve Drawnix’te yeniden düzenleme sonrasında kopabilir.
+- Drawnix tüm açık yönlü ilişkileri korur; toplam sayı veya düğüm başına sabit sınır uygulamaz. Yalnızca aynı iddialar tekilleştirilir; farklı yüklemler ve ters yönler korunur. Çakışan dış yollar ayrı hatlar kullanır, ayrık yollar hatları yeniden kullanır. Etiketlere ölçülerine uygun satırlar ayrılır ve tuval gerektiğinde genişler. Etiketsiz, genel veya hiyerarşiyi tekrarlayan oklar nedenleriyle birlikte meta veride kalır. İlişki kutusu metni, eski SVG önbellekleri dahil PDF çıktısında görünür. Dallar arası oklar statiktir ve Drawnix içinde yeniden düzenlemeden sonra ayrılabilir.
 - Masaüstü kullanıcıları, sistemdeki Tectonic/pdflatex’i yeniden kullanmak, özel bir derleyici seçmek veya sabitlenmiş yönetilen Tectonic çalışma zamanını açıkça yüklemek için isteğe bağlı CircuitikZ yerel derleme ortamını açabilirler. Önizleme, SVG, PNG ve PDF önizleme dışa aktarımları için LaTeX gerekmez.
 - Gelişmiş toplu dosya seçimi özelliği, kaydedilmiş seçim profillerini ve kural önizlemelerini mümkün kılar.
 - Eksik bir toplu işleme hedef klasörü, onaydan sonra oluşturulabilir ve gelecekteki eksik klasörler için otomatik oluşturma özelliği hatırlanabilir.

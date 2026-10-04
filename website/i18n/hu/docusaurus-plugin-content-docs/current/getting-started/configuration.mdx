@@ -104,3 +104,9 @@ Kis jegyzeten ellenőrizze a pontos profilt/modellt. Hiányzó mezőnél nézze 
 - [Kötegelt feldolgozás](../advanced/batch-processing).
 - [Egyéni promptok](../advanced/custom-prompts).
 - [Hibaelhárítás](../advanced/troubleshooting).
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Biztonságos előnézetek és Vault-helyi beállítások
+
+Az importált SVG-előnézetek eltávolítják az aktív tartalmat és a külső erőforrásokat, megtartva a kínai feliratokat és panelstílusokat. A helyi szolgáltatók Vaultonként elkülönülnek; a régi listát kifejezetten a beállításokból importálja, megőrizve azt és a meglévő konfigurációkat. A bemutatók loopback-kiszolgálót használnak a közös fogyasztók kezelésével. A kedvencek mentési és másolási hibái megjelennek; a törlés követi a Vault beállításait. A PNG-kompatibilitás bekapcsolva marad: az eredeti megmarad, és csak szükség esetén készül ellenőrzött, alacsonyabb PPI-jű másolat. A Drawnix kapcsolataihoz nincs rögzített korlát; a bemutatók beállításai külön maradnak. Azonos verziójú fájlokat telepítsen, töltse újra, és előbb teszteljen egy jegyzetet.

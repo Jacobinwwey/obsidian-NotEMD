@@ -16,6 +16,7 @@ function createManifest() {
 describe('Drawnix knowledge-map delivery settings migration', () => {
     test('persists one sanitized settings record without local-only provider credentials', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
+        plugin.app = mockApp;
         const localProvider = {
             name: 'Local provider',
             apiKey: 'local-secret',

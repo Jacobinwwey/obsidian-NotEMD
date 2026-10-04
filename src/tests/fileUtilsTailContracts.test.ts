@@ -98,5 +98,17 @@ describe('fileUtils tail contracts', () => {
             ]
         }));
         expect(mockApp.vault.trash).not.toHaveBeenCalled();
+        expect(mockApp.fileManager.trashFile).not.toHaveBeenCalled();
+    });
+    test('confirmed duplicate deletion respects the Vault trash preference through FileManager', async () => {
+        const folder = Object.assign(new (TFolder as any)(), { path: 'Concepts', name: 'Concepts' });
+        const duplicate = Object.assign(new (TFile as any)(), { path: 'Concepts/Alpha.md', basename: 'Alpha', name: 'Alpha.md' });
+        const note = Object.assign(new (TFile as any)(), { path: 'Notes/Alpha.md', basename: 'Alpha', name: 'Alpha.md' });
+        mockApp.vault.getAbstractFileByPath = jest.fn(path => path === 'Concepts' ? folder : path === duplicate.path ? duplicate : null);
+        mockApp.vault.getMarkdownFiles = jest.fn(() => [duplicate, note]);
+        const result = await checkAndRemoveDuplicateConceptNotes(mockApp, mockSettings, createReporter(), { confirmDeletion: jest.fn().mockResolvedValue(true) });
+        expect(mockApp.fileManager.trashFile).toHaveBeenCalledWith(duplicate);
+        expect(mockApp.vault.trash).not.toHaveBeenCalled();
+        expect(result.removedCount).toBe(1);
     });
 });

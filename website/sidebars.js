@@ -50,7 +50,7 @@ const sidebars = {
     'faq',
     'developers/overview',
     'agents/overview',
-    'releases/1.9.9', 'releases/1.9.8',
+    'releases/1.9.10', 'releases/1.9.9', 'releases/1.9.8',
   ],
 };
 

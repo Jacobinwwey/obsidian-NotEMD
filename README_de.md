@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd-Plugin für Obsidian
 
 > Notemd ist ein Obsidian-Plugin unter der MIT-Lizenz für verknüpftes Markdown, Konzeptnotizen, Zusammenfassungen, Übersetzungen und Diagramme. Dateien bleiben im Vault; Cloud-Aufgaben senden Inhalte an den gewählten Anbieter, und Web-Recherche benötigt Netzwerkzugriff.
@@ -25,13 +26,19 @@ Jede Diagrammvorschau bietet unabhängigen Zoom, Verschieben, Einpassen und Orig
 | Entwickler | [Entwicklerhandbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/developers/overview) | Bestehende Verträge bauen, testen und erweitern |
 | Agent | [Agent-Handbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/agents/overview) | Vier unterstützte Exportbefehle finden |
 
-**Version:** 1.9.9
+**Version:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Sichere Vorschauen und Vault-lokale Einstellungen
+
+Importierte SVG-Vorschauen entfernen aktive Inhalte und externe Ressourcen; chinesische Beschriftungen und Panel-Stile bleiben erhalten. Geräteanbieter sind je Vault isoliert. Importieren Sie die alte Liste ausdrücklich in den Einstellungen; vorhandene Konfigurationen und die alte Liste bleiben erhalten. Präsentationsvorschauen nutzen einen Loopback-Server mit Verwaltung gemeinsamer Nutzer. Fehler beim Speichern von Favoriten oder beim Kopieren werden gemeldet; Löschen folgt den Vault-Vorgaben. PNG-Kompatibilität bleibt standardmäßig aktiv: Das Original bleibt erhalten, bei Bedarf kommt eine geprüfte Kopie mit weniger PPI hinzu. Drawnix hat keine feste Beziehungsgrenze; Präsentationsexporte behalten getrennte Einstellungen. Passende Release-Dateien installieren, neu laden und vor Stapelverarbeitung eine Notiz testen.
 
 - Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert.
 - Ausgewählte Dateien werden automatisch neben der Quellnotiz oder direkt im konfigurierten Ausgabeordner gespeichert. Der Name enthält den Typ, etwa `topic_drawnix.pdf` oder `topic_flowchart.svg`. Bei Kollisionen folgen `-2`, `-3` usw.; vorhandene Dateien werden nicht überschrieben.
 - Drawnix erhält alle ausdrücklich beschriebenen gerichteten Beziehungen ohne feste Gesamtzahl oder Grenze pro Knoten. Identische Aussagen werden dedupliziert; verschiedene Prädikate und Gegenrichtungen bleiben erhalten. Überlappende Außenrouten erhalten getrennte Spuren, getrennte Bereiche nutzen Spuren erneut. Beschriftungen erhalten vermessene Zeilen; die Zeichenfläche wächst nach Bedarf. Unbeschriftete, allgemeine oder zur Hierarchie redundante Pfeile bleiben mit Begründung in den Metadaten. Text in Beziehungsrahmen bleibt im PDF sichtbar, auch aus älteren SVG-Caches. Pfeile zwischen Zweigen bleiben statisch und können sich nach einer Neuanordnung in Drawnix lösen.
 
-Die 36 Anbietervorlagen und 33 ausführbaren Diagrammtypen waren bereits in 1.9.7 vorhanden. [Upgrade-Anleitung](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/releases/1.9.9) · [Öffentliches Release prüfen](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+Die 36 Anbietervorlagen und 33 ausführbaren Diagrammtypen waren bereits in 1.9.7 vorhanden. [Upgrade-Anleitung](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/releases/1.9.10) · [Öffentliches Release prüfen](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Drawnix-Pfeile zwischen Zweigen bleiben nach einer Neuanordnung statisch. Mermaid/SVG kann in PPTX als Bild ausgegeben werden. Abbrechen macht gespeicherte Änderungen nicht rückgängig und garantiert keinen Stopp entfernter Generierung oder Abrechnung. Physische Mobilgeräte und Obsidian 0.15.0 sind weiterhin ungeprüft.
 
@@ -176,7 +183,7 @@ Web-Recherche und Diagrammerzeugung sind separate Aktionen. Warten Sie nach eine
 
 - **Auf Duplikate in aktueller Datei prüfen**: Dieser Befehl hilft, potenzielle doppelte Begriffe in der aktiven Datei zu identifizieren.
 - **Duplikaterkennung**: Grundlegende Prüfung auf doppelte Wörter innerhalb des aktuell verarbeiteten Dateiinhalts (Ergebnisse werden in der Konsole protokolliert).
-- **Doppelte Konzeptnotizen prüfen & entfernen**: Identifiziert potenzielle doppelte Notizen innerhalb des konfigurierten **Konzeptnotiz-Ordners**, basierend auf exakten Namensübereinstimmungen, Pluralformen, Normalisierung und Einwort-Enthaltensein im Vergleich zu Notizen außerhalb des Ordners. Der Vergleichsumfang (welche Notizen außerhalb des Konzeptordners geprüft werden) kann auf den **gesamten Vault**, **spezifisch eingeschlossene Ordner** oder **alle Ordner außer spezifisch ausgeschlossenen** konfiguriert werden. Präsentiert eine detaillierte Liste mit Gründen und kollidierenden Dateien und bittet vor dem Verschieben der identifizierten Duplikate in den System-Papierkorb um Bestätigung. Zeigt den Fortschritt während der Entfernung an.
+- **Doppelte Konzeptnotizen prüfen & entfernen**: Identifiziert potenzielle doppelte Notizen innerhalb des konfigurierten **Konzeptnotiz-Ordners**, basierend auf exakten Namensübereinstimmungen, Pluralformen, Normalisierung und Einwort-Enthaltensein im Vergleich zu Notizen außerhalb des Ordners. Der Vergleichsumfang (welche Notizen außerhalb des Konzeptordners geprüft werden) kann auf den **gesamten Vault**, **spezifisch eingeschlossene Ordner** oder **alle Ordner außer spezifisch ausgeschlossenen** konfiguriert werden. Präsentiert eine detaillierte Liste mit Gründen und kollidierenden Dateien und bittet vor dem Löschen der identifizierten Duplikate gemäß den Löschpräferenzen des Vaults um Bestätigung. Zeigt den Fortschritt während der Entfernung an.
 - **Batch-Mermaid-Korrektur**: Wendet Mermaid- und LaTeX-Syntaxkorrekturen auf alle Markdown-Dateien in einem vom Benutzer ausgewählten Ordner an.
     - **Workflow-bereit**: Kann als eigenständiges Utility oder als Schritt innerhalb einer benutzerdefinierten Ein-Klick-Workflow-Schaltfläche verwendet werden.
     - **Fehlerbericht**: Erzeugt einen Bericht `mermaid_error_{ordnername}.md`, der Dateien auflistet, die nach der Verarbeitung noch potenzielle Mermaid-Fehler enthalten.
@@ -553,7 +560,7 @@ Dies ist die Kernfunktionalität, die darauf fokussiert ist, Konzepte zu identif
     *   Führen Sie `Notemd: Check and Remove Duplicate Concept Notes` aus (über die Befehlspalette oder die Schaltfläche in der Seitenleiste).
     *   Das Plugin scannt den Konzeptnotiz-Ordner und vergleicht Dateinamen mit Notizen außerhalb des Ordners anhand verschiedener Regeln (exakte Übereinstimmung, Pluralformen, Normalisierung, Enthaltensein).
     *   Wenn potenzielle Duplikate gefunden werden, erscheint ein Modal-Fenster, das die Dateien, den Grund für die Markierung und die kollidierenden Dateien auflistet.
-    *   Überprüfen Sie die Liste sorgfältig. Klicken Sie auf **"Delete Files"**, um die aufgelisteten Dateien in den System-Papierkorb zu verschieben, oder auf **"Cancel"**, um keine Aktion auszuführen.
+    *   Überprüfen Sie die Liste sorgfältig. Klicken Sie auf **"Delete Files"**, um die aufgelisteten Dateien gemäß den Löschpräferenzen des Vaults zu löschen, oder auf **"Cancel"**, um keine Aktion auszuführen.
     *   Fortschritt und Ergebnisse werden in der Seitenleiste/im Modal-Log angezeigt.
 
 7.  **Konzepte extrahieren (Reiner Modus)**:
@@ -657,7 +664,7 @@ Notemd läuft lokal innerhalb von Obsidian, aber einige Funktionen senden ausgeh
 
 ### Lokale Speicherung
 
-- Die Plugin-Konfiguration wird in `.obsidian/plugins/notemd/data.json` gespeichert.
+- Allgemeine Einstellungen bleiben in `data.json`. Local-only-Anbieter verwenden Obsidians lokalen Speicher für den aktuellen Vault; die alte geräteweit geteilte Liste wird nur ausdrücklich importiert.
 - Generierte Dateien, Berichte und optionale Protokolle werden gemäß Ihren Einstellungen in Ihrem Vault gespeichert.
 
 ## Fehlerbehebung
@@ -726,7 +733,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.9.9 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.9.10 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 
@@ -764,7 +771,7 @@ Die Einstellungsseite von Notemd bietet eine feingranulare Suche unter Berücksi
 - Für Zwischendateien lässt sich ein gemeinsamer Vault-relativer Ordner festlegen. Ein leeres Feld verwendet `notemd_assert/` neben jeder Quelle. Dort liegen Wiederherstellungsprotokolle, Render-Caches und optionale Anhänge. Weiterhin referenzierte Dateien behalten; Ordneränderungen gelten nur für neue Durchläufe.
 - Diagramm-HTML enthält eine zoombare Grafik; strukturiertes Zusammenfassungs-HTML enthält Text, Struktur und Belege. Editierbares HTML/SVG bezeichnet einen Renderer, keinen Webeditor. Zum Bearbeiten dient die native Quelldatei. Präsentationsexporte einschließlich PPTX und MP4 behalten eigene Einstellungen und Abhängigkeiten.
 - Typen werden nacheinander erzeugt. Ein Fehler blockiert die anderen nicht. Abbrechen stoppt ausstehende Typen und erhält fertige Dateien. Exporte lassen sich in Vorschau oder Verlauf ohne neue Modellanfrage wiederholen. Bei einem Generierungsfehler muss dieser Typ neu erzeugt werden. v1/v2-Protokolle bleiben lesbar.
-- Drawnix zeigt höchstens sechs beschriftete zentrale gerichtete Beziehungen, maximal drei je Knoten. Ausgelassene Beziehungen bleiben in den Metadaten. Eingerahmter Text bleibt im PDF sichtbar, auch bei älteren SVG-Caches. Zweigübergreifende Pfeile sind statisch und können sich nach einer Neuanordnung in Drawnix lösen.
+- Drawnix erhält alle ausdrücklich beschriebenen gerichteten Beziehungen ohne feste Gesamtzahl oder Grenze pro Knoten. Identische Aussagen werden dedupliziert; verschiedene Prädikate und Gegenrichtungen bleiben erhalten. Überlappende Außenrouten erhalten getrennte Spuren, getrennte Bereiche nutzen Spuren erneut. Beschriftungen erhalten vermessene Zeilen; die Zeichenfläche wächst nach Bedarf. Unbeschriftete, allgemeine oder zur Hierarchie redundante Pfeile bleiben mit Begründung in den Metadaten. Text in Beziehungsrahmen bleibt im PDF sichtbar, auch aus älteren SVG-Caches. Pfeile zwischen Zweigen bleiben statisch und können sich nach einer Neuanordnung in Drawnix lösen.
 - Desktop-Nutzer können die optionale native Kompilierumgebung von CircuitikZ öffnen, um das System-Tectonic/pdflatex wiederverwenden zu können, einen eigenen Compiler auszuwählen oder explizit den festgelegten verwalteten Tectonic-Runtime zu installieren. Für Vorschauen, SVG, PNG sowie Exporte von PDF ist LaTeX nicht erforderlich.
 - Die erweiterte Auswahl von Batch-Dateien ermöglicht das Verwenden gespeicherter Auswahlprofile und die Anzeige von Regelvorschauen.
 - Ein fehlender Zielordner für Batch-Operationen kann nach Bestätigung erstellt werden, wobei die Option besteht, künftig automatisch solche fehlenden Ordnner zu erstellen.

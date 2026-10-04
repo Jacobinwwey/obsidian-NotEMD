@@ -1,3 +1,4 @@
+import { mountDiagramSvg } from '../rendering/preview/svgHostSanitizer';
 import { App, Menu, Modal, Notice } from 'obsidian';
 import { DiagramPreviewViewport } from './DiagramPreviewViewport';
 import { formatI18n, getI18nStrings } from '../i18n';
@@ -844,7 +845,7 @@ export class DiagramPreviewModal extends Modal {
             );
             container.empty();
             container.addClass('is-json-canvas');
-            container.innerHTML = svg;
+            mountDiagramSvg(container, svg);
             return true;
         } catch (error) {
             console.error('Failed to render JSON Canvas preview. Falling back to srcdoc preview.', error);
@@ -860,7 +861,7 @@ export class DiagramPreviewModal extends Modal {
             );
             container.empty();
             container.addClass('is-svg-preview');
-            container.innerHTML = svg;
+            mountDiagramSvg(container, svg);
             return true;
         } catch (error) {
             console.error('Failed to render diagram SVG preview. Falling back to source preview.', error);

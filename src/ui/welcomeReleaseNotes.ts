@@ -10,6 +10,7 @@ type WelcomeReleaseNoteCatalog = Record<string, WelcomeReleaseNoteEntry[]>;
 const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
+    {"version":"1.9.10","highlights":["Imported SVG previews now strip active content and external resources while preserving vector labels and panel styles. Mobile startup keeps desktop dependencies lazy.","Device-only providers are Vault-scoped. Explicit legacy import preserves the old list and configured providers; storage, favorites and clipboard failures are visible.","Presentation HTML uses a loopback server with shared-consumer lifecycle control. Requested PNGs and verified compatibility companions remain available; Drawnix has no fixed relation quota."]},
     {
         version: '1.9.9',
         highlights: [
@@ -109,6 +110,7 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
+    {"version":"1.9.10","highlights":["导入 SVG 预览移除活动内容与外部资源，保留向量文字和各面板样式；移动端启动不再提前加载桌面依赖。","仅设备 provider 按 Vault 隔离，显式旧版导入保留原列表与已有配置；存储、收藏及剪贴板失败明确报告。","演示 HTML 使用 loopback 服务器并管理共享消费者生命周期；保留请求 PNG 与已验证兼容副本，Drawnix 不设固定关系配额。"]},
     {
         version: '1.9.9',
         highlights: [
@@ -208,6 +210,7 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {"version":"1.9.10","highlights":["匯入 SVG 預覽移除活動內容與外部資源，保留向量文字和各面板樣式；行動端啟動不再提前載入桌面依賴。","僅裝置 provider 依 Vault 隔離，明確匯入舊版列表並保留原列表與既有設定；儲存、收藏及剪貼簿失敗會顯示錯誤。","簡報 HTML 使用 loopback 伺服器並管理共用使用者生命週期；保留要求的 PNG 與已驗證相容副本，Drawnix 不設固定關係配額。"]},
     {
         version: '1.9.9',
         highlights: [

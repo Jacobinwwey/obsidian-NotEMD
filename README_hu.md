@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd bővítmény az Obsidianhez
 
 > A Notemd MIT-licencű Obsidian-bővítmény hivatkozásokkal ellátott Markdownhoz, fogalomjegyzetekhez, összefoglalókhoz, fordításokhoz és diagramokhoz. A fájlok a tárolóban maradnak; a felhőfeladatok tartalmat küldenek a kiválasztott szolgáltatónak, a webes kutatás pedig hálózatot használ.
@@ -25,13 +26,19 @@ Minden diagramelőnézet külön nagyítási, mozgatási, illesztési és eredet
 | Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
 | Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
 
-**Verzió:** 1.9.9
+**Verzió:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Biztonságos előnézetek és Vault-helyi beállítások
+
+Az importált SVG-előnézetek eltávolítják az aktív tartalmat és a külső erőforrásokat, megtartva a kínai feliratokat és panelstílusokat. A helyi szolgáltatók Vaultonként elkülönülnek; a régi listát kifejezetten a beállításokból importálja, megőrizve azt és a meglévő konfigurációkat. A bemutatók loopback-kiszolgálót használnak a közös fogyasztók kezelésével. A kedvencek mentési és másolási hibái megjelennek; a törlés követi a Vault beállításait. A PNG-kompatibilitás bekapcsolva marad: az eredeti megmarad, és csak szükség esetén készül ellenőrzött, alacsonyabb PPI-jű másolat. A Drawnix kapcsolataihoz nincs rögzített korlát; a bemutatók beállításai külön maradnak. Azonos verziójú fájlokat telepítsen, töltse újra, és előbb teszteljen egy jegyzetet.
 
 - Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
 - A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás.
 - A Drawnix minden kifejezett irányított kapcsolatot megtart, rögzített összesített vagy csomópontonkénti korlát nélkül. Csak az azonos állításokat szűri ki; a különböző predikátumok és fordított irányok megmaradnak. Az átfedő külső útvonalak külön sávot kapnak, az elkülönülők újrahasználják a sávokat. A címkék méretük szerinti sorokat kapnak, a rajzterület szükség szerint bővül. A címke nélküli, általános vagy a hierarchiát ismétlő nyilak indoklással a metaadatokban maradnak. A kapcsolati keretek szövege PDF-ben is látható, régi SVG-gyorsítótárból is. Az ágak közötti nyilak statikusak, és Drawnixban történő átrendezés után leválhatnak.
 
-A 36 szolgáltatói előbeállítás és 33 végrehajtható diagramtípus már az 1.9.7-ben is létezett. [Frissítési útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/releases/1.9.9) · [Nyilvános kiadás ellenőrzése](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+A 36 szolgáltatói előbeállítás és 33 végrehajtható diagramtípus már az 1.9.7-ben is létezett. [Frissítési útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/releases/1.9.10) · [Nyilvános kiadás ellenőrzése](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 A Drawnix ágak közötti nyilai átrendezés után statikusak maradnak. A PPTX Mermaid/SVG tartalma képként jelenhet meg. A megszakítás nem vonja vissza a mentett módosításokat, és nem garantálja a távoli generálás vagy számlázás leállását. Fizikai mobileszközök és az Obsidian 0.15.0 nincsenek ellenőrizve.
 
@@ -172,7 +179,7 @@ A webes kutatás és a diagramgenerálás külön művelet. Megszakítás után 
 
 - **Duplikátumok ellenőrzése az aktuális fájlban**: ez a parancs segít az aktív fájlban lévő lehetséges ismétlődő kifejezések azonosításában.
 - **Duplikátumészlelés**: alapvető ellenőrzés az aktuálisan feldolgozott fájl tartalmában előforduló ismétlődő szavakra (az eredmények a konzolba kerülnek).
-- **Check and Remove Duplicate Concept Notes**: azonosítja a lehetséges duplikált jegyzeteket a konfigurált **Concept Note Folder** mappában névazonosság, többes szám, normalizálás és egyszavas tartalmazás alapján, a mappán kívüli jegyzetekhez hasonlítva. Az összehasonlítás hatóköre (vagyis hogy a fogalommappán kívüli mely jegyzeteket ellenőrzi) beállítható **az egész vaultra**, **konkrét felvett mappákra**, vagy **minden mappára bizonyos mappák kizárásával**. Részletes listát mutat az okokkal és az ütköző fájlokkal, majd megerősítést kér, mielőtt a talált duplikátumokat a rendszer lomtárába helyezné. A törlés közben előrehaladást is mutat.
+- **Check and Remove Duplicate Concept Notes**: azonosítja a lehetséges duplikált jegyzeteket a konfigurált **Concept Note Folder** mappában névazonosság, többes szám, normalizálás és egyszavas tartalmazás alapján, a mappán kívüli jegyzetekhez hasonlítva. Az összehasonlítás hatóköre (vagyis hogy a fogalommappán kívüli mely jegyzeteket ellenőrzi) beállítható **az egész vaultra**, **konkrét felvett mappákra**, vagy **minden mappára bizonyos mappák kizárásával**. Részletes listát mutat az okokkal és az ütköző fájlokkal, majd megerősítést kér, mielőtt a talált duplikátumokat a vault törlési beállítása szerint törölné. A törlés közben előrehaladást is mutat.
 - **Batch Mermaid Fix**: Mermaid- és LaTeX-szintaxisjavításokat alkalmaz egy felhasználó által kiválasztott mappa összes Markdown-fájljára.
     - **Workflow Ready**: használható önálló segédeszközként vagy egy egyéni, egykattintásos munkafolyamat lépéseként.
     - **Error Reporting**: létrehoz egy `mermaid_error_{foldername}.md` jelentést, amely felsorolja azokat a fájlokat, amelyek a feldolgozás után még mindig potenciális Mermaid-hibákat tartalmaznak.
@@ -544,7 +551,7 @@ Ez az alapfunkció, amely a fogalmak azonosítására és `[[wiki-links]]` hivat
     *   Futtassa a `Notemd: Check and Remove Duplicate Concept Notes` parancsot (parancspalettából vagy oldalsáv-gombbal).
     *   A bővítmény átvizsgálja a fogalomjegyzet-mappát, és több szabály (pontos egyezés, többes szám, normalizálás, tartalmazás) alapján összeveti a fájlneveket a mappán kívüli jegyzetekkel.
     *   Ha potenciális duplikátumokat talál, egy modális ablak jelenik meg a fájlok listájával, a megjelölés okával és az ütköző fájlokkal.
-    *   Nézze át figyelmesen a listát. Kattintson a **"Delete Files"** gombra a felsorolt fájlok rendszerlomtárba helyezéséhez, vagy a **"Cancel"** gombra, ha nem szeretne módosítást végezni.
+    *   Nézze át figyelmesen a listát. Kattintson a **"Delete Files"** gombra a felsorolt fájlok vaultbeállítás szerinti törléséhez, vagy a **"Cancel"** gombra, ha nem szeretne módosítást végezni.
     *   Az előrehaladás és az eredmények az oldalsáv/modális naplóban jelennek meg.
 
 7.  **Extract Concepts (Pure Mode)**:
@@ -648,7 +655,7 @@ A Notemd helyben fut az Obsidianon belül, de bizonyos funkciók külső kérés
 
 ### Helyi tárolás
 
-- A bővítmény konfigurációja a `.obsidian/plugins/notemd/data.json` fájlban tárolódik.
+- Az általános beállítások a `data.json` fájlban maradnak. A local-only szolgáltatók az Obsidian aktuális vaulthoz tartozó helyi tárhelyét használják; a régi, eszközszinten megosztott lista csak kifejezett művelettel importálható.
 - A generált fájlok, jelentések és opcionális naplók a beállításoknak megfelelően a vaultban tárolódnak.
 
 ## Hibaelhárítás
@@ -717,7 +724,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.9 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.10 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->
@@ -754,7 +761,7 @@ A Notemd beállítások oldala biztonsági szempontból fontos adatokat tartalma
 - Állítson be közös, Vault-relatív mappát a köztes fájloknak, vagy hagyja üresen a mezőt a források melletti `notemd_assert/` használatához. Itt tárolódnak a helyreállítási rekordok, gyorsítótárak és választható mellékletek. A hivatkozott fájlokat őrizze meg; a módosítás csak új futtatásokra érvényes.
 - A diagram-HTML nagyítható grafikát, a strukturált összefoglaló HTML szöveget, szerkezetet és hivatkozásokat tartalmaz. A szerkeszthető HTML/SVG egy megjelenítő neve, nem webes szerkesztő. Szerkesztéshez használja a natív forrást. A prezentációk, köztük a PPTX és MP4 exportja külön beállításokat és függőségeket használ.
 - A típusok egymás után készülnek. Egy hiba nem állítja le a többit; a megszakítás leállítja a várakozó típusokat és megőrzi a kész fájlokat. Az export az előnézetből vagy előzményekből új modellkérés nélkül ismételhető. Generálási hiba esetén a típust újra kell generálni. A v1/v2 rekordok olvashatók maradnak.
-- A Drawnix legfeljebb hat feliratozott, irányított fő kapcsolatot mutat, csomópontonként legfeljebb hármat. A kihagyott kapcsolatok megmaradnak a metaadatokban. A keretes szöveg régi SVG-gyorsítótárból is látszik PDF-ben. Az ágak közötti nyilak statikusak, és átrendezéskor leválhatnak a Drawnixban.
+- A Drawnix minden kifejezett irányított kapcsolatot megtart, rögzített összesített vagy csomópontonkénti korlát nélkül. Csak az azonos állításokat szűri ki; a különböző predikátumok és fordított irányok megmaradnak. Az átfedő külső útvonalak külön sávot kapnak, az elkülönülők újrahasználják a sávokat. A címkék méretük szerinti sorokat kapnak, a rajzterület szükség szerint bővül. A címke nélküli, általános vagy a hierarchiát ismétlő nyilak indoklással a metaadatokban maradnak. A kapcsolati keretek szövege PDF-ben is látható, régi SVG-gyorsítótárból is. Az ágak közötti nyilak statikusak, és Drawnixban történő átrendezés után leválhatnak.
 - Aszintális használók lehetőségük van nyitni a CircuitikZ natív kompilációs környezetét, hogy újrahasználhassák a rendszeri Tectonic/pdflatex-t, választhassák egy személyre szabott kompilátort, vagy kifejezetten telepíthessék a beállított Tectonic futtatóprogramot. Az előnézetek, SVG, PNG és PDF exportálásai nem igényelnek LaTeX-t.
 - A fejlett partnélküli fájl választása lehetőséget ad a mentett választási profillerek és szabályok előnézetére.
 - Ha egy partnélküli célmappa nincs, ezt az bizonyítás után hozható létre, és lehetőség van jövőbeni hiányzó mappák automatikus létrehozását emlékeztetni.

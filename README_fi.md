@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd-liitännäinen Obsidianille
 
 > Notemd on MIT-lisensoitu Obsidian-lisäosa linkitettyä Markdownia, käsitemuistiinpanoja, yhteenvetoja, käännöksiä ja kaavioita varten. Tiedostot jäävät holviin; pilvitehtävät lähettävät sisältöä valitulle tarjoajalle ja verkkotutkimus käyttää verkkoyhteyttä.
@@ -25,13 +26,19 @@ Jokaisessa kaavion esikatselussa on oma zoomaus, siirto, sovitus ja todellinen k
 | Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
 | Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
 
-**Versio:** 1.9.9
+**Versio:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Turvalliset esikatselut ja Vault-kohtaiset asetukset
+
+Tuodut SVG-esikatselut poistavat aktiivisen sisällön ja ulkoiset resurssit mutta säilyttävät kiinankieliset tekstit ja paneelien tyylit. Paikalliset palveluntarjoajat eristetään Vaultin mukaan; tuo vanha luettelo erikseen asetuksista, säilyttäen alkuperäisen luettelon ja nykyiset määritykset. Esitykset käyttävät loopback-palvelinta, joka hallitsee yhteisiä käyttäjiä. Suosikkien tallennus- ja kopiointivirheet ilmoitetaan; poisto noudattaa Vaultin asetuksia. PNG-yhteensopivuus pysyy käytössä: alkuperäinen säilyy ja tarvittaessa lisätään tarkistettu pienemmän PPI:n kopio. Drawnix-suhteilla ei ole kiinteää rajaa; esityksillä on erilliset asetukset. Asenna saman version tiedostot, lataa uudelleen ja kokeile yhtä muistiinpanoa ennen eräajoa.
 
 - Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti.
 - Valitut tiedostot viedään automaattisesti lähdemuistiinpanon viereen tai suoraan määritettyyn tuloskansioon. Nimi sisältää tyypin, kuten `topic_drawnix.pdf` tai `topic_flowchart.svg`. Nimiristiriidoissa lisätään `-2`, `-3` jne. korvaamatta vanhoja tiedostoja.
 - Drawnix säilyttää kaikki selkeästi ilmaistut suunnatut suhteet ilman kokonaismäärän tai solmukohtaisen määrän rajaa. Vain samat väitteet poistetaan kaksoiskappaleina; eri predikaatit ja vastakkaiset suunnat säilyvät. Päällekkäiset ulkoreitit saavat erilliset kaistat, erilliset reitit käyttävät kaistoja uudelleen. Tunnisteille varataan mittojen mukaiset rivit ja piirtoalue kasvaa tarvittaessa. Nimeämättömät, yleiset tai hierarkiaa toistavat nuolet jäävät metatietoihin syineen. Suhderuutujen teksti näkyy PDF:ssä myös vanhasta SVG-välimuistista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa tehdyn uudelleenjärjestelyn jälkeen.
 
-36 tarjoajaesiasetusta ja 33 suoritettavaa kaaviotyyppiä olivat mukana jo versiossa 1.9.7. [Päivitysopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/releases/1.9.9) · [Tarkista julkinen julkaisu](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+36 tarjoajaesiasetusta ja 33 suoritettavaa kaaviotyyppiä olivat mukana jo versiossa 1.9.7. [Päivitysopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/releases/1.9.10) · [Tarkista julkinen julkaisu](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Drawnixin haarojen väliset nuolet pysyvät staattisina uudelleenjärjestelyn jälkeen. PPTX:n Mermaid/SVG voi käyttää kuvavaraesitystä. Peruutus ei kumoa tallennettuja muutoksia eikä takaa etägeneroinnin tai laskutuksen loppumista. Fyysisiä mobiililaitteita ja Obsidian 0.15.0:aa ei ole varmennettu.
 
@@ -172,7 +179,7 @@ Verkkotutkimus ja kaavioiden luonti ovat erillisiä toimintoja. Odota peruutukse
 
 - **Tarkista duplikaatit nykyisestä tiedostosta**: Tämä komento auttaa havaitsemaan aktiivisen tiedoston mahdolliset duplikaattitermit.
 - **Duplikaattien tunnistus**: Perustason tarkistus käsitellyn tiedoston sisällön duplikaattisanoille; tulokset kirjataan konsoliin.
-- **Tarkista ja poista duplikaattikäsite-muistiinpanot**: Tunnistaa mahdolliset duplikaattimuistiinpanot määritetystä **Concept Note Folder** -kansiosta täsmällisten nimiosumien, monikkomuotojen, normalisoinnin ja yksittäisen sanan sisältämisen perusteella verrattuna kansion ulkopuolisiin muistiinpanoihin. Vertailun laajuus voidaan määrittää koskemaan **koko vaultia**, **vain tiettyjä sisällytettäviä kansioita** tai **kaikkia kansioita tiettyjä poikkeuksia lukuun ottamatta**. Näyttää yksityiskohtaisen listan syistä ja ristiriitaisista tiedostoista, ja pyytää vahvistuksen ennen kuin löydetyt duplikaatit siirretään järjestelmän roskakoriin. Näyttää etenemisen poistamisen aikana.
+- **Tarkista ja poista duplikaattikäsite-muistiinpanot**: Tunnistaa mahdolliset duplikaattimuistiinpanot määritetystä **Concept Note Folder** -kansiosta täsmällisten nimiosumien, monikkomuotojen, normalisoinnin ja yksittäisen sanan sisältämisen perusteella verrattuna kansion ulkopuolisiin muistiinpanoihin. Vertailun laajuus voidaan määrittää koskemaan **koko vaultia**, **vain tiettyjä sisällytettäviä kansioita** tai **kaikkia kansioita tiettyjä poikkeuksia lukuun ottamatta**. Näyttää yksityiskohtaisen listan syistä ja ristiriitaisista tiedostoista, ja pyytää vahvistuksen ennen kuin löydetyt duplikaatit poistetaan vaultin poistoasetuksen mukaisesti. Näyttää etenemisen poistamisen aikana.
 - **Erä Mermaid -korjaus**: Soveltaa Mermaid- ja LaTeX-syntaksikorjauksia kaikkiin käyttäjän valitseman kansion Markdown-tiedostoihin.
   - **Työnkulkuvalmis**: Voidaan käyttää joko erillisenä työkaluna tai osana mukautettua yhden napsautuksen työnkulkupainiketta.
   - **Virheraportointi**: Luo `mermaid_error_{foldername}.md`-raportin, jossa luetellaan tiedostot, jotka sisältävät edelleen mahdollisia Mermaid-virheitä käsittelyn jälkeen.
@@ -547,7 +554,7 @@ Tämä on ydinominaisuus, joka keskittyy käsitteiden tunnistamiseen ja `[[wiki-
    - Suorita `Notemd: Check and Remove Duplicate Concept Notes` komentopaletista tai sivupalkin painikkeesta.
    - Liitännäinen skannaa concept note -kansion ja vertaa tiedostonimiä kansion ulkopuolisiin muistiinpanoihin useiden sääntöjen avulla, kuten täsmäosumat, monikkomuodot, normalisointi ja sisältävyys.
    - Jos mahdollisia duplikaatteja löytyy, näkyviin tulee modaali, jossa luetellaan tiedostot, merkinnän syy ja ristiriitaiset tiedostot.
-   - Tarkista lista huolellisesti. Napsauta **"Delete Files"** siirtääksesi luetellut tiedostot järjestelmän roskakoriin tai **"Cancel"** jättääksesi kaiken ennalleen.
+   - Tarkista lista huolellisesti. Napsauta **"Delete Files"** poistaaksesi luetellut tiedostot vaultin poistoasetuksen mukaisesti tai **"Cancel"** jättääksesi kaiken ennalleen.
    - Edistyminen ja tulokset näkyvät sivupalkin tai modaalin lokissa.
 
 7. **Extract Concepts (Pure Mode)**:
@@ -651,7 +658,7 @@ Notemd toimii paikallisesti Obsidianin sisällä, mutta osa ominaisuuksista läh
 
 ### Paikallinen tallennus
 
-- Liitännäisen asetukset tallennetaan tiedostoon `.obsidian/plugins/notemd/data.json`.
+- Tavalliset asetukset säilyvät tiedostossa `data.json`. Local-only-palveluntarjoajat käyttävät Obsidianin nykyisen vaultin paikallista tallennustilaa; vanha laitteella jaettu luettelo tuodaan vain erillisellä käyttäjän toiminnolla.
 - Luodut tiedostot, raportit ja valinnaiset lokit tallennetaan vaultiin asetustesi mukaisesti.
 
 ## Vianetsintä
@@ -720,7 +727,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.9 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.10 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->
@@ -757,7 +764,7 @@ Notemd -asetuksensivu tarjoaa alueita tunnistavaa hämävyysotsintaa, laajoja ka
 - Määritä välitiedostoille yhteinen Vault-suhteinen kansio tai jätä kenttä tyhjäksi, jolloin käytetään kunkin lähteen viereistä `notemd_assert/`-kansiota. Sinne tallentuvat palautustietueet, hahmonnusvälimuisti ja valinnaiset liitteet. Säilytä edelleen viitatut tiedostot; muutos koskee vain uusia ajoja.
 - Kaavio-HTML sisältää zoomattavan kuvan; rakenteisen yhteenvedon HTML sisältää tekstin, rakenteen ja lähdeviitteet. Muokattava HTML/SVG tarkoittaa hahmonninta, ei verkkoselaimen editoria. Käytä muokkaukseen alkuperäistä lähdetiedostoa. Esitysviennillä, myös PPTX- ja MP4-muodoilla, on erilliset asetukset ja riippuvuudet.
 - Tyypit luodaan peräkkäin. Yhden virhe ei estä muita. Peruutus pysäyttää odottavat tyypit ja säilyttää valmiit tiedostot. Viennin voi uusia esikatselusta tai historiasta ilman uutta mallipyyntöä. Luontivirhe vaatii kyseisen tyypin luomisen uudelleen. v1/v2-palautustietueet ovat edelleen luettavissa.
-- Drawnix näyttää enintään kuusi nimettyä, suunnattua ydinsuhdetta, korkeintaan kolme solmua kohti. Pois jätetyt suhteet säilyvät metatiedoissa. Laatikoiden teksti näkyy PDF:ssä myös vanhoista SVG-välimuisteista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa uudelleen järjestettäessä.
+- Drawnix säilyttää kaikki selkeästi ilmaistut suunnatut suhteet ilman kokonaismäärän tai solmukohtaisen määrän rajaa. Vain samat väitteet poistetaan kaksoiskappaleina; eri predikaatit ja vastakkaiset suunnat säilyvät. Päällekkäiset ulkoreitit saavat erilliset kaistat, erilliset reitit käyttävät kaistoja uudelleen. Tunnisteille varataan mittojen mukaiset rivit ja piirtoalue kasvaa tarvittaessa. Nimeämättömät, yleiset tai hierarkiaa toistavat nuolet jäävät metatietoihin syineen. Suhderuutujen teksti näkyy PDF:ssä myös vanhasta SVG-välimuistista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa tehdyn uudelleenjärjestelyn jälkeen.
 - Tietokonekäyttäjät voivat avata valintaista CircuitikZ -natiivisen kompiloimisympäristön, jotta voivat käyttää sistemin Tectonic/pdflatex -sovelluksia, valita omakustannuselisen kompilaatorin tai asentaa suoraan hallitsevan Tectonic -järjestelmän. Etukatsaus, SVG, PNG sekä PDF -etukatsausluodot eivät vaadi LaTeXia.
 - Edistynyt paketityyppien valinta mahdollistaa salvestettujen valintaprofiilien ja sääntöjen etukatsauksien käyttöä.
 - Puuttuvan paketitiedon siirtokytkälän kanssa on mahdollista luoda se vahvistuksen jälkeen, ja on mahdollisuus muistaa automaattisen luomisen tuleviin puutteville tiedostoille.

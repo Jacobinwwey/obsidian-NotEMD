@@ -592,7 +592,7 @@ export default class NotemdPlugin extends Plugin {
             modal.open();
         });
         if (!confirmed) return false;
-        for (const file of files) await this.app.vault.trash(file, true);
+        for (const file of files) await this.app.fileManager.trashFile(file);
         return true;
     }
 
@@ -1316,7 +1316,7 @@ export default class NotemdPlugin extends Plugin {
         });
 
         // Slide export commands (desktop-only)
-        if ((globalThis as any).Platform?.isDesktopApp !== false) {
+        if (isDesktopApp()) {
             this.addCommand({
                 id: 'probe-slide-export-environment',
                 name: getSidebarActionLabel(uiStrings, 'probe-slide-export-env'),
@@ -1458,22 +1458,16 @@ export default class NotemdPlugin extends Plugin {
         });
 
 
-        // Merge local-only providers from localStorage
-        if (typeof localStorage !== 'undefined') {
-            try {
-                const localRaw = localStorage.getItem('notemd-local-providers');
-                if (localRaw) {
-                    const localProviders = canonicalizeProviderConfigs(JSON.parse(localRaw) as LLMProviderConfig[]);
-                    const mergedNames = new Set(mergedProviders.map(p => p.name));
-                    for (const lp of localProviders) {
-                        if (!mergedNames.has(lp.name)) {
-                            lp.localOnly = true;
-                            mergedProviders.push(lp);
-                        }
-                    }
-                }
-            } catch {
-                // Corrupted localStorage data — ignore
+        // App storage is device-local AND Vault-scoped. A legacy global entry
+        // has no ownership record and must not be silently copied into every Vault.
+        const localStored: unknown = this.app.loadLocalStorage?.('notemd-local-providers');
+        if (localStored !== null && localStored !== undefined) {
+            if (!Array.isArray(localStored)) throw new Error('Invalid local provider storage.');
+            for (const local of canonicalizeProviderConfigs(localStored)) {
+                local.localOnly = true;
+                const index = mergedProviders.findIndex(provider => provider.name === local.name);
+                if (index >= 0) mergedProviders[index] = local;
+                else mergedProviders.push(local);
             }
         }
 
@@ -1541,18 +1535,46 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
+    /** Legacy storage has no Vault identity: import only after the user's explicit action. */
+    async importLegacyLocalProviders(): Promise<number> {
+        const stored = globalThis.localStorage?.getItem('notemd-local-providers');
+        if (!stored) return 0;
+        const parsed: unknown = JSON.parse(stored);
+        if (!Array.isArray(parsed)) throw new Error('Invalid legacy provider storage.');
+        const legacy = canonicalizeProviderConfigs(parsed);
+        const previous = this.settings.providers;
+        const next = [...previous];
+        let count = 0;
+        for (const provider of legacy) {
+            const index = next.findIndex(current => current.name === provider.name);
+            const current = next[index];
+            const preset = DEFAULT_SETTINGS.providers.find(candidate => candidate.name === provider.name);
+            // A preset can be replaced only when every persisted field still has its default value.
+            const unusedPreset = current && preset && Object.keys(current).every(key =>
+                current[key as keyof LLMProviderConfig] === preset[key as keyof LLMProviderConfig]);
+            if (current && !unusedPreset) continue;
+            const imported = { ...provider, localOnly: true };
+            if (index >= 0) next[index] = imported; else next.push(imported);
+            count++;
+        }
+        if (count === 0) return 0;
+        this.settings.providers = next;
+        try { await this.saveSettings(); }
+        catch (error: unknown) { this.settings.providers = previous; throw error; }
+        return count;
+    }
+
     async saveSettings() {
         // Separate local-only providers from syncable ones
         const localProviders = this.settings.providers.filter(p => p.localOnly);
         const syncProviders = this.settings.providers.filter(p => !p.localOnly);
 
-        // Store local-only providers in localStorage
-        if (typeof localStorage !== 'undefined') {
-            try {
-                localStorage.setItem('notemd-local-providers', JSON.stringify(localProviders));
-            } catch {
-                // localStorage may be full or unavailable
-            }
+        // Persist secrets before writing the syncable record. A failed local
+        // write must reject rather than report success after dropping credentials.
+        if (typeof this.app.saveLocalStorage === 'function') {
+            this.app.saveLocalStorage('notemd-local-providers', localProviders);
+        } else if (localProviders.length > 0) {
+            throw new Error('Vault-scoped local provider storage is unavailable.');
         }
 
         // Save only syncable providers to data.json

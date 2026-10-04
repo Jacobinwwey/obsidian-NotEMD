@@ -1,3 +1,4 @@
+import { sanitizeSvgForHost } from './svgHostSanitizer';
 import { App, TFile } from 'obsidian';
 import { RenderArtifact } from '../types';
 import { getRenderTargetDescriptor } from '../renderTargetCatalog';
@@ -115,7 +116,7 @@ function composePreviewSvgCanvases(canvases: readonly PreviewSvgCanvas[]): strin
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img">${nestedSvgs}</svg>`;
 }
 
-async function renderPreviewArtifactSvgWithRenderer(
+async function renderPreviewArtifactSvgWithRendererRaw(
     artifact: RenderArtifact,
     deps: PreviewSvgRenderDeps,
     renderTarget: (adapter: PreviewTargetAdapter, artifact: RenderArtifact, deps: PreviewSvgRenderDeps) => Promise<string>
@@ -127,7 +128,7 @@ async function renderPreviewArtifactSvgWithRenderer(
     if (artifact.previewPanels && artifact.previewPanels.length > 0) {
         const panelSvgs: PreviewSvgCanvas[] = [];
         for (const panel of artifact.previewPanels) {
-            const svg = await renderPreviewArtifactSvgWithRenderer(panel.artifact, deps, renderTarget);
+            const svg = await renderPreviewArtifactSvgWithRendererRaw(panel.artifact, deps, renderTarget);
             panelSvgs.push(parsePreviewSvgCanvas(svg));
         }
         return ensureSemanticFigureSvgStandaloneStyles(composePreviewSvgCanvases(panelSvgs));
@@ -139,6 +140,17 @@ async function renderPreviewArtifactSvgWithRenderer(
     }
 
     return renderTarget(adapter, artifact, deps);
+}
+
+async function renderPreviewArtifactSvgWithRenderer(
+    artifact: RenderArtifact,
+    deps: PreviewSvgRenderDeps,
+    renderTarget: (adapter: PreviewTargetAdapter, artifact: RenderArtifact, deps: PreviewSvgRenderDeps) => Promise<string>
+): Promise<string> {
+    const svg = await renderPreviewArtifactSvgWithRendererRaw(artifact, deps, renderTarget);
+    // Offline fixture renderers have no DOM authority. Browser exports and all
+    // host mounts sanitize; mounting always requires the receiving document.
+    return typeof document === 'undefined' ? svg : sanitizeSvgForHost(svg, document);
 }
 
 export async function renderPreviewArtifactSvg(

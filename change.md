@@ -1,3 +1,13 @@
+## 1.9.10
+
+### English
+
+SVG host security and panel-style preservation; mobile-safe lazy desktop dependencies; Vault-local provider persistence with explicit legacy import; loopback server lifecycle and path controls; honest settings/copy failure notices; Vault deletion preferences. Mermaid 11.17.2, DOMPurify 3.4.11, unused direct dependency removal. Directly authored locale docs and the community/ponytail architecture audit. Existing PNG compatibility and unlimited explicit Drawnix relationships remain available.
+
+### 中文
+
+收口 SVG 宿主安全与面板样式保真、移动端桌面依赖懒加载、Vault 本地 provider 持久化及显式旧版导入、loopback 服务器生命周期与路径控制、设置和复制失败反馈、Vault 删除偏好。升级 Mermaid 11.17.2，使用 DOMPurify 3.4.11，移除无用直接依赖。直接编写本地化文档并交付社区/ponytail 架构审查。保留 PNG 兼容及无固定配额的明确 Drawnix 关系。
+
 # Notemd Change Log
 
 This document summarizes the major functional and architectural changes implemented.

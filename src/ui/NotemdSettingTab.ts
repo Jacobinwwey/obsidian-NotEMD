@@ -1,3 +1,4 @@
+import { isDesktopApp } from '../slideExport/platformUtils';
 import { App, ButtonComponent, PluginSettingTab, Setting, Notice, setIcon, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import {
@@ -162,7 +163,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         const favorites = new Set(retainedFavoriteIds);
         if (retainedFavoriteIds.length !== (this.plugin.settings.favoriteSettingIds ?? []).length) {
             this.plugin.settings.favoriteSettingIds = retainedFavoriteIds;
-            void this.plugin.saveSettings();
+            void this.plugin.saveSettings().catch((error: unknown) => {
+                new Notice(formatI18n(getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settingsPersistence.saveFailed, { message: error instanceof Error ? error.message : String(error) }));
+            });
         }
         const header = containerEl.createDiv({ cls: 'notemd-settings-discovery' });
         containerEl.prepend(header);
@@ -370,8 +373,16 @@ export class NotemdSettingTab extends PluginSettingTab {
         };
         discoveryToggle.onclick = () => setDiscoveryCollapsed(!discoveryCollapsed);
         const persistFavoriteIds = async () => {
+            const previousFavoriteIds = this.plugin.settings.favoriteSettingIds ?? [];
             this.plugin.settings.favoriteSettingIds = [...favorites];
-            await this.plugin.saveSettings();
+            try {
+                await this.plugin.saveSettings();
+            } catch (error: unknown) {
+                this.plugin.settings.favoriteSettingIds = previousFavoriteIds;
+                favorites.clear();
+                previousFavoriteIds.forEach(id => favorites.add(id));
+                new Notice(formatI18n(getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settingsPersistence.saveFailed, { message: error instanceof Error ? error.message : String(error) }));
+            }
         };
         const addFavorite = async (settingId: string) => {
             if (favorites.has(settingId)) return;
@@ -2066,6 +2077,22 @@ export class NotemdSettingTab extends PluginSettingTab {
         providerMgmtSetting.addButton(button => button
             .setButtonText(providerI18n.importButton).setTooltip(providerI18n.importTooltip).onClick(() => this.importProviderSettings()));
 
+        if (globalThis.localStorage?.getItem('notemd-local-providers')) {
+            this.createCatalogSetting(containerEl)
+                .setName(i18n.settingsPersistence.legacyImportName)
+                .setDesc(i18n.settingsPersistence.legacyImportDesc)
+                .addButton(button => button.setButtonText(i18n.settingsPersistence.legacyImportButton).onClick(async () => {
+                    button.setDisabled(true);
+                    try {
+                        const count = await this.plugin.importLegacyLocalProviders();
+                        new Notice(formatI18n(i18n.settingsPersistence.legacyImported, { count }));
+                        this.display();
+                    } catch (error: unknown) {
+                        new Notice(formatI18n(i18n.settingsPersistence.saveFailed, { message: error instanceof Error ? error.message : String(error) }));
+                    } finally { button.setDisabled(false); }
+                }));
+        }
+
         this.createCatalogSetting(containerEl)
             .setName(providerI18n.activeProviderName)
             .setDesc(providerI18n.activeProviderDesc)
@@ -2161,18 +2188,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                             button.setDisabled(false).setButtonText(providerI18n.testConnectionButton);
                         }
                     }));
-        } else {
-            containerEl.createEl('p', { text: providerI18n.missingActiveProvider, cls: 'notemd-error-text' });
-
             this.createCatalogSetting(containerEl)
                 .setName(providerI18n.localOnlyName)
                 .setDesc(providerI18n.localOnlyDesc)
                 .addToggle(toggle => toggle
-                    .setValue(activeProvider!.localOnly === true)
+                    .setValue(activeProvider.localOnly === true)
                     .onChange(async (value) => {
-                        activeProvider!.localOnly = value;
+                        activeProvider.localOnly = value;
                         await this.plugin.saveSettings();
                     }));
+        } else {
+            containerEl.createEl('p', { text: providerI18n.missingActiveProvider, cls: 'notemd-error-text' });
         }
 
         // --- Multi-Model Settings ---
@@ -3842,9 +3868,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                         .inputEl.setAttrs({ rows: 5, style: 'width: 100%; font-family: monospace; font-size: 0.9em; margin-bottom: 5px;' });
 
                     const copyButton = defaultPromptDisplay.createEl('button', { text: customPromptsI18n.copyDefaultButton });
-                    copyButton.onclick = () => {
-                        navigator.clipboard.writeText(defaultPromptText);
-                        new Notice(customPromptsI18n.copyDefaultNotice);
+                    copyButton.onclick = async () => {
+                        copyButton.disabled = true;
+                        try {
+                            const clipboard = defaultPromptDisplay.ownerDocument.defaultView?.navigator.clipboard;
+                            if (!clipboard) throw new Error('Clipboard is unavailable.');
+                            await clipboard.writeText(defaultPromptText);
+                            new Notice(customPromptsI18n.copyDefaultNotice);
+                        } catch (error: unknown) {
+                            new Notice(formatI18n(i18n.settingsPersistence.copyFailed, { message: error instanceof Error ? error.message : String(error) }));
+                        } finally { copyButton.disabled = false; }
                     };
                     defaultPromptDisplay.style.marginBottom = "10px";
 
@@ -3897,7 +3930,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Slide Export (Desktop only) ---
-        if ((globalThis as any).Platform?.isDesktopApp !== false) {
+        if (isDesktopApp()) {
             containerEl.createEl('hr');
             this.createCatalogSetting(containerEl).setName(i18n.slideExport.settingsHeading).setHeading();
 

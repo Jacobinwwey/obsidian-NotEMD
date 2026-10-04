@@ -22,6 +22,7 @@ export const publishedZhCnDocs = [
   {id: 'faq', path: '/docs/faq', sourcePath: 'faq.mdx'},
   {id: 'developers/overview', path: '/docs/developers/overview', sourcePath: 'developers/overview.mdx'},
   {id: 'agents/overview', path: '/docs/agents/overview', sourcePath: 'agents/overview.mdx'},
+  {id: 'releases/1.9.10', path: '/docs/releases/1.9.10', sourcePath: 'releases/1.9.10.mdx'},
   {id: 'releases/1.9.9', path: '/docs/releases/1.9.9', sourcePath: 'releases/1.9.9.mdx'},
   {id: 'releases/1.9.8', path: '/docs/releases/1.9.8', sourcePath: 'releases/1.9.8.mdx'},
 ];

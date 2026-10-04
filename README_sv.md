@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd-plugin för Obsidian
 
 > Notemd är ett Obsidian-tillägg med MIT-licens för länkad Markdown, begreppsanteckningar, sammanfattningar, översättningar och diagram. Filerna sparas i valvet; molnuppgifter skickar innehåll till vald leverantör och webbsökning använder nätverket.
@@ -25,13 +26,19 @@ Varje diagramförhandsvisning har separat zoom, panorering, anpassning och fakti
 | Utvecklare | [Utvecklarguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/developers/overview) | Bygg, testa och utöka befintliga kontrakt |
 | Agent | [Agentguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/agents/overview) | Hitta fyra stödda exportkommandon |
 
-**Version:** 1.9.9
+**Version:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Säkra förhandsvisningar och Vault-lokala inställningar
+
+Importerade SVG-förhandsvisningar tar bort aktivt innehåll och externa resurser men behåller kinesiska etiketter och panelstilar. Lokala leverantörer isoleras per Vault; importera den gamla listan uttryckligen i inställningarna utan att ta bort befintliga konfigurationer eller originallistan. Presentationer använder en loopback-server som hanterar gemensamma användare. Fel vid sparande av favoriter och kopiering visas; radering följer Vault-inställningarna. PNG-kompatibilitet är fortsatt aktiv: originalet behålls och en verifierad kopia med lägre PPI läggs bara till vid behov. Drawnix saknar fast relationsgräns; presentationer behåller separata inställningar. Installera filer av samma version, ladda om och testa en anteckning före batchkörning.
 
 - Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.
 - Valda filer exporteras automatiskt bredvid källanteckningen eller direkt till den angivna mappen. Namnen innehåller typen, exempelvis `topic_drawnix.pdf` och `topic_flowchart.svg`. Vid namnkonflikter läggs `-2`, `-3` och så vidare till utan överskrivning.
 - Drawnix bevarar alla uttryckliga riktade relationer utan fast totalgräns eller gräns per nod. Identiska påståenden dedupliceras; olika predikat och motsatta riktningar bevaras. Överlappande yttre rutter får separata spår, åtskilda rutter återanvänder spår. Etiketter får rader efter sina mått och ritytan växer vid behov. Pilar utan etikett, allmänna samband och pilar som upprepar hierarkin finns kvar i metadata med orsak. Text i relationsrutor syns i PDF, även från äldre SVG-cache. Pilar mellan grenar är statiska och kan lossna efter omplacering i Drawnix.
 
-De 36 leverantörsförvalen och 33 körbara diagramtyperna fanns redan i 1.9.7. [Uppgraderingsguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/releases/1.9.9) · [Kontrollera offentlig utgåva](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+De 36 leverantörsförvalen och 33 körbara diagramtyperna fanns redan i 1.9.7. [Uppgraderingsguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/releases/1.9.10) · [Kontrollera offentlig utgåva](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Drawnix-pilar mellan grenar förblir statiska efter omflyttning. Mermaid/SVG i PPTX kan ersättas med bilder. Avbrytning ångrar inte sparade ändringar och garanterar inte att fjärrgenerering eller debitering stoppas. Fysiska mobila enheter och Obsidian 0.15.0 är inte verifierade.
 
@@ -172,7 +179,7 @@ Webbforskning och diagramgenerering är separata åtgärder. Vänta efter avbryt
 
 - **Check for Duplicates in Current File**: Det här kommandot hjälper dig att identifiera potentiella dubbletter av termer i den aktiva filen.
 - **Duplicate Detection**: Grundläggande kontroll av dubbla ord i innehållet i den aktuellt bearbetade filen (resultat loggas i konsolen).
-- **Check and Remove Duplicate Concept Notes**: Identifierar potentiella dubblettanteckningar i den konfigurerade **Concept Note Folder** baserat på exakta namnträffar, pluralformer, normalisering och innehåll av enstaka ord jämfört med anteckningar utanför mappen. Jämförelsens omfattning kan konfigureras till **hela vaultet**, **specifika inkluderade mappar** eller **alla mappar utom specifika undantag**. Visar en detaljerad lista med orsaker och konfliktfiler och ber sedan om bekräftelse innan identifierade dubbletter flyttas till systemets papperskorg. Visar framsteg under borttagningen.
+- **Check and Remove Duplicate Concept Notes**: Identifierar potentiella dubblettanteckningar i den konfigurerade **Concept Note Folder** baserat på exakta namnträffar, pluralformer, normalisering och innehåll av enstaka ord jämfört med anteckningar utanför mappen. Jämförelsens omfattning kan konfigureras till **hela vaultet**, **specifika inkluderade mappar** eller **alla mappar utom specifika undantag**. Visar en detaljerad lista med orsaker och konfliktfiler och ber sedan om bekräftelse innan identifierade dubbletter tas bort enligt vaultets inställning för borttagning. Visar framsteg under borttagningen.
 - **Batch Mermaid Fix**: Tillämpar korrigeringar av Mermaid- och LaTeX-syntax på alla Markdown-filer i en användarvald mapp.
   - **Redo för arbetsflöden**: Kan användas som ett fristående verktyg eller som ett steg i en anpassad one-click workflow-knapp.
   - **Felrapportering**: Skapar en rapport `mermaid_error_{foldername}.md` med filer som fortfarande innehåller potentiella Mermaid-fel efter bearbetning.
@@ -547,7 +554,7 @@ Detta är kärnfunktionen som fokuserar på att identifiera begrepp och lägga t
    - Kör `Notemd: Check and Remove Duplicate Concept Notes`, via command palette eller knappen i sidofältet.
    - Pluginet skannar concept note-mappen och jämför filnamn mot anteckningar utanför mappen med flera regler, som exakt matchning, pluralformer, normalisering och innehåll.
    - Om potentiella dubbletter hittas visas en modal med filerna, orsaken till flaggningen och konfliktfilerna.
-   - Granska listan noga. Klicka på **"Delete Files"** för att flytta listade filer till systemets papperskorg, eller **"Cancel"** för att inte göra något.
+   - Granska listan noga. Klicka på **"Delete Files"** för att ta bort listade filer enligt vaultets inställning för borttagning, eller **"Cancel"** för att inte göra något.
    - Framsteg och resultat visas i sidofältets eller modalens logg.
 
 7. **Extract Concepts (Pure Mode)**:
@@ -651,7 +658,7 @@ Notemd körs lokalt inne i Obsidian, men vissa funktioner skickar utgående beg�
 
 ### Lokal lagring
 
-- Pluginets konfiguration lagras i `.obsidian/plugins/notemd/data.json`.
+- Vanliga inställningar finns kvar i `data.json`. Local-only-leverantörer använder Obsidians lokala lagring för aktuellt vault; den gamla enhetsgemensamma listan importeras endast genom en uttrycklig åtgärd.
 - Genererade filer, rapporter och valfria loggar lagras i ditt vault enligt dina inställningar.
 
 ## Felsökning
@@ -720,7 +727,7 @@ MIT License - Se filen [LICENSE](LICENSE) för detaljer.
 ---
 
 
-*Notemd v1.9.9 - Förbättra din Obsidian-kunskapsgraf med AI.*
+*Notemd v1.9.10 - Förbättra din Obsidian-kunskapsgraf med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -757,7 +764,7 @@ Notemd-inställningssidan erbjuder suddjupssökning som känner till fält, navi
 - Ange en gemensam Vault-relativ mapp för mellanfiler, eller lämna tomt för `notemd_assert/` bredvid varje källa. Där lagras återställningsposter, renderingscache och valfria bilagor. Behåll filer som fortfarande refereras; mappändringar gäller bara nya körningar.
 - Diagram-HTML innehåller en zoombar bild; HTML för strukturerad sammanfattning innehåller text, struktur och belägg. Redigerbar HTML/SVG är en renderare, inte en webbredigerare. Använd den ursprungliga källfilen för redigering. Presentationsexport, inklusive PPTX och MP4, har separata inställningar och beroenden.
 - Typer genereras i följd. Ett fel stoppar inte de andra; avbrytning stoppar väntande typer och behåller färdiga filer. Försök exportera igen via förhandsvisning eller historik utan en ny modellförfrågan. Genereringsfel kräver att typen genereras igen. Återställningsposter v1/v2 kan fortfarande läsas.
-- Drawnix visar högst sex namngivna riktade kärnrelationer, högst tre per nod. Utelämnade relationer finns kvar i metadata. Text i rutor syns i PDF även från äldre cachade SVG-filer. Pilar mellan grenar är statiska och kan lossna när noder flyttas i Drawnix.
+- Drawnix bevarar alla uttryckliga riktade relationer utan fast totalgräns eller gräns per nod. Identiska påståenden dedupliceras; olika predikat och motsatta riktningar bevaras. Överlappande yttre rutter får separata spår, åtskilda rutter återanvänder spår. Etiketter får rader efter sina mått och ritytan växer vid behov. Pilar utan etikett, allmänna samband och pilar som upprepar hierarkin finns kvar i metadata med orsak. Text i relationsrutor syns i PDF, även från äldre SVG-cache. Pilar mellan grenar är statiska och kan lossna efter omplacering i Drawnix.
 - Desktop-användare kan öppna det valfria CircuitikZ-nativa kompileringsmiljön för att återanvända systemets Tectonic/pdflatex, välja en anpassad kompilerare eller explicit installera den fixade, hanterade Tectonic-körmiljön. Förhandsvisning, SVG, PNG samt export av förhandsvisning med PDF kräver inget LaTeX.
 - Avancerad val av batchfiler möjliggör sparade valprofiler och regelförhandsvisningar.
 - En saknad batchmålsmapp kan skapas efter bekräftelse, med möjlighet att komma ihåg den automatiska skapandet för framtida saknade mappar.

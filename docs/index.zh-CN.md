@@ -79,3 +79,6 @@
 - 英文计划正文文件保持显式 `*.en.md` 命名。
 - 中文计划正文文件保持显式 `*.zh-CN.md` 命名。
 - VitePress 重写规则继续保留旧版英文计划裸路由，因此 `/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap` 这类旧链接不会失效。
+
+- [1.9.10 中文发布说明](./releases/1.9.10.zh-CN.md)
+- [社区与架构审查](./audits/2026-10-04-community-ponytail.zh-CN.md)

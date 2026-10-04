@@ -1,7 +1,6 @@
 import { DiagramIntent } from '../../diagram/types';
-import { renderMermaidArtifactSvg } from '../preview/mermaidPreview';
+import { renderPreviewArtifactSvg } from '../preview/previewExport';
 import { RenderWebviewTheme } from '../theme';
-import { renderVegaLiteArtifactSvg } from '../preview/vegaLitePreview';
 import { getBundledMermaidPreviewDeps, getBundledVegaLitePreviewDeps } from './bundledPreviewDeps';
 
 export const RENDER_HOST_BRIDGE_GLOBAL = '__NOTEMD_RENDER_BRIDGE__';
@@ -18,20 +17,20 @@ type RenderHostGlobal = typeof globalThis & {
 function createRenderHostBridge(): RenderHostBridge {
     return {
         renderMermaidToSvg(content, theme = 'system', sourceIntent = 'flowchart') {
-            return renderMermaidArtifactSvg({
+            return renderPreviewArtifactSvg({
                 target: 'mermaid',
                 content,
                 mimeType: 'text/vnd.mermaid',
                 sourceIntent
-            }, getBundledMermaidPreviewDeps(), theme);
+            }, { mermaid: getBundledMermaidPreviewDeps(), theme });
         },
         renderVegaLiteToSvg(content, theme = 'system', sourceIntent = 'dataChart') {
-            return renderVegaLiteArtifactSvg({
+            return renderPreviewArtifactSvg({
                 target: 'vega-lite',
                 content,
                 mimeType: 'application/json',
                 sourceIntent
-            }, async () => getBundledVegaLitePreviewDeps(), theme);
+            }, { vegaLiteDepsLoader: async () => getBundledVegaLitePreviewDeps(), theme });
         }
     };
 }

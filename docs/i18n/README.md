@@ -83,3 +83,9 @@ This page centralizes the current language-support contract for both documentati
 2. Keep section order aligned with [README.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/README.md).
 3. Update this Language Hub whenever a new README translation or UI locale is added.
 4. Open a PR and include native-speaker review when practical.
+
+## 1.9.10 — Safer previews and Vault-local settings
+
+Imported SVG previews remove active content and external resources while preserving Chinese labels and panel styles. Device-only providers are now isolated by Vault; use the explicit legacy import action in settings, which preserves the old list and existing configurations. Presentation previews use a loopback server with shared-consumer lifecycle control. Failed favorites saves and clipboard writes report errors; deletion follows Vault preferences. PNG compatibility stays enabled by default, preserving the requested original and adding a verified lower-PPI copy only when needed. Drawnix has no fixed relation quota; presentation exports keep separate settings. Install matching release files, reload, and test one note before batching.
+
+[Architecture audit](.././audits/2026-10-04-community-ponytail.md)

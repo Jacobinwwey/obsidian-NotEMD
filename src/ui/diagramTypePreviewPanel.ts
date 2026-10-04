@@ -1,3 +1,4 @@
+import { mountDiagramSvg } from '../rendering/preview/svgHostSanitizer';
 import { getExecutableDiagramExamples } from '../diagram/examples/diagramExampleCatalog';
 import {
     getExecutableDiagramType,
@@ -151,7 +152,7 @@ export function renderDiagramTypePreviewPanel(
                     setText(canvas, params.copy.unavailable, 'notemd-diagram-type-preview-error');
                     return;
                 }
-                canvas.innerHTML = svg;
+                mountDiagramSvg(canvas, svg);
                 const renderedSvg = canvas.querySelector('svg');
                 if (renderedSvg) {
                     renderedSvg.setAttribute('role', 'img');

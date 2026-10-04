@@ -109,3 +109,9 @@ SVG/PNG/PDF wymagają podglądu wizualnego. Gdy dostępny jest tylko tekst, zapi
 ### CircuitikZ nie kompiluje się
 
 Sprawdź **CircuitikZ native compile environment**. Napraw środowisko zarządzane lub potwierdź, że własny/systemowy kompilator może pobrać `circuitikz`. Bundle wtyczki nie zawiera pełnej dystrybucji TeX.
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Bezpieczne podglądy i ustawienia lokalne Vault
+
+Importowane SVG usuwają aktywną treść i zasoby zewnętrzne, zachowując chińskie etykiety oraz style paneli. Lokalni dostawcy są izolowani według Vault; jawnie zaimportuj starą listę w ustawieniach, zachowując ją i istniejące konfiguracje. Prezentacje korzystają z serwera loopback zarządzającego współdzielonymi odbiorcami. Błędy zapisu ulubionych i kopiowania są zgłaszane; usuwanie respektuje preferencje Vault. Zgodność PNG pozostaje włączona: oryginał jest zachowany, a sprawdzona kopia o mniejszym PPI dodawana tylko w razie potrzeby. Drawnix nie ma stałego limitu relacji; prezentacje zachowują osobne ustawienia. Zainstaluj pliki tej samej wersji, przeładuj i sprawdź jedną notatkę przed przetwarzaniem zbiorczym.

@@ -394,3 +394,9 @@ lane-grid 遵循同一边界：先测量并换行摘要，再放置 lane 标题�
 - `npm run lint` — 静态质量门禁
 - `npm run verify:vault-bundle -- --vault <vault-path>` — 源码/Vault bundle hash 与 manifest 版本一致
 - `git diff --check` — 空白符卫生
+
+## 1.9.10 — 安全预览与 Vault 本地设置
+
+导入 SVG 预览会移除活动内容和外部资源，同时保留中文标签与面板样式。仅设备 provider 现按 Vault 隔离；在设置中显式导入旧列表，保留原列表与已有配置。演示预览仅使用 loopback 服务器，并管理共享消费者的生命周期。收藏保存或剪贴板写入失败会报告错误；删除遵守 Vault 偏好。PNG 兼容默认开启，保留请求原图，仅在需要时增加已验证的低 PPI 副本。Drawnix 没有固定关系配额；演示导出保持独立设置。安装同版本发布文件、重载插件，批处理前先验证一篇笔记。
+
+[架构审查](./audits/2026-10-04-community-ponytail.zh-CN.md)

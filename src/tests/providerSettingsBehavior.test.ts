@@ -1,3 +1,4 @@
+jest.mock('../rendering/preview/svgHostSanitizer', () => ({ mountDiagramSvg: (container: { innerHTML: string }, svg: string) => { container.innerHTML = svg; } }));
 import { Notice } from 'obsidian';
 import { NotemdSettingTab } from '../ui/NotemdSettingTab';
 import { DEFAULT_SETTINGS } from '../constants';
@@ -2475,4 +2476,26 @@ describe('provider settings behavior', () => {
         expect(favoritesPanel?.hidden).toBe(false);
         expect(favoritesPanel?.querySelector?.('.notemd-settings-empty-state')?.textContent?.trim()).toBeTruthy();
     });
+    test('shows device-only storage for a valid provider and tolerates a missing provider', () => {
+        const instance = createPlugin();
+        const tab = new NotemdSettingTab(mockApp, instance as any) as any;
+        tab.display();
+        expect(findSettingByName(tab.containerEl, 'Store on this device only')).toBeDefined();
+        instance.settings.activeProvider = 'missing-provider';
+        expect(() => tab.display()).not.toThrow();
+        expect(findSettingByName(tab.containerEl, 'Store on this device only')).toBeUndefined();
+    });
+
+    test('favorite persistence failure restores the selection and reports an error', async () => {
+        const instance = createPlugin();
+        instance.saveSettings.mockRejectedValue(new Error('disk unavailable'));
+        const tab = new NotemdSettingTab(mockApp, instance as any) as any;
+        tab.display();
+        const star = tab.containerEl.querySelector('.notemd-setting-favorite-button');
+        await expect(star.onclick()).resolves.toBeUndefined();
+        expect(instance.settings.favoriteSettingIds).toEqual([]);
+        expect(star.textContent).toBe('☆');
+        expect(Notice).toHaveBeenCalledWith(expect.stringContaining('disk unavailable'));
+    });
+
 });

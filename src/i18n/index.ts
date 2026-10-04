@@ -1,3 +1,4 @@
+import { SETTINGS_PERSISTENCE_LOCALE_EXTENSIONS } from './locales/settingsPersistence';
 import { getLanguage } from 'obsidian';
 import { normalizeLocaleCode, resolveSupportedLocaleCode, resolveUiLocale, UI_LOCALE_AUTO } from './languageContext';
 import { STRINGS_EN, NotemdEnglishStrings } from './locales/en';
@@ -93,7 +94,8 @@ function getLocaleLayers(locale: string): Array<DeepPartial<TranslationStrings>>
         CLI_EXPORT_ACTION_LOCALE_EXTENSIONS[locale],
         EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS[locale],
         DIAGRAM_ACTION_LOCALE_EXTENSIONS[locale],
-        PREVIEW_MODAL_LOCALE_EXTENSIONS[locale]
+        PREVIEW_MODAL_LOCALE_EXTENSIONS[locale],
+        SETTINGS_PERSISTENCE_LOCALE_EXTENSIONS[locale]
     ].filter((value): value is DeepPartial<TranslationStrings> => Boolean(value));
 }
 

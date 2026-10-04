@@ -111,3 +111,9 @@ SVG/PNG/PDF richiedono anteprima visiva. Se c’è solo testo, salva la fonte e 
 ### CircuitikZ non compila
 
 Apri **CircuitikZ native compile environment**, verifica ambiente, ripara runtime gestita o controlla che il compilatore trovi `circuitikz`. Il plugin non incorpora una distribuzione TeX completa.
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Anteprime sicure e impostazioni locali del Vault
+
+Le anteprime SVG importate rimuovono contenuti attivi e risorse esterne, mantenendo etichette cinesi e stili dei pannelli. I provider locali sono isolati per Vault: importate esplicitamente il vecchio elenco dalle impostazioni, conservando elenco e configurazioni esistenti. Le presentazioni usano un server loopback che gestisce gli utilizzatori condivisi. Gli errori di salvataggio dei preferiti e copia vengono segnalati; la cancellazione segue le preferenze del Vault. La compatibilità PNG resta attiva: conserva l’originale e aggiunge una copia verificata a PPI inferiore solo se necessaria. Drawnix non impone un limite fisso alle relazioni; le presentazioni mantengono impostazioni separate. Installate file della stessa versione, ricaricate e provate una nota prima dell’elaborazione in serie.

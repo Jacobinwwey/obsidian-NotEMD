@@ -1,6 +1,8 @@
 import { App, Vault, TFile, TFolder } from 'obsidian';
 
 export const mockApp = {
+    loadLocalStorage: jest.fn(() => null),
+    saveLocalStorage: jest.fn(),
     vault: {
         create: jest.fn(),
         createFolder: jest.fn(),
@@ -45,7 +47,7 @@ export const mockApp = {
     // Add other App properties/methods as needed by tests
     keymap: { pushScope: jest.fn(), popScope: jest.fn() },
     scope: {}, // Placeholder
-    fileManager: {}, // Placeholder
+    fileManager: { trashFile: jest.fn().mockResolvedValue(undefined) },
     lastEvent: null, // Placeholder
     plugins: { // Placeholder
         enabledPlugins: new Set(),

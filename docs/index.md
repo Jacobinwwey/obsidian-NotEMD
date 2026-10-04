@@ -79,3 +79,6 @@ Repository docs preview for `obsidian-NotEMD`.
 - English plan source files stay explicit as `*.en.md`.
 - Chinese plan source files stay explicit as `*.zh-CN.md`.
 - VitePress rewrites keep legacy English plan URLs alive, so old links like `/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap` do not break.
+
+- [1.9.10 (EN)](./releases/1.9.10.md)
+- [1.9.10 (zh-CN)](./releases/1.9.10.zh-CN.md)

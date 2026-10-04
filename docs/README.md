@@ -89,3 +89,8 @@ This directory contains repository-level documentation for maintainers and contr
 - Release notes are stored as two complete files, one English and one Simplified Chinese. GitHub release publishing composes those two files into one bilingual release body at publish time.
 - Do not add inline bilingual summary blocks to active docs. Keep each language in its own complete file.
 - Root-level one-off reports belong in `docs/archive/root-history/`, not in the repository root.
+
+- [Community and ponytail architecture audit](./audits/2026-10-04-community-ponytail.md)
+- [1.9.10 release notes](./releases/1.9.10.md)
+
+- [1.9.10 candidate acceptance and pending native gate](./maintainer/release-1.9.10-acceptance.md)

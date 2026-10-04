@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Plugin Notemd untuk Obsidian
 
 > Notemd adalah plugin Obsidian berlisensi MIT untuk Markdown bertaut, catatan konsep, ringkasan, terjemahan, dan diagram. Berkas tetap di vault; tugas awan mengirim konten ke penyedia pilihan, sedangkan riset web menggunakan jaringan.
@@ -25,13 +26,19 @@ Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang 
 | Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
 | Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
 
-**Versi:** 1.9.9
+**Versi:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Pratinjau aman dan pengaturan lokal Vault
+
+Pratinjau SVG yang diimpor menghapus konten aktif dan sumber eksternal, sambil mempertahankan label Tionghoa dan gaya panel. Penyedia lokal dipisahkan per Vault; impor daftar lama secara eksplisit melalui pengaturan, dengan mempertahankan daftar asli dan konfigurasi yang ada. Presentasi memakai server loopback yang mengelola pengguna bersama. Kegagalan menyimpan favorit dan menyalin dilaporkan; penghapusan mengikuti preferensi Vault. Kompatibilitas PNG tetap aktif: gambar asli disimpan dan salinan PPI lebih rendah yang terverifikasi ditambahkan hanya bila perlu. Drawnix tidak memiliki batas relasi tetap; presentasi tetap memiliki pengaturan terpisah. Instal berkas versi yang sama, muat ulang, dan uji satu catatan sebelum pemrosesan massal.
 
 - Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
 - File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file.
 - Drawnix mempertahankan semua hubungan berarah yang dinyatakan jelas, tanpa batas total atau batas per simpul. Hanya pernyataan identik yang dihapus sebagai duplikat; predikat berbeda dan arah terbalik tetap dipertahankan. Rute luar yang rentangnya bertumpang tindih memakai jalur terpisah, rute yang terpisah memakai ulang jalur. Label mendapat baris sesuai ukurannya dan kanvas meluas sesuai kebutuhan. Panah tanpa label, hubungan umum, atau pengulangan hierarki tetap disimpan dalam metadata beserta alasannya. Teks dalam kotak hubungan tampil di PDF, termasuk dari cache SVG lama. Panah lintas cabang tetap statis dan dapat terlepas setelah penataan ulang di Drawnix.
 
-36 preset penyedia dan 33 jenis diagram yang dapat dijalankan sudah ada pada 1.9.7. [Panduan peningkatan](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/releases/1.9.9) · [Periksa rilis publik](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+36 preset penyedia dan 33 jenis diagram yang dapat dijalankan sudah ada pada 1.9.7. [Panduan peningkatan](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/releases/1.9.10) · [Periksa rilis publik](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Panah Drawnix antarcabang tetap statis setelah penataan ulang. Mermaid/SVG dalam PPTX dapat memakai gambar pengganti. Pembatalan tidak membatalkan perubahan tersimpan maupun menjamin penghentian generasi atau tagihan jarak jauh. Perangkat seluler fisik dan Obsidian 0.15.0 belum diverifikasi.
 
@@ -172,7 +179,7 @@ Riset web dan pembuatan diagram adalah tindakan terpisah. Setelah membatalkan, t
 
 - **Check for Duplicates in Current File**: perintah ini membantu mengidentifikasi istilah yang mungkin duplikat di file aktif.
 - **Duplicate Detection**: pemeriksaan dasar terhadap kata yang berulang di dalam konten file yang diproses. Hasilnya dicatat ke console.
-- **Check and Remove Duplicate Concept Notes**: mengidentifikasi concept note yang berpotensi duplikat di dalam **Concept Note Folder** yang dikonfigurasi berdasarkan exact name match, bentuk jamak, normalisasi, dan containment untuk single-word, dibandingkan dengan catatan di luar folder tersebut. Cakupan perbandingan dapat diatur ke **seluruh vault**, **folder include tertentu**, atau **seluruh folder kecuali yang dikecualikan**. Plugin lalu menampilkan daftar rinci beserta alasan dan file yang konflik, serta meminta konfirmasi sebelum memindahkan duplicate yang teridentifikasi ke system trash. Progress penghapusan juga ditampilkan.
+- **Check and Remove Duplicate Concept Notes**: mengidentifikasi concept note yang berpotensi duplikat di dalam **Concept Note Folder** yang dikonfigurasi berdasarkan exact name match, bentuk jamak, normalisasi, dan containment untuk single-word, dibandingkan dengan catatan di luar folder tersebut. Cakupan perbandingan dapat diatur ke **seluruh vault**, **folder include tertentu**, atau **seluruh folder kecuali yang dikecualikan**. Plugin lalu menampilkan daftar rinci beserta alasan dan file yang konflik, serta meminta konfirmasi sebelum menghapus duplikat yang teridentifikasi sesuai preferensi penghapusan vault. Progress penghapusan juga ditampilkan.
 - **Batch Mermaid Fix**: menerapkan koreksi sintaks Mermaid dan LaTeX ke semua file Markdown dalam folder yang dipilih pengguna.
   - **Workflow Ready**: dapat dipakai sebagai utilitas mandiri atau sebagai langkah dalam custom one-click workflow button.
   - **Error Reporting**: menghasilkan file `mermaid_error_{foldername}.md` yang mencantumkan file yang masih mengandung potensi error Mermaid setelah diproses.
@@ -556,7 +563,7 @@ Ini adalah fungsi inti yang berfokus pada identifikasi konsep dan penambahan `[[
    - Jalankan `Notemd: Check and Remove Duplicate Concept Notes` melalui command palette atau tombol bilah samping.
    - Plugin memindai concept note folder dan membandingkan nama file dengan catatan di luar folder menggunakan beberapa aturan, seperti exact match, bentuk jamak, normalisasi, dan containment.
    - Jika duplicate potensial ditemukan, sebuah modal akan menampilkan daftar file, alasan penandaan, dan file yang konflik.
-   - Tinjau daftarnya dengan cermat. Klik **"Delete Files"** untuk memindahkan file ke system trash, atau **"Cancel"** untuk tidak melakukan perubahan.
+   - Tinjau daftarnya dengan cermat. Klik **"Delete Files"** untuk menghapus file sesuai preferensi penghapusan vault, atau **"Cancel"** untuk tidak melakukan perubahan.
    - Progres dan hasil terlihat di bilah samping atau log modal.
 
 8. **Extract Concepts (Pure Mode)**:
@@ -660,7 +667,7 @@ Notemd berjalan secara lokal di dalam Obsidian, tetapi beberapa fitur mengirimka
 
 ### Penyimpanan Lokal
 
-- Konfigurasi plugin disimpan di `.obsidian/plugins/notemd/data.json`.
+- Pengaturan umum tetap di `data.json`. Penyedia local-only menggunakan penyimpanan lokal Obsidian untuk vault saat ini; daftar lama yang dibagikan di perangkat hanya diimpor melalui tindakan eksplisit.
 - Generated files, report, dan log opsional disimpan di vault Anda sesuai settings.
 
 ## Pemecahan Masalah
@@ -729,7 +736,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.9 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.10 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -766,7 +773,7 @@ Halaman pengaturan Notemd menyediakan fitur pencarian kabur berbasis bidang, nav
 - Atur folder perantara bersama relatif terhadap Vault, atau kosongkan untuk memakai `notemd_assert/` di samping tiap sumber. Catatan pemulihan, cache render, dan lampiran opsional disimpan di sana. Pertahankan file yang masih dirujuk; perubahan folder hanya berlaku untuk proses baru.
 - HTML diagram berisi gambar yang dapat diperbesar; HTML ringkasan terstruktur berisi teks, struktur, dan rujukan. HTML/SVG yang dapat diedit adalah nama perender, bukan editor web. Gunakan sumber asli untuk mengedit. Ekspor presentasi, termasuk PPTX dan MP4, memiliki pengaturan dan dependensi terpisah.
 - Jenis dibuat berurutan. Kegagalan satu jenis tidak menghentikan lainnya; pembatalan menghentikan jenis yang menunggu dan mempertahankan file selesai. Ulangi ekspor dari pratinjau atau riwayat tanpa permintaan model baru. Kegagalan pembuatan memerlukan pembuatan ulang jenis tersebut. Catatan v1/v2 tetap dapat dibaca.
-- Drawnix menampilkan hingga enam hubungan inti berarah dan berlabel, maksimal tiga per simpul. Hubungan yang dihilangkan tetap ada dalam metadata. Teks kotak terlihat dalam PDF, termasuk dari cache SVG lama. Panah antarcabang bersifat statis dan dapat terlepas setelah penataan ulang di Drawnix.
+- Drawnix mempertahankan semua hubungan berarah yang dinyatakan jelas, tanpa batas total atau batas per simpul. Hanya pernyataan identik yang dihapus sebagai duplikat; predikat berbeda dan arah terbalik tetap dipertahankan. Rute luar yang rentangnya bertumpang tindih memakai jalur terpisah, rute yang terpisah memakai ulang jalur. Label mendapat baris sesuai ukurannya dan kanvas meluas sesuai kebutuhan. Panah tanpa label, hubungan umum, atau pengulangan hierarki tetap disimpan dalam metadata beserta alasannya. Teks dalam kotak hubungan tampil di PDF, termasuk dari cache SVG lama. Panah lintas cabang tetap statis dan dapat terlepas setelah penataan ulang di Drawnix.
 - Pengguna desktop dapat membuka lingkungan kompilasi bawaan CircuitikZ jika diinginkan, untuk memanfaatkan Tectonic/pdflatex yang sudah ada di sistem, memilih kompiler khusus, atau secara eksplisit menginstal runtime Tectonic yang telah ditentukan. Pratinjau, SVG, PNG, dan ekspor pratinjau PDF tidak memerlukan LaTeX.
 - Fitur pemilihan file batch tingkat lanjut memungkinkan penggunaan profil pilihan yang telah disimpan serta pratinjau aturan.
 - Folder target batch yang hilang dapat dibuat setelah mendapat konfirmasi, dengan opsi untuk mengingat pembuatan otomatisnya bagi folder yang hilang di masa depan.

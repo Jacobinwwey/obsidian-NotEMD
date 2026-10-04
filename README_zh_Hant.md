@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd Obsidian 插件
 
 > Notemd 是採用 MIT 授權的 Obsidian 插件，可將筆記處理為帶連結的 Markdown、概念筆記、研究摘要、譯文與圖表。檔案保存在庫中；雲端任務會將內容傳送至所選供應商，網頁研究也會連網。
@@ -25,13 +26,19 @@
 | 開發者 | [開發指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/developers/overview) | 建置、測試並擴充現有契約 |
 | Agent | [整合指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/agents/overview) | 探索四個受支援的匯出指令 |
 
-**版本:** 1.9.9
+**版本:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — 安全預覽與 Vault 本機設定
+
+匯入 SVG 預覽會移除活動內容與外部資源，同時保留中文標籤與面板樣式。僅裝置 provider 現依 Vault 隔離；在設定中明確匯入舊清單，保留原清單與既有設定。簡報預覽僅使用 loopback 伺服器，並管理共用使用者的生命週期。收藏儲存或剪貼簿寫入失敗會顯示錯誤；刪除遵守 Vault 偏好。PNG 相容預設開啟，保留要求的原圖，僅在需要時增加已驗證的低 PPI 副本。Drawnix 沒有固定關係配額；簡報匯出保持獨立設定。安裝同版本檔案並重新載入，批次處理前先驗證一篇筆記。
 
 - 一次勾選多種圖表，每種類型獨立選擇多種輸出格式。取消勾選仍保留該類型的格式偏好；全部取消則自動分析原文。
 - 所選檔案自動匯出至原筆記所在目錄，或直接儲存至設定的輸出目錄。名稱包含圖表類型，例如 `topic_drawnix.pdf`、`topic_flowchart.svg`；重名追加 `-2`、`-3` 等序號，不覆寫現有檔案。
 - Drawnix 保留全部明確的有向關係，不限制總條數或每個節點的關係數。相同關係去重，不同謂詞及反向關係分別保留。外側連線區間重疊時錯開軌道，不重疊時共用軌道，標籤按實際尺寸分行；畫布依關係需要擴展。無標籤、泛化或重複階層的連線仍附原因保存在中繼資料中。PDF 關係方框文字正常顯示，也相容舊 SVG 快取。跨分支箭頭仍為靜態關係，在 Drawnix 重新排列後可能脫離節點。
 
-36 個供應商預設與 33 項可執行圖表在 1.9.7 已存在。 [升級指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/releases/1.9.9) · [確認公開發布狀態](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+36 個供應商預設與 33 項可執行圖表在 1.9.7 已存在。 [升級指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/releases/1.9.10) · [確認公開發布狀態](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Drawnix 跨分支箭頭重新排列後仍有靜態座標限制；PPTX 中的 Mermaid／SVG 可能使用圖片替代。取消不等於復原已儲存變更，也不保證遠端生成或計費停止。實體行動裝置與 Obsidian 0.15.0 仍未驗證。
 
@@ -725,7 +732,7 @@ Notemd 在本地 Obsidian 執行，但部分功能會發起外部網路請求。
 
 ### 本地儲存
 
-- 插件配置儲存在 `.obsidian/plugins/notemd/data.json`。
+- 一般設定仍儲存在 `data.json`。僅本機 provider 使用 Obsidian 目前 Vault 的本機儲存；舊裝置共用清單僅透過明確匯入遷移。
 - 生成文件、報告和可選日誌根據您的設定儲存在保險庫內。
 
 ## 疑難排解
@@ -791,7 +798,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.9 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.10 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->
@@ -828,7 +835,7 @@ Notemd 的設定頁面提供針對欄位優化的模糊搜尋功能、大型類�
 - 圖形中間檔案目錄可設為統一的 Vault 相對路徑；留空則使用各原文旁的 `notemd_assert/`。復原記錄、渲染快取及選用附件存放於此。保留仍被既有產物引用的檔案；目錄變更僅影響新工作。
 - 圖形 HTML 包含可縮放的圖形；結構化摘要 HTML 顯示文字、結構與引文。可編輯 HTML/SVG 是渲染器名稱，不代表網頁內編輯器；編輯請使用原生原始檔。PPTX、MP4 等簡報匯出保留獨立設定與相依元件。
 - 各類型依序產生，一種失敗不阻斷其他類型；取消會停止後續類型並保留已完成檔案。匯出失敗可從預覽或歷史重試，無須再次請求模型；產生階段失敗仍須重新產生該類型。舊版 v1/v2 復原記錄繼續可讀。
-- Drawnix 概覽最多保留六條附標籤的核心有向關係，每個節點最多三條；省略關係保存在原始檔中繼資料中。PDF 關係方框文字正常顯示，也相容舊 SVG 快取。跨分支箭頭仍為靜態關係，在 Drawnix 重新排列後可能脫離節點。
+- Drawnix 保留全部明確的有向關係，不限制總條數或每個節點的關係數。相同關係去重，不同謂詞及反向關係分別保留。外側連線區間重疊時錯開軌道，不重疊時共用軌道，標籤按實際尺寸分行；畫布依關係需要擴展。無標籤、泛化或重複階層的連線仍附原因保存在中繼資料中。PDF 關係方框文字正常顯示，也相容舊 SVG 快取。跨分支箭頭仍為靜態關係，在 Drawnix 重新排列後可能脫離節點。
 - 桌面端使用者可以開啟可選的 CircuitikZ 本機編譯環境，以便重複使用系統中的 Tectonic/pdflatex、選擇自訂編譯器，或明確安裝已固定的管理型 Tectonic 執行環境。預覽、SVG、PNG 以及預覽 PDF 的匯出功能均不需要 LaTeX。
 - 進階的批次檔案選擇功能可讓使用者使用已儲存的選項設定檔與規則預覽。
 - 若缺少批次處理目標資料夾，可在確認後建立該資料夾，並可選擇將此自動建立的功能記住，以便日後再遇到缺失的資料夾時自動處理。

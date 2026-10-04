@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Plugin Notemd untuk Obsidian
 
 > Notemd ialah pemalam Obsidian berlesen MIT untuk Markdown berpaut, nota konsep, ringkasan, terjemahan dan rajah. Fail kekal dalam bilik kebal; tugas awan menghantar kandungan kepada penyedia pilihan, manakala penyelidikan web menggunakan rangkaian.
@@ -25,13 +26,19 @@ Setiap pratonton rajah mempunyai zum, anjakan, muat dan saiz sebenar yang berasi
 | Pembangun | [Panduan pembangun](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/developers/overview) | Bina, uji dan perluaskan kontrak sedia ada |
 | Ejen | [Panduan ejen](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/agents/overview) | Temui empat perintah eksport yang disokong |
 
-**Versi:** 1.9.9
+**Versi:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Pratonton selamat dan tetapan setempat Vault
+
+Pratonton SVG yang diimport membuang kandungan aktif dan sumber luar, sambil mengekalkan label Cina serta gaya panel. Pembekal setempat diasingkan mengikut Vault; import senarai lama secara jelas melalui tetapan dengan mengekalkan senarai asal dan konfigurasi sedia ada. Persembahan menggunakan pelayan loopback yang mengurus pengguna bersama. Kegagalan menyimpan kegemaran dan menyalin dilaporkan; pemadaman mengikut pilihan Vault. Keserasian PNG kekal aktif: imej asal disimpan dan salinan PPI lebih rendah yang disahkan ditambah hanya jika perlu. Drawnix tiada had hubungan tetap; persembahan kekal dengan tetapan berasingan. Pasang fail versi yang sama, muat semula dan uji satu nota sebelum pemprosesan kelompok.
 
 - Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.
 - Fail terpilih dieksport secara automatik di sebelah nota sumber atau terus ke folder output yang ditetapkan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Konflik nama menambah `-2`, `-3` dan seterusnya tanpa menulis ganti fail.
 - Drawnix mengekalkan semua hubungan berarah yang dinyatakan jelas, tanpa had jumlah atau had bagi setiap nod. Hanya pernyataan yang sama dibuang sebagai pendua; predikat berbeza dan arah songsang dikekalkan. Laluan luar yang julatnya bertindih menggunakan trek berasingan, laluan yang terpisah menggunakan semula trek. Label mendapat baris mengikut saiznya dan kanvas berkembang apabila perlu. Anak panah tanpa label, hubungan umum atau pengulangan hierarki kekal dalam metadata bersama sebabnya. Teks dalam kotak hubungan dipaparkan dalam PDF, termasuk daripada cache SVG lama. Anak panah antara cabang kekal statik dan boleh terpisah selepas penyusunan semula dalam Drawnix.
 
-36 pratetap penyedia dan 33 jenis rajah yang boleh dijalankan sudah tersedia dalam 1.9.7. [Panduan naik taraf](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/releases/1.9.9) · [Semak keluaran awam](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+36 pratetap penyedia dan 33 jenis rajah yang boleh dijalankan sudah tersedia dalam 1.9.7. [Panduan naik taraf](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/releases/1.9.10) · [Semak keluaran awam](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Anak panah Drawnix antara cabang kekal statik selepas penyusunan semula. Mermaid/SVG dalam PPTX mungkin menggunakan imej gantian. Pembatalan tidak membuat asal perubahan tersimpan atau menjamin penghentian penjanaan atau bil jauh. Peranti mudah alih fizikal dan Obsidian 0.15.0 belum disahkan.
 
@@ -172,7 +179,7 @@ Penyelidikan web dan penjanaan rajah ialah tindakan berasingan. Selepas pembatal
 
 - **Check for Duplicates in Current File**: Perintah ini membantu mengenal pasti kemungkinan istilah pendua dalam fail aktif.
 - **Duplicate Detection**: Pemeriksaan asas untuk perkataan pendua dalam kandungan fail yang sedang diproses, dengan hasil dicatatkan dalam konsol.
-- **Check and Remove Duplicate Concept Notes**: Mengenal pasti kemungkinan nota pendua dalam **Concept Note Folder** yang dikonfigurasi berdasarkan padanan nama tepat, bentuk jamak, normalisasi, dan containment satu perkataan berbanding nota di luar folder. Skop perbandingan, iaitu nota mana di luar folder konsep yang diperiksa, boleh ditetapkan kepada **seluruh vault**, **folder tertentu yang dimasukkan**, atau **semua folder kecuali yang dikecualikan**. Senarai terperinci dengan sebab dan fail yang bercanggah akan dipaparkan, kemudian pengguna diminta mengesahkan sebelum fail pendua dipindahkan ke system trash. Kemajuan semasa pemadaman juga dipaparkan.
+- **Check and Remove Duplicate Concept Notes**: Mengenal pasti kemungkinan nota pendua dalam **Concept Note Folder** yang dikonfigurasi berdasarkan padanan nama tepat, bentuk jamak, normalisasi, dan containment satu perkataan berbanding nota di luar folder. Skop perbandingan, iaitu nota mana di luar folder konsep yang diperiksa, boleh ditetapkan kepada **seluruh vault**, **folder tertentu yang dimasukkan**, atau **semua folder kecuali yang dikecualikan**. Senarai terperinci dengan sebab dan fail yang bercanggah akan dipaparkan, kemudian pengguna diminta mengesahkan sebelum fail pendua dipadam mengikut pilihan pemadaman vault. Kemajuan semasa pemadaman juga dipaparkan.
 - **Batch Mermaid Fix**: Menerapkan pembetulan sintaks Mermaid dan LaTeX ke semua fail Markdown dalam folder yang dipilih pengguna.
   - **Workflow Ready**: Boleh digunakan sebagai utiliti kendiri atau sebagai langkah dalam butang custom one-click workflow.
   - **Error Reporting**: Menjana laporan `mermaid_error_{foldername}.md` yang menyenaraikan fail yang masih mengandungi kemungkinan ralat Mermaid selepas diproses.
@@ -547,7 +554,7 @@ Ini ialah fungsi teras yang tertumpu pada mengenal pasti konsep dan menambah `[[
    - Jalankan `Notemd: Check and Remove Duplicate Concept Notes`, sama ada melalui command palette atau butang di bar sisi.
    - Plugin akan mengimbas folder nota konsep dan membandingkan nama fail dengan nota di luar folder menggunakan beberapa peraturan, seperti padanan tepat, bentuk jamak, normalisasi, dan containment.
    - Jika kemungkinan duplikat ditemui, sebuah modal akan dipaparkan yang menyenaraikan fail, sebab ia ditandakan, dan fail yang bercanggah.
-   - Semak senarai itu dengan teliti. Klik **"Delete Files"** untuk memindahkan fail yang disenaraikan ke system trash, atau klik **"Cancel"** untuk tidak melakukan sebarang tindakan.
+   - Semak senarai itu dengan teliti. Klik **"Delete Files"** untuk memadam fail yang disenaraikan mengikut pilihan pemadaman vault, atau klik **"Cancel"** untuk tidak melakukan sebarang tindakan.
    - Kemajuan dan hasil dipaparkan dalam log di bar sisi atau modal.
 
 7. **Extract Concepts (Pure Mode)**:
@@ -651,7 +658,7 @@ Notemd berjalan secara setempat di dalam Obsidian, tetapi sebahagian ciri mengha
 
 ### Penyimpanan Lokal
 
-- Konfigurasi plugin disimpan dalam `.obsidian/plugins/notemd/data.json`.
+- Tetapan biasa kekal dalam `data.json`. Penyedia local-only menggunakan storan setempat Obsidian untuk vault semasa; senarai lama yang dikongsi pada peranti hanya diimport melalui tindakan nyata.
 - Fail yang dijana, laporan, dan log opsional disimpan dalam vault anda mengikut tetapan yang dipilih.
 
 ## Penyelesaian Masalah
@@ -720,7 +727,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.9 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.10 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 
@@ -758,7 +765,7 @@ Halaman tetapan Notemd menyediakan carian kabur yang mengambil kira medan terten
 - Tetapkan folder perantaraan bersama relatif kepada Vault, atau kosongkan untuk menggunakan `notemd_assert/` di sebelah setiap sumber. Rekod pemulihan, cache pemaparan dan lampiran pilihan disimpan di situ. Kekalkan fail yang masih dirujuk; perubahan folder hanya terpakai pada pelaksanaan baharu.
 - HTML rajah mengandungi grafik yang boleh dizum; HTML ringkasan berstruktur mengandungi teks, struktur dan rujukan. HTML/SVG boleh sunting ialah nama pemapar, bukan penyunting web. Gunakan sumber asal untuk menyunting. Eksport persembahan, termasuk PPTX dan MP4, mengekalkan tetapan serta kebergantungan berasingan.
 - Jenis dijana mengikut turutan. Kegagalan satu jenis tidak menyekat yang lain; pembatalan menghentikan jenis menunggu dan mengekalkan fail siap. Cuba semula eksport melalui pratonton atau sejarah tanpa permintaan model baharu. Kegagalan penjanaan memerlukan jenis itu dijana semula. Rekod v1/v2 masih boleh dibaca.
-- Drawnix memaparkan sehingga enam hubungan teras berarah dan berlabel, maksimum tiga bagi setiap nod. Hubungan yang digugurkan kekal dalam metadata. Teks dalam kotak kelihatan dalam PDF, termasuk daripada cache SVG lama. Anak panah antara cabang adalah statik dan mungkin terpisah selepas susunan semula dalam Drawnix.
+- Drawnix mengekalkan semua hubungan berarah yang dinyatakan jelas, tanpa had jumlah atau had bagi setiap nod. Hanya pernyataan yang sama dibuang sebagai pendua; predikat berbeza dan arah songsang dikekalkan. Laluan luar yang julatnya bertindih menggunakan trek berasingan, laluan yang terpisah menggunakan semula trek. Label mendapat baris mengikut saiznya dan kanvas berkembang apabila perlu. Anak panah tanpa label, hubungan umum atau pengulangan hierarki kekal dalam metadata bersama sebabnya. Teks dalam kotak hubungan dipaparkan dalam PDF, termasuk daripada cache SVG lama. Anak panah antara cabang kekal statik dan boleh terpisah selepas penyusunan semula dalam Drawnix.
 - Pengguna desktop boleh membuka persekitaran kompilasi asli CircuitikZ secara pilihan untuk menggunakan Tectonic/pdflatex sistem, memilih kompiler khusus, atau memasang runtime Tectonic yang diuruskan secara eksplisit. Pratonton, SVG, PNG, dan eksport pratonton PDF tidak memerlukan LaTeX.
 - Pemilihan fail kumpulan lanjutan membolehkan pengguna menggunakan profil pemilihan yang telah disimpan serta melihat pratonton peraturan.
 - Folder sasaran kumpulan yang hilang boleh dibuat selepas pengesahan, dengan pilihan untuk menyimpan penghasilannya secara automatik bagi folder yang hilang pada masa akan datang.

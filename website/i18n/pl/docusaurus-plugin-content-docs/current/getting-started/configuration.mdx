@@ -102,3 +102,9 @@ Przetestuj dokładnego dostawcę/model na krótkiej notatce. Gdy pola brak, spra
 - [Przetwarzanie wsadowe](../advanced/batch-processing).
 - [Własne prompty](../advanced/custom-prompts).
 - [Rozwiązywanie problemów](../advanced/troubleshooting).
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Bezpieczne podglądy i ustawienia lokalne Vault
+
+Importowane SVG usuwają aktywną treść i zasoby zewnętrzne, zachowując chińskie etykiety oraz style paneli. Lokalni dostawcy są izolowani według Vault; jawnie zaimportuj starą listę w ustawieniach, zachowując ją i istniejące konfiguracje. Prezentacje korzystają z serwera loopback zarządzającego współdzielonymi odbiorcami. Błędy zapisu ulubionych i kopiowania są zgłaszane; usuwanie respektuje preferencje Vault. Zgodność PNG pozostaje włączona: oryginał jest zachowany, a sprawdzona kopia o mniejszym PPI dodawana tylko w razie potrzeby. Drawnix nie ma stałego limitu relacji; prezentacje zachowują osobne ustawienia. Zainstaluj pliki tej samej wersji, przeładuj i sprawdź jedną notatkę przed przetwarzaniem zbiorczym.

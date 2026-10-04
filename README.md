@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd — AI-Powered Knowledge Base Builder for Obsidian
 
 > **Notemd** transforms notes into linked Markdown, concept notes, research summaries, translations and diagrams. Choose the model, inspect the output and keep the results in your Obsidian vault.
@@ -28,13 +29,19 @@ Each diagram preview has independent zoom, pan, fit and actual-size controls. Ct
 
 Notemd is an **MIT-licensed Obsidian plugin** for file-based knowledge work. It supports cloud providers, gateways and local model servers. Stored outputs stay in the vault; cloud tasks send content to the selected endpoint, and web research uses the network.
 
-**Version:** 1.9.9
+**Version:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Safer previews and Vault-local settings
+
+Imported SVG previews remove active content and external resources while preserving Chinese labels and panel styles. Device-only providers are now isolated by Vault; use the explicit legacy import action in settings, which preserves the old list and existing configurations. Presentation previews use a loopback server with shared-consumer lifecycle control. Failed favorites saves and clipboard writes report errors; deletion follows Vault preferences. PNG compatibility stays enabled by default, preserving the requested original and adding a verified lower-PPI copy only when needed. Drawnix has no fixed relation quota; presentation exports keep separate settings. Install matching release files, reload, and test one note before batching.
 
 - Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis.
 - Selected files are exported automatically beside the source note, or directly into the configured output folder. Names include the type, such as `topic_drawnix.pdf` and `topic_flowchart.svg`; collisions add `-2`, `-3` and so on without overwriting existing files.
 - Drawnix preserves all explicit directed relationships without a fixed total or per-node limit. Identical claims are deduplicated; different predicates and reverse directions remain distinct. Overlapping exterior routes use separate tracks, disjoint routes reuse tracks, and labels receive separate measured rows. The canvas grows to retain relationships. Unlabeled, generic or redundant hierarchy arrows remain in metadata with reasons. Boxed relation text stays visible in PDF, including older cached SVG. Cross-branch arrows remain static and may detach after rearrangement in Drawnix.
 
-The 36 provider presets and 33 executable diagram entries already existed in 1.9.7. Read the [upgrade guide](https://jacobinwwey.github.io/obsidian-NotEMD/docs/releases/1.9.9) and check the [public Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9) for availability.
+The 36 provider presets and 33 executable diagram entries already existed in 1.9.7. Read the [upgrade guide](https://jacobinwwey.github.io/obsidian-NotEMD/docs/releases/1.9.10) and check the [public Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10) for availability.
 
 Drawnix cross-branch arrows remain static after rearrangement. Mermaid/SVG in PPTX may use image fallback. Cancellation is not undo and does not guarantee remote generation or billing stops. Physical mobile devices and Obsidian 0.15.0 remain unverified.
 
@@ -223,7 +230,7 @@ The following renderer table describes legacy single-artifact filenames and indi
 
 - **Check for Duplicates in Current File**: This command helps identify potential duplicate terms within the active file.
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
-- **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
+- **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before deleting identified duplicates according to the Vault’s deletion preference. Shows progress during deletion.
 - **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections to all Markdown files within a user-selected folder.
     - **Workflow Ready**: Can be used as a standalone utility or as a step inside a custom one-click workflow button.
     - **Error Reporting**: Generates a `mermaid_error_{foldername}.md` report listing files that still contain potential Mermaid errors after processing.
@@ -656,7 +663,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Run `Notemd: Check and Remove Duplicate Concept Notes` (via command palette or sidebar button).
     *   The plugin scans the concept note folder and compares filenames against notes outside the folder using several rules (exact match, plurals, normalization, containment).
     *   If potential duplicates are found, a modal window appears listing the files, the reason they were flagged, and the conflicting files.
-    *   Review the list carefully. Click **"Delete Files"** to move the listed files to the system trash, or **"Cancel"** to take no action.
+    *   Review the list carefully. Click **"Delete Files"** to delete the listed files according to the Vault’s deletion preference, or **"Cancel"** to take no action.
     *   Progress and results are shown in the sidebar/modal log.
 
 7.  **Extract Concepts (Pure Mode)**:
@@ -772,7 +779,7 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
 
 ### Local Storage
 
-- Plugin configuration is stored in `.obsidian/plugins/notemd/data.json`.
+- Ordinary settings remain in `data.json`. Local-only providers use Obsidian’s local storage for the current Vault; importing the old device-wide list requires an explicit action.
 - Generated files, reports, and optional logs are stored in your vault according to your settings.
 
 ## Troubleshooting
@@ -852,7 +859,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.9 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.10 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->

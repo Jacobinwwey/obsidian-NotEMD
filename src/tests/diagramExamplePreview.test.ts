@@ -1,3 +1,5 @@
+// DOM security is covered by svgHostSecurity.playwright.test.ts; this suite uses structural UI doubles.
+jest.mock('../rendering/preview/svgHostSanitizer', () => ({ mountDiagramSvg: (container: { innerHTML: string }, svg: string) => { container.innerHTML = svg; } }));
 const mockRender = jest.fn();
 const mockCreateDefaultRendererService = jest.fn(() => ({ render: mockRender }));
 const mockCreateSession = jest.fn(() => ({ htmlSrcdoc: '<html></html>', payload: {} }));

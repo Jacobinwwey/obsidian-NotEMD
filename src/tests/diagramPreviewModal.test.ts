@@ -1,3 +1,4 @@
+jest.mock('../rendering/preview/svgHostSanitizer', () => ({ mountDiagramSvg: (container: { innerHTML: string }, svg: string) => { container.innerHTML = svg; } }));
 import { Menu, Notice } from 'obsidian';
 import { DiagramPreviewModal } from '../ui/DiagramPreviewModal';
 import { clearDiagramPreviewHistory } from '../ui/diagramPreviewHistory';

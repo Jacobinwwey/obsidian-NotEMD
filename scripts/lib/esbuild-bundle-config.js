@@ -1,4 +1,5 @@
-const builtins = require('builtin-modules');
+const { builtinModules } = require('node:module');
+const builtins = [...new Set(builtinModules.flatMap(name => [name, name.startsWith('node:') ? name : 'node:' + name]))];
 const {
     MAIN_BUNDLE_OUTPUT_FILE,
     RENDER_HOST_RUNTIME_OUTPUT_FILE

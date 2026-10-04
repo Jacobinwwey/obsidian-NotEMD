@@ -1,3 +1,4 @@
+import * as previewExport from '../rendering/preview/previewExport';
 import { ensureRenderHostBridge, RENDER_HOST_BRIDGE_GLOBAL } from '../rendering/webview/bootstrap';
 import * as mermaidPreview from '../rendering/preview/mermaidPreview';
 import * as vegaLitePreview from '../rendering/preview/vegaLitePreview';
@@ -21,11 +22,11 @@ jest.mock('vega', () => ({
 }));
 
 jest.mock('../rendering/preview/mermaidPreview', () => ({
-    renderMermaidArtifactSvg: jest.fn().mockResolvedValue('<svg data-renderer="mermaid" />')
+    renderMermaidArtifactSvg: jest.fn().mockResolvedValue('<svg data-renderer="mermaid" viewBox="0 0 100 100"><rect width="100" height="100"/></svg>')
 }));
 
 jest.mock('../rendering/preview/vegaLitePreview', () => ({
-    renderVegaLiteArtifactSvg: jest.fn().mockResolvedValue('<svg data-renderer="vega-lite" />')
+    renderVegaLiteArtifactSvg: jest.fn().mockResolvedValue('<svg data-renderer="vega-lite" viewBox="0 0 100 100"><rect width="100" height="100"/></svg>')
 }));
 
 describe('render webview bridge', () => {
@@ -65,4 +66,16 @@ describe('render webview bridge', () => {
             'dark'
         );
     });
+});
+
+test('both same-origin iframe bridge paths use the shared safe SVG export boundary', async () => {
+    const safe = '<svg data-safe="true"></svg>';
+    const boundary = jest.spyOn(previewExport, 'renderPreviewArtifactSvg').mockResolvedValue(safe);
+    try {
+        const bridge = ensureRenderHostBridge({} as any);
+        expect(await bridge.renderMermaidToSvg('flowchart TD\nA --> B')).toBe(safe);
+        expect(await bridge.renderVegaLiteToSvg('{"mark":"bar"}')).toBe(safe);
+        expect(boundary).toHaveBeenCalledWith(expect.objectContaining({ target: 'mermaid' }), expect.anything());
+        expect(boundary).toHaveBeenCalledWith(expect.objectContaining({ target: 'vega-lite' }), expect.anything());
+    } finally { boundary.mockRestore(); }
 });

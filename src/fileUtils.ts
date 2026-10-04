@@ -2304,7 +2304,7 @@ export async function checkAndRemoveDuplicateConceptNotes(
                 try {
                     const fileToDelete = app.vault.getAbstractFileByPath(item.path);
                     if (fileToDelete instanceof TFile) {
-                        await app.vault.trash(fileToDelete, true);
+                        await app.fileManager.trashFile(fileToDelete);
                         progressReporter.log(`[DELETED] ${item.path}`);
                         deletedCount++;
                         result.removedCount += 1;

@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd — Obsidian AI 知识库构建插件
 
 > **Notemd** 将笔记处理为带链接的 Markdown、概念笔记、研究摘要、译文和图表。选择模型、检查输出，再将结果保存在 Obsidian 库中。
@@ -28,13 +29,19 @@
 
 Notemd 是采用 **MIT 许可证的 Obsidian 插件**，提供文件式知识工作流，支持云端 provider、网关和本地模型服务器。输出保存在库中；云端任务会向选定端点发送内容，Web 研究也会联网。
 
-**版本:** 1.9.9
+**版本:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — 安全预览与 Vault 本地设置
+
+导入 SVG 预览会移除活动内容和外部资源，同时保留中文标签与面板样式。仅设备 provider 现按 Vault 隔离；在设置中显式导入旧列表，保留原列表与已有配置。演示预览仅使用 loopback 服务器，并管理共享消费者的生命周期。收藏保存或剪贴板写入失败会报告错误；删除遵守 Vault 偏好。PNG 兼容默认开启，保留请求原图，仅在需要时增加已验证的低 PPI 副本。Drawnix 没有固定关系配额；演示导出保持独立设置。安装同版本发布文件、重载插件，批处理前先验证一篇笔记。
 
 - 一次勾选多种图表，每种类型独立选择多种输出格式。取消勾选仍保留该类型的格式偏好；全部取消则自动分析原文。
 - 所选文件自动导出到原笔记所在目录，或直接保存到配置的输出目录。名称包含图表类型，如 `topic_drawnix.pdf`、`topic_flowchart.svg`；重名追加 `-2`、`-3` 等序号，不覆盖已有文件。
 - Drawnix 保留全部明确的有向关系，不限制总条数或每个节点的关系数。相同关系去重，不同谓词及反向关系分别保留。外侧连线区间重叠时错开轨道，不重叠时复用轨道，标签按实际尺寸分行；画布随关系需要扩展。无标签、泛化或重复层级的连线仍附原因保存在元数据中。PDF 关系方框文字正常显示，也兼容旧 SVG 缓存。跨分支箭头仍为静态关系，在 Drawnix 重排后可能脱离节点。
 
-36 个 provider 预设和 33 项可执行图表在 1.9.7 已存在。参阅[升级指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/releases/1.9.9)，以[公开 Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9) 确认版本可用性。
+36 个 provider 预设和 33 项可执行图表在 1.9.7 已存在。参阅[升级指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/releases/1.9.10)，以[公开 Release](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10) 确认版本可用性。
 
 Drawnix 跨分支箭头重排后仍有静态坐标限制，PPTX 中 Mermaid／SVG 可能采用图片回退。取消不是撤销，不保证远端生成或计费停止。实体移动设备与 Obsidian 0.15.0 仍未验证。
 
@@ -835,7 +842,7 @@ Notemd 在本地 Obsidian 运行，但部分功能会发起外部网络请求。
 
 ### 本地存储
 
-- 插件配置保存在 `.obsidian/plugins/notemd/data.json`。
+- 普通设置仍保存在 `data.json`。仅本地 provider 使用 Obsidian 当前 Vault 的本地存储；旧设备共享列表仅通过显式导入迁移。
 - 生成文件、报告和可选日志根据你的设置保存在保险库内。
 
 ## 故障排除
@@ -907,7 +914,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.9 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.10 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史

@@ -16,7 +16,7 @@ export const Menu = jest.fn().mockImplementation(() => ({
 	}),
 	showAtMouseEvent: jest.fn(),
 }));
-export const Plugin = jest.fn();
+export const Plugin = jest.fn(function (this: { app: unknown; manifest: unknown }, app: unknown, manifest: unknown) { this.app = app; this.manifest = manifest; });
 export const PluginSettingTab = jest.fn();
 export const requestUrl = jest.fn();
 export const getLanguage = jest.fn(() => 'en');

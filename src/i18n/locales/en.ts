@@ -1197,6 +1197,14 @@ export const STRINGS_EN = {
         removeIndex: 'Remove from history', deleteArtifacts: 'Delete artifacts…',
         previous: 'Previous', next: 'Next', page: '{page} / {total}'
     },
+    settingsPersistence: {
+        "saveFailed": "Could not save settings: {message}",
+        "copyFailed": "Could not copy: {message}",
+        "legacyImportName": "Import legacy device-only providers",
+        "legacyImportDesc": "Copy the old device-wide provider list into this Vault. Existing configured providers and the old list are preserved.",
+        "legacyImportButton": "Import into this Vault",
+        "legacyImported": "Imported {count} device-only providers."
+},
     settingsDiscovery: {
         searchPlaceholder: 'Search settings…', searchLabel: 'Search settings', favorites: '★ Favorites',
         collapseSearch: 'Collapse settings search', expandSearch: 'Expand settings search',

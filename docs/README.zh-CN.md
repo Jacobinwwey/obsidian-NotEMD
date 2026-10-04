@@ -87,3 +87,8 @@
 - 发布说明必须拆分为英文与简体中文两个完整文件；发布 GitHub Release 时再由辅助脚本组合成一个双语 release body。
 - 不要再向活跃文档里追加行内双语摘要块。每种语言都应维护独立完整文件。
 - 根目录下的一次性报告应进入 `docs/archive/root-history/`，不要再直接堆回仓库根目录。
+
+- [社区与 ponytail 架构审查](./audits/2026-10-04-community-ponytail.zh-CN.md)
+- [1.9.10 发布说明](./releases/1.9.10.zh-CN.md)
+
+- [1.9.10 候选验收与待完成宿主门禁](./maintainer/release-1.9.10-acceptance.zh-CN.md)

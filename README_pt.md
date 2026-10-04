@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Plugin Notemd para Obsidian
 
 > O Notemd é um plugin Obsidian com licença MIT para Markdown com links, notas de conceitos, resumos, traduções e diagramas. Os arquivos permanecem no cofre; tarefas na nuvem enviam conteúdo ao provedor escolhido e a pesquisa web utiliza a rede.
@@ -25,13 +26,19 @@ Cada pré-visualização tem zoom, deslocação, ajuste e tamanho real independe
 | Desenvolvedor | [Guia de desenvolvimento](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/developers/overview) | Compilar, testar e ampliar os contratos existentes |
 | Agente | [Guia de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/agents/overview) | Encontrar os quatro comandos de exportação suportados |
 
-**Versão:** 1.9.9
+**Versão:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Pré-visualizações seguras e definições locais do Vault
+
+As pré-visualizações SVG importadas removem conteúdo ativo e recursos externos, preservando rótulos chineses e estilos dos painéis. Os fornecedores locais são isolados por Vault; importe explicitamente a lista antiga nas definições, preservando a lista e configurações existentes. As apresentações usam um servidor loopback com gestão de consumidores partilhados. Falhas ao guardar favoritos ou copiar são apresentadas; a eliminação respeita as preferências do Vault. A compatibilidade PNG continua ativa: conserva o original e acrescenta uma cópia verificada com menos PPI apenas quando necessário. Drawnix não tem limite fixo de relações; as apresentações mantêm definições separadas. Instale ficheiros da mesma versão, recarregue e teste uma nota antes de um lote.
 
 - Selecione vários tipos de diagrama numa execução e vários formatos independentes para cada tipo. Desmarcar um tipo conserva os seus formatos; sem seleção, o conteúdo é analisado automaticamente.
 - Os ficheiros selecionados são exportados automaticamente junto da nota original ou diretamente para a pasta configurada. Os nomes incluem o tipo, como `topic_drawnix.pdf` e `topic_flowchart.svg`. Em caso de colisão, acrescenta-se `-2`, `-3`, etc., sem substituir ficheiros.
 - O Drawnix preserva todas as relações direcionadas explícitas, sem limite total ou por nó. Elimina afirmações idênticas, mas mantém predicados diferentes e direções inversas. Os percursos exteriores sobrepostos usam vias separadas; os restantes reutilizam as vias. As etiquetas recebem linhas medidas e a tela cresce conforme necessário. As setas sem etiqueta, genéricas ou redundantes com a hierarquia permanecem nos metadados com o motivo. O texto nas caixas continua visível no PDF, incluindo SVG antigos em cache. As setas entre ramos são estáticas e podem desligar-se após uma reorganização no Drawnix.
 
-Os 36 presets de provedores e 33 tipos executáveis de diagramas já existiam em 1.9.7. [Guia de atualização](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/releases/1.9.9) · [Verificar o lançamento público](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+Os 36 presets de provedores e 33 tipos executáveis de diagramas já existiam em 1.9.7. [Guia de atualização](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/releases/1.9.10) · [Verificar o lançamento público](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Setas Drawnix entre ramos continuam estáticas após reorganização. Mermaid/SVG em PPTX pode usar uma imagem de reserva. Cancelar não desfaz alterações salvas nem garante interromper geração ou cobrança remota. Dispositivos móveis físicos e Obsidian 0.15.0 continuam sem verificação.
 
@@ -176,7 +183,7 @@ Pesquisa web e geração de diagramas são ações separadas. Após cancelar, ag
 
 - **Verificar Duplicatas no Arquivo Atual**: Este comando ajuda a identificar possíveis termos duplicados dentro do arquivo ativo.
 - **Detecção de Duplicatas**: Verificação básica de palavras duplicadas dentro do conteúdo do arquivo processado no momento (resultados registrados no console).
-- **Verificar e Remover Notas de Conceito Duplicadas**: Identifica possíveis notas duplicadas dentro da **Pasta de Notas de Conceito** configurada baseando-se em correspondências exatas de nomes, plurais, normalização e contenção de palavras únicas em comparação com notas fora da pasta. O escopo da comparação (quais notas fora da pasta de conceito são verificadas) pode ser configurado para **todo o vault**, **pastas incluídas específicas** ou **todas as pastas exceto as especificamente excluídas**. Apresenta uma lista detalhada com motivos e arquivos em conflito, solicitando confirmação antes de mover as duplicatas identificadas para a lixeira do sistema. Mostra o progresso durante a remoção.
+- **Verificar e Remover Notas de Conceito Duplicadas**: Identifica possíveis notas duplicadas dentro da **Pasta de Notas de Conceito** configurada baseando-se em correspondências exatas de nomes, plurais, normalização e contenção de palavras únicas em comparação com notas fora da pasta. O escopo da comparação (quais notas fora da pasta de conceito são verificadas) pode ser configurado para **todo o vault**, **pastas incluídas específicas** ou **todas as pastas exceto as especificamente excluídas**. Apresenta uma lista detalhada com motivos e arquivos em conflito, solicitando confirmação antes de excluir as duplicatas identificadas conforme a preferência de exclusão do vault. Mostra o progresso durante a remoção.
 - **Correção Mermaid em Lote**: Aplica correções de sintaxe Mermaid e LaTeX a todos os arquivos Markdown dentro de uma pasta selecionada pelo usuário.
     - **Pronto para Fluxo de Trabalho**: Pode ser usado como um utilitário independente ou como um passo dentro de um botão de fluxo de trabalho personalizado com um clique.
     - **Relatório de Erros**: Gera um relatório `mermaid_error_{nome_da_pasta}.md` listando arquivos que ainda contêm possíveis erros Mermaid após o processamento.
@@ -553,7 +560,7 @@ Esta é a funcionalidade principal focada em identificar conceitos e adicionar `
     *   Execute `Notemd: Check and Remove Duplicate Concept Notes` (via paleta de comandos ou botão da barra lateral).
     *   O plugin verifica a pasta de notas de conceito e compara os nomes dos arquivos com notas fora da pasta usando várias regras (correspondência exata, plurais, normalização, contenção).
     *   Se possíveis duplicatas forem encontradas, uma janela modal aparecerá listando os arquivos, o motivo pelo qual foram sinalizados e os arquivos em conflito.
-    *   Examine a lista cuidadosamente. Clique em **"Delete Files"** para mover os arquivos listados para a lixeira do sistema, ou em **"Cancel"** para não realizar nenhuma ação.
+    *   Examine a lista cuidadosamente. Clique em **"Delete Files"** para excluir os arquivos listados conforme a preferência de exclusão do vault, ou em **"Cancel"** para não realizar nenhuma ação.
     *   O progresso e os resultados são mostrados na barra lateral/log do modal.
 
 7.  **Extrair Conceitos (Modo Puro)**:
@@ -657,7 +664,7 @@ O Notemd é executado localmente dentro do Obsidian, mas alguns recursos enviam 
 
 ### Armazenamento Local
 
-- A configuração do plugin é armazenada em `.obsidian/plugins/notemd/data.json`.
+- As configurações comuns permanecem em `data.json`. Os provedores local-only usam o armazenamento local do Obsidian do vault atual; a antiga lista compartilhada no dispositivo só é importada por uma ação explícita.
 - Arquivos gerados, relatórios e logs opcionais são armazenados em seu vault de acordo com suas configurações.
 
 ## Solução de Problemas
@@ -726,7 +733,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.9 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.10 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 
@@ -764,7 +771,7 @@ A página de configurações Notemd oferece busca por semelhança que leva em co
 - Defina uma pasta intermédia partilhada relativa ao Vault, ou deixe o campo vazio para usar `notemd_assert/` junto de cada original. Guarda registos de recuperação, renderizações em cache e anexos opcionais. Conserve ficheiros ainda referenciados; a alteração só afeta novas execuções.
 - O HTML de diagrama contém um gráfico com zoom; o HTML de resumo estruturado contém texto, estrutura e referências. HTML/SVG editável designa um renderizador, não um editor web. Para editar, utilize a fonte nativa. A exportação de apresentações, incluindo PPTX e MP4, mantém definições e dependências separadas.
 - Os tipos são gerados em sequência. Uma falha não bloqueia os restantes; cancelar interrompe os pendentes e preserva os ficheiros concluídos. Repita exportações pela pré-visualização ou histórico sem outro pedido ao modelo. Uma falha de geração exige gerar novamente esse tipo. Os registos v1/v2 continuam legíveis.
-- Drawnix apresenta até seis relações dirigidas essenciais com rótulo, no máximo três por nó; as omitidas ficam nos metadados. O texto das caixas permanece visível no PDF, incluindo SVG antigos em cache. As setas entre ramos são estáticas e podem desligar-se após reorganizar no Drawnix.
+- O Drawnix preserva todas as relações direcionadas explícitas, sem limite total ou por nó. Elimina afirmações idênticas, mas mantém predicados diferentes e direções inversas. Os percursos exteriores sobrepostos usam vias separadas; os restantes reutilizam as vias. As etiquetas recebem linhas medidas e a tela cresce conforme necessário. As setas sem etiqueta, genéricas ou redundantes com a hierarquia permanecem nos metadados com o motivo. O texto nas caixas continua visível no PDF, incluindo SVG antigos em cache. As setas entre ramos são estáticas e podem desligar-se após uma reorganização no Drawnix.
 - Os usuários de desktop podem abrir o ambiente de compilação nativo CircuitikZ, opcional, para reutilizar o Tectonic/pdflatex do sistema, selecionar um compilador personalizado ou instalar explicitamente a versão gerenciada e fixada do Tectonic. As prévias, SVG, PNG e as exportações de prévia PDF não exigem LaTeX.
 - A seleção avançada de arquivos em lote permite o uso de perfis de seleção salvos e visualizações de regras.
 - Uma pasta-alvo de lote ausente pode ser criada após confirmação, com a opção de lembrar a criação automática para pastas faltantes futuras.

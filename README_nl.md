@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Notemd-plugin voor Obsidian
 
 > Notemd is een Obsidian-plugin onder de MIT-licentie voor gekoppelde Markdown, conceptnotities, samenvattingen, vertalingen en diagrammen. Bestanden blijven in de kluis; cloudtaken sturen inhoud naar de gekozen aanbieder en webonderzoek gebruikt het netwerk.
@@ -25,13 +26,19 @@ Elke diagramweergave heeft onafhankelijke zoom, verschuiving, passend maken en w
 | Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
 | Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
 
-**Versie:** 1.9.9
+**Versie:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Veilige voorbeelden en Vault-lokale instellingen
+
+Geïmporteerde SVG-voorbeelden verwijderen actieve inhoud en externe bronnen, met behoud van Chinese labels en paneelstijlen. Lokale providers zijn per Vault gescheiden; importeer de oude lijst expliciet via instellingen, met behoud van de lijst en bestaande configuraties. Presentaties gebruiken een loopback-server die gedeelde gebruikers beheert. Mislukte favorietenopslag en kopieeracties melden fouten; verwijderen volgt de Vault-voorkeuren. PNG-compatibiliteit blijft aan: het origineel blijft behouden en alleen indien nodig wordt een gecontroleerde kopie met minder PPI toegevoegd. Drawnix heeft geen vaste relatielimiet; presentaties houden aparte instellingen. Installeer bestanden van dezelfde versie, herlaad en test één notitie vóór batchverwerking.
 
 - Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
 - Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven.
 - Drawnix bewaart alle expliciete gerichte relaties zonder vaste totale limiet of limiet per knooppunt. Identieke beweringen worden ontdubbeld; verschillende predicaten en omgekeerde richtingen blijven behouden. Overlappende buitenroutes krijgen aparte sporen, gescheiden routes hergebruiken sporen. Labels krijgen rijen op basis van hun afmetingen en het canvas groeit waar nodig. Pijlen zonder label, algemene verbanden en pijlen die de hiërarchie herhalen blijven met reden in de metadata. Tekst in relatiekaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken blijven statisch en kunnen na herschikking in Drawnix losraken.
 
-De 36 aanbiedervoorinstellingen en 33 uitvoerbare diagramtypen bestonden al in 1.9.7. [Upgradegids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/releases/1.9.9) · [Openbare release controleren](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+De 36 aanbiedervoorinstellingen en 33 uitvoerbare diagramtypen bestonden al in 1.9.7. [Upgradegids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/releases/1.9.10) · [Openbare release controleren](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Drawnix-pijlen tussen takken blijven statisch na herschikking. Mermaid/SVG in PPTX kan op een afbeelding terugvallen. Annuleren draait opgeslagen wijzigingen niet terug en garandeert geen stop van externe generatie of facturering. Fysieke mobiele apparaten en Obsidian 0.15.0 zijn niet geverifieerd.
 
@@ -172,7 +179,7 @@ Webonderzoek en diagramgeneratie zijn aparte acties. Wacht na annulering tot act
 
 - **Check for Duplicates in Current File**: Deze opdracht helpt bij het identificeren van mogelijke dubbele termen in het actieve bestand.
 - **Duplicate Detection**: Basiscontrole op dubbele woorden binnen de momenteel verwerkte inhoud van een bestand (resultaten worden in de console gelogd).
-- **Check and Remove Duplicate Concept Notes**: Identificeert mogelijke dubbele notities binnen de geconfigureerde **Concept Note Folder** op basis van exacte naammatches, meervouden, normalisatie en enkelwoord-bevatting vergeleken met notities buiten de map. De reikwijdte van de vergelijking (welke notities buiten de conceptmap worden meegenomen) kan worden ingesteld op de **volledige vault**, **specifieke opgenomen mappen** of **alle mappen behalve specifieke uitgesloten mappen**. Toont een gedetailleerde lijst met redenen en conflicterende bestanden en vraagt daarna om bevestiging voordat de gevonden duplicaten naar de systeemprullenbak worden verplaatst. Laat voortgang zien tijdens het verwijderen.
+- **Check and Remove Duplicate Concept Notes**: Identificeert mogelijke dubbele notities binnen de geconfigureerde **Concept Note Folder** op basis van exacte naammatches, meervouden, normalisatie en enkelwoord-bevatting vergeleken met notities buiten de map. De reikwijdte van de vergelijking (welke notities buiten de conceptmap worden meegenomen) kan worden ingesteld op de **volledige vault**, **specifieke opgenomen mappen** of **alle mappen behalve specifieke uitgesloten mappen**. Toont een gedetailleerde lijst met redenen en conflicterende bestanden en vraagt daarna om bevestiging voordat de gevonden duplicaten volgens de verwijdervoorkeur van de vault worden verwijderd. Laat voortgang zien tijdens het verwijderen.
 - **Batch Mermaid Fix**: Past Mermaid- en LaTeX-syntaxcorrecties toe op alle Markdown-bestanden binnen een door de gebruiker geselecteerde map.
   - **Workflow-klaar**: Kan als zelfstandige utility worden gebruikt of als stap binnen een aangepaste one-click-workflowknop.
   - **Foutrapportage**: Genereert een rapport `mermaid_error_{foldername}.md` met bestanden die na verwerking nog steeds mogelijke Mermaid-fouten bevatten.
@@ -547,7 +554,7 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
    - Voer `Notemd: Check and Remove Duplicate Concept Notes` uit (via het command palette of de zijbalkknop).
    - De plugin scant de conceptnotitiemap en vergelijkt bestandsnamen met notities buiten de map op basis van meerdere regels (exacte match, meervouden, normalisatie, containment).
    - Als mogelijke duplicaten worden gevonden, verschijnt een venster met de bestanden, de reden waarom ze zijn gemarkeerd en de conflicterende bestanden.
-   - Controleer de lijst zorgvuldig. Klik op **"Delete Files"** om de vermelde bestanden naar de systeemprullenbak te verplaatsen, of op **"Cancel"** om geen actie te ondernemen.
+   - Controleer de lijst zorgvuldig. Klik op **"Delete Files"** om de vermelde bestanden volgens de verwijdervoorkeur van de vault te verwijderen, of op **"Cancel"** om geen actie te ondernemen.
    - Voortgang en resultaten worden getoond in het log van de zijbalk/het venster.
 
 7. **Extract Concepts (Pure Mode)**:
@@ -651,7 +658,7 @@ Notemd draait lokaal in Obsidian, maar sommige functies versturen uitgaande requ
 
 ### Lokale opslag
 
-- Pluginconfiguratie wordt opgeslagen in `.obsidian/plugins/notemd/data.json`.
+- Algemene instellingen blijven in `data.json`. Local-only-providers gebruiken de lokale opslag van Obsidian voor de huidige vault; de oude gedeelde apparaatlijst wordt alleen met een expliciete actie geïmporteerd.
 - Gegenereerde bestanden, rapporten en optionele logs worden volgens jouw instellingen in je vault opgeslagen.
 
 ## Probleemoplossing
@@ -720,7 +727,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.9 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.10 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 
@@ -758,7 +765,7 @@ De instellingenspagina voor Notemd biedt een op velden gebaseerde vage zoekfunct
 - Stel een gedeelde Vault-relatieve map voor tussenbestanden in, of laat het veld leeg voor `notemd_assert/` naast elke bron. Hier staan herstelgegevens, rendercaches en optionele bijlagen. Bewaar bestanden waarnaar nog wordt verwezen; een mapwijziging geldt alleen voor nieuwe uitvoeringen.
 - Diagram-HTML bevat een zoombare afbeelding; HTML met een gestructureerde samenvatting bevat tekst, structuur en verwijzingen. Bewerkbaar HTML/SVG is een renderer, geen webeditor. Gebruik de oorspronkelijke bron voor bewerking. Presentatie-export, waaronder PPTX en MP4, behoudt afzonderlijke instellingen en afhankelijkheden.
 - Typen worden achtereenvolgens gemaakt. Eén fout blokkeert de overige niet; annuleren stopt wachtende typen en bewaart voltooide bestanden. Herhaal exports vanuit het voorbeeld of de geschiedenis zonder nieuwe modelaanvraag. Na een generatiefout moet dat type opnieuw worden gemaakt. v1/v2-herstelgegevens blijven leesbaar.
-- Drawnix toont maximaal zes benoemde gerichte kernrelaties, hoogstens drie per knooppunt. Weggelaten relaties blijven in de metadata. Tekst in kaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken zijn statisch en kunnen losraken na herschikken in Drawnix.
+- Drawnix bewaart alle expliciete gerichte relaties zonder vaste totale limiet of limiet per knooppunt. Identieke beweringen worden ontdubbeld; verschillende predicaten en omgekeerde richtingen blijven behouden. Overlappende buitenroutes krijgen aparte sporen, gescheiden routes hergebruiken sporen. Labels krijgen rijen op basis van hun afmetingen en het canvas groeit waar nodig. Pijlen zonder label, algemene verbanden en pijlen die de hiërarchie herhalen blijven met reden in de metadata. Tekst in relatiekaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken blijven statisch en kunnen na herschikking in Drawnix losraken.
 - Desktopgebruikers kunnen het optionele native compileeromgeving van CircuitikZ openen om het systeem Tectonic/pdflatex opnieuw te gebruiken, een aangepaste compiler te kiezen of expliciet de geselecteerde Tectonic-runtime te installeren. Voorbeelden, SVG, PNG en exporten van PDF vereisen geen LaTeX.
 - Geavanceerde selectiemogelijkheden voor batchbestanden stellen het gebruik van opgeslagen selectieprofielen en regelvoorbeelden mogelijk.
 - Een ontbrekende batchdoelmap kan na bevestiging worden aangemaakt, met de optie om automatische aanmaak voor toekomstige ontbrekende mappen te onthouden.

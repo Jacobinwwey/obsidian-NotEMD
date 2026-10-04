@@ -758,9 +758,10 @@ async function extractSlidesFromHtml(
 
 	try {
 		if (isSlidevServerHtmlEntryPath(htmlPath)) {
-			serverDirectory = dirname(htmlPath);
-			const port = await startLocalServer(serverDirectory);
-			baseUrl = `http://localhost:${port}/index.html`;
+			const directory = dirname(htmlPath);
+			const port = await startLocalServer(directory);
+			serverDirectory = directory;
+			baseUrl = `http://127.0.0.1:${port}/index.html`;
 		}
 
 		const slides: SlidevPptxSlide[] = [];
@@ -784,10 +785,8 @@ async function extractSlidesFromHtml(
 			residueSampling: summarizeVisibleNativeResidueSampling(residueSlides),
 		};
 	} finally {
-		await browser.close();
-		if (serverDirectory) {
-			stopLocalServer(serverDirectory);
-		}
+		try { await browser.close(); }
+		finally { if (serverDirectory) stopLocalServer(serverDirectory); }
 	}
 }
 
@@ -815,9 +814,10 @@ async function capturePptxRenderedHtmlReferenceImages(
 
 	try {
 		if (isSlidevServerHtmlEntryPath(htmlPath)) {
-			serverDirectory = dirname(htmlPath);
-			const port = await startLocalServer(serverDirectory);
-			baseUrl = `http://localhost:${port}/index.html`;
+			const directory = dirname(htmlPath);
+			const port = await startLocalServer(directory);
+			serverDirectory = directory;
+			baseUrl = `http://127.0.0.1:${port}/index.html`;
 		}
 
 		const images: SlidevPptxImage[] = [];
@@ -835,10 +835,8 @@ async function capturePptxRenderedHtmlReferenceImages(
 		}
 		return images;
 	} finally {
-		await browser.close();
-		if (serverDirectory) {
-			stopLocalServer(serverDirectory);
-		}
+		try { await browser.close(); }
+		finally { if (serverDirectory) stopLocalServer(serverDirectory); }
 	}
 }
 
@@ -869,9 +867,10 @@ async function extractVisibleNativeExperimentSlidesFromHtml(
 
 	try {
 		if (isSlidevServerHtmlEntryPath(htmlPath)) {
-			serverDirectory = dirname(htmlPath);
-			const port = await startLocalServer(serverDirectory);
-			baseUrl = `http://localhost:${port}/index.html`;
+			const directory = dirname(htmlPath);
+			const port = await startLocalServer(directory);
+			serverDirectory = directory;
+			baseUrl = `http://127.0.0.1:${port}/index.html`;
 		}
 
 		const slides: SlidevPptxSlide[] = [];
@@ -898,10 +897,8 @@ async function extractVisibleNativeExperimentSlidesFromHtml(
 			residueSampling: summarizeVisibleNativeResidueSampling(residueSlides),
 		};
 	} finally {
-		await browser.close();
-		if (serverDirectory) {
-			stopLocalServer(serverDirectory);
-		}
+		try { await browser.close(); }
+		finally { if (serverDirectory) stopLocalServer(serverDirectory); }
 	}
 }
 

@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Pluginul Notemd pentru Obsidian
 
 > Notemd este un plugin Obsidian cu licență MIT pentru Markdown cu legături, note despre concepte, rezumate, traduceri și diagrame. Fișierele rămân în seif; sarcinile cloud trimit conținut furnizorului ales, iar cercetarea web utilizează rețeaua.
@@ -25,13 +26,19 @@ Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală ind
 | Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
 | Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
 
-**Versiune:** 1.9.9
+**Versiune:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Previzualizări sigure și setări locale pentru Vault
+
+Previzualizările SVG importate elimină conținutul activ și resursele externe, păstrând etichetele chinezești și stilurile panourilor. Furnizorii locali sunt izolați pe Vault; importați explicit lista veche din setări, păstrând lista și configurațiile existente. Prezentările folosesc un server loopback care gestionează consumatorii comuni. Erorile de salvare a favoritelor și copiere sunt afișate; ștergerea respectă preferințele Vault. Compatibilitatea PNG rămâne activă: originalul este păstrat și o copie verificată cu PPI mai mic este adăugată numai la nevoie. Drawnix nu are o limită fixă de relații; prezentările păstrează setări separate. Instalați fișiere din aceeași versiune, reîncărcați și testați o notă înainte de procesarea în lot.
 
 - Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
 - Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere.
 - Drawnix păstrează toate relațiile direcționate explicite, fără limită totală fixă sau limită per nod. Elimină doar afirmațiile identice; predicatele diferite și direcțiile inverse rămân distincte. Traseele exterioare suprapuse primesc culoare separate, iar cele disjuncte le reutilizează. Etichetele au rânduri adaptate dimensiunilor, iar suprafața de desen crește după nevoie. Săgețile fără etichetă, relațiile generice sau cele redundante cu ierarhia rămân în metadate cu motivul. Textul din casetele relațiilor este vizibil în PDF, inclusiv din cache-uri SVG vechi. Săgețile între ramuri sunt statice și se pot desprinde după rearanjare în Drawnix.
 
-Cele 36 de presetări de furnizori și 33 de tipuri executabile de diagrame existau deja în 1.9.7. [Ghid de actualizare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/releases/1.9.9) · [Verifică versiunea publicată](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+Cele 36 de presetări de furnizori și 33 de tipuri executabile de diagrame existau deja în 1.9.7. [Ghid de actualizare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/releases/1.9.10) · [Verifică versiunea publicată](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Săgețile Drawnix între ramuri rămân statice după rearanjare. Mermaid/SVG în PPTX poate folosi imagini de rezervă. Anularea nu revine asupra modificărilor salvate și nu garantează oprirea generării sau facturării la distanță. Dispozitivele mobile fizice și Obsidian 0.15.0 rămân neverificate.
 
@@ -172,7 +179,7 @@ Cercetarea web și generarea diagramelor sunt acțiuni separate. După anulare, 
 
 - **Verificare duplicate în fișierul curent**: această comandă ajută la identificarea termenilor potențial duplicat din fișierul activ.
 - **Detectare duplicate**: verificare de bază a cuvintelor duplicate din conținutul fișierului procesat curent (rezultatele sunt înregistrate în consolă).
-- **Check and Remove Duplicate Concept Notes**: identifică note potențial duplicate în **Concept Note Folder** configurat, pe baza potrivirilor exacte de nume, pluralelor, normalizării și conținerii unui singur cuvânt, comparate cu note din afara folderului. Domeniul comparației (ce note din afara folderului de concepte sunt verificate) poate fi configurat la **întregul vault**, **foldere specifice incluse** sau **toate folderele cu excluderea unora specifice**. Afișează o listă detaliată cu motive și fișiere conflictuale, apoi cere confirmare înainte de a muta duplicatele identificate în coșul sistemului. Afișează progresul în timpul ștergerii.
+- **Check and Remove Duplicate Concept Notes**: identifică note potențial duplicate în **Concept Note Folder** configurat, pe baza potrivirilor exacte de nume, pluralelor, normalizării și conținerii unui singur cuvânt, comparate cu note din afara folderului. Domeniul comparației (ce note din afara folderului de concepte sunt verificate) poate fi configurat la **întregul vault**, **foldere specifice incluse** sau **toate folderele cu excluderea unora specifice**. Afișează o listă detaliată cu motive și fișiere conflictuale, apoi cere confirmare înainte de a șterge duplicatele identificate conform preferinței de ștergere a vaultului. Afișează progresul în timpul ștergerii.
 - **Batch Mermaid Fix**: aplică corecții de sintaxă Mermaid și LaTeX tuturor fișierelor Markdown dintr-un folder selectat de utilizator.
     - **Workflow Ready**: poate fi folosită ca utilitar independent sau ca pas într-un buton personalizat de flux one-click.
     - **Error Reporting**: generează un raport `mermaid_error_{foldername}.md` care listează fișierele ce mai conțin posibile erori Mermaid după procesare.
@@ -544,7 +551,7 @@ Aceasta este funcționalitatea de bază, axată pe identificarea conceptelor și
     *   Rulează `Notemd: Check and Remove Duplicate Concept Notes` (din paleta de comenzi sau prin butonul din sidebar).
     *   Pluginul scanează folderul de note de concept și compară numele de fișiere cu notele din afara folderului folosind mai multe reguli (potrivire exactă, plural, normalizare, conținere).
     *   Dacă sunt găsite duplicate potențiale, apare o fereastră modală care listează fișierele, motivul pentru care au fost marcate și fișierele aflate în conflict.
-    *   Revizuiește cu atenție lista. Fă clic pe **"Delete Files"** pentru a muta fișierele listate în coșul sistemului sau pe **"Cancel"** pentru a nu face nicio modificare.
+    *   Revizuiește cu atenție lista. Fă clic pe **"Delete Files"** pentru a șterge fișierele listate conform preferinței de ștergere a vaultului sau pe **"Cancel"** pentru a nu face nicio modificare.
     *   Progresul și rezultatele sunt afișate în logul din sidebar/modal.
 
 7.  **Extract Concepts (Pure Mode)**:
@@ -648,7 +655,7 @@ Notemd rulează local în interiorul Obsidian, dar unele funcții trimit request
 
 ### Stocare locală
 
-- Configurația pluginului este stocată în `.obsidian/plugins/notemd/data.json`.
+- Setările obișnuite rămân în `data.json`. Furnizorii local-only folosesc stocarea locală Obsidian a vaultului curent; lista veche partajată pe dispozitiv se importă doar printr-o acțiune explicită.
 - Fișierele generate, rapoartele și logurile opționale sunt stocate în vaultul tău conform setărilor tale.
 
 ## Depanare
@@ -717,7 +724,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.9 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.10 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -754,7 +761,7 @@ Pagina de setări Notemd oferă o căutare fuzzy care ține cont de câmpurile s
 - Configurează un dosar intermediar comun relativ la Vault sau lasă câmpul gol pentru `notemd_assert/` lângă fiecare sursă. Aici se păstrează înregistrări de recuperare, randări în cache și atașamente opționale. Păstrează fișierele încă referite; schimbarea afectează numai execuțiile noi.
 - HTML-ul diagramei conține grafică cu zoom; HTML-ul rezumatului structurat conține text, structură și referințe. HTML/SVG editabil denumește un motor de randare, nu un editor web. Folosește sursa nativă pentru editare. Exportul prezentărilor, inclusiv PPTX și MP4, păstrează setări și dependențe separate.
 - Tipurile se generează succesiv. O eroare nu le blochează pe celelalte; anularea oprește tipurile în așteptare și păstrează fișierele finalizate. Reîncearcă exportul din previzualizare sau istoric fără altă cerere către model. Eșecul generării necesită regenerarea acelui tip. Înregistrările v1/v2 rămân lizibile.
-- Drawnix afișează cel mult șase relații direcționate esențiale cu etichete, maximum trei pe nod. Cele omise rămân în metadate. Textul încadrat apare în PDF inclusiv din SVG vechi în cache. Săgețile dintre ramuri sunt statice și se pot desprinde după rearanjarea în Drawnix.
+- Drawnix păstrează toate relațiile direcționate explicite, fără limită totală fixă sau limită per nod. Elimină doar afirmațiile identice; predicatele diferite și direcțiile inverse rămân distincte. Traseele exterioare suprapuse primesc culoare separate, iar cele disjuncte le reutilizează. Etichetele au rânduri adaptate dimensiunilor, iar suprafața de desen crește după nevoie. Săgețile fără etichetă, relațiile generice sau cele redundante cu ierarhia rămân în metadate cu motivul. Textul din casetele relațiilor este vizibil în PDF, inclusiv din cache-uri SVG vechi. Săgețile între ramuri sunt statice și se pot desprinde după rearanjare în Drawnix.
 - Utilizatorii desktop pot deschide mediul de compilare nativ CircuitikZ, opțional, pentru a reutiliza Tectonic/pdflatex din sistem, a selecta un compiler personal sau a instala explicit runtime-ul Tectonic gestionat. Vizualizările preliminare, SVG, PNG și exporturile preliminare PDF nu necesită LaTeX.
 - Selectarea avansată a fișierelor de lot permite utilizarea profilurilor de selecție salvate și a vizualizărilor regulelor.
 - O foldere țintă pentru loturi lipsită poate fi creată după confirmare, cu opțiunea de a memora crearea automată pentru folderele lipsite viitoare.

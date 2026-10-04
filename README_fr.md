@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Plugin Notemd pour Obsidian
 
 > Notemd est un plugin Obsidian sous licence MIT qui transforme les notes en Markdown lié, notes de concepts, résumés, traductions et diagrammes. Les fichiers restent dans le coffre ; les tâches cloud envoient du contenu au fournisseur choisi et la recherche web utilise le réseau.
@@ -25,13 +26,19 @@ Chaque aperçu dispose de zoom, déplacement, ajustement et taille réelle indé
 | Développeur | [Guide de développement](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/developers/overview) | Compiler, tester et étendre les contrats existants |
 | Agent | [Guide des agents](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/agents/overview) | Découvrir les quatre commandes d’export prises en charge |
 
-**Version:** 1.9.9
+**Version:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Aperçus sécurisés et paramètres propres au Vault
+
+Les aperçus SVG importés retirent le contenu actif et les ressources externes, tout en conservant les libellés chinois et les styles des panneaux. Les fournisseurs locaux sont isolés par Vault ; importez explicitement l’ancienne liste depuis les paramètres, sans supprimer les configurations existantes ni la liste d’origine. Les présentations utilisent un serveur loopback qui gère les utilisateurs simultanés. Les échecs d’enregistrement des favoris et de copie sont signalés ; la suppression respecte les préférences du Vault. La compatibilité PNG reste activée : l’original est conservé et une copie vérifiée à PPI réduit est ajoutée si nécessaire. Drawnix n’impose aucun quota fixe de relations ; les présentations gardent leurs réglages distincts. Installez les fichiers de même version, rechargez et testez une note avant un lot.
 
 - Sélectionnez plusieurs types de diagramme par exécution et plusieurs formats indépendants pour chacun. Décocher un type conserve ses formats ; sans sélection, le contenu est analysé automatiquement.
 - Les fichiers choisis sont exportés automatiquement à côté de la note source ou directement dans le dossier configuré. Leur nom indique le type, comme `topic_drawnix.pdf` ou `topic_flowchart.svg` ; les conflits ajoutent `-2`, `-3`, etc., sans écraser les fichiers existants.
 - Drawnix conserve toutes les relations orientées explicites, sans limite globale ni par nœud. Seules les affirmations identiques sont dédupliquées ; les prédicats différents et les directions inverses restent distincts. Les trajets extérieurs qui se chevauchent utilisent des pistes séparées ; les autres réutilisent les pistes. Les étiquettes disposent de lignes mesurées et le canevas grandit selon les besoins. Les flèches sans étiquette, génériques ou redondantes avec la hiérarchie restent dans les métadonnées avec leur motif. Le texte encadré reste visible dans le PDF, y compris depuis un ancien SVG en cache. Les flèches entre branches restent statiques et peuvent se détacher après un réarrangement dans Drawnix.
 
-Les 36 préréglages de fournisseurs et 33 types de diagrammes exécutables existaient déjà en 1.9.7. [Guide de mise à niveau](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/releases/1.9.9) · [Vérifier la publication publique](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+Les 36 préréglages de fournisseurs et 33 types de diagrammes exécutables existaient déjà en 1.9.7. [Guide de mise à niveau](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/releases/1.9.10) · [Vérifier la publication publique](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Les flèches Drawnix entre branches restent statiques après réorganisation. Mermaid/SVG dans un PPTX peut être exporté sous forme d’image. Annuler ne revient pas à annuler les modifications déjà enregistrées et ne garantit pas l’arrêt de la génération ou de la facturation distante. Les appareils mobiles physiques et Obsidian 0.15.0 restent non vérifiés.
 
@@ -176,7 +183,7 @@ La recherche web et la génération de diagrammes sont des actions séparées. A
 
 - **Vérifier les Doublons dans le Fichier Actuel** : Cette commande aide à identifier les termes potentiellement en double dans le fichier actif.
 - **Détection de Doublons** : Vérification de base des mots en double dans le contenu du fichier en cours de traitement (résultats enregistrés dans la console).
-- **Vérifier et Supprimer les Notes de Concept en Double** : Identifie les notes potentiellement en double dans le **Dossier de Notes de Concept** configuré en fonction des correspondances exactes de noms, pluriels, normalisation et inclusion de mots uniques par rapport aux notes en dehors du dossier. La portée de la comparaison (quelles notes en dehors du dossier de concept sont vérifiées) peut être configurée pour **tout le coffre**, **des dossiers inclus spécifiques**, ou **tous les dossiers sauf certains spécifiques**. Présente une liste détaillée avec les raisons et les fichiers en conflit, puis demande confirmation avant de déplacer les doublons identifiés vers la corbeille système. Affiche la progression pendant la suppression.
+- **Vérifier et Supprimer les Notes de Concept en Double** : Identifie les notes potentiellement en double dans le **Dossier de Notes de Concept** configuré en fonction des correspondances exactes de noms, pluriels, normalisation et inclusion de mots uniques par rapport aux notes en dehors du dossier. La portée de la comparaison (quelles notes en dehors du dossier de concept sont vérifiées) peut être configurée pour **tout le coffre**, **des dossiers inclus spécifiques**, ou **tous les dossiers sauf certains spécifiques**. Présente une liste détaillée avec les raisons et les fichiers en conflit, puis demande confirmation avant de supprimer les doublons identifiés selon la préférence de suppression du coffre. Affiche la progression pendant la suppression.
 - **Correction Mermaid en Masse** : Applique les corrections de syntaxe Mermaid et LaTeX à tous les fichiers Markdown d'un dossier sélectionné par l'utilisateur.
     - **Prêt pour le Workflow** : Peut être utilisé comme utilitaire autonome ou comme étape dans un bouton de workflow personnalisé en un clic.
     - **Rapport d'Erreurs** : Génère un rapport `mermaid_error_{foldername}.md` listant les fichiers qui contiennent encore des erreurs Mermaid potentielles après le traitement.
@@ -553,7 +560,7 @@ C'est la fonctionnalité de base centrée sur l'identification des concepts et l
     *   Lancez `Notemd: Check and Remove Duplicate Concept Notes` (via la palette de commandes ou le bouton de la barre latérale).
     *   Le plugin analyse le dossier des notes de concept et compare les noms de fichiers aux notes en dehors du dossier à l'aide de plusieurs règles (correspondance exacte, pluriels, normalisation, inclusion).
     *   Si des doublons potentiels sont trouvés, une fenêtre modale apparaît listant les fichiers, la raison pour laquelle ils ont été signalés et les fichiers en conflit.
-    *   Examinez attentivement la liste. Cliquez sur **"Supprimer les fichiers"** pour déplacer les fichiers listés vers la corbeille système, ou sur **"Annuler"** pour ne rien faire.
+    *   Examinez attentivement la liste. Cliquez sur **"Supprimer les fichiers"** pour supprimer les fichiers listés selon la préférence de suppression du coffre, ou sur **"Annuler"** pour ne rien faire.
     *   La progression et les résultats sont affichés dans le journal de la barre latérale/fenêtre.
 
 7.  **Extraire des Concepts (Mode Pure)** :
@@ -657,7 +664,7 @@ Notemd s'exécute localement à l'intérieur d'Obsidian, mais certaines fonction
 
 ### Stockage Local
 
-- La configuration du plugin est stockée dans `.obsidian/plugins/notemd/data.json`.
+- Les réglages ordinaires restent dans `data.json`. Les fournisseurs local-only utilisent le stockage local d’Obsidian propre au coffre actuel ; l’ancienne liste partagée sur l’appareil nécessite une importation explicite.
 - Les fichiers générés, rapports et journaux optionnels sont stockés dans votre coffre selon vos réglages.
 
 ## Dépannage
@@ -726,7 +733,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 ---
 
 
-*Notemd v1.9.9 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.9.10 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 
@@ -764,7 +771,7 @@ La page des paramètres Notemd propose une recherche floue sensible aux champs, 
 - Définissez un dossier intermédiaire partagé relatif au Vault, ou laissez le champ vide pour utiliser `notemd_assert/` près de chaque source. Il contient les enregistrements de reprise, rendus en cache et pièces jointes facultatives. Conservez les fichiers encore référencés ; le changement concerne seulement les nouvelles exécutions.
 - Le HTML du diagramme contient un graphique avec zoom ; le HTML de synthèse structurée contient texte, structure et références. HTML/SVG éditable désigne un moteur de rendu, pas un éditeur web. Utilisez la source native pour modifier le diagramme. Les présentations, dont PPTX et MP4, gardent leurs réglages et dépendances distincts.
 - Les types sont générés successivement. Un échec ne bloque pas les autres ; l’annulation arrête les types en attente et conserve les fichiers terminés. Relancez les exports depuis l’aperçu ou l’historique sans nouvelle requête au modèle. Un échec de génération nécessite de régénérer ce type. Les enregistrements v1/v2 restent lisibles.
-- Drawnix affiche au plus six relations dirigées essentielles et libellées, trois par nœud ; les autres restent dans les métadonnées. Le texte encadré reste visible en PDF, y compris avec les anciens SVG en cache. Les flèches entre branches sont statiques et peuvent se détacher après réorganisation dans Drawnix.
+- Drawnix conserve toutes les relations orientées explicites, sans limite globale ni par nœud. Seules les affirmations identiques sont dédupliquées ; les prédicats différents et les directions inverses restent distincts. Les trajets extérieurs qui se chevauchent utilisent des pistes séparées ; les autres réutilisent les pistes. Les étiquettes disposent de lignes mesurées et le canevas grandit selon les besoins. Les flèches sans étiquette, génériques ou redondantes avec la hiérarchie restent dans les métadonnées avec leur motif. Le texte encadré reste visible dans le PDF, y compris depuis un ancien SVG en cache. Les flèches entre branches restent statiques et peuvent se détacher après un réarrangement dans Drawnix.
 - Les utilisateurs desktop peuvent ouvrir l’environnement de compilation natif CircuitikZ (optionnel) afin de réutiliser Tectonic/pdflatex du système, de sélectionner un compilateur personnalisé ou d’installer explicitement le runtime Tectonic géré. Les aperçus, SVG, PNG ainsi que les exports d’aperçu PDF ne nécessitent pas LaTeX.
 - La sélection avancée des fichiers de lot permet d’utiliser des profils de sélection enregistrés et des prévisualisations de règles.
 - Un dossier cible de lot manquant peut être créé après confirmation, avec la possibilité de mémoriser cette création automatique pour les dossiers manquants ultérieurs.

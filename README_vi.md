@@ -3,6 +3,7 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
+
 # Tiện ích Notemd cho Obsidian
 
 > Notemd là tiện ích Obsidian theo giấy phép MIT để tạo Markdown có liên kết, ghi chú khái niệm, tóm tắt, bản dịch và sơ đồ. Tệp nằm trong kho; tác vụ đám mây gửi nội dung đến nhà cung cấp đã chọn, còn nghiên cứu web dùng mạng.
@@ -25,13 +26,19 @@ Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích th�
 | Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
 | Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
 
-**Phiên bản:** 1.9.9
+**Phiên bản:** 1.9.10
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Bản xem trước an toàn và cài đặt riêng cho Vault
+
+Bản xem trước SVG nhập vào loại bỏ nội dung hoạt động và tài nguyên ngoài, giữ nhãn tiếng Trung và kiểu bảng. Nhà cung cấp cục bộ được tách theo Vault; hãy nhập danh sách cũ rõ ràng trong cài đặt, giữ nguyên danh sách và cấu hình hiện có. Bản xem trước trình chiếu dùng máy chủ loopback quản lý các bên sử dụng chung. Lỗi lưu mục yêu thích và sao chép được thông báo; việc xóa tuân theo tùy chọn Vault. Tương thích PNG vẫn bật: giữ ảnh gốc và chỉ thêm bản sao PPI thấp đã xác minh khi cần. Drawnix không có giới hạn quan hệ cố định; trình chiếu giữ cài đặt riêng. Cài tệp cùng phiên bản, tải lại và thử một ghi chú trước khi xử lý hàng loạt.
 
 - Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.
 - Tệp đã chọn tự động xuất cạnh ghi chú nguồn hoặc trực tiếp vào thư mục đầu ra đã đặt. Tên chứa loại, chẳng hạn `topic_drawnix.pdf` và `topic_flowchart.svg`. Khi trùng tên, thêm `-2`, `-3`… mà không ghi đè tệp.
 - Drawnix giữ tất cả quan hệ có hướng được nêu rõ, không giới hạn cố định tổng số hoặc số quan hệ mỗi nút. Chỉ loại bỏ khẳng định trùng hệt; giữ vị từ khác nhau và hướng ngược lại. Các tuyến bên ngoài có khoảng chồng lấn dùng làn riêng, các tuyến tách biệt tái sử dụng làn. Nhãn được bố trí hàng theo kích thước và vùng vẽ mở rộng khi cần. Mũi tên không nhãn, liên hệ chung hoặc lặp lại phân cấp vẫn nằm trong siêu dữ liệu kèm lý do. Chữ trong khung quan hệ hiển thị ở PDF, kể cả từ bộ nhớ đệm SVG cũ. Mũi tên giữa các nhánh vẫn là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
 
-36 cấu hình nhà cung cấp và 33 loại sơ đồ có thể thực thi đã tồn tại từ 1.9.7. [Hướng dẫn nâng cấp](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/releases/1.9.9) · [Kiểm tra bản phát hành công khai](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
+36 cấu hình nhà cung cấp và 33 loại sơ đồ có thể thực thi đã tồn tại từ 1.9.7. [Hướng dẫn nâng cấp](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/releases/1.9.10) · [Kiểm tra bản phát hành công khai](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.10).
 
 Mũi tên Drawnix giữa các nhánh vẫn có tọa độ tĩnh sau khi sắp xếp lại. Mermaid/SVG trong PPTX có thể dùng ảnh thay thế. Hủy không hoàn tác thay đổi đã lưu và không bảo đảm dừng tạo nội dung hay tính phí từ xa. Thiết bị di động thật và Obsidian 0.15.0 chưa được xác minh.
 
@@ -172,7 +179,7 @@ Nghiên cứu web và tạo sơ đồ là thao tác riêng. Sau khi hủy, đợ
 
 - **Check for Duplicates in Current File**: lệnh này giúp xác định các thuật ngữ có khả năng trùng lặp trong file đang hoạt động.
 - **Duplicate Detection**: kiểm tra cơ bản các từ trùng lặp trong nội dung của file hiện đang được xử lý, kết quả được ghi vào console.
-- **Check and Remove Duplicate Concept Notes**: xác định các ghi chú có khả năng trùng lặp trong **Concept Note Folder** đã cấu hình dựa trên trùng tên tuyệt đối, dạng số nhiều, chuẩn hóa và chứa một từ đơn khi so với các ghi chú bên ngoài thư mục đó. Phạm vi so sánh, tức các ghi chú bên ngoài concept folder nào sẽ được kiểm tra, có thể cấu hình là **toàn bộ vault**, **chỉ các thư mục được chỉ định để bao gồm** hoặc **mọi thư mục ngoại trừ các thư mục bị loại trừ**. Tính năng sẽ hiển thị danh sách chi tiết với lý do và file xung đột, sau đó yêu cầu xác nhận trước khi chuyển các bản sao trùng lặp được xác định vào system trash. Nó cũng hiển thị tiến độ trong khi xóa.
+- **Check and Remove Duplicate Concept Notes**: xác định các ghi chú có khả năng trùng lặp trong **Concept Note Folder** đã cấu hình dựa trên trùng tên tuyệt đối, dạng số nhiều, chuẩn hóa và chứa một từ đơn khi so với các ghi chú bên ngoài thư mục đó. Phạm vi so sánh, tức các ghi chú bên ngoài concept folder nào sẽ được kiểm tra, có thể cấu hình là **toàn bộ vault**, **chỉ các thư mục được chỉ định để bao gồm** hoặc **mọi thư mục ngoại trừ các thư mục bị loại trừ**. Tính năng sẽ hiển thị danh sách chi tiết với lý do và file xung đột, sau đó yêu cầu xác nhận trước khi xóa các bản trùng lặp được xác định theo tùy chọn xóa của vault. Nó cũng hiển thị tiến độ trong khi xóa.
 - **Batch Mermaid Fix**: áp dụng chỉnh sửa cú pháp Mermaid và LaTeX cho tất cả Markdown file trong thư mục do người dùng chọn.
   - **Sẵn sàng cho workflow**: có thể dùng như một tiện ích độc lập hoặc như một bước bên trong custom one-click workflow button.
   - **Báo lỗi**: tạo báo cáo `mermaid_error_{foldername}.md` liệt kê các file vẫn còn lỗi Mermaid tiềm ẩn sau khi xử lý.
@@ -548,7 +555,7 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
    - Chạy `Notemd: Check and Remove Duplicate Concept Notes` qua bảng lệnh hoặc nút trong sidebar.
    - Tiện ích quét concept note folder và so sánh tên file với các ghi chú bên ngoài thư mục đó bằng nhiều quy tắc như exact match, plural, normalization và containment.
    - Nếu phát hiện duplicate tiềm năng, một modal sẽ xuất hiện liệt kê các file, lý do bị gắn cờ và các file xung đột.
-   - Hãy xem kỹ danh sách. Nhấp **"Delete Files"** để chuyển các file liệt kê vào system trash, hoặc nhấp **"Cancel"** để không làm gì.
+   - Hãy xem kỹ danh sách. Nhấp **"Delete Files"** để xóa các file liệt kê theo tùy chọn xóa của vault, hoặc nhấp **"Cancel"** để không làm gì.
    - Tiến độ và kết quả được hiển thị trong sidebar hoặc modal log.
 
 7. **Extract Concepts (Pure Mode)**:
@@ -652,7 +659,7 @@ Notemd chạy cục bộ bên trong Obsidian, nhưng một số tính năng sẽ
 
 ### Lưu trữ cục bộ
 
-- Cấu hình của tiện ích được lưu trong `.obsidian/plugins/notemd/data.json`.
+- Các thiết lập thông thường vẫn ở `data.json`. Nhà cung cấp local-only dùng bộ nhớ cục bộ Obsidian của vault hiện tại; danh sách cũ dùng chung trên thiết bị chỉ được nhập khi người dùng chủ động thực hiện.
 - File sinh ra, báo cáo và log tùy chọn được lưu trong vault của bạn theo các settings hiện tại.
 
 ## Khắc phục sự cố
@@ -721,7 +728,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.9 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.10 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 
@@ -759,7 +766,7 @@ Trang cài đặt Notemd cung cấp chức năng tìm kiếm mờ dựa trên t�
 - Đặt thư mục trung gian dùng chung bằng đường dẫn tương đối trong Vault, hoặc để trống để dùng `notemd_assert/` cạnh từng nguồn. Nơi này lưu bản ghi khôi phục, bộ nhớ đệm kết xuất và tệp đính kèm tùy chọn. Giữ tệp còn được tham chiếu; đổi thư mục chỉ tác động lần chạy mới.
 - HTML sơ đồ chứa hình có thể thu phóng; HTML tóm tắt có cấu trúc chứa văn bản, cấu trúc và trích dẫn. HTML/SVG có thể chỉnh sửa là tên bộ kết xuất, không phải trình sửa trên web. Dùng nguồn gốc để chỉnh sửa. Xuất bản trình bày, gồm PPTX và MP4, có cài đặt và thư viện phụ thuộc riêng.
 - Các loại được tạo tuần tự. Một loại lỗi không chặn các loại khác; hủy sẽ dừng loại đang chờ và giữ tệp đã hoàn tất. Thử xuất lại từ xem trước hoặc lịch sử mà không gửi yêu cầu mới đến mô hình. Lỗi tạo cần tạo lại loại đó. Bản ghi v1/v2 vẫn đọc được.
-- Drawnix hiển thị tối đa sáu quan hệ cốt lõi có hướng và nhãn, tối đa ba quan hệ mỗi nút. Quan hệ bị lược bỏ vẫn nằm trong siêu dữ liệu. Chữ trong khung hiển thị trong PDF, kể cả từ SVG cũ trong bộ nhớ đệm. Mũi tên giữa các nhánh là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
+- Drawnix giữ tất cả quan hệ có hướng được nêu rõ, không giới hạn cố định tổng số hoặc số quan hệ mỗi nút. Chỉ loại bỏ khẳng định trùng hệt; giữ vị từ khác nhau và hướng ngược lại. Các tuyến bên ngoài có khoảng chồng lấn dùng làn riêng, các tuyến tách biệt tái sử dụng làn. Nhãn được bố trí hàng theo kích thước và vùng vẽ mở rộng khi cần. Mũi tên không nhãn, liên hệ chung hoặc lặp lại phân cấp vẫn nằm trong siêu dữ liệu kèm lý do. Chữ trong khung quan hệ hiển thị ở PDF, kể cả từ bộ nhớ đệm SVG cũ. Mũi tên giữa các nhánh vẫn là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
 - Người dùng máy tính để bàn có thể mở môi trường biên dịch gốc CircuitikZ (nếu có) để tái sử dụng các công cụ Tectonic/pdflatex của hệ thống, chọn trình biên dịch tùy chỉnh, hoặc cài đặt phiên bản Tectonic được quản lý một cách cố định. Các chức năng xem trước, SVG, PNG và việc xuất bản xem trước PDF không yêu cầu sử dụng LaTeX.
 - Tính năng chọn tập tin xử lý theo nhóm nâng cao cho phép sử dụng các thiết lập lựa chọn đã lưu và xem trước các quy tắc liên quan.
 - Nếu thư mục đích của nhóm xử lý bị thiếu, người dùng có thể tạo thư mục đó sau khi xác nhận, với tùy chọn để hệ thống tự động tạo thư mục khi gặp trường hợp tương tự trong tương lai.

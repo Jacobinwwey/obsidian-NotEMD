@@ -14,7 +14,9 @@ function createPreviewId(): string {
 export function buildMermaidPreviewConfig(theme: RenderWebviewTheme = 'system'): Record<string, unknown> {
     return {
         startOnLoad: false,
-        securityLevel: 'loose',
+        securityLevel: 'strict',
+        htmlLabels: false,
+        secure: ['securityLevel', 'startOnLoad', 'htmlLabels', 'secure'],
         theme: resolveRenderTheme(theme) === 'dark' ? 'dark' : 'default'
     };
 }

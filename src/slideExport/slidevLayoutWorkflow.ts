@@ -202,9 +202,10 @@ async function runPlaywrightLayoutChecks(
 
 	try {
 		if (isSlidevServerHtmlEntryPath(htmlPath)) {
-			serverDirectory = dirname(htmlPath);
-			const port = await startLocalServer(serverDirectory);
-			baseUrl = `http://localhost:${port}/index.html`;
+			const directory = dirname(htmlPath);
+			const port = await startLocalServer(directory);
+			serverDirectory = directory;
+			baseUrl = `http://127.0.0.1:${port}/index.html`;
 		}
 
 		for (const slide of sampleSlides) {
@@ -246,10 +247,8 @@ async function runPlaywrightLayoutChecks(
 			layoutAudits.push(layoutAudit);
 		}
 	} finally {
-		await browser.close();
-		if (serverDirectory) {
-			stopLocalServer(serverDirectory);
-		}
+		try { await browser.close(); }
+		finally { if (serverDirectory) stopLocalServer(serverDirectory); }
 	}
 
 	return { checks, layoutAudits };

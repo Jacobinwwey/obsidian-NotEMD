@@ -1,3 +1,4 @@
+import { mountDiagramSvg } from '../preview/svgHostSanitizer';
 import { isSupportedRenderTarget } from '../../diagram/types';
 import type { DiagramIntent } from '../../diagram/types';
 import { normalizeMermaidDefinition } from '../../diagram/adapters/mermaid/normalize';
@@ -27,7 +28,7 @@ function mountSvgWithPresentationSafety(mount: HTMLElement, svg: string, source:
     // visible. Geometry APIs return zero for hidden subtrees, so expose the
     // mount before measuring and roll it back if the final presentation is
     // unsafe. An unsafe SVG must never remain visible behind the error state.
-    mount.innerHTML = svg;
+    mountDiagramSvg(mount, svg);
     mount.hidden = false;
     try {
         assertMountedSvgPresentationSafety(mount, source);

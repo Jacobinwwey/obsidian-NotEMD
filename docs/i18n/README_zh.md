@@ -83,3 +83,9 @@
 2. 章节顺序尽量与 [README.md](https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/README.md) 保持一致。
 3. 新增 README 译文或 UI locale 时，请同步更新本语言中心。
 4. 提交 PR，条件允许时至少邀请一位母语贡献者复核。
+
+## 1.9.10 — 安全预览与 Vault 本地设置
+
+导入 SVG 预览会移除活动内容和外部资源，同时保留中文标签与面板样式。仅设备 provider 现按 Vault 隔离；在设置中显式导入旧列表，保留原列表与已有配置。演示预览仅使用 loopback 服务器，并管理共享消费者的生命周期。收藏保存或剪贴板写入失败会报告错误；删除遵守 Vault 偏好。PNG 兼容默认开启，保留请求原图，仅在需要时增加已验证的低 PPI 副本。Drawnix 没有固定关系配额；演示导出保持独立设置。安装同版本发布文件、重载插件，批处理前先验证一篇笔记。
+
+[架构审查](.././audits/2026-10-04-community-ponytail.zh-CN.md)

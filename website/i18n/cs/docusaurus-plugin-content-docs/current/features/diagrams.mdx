@@ -117,3 +117,9 @@ SVG/PNG/PDF vyžadují vizuální náhled. Je-li dostupný jen zdrojový text, u
 ### CircuitikZ nejde externě zkompilovat
 
 Otevřete **CircuitikZ native compile environment** a zkontrolujte prostředí. Opravte spravovaný runtime nebo ověřte, že vlastní/systémový kompilátor získá balíček `circuitikz`. Plugin neobsahuje úplnou distribuci TeXu.
+
+<!-- notemd-hardening-1.9.10 -->
+
+## 1.9.10 — Bezpečné náhledy a místní nastavení Vault
+
+Importované náhledy SVG odstraňují aktivní obsah a externí zdroje, zachovávají však čínské popisky a styly panelů. Místní poskytovatelé jsou odděleni podle Vault; starý seznam výslovně importujte v nastavení se zachováním seznamu a stávajících konfigurací. Prezentace používají loopback server se správou sdílených uživatelů. Chyby ukládání oblíbených a kopírování se zobrazí; mazání respektuje nastavení Vault. Kompatibilita PNG zůstává zapnutá: originál se zachová a ověřená kopie s nižším PPI přibude jen podle potřeby. Drawnix nemá pevný limit vztahů; prezentace mají samostatné nastavení. Nainstalujte soubory stejné verze, načtěte znovu a před dávkou otestujte jednu poznámku.
