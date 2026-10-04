@@ -37,7 +37,7 @@
 
 1. Mermaid iframe 仍依赖 allow-scripts、allow-same-origin 和 parent bridge，不能作为强隔离边界。本次锁定 Mermaid 安全配置，并让两条父桥渲染路径统一进入安全 SVG 返回边界；后续 opaque-origin 消息桥需要同时迁移契约、视口行为和发布资产。单独删除 same-origin 会破坏渲染。
 2. 浏览器 SVG 净化不代表纯 Node/offline 原始 SVG 已普遍安全；任何后续 DOM 消费者仍需净化，文档明确此限制。
-3. Obsidian 1.13 原生设置发现属于前向兼容缺口；当前 SDK 与 1Knowledge 宿主为 1.12.7，缺少已验证的新 API 契约。确认接口后从现有 catalog 派生，不能手工复制另一套搜索标签。
+3. 固定 SDK 对 Obsidian 1.13 新原生设置发现接口的集成仍未验证。2026-10-05 官方 CLI 确认 1Knowledge 实际应用为 1.13.7（安装器 1.12.7），现有插件的预览、导出和 Vault 存储路径通过真实验收；这证明上述路径的兼容性，不代表采用了所有新设置 API，也不能保证未来所有版本。确认新契约后从现有 catalog 派生，不能手工复制另一套搜索标签。
 4. 固定源码的 new Function 导入 shim 是 CSP 与设计债务，不证明笔记文字被拼接执行。Playwright page.evaluate 内构造器与元素同 realm，相关 instanceof 发现不是 Obsidian 弹出窗口缺陷。
 5. 删除链接时共享 global regex 的疑点尚未确认，replace 可能重置 lastIndex；没有运行反例不能标成已复现 bug。
 6. realpath/stat/read 间文件替换需要同机写权限；未确认远程目录包含检查绕过。演示 HTML 本来具有脚本执行能力，必须保持 loopback。

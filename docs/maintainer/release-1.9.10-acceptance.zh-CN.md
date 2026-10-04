@@ -1,4 +1,4 @@
-# 1.9.10 候选验收 — 2026-10-04
+# 1.9.10 候选验收 — 更新于 2026-10-05
 
 ## 范围
 
@@ -21,14 +21,34 @@
 
 接续检查：最终三个已安装文件的 SHA-256 仍与仓库一致。README/版本和网站文档契约检查通过（2 个 suite、14 项测试），随后 git diff --check 通过。当前手册已统一 Vault 删除偏好、仅本地 provider 存储归属和无固定配额的 Drawnix 关系说明。有超时限制的 CLI 连通性探测再次返回“The CLI is unable to find Obsidian.”。证据：.cache/obsidian-png-compatibility/audit-resume-checkpoint.json。
 
-## 真实 Vault 证据与当前发布门禁
+## 接续验证 — 2026-10-05
 
-官方 Obsidian CLI 已将候选版本成功重载到已打开的 1Knowledge。随后 eval 确认版本 1.9.10、默认 PNG 兼容开关为 true、App.saveLocalStorage 存在。实测宿主报告 Obsidian 1.12.7 / Electron 39.8.3 / Chromium 142.0.7444.265。
+从会话 01a0f563-c6c7-78f0-940b-e783d1fe8a9b 的候选 ef197278 接续，针对 d99309780679 的 Git diff 核对 SVG、provider 存储、预览/导出和服务器生命周期边界。本次接续无需修改产品源码。
 
-随后已再次将最终编译的 main.js、manifest.json 和 styles.css 复制到 Vault 插件目录，仓库与 Vault 的 SHA-256 一致，记录见 .cache/obsidian-png-compatibility/audit-installed-bundle-hashes.json。该最终 bundle 的运行时重载仍待完成；较早的 eval 不能证明最终字节已在宿主运行。
+- 重新执行生产构建与全量回归：**304 个 suite、2,954 项通过、零失败、1 项既有跳过**，耗时 521.871 秒。报告：.cache/obsidian-png-compatibility/resume-regression-tests.json。
+- Provider 传输、工作流、输出偏好、导出恢复、浏览器 SVG 安全、移动端 bundle 加载与真实 HTTP 服务器测试全部通过。UI 字符串、render-host 审计通过；lint ratchet 在 **31 个改动 TypeScript 文件中发现零回归**。
+- 重建的 main.js 仍与已安装 bundle 一致；三个插件文件的哈希与 audit-installed-bundle-hashes.json 一致。官方 CLI 已重载最终插件，并通过重载前后实例身份变化确认。
 
-接下来的多格式宿主探测没有完成：官方 CLI 传输超时，后续 help/version 短请求同样无法完成，随后明确报告无法找到运行中的 Obsidian 实例。因此源伴随文件预览、真实 SVG/HTML/PNG/PDF 交付和设置失败注入**尚未验收**。独立 obsidian-cli 可执行文件未安装。本轮没有强制结束用户应用，也未使用 computer-use。
+## 已通过的真实 Vault 验收
 
-SHA-256 检查确认 architecture.zh-CN.md、architecture.zh-CN_diagram.drawnix、既有恢复 manifest 和 architecture.zh-CN_drawnix-3/-4/-5.png 未改变。计划中的唯一审查 fixture 父目录没有创建。旧 PNG 宿主证据仅证明当时已交付基线，不能改标为新净化边界的候选证据。
+官方 CLI 在 1Knowledge 报告 **Obsidian 1.13.7（安装器 1.12.7）**。user-agent 中的版本属于安装器，旧记录仅据此判断应用版本并不充分。独立 obsidian-cli 可执行文件未安装。
 
-远端 main 推送、数字 tag 1.9.10、公开 Release 和 Pages 部署等待真实宿主门禁。不得声称已发布，不得复用旧 CI/Pages 成功作为当前候选证据。当前宿主 CLI 恢复后，使用已有父目录和唯一 fixture 路径重跑 .cache/obsidian-png-compatibility/audit-live-code.txt，恢复设置并完成语义验收，再按唯一 publisher 工作流发布。放宽真实宿主门禁需要明确记录的发布决策。
+真实验收 fixture：Notemd CLI Tests/Audit-1.9.10-native-1791156334109。报告：.cache/obsidian-png-compatibility/resume-native-acceptance.json。
+
+- 源 .drawnix 的伴随 SVG 在真实预览中打开；事件属性、外部及可执行 URL 被移除，宿主外部 UI 保持可见，foreignObject 和向量中文文字保留。
+- SVG、HTML 图形、PNG、PDF 均成功输出到 fixture 源文件旁。300 × 140 CSS 像素的测试图按 72 PPI 输出为 225 × 105 像素 PNG，在 Obsidian 中成功解码。HTML 嵌入净化后且保留中文的 SVG，PDF 文件头有效。
+- 测试用 local-only provider 可经 Vault 本地存储保存和重新加载；注入本地写失败后明确拒绝。在标记通过之前，内存设置、持久化设置和原有本地记录均精确恢复，包括原本不存在记录的情况。
+- 两个真实预览窗口缩放互不影响：一处从 1:1 调至 125%，另一处保持不变。已有 architecture.zh-CN_drawnix-6_obsidian_87ppi.png 成功解码为 4325 × 15179 像素。报告：.cache/obsidian-png-compatibility/resume-native-zoom.json。
+- SHA-256 检查确认 architecture.zh-CN.md、architecture.zh-CN_diagram.drawnix、原有恢复 manifest 与 architecture.zh-CN_drawnix-3/-4/-5.png 保持不变；仅创建了唯一命名的测试 fixture。
+
+## CLI 恢复与复现方式
+
+将旧 fixture 全文作为 Windows 原生 CLI 参数传入后，Obsidian 主进程在 fixture 执行前因请求 JSON 格式错误而拒绝解析；错误弹窗阻塞了后续 CLI 请求。用户手动关闭弹窗，未强制终止应用，后续工作仅使用 CLI。
+
+通过 Node execFileSync 和参数数组调用已安装的 Obsidian.com，设置超时及 windowsHide:true。保持 eval 参数简短：先用 require('node:fs').readFileSync 加载已审阅的本地 fixture，再执行。除退出码外也检查语义结果，因为 CLI eval 可能以退出码零返回 Error: 文本；轮询 fixture 的明确状态，不将提交命令等同于完成。
+
+继承的 fixture 还存在预览选择器不存在、使用不支持的 html 而非 html-diagram 输出 ID、未精确恢复原本缺失的本地记录等问题。修正这些探测假设后，验收通过，无需弱化产品行为或修改插件 bundle。
+
+## 发布门禁
+
+最终候选的真实宿主验收**通过**。须在对应 main 提交通过 Linux 与 Windows CI 后发布，使用数字 tag 1.9.10 和唯一 Actions publisher，验证公开四资产来源及完整双语说明，再核对 chronicle 并显式部署 Pages。发布结论以实际工作流和资产结果为证据，真实宿主验收本身不代表已经发布。

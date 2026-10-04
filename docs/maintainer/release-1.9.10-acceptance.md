@@ -1,4 +1,4 @@
-# 1.9.10 candidate acceptance — 2026-10-04
+# 1.9.10 candidate acceptance — updated 2026-10-05
 
 ## Scope
 
@@ -21,14 +21,34 @@ Translations were authored directly: 21 UI locales for new persistence messages,
 
 Continuation checks: the final three installed files still match the repository SHA-256 hashes. The README/version and website documentation contract checks passed (2 suites, 14 tests), followed by git diff --check. Current manuals now consistently describe Vault deletion preferences, local-only provider storage and Drawnix relationships without a fixed quota. A bounded CLI connectivity probe again returned “The CLI is unable to find Obsidian.” Evidence: .cache/obsidian-png-compatibility/audit-resume-checkpoint.json.
 
-## Real Vault evidence and current release gate
+## Resumed verification — 2026-10-05
 
-The official Obsidian CLI successfully reloaded the candidate into the already open 1Knowledge Vault. A subsequent eval confirmed version 1.9.10, default PNG compatibility true and App.saveLocalStorage available. The observed host reports Obsidian 1.12.7 / Electron 39.8.3 / Chromium 142.0.7444.265.
+Recovered session 01a0f563-c6c7-78f0-940b-e783d1fe8a9b at candidate ef197278. Git diff against d99309780679 was reviewed at the SVG, provider storage, preview/export and server lifecycle boundaries. No product source changes were needed during this continuation.
 
-The final compiled main.js, manifest.json and styles.css were subsequently copied to the Vault plugin directory again, with matching repository/Vault SHA-256 hashes recorded in .cache/obsidian-png-compatibility/audit-installed-bundle-hashes.json. Runtime reload of that final bundle is still pending; the earlier eval does not verify these final bytes.
+- Fresh production build and full regression pass: **304 suites, 2,954 passed tests, zero failures, one existing skipped test**, 521.871 seconds. Report: .cache/obsidian-png-compatibility/resume-regression-tests.json.
+- Provider transports, workflows, output preferences, export recovery, browser SVG security, mobile bundle loading and actual HTTP server tests all pass. UI-string and render-host audits pass; the lint ratchet reports **zero regressions across 31 changed TypeScript files**.
+- Rebuilt main.js still matches the installed bundle. All three installed file hashes match audit-installed-bundle-hashes.json. The final plugin instance was reloaded through the official CLI, with object identity checked before and after.
 
-The next multi-format native probe did not complete: the official CLI transport timed out, including subsequent help/version requests, then reported that it could not find the running Obsidian instance. Therefore live source-companion preview, native SVG/HTML/PNG/PDF delivery and settings failure injection are **not accepted yet**. The separate obsidian-cli executable is not installed. No forced app termination or computer-use was performed.
+## Accepted real Vault evidence
 
-SHA-256 checks confirm that architecture.zh-CN.md, architecture.zh-CN_diagram.drawnix, its existing recovery manifest and architecture.zh-CN_drawnix-3/-4/-5.png remain unchanged. The intended unique audit fixture parent was not created. The prior PNG real-host evidence remains valid for its delivered baseline, and is not relabeled as evidence for this candidate's new sanitizer.
+The official CLI reports **Obsidian 1.13.7 (installer 1.12.7)** in 1Knowledge. The user-agent version describes the installer and was insufficient to identify the application version in the earlier record. The separate obsidian-cli executable is not installed.
 
-Remote main push, numeric 1.9.10 tag, public Release and Pages deployment are pending the native gate. Do not claim publication or use the older CI/Pages successes as candidate proof. Once the existing host CLI is responsive, rerun the recorded .cache/obsidian-png-compatibility/audit-live-code.txt probe with a unique fixture path and an existing parent, restore settings, finish semantic checks, then follow the single-publisher release workflow. The native gate can only be relaxed through an explicit documented release decision.
+The native acceptance fixture is Notemd CLI Tests/Audit-1.9.10-native-1791156334109. Report: .cache/obsidian-png-compatibility/resume-native-acceptance.json.
+
+- The source .drawnix companion SVG opens in the real preview. Event attributes and external/executable URLs are removed, outside host UI remains visible, and Chinese foreignObject/vector text is retained.
+- SVG, HTML diagram, PNG and PDF outputs all complete beside the fixture source. The PNG decodes in Obsidian at 225 × 105 pixels for the 300 × 140 CSS-pixel fixture at 72 PPI. HTML embeds a sanitized SVG retaining Chinese text; the PDF has a valid PDF header.
+- A dummy local-only provider survives save/load in Vault-scoped storage. Injected local write failure rejects with the expected error. In-memory settings, persisted settings and the exact prior local record, including its absence, are restored before acceptance is marked passed.
+- Two real preview windows preserve independent zoom: 1:1 changes to 125% in one window while the other stays unchanged. The existing architecture.zh-CN_drawnix-6_obsidian_87ppi.png decodes at 4325 × 15179 pixels. Report: .cache/obsidian-png-compatibility/resume-native-zoom.json.
+- SHA-256 checks preserve architecture.zh-CN.md, architecture.zh-CN_diagram.drawnix, its original recovery manifest and architecture.zh-CN_drawnix-3/-4/-5.png. Only uniquely named test fixtures were created.
+
+## CLI recovery and reproducibility
+
+Passing the entire old fixture as a native Windows CLI argument caused the Obsidian main-process receiver to reject malformed request JSON before the fixture ran. The error dialog blocked later CLI requests. The user dismissed it; no application was forcibly terminated. Subsequent work used CLI only.
+
+Invoke the installed Obsidian.com with Node execFileSync and an argument array, a bounded timeout and windowsHide:true. Keep the eval argument short: load the reviewed local fixture with require('node:fs').readFileSync, then evaluate it. Check semantic output as well as the exit code: CLI eval can return an Error: string with exit code zero. Poll the fixture's explicit status rather than treating command submission as completion.
+
+The inherited fixture also used a nonexistent preview selector, the unsupported output ID html instead of html-diagram, and incomplete restoration of an absent local record. Correcting those probe assumptions resolved the false failures without weakening product behavior or changing the plugin bundle.
+
+## Release gate
+
+The final candidate's native gate is **accepted**. Publish only after the corresponding main commit passes both Linux and Windows CI. Use one numeric 1.9.10 tag and the single Actions publisher, verify the public four-asset provenance and complete bilingual notes, then verify chronicle and explicitly deploy Pages. Publication evidence belongs to those observed workflow and asset results; the native acceptance alone is not a publication claim.
