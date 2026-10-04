@@ -1,0 +1,11 @@
+# Drawnix relationship completeness
+
+The fixed six-edge overview and three-edge node limit discard meaningful dependencies before routing. The prompt also asks for three to six edges, so missing relationships may never reach the renderer. The supplied `architecture.zh-CN_diagram.drawnix` contains 250 nodes, four arrows and no omitted-relation record; those absent claims cannot be recovered by changing layout alone.
+
+Keep every explicit directed claim without a numeric budget. Remove only unlabeled/generic claims, redundant direct hierarchy links and identical `(from, to, predicate)` claims. Preserve distinct predicates and reverse directions. Continue accepting old `parallel` and `density` omission reasons when reading historical files.
+
+Use existing obstacle-aware compact routes first. Exterior fallback allocates deterministic rows for measured labels and partitions overlapping vertical spans into separate track slots; disjoint spans reuse slots. Reserve sufficient horizontal space for overlapping track banks and grow the canvas instead of dropping edges. This can enlarge dense diagrams and cannot guarantee a crossing-free drawing for every graph. Native Drawnix arrows remain static after node rearrangement.
+
+Regression checks cover chain completeness, high fan-out, distinct predicates, reverse direction, separate label rectangles, reusable/disjoint tracks, the ten-edge architecture fixture and the 137-node/32-edge benchmark. Reproject the supplied 250-node file into separate local artifacts without inventing relationships, changing the original, or calling a model. Build, full Jest, lint regression and UI/bundle audits must pass before closeout. This working change does not replace the immutable public 1.9.9 release.
+
+Validation: production build, UI/bundle audits and lint regression passed. The full run passed 298 suites and 2,879 tests; its sole failure was this new document's missing paired language file, corrected before focused revalidation. The 137-node benchmark exports all 32 edges with zero omissions in approximately 1.7 seconds locally. The supplied Vault map reprojects 250 nodes and four edges with zero validation errors and unchanged source hash. The unpublished working build was reloaded into `1Knowledge` through the official CLI with identical settings bytes.

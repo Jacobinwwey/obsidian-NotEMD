@@ -8,6 +8,8 @@ import {
 import * as legacyDrawnixRouter from '../diagram/adapters/drawnix/drawnixCrossRootRouter';
 import { DrawnixRenderer } from '../rendering/renderers/drawnixRenderer';
 import { DRAWNIX_ARCHITECTURE_DOCUMENT_TREE_FIXTURE } from './fixtures/drawnixArchitectureDocumentTreeFixture';
+import { DRAWNIX_RESERVED_LANE_INGRESS_FIXTURE } from './fixtures/drawnixReservedLaneIngressFixture';
+import { pointOnDrawnixPolyline } from '../diagram/adapters/drawnix/drawnixGeometry';
 
 function intersectsInterior(
     start: [number, number],
@@ -654,6 +656,8 @@ describe('Drawnix relation routing', () => {
         const nodes = [
             source,
             target,
+            { id: 'left-port-blocker', rootId: 'root', label: 'left', role: 'concept' as const, depth: 1, branchIndex: 0, x: 400, y: 288, width: 80, height: 32, textLines: ['left'] },
+            { id: 'right-port-blocker', rootId: 'root', label: 'right', role: 'concept' as const, depth: 1, branchIndex: 0, x: 592, y: 288, width: 72, height: 32, textLines: ['right'] },
             { id: 'b0', rootId: 'root', label: 'b0', role: 'concept' as const, depth: 1, branchIndex: 0, x: 400, y: 360, width: 72, height: 48, textLines: ['b0'] },
             { id: 'b6', rootId: 'root', label: 'b6', role: 'concept' as const, depth: 1, branchIndex: 0, x: 80, y: 600, width: 72, height: 48, textLines: ['b6'] },
             { id: 'b16', rootId: 'root', label: 'b16', role: 'concept' as const, depth: 1, branchIndex: 0, x: 320, y: 280, width: 72, height: 48, textLines: ['b16'] },
@@ -678,10 +682,36 @@ describe('Drawnix relation routing', () => {
             canvasHeight: 900
         });
 
-        expect(route.points[0]).toEqual([536, 280]);
+        expect([[536, 280], [536, 328]]).toContainEqual(route.points[0]);
         expect(route.points.some(([, y]) => y === 820)).toBe(true);
         expect(route.nativeTextPosition).toBeGreaterThan(0);
         expect(route.nativeTextPosition).toBeLessThan(1);
+    });
+
+    test('keeps reserved label bridges intact when grid ingress approaches from inside the track span', () => {
+        const route = routeDrawnixRelationThroughReservedLane(DRAWNIX_RESERVED_LANE_INGRESS_FIXTURE);
+        const { lane, nodes, additionalObstacles } = DRAWNIX_RESERVED_LANE_INGRESS_FIXTURE;
+
+        expect(pointOnDrawnixPolyline(route.points, route.nativeTextPosition)).toEqual([
+            lane.labelCenterX, lane.y
+        ]);
+        route.points.slice(1).forEach((point, index) => {
+            const start = route.points[index];
+            expect(start[0] === point[0] || start[1] === point[1]).toBe(true);
+            [...nodes, ...(additionalObstacles ?? [])].forEach(rectangle => {
+                expect(intersectsInterior(start, point, rectangle)).toBe(false);
+            });
+        });
+        expect(route.points.some(([x, y]) => x === lane.leftTrackX && y === lane.y)).toBe(true);
+        expect(route.points.some(([x, y]) => x === lane.rightTrackX && y === lane.y)).toBe(true);
+    });
+
+    test('rejects a reserved lane when the protected canvas genuinely seals every ingress', () => {
+        const input = DRAWNIX_RESERVED_LANE_INGRESS_FIXTURE;
+        expect(() => routeDrawnixRelationThroughReservedLane({
+            ...input,
+            additionalObstacles: [{ x: 0, y: 0, width: input.canvasWidth, height: input.canvasHeight }]
+        })).toThrow(/could not find obstacle-free ingress paths/);
     });
 
     test('fails closed instead of returning a direct route when no obstacle-free route exists', () => {

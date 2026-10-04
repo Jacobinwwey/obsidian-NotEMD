@@ -4,6 +4,13 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## Unreleased
+
+- Keep the reserved Drawnix label bridge clear during endpoint ingress routing, preventing grid-path reversals from erasing its tracks and falsely reporting an unreachable relation lane.
+- Drawnix 端点入口避开预留标签连接段，防止网格路径折返后轨道点被简化删除，进而误报关系轨道不可达。
+- Preserve all explicit Drawnix relationships without global or per-node count limits. Keep distinct predicates and reciprocal claims; deduplicate only identical claims. Scale exterior track allocation and label rows with geometry instead of omitting edges for density.
+- Drawnix 保留全部明确关系，不再限制总条数或每节点条数；不同谓词及反向关系分别保留，仅对相同关系去重。外侧轨道及标签行按几何占用扩展，不再因密度省略关系。
+
 ## 1.9.9
 
 ### English

@@ -80,7 +80,7 @@ Imagens resolvidas usam SVG com dados incorporados quando possível. Ordem: dado
 
 O quadro principal precede painéis Mermaid pela ordem da fonte. Reabrir histórico reconstrói painéis, dimensões e ações.
 
-Drawnix mostra até seis relações direcionadas essenciais com rótulos, no máximo três por nó. As omitidas ficam nos metadados. O texto das caixas permanece visível no PDF, inclusive de SVG antigos em cache. As setas entre ramos são estáticas e podem se soltar após reorganizar no Drawnix.
+O Drawnix preserva todas as relações direcionadas explícitas, sem limite total ou por nó. Remove afirmações idênticas, mas mantém predicados diferentes e direções inversas. Os trajetos externos sobrepostos usam faixas separadas; os demais reutilizam as faixas. Os rótulos recebem linhas dimensionadas e a área de desenho cresce conforme necessário. As setas sem rótulo, genéricas ou redundantes com a hierarquia permanecem nos metadados com o motivo. O texto nas caixas continua visível no PDF, incluindo SVG antigos em cache. As setas entre ramos são estáticas e podem se desconectar após uma reorganização no Drawnix.
 
 ## Limites de exportação nativa
 

@@ -23,7 +23,7 @@
 
 - Wähle mehrere Diagrammtypen pro Durchlauf und für jeden Typ mehrere Ausgabeformate. Beim Abwählen bleiben die Formate gespeichert. Ohne ausgewählte Typen wird der Inhalt automatisch analysiert.
 - Ausgewählte Dateien werden automatisch neben der Quellnotiz oder direkt im konfigurierten Ausgabeordner gespeichert. Der Name enthält den Typ, etwa `topic_drawnix.pdf` oder `topic_flowchart.svg`. Bei Kollisionen folgen `-2`, `-3` usw.; vorhandene Dateien werden nicht überschrieben.
-- Drawnix zeigt höchstens sechs beschriftete zentrale gerichtete Beziehungen, maximal drei je Knoten. Ausgelassene Beziehungen bleiben in den Metadaten. Eingerahmter Text bleibt im PDF sichtbar, auch bei älteren SVG-Caches. Zweigübergreifende Pfeile sind statisch und können sich nach einer Neuanordnung in Drawnix lösen.
+- Drawnix erhält alle ausdrücklich beschriebenen gerichteten Beziehungen ohne feste Gesamtzahl oder Grenze pro Knoten. Identische Aussagen werden dedupliziert; verschiedene Prädikate und Gegenrichtungen bleiben erhalten. Überlappende Außenrouten erhalten getrennte Spuren, getrennte Bereiche nutzen Spuren erneut. Beschriftungen erhalten vermessene Zeilen; die Zeichenfläche wächst nach Bedarf. Unbeschriftete, allgemeine oder zur Hierarchie redundante Pfeile bleiben mit Begründung in den Metadaten. Text in Beziehungsrahmen bleibt im PDF sichtbar, auch aus älteren SVG-Caches. Pfeile zwischen Zweigen bleiben statisch und können sich nach einer Neuanordnung in Drawnix lösen.
 
 Die 36 Anbietervorlagen und 33 ausführbaren Diagrammtypen waren bereits in 1.9.7 vorhanden. [Upgrade-Anleitung](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/releases/1.9.9) · [Öffentliches Release prüfen](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

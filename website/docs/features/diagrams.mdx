@@ -76,7 +76,7 @@ Resolved image embeds receive a data-backed SVG preview when possible. Preview l
 
 The preview is intentionally a single scrollable surface: the main Drawnix canvas appears first, followed by each embedded Mermaid panel in source order. Closing and reopening a saved history entry reconstructs the same panel list, dimensions, and export actions.
 
-Drawnix overviews keep up to six labeled core directed relations, at most three per node. Omitted relations remain in source metadata. Boxed relation text stays visible in PDF, including exports from older cached SVG. Cross-branch arrows are static and may detach after rearrangement in Drawnix.
+Drawnix preserves all explicit directed relationships without a fixed total or per-node limit. Identical claims are deduplicated; different predicates and reverse directions remain distinct. Overlapping exterior routes use separate tracks, disjoint routes reuse tracks, and labels receive separate measured rows. The canvas grows to retain relationships. Unlabeled, generic or redundant hierarchy arrows remain in metadata with reasons. Boxed relation text stays visible in PDF, including older cached SVG. Cross-branch arrows remain static and may detach after rearrangement in Drawnix.
 
 ## Native export boundaries
 

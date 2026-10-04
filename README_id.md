@@ -23,7 +23,7 @@
 
 - Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
 - File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file.
-- Drawnix menampilkan hingga enam hubungan inti berarah dan berlabel, maksimal tiga per simpul. Hubungan yang dihilangkan tetap ada dalam metadata. Teks kotak terlihat dalam PDF, termasuk dari cache SVG lama. Panah antarcabang bersifat statis dan dapat terlepas setelah penataan ulang di Drawnix.
+- Drawnix mempertahankan semua hubungan berarah yang dinyatakan jelas, tanpa batas total atau batas per simpul. Hanya pernyataan identik yang dihapus sebagai duplikat; predikat berbeda dan arah terbalik tetap dipertahankan. Rute luar yang rentangnya bertumpang tindih memakai jalur terpisah, rute yang terpisah memakai ulang jalur. Label mendapat baris sesuai ukurannya dan kanvas meluas sesuai kebutuhan. Panah tanpa label, hubungan umum, atau pengulangan hierarki tetap disimpan dalam metadata beserta alasannya. Teks dalam kotak hubungan tampil di PDF, termasuk dari cache SVG lama. Panah lintas cabang tetap statis dan dapat terlepas setelah penataan ulang di Drawnix.
 
 36 preset penyedia dan 33 jenis diagram yang dapat dijalankan sudah ada pada 1.9.7. [Panduan peningkatan](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/releases/1.9.9) · [Periksa rilis publik](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

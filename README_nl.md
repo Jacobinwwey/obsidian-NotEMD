@@ -23,7 +23,7 @@
 
 - Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
 - Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven.
-- Drawnix toont maximaal zes benoemde gerichte kernrelaties, hoogstens drie per knooppunt. Weggelaten relaties blijven in de metadata. Tekst in kaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken zijn statisch en kunnen losraken na herschikken in Drawnix.
+- Drawnix bewaart alle expliciete gerichte relaties zonder vaste totale limiet of limiet per knooppunt. Identieke beweringen worden ontdubbeld; verschillende predicaten en omgekeerde richtingen blijven behouden. Overlappende buitenroutes krijgen aparte sporen, gescheiden routes hergebruiken sporen. Labels krijgen rijen op basis van hun afmetingen en het canvas groeit waar nodig. Pijlen zonder label, algemene verbanden en pijlen die de hiërarchie herhalen blijven met reden in de metadata. Tekst in relatiekaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken blijven statisch en kunnen na herschikking in Drawnix losraken.
 
 De 36 aanbiedervoorinstellingen en 33 uitvoerbare diagramtypen bestonden al in 1.9.7. [Upgradegids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/releases/1.9.9) · [Openbare release controleren](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

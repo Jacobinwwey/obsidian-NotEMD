@@ -80,7 +80,7 @@ Les images résolues reçoivent lorsque possible une prévisualisation SVG avec 
 
 Le tableau principal précède les panneaux Mermaid, dans un seul conteneur déroulant. Rouvrir une entrée enregistrée reconstruit panneaux, dimensions et actions d’export.
 
-Drawnix affiche au plus six relations dirigées essentielles et libellées, trois par nœud ; les autres restent dans les métadonnées. Le texte encadré reste visible en PDF, y compris avec les anciens SVG en cache. Les flèches entre branches sont statiques et peuvent se détacher après réorganisation dans Drawnix.
+Drawnix conserve toutes les relations orientées explicites, sans limite globale ni par nœud. Seules les affirmations identiques sont dédupliquées ; les prédicats différents et les directions inverses restent distincts. Les trajets extérieurs qui se chevauchent utilisent des pistes séparées ; les autres réutilisent les pistes. Les étiquettes disposent de lignes mesurées et le canevas grandit selon les besoins. Les flèches sans étiquette, génériques ou redondantes avec la hiérarchie restent dans les métadonnées avec leur motif. Le texte encadré reste visible dans le PDF, y compris depuis un ancien SVG en cache. Les flèches entre branches restent statiques et peuvent se détacher après un réarrangement dans Drawnix.
 
 ## Limites des exports natifs
 

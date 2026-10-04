@@ -83,7 +83,7 @@ export class DrawnixRenderer implements DiagramRenderer {
         const diagnostics = [...coverageDiagnostics, ...sourceVisualCompanions.diagnostics];
         if (relations.omitted.length) diagnostics.push({
             severity: 'info', kind: 'drawnix-core-relations',
-            message: `The overview shows ${relations.edges.length} labeled core relationships; ${relations.omitted.length} additional or unspecified relationships are retained in metadata.`,
+            message: `The map shows ${relations.edges.length} labeled relationships; ${relations.omitted.length} redundant or unspecified relationships are retained in metadata.`,
             advice: 'Inspect metadata.notemd.omittedRelations for the original relationships and omission reasons.'
         });
         if (projection.crossRelations.length > 0) {

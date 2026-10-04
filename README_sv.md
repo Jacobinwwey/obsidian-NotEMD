@@ -23,7 +23,7 @@
 
 - Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.
 - Valda filer exporteras automatiskt bredvid källanteckningen eller direkt till den angivna mappen. Namnen innehåller typen, exempelvis `topic_drawnix.pdf` och `topic_flowchart.svg`. Vid namnkonflikter läggs `-2`, `-3` och så vidare till utan överskrivning.
-- Drawnix visar högst sex namngivna riktade kärnrelationer, högst tre per nod. Utelämnade relationer finns kvar i metadata. Text i rutor syns i PDF även från äldre cachade SVG-filer. Pilar mellan grenar är statiska och kan lossna när noder flyttas i Drawnix.
+- Drawnix bevarar alla uttryckliga riktade relationer utan fast totalgräns eller gräns per nod. Identiska påståenden dedupliceras; olika predikat och motsatta riktningar bevaras. Överlappande yttre rutter får separata spår, åtskilda rutter återanvänder spår. Etiketter får rader efter sina mått och ritytan växer vid behov. Pilar utan etikett, allmänna samband och pilar som upprepar hierarkin finns kvar i metadata med orsak. Text i relationsrutor syns i PDF, även från äldre SVG-cache. Pilar mellan grenar är statiska och kan lossna efter omplacering i Drawnix.
 
 De 36 leverantörsförvalen och 33 körbara diagramtyperna fanns redan i 1.9.7. [Uppgraderingsguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/releases/1.9.9) · [Kontrollera offentlig utgåva](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

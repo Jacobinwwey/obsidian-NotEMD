@@ -23,7 +23,7 @@
 
 - Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.
 - Tệp đã chọn tự động xuất cạnh ghi chú nguồn hoặc trực tiếp vào thư mục đầu ra đã đặt. Tên chứa loại, chẳng hạn `topic_drawnix.pdf` và `topic_flowchart.svg`. Khi trùng tên, thêm `-2`, `-3`… mà không ghi đè tệp.
-- Drawnix hiển thị tối đa sáu quan hệ cốt lõi có hướng và nhãn, tối đa ba quan hệ mỗi nút. Quan hệ bị lược bỏ vẫn nằm trong siêu dữ liệu. Chữ trong khung hiển thị trong PDF, kể cả từ SVG cũ trong bộ nhớ đệm. Mũi tên giữa các nhánh là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
+- Drawnix giữ tất cả quan hệ có hướng được nêu rõ, không giới hạn cố định tổng số hoặc số quan hệ mỗi nút. Chỉ loại bỏ khẳng định trùng hệt; giữ vị từ khác nhau và hướng ngược lại. Các tuyến bên ngoài có khoảng chồng lấn dùng làn riêng, các tuyến tách biệt tái sử dụng làn. Nhãn được bố trí hàng theo kích thước và vùng vẽ mở rộng khi cần. Mũi tên không nhãn, liên hệ chung hoặc lặp lại phân cấp vẫn nằm trong siêu dữ liệu kèm lý do. Chữ trong khung quan hệ hiển thị ở PDF, kể cả từ bộ nhớ đệm SVG cũ. Mũi tên giữa các nhánh vẫn là tĩnh và có thể rời nút sau khi sắp xếp lại trong Drawnix.
 
 36 cấu hình nhà cung cấp và 33 loại sơ đồ có thể thực thi đã tồn tại từ 1.9.7. [Hướng dẫn nâng cấp](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/releases/1.9.9) · [Kiểm tra bản phát hành công khai](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

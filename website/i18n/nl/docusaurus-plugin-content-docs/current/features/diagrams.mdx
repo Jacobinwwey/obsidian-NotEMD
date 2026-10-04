@@ -74,7 +74,7 @@ Notemd reinigt SVG en bewaart Mermaid-bron in `.drawnix`-metadata. Preview werkt
 
 Afbeeldingen krijgen waar mogelijk een preview met ingesloten data. Eerst worden embedded data gebruikt, dan oude bijbestanden, dan beschikbare brontekst. Bewaar nog gerefereerde bestanden: een nieuwe zelfstandige export bewijst niet dat een oude gedeelde map overbodig is.
 
-Drawnix toont maximaal zes benoemde gerichte kernrelaties, hoogstens drie per knooppunt. Weggelaten relaties blijven in de metadata. Tekst in kaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken zijn statisch en kunnen losraken na herschikken in Drawnix.
+Drawnix bewaart alle expliciete gerichte relaties zonder vaste totale limiet of limiet per knooppunt. Identieke beweringen worden ontdubbeld; verschillende predicaten en omgekeerde richtingen blijven behouden. Overlappende buitenroutes krijgen aparte sporen, gescheiden routes hergebruiken sporen. Labels krijgen rijen op basis van hun afmetingen en het canvas groeit waar nodig. Pijlen zonder label, algemene verbanden en pijlen die de hiërarchie herhalen blijven met reden in de metadata. Tekst in relatiekaders blijft zichtbaar in PDF, ook vanuit oudere SVG-caches. Pijlen tussen takken blijven statisch en kunnen na herschikking in Drawnix losraken.
 
 ## Native exportgrenzen
 

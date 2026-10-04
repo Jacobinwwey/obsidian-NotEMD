@@ -32,8 +32,31 @@ describe('Drawnix relation lane layout', () => {
 
         expect(lanes.map(lane => lane.relationId)).toEqual(relations.map(relation => relation.relationId));
         expect(new Set(lanes.map(lane => lane.y)).size).toBe(relations.length);
+        expect(new Set(lanes.map(lane => lane.leftTrackX)).size).toBe(relations.length);
+        expect(new Set(lanes.map(lane => lane.rightTrackX)).size).toBe(relations.length);
         expect(lanes.every(lane => lane.leftTrackX < lane.rightTrackX)).toBe(true);
         expect(repeated).toEqual(resolved);
+    });
+
+    test('reuses exterior tracks for vertically disjoint relationships', () => {
+        const relations = [
+            { relationId: 'upper', sourceId: 'upper-a', targetId: 'upper-b', labelSize: { width: 96, height: 32 } },
+            { relationId: 'lower', sourceId: 'lower-a', targetId: 'lower-b', labelSize: { width: 96, height: 32 } }
+        ];
+        const reservation = reserveDrawnixRelationLaneSpace({ forestWidth: 1000, relations });
+        const lanes = assignDrawnixRelationLaneGeometry({
+            canvasWidth: reservation.width, reservations: reservation.reservations, relations,
+            nodes: [
+                { id: 'root', rootId: 'root', x: 200, y: 400, width: 150, height: 56 },
+                { id: 'upper-a', rootId: 'root', x: 500, y: 100, width: 100, height: 56 },
+                { id: 'upper-b', rootId: 'root', x: 650, y: 200, width: 100, height: 56 },
+                { id: 'lower-a', rootId: 'root', x: 500, y: 700, width: 100, height: 56 },
+                { id: 'lower-b', rootId: 'root', x: 650, y: 800, width: 100, height: 56 }
+            ]
+        }).lanes;
+        expect(lanes[0].leftTrackX).toBe(lanes[1].leftTrackX);
+        expect(lanes[0].rightTrackX).toBe(lanes[1].rightTrackX);
+        expect(lanes[0].y).not.toBe(lanes[1].y);
     });
 
     test('reserves a same-side corridor outside every placed branch', () => {

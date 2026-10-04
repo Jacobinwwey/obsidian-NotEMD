@@ -91,6 +91,51 @@ interface QueueEntry {
     cost: number;
 }
 
+// Dense fallback grids must not sort the entire frontier at every expansion.
+// Preserve the historical tie order while reducing queue operations to O(log n).
+class DrawnixRouteSearchQueue {
+    private entries: QueueEntry[] = [];
+
+    get size(): number {
+        return this.entries.length;
+    }
+
+    private compare(left: QueueEntry, right: QueueEntry): number {
+        return left.cost - right.cost || left.nodeIndex - right.nodeIndex || left.direction - right.direction;
+    }
+
+    push(entry: QueueEntry): void {
+        let index = this.entries.length;
+        this.entries.push(entry);
+        while (index > 0) {
+            const parent = Math.floor((index - 1) / 2);
+            if (this.compare(this.entries[parent], entry) <= 0) break;
+            this.entries[index] = this.entries[parent];
+            index = parent;
+        }
+        this.entries[index] = entry;
+    }
+
+    takeMinimum(): QueueEntry | undefined {
+        const minimum = this.entries[0];
+        const last = this.entries.pop();
+        if (this.entries.length > 0 && last) {
+            let index = 0;
+            while (index * 2 + 1 < this.entries.length) {
+                const left = index * 2 + 1;
+                const right = left + 1;
+                const child = right < this.entries.length && this.compare(this.entries[right], this.entries[left]) < 0
+                    ? right : left;
+                if (this.compare(last, this.entries[child]) <= 0) break;
+                this.entries[index] = this.entries[child];
+                index = child;
+            }
+            this.entries[index] = last;
+        }
+        return minimum;
+    }
+}
+
 function center(node: DrawnixMindMapPlacedNode): DrawnixPoint {
     return [node.x + node.width / 2, node.y + node.height / 2];
 }
@@ -397,14 +442,19 @@ function buildParallelLaneRoute(
     return null;
 }
 
-function buildGridRoute(
-    start: DrawnixPoint,
-    end: DrawnixPoint,
+interface DrawnixRouteGrid {
+    points: DrawnixPoint[];
+    nodeByCoordinate: Map<string, number>;
+    neighborsByNode: Array<Array<{ nodeIndex: number; direction: 1 | 2; distance: number }>>;
+}
+
+function buildDrawnixRouteGrid(
+    requiredPoints: readonly DrawnixPoint[],
     obstacles: readonly RouteRect[],
     canvasWidth: number,
     canvasHeight: number,
     labelSize?: DrawnixRelationLabelSize
-): DrawnixPoint[] | null {
+): DrawnixRouteGrid {
     // Keep fallback routes inside the exported canvas. A negative perimeter
     // coordinate is clipped by SVG/Drawnix and appears as a false dashed frame
     // along the page edge, which can obscure the title or summary.
@@ -415,15 +465,13 @@ function buildGridRoute(
     const outerTop = ROUTE_CLEARANCE + labelHalfHeight;
     const outerBottom = Math.max(outerTop, canvasHeight - ROUTE_CLEARANCE - labelHalfHeight);
     const xs = deduplicate([
-        start[0],
-        end[0],
+        ...requiredPoints.map(point => point[0]),
         outerLeft,
         outerRight,
         ...obstacles.flatMap(rect => [rect.x - ROUTE_CLEARANCE, rect.x + rect.width + ROUTE_CLEARANCE])
     ]).filter(x => x >= outerLeft && x <= outerRight);
     const ys = deduplicate([
-        start[1],
-        end[1],
+        ...requiredPoints.map(point => point[1]),
         outerTop,
         outerBottom,
         ...obstacles.flatMap(rect => [rect.y - ROUTE_CLEARANCE, rect.y + rect.height + ROUTE_CLEARANCE])
@@ -438,12 +486,6 @@ function buildGridRoute(
             points.push(point);
         }
     }));
-
-    const startIndex = nodeByCoordinate.get(`${start[0]}:${start[1]}`);
-    const endIndex = nodeByCoordinate.get(`${end[0]}:${end[1]}`);
-    if (startIndex === undefined || endIndex === undefined) {
-        return null;
-    }
 
     const neighborsByNode = points.map(() => [] as Array<{ nodeIndex: number; direction: 1 | 2; distance: number }>);
     const connectAdjacent = (groups: Map<number, number[]>, direction: 1 | 2): void => {
@@ -480,18 +522,38 @@ function buildGridRoute(
     connectAdjacent(horizontalGroups, 2);
     neighborsByNode.forEach(found => found.sort((left, right) => left.nodeIndex - right.nodeIndex || left.direction - right.direction));
 
+    return { points, nodeByCoordinate, neighborsByNode };
+}
+
+function findDrawnixGridRoutes(
+    grid: DrawnixRouteGrid,
+    start: DrawnixPoint,
+    endpoints: readonly DrawnixPoint[]
+): Map<string, DrawnixPoint[]> {
+    const { points, nodeByCoordinate, neighborsByNode } = grid;
+    const routes = new Map<string, DrawnixPoint[]>();
+    const startIndex = nodeByCoordinate.get(`${start[0]}:${start[1]}`);
+    const pendingEndpoints = new Map<number, string>();
+    endpoints.forEach(point => {
+        const key = `${point[0]}:${point[1]}`;
+        const index = nodeByCoordinate.get(key);
+        if (index !== undefined) pendingEndpoints.set(index, key);
+    });
+    if (startIndex === undefined || pendingEndpoints.size === 0) return routes;
+
     const distances = new Map<string, number>();
     const previous = new Map<string, { state: string; nodeIndex: number }>();
-    const queue: QueueEntry[] = [{ state: `${startIndex}:0`, nodeIndex: startIndex, direction: 0, cost: 0 }];
-    distances.set(queue[0].state, 0);
+    const queue = new DrawnixRouteSearchQueue();
+    queue.push({ state: `${startIndex}:0`, nodeIndex: startIndex, direction: 0, cost: 0 });
+    distances.set(`${startIndex}:0`, 0);
 
-    while (queue.length > 0) {
-        queue.sort((left, right) => left.cost - right.cost || left.nodeIndex - right.nodeIndex || left.direction - right.direction);
-        const current = queue.shift()!;
+    while (queue.size > 0) {
+        const current = queue.takeMinimum()!;
         if (current.cost !== distances.get(current.state)) {
             continue;
         }
-        if (current.nodeIndex === endIndex) {
+        const endpointKey = pendingEndpoints.get(current.nodeIndex);
+        if (endpointKey !== undefined) {
             const path: DrawnixPoint[] = [];
             let state = current.state;
             let nodeIndex = current.nodeIndex;
@@ -502,7 +564,9 @@ function buildGridRoute(
                 state = previousState.state;
                 path.push(points[nodeIndex]);
             }
-            return simplify(path.reverse());
+            routes.set(endpointKey, simplify(path.reverse()));
+            pendingEndpoints.delete(current.nodeIndex);
+            if (pendingEndpoints.size === 0) return routes;
         }
 
         for (const neighbor of neighborsByNode[current.nodeIndex]) {
@@ -517,7 +581,19 @@ function buildGridRoute(
         }
     }
 
-    return null;
+    return routes;
+}
+
+function buildGridRoute(
+    start: DrawnixPoint,
+    end: DrawnixPoint,
+    obstacles: readonly RouteRect[],
+    canvasWidth: number,
+    canvasHeight: number,
+    labelSize?: DrawnixRelationLabelSize
+): DrawnixPoint[] | null {
+    const grid = buildDrawnixRouteGrid([start, end], obstacles, canvasWidth, canvasHeight, labelSize);
+    return findDrawnixGridRoutes(grid, start, [end]).get(`${end[0]}:${end[1]}`) ?? null;
 }
 
 function endpointsTowardTrack(
@@ -640,6 +716,19 @@ function reservedLaneLabelPosition(
     return null;
 }
 
+function reservedLaneIngressObstacle(lane: DrawnixRelationLane): RouteRect {
+    // Ingress must approach the bridge from outside its span. Otherwise a
+    // shortest grid leg can enter along the label row and retrace the bridge;
+    // simplification then removes a reserved track or the label segment itself.
+    const halfHeight = Math.max(ROUTE_CLEARANCE, (lane.labelBounds?.height ?? 0) / 2);
+    return {
+        x: lane.leftTrackX,
+        y: lane.y - halfHeight,
+        width: lane.rightTrackX - lane.leftTrackX,
+        height: halfHeight * 2
+    };
+}
+
 function findClearEndpointLaneLeg(
     endpoint: DrawnixPoint,
     node: DrawnixMindMapPlacedNode,
@@ -704,6 +793,7 @@ export function findDrawnixDirectReservedLaneRoute(
         ...buildNodeObstacles(input.nodes, source.id, target.id),
         ...(input.additionalObstacles ?? [])
     ];
+    const ingressObstacles = [...obstacles, reservedLaneIngressObstacle(lane)];
     const laneDirections = [
         { sourceTrackX: lane.leftTrackX, targetTrackX: lane.rightTrackX },
         { sourceTrackX: lane.rightTrackX, targetTrackX: lane.leftTrackX }
@@ -718,7 +808,7 @@ export function findDrawnixDirectReservedLaneRoute(
                 source,
                 direction.sourceTrackX,
                 lane.y,
-                obstacles,
+                ingressObstacles,
                 input.canvasWidth,
                 input.canvasHeight
             );
@@ -732,7 +822,7 @@ export function findDrawnixDirectReservedLaneRoute(
                     target,
                     direction.targetTrackX,
                     lane.y,
-                    obstacles,
+                    ingressObstacles,
                     input.canvasWidth,
                     input.canvasHeight
                 );
@@ -788,33 +878,35 @@ export function routeDrawnixRelationThroughReservedLane(
         ...buildNodeObstacles(input.nodes, source.id, target.id),
         ...(input.additionalObstacles ?? [])
     ];
+    const ingressObstacles = [...obstacles, reservedLaneIngressObstacle(lane)];
     const laneDirections = [
         { sourceTrackX: lane.leftTrackX, targetTrackX: lane.rightTrackX },
         { sourceTrackX: lane.rightTrackX, targetTrackX: lane.leftTrackX }
     ];
     const candidates: Array<{ points: DrawnixPoint[]; nativeTextPosition: number }> = [];
 
+    // One visibility graph and two searches serve every port and direction.
+    // Rebuilding the same dense grid sixteen times stalls the desktop host.
+    const sourcePorts = endpointsForReservedLaneGrid(source, lane.leftTrackX, lane.y);
+    const targetPorts = endpointsForReservedLaneGrid(target, lane.rightTrackX, lane.y);
+    const trackPoints: DrawnixPoint[] = [[lane.leftTrackX, lane.y], [lane.rightTrackX, lane.y]];
+    const grid = buildDrawnixRouteGrid(
+        [...sourcePorts, ...targetPorts, ...trackPoints], ingressObstacles, input.canvasWidth, input.canvasHeight
+    );
+    const pathsByTrack = new Map(trackPoints.map(point => [
+        point[0], findDrawnixGridRoutes(grid, point, [...sourcePorts, ...targetPorts])
+    ]));
+
     for (const direction of laneDirections) {
-        const sourceLanePoint: DrawnixPoint = [direction.sourceTrackX, lane.y];
         const targetLanePoint: DrawnixPoint = [direction.targetTrackX, lane.y];
-        const sourceGridLegs = endpointsForReservedLaneGrid(source, direction.sourceTrackX, lane.y)
-            .map(start => buildGridRoute(
-                start,
-                sourceLanePoint,
-                obstacles,
-                input.canvasWidth,
-                input.canvasHeight
-            ))
-            .filter((points): points is DrawnixPoint[] => points !== null);
-        const targetGridLegs = endpointsForReservedLaneGrid(target, direction.targetTrackX, lane.y)
-            .map(end => buildGridRoute(
-                targetLanePoint,
-                end,
-                obstacles,
-                input.canvasWidth,
-                input.canvasHeight
-            ))
-            .filter((points): points is DrawnixPoint[] => points !== null);
+        const sourcePaths = pathsByTrack.get(direction.sourceTrackX)!;
+        const targetPaths = pathsByTrack.get(direction.targetTrackX)!;
+        const sourceGridLegs = sourcePorts
+            .map(point => sourcePaths.get(`${point[0]}:${point[1]}`)?.slice().reverse())
+            .filter((points): points is DrawnixPoint[] => points !== undefined);
+        const targetGridLegs = targetPorts
+            .map(point => targetPaths.get(`${point[0]}:${point[1]}`))
+            .filter((points): points is DrawnixPoint[] => points !== undefined);
 
         for (const sourceGridLeg of sourceGridLegs) {
             for (const targetGridLeg of targetGridLegs) {

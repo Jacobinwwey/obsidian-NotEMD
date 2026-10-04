@@ -80,7 +80,7 @@ Las imágenes resueltas usan SVG con datos integrados cuando es posible. Orden: 
 
 El tablero principal precede paneles Mermaid en orden de origen. Reabrir historial reconstruye paneles, dimensiones y acciones.
 
-Drawnix muestra hasta seis relaciones dirigidas esenciales con etiqueta, como máximo tres por nodo; las omitidas permanecen en los metadatos. El texto de los recuadros se ve en PDF, incluso desde SVG antiguos en caché. Las flechas entre ramas son estáticas y pueden separarse al reorganizar Drawnix.
+Drawnix conserva todas las relaciones dirigidas explícitas, sin un límite total ni por nodo. Elimina afirmaciones idénticas, pero mantiene predicados distintos y direcciones inversas. Las rutas exteriores superpuestas usan carriles separados; las disjuntas reutilizan carriles. Las etiquetas reciben filas según su tamaño y el lienzo crece cuando hace falta. Las flechas sin etiqueta, genéricas o redundantes con la jerarquía permanecen en los metadatos con el motivo. El texto enmarcado sigue visible en PDF, incluso desde SVG antiguos en caché. Las flechas entre ramas son estáticas y pueden desconectarse tras reorganizar el mapa en Drawnix.
 
 ## Límites de exportación nativa
 

@@ -7,7 +7,7 @@ describe('Drawnix knowledge-map benchmark', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const benchmarkPath = path.join(repoRoot, 'scripts', 'benchmark-drawnix-knowledge-map.js');
 
-    test('exports a bounded overview while retaining every semantic relationship', () => {
+    test('exports every semantic relationship without a global overview limit', () => {
         const outputDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-drawnix-benchmark-'));
 
         try {
@@ -23,8 +23,8 @@ describe('Drawnix knowledge-map benchmark', () => {
             expect(result).toEqual(expect.objectContaining({
                 rootCount: 1,
                 nodeCount: 137,
-                edgeCount: 6,
-                omittedRelationCount: 26,
+                edgeCount: 32,
+                omittedRelationCount: 0,
                 retainedRelationCount: 32,
                 validationErrorCount: 0
             }));

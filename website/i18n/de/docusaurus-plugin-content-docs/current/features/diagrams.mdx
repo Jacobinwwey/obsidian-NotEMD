@@ -80,7 +80,7 @@ Bilder verwenden wenn möglich dateneingebettete SVG-Vorschau. Laden priorisiert
 
 Das Hauptboard steht vor Mermaid-Panels in Quellreihenfolge. Gespeicherte Historieneinträge rekonstruieren dieselben Panels, Größen und Exportaktionen.
 
-Drawnix zeigt höchstens sechs beschriftete zentrale gerichtete Beziehungen, maximal drei je Knoten. Ausgelassene Beziehungen bleiben in den Metadaten. Eingerahmter Text bleibt im PDF sichtbar, auch bei älteren SVG-Caches. Zweigübergreifende Pfeile sind statisch und können sich nach einer Neuanordnung in Drawnix lösen.
+Drawnix erhält alle ausdrücklich beschriebenen gerichteten Beziehungen ohne feste Gesamtzahl oder Grenze pro Knoten. Identische Aussagen werden dedupliziert; verschiedene Prädikate und Gegenrichtungen bleiben erhalten. Überlappende Außenrouten erhalten getrennte Spuren, getrennte Bereiche nutzen Spuren erneut. Beschriftungen erhalten vermessene Zeilen; die Zeichenfläche wächst nach Bedarf. Unbeschriftete, allgemeine oder zur Hierarchie redundante Pfeile bleiben mit Begründung in den Metadaten. Text in Beziehungsrahmen bleibt im PDF sichtbar, auch aus älteren SVG-Caches. Pfeile zwischen Zweigen bleiben statisch und können sich nach einer Neuanordnung in Drawnix lösen.
 
 ## Native Exportgrenzen
 

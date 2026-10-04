@@ -177,10 +177,11 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/Supported intent:\s*drawnixMindmap/i);
         expect(prompt).toMatch(/Target: editable Drawnix knowledge map/i);
         expect(prompt).toMatch(/Use node\.children for ownership and taxonomy/i);
-        expect(prompt).toMatch(/core directed relationships/i);
+        expect(prompt).toMatch(/explicit directed relationships/i);
         expect(prompt).toMatch(/Every edge MUST have a concise, explicit predicate/i);
-        expect(prompt).toMatch(/ordered from most important to least important/i);
-        expect(prompt).toMatch(/at most six relationships/i);
+        expect(prompt).toMatch(/Do not impose a fixed relationship count/i);
+        expect(prompt).toMatch(/Different source-supported predicates/i);
+        expect(prompt).not.toMatch(/at most six relationships/i);
         expect(prompt).not.toMatch(/at most 4/i);
         expect(prompt).not.toMatch(/Drawnix JSON/i);
     });

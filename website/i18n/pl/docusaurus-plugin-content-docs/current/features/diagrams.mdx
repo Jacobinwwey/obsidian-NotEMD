@@ -74,7 +74,7 @@ Notemd oczyszcza SVG i zachowuje źródło Mermaid w metadanych `.drawnix`. Podg
 
 Gdzie to możliwe, obrazy otrzymują podgląd z osadzonymi danymi. Kolejność: dane osadzone, dawne pliki towarzyszące, dostępny tekst źródła. Zachowaj pliki nadal przywoływane: nowy samowystarczalny eksport nie dowodzi, że stary wspólny folder jest zbędny.
 
-Drawnix pokazuje maksymalnie sześć podpisanych głównych relacji skierowanych, najwyżej trzy na węzeł. Pominięte relacje pozostają w metadanych. Tekst w ramkach jest widoczny w PDF również ze starszych SVG w pamięci podręcznej. Strzałki między gałęziami są statyczne i mogą odłączyć się po zmianie układu w Drawnix.
+Drawnix zachowuje wszystkie jawne relacje skierowane bez stałego limitu całkowitego ani limitu na węzeł. Usuwa tylko identyczne twierdzenia; różne predykaty i przeciwne kierunki pozostają. Nakładające się trasy zewnętrzne otrzymują osobne tory, rozłączne trasy ponownie wykorzystują tory. Etykiety dostają wiersze dopasowane do wymiarów, a obszar rysunku rośnie według potrzeb. Strzałki bez etykiet, ogólne powiązania i powtórzenia hierarchii pozostają w metadanych z przyczyną. Tekst w ramkach relacji jest widoczny w PDF, także ze starszej pamięci SVG. Strzałki między gałęziami są statyczne i mogą odłączyć się po zmianie układu w Drawnix.
 
 ## Granice eksportu natywnego
 

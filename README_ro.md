@@ -23,7 +23,7 @@
 
 - Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
 - Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere.
-- Drawnix afișează cel mult șase relații direcționate esențiale cu etichete, maximum trei pe nod. Cele omise rămân în metadate. Textul încadrat apare în PDF inclusiv din SVG vechi în cache. Săgețile dintre ramuri sunt statice și se pot desprinde după rearanjarea în Drawnix.
+- Drawnix păstrează toate relațiile direcționate explicite, fără limită totală fixă sau limită per nod. Elimină doar afirmațiile identice; predicatele diferite și direcțiile inverse rămân distincte. Traseele exterioare suprapuse primesc culoare separate, iar cele disjuncte le reutilizează. Etichetele au rânduri adaptate dimensiunilor, iar suprafața de desen crește după nevoie. Săgețile fără etichetă, relațiile generice sau cele redundante cu ierarhia rămân în metadate cu motivul. Textul din casetele relațiilor este vizibil în PDF, inclusiv din cache-uri SVG vechi. Săgețile între ramuri sunt statice și se pot desprinde după rearanjare în Drawnix.
 
 Cele 36 de presetări de furnizori și 33 de tipuri executabile de diagrame existau deja în 1.9.7. [Ghid de actualizare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/releases/1.9.9) · [Verifică versiunea publicată](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

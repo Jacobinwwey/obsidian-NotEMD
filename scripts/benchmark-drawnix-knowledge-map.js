@@ -103,7 +103,7 @@ function assertBenchmarkSummary(summary) {
   const expected = {
     rootCount: 1,
     nodeCount: expectedNodeCount(),
-    edgeCount: 6,
+    edgeCount: SUBSYSTEM_COUNT * BRANCHES_PER_SUBSYSTEM,
     retainedRelationCount: SUBSYSTEM_COUNT * BRANCHES_PER_SUBSYSTEM,
     validationErrorCount: 0
   };

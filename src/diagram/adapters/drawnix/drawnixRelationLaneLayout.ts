@@ -69,6 +69,7 @@ const LANE_VERTICAL_GAP = 28;
 const LANE_LABEL_VERTICAL_CLEARANCE = 18;
 const UNLABELLED_LANE_HEIGHT = 56;
 const MINIMUM_RELATION_TRACK_SPAN = 56;
+const RELATION_TRACK_GAP = 16;
 
 function finiteCanvasDimension(value: number): number {
     return Math.max(1, Math.ceil(value));
@@ -138,11 +139,10 @@ interface DrawnixRelationLanePlacement {
     reservation: DrawnixRelationLaneReservation;
     relation: DrawnixRelationLaneRequest;
     mode: DrawnixRelationLaneMode;
-    leftTrackX: number;
-    rightTrackX: number;
-    labelCenterX: number;
     laneHeight: number;
     preferredY: number;
+    endpointTop: number;
+    endpointBottom: number;
 }
 
 function relationLaneHeight(labelSize: DrawnixRelationLaneLabelSize | undefined): number {
@@ -207,6 +207,39 @@ function assignCrossForestLaneRows(
     };
 }
 
+function assignExteriorTrackSlots(
+    placements: readonly DrawnixRelationLanePlacement[],
+    yByRelationId: ReadonlyMap<string, number>
+): { slots: ReadonlyMap<string, number>; westSpan: number; eastSpan: number } {
+    const intervals = placements.map(placement => {
+        const y = yByRelationId.get(placement.reservation.relationId)!;
+        return {
+            placement,
+            top: Math.min(placement.endpointTop, y - placement.laneHeight / 2),
+            bottom: Math.max(placement.endpointBottom, y + placement.laneHeight / 2)
+        };
+    }).sort((left, right) => left.top - right.top
+        || left.placement.reservation.relationId.localeCompare(right.placement.reservation.relationId));
+    const westEnds: number[] = [];
+    const eastEnds: number[] = [];
+    const slots = new Map<string, number>();
+    for (const { placement, top, bottom } of intervals) {
+        const usesWest = placement.mode !== 'right-side';
+        const usesEast = placement.mode !== 'left-side';
+        let slot = 0;
+        while ((usesWest && (westEnds[slot] ?? Number.NEGATIVE_INFINITY) + LANE_VERTICAL_GAP >= top)
+            || (usesEast && (eastEnds[slot] ?? Number.NEGATIVE_INFINITY) + LANE_VERTICAL_GAP >= top)) slot += 1;
+        if (usesWest) westEnds[slot] = bottom;
+        if (usesEast) eastEnds[slot] = bottom;
+        slots.set(placement.reservation.relationId, slot);
+    }
+    return {
+        slots,
+        westSpan: Math.max(0, westEnds.length - 1) * RELATION_TRACK_GAP,
+        eastSpan: Math.max(0, eastEnds.length - 1) * RELATION_TRACK_GAP
+    };
+}
+
 /**
  * Resolves relation geometry after the forest has been placed. The preliminary
  * reservation owns only horizontal canvas space and relation identity. This
@@ -232,27 +265,15 @@ export function assignDrawnixRelationLaneGeometry(
             throw new Error(`Drawnix relation lane "${reservation.relationId}" has no placed endpoints.`);
         }
 
-        const trackSpan = relationTrackSpan(relation.labelSize);
-        const westInnerTrackX = forestLeft - NODE_TRACK_CLEARANCE;
-        const westOuterTrackX = westInnerTrackX - trackSpan;
-        const eastInnerTrackX = forestRight + NODE_TRACK_CLEARANCE;
-        const eastOuterTrackX = eastInnerTrackX + trackSpan;
         const mode = resolveRelationLaneMode(source, target, nodesById);
-        const [leftTrackX, rightTrackX] = mode === 'left-side'
-                ? [westOuterTrackX, westInnerTrackX]
-            : mode === 'right-side'
-                ? [eastInnerTrackX, eastOuterTrackX]
-                : [westInnerTrackX, eastInnerTrackX];
-        assertTracksFitCanvas(reservation.relationId, leftTrackX, rightTrackX, input.canvasWidth);
         return {
             reservation,
             relation,
             mode,
-            leftTrackX,
-            rightTrackX,
-            labelCenterX: (leftTrackX + rightTrackX) / 2,
             laneHeight: relationLaneHeight(relation.labelSize),
-            preferredY: (centerY(source) + centerY(target)) / 2
+            preferredY: (centerY(source) + centerY(target)) / 2,
+            endpointTop: Math.min(source.y, target.y),
+            endpointBottom: Math.max(source.y + source.height, target.y + target.height)
         };
     });
     const sideLaneYByRelationId = new Map<string, number>();
@@ -278,15 +299,29 @@ export function assignDrawnixRelationLaneGeometry(
         ))
     );
     const height = finiteCanvasDimension(lowerLaneBoundary + LANE_BOTTOM_GAP);
+    const exteriorTracks = assignExteriorTrackSlots(placements, yByRelationId);
+    const maximumTrackSpan = Math.max(MINIMUM_RELATION_TRACK_SPAN,
+        ...input.relations.map(relation => relationTrackSpan(relation.labelSize)));
     const lanes = placements.map(placement => {
         const y = yByRelationId.get(placement.reservation.relationId);
         if (y === undefined) {
             throw new Error(`Drawnix relation lane "${placement.reservation.relationId}" has no allocated row.`);
         }
         const labelSize = placement.relation.labelSize;
+        const trackOffset = exteriorTracks.slots.get(placement.reservation.relationId)! * RELATION_TRACK_GAP;
+        const westInner = forestLeft - NODE_TRACK_CLEARANCE;
+        const eastInner = forestRight + NODE_TRACK_CLEARANCE;
+        const [leftTrackX, rightTrackX, labelCenterX] = placement.mode === 'left-side'
+            ? [westInner - exteriorTracks.westSpan - maximumTrackSpan - trackOffset,
+                westInner - trackOffset, westInner - exteriorTracks.westSpan - maximumTrackSpan / 2]
+            : placement.mode === 'right-side'
+                ? [eastInner + trackOffset, eastInner + exteriorTracks.eastSpan + maximumTrackSpan + trackOffset,
+                    eastInner + exteriorTracks.eastSpan + maximumTrackSpan / 2]
+                : [westInner - trackOffset, eastInner + trackOffset, (westInner + eastInner) / 2];
+        assertTracksFitCanvas(placement.reservation.relationId, leftTrackX, rightTrackX, input.canvasWidth);
         const labelBounds = labelSize
             ? {
-                x: placement.labelCenterX - labelSize.width / 2,
+                x: labelCenterX - labelSize.width / 2,
                 y: y - labelSize.height / 2,
                 width: labelSize.width,
                 height: labelSize.height
@@ -297,10 +332,10 @@ export function assignDrawnixRelationLaneGeometry(
         }
         return {
             relationId: placement.reservation.relationId,
-            leftTrackX: placement.leftTrackX,
-            rightTrackX: placement.rightTrackX,
+            leftTrackX,
+            rightTrackX,
             y,
-            labelCenterX: placement.labelCenterX,
+            labelCenterX,
             labelBounds
         };
     });
@@ -309,7 +344,7 @@ export function assignDrawnixRelationLaneGeometry(
 }
 
 /**
- * Reserves the horizontal canvas space required by the widest relation label.
+ * Reserves space for the widest label and worst-case overlapping track banks.
  * Final row and track geometry is resolved only after nodes are placed.
  */
 export function reserveDrawnixRelationLaneSpace(
@@ -328,7 +363,8 @@ export function reserveDrawnixRelationLaneSpace(
         MINIMUM_RELATION_TRACK_SPAN,
         ...input.relations.map(relation => relationTrackSpan(relation.labelSize))
     );
-    const forestSideReserve = CANVAS_EDGE_INSET + NODE_TRACK_CLEARANCE + maximumTrackSpan;
+    const trackBankSpan = Math.max(0, input.relations.length - 1) * RELATION_TRACK_GAP;
+    const forestSideReserve = CANVAS_EDGE_INSET + NODE_TRACK_CLEARANCE + maximumTrackSpan + trackBankSpan * 2;
     const width = finiteCanvasDimension(forestWidth + forestSideReserve * 2);
     const forestOffsetX = Math.ceil((width - forestWidth) / 2);
 

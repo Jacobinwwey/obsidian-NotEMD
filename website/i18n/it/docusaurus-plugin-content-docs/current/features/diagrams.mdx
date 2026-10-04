@@ -76,7 +76,7 @@ Notemd sanitizza SVG e mantiene la fonte Mermaid nei metadati `.drawnix`. Antepr
 
 Le immagini risolte usano dati incorporati quando possibile. L’ordine è dati embedded, file companion precedenti, ricostruzione dalla fonte. Mantieni file ancora referenziati: un nuovo export autonomo non prova inutilità di directory condivise.
 
-Drawnix mostra fino a sei relazioni dirette essenziali con etichetta, al massimo tre per nodo; quelle omesse restano nei metadati. Il testo nei riquadri è visibile nel PDF anche da vecchi SVG in cache. Le frecce tra rami sono statiche e possono staccarsi dopo una riorganizzazione in Drawnix.
+Drawnix conserva tutte le relazioni dirette esplicite, senza un limite totale o per nodo. Deduplica le affermazioni identiche, mantenendo predicati diversi e direzioni inverse. I percorsi esterni sovrapposti usano corsie separate; quelli disgiunti riutilizzano le corsie. Le etichette ricevono righe dimensionate e la tela si espande quando necessario. Le frecce senza etichetta, generiche o ridondanti rispetto alla gerarchia restano nei metadati con il motivo. Il testo nei riquadri resta visibile nel PDF, anche da vecchie cache SVG. Le frecce tra rami sono statiche e possono scollegarsi dopo una riorganizzazione in Drawnix.
 
 ## Limiti dell’export nativo
 

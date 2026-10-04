@@ -23,7 +23,7 @@
 
 - Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
 - Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir.
-- Drawnix en fazla altı etiketli temel yönlü ilişki, düğüm başına en fazla üç ilişki gösterir. Atlanan ilişkiler üst verilerde korunur. Kutulu metin eski SVG önbelleğinden de PDF’de görünür. Dallar arası oklar statiktir ve Drawnix’te yeniden düzenleme sonrasında kopabilir.
+- Drawnix tüm açık yönlü ilişkileri korur; toplam sayı veya düğüm başına sabit sınır uygulamaz. Yalnızca aynı iddialar tekilleştirilir; farklı yüklemler ve ters yönler korunur. Çakışan dış yollar ayrı hatlar kullanır, ayrık yollar hatları yeniden kullanır. Etiketlere ölçülerine uygun satırlar ayrılır ve tuval gerektiğinde genişler. Etiketsiz, genel veya hiyerarşiyi tekrarlayan oklar nedenleriyle birlikte meta veride kalır. İlişki kutusu metni, eski SVG önbellekleri dahil PDF çıktısında görünür. Dallar arası oklar statiktir ve Drawnix içinde yeniden düzenlemeden sonra ayrılabilir.
 
 36 sağlayıcı ön ayarı ve çalıştırılabilir 33 diyagram türü 1.9.7 sürümünde zaten vardı. [Yükseltme kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/releases/1.9.9) · [Herkese açık sürümü doğrulayın](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

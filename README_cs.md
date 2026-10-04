@@ -23,7 +23,7 @@
 
 - Vyberte více typů diagramů pro jeden běh a pro každý typ více výstupních formátů. Zrušení výběru zachová jeho formáty; bez vybraného typu se obsah analyzuje automaticky.
 - Vybrané soubory se automaticky exportují vedle zdrojové poznámky nebo přímo do nastavené složky. Název obsahuje typ, například `topic_drawnix.pdf` a `topic_flowchart.svg`; při kolizi se přidá `-2`, `-3` atd. bez přepsání souborů.
-- Drawnix zobrazuje nejvýše šest popsaných hlavních směrovaných vztahů, maximálně tři na uzel. Vynechané vztahy zůstávají v metadatech. Text v rámečcích je viditelný v PDF i ze starších SVG v mezipaměti. Šipky mezi větvemi jsou statické a po přeuspořádání v Drawnix se mohou odpojit.
+- Drawnix zachovává všechny výslovné orientované vztahy bez pevného celkového limitu nebo limitu na uzel. Odstraňuje pouze shodná tvrzení; různé predikáty a opačné směry zůstávají. Překrývající se vnější trasy dostávají oddělené dráhy, oddělené trasy dráhy znovu využívají. Popisky mají řádky podle rozměrů a plátno se podle potřeby rozšiřuje. Šipky bez popisku, obecné vazby a opakování hierarchie zůstávají v metadatech s důvodem. Text v rámečcích vztahů je viditelný v PDF i ze starší mezipaměti SVG. Šipky mezi větvemi jsou statické a po změně uspořádání v Drawnix se mohou odpojit.
 
 36 předvoleb poskytovatelů a 33 spustitelných typů diagramů existovalo už v 1.9.7. [Průvodce aktualizací](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/releases/1.9.9) · [Ověřit veřejné vydání](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

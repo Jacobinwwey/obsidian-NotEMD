@@ -23,7 +23,7 @@
 
 - Wybierz wiele typów diagramów w jednym uruchomieniu i osobne zestawy formatów dla każdego typu. Odznaczenie typu zachowuje jego formaty; brak wyboru oznacza automatyczną analizę treści.
 - Wybrane pliki są automatycznie eksportowane obok notatki źródłowej lub bezpośrednio do wskazanego folderu. Nazwy zawierają typ, np. `topic_drawnix.pdf` i `topic_flowchart.svg`. Konflikty dodają `-2`, `-3` itd., bez nadpisywania plików.
-- Drawnix pokazuje maksymalnie sześć podpisanych głównych relacji skierowanych, najwyżej trzy na węzeł. Pominięte relacje pozostają w metadanych. Tekst w ramkach jest widoczny w PDF również ze starszych SVG w pamięci podręcznej. Strzałki między gałęziami są statyczne i mogą odłączyć się po zmianie układu w Drawnix.
+- Drawnix zachowuje wszystkie jawne relacje skierowane bez stałego limitu całkowitego ani limitu na węzeł. Usuwa tylko identyczne twierdzenia; różne predykaty i przeciwne kierunki pozostają. Nakładające się trasy zewnętrzne otrzymują osobne tory, rozłączne trasy ponownie wykorzystują tory. Etykiety dostają wiersze dopasowane do wymiarów, a obszar rysunku rośnie według potrzeb. Strzałki bez etykiet, ogólne powiązania i powtórzenia hierarchii pozostają w metadanych z przyczyną. Tekst w ramkach relacji jest widoczny w PDF, także ze starszej pamięci SVG. Strzałki między gałęziami są statyczne i mogą odłączyć się po zmianie układu w Drawnix.
 
 36 ustawień dostawców i 33 wykonywalne typy diagramów istniały już w 1.9.7. [Przewodnik aktualizacji](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/releases/1.9.9) · [Sprawdź publiczne wydanie](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

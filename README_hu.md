@@ -23,7 +23,7 @@
 
 - Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
 - A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás.
-- A Drawnix legfeljebb hat feliratozott, irányított fő kapcsolatot mutat, csomópontonként legfeljebb hármat. A kihagyott kapcsolatok megmaradnak a metaadatokban. A keretes szöveg régi SVG-gyorsítótárból is látszik PDF-ben. Az ágak közötti nyilak statikusak, és átrendezéskor leválhatnak a Drawnixban.
+- A Drawnix minden kifejezett irányított kapcsolatot megtart, rögzített összesített vagy csomópontonkénti korlát nélkül. Csak az azonos állításokat szűri ki; a különböző predikátumok és fordított irányok megmaradnak. Az átfedő külső útvonalak külön sávot kapnak, az elkülönülők újrahasználják a sávokat. A címkék méretük szerinti sorokat kapnak, a rajzterület szükség szerint bővül. A címke nélküli, általános vagy a hierarchiát ismétlő nyilak indoklással a metaadatokban maradnak. A kapcsolati keretek szövege PDF-ben is látható, régi SVG-gyorsítótárból is. Az ágak közötti nyilak statikusak, és Drawnixban történő átrendezés után leválhatnak.
 
 A 36 szolgáltatói előbeállítás és 33 végrehajtható diagramtípus már az 1.9.7-ben is létezett. [Frissítési útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/releases/1.9.9) · [Nyilvános kiadás ellenőrzése](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 

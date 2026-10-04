@@ -23,7 +23,7 @@
 
 - Valitse useita kaaviotyyppejä samaan ajoon ja kullekin tyypille useita tulostusmuotoja. Tyypin valinnan poistaminen säilyttää sen muodot. Jos mitään tyyppiä ei valita, sisältö analysoidaan automaattisesti.
 - Valitut tiedostot viedään automaattisesti lähdemuistiinpanon viereen tai suoraan määritettyyn tuloskansioon. Nimi sisältää tyypin, kuten `topic_drawnix.pdf` tai `topic_flowchart.svg`. Nimiristiriidoissa lisätään `-2`, `-3` jne. korvaamatta vanhoja tiedostoja.
-- Drawnix näyttää enintään kuusi nimettyä, suunnattua ydinsuhdetta, korkeintaan kolme solmua kohti. Pois jätetyt suhteet säilyvät metatiedoissa. Laatikoiden teksti näkyy PDF:ssä myös vanhoista SVG-välimuisteista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa uudelleen järjestettäessä.
+- Drawnix säilyttää kaikki selkeästi ilmaistut suunnatut suhteet ilman kokonaismäärän tai solmukohtaisen määrän rajaa. Vain samat väitteet poistetaan kaksoiskappaleina; eri predikaatit ja vastakkaiset suunnat säilyvät. Päällekkäiset ulkoreitit saavat erilliset kaistat, erilliset reitit käyttävät kaistoja uudelleen. Tunnisteille varataan mittojen mukaiset rivit ja piirtoalue kasvaa tarvittaessa. Nimeämättömät, yleiset tai hierarkiaa toistavat nuolet jäävät metatietoihin syineen. Suhderuutujen teksti näkyy PDF:ssä myös vanhasta SVG-välimuistista. Haarojen väliset nuolet ovat staattisia ja voivat irrota Drawnixissa tehdyn uudelleenjärjestelyn jälkeen.
 
 36 tarjoajaesiasetusta ja 33 suoritettavaa kaaviotyyppiä olivat mukana jo versiossa 1.9.7. [Päivitysopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/releases/1.9.9) · [Tarkista julkinen julkaisu](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.9).
 
