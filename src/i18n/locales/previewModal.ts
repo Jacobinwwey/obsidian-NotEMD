@@ -5,6 +5,12 @@ type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } 
 export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdEnglishStrings>> = {
     ar: {
         previewModal: {
+            zoomIn: "تكبير",
+            zoomOut: "تصغير",
+            zoomFit: "ملاءمة",
+            zoomActual: "الحجم الفعلي",
+            zoomLevel: "مستوى التكبير",
+            zoomViewport: "عرض المخطط. اسحب للتحريك؛ اضغط Ctrl أو Command مع عجلة الفأرة للتكبير.",
             title: 'معاينة {target}',
             copySource: 'نسخ المصدر',
             saveSource: 'حفظ ملف المصدر',
@@ -31,6 +37,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     de: {
         previewModal: {
+            zoomIn: "Vergrößern",
+            zoomOut: "Verkleinern",
+            zoomFit: "Einpassen",
+            zoomActual: "Originalgröße",
+            zoomLevel: "Zoomstufe",
+            zoomViewport: "Diagrammansicht. Zum Verschieben ziehen; mit Strg oder Command und Mausrad zoomen.",
             title: '{target}-Vorschau',
             copySource: 'Quelle kopieren',
             saveSource: 'Quelldatei speichern',
@@ -57,6 +69,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     es: {
         previewModal: {
+            zoomIn: "Acercar",
+            zoomOut: "Alejar",
+            zoomFit: "Ajustar",
+            zoomActual: "Tamaño real",
+            zoomLevel: "Nivel de zoom",
+            zoomViewport: "Vista del diagrama. Arrastra para desplazar; usa Ctrl o Command y la rueda para ampliar.",
             title: 'Vista previa de {target}',
             copySource: 'Copiar fuente',
             saveSource: 'Guardar archivo fuente',
@@ -83,6 +101,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     fa: {
         previewModal: {
+            zoomIn: "بزرگ‌نمایی",
+            zoomOut: "کوچک‌نمایی",
+            zoomFit: "جا دادن",
+            zoomActual: "اندازهٔ واقعی",
+            zoomLevel: "میزان بزرگ‌نمایی",
+            zoomViewport: "نمای نمودار. برای جابه‌جایی بکشید؛ برای بزرگ‌نمایی Ctrl یا Command را همراه چرخ ماوس نگه دارید.",
             title: 'پیش‌نمایش {target}',
             copySource: 'کپی منبع',
             saveSource: 'ذخیره فایل منبع',
@@ -109,6 +133,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     fr: {
         previewModal: {
+            zoomIn: "Agrandir",
+            zoomOut: "Réduire",
+            zoomFit: "Ajuster",
+            zoomActual: "Taille réelle",
+            zoomLevel: "Niveau de zoom",
+            zoomViewport: "Vue du diagramme. Glissez pour déplacer ; utilisez Ctrl ou Command avec la molette pour zoomer.",
             title: 'Aperçu {target}',
             copySource: 'Copier la source',
             saveSource: 'Enregistrer le fichier source',
@@ -135,6 +165,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     id: {
         previewModal: {
+            zoomIn: "Perbesar",
+            zoomOut: "Perkecil",
+            zoomFit: "Sesuaikan",
+            zoomActual: "Ukuran asli",
+            zoomLevel: "Tingkat zoom",
+            zoomViewport: "Tampilan diagram. Seret untuk menggeser; gunakan Ctrl atau Command dan roda mouse untuk memperbesar.",
             title: 'Pratinjau {target}',
             copySource: 'Salin sumber',
             saveSource: 'Simpan file sumber',
@@ -161,6 +197,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     it: {
         previewModal: {
+            zoomIn: "Ingrandisci",
+            zoomOut: "Riduci",
+            zoomFit: "Adatta",
+            zoomActual: "Dimensioni reali",
+            zoomLevel: "Livello di zoom",
+            zoomViewport: "Vista del diagramma. Trascina per spostare; usa Ctrl o Command e la rotellina per ingrandire.",
             title: 'Anteprima {target}',
             copySource: 'Copia sorgente',
             saveSource: 'Salva file sorgente',
@@ -187,6 +229,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     ja: {
         previewModal: {
+            zoomIn: "拡大",
+            zoomOut: "縮小",
+            zoomFit: "全体表示",
+            zoomActual: "実際のサイズ",
+            zoomLevel: "ズーム倍率",
+            zoomViewport: "図の表示。ドラッグで移動、Ctrl または Command とマウスホイールで拡大・縮小。",
             title: '{target} プレビュー',
             copySource: 'ソースをコピー',
             saveSource: 'ソースファイルを保存',
@@ -213,6 +261,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     ko: {
         previewModal: {
+            zoomIn: "확대",
+            zoomOut: "축소",
+            zoomFit: "화면 맞춤",
+            zoomActual: "실제 크기",
+            zoomLevel: "확대 배율",
+            zoomViewport: "다이어그램 보기. 드래그하여 이동하고 Ctrl 또는 Command와 마우스 휠로 확대·축소하세요.",
             title: '{target} 미리보기',
             copySource: '소스 복사',
             saveSource: '소스 파일 저장',
@@ -239,6 +293,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     nl: {
         previewModal: {
+            zoomIn: "Inzoomen",
+            zoomOut: "Uitzoomen",
+            zoomFit: "Passend",
+            zoomActual: "Werkelijke grootte",
+            zoomLevel: "Zoomniveau",
+            zoomViewport: "Diagramweergave. Sleep om te verplaatsen; gebruik Ctrl of Command en het muiswiel om te zoomen.",
             title: '{target}-voorbeeld',
             copySource: 'Bron kopieren',
             saveSource: 'Bronbestand opslaan',
@@ -265,6 +325,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     pl: {
         previewModal: {
+            zoomIn: "Powiększ",
+            zoomOut: "Pomniejsz",
+            zoomFit: "Dopasuj",
+            zoomActual: "Rozmiar rzeczywisty",
+            zoomLevel: "Poziom powiększenia",
+            zoomViewport: "Widok diagramu. Przeciągnij, aby przesunąć; użyj Ctrl lub Command i kółka myszy, aby powiększyć.",
             title: 'Podgląd {target}',
             copySource: 'Kopiuj źródło',
             saveSource: 'Zapisz plik źródłowy',
@@ -291,6 +357,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     pt: {
         previewModal: {
+            zoomIn: "Ampliar",
+            zoomOut: "Reduzir",
+            zoomFit: "Ajustar",
+            zoomActual: "Tamanho real",
+            zoomLevel: "Nível de zoom",
+            zoomViewport: "Vista do diagrama. Arraste para deslocar; use Ctrl ou Command e a roda do rato para ampliar.",
             title: 'Pré-visualização de {target}',
             copySource: 'Copiar origem',
             saveSource: 'Guardar ficheiro fonte',
@@ -317,6 +389,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     'pt-BR': {
         previewModal: {
+            zoomIn: "Ampliar",
+            zoomOut: "Reduzir",
+            zoomFit: "Ajustar",
+            zoomActual: "Tamanho real",
+            zoomLevel: "Nível de zoom",
+            zoomViewport: "Visualização do diagrama. Arraste para mover; use Ctrl ou Command e a roda do mouse para ampliar.",
             title: 'Pré-visualização de {target}',
             copySource: 'Copiar fonte',
             saveSource: 'Salvar arquivo-fonte',
@@ -343,6 +421,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     ru: {
         previewModal: {
+            zoomIn: "Увеличить",
+            zoomOut: "Уменьшить",
+            zoomFit: "Вписать",
+            zoomActual: "Исходный размер",
+            zoomLevel: "Масштаб",
+            zoomViewport: "Просмотр диаграммы. Перетаскивайте для перемещения; используйте Ctrl или Command и колесо мыши для изменения масштаба.",
             title: 'Предпросмотр {target}',
             copySource: 'Копировать исходник',
             saveSource: 'Сохранить исходный файл',
@@ -369,6 +453,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     th: {
         previewModal: {
+            zoomIn: "ขยาย",
+            zoomOut: "ย่อ",
+            zoomFit: "พอดีหน้าต่าง",
+            zoomActual: "ขนาดจริง",
+            zoomLevel: "ระดับการซูม",
+            zoomViewport: "มุมมองแผนภาพ ลากเพื่อเลื่อน ใช้ Ctrl หรือ Command ร่วมกับล้อเมาส์เพื่อซูม",
             title: 'ตัวอย่าง {target}',
             copySource: 'คัดลอกซอร์ส',
             saveSource: 'บันทึกไฟล์ต้นฉบับ',
@@ -395,6 +485,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     tr: {
         previewModal: {
+            zoomIn: "Yakınlaştır",
+            zoomOut: "Uzaklaştır",
+            zoomFit: "Sığdır",
+            zoomActual: "Gerçek boyut",
+            zoomLevel: "Yakınlaştırma düzeyi",
+            zoomViewport: "Diyagram görünümü. Kaydırmak için sürükleyin; yakınlaştırmak için Ctrl veya Command ile fare tekerleğini kullanın.",
             title: '{target} önizlemesi',
             copySource: 'Kaynağı kopyala',
             saveSource: 'Kaynak dosyayı kaydet',
@@ -421,6 +517,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     uk: {
         previewModal: {
+            zoomIn: "Збільшити",
+            zoomOut: "Зменшити",
+            zoomFit: "Умістити",
+            zoomActual: "Початковий розмір",
+            zoomLevel: "Масштаб",
+            zoomViewport: "Перегляд діаграми. Перетягуйте для переміщення; використовуйте Ctrl або Command і коліщатко миші для масштабування.",
             title: 'Попередній перегляд {target}',
             copySource: 'Копіювати джерело',
             saveSource: 'Зберегти файл джерела',
@@ -447,6 +549,12 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
     },
     vi: {
         previewModal: {
+            zoomIn: "Phóng to",
+            zoomOut: "Thu nhỏ",
+            zoomFit: "Vừa khung",
+            zoomActual: "Kích thước thật",
+            zoomLevel: "Mức thu phóng",
+            zoomViewport: "Khung xem sơ đồ. Kéo để di chuyển; dùng Ctrl hoặc Command cùng con lăn chuột để thu phóng.",
             title: 'Xem trước {target}',
             copySource: 'Sao chép nguồn',
             saveSource: 'Lưu tệp nguồn',

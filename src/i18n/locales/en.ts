@@ -1074,6 +1074,12 @@ export const STRINGS_EN = {
         userRequestedCancellation: 'User requested cancellation.'
     },
     previewModal: {
+        zoomIn: "Zoom in",
+        zoomOut: "Zoom out",
+        zoomFit: "Fit",
+        zoomActual: "Actual size",
+        zoomLevel: "Zoom level",
+        zoomViewport: "Diagram view. Drag to pan; Ctrl or Command with the mouse wheel to zoom.",
         title: '{target} preview',
         panelTitle: 'Diagram {index} of {total}',
         exportMenu: 'Export',

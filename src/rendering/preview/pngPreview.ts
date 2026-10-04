@@ -1,3 +1,5 @@
+import { Zlib } from 'fflate';
+
 export interface PreviewImageLike {
     onload: null | ((...args: unknown[]) => unknown);
     onerror: null | ((...args: unknown[]) => unknown);
@@ -9,6 +11,7 @@ export type PreviewImageSource = PreviewImageLike | HTMLImageElement;
 export interface PreviewCanvasContextLike {
     scale(x: number, y: number): void;
     drawImage(image: PreviewImageSource, dx: number, dy: number, dw: number, dh: number): void;
+    getImageData?: (x: number, y: number, width: number, height: number) => { data: Uint8ClampedArray };
     fillStyle?: string;
     fillRect?: (x: number, y: number, width: number, height: number) => void;
 }
@@ -45,6 +48,12 @@ export const MAX_PREVIEW_EXPORT_PPI = 600;
 export const SUPPORTED_PREVIEW_EXPORT_PPI = [100, 300, 600] as const;
 export type SupportedPreviewExportPpi = typeof SUPPORTED_PREVIEW_EXPORT_PPI[number];
 const CSS_PIXELS_PER_INCH = 96;
+// Large PNGs use bounded SVG viewports and scanline strips; PPI is never reduced.
+const MAX_RASTER_EDGE_PX = 8192;
+const MAX_RASTER_PIXELS = 16 * 1024 * 1024;
+const MAX_PNG_STRIP_BYTES = 16 * 1024 * 1024;
+const MAX_PNG_STRIP_ROWS = 512;
+const PNG_COMPRESSION_ROWS = 16;
 const METERS_PER_INCH = 0.0254;
 const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
@@ -62,6 +71,7 @@ export interface RasterizedImageResult {
     imageWidthPx: number;
     imageHeightPx: number;
     ppi: number;
+    requestedPpi: number;
     mimeType: 'image/png' | 'image/jpeg';
 }
 
@@ -487,8 +497,132 @@ async function loadImage(sourceUrl: string, deps: PreviewPngRasterDeps): Promise
     });
 }
 
-function resolveRasterScale(ppi: number): number {
-    return ppi / CSS_PIXELS_PER_INCH;
+function resolveRasterGeometry(dimensions: SvgDimensions, ppi: number) {
+    const scale = ppi / CSS_PIXELS_PER_INCH;
+    const width = Math.max(1, Math.ceil(dimensions.width * scale));
+    const height = Math.max(1, Math.ceil(dimensions.height * scale));
+    // PNG dimensions are unsigned 31-bit values. One scanline must also fit the
+    // strip budget; this protects against malformed intrinsic dimensions.
+    if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height)
+        || width > 0x7fffffff || height > 0x7fffffff || width * 4 + 1 > MAX_PNG_STRIP_BYTES) {
+        throw new Error('Raster export dimensions exceed the supported scanline size.');
+    }
+    return { scale, width, height };
+}
+
+async function encodeRasterCanvas(
+    image: PreviewImageSource,
+    dimensions: SvgDimensions,
+    geometry: ReturnType<typeof resolveRasterGeometry>,
+    deps: PreviewPngRasterDeps,
+    options: PreviewRasterExportOptions
+): Promise<Blob | null> {
+    const canvas = deps.createCanvas(geometry.width, geometry.height);
+    try {
+        const context = canvas.getContext('2d');
+        if (!context) return null;
+        context.scale(geometry.scale, geometry.scale);
+        if (context.fillRect) {
+            context.fillStyle = options.backgroundColor ?? '#ffffff';
+            context.fillRect(0, 0, dimensions.width, dimensions.height);
+        }
+        context.drawImage(image, 0, 0, dimensions.width, dimensions.height);
+        return await new Promise<Blob | null>(resolve => {
+            canvas.toBlob(resolve, options.mimeType ?? 'image/png', options.quality);
+        });
+    } finally {
+        canvas.width = 0;
+        canvas.height = 0;
+    }
+}
+
+function createSvgTileMarkup(
+    svg: string, dimensions: SvgDimensions, scale: number,
+    x: number, y: number, width: number, height: number
+): string {
+    // Keep the original root as a nested viewport. Replacing its viewBox would
+    // lose nonzero origins, aspect-ratio alignment, and percentage coordinates.
+    const nestedSvg = svg.replace(/<svg\b([^>]*)>/i, (_match, attributes: string) => {
+        const preserved = attributes.replace(/\s+(?:width|height|x|y)\s*=\s*(["']).*?\1/gi, '');
+        const style = readSvgAttribute(preserved, 'style') ?? '';
+        const withoutStyle = preserved.replace(/\s+style\s*=\s*(["']).*?\1/gi, '');
+        return '<svg' + withoutStyle + ' x="0" y="0" width="' + dimensions.width
+            + '" height="' + dimensions.height + '" style="' + style.replace(/"/g, '&quot;')
+            + ';width:' + dimensions.width + 'px!important;height:' + dimensions.height + 'px!important">';
+    });
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height
+        + '" viewBox="' + x / scale + ' ' + y / scale + ' ' + width / scale + ' ' + height / scale
+        + '" preserveAspectRatio="none">' + nestedSvg.replace(/^\s*<\?xml[^>]*>\s*/i, '') + '</svg>';
+}
+
+async function encodeTiledSvgPng(
+    svg: string, dimensions: SvgDimensions, geometry: ReturnType<typeof resolveRasterGeometry>,
+    deps: PreviewPngRasterDeps, options: PreviewRasterExportOptions, ppi: number
+): Promise<ArrayBuffer> {
+    const header = new Uint8Array(13);
+    const headerView = new DataView(header.buffer);
+    headerView.setUint32(0, geometry.width, false);
+    headerView.setUint32(4, geometry.height, false);
+    header[8] = 8;
+    header[9] = 6; // Eight-bit RGBA, noninterlaced.
+    const chunks = [PNG_SIGNATURE, buildPngChunk('IHDR', header), buildPngPhysicalPixelDensityChunk(ppi)];
+    const compressor = new Zlib({ level: 1 }, compressed => {
+        if (compressed.byteLength) chunks.push(buildPngChunk('IDAT', compressed));
+    });
+    // Message tasks yield to input without background-window timer throttling.
+    const scheduler = new MessageChannel();
+    const yieldToRenderer = () => new Promise<void>(resolve => {
+        scheduler.port1.onmessage = () => resolve();
+        scheduler.port2.postMessage(null);
+    });
+    const stride = geometry.width * 4 + 1;
+    const stripRows = Math.min(MAX_PNG_STRIP_ROWS, Math.floor(MAX_PNG_STRIP_BYTES / stride));
+    try {
+        for (let y = 0; y < geometry.height; y += stripRows) {
+            const height = Math.min(stripRows, geometry.height - y);
+            // Every row starts with filter 0. Keep only one strip, never the complete
+            // RGBA image; the public API retains just the compressed PNG bytes.
+            const scanlines = new Uint8Array(stride * height);
+            for (let x = 0; x < geometry.width; x += MAX_RASTER_EDGE_PX) {
+                const width = Math.min(MAX_RASTER_EDGE_PX, geometry.width - x);
+                const markup = createSvgTileMarkup(svg, dimensions, geometry.scale, x, y, width, height);
+                const url = deps.createObjectURL(deps.createBlob([markup], { type: 'image/svg+xml;charset=utf-8' }));
+                let canvas: PreviewCanvasLike | undefined;
+                let image: PreviewImageSource | undefined;
+                try {
+                    image = await loadImage(url, deps);
+                    canvas = deps.createCanvas(width, height);
+                    const context = canvas.getContext('2d');
+                    if (!context?.getImageData) throw new Error('PNG export pixel readback is unavailable.');
+                    if (context.fillRect) {
+                        context.fillStyle = options.backgroundColor ?? '#ffffff';
+                        context.fillRect(0, 0, width, height);
+                    }
+                    context.drawImage(image, 0, 0, width, height);
+                    const pixels = context.getImageData(0, 0, width, height).data;
+                    for (let row = 0; row < height; row++) {
+                        scanlines.set(pixels.subarray(row * width * 4, (row + 1) * width * 4), row * stride + 1 + x * 4);
+                    }
+                } finally {
+                    if (canvas) { canvas.width = 0; canvas.height = 0; }
+                    if (image) { image.onload = null; image.onerror = null; image.src = ''; }
+                    deps.revokeObjectURL(url);
+                }
+            }
+            // Limit synchronous compression work between event-loop turns so a large
+            // diagram does not monopolize the Obsidian renderer.
+            for (let row = 0; row < height; row += PNG_COMPRESSION_ROWS) {
+                const end = Math.min(height, row + PNG_COMPRESSION_ROWS);
+                compressor.push(scanlines.subarray(row * stride, end * stride), y + end === geometry.height);
+                await yieldToRenderer();
+            }
+        }
+    } finally {
+        scheduler.port1.close();
+        scheduler.port2.close();
+    }
+    chunks.push(buildPngChunk('IEND', new Uint8Array()));
+    return concatBytes(chunks).buffer as ArrayBuffer;
 }
 
 export async function rasterizeSvgToImageArrayBuffer(
@@ -498,55 +632,30 @@ export async function rasterizeSvgToImageArrayBuffer(
 ): Promise<RasterizedImageResult> {
     const dimensions = resolveSvgDimensions(svg);
     const ppi = resolvePreviewExportPpi(options.ppi);
-    const scale = resolveRasterScale(ppi);
     const mimeType = options.mimeType ?? 'image/png';
+    const geometry = resolveRasterGeometry(dimensions, ppi);
     const rasterSvg = sanitizeSvgForExport(svg);
-    const blob = deps.createBlob([rasterSvg], { type: 'image/svg+xml;charset=utf-8' });
-    const objectUrl = deps.createObjectURL(blob);
-    const imageWidthPx = Math.max(1, Math.ceil(dimensions.width * scale));
-    const imageHeightPx = Math.max(1, Math.ceil(dimensions.height * scale));
-
-    try {
-        const image = await loadImage(objectUrl, deps);
-        const canvas = deps.createCanvas(imageWidthPx, imageHeightPx);
-        const context = canvas.getContext('2d');
-        if (!context) {
-            throw new Error('PNG export canvas context is unavailable.');
+    let data: ArrayBuffer | undefined;
+    if (geometry.width <= MAX_RASTER_EDGE_PX && geometry.height <= MAX_RASTER_EDGE_PX
+        && geometry.width * geometry.height <= MAX_RASTER_PIXELS) {
+        const objectUrl = deps.createObjectURL(deps.createBlob([rasterSvg], { type: 'image/svg+xml;charset=utf-8' }));
+        try {
+            const image = await loadImage(objectUrl, deps);
+            const rasterBlob = await encodeRasterCanvas(image, dimensions, geometry, deps, options);
+            if (rasterBlob) {
+                data = await deps.blobToArrayBuffer(rasterBlob);
+                if (mimeType === 'image/png') data = applyPngPhysicalPixelDensity(data, ppi);
+            }
+        } finally {
+            deps.revokeObjectURL(objectUrl);
         }
-
-        context.scale(scale, scale);
-        if (context.fillRect) {
-            context.fillStyle = options.backgroundColor ?? '#ffffff';
-            context.fillRect(0, 0, dimensions.width, dimensions.height);
-        }
-        context.drawImage(image, 0, 0, dimensions.width, dimensions.height);
-
-        const rasterBlob = await new Promise<Blob>((resolve, reject) => {
-            canvas.toBlob((blob) => {
-                if (!blob) {
-                    reject(new Error('Raster export canvas encoding failed.'));
-                    return;
-                }
-                resolve(blob);
-            }, mimeType, options.quality);
-        });
-        const data = await deps.blobToArrayBuffer(rasterBlob);
-        const exportData = mimeType === 'image/png'
-            ? applyPngPhysicalPixelDensity(data, ppi)
-            : data;
-
-        return {
-            data: exportData,
-            sourceWidthCssPx: dimensions.width,
-            sourceHeightCssPx: dimensions.height,
-            imageWidthPx,
-            imageHeightPx,
-            ppi,
-            mimeType
-        };
-    } finally {
-        deps.revokeObjectURL(objectUrl);
     }
+    if (!data) {
+        if (mimeType !== 'image/png') throw new Error('JPEG export exceeds the available canvas capacity.');
+        data = await encodeTiledSvgPng(rasterSvg, dimensions, geometry, deps, options, ppi);
+    }
+    return { data, sourceWidthCssPx: dimensions.width, sourceHeightCssPx: dimensions.height,
+        imageWidthPx: geometry.width, imageHeightPx: geometry.height, ppi, requestedPpi: ppi, mimeType };
 }
 
 export async function rasterizeSvgToPngArrayBuffer(

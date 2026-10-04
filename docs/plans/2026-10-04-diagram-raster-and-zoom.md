@@ -1,0 +1,21 @@
+# PNG resolution preservation and independent preview zoom
+
+## Problem and contract
+
+The real architecture receipt recorded a failed PNG while Drawnix, HTML, SVG and PDF succeeded. A 4772 × 16749 CSS-pixel SVG at 300 PPI requires 14913 × 52341 pixels, about 3.12 GB of RGBA storage. The single-canvas encoder returned null. An initial memory-budget implementation reduced the output to about 44 PPI; this violates the existing 72–600 PPI contract and was rejected. Default PPI remains 300. SVG is vector-based; PPI applies when rasterizing it.
+
+## Implementation
+
+Keep the requested pixel dimensions. Small images retain the native canvas encoder; large PNGs and null native encodings use bounded SVG viewports, scanline strips and a streaming zlib encoder. Each strip is at most 16 MiB, each tile is at most 8192 pixels wide and 512 rows high, and the actual strip height also respects the byte budget. Preserve the original SVG root as a nested viewport, including its viewBox origin, aspect-ratio alignment, percentage coordinates, definitions and Unicode labels. Write IHDR and pHYs directly, followed by streaming IDAT chunks. Release canvas storage, image sources, object URLs and message ports. Message tasks yield between bounded compression batches without background timer throttling. The API returns compressed bytes, so compressed output storage still scales with output size. JPEG has no production consumers and does not silently lower PPI; its native canvas capacity remains a limitation.
+
+Each visual preview owns an independent display viewport: zoom out, percentage, zoom in, fit and actual size. Fit considers width and height. Buttons, +/- keys, 0 for fit, 1 for actual size, Ctrl/Command+wheel and dragging provide navigation. Plain wheel still scrolls. Inline SVG, JSON Canvas and same-origin iframe diagrams use the same controller. Export the original artifact; display transforms do not affect resolution. Disconnect observers and listeners on rerender/close. Preserve sandbox policy and interactions on links, forms and editable elements.
+
+## Verification and rollout
+
+Unit regressions check PNG dimensions and density, decompressed scanline order across tiles, UTF-8 labels, nonzero viewBox preservation, resource release and failures without hidden PPI reduction. Small-image output remains 1250 × 625 at 300 PPI. Browser pixel comparisons cover horizontal and vertical seams at 300 PPI and 600 PPI. A fractional final pixel can differ at the outer image edge; interior channels differ by at most one level. Browser viewport checks cover independent panels, inline/iframe diagrams, keyboard, wheel, pan, asynchronous replacement and destroyed listeners, with 44-pixel controls.
+
+Verify the final normal build in the open 1Knowledge Vault through Obsidian CLI. Use the existing generation without a model request, collision-safe numbered siblings, and hashes for original notes and completed deliveries. Keep cache receipts in notemd_assert. Do not overwrite the initial low-PPI output or user-edited files. Recheck PNG IHDR, pHYs, every chunk CRC, the complete zlib stream and scanline count without decoding a 3.12 GB image into a single buffer. Configuration may gain a normal export-history entry; preserve user settings. Translate manuals and diagram pages directly. Require a fresh build, full Jest suite, lint ratchet, UI/render-host audits and website validation before pushing main. Preserve the already published 1.9.9 release assets.
+
+Frontend-law evidence is under .cache/diagram-preview-viewport. Unmeasured contrast and latency metrics remain unknown. The installed ui-ux-pro-max skill lacks its referenced search script; its written rules were applied directly.
+
+Final evidence: 299 Jest suites passed, 2891 tests passed and one skipped. Build, lint ratchet, UI-string/render-host audits and all-locale website build/audit passed. Navigation audit covered 96 pages with zero failures. The final installed normal build exported architecture.zh-CN_drawnix-5.png in 1Knowledge at 14913 × 52341 pixels and 11811 pixels/meter (299.9994 PPI), in about 77 seconds. All 5111 chunk CRCs and 52341 scanlines passed streaming validation. Original files and completed outputs retained their hashes; no model call was made.

@@ -1,9 +1,11 @@
+import { unzlibSync } from 'fflate';
 import {
     DEFAULT_PREVIEW_EXPORT_PPI,
     MAX_PREVIEW_EXPORT_PPI,
     SUPPORTED_PREVIEW_EXPORT_PPI,
     applyPngPhysicalPixelDensity,
     rasterizeSvgToPngArrayBuffer,
+    rasterizeSvgToImageArrayBuffer,
     resolvePngPixelsPerMeter,
     resolvePreviewExportPpi,
     resolveSvgDimensions,
@@ -83,6 +85,120 @@ function readUint32(data: Uint8Array, offset: number): number {
 }
 
 describe('png preview rasterizer', () => {
+    function createRasterProbe(failedEncodings = 0) {
+        const image = {
+            onload: null as null | (() => void), onerror: null,
+            set src(_value: string) { this.onload?.(); }
+        };
+        const canvases: Array<{ width: number; height: number }> = [];
+        const createCanvas = jest.fn((width: number, height: number) => {
+            const canvas = { width, height, getContext: () => ({ scale: jest.fn(), drawImage: jest.fn() }),
+                toBlob: (callback: (blob: Blob | null) => void) => callback(failedEncodings-- > 0 ? null : new Blob(['png'])) };
+            canvases.push(canvas);
+            return canvas;
+        });
+        return { canvases, createCanvas, createBlob: (parts: BlobPart[], options?: BlobPropertyBag) => new Blob(parts, options),
+            createImage: () => image, createObjectURL: () => 'blob:probe', revokeObjectURL: jest.fn(),
+            blobToArrayBuffer: async () => buildMinimalPng() };
+    }
+
+    test('streams wide SVGs at the requested PPI with bounded surfaces and correct scanline order', async () => {
+        const deps = createRasterProbe();
+        let tileMarkup = '';
+        let originX = 0;
+        let originY = 0;
+        deps.createBlob = (parts, options) => {
+            tileMarkup = String(parts[0]);
+            return new Blob(parts, options);
+        };
+        deps.createCanvas.mockImplementation((width, height) => {
+            const viewBox = tileMarkup.match(/viewBox="([^"]+)"/)![1].split(' ').map(Number);
+            originX = viewBox[0];
+            originY = viewBox[1];
+            const canvas = { width, height,
+                getContext: () => ({ scale: jest.fn(), drawImage: jest.fn(),
+                    getImageData: (_x: number, _y: number, w: number, h: number) => {
+                        const pixels = new Uint8ClampedArray(w * h * 4);
+                        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+                            const offset = (y * w + x) * 4;
+                            pixels.set([(originX + x) % 256, (originY + y) % 256, 37, 255], offset);
+                        }
+                        return { data: pixels };
+                    }
+                }), toBlob: jest.fn()
+            };
+            deps.canvases.push(canvas);
+            return canvas;
+        });
+        const image = await rasterizeSvgToImageArrayBuffer(
+            '<svg width="8193" height="2" viewBox="10 -20 200 100" preserveAspectRatio="xMaxYMin slice" style="font-family:&quot;测试字体&quot;"><text>中文</text></svg>', deps, { ppi: 96 });
+        expect(image.imageWidthPx).toBe(8193);
+        expect(image.imageHeightPx).toBe(2);
+        expect(image.ppi).toBe(96);
+        expect(tileMarkup).toContain('viewBox="10 -20 200 100"');
+        expect(tileMarkup).toContain('preserveAspectRatio="xMaxYMin slice"');
+        expect(tileMarkup).toContain('中文');
+        expect(tileMarkup).toContain('font-family:&quot;测试字体&quot;');
+        expect(tileMarkup).not.toContain('&amp;quot;');
+        const chunks = readPngChunks(image.data);
+        const header = chunks.find(chunk => chunk.type === 'IHDR')!.data;
+        expect(readUint32(header, 0)).toBe(8193);
+        expect(readUint32(header, 4)).toBe(2);
+        expect(readUint32(chunks.find(chunk => chunk.type === 'pHYs')!.data, 0)).toBe(Math.round(96 / 0.0254));
+        const rows = unzlibSync(concatBytes(chunks.filter(chunk => chunk.type === 'IDAT').map(chunk => chunk.data)));
+        const stride = 8193 * 4 + 1;
+        expect(rows.length).toBe(stride * 2);
+        for (let y = 0; y < 2; y++) {
+            expect(rows[y * stride]).toBe(0);
+            for (const x of [0, 8191, 8192]) expect(Array.from(rows.slice(y * stride + 1 + x * 4, y * stride + 5 + x * 4)))
+                .toEqual([x % 256, y, 37, 255]);
+        }
+        expect(deps.createCanvas.mock.calls.every(([width, height]) => width <= 8192 && width * height <= 16 * 1024 * 1024)).toBe(true);
+        expect(deps.canvases.every(canvas => canvas.width === 0 && canvas.height === 0)).toBe(true);
+        expect(deps.revokeObjectURL).toHaveBeenCalledTimes(2);
+    });
+
+    test('fails unsupported pixel readback without silently lowering PPI, and releases storage', async () => {
+        const deps = createRasterProbe(100);
+        await expect(rasterizeSvgToImageArrayBuffer('<svg width="400" height="200"></svg>', deps, { ppi: 300 }))
+            .rejects.toThrow(/pixel readback/);
+        expect(deps.canvases.every(canvas => canvas.width === 0 && canvas.height === 0)).toBe(true);
+        expect(deps.revokeObjectURL).toHaveBeenCalledTimes(2);
+    });
+
+    test('falls back from a null native encoder while preserving dimensions and PPI', async () => {
+        const deps = createRasterProbe();
+        deps.createCanvas.mockImplementation((width, height) => {
+            const canvas = { width, height,
+                getContext: () => ({ scale: jest.fn(), drawImage: jest.fn(),
+                    getImageData: () => ({ data: new Uint8ClampedArray(width * height * 4) }) }),
+                toBlob: (callback: (blob: Blob | null) => void) => callback(null) };
+            deps.canvases.push(canvas);
+            return canvas;
+        });
+        const output = await rasterizeSvgToImageArrayBuffer('<svg width="100" height="2"></svg>', deps, { ppi: 300 });
+        expect(output.ppi).toBe(300);
+        expect(output.imageWidthPx).toBe(313);
+        expect(output.imageHeightPx).toBe(7);
+        const chunks = readPngChunks(output.data);
+        expect(readUint32(chunks.find(chunk => chunk.type === 'IHDR')!.data, 0)).toBe(313);
+        expect(readUint32(chunks.find(chunk => chunk.type === 'pHYs')!.data, 0)).toBe(11811);
+        expect(deps.createCanvas).toHaveBeenCalledTimes(2);
+        expect(deps.canvases.every(canvas => canvas.width === 0 && canvas.height === 0)).toBe(true);
+    });
+
+    test('tiles the real architecture dimensions before any canvas allocation', async () => {
+        const deps = createRasterProbe();
+        const createBlob = jest.fn(deps.createBlob);
+        deps.createBlob = createBlob;
+        deps.createCanvas.mockImplementation(() => { throw new Error('Probe stops at the allocation boundary'); });
+        await expect(rasterizeSvgToImageArrayBuffer('<svg viewBox="0 0 4772 16749"></svg>', deps, { ppi: 300 }))
+            .rejects.toThrow('Probe stops at the allocation boundary');
+        expect(deps.createCanvas).toHaveBeenCalledWith(8192, 281);
+        expect(String(createBlob.mock.calls[0][0][0])).toContain('viewBox="0 0 2621.44 89.92"');
+        expect(deps.revokeObjectURL).toHaveBeenCalledTimes(1);
+    });
+
     test('sanitizes foreignObject labels and external image references before rasterization', () => {
         const safeSvg = sanitizeSvgForExport(`
             <svg xmlns="http://www.w3.org/2000/svg" width="240" height="120">

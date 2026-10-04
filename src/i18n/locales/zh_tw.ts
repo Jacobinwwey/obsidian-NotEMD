@@ -1037,6 +1037,12 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         userRequestedCancellation: '使用者要求取消。'
     },
     previewModal: {
+        zoomIn: "放大",
+        zoomOut: "縮小",
+        zoomFit: "適應視窗",
+        zoomActual: "實際大小",
+        zoomLevel: "縮放比例",
+        zoomViewport: "圖形預覽。拖曳平移；按住 Ctrl 或 Command 滾動滑鼠滾輪縮放。",
         title: '{target} 預覽',
         copySource: '複製原始碼',
         copySuccessNotice: '圖形原始碼已複製到剪貼簿！',

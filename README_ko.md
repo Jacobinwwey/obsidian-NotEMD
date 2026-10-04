@@ -10,6 +10,9 @@
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
 <!-- notemd-release-entry-1.9.9 -->
+
+각 다이어그램 미리보기는 확대·축소, 이동, 화면 맞춤, 실제 크기를 독립적으로 지원합니다. Ctrl/Command + 휠로 확대·축소하고 일반 휠로 스크롤합니다. 큰 PNG 내보내기도 선택한 72–600 PPI를 유지합니다(기본값 300). SVG는 벡터 형식이며 PPI는 래스터 내보내기에만 적용됩니다.
+
 ## 여기서 시작하세요
 
 | 대상 | 시작점 | 목표 |

@@ -7,6 +7,20 @@ import * as previewExport from '../rendering/preview/previewExport';
 import * as bundledPreviewDeps from '../rendering/webview/bundledPreviewDeps';
 import * as exportFolderModal from '../ui/DiagramPreviewExportFolderModal';
 import * as exportRuns from '../diagram/diagramExportRun';
+import { DiagramPreviewViewport } from '../ui/DiagramPreviewViewport';
+
+// Browser geometry is covered by verify-diagram-preview-viewport.cjs. These
+// Modal tests isolate lifecycle/renderer dispatch from the lightweight DOM mock.
+jest.mock('../ui/DiagramPreviewViewport', () => ({
+    DiagramPreviewViewport: jest.fn().mockImplementation((container: HTMLElement) => ({
+        contentEl: container, refresh: jest.fn(),
+        attachIframe: jest.fn((iframe: HTMLIFrameElement) => {
+            const body = iframe.contentDocument?.body;
+            iframe.style.height = `${Math.max(body?.scrollHeight ?? 0, body?.offsetHeight ?? 0, 260)}px`;
+        }),
+        destroy: jest.fn()
+    }))
+}));
 
 const bundledMermaidDeps = {
     initialize: jest.fn(),
@@ -230,8 +244,7 @@ function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes
 }
 
 async function flushPromises(): Promise<void> {
-    await Promise.resolve();
-    await Promise.resolve();
+    await new Promise<void>(resolve => setImmediate(resolve));
 }
 
 async function clickExportMenuItem(modal: any, index: number): Promise<void> {
@@ -511,15 +524,7 @@ describe('diagram preview modal', () => {
         expect(iframe.style.height).toBe('928px');
     });
 
-    test('disconnects iframe observers before rerendering the preview', async () => {
-        const originalResizeObserver = (globalThis as any).ResizeObserver;
-        const disconnect = jest.fn();
-        (globalThis as any).ResizeObserver = class {
-            observe = jest.fn();
-            disconnect = disconnect;
-        };
-
-        try {
+    test('destroys per-diagram viewports before rerendering the preview', async () => {
             const modal = mountModal(new DiagramPreviewModal(mockApp, {
                 ...createSession({}, 'Notes/Topic.md', 'dark'),
                 htmlSrcdoc: '<!DOCTYPE html><html><body><svg /></body></html>'
@@ -534,12 +539,10 @@ describe('diagram preview modal', () => {
                 querySelector: () => ({ getBoundingClientRect: () => ({ height: 900 }) })
             };
             iframe.onload?.();
+            const viewport = (DiagramPreviewViewport as jest.Mock).mock.results[0].value;
             modal.renderModal();
 
-            expect(disconnect).toHaveBeenCalledTimes(1);
-        } finally {
-            (globalThis as any).ResizeObserver = originalResizeObserver;
-        }
+            expect(viewport.destroy).toHaveBeenCalledTimes(1);
     });
 
     test('renders every ordered preview panel in the modal', async () => {
@@ -576,6 +579,7 @@ describe('diagram preview modal', () => {
         expect(iframes).toHaveLength(2);
         expect(iframes[0].srcdoc).toContain('flowchart TD');
         expect(iframes[1].srcdoc).toContain('sequenceDiagram');
+        expect(DiagramPreviewViewport).toHaveBeenCalledTimes(2);
     });
 
     test('marks the preview body as a vertical scroll region for tall multi-panel previews', async () => {

@@ -1,4 +1,5 @@
 import { App, Menu, Modal, Notice } from 'obsidian';
+import { DiagramPreviewViewport } from './DiagramPreviewViewport';
 import { formatI18n, getI18nStrings } from '../i18n';
 import {
     renderPreviewArtifactSvg,
@@ -63,7 +64,7 @@ export class DiagramPreviewModal extends Modal {
     private readonly historyStore?: DiagramHistoryStore;
     private readonly historyEntryId?: string;
     private historyDrawer: DiagramHistoryDrawer | null = null;
-    private readonly iframeResizeObservers = new Map<HTMLIFrameElement, ResizeObserver>();
+    private readonly previewViewports = new Set<DiagramPreviewViewport>();
     private exportRun?: DiagramExportRun;
     private exportHistoryError?: string;
     private readonly exportRequest?: DiagramExportRequest;
@@ -97,7 +98,7 @@ export class DiagramPreviewModal extends Modal {
 
     onClose() {
         this.exportReporter.cancelled = true;
-        this.disconnectIframeResizeObservers();
+        this.destroyPreviewViewports();
         this.historyDrawer?.destroy();
         this.historyDrawer = null;
         this.modalEl.removeClass('notemd-diagram-preview-shell');
@@ -105,7 +106,7 @@ export class DiagramPreviewModal extends Modal {
     }
 
     private renderModal(): void {
-        this.disconnectIframeResizeObservers();
+        this.destroyPreviewViewports();
         const i18n = getI18nStrings({ uiLocale: this.uiLocale });
         const { contentEl } = this;
         contentEl.empty();
@@ -270,11 +271,9 @@ export class DiagramPreviewModal extends Modal {
             : null;
     }
 
-    private disconnectIframeResizeObservers(): void {
-        for (const observer of this.iframeResizeObservers.values()) {
-            observer.disconnect();
-        }
-        this.iframeResizeObservers.clear();
+    private destroyPreviewViewports(): void {
+        this.previewViewports.forEach(viewport => viewport.destroy());
+        this.previewViewports.clear();
     }
 
     private showExportMenu(event: MouseEvent): void {
@@ -782,8 +781,19 @@ export class DiagramPreviewModal extends Modal {
     }
 
     private async renderArtifactPreview(container: HTMLElement, artifact: RenderArtifact): Promise<void> {
+        if (supportsSourceOnlyDiagramPreview(artifact) && !supportsPreviewSvgExport(artifact)) {
+            this.renderSourceOnlyPreview(container, artifact);
+            return;
+        }
+        const viewport = new DiagramPreviewViewport(container, getI18nStrings({ uiLocale: this.uiLocale }).previewModal);
+        this.previewViewports.add(viewport);
+        await this.renderArtifactContents(viewport.contentEl, artifact, viewport);
+        viewport.refresh();
+    }
+
+    private async renderArtifactContents(container: HTMLElement, artifact: RenderArtifact, viewport: DiagramPreviewViewport): Promise<void> {
         if (supportsInlineMermaidPreview(artifact) || supportsInlineVegaLitePreview(artifact)) {
-            this.renderIframePreview(container, artifact);
+            this.renderIframePreview(container, artifact, viewport);
             return;
         }
 
@@ -795,7 +805,7 @@ export class DiagramPreviewModal extends Modal {
         }
 
         if (supportsIframeHtmlPreview(artifact)) {
-            this.renderIframePreview(container, artifact);
+            this.renderIframePreview(container, artifact, viewport);
             return;
         }
 
@@ -811,7 +821,7 @@ export class DiagramPreviewModal extends Modal {
             return;
         }
 
-        this.renderIframePreview(container, artifact);
+        this.renderIframePreview(container, artifact, viewport);
     }
 
     private async tryRenderCanvas(container: HTMLElement, artifact: RenderArtifact): Promise<boolean> {
@@ -846,7 +856,7 @@ export class DiagramPreviewModal extends Modal {
         }
     }
 
-    private renderIframePreview(container: HTMLElement, artifact: RenderArtifact): void {
+    private renderIframePreview(container: HTMLElement, artifact: RenderArtifact, viewport: DiagramPreviewViewport): void {
         container.empty();
         const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
         const iframe = container.createEl('iframe', { cls: 'notemd-diagram-preview-frame' });
@@ -868,7 +878,7 @@ export class DiagramPreviewModal extends Modal {
         iframe.onload = () => {
             settled = true;
             if (timeout !== undefined) globalThis.clearTimeout(timeout);
-            this.resizeIframePreview(iframe);
+            viewport.attachIframe(iframe);
         };
         iframe.onerror = () => {
             settled = true;
@@ -884,25 +894,6 @@ export class DiagramPreviewModal extends Modal {
             artifactSaved: this.session.payload.artifactSaved,
             previewTitle: this.session.payload.previewTitle
         }).htmlSrcdoc;
-    }
-
-    private resizeIframePreview(iframe: HTMLIFrameElement): void {
-        const frameDocument = iframe.contentDocument;
-        const body = frameDocument?.body;
-        if (!body) {
-            return;
-        }
-
-        const renderedSvg = frameDocument.querySelector('svg');
-        const svgHeight = renderedSvg?.getBoundingClientRect().height ?? 0;
-        const contentHeight = Math.max(body.scrollHeight, body.offsetHeight, svgHeight, 260);
-        iframe.style.height = `${Math.ceil(contentHeight)}px`;
-
-        if (typeof ResizeObserver !== 'undefined' && !this.iframeResizeObservers.has(iframe)) {
-            const observer = new ResizeObserver(() => this.resizeIframePreview(iframe));
-            observer.observe(body);
-            this.iframeResizeObservers.set(iframe, observer);
-        }
     }
 
     private renderSourceOnlyPreview(container: HTMLElement, artifact: RenderArtifact): void {

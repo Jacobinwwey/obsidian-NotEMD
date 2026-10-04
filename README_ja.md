@@ -10,6 +10,9 @@
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
 <!-- notemd-release-entry-1.9.9 -->
+
+各図のプレビューで拡大・縮小、移動、全体表示、実際のサイズを個別に操作できます。Ctrl/Command＋ホイールでズームし、通常のホイールでスクロールします。 大きな PNG の書き出しでも、選択した 72〜600 PPI（初期値 300）を保持します。SVG はベクター形式であり、PPI はラスター画像の書き出しにのみ適用されます。
+
 ## 目的から始める
 
 | 利用者 | 入口 | できること |

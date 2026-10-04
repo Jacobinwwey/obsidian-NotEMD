@@ -1069,6 +1069,71 @@
     background: transparent;
 }
 
+.notemd-diagram-zoom-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.3rem;
+    padding: 0.35rem 0;
+}
+
+.notemd-diagram-zoom-controls button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.3rem 0.65rem;
+    box-shadow: none;
+}
+
+.notemd-diagram-zoom-controls output {
+    min-width: 4rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+}
+
+.notemd-diagram-zoom-viewport {
+    height: clamp(260px, 52vh, 560px);
+    overflow: auto;
+    position: relative;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-s);
+    background: var(--background-primary);
+    cursor: grab;
+    touch-action: pan-x pan-y;
+    direction: ltr;
+    overscroll-behavior: contain;
+}
+
+.notemd-diagram-zoom-viewport.is-panning {
+    cursor: grabbing;
+    user-select: none;
+}
+
+.notemd-diagram-zoom-stage {
+    position: relative;
+}
+
+.notemd-diagram-zoom-content {
+    position: absolute;
+    inset: 0 auto auto 0;
+    transform-origin: top left;
+}
+
+.notemd-diagram-zoom-content > svg,
+.notemd-diagram-zoom-content > iframe {
+    display: block;
+    max-width: none;
+    min-height: 0;
+}
+
+.notemd-diagram-zoom-viewport:focus-visible,
+.notemd-diagram-zoom-controls button:focus-visible {
+    outline: 2px solid var(--notemd-focus, var(--interactive-accent));
+    outline-offset: 2px;
+}
+
 @media (max-width: 860px) {
     .notemd-diagram-preview-layout {
         grid-template-columns: minmax(0, 1fr);

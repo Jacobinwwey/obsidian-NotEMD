@@ -1077,6 +1077,12 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         userRequestedCancellation: '用户请求取消。'
     },
     previewModal: {
+        zoomIn: "放大",
+        zoomOut: "缩小",
+        zoomFit: "适应窗口",
+        zoomActual: "实际大小",
+        zoomLevel: "缩放比例",
+        zoomViewport: "图形预览。拖动平移；按住 Ctrl 或 Command 滚动鼠标滚轮缩放。",
         title: '{target} 预览',
         panelTitle: '图形 {index}/{total}',
         exportMenu: '导出',

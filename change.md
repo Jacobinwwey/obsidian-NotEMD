@@ -6,6 +6,8 @@ This document summarizes the major functional and architectural changes implemen
 
 ## Unreleased
 
+- Preserve selected 72–600 PPI (default 300) for large PNG exports through bounded SVG tiles and streaming PNG encoding, with matching dimensions and density metadata. Avoid background timer throttling and release raster resources. Give every visual preview independent zoom, pan, fit and actual-size controls across SVG and iframe renderers.
+- 大图 PNG 通过有界 SVG 分块与流式编码保留所选 72–600 PPI（默认 300），像素尺寸与密度元数据一致；避免后台定时器节流，并及时释放栅格资源。各 SVG 和 iframe 图形预览独立支持缩放、平移、适应窗口及实际大小。
 - Keep the reserved Drawnix label bridge clear during endpoint ingress routing, preventing grid-path reversals from erasing its tracks and falsely reporting an unreachable relation lane.
 - Drawnix 端点入口避开预留标签连接段，防止网格路径折返后轨道点被简化删除，进而误报关系轨道不可达。
 - Preserve all explicit Drawnix relationships without global or per-node count limits. Keep distinct predicates and reciprocal claims; deduplicate only identical claims. Scale exterior track allocation and label rows with geometry instead of omitting edges for density.
