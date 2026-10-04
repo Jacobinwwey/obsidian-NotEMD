@@ -13,6 +13,9 @@
 
 Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma ve gerçek boyut denetimleri vardır. Ctrl/Command + tekerlek yakınlaştırır; normal tekerlek kaydırır. Büyük PNG dışa aktarımları seçilen 72–600 PPI değerini korur (varsayılan 300). SVG vektör biçimidir; PPI yalnızca raster dışa aktarımlarına uygulanır.
 
+
+**Obsidian ile uyumlu görseller oluştur** — Varsayılan olarak açıktır. Obsidian’da PNG çözümlemesini kontrol eder; başarısızsa özgün dosyayı korur ve daha düşük PPI ile bir kopya ekler. İki dosya adı da PPI belirtir. Kapalıysa yalnızca istenen özgün dosya dışa aktarılır. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Buradan başlayın
 
 | Okuyucu | Giriş | Amaç |

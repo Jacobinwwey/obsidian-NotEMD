@@ -13,6 +13,9 @@
 
 Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang independen. Ctrl/Command + roda mouse memperbesar; roda biasa menggulir. Ekspor PNG besar mempertahankan 72–600 PPI yang dipilih (bawaan 300). SVG berbasis vektor; PPI hanya berlaku untuk ekspor raster.
 
+
+**Buat gambar yang kompatibel dengan Obsidian** — Aktif secara default. Periksa dekode PNG di Obsidian; jika gagal, simpan gambar asli dan tambahkan salinan dengan PPI lebih rendah. Kedua nama berkas mencantumkan PPI. Nonaktif: hanya gambar asli yang diminta. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Mulai di sini
 
 | Pembaca | Pintu masuk | Tujuan |

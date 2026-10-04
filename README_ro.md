@@ -13,6 +13,9 @@
 
 Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală independente. Ctrl/Command + rotiță mărește; rotița singură derulează. Exporturile PNG mari păstrează cei 72–600 PPI selectați (implicit 300). SVG este vectorial; PPI se aplică doar exporturilor raster.
 
+
+**Generează imagini compatibile cu Obsidian** — Activat implicit. Verifică decodarea PNG în Obsidian; dacă eșuează, păstrează originalul și adaugă o copie cu PPI mai mic. Ambele nume indică PPI. Dezactivat: exportă doar originalul solicitat. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Începe aici
 
 | Cititor | Intrare | Obiectiv |

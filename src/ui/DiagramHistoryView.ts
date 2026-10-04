@@ -10,7 +10,7 @@ export interface DiagramHistoryStore {
     reopenArtifact?: (entry: DiagramHistoryEntry) => Promise<boolean>;
     recordCompleted?: (entry: DiagramHistoryEntry) => Promise<unknown>;
     recordArtifactPath?: (id: string, path: string) => Promise<unknown>;
-    recordExportPath?: (id: string, kind: DiagramHistoryExportKind, path: string) => Promise<unknown>;
+    recordExportPath?: (id: string, kind: DiagramHistoryExportKind, path: string, companionPaths?: readonly string[]) => Promise<unknown>;
 }
 
 export interface DiagramHistoryViewOptions {

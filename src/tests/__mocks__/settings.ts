@@ -145,6 +145,7 @@ export const mockSettings: NotemdSettings = {
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
     preferredDiagramRenderTarget: undefined,
     diagramPreviewExportPpi: 300,
+    diagramObsidianCompatiblePng: true,
     drawnixExportMermaidCompanions: false,
     circuitikzCompilerPreference: 'auto',
     circuitikzCustomCompilerKind: 'pdflatex',

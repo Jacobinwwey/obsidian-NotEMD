@@ -5,6 +5,7 @@ import {
     SUPPORTED_PREVIEW_EXPORT_PPI,
     applyPngPhysicalPixelDensity,
     rasterizeSvgToPngArrayBuffer,
+    rasterizeSvgToCompatibilityPng,
     rasterizeSvgToImageArrayBuffer,
     resolvePngPixelsPerMeter,
     resolvePreviewExportPpi,
@@ -197,6 +198,19 @@ describe('png preview rasterizer', () => {
         expect(deps.createCanvas).toHaveBeenCalledWith(8192, 281);
         expect(String(createBlob.mock.calls[0][0][0])).toContain('viewBox="0 0 2621.44 89.92"');
         expect(deps.revokeObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    test('compatibility PNGs below 72 PPI are rerendered at actual dimensions and density', async () => {
+        const deps = createRasterProbe();
+        const output = await rasterizeSvgToCompatibilityPng('<svg width="400" height="200"></svg>', 24, deps);
+        expect(output.ppi).toBe(24);
+        expect(output.imageWidthPx).toBe(100);
+        expect(output.imageHeightPx).toBe(50);
+        expect(deps.createCanvas).toHaveBeenCalledWith(100, 50);
+        const chunks = readPngChunks(output.data);
+        expect(readUint32(chunks.find(chunk => chunk.type === 'pHYs')?.data ?? new Uint8Array(), 0)).toBe(Math.round(24 / 0.0254));
+        await expect(rasterizeSvgToCompatibilityPng('<svg/>', 0, deps)).rejects.toThrow('integer');
+        await expect(rasterizeSvgToCompatibilityPng('<svg/>', 24.5, deps)).rejects.toThrow('integer');
     });
 
     test('sanitizes foreignObject labels and external image references before rasterization', () => {

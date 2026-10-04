@@ -13,6 +13,9 @@
 
 Každý náhled diagramu má samostatné přiblížení, posun, přizpůsobení a skutečnou velikost. Ctrl/Command + kolečko mění měřítko, samotné kolečko posouvá. Velké exporty PNG zachovávají zvolených 72–600 PPI (výchozí 300). SVG je vektorový formát; PPI se týká pouze rastrového exportu.
 
+
+**Vytvářet obrázky kompatibilní s Obsidian** — Ve výchozím stavu zapnuto. Ověří dekódování PNG v Obsidian; při selhání ponechá originál a přidá kopii s nižším PPI. Oba názvy obsahují PPI. Po vypnutí exportuje jen požadovaný originál. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Začněte zde
 
 | Čtenář | Vstup | Cíl |

@@ -53,6 +53,7 @@ export interface DiagramPreviewModalOptions {
     exportRequest?: DiagramExportRequest;
     onExportRunSaved?: (run: DiagramExportRun) => Promise<void>;
     exportPpi?: number;
+    obsidianCompatiblePng?: boolean;
     historyEntryId?: string;
     historyStore?: DiagramHistoryStore;
 }
@@ -61,6 +62,8 @@ export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
     private currentHistoryEntryId: string | null = null;
     private readonly exportPpi: number;
+    private readonly obsidianCompatiblePng: boolean;
+    private readonly pngAbort = new AbortController();
     private readonly historyStore?: DiagramHistoryStore;
     private readonly historyEntryId?: string;
     private historyDrawer: DiagramHistoryDrawer | null = null;
@@ -85,6 +88,7 @@ export class DiagramPreviewModal extends Modal {
         this.exportRequest = options.exportRequest;
         this.onExportRunSaved = options.onExportRunSaved;
         this.exportPpi = resolvePreviewExportPpi(options.exportPpi);
+        this.obsidianCompatiblePng = options.obsidianCompatiblePng ?? true;
         this.historyStore = options.historyStore;
         this.historyEntryId = options.historyEntryId;
     }
@@ -98,6 +102,7 @@ export class DiagramPreviewModal extends Modal {
 
     onClose() {
         this.exportReporter.cancelled = true;
+        this.pngAbort.abort();
         this.destroyPreviewViewports();
         this.historyDrawer?.destroy();
         this.historyDrawer = null;
@@ -398,7 +403,9 @@ export class DiagramPreviewModal extends Modal {
                 sourcePath,
                 folderPath,
                 this.session.payload.artifact,
-                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
+                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi,
+                    obsidianCompatiblePng: this.obsidianCompatiblePng, signal: this.pngAbort.signal,
+                    onPngSaved: delivery => this.recordExportPath('png', delivery.path, delivery.files) }
             );
             await this.recordExportPath('png', outputPath);
             new Notice(formatI18n(copy.exportPngSuccessNotice, { path: outputPath }));
@@ -465,7 +472,9 @@ export class DiagramPreviewModal extends Modal {
                     panel.id,
                     folderPath,
                     panel.artifact,
-                    { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
+                    { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi,
+                    obsidianCompatiblePng: this.obsidianCompatiblePng, signal: this.pngAbort.signal,
+                    onPngSaved: delivery => this.recordExportPath('png', delivery.path, delivery.files) }
                 );
                 await this.recordExportPath('png', outputPath);
                 successCount += 1;
@@ -588,7 +597,9 @@ export class DiagramPreviewModal extends Modal {
                 panel.id,
                 folderPath,
                 panel.artifact,
-                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
+                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi,
+                    obsidianCompatiblePng: this.obsidianCompatiblePng, signal: this.pngAbort.signal,
+                    onPngSaved: delivery => this.recordExportPath('png', delivery.path, delivery.files) }
             );
             await this.recordExportPath('png', outputPath);
             new Notice(formatI18n(copy.exportPngSuccessNotice, { path: outputPath }));
@@ -678,9 +689,10 @@ export class DiagramPreviewModal extends Modal {
         }
     }
 
-    private async recordExportPath(kind: DiagramHistoryExportKind, path: string): Promise<void> {
+    private async recordExportPath(kind: DiagramHistoryExportKind, path: string, companionPaths?: readonly string[]): Promise<void> {
         if (this.historyEntryId && this.historyStore?.recordExportPath) {
-            await this.historyStore.recordExportPath(this.historyEntryId, kind, path);
+            if (companionPaths) await this.historyStore.recordExportPath(this.historyEntryId, kind, path, companionPaths);
+            else await this.historyStore.recordExportPath(this.historyEntryId, kind, path);
         }
     }
 

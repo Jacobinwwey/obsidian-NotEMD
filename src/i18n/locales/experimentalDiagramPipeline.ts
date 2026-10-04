@@ -7,6 +7,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "إنشاء صور متوافقة مع Obsidian",
+                    obsidianCompatiblePngDesc: "مفعّل افتراضيًا. يتحقق من فك ترميز PNG في Obsidian؛ عند الفشل يحتفظ بالأصل ويضيف نسخة بدقة PPI أقل. يظهر PPI في الاسمين. عند التعطيل يُصدّر الأصل فقط.",
                     heading: 'مسار المخططات التجريبي',
                     enableName: 'تفعيل مسار Mermaid المعتمد على المواصفات',
                     enableDesc:
@@ -24,6 +26,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Obsidian-kompatible Bilder erzeugen",
+                    obsidianCompatiblePngDesc: "Standardmäßig aktiv. Prüft die PNG-Dekodierung in Obsidian. Bei Fehlern bleibt das Original erhalten und eine Kopie mit niedrigerem PPI wird ergänzt. Beide Dateinamen zeigen den PPI. Aus: nur das angeforderte Original.",
                     heading: 'Experimentelle Diagramm-Pipeline',
                     enableName: 'Spezifikationsbasierte Mermaid-Pipeline aktivieren',
                     enableDesc:
@@ -46,6 +50,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Generar imágenes compatibles con Obsidian",
+                    obsidianCompatiblePngDesc: "Activado por defecto. Comprueba la decodificación del PNG en Obsidian; si falla, conserva el original y añade una copia con menos PPI. Ambos nombres indican los PPI. Desactivado: solo el original solicitado.",
                     heading: 'Canal experimental de diagramas',
                     enableName: 'Activar canal Mermaid basado en especificaciones',
                     enableDesc:
@@ -68,6 +74,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "تولید تصاویر سازگار با Obsidian",
+                    obsidianCompatiblePngDesc: "به‌طور پیش‌فرض فعال است. رمزگشایی PNG در Obsidian بررسی می‌شود؛ در صورت شکست، نسخه اصلی حفظ و یک نسخه با PPI کمتر افزوده می‌شود. هر دو نام فایل PPI را نشان می‌دهند. در حالت غیرفعال فقط نسخه اصلی صادر می‌شود.",
                     heading: 'خط لوله آزمایشی نمودار',
                     enableName: 'فعال‌سازی خط لوله Mermaid مبتنی بر مشخصات',
                     enableDesc:
@@ -85,6 +93,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Générer des images compatibles avec Obsidian",
+                    obsidianCompatiblePngDesc: "Activé par défaut. Vérifie le décodage du PNG dans Obsidian ; en cas d’échec, conserve l’original et ajoute une copie à PPI réduit. Les deux noms indiquent le PPI. Désactivé : seulement l’original demandé.",
                     heading: 'Pipeline expérimental de diagrammes',
                     enableName: 'Activer le pipeline Mermaid orienté spécification',
                     enableDesc:
@@ -107,6 +117,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Buat gambar yang kompatibel dengan Obsidian",
+                    obsidianCompatiblePngDesc: "Aktif secara default. Periksa dekode PNG di Obsidian; jika gagal, simpan gambar asli dan tambahkan salinan dengan PPI lebih rendah. Kedua nama berkas mencantumkan PPI. Nonaktif: hanya gambar asli yang diminta.",
                     heading: 'Pipeline diagram eksperimental',
                     enableName: 'Aktifkan pipeline Mermaid berbasis spesifikasi',
                     enableDesc:
@@ -124,6 +136,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Genera immagini compatibili con Obsidian",
+                    obsidianCompatiblePngDesc: "Attivo per impostazione predefinita. Verifica la decodifica PNG in Obsidian; in caso di errore conserva l’originale e aggiunge una copia con PPI ridotto. Entrambi i nomi indicano il PPI. Disattivato: solo l’originale richiesto.",
                     heading: 'Pipeline diagrammi sperimentale',
                     enableName: 'Abilita pipeline Mermaid guidata da specifica',
                     enableDesc:
@@ -141,6 +155,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Obsidian 対応の画像を生成",
+                    obsidianCompatiblePngDesc: "既定で有効です。Obsidian で PNG をデコードできるか確認し、失敗した場合は指定 PPI の原本を残して低 PPI のコピーを追加します。両方のファイル名に PPI を表示します。無効時は指定の原本のみ出力します。",
                     heading: '実験的なダイアグラムパイプライン',
                     enableName: '仕様先行の Mermaid パイプラインを有効化',
                     enableDesc:
@@ -163,6 +179,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Obsidian 호환 이미지 생성",
+                    obsidianCompatiblePngDesc: "기본적으로 켜져 있습니다. Obsidian에서 PNG 디코딩을 확인하고 실패하면 요청한 원본을 보존하면서 PPI가 낮은 사본을 추가합니다. 두 파일 이름에 PPI를 표시합니다. 끄면 요청한 원본만 내보냅니다.",
                     heading: '실험적 다이어그램 파이프라인',
                     enableName: '명세 우선 Mermaid 파이프라인 사용',
                     enableDesc:
@@ -185,6 +203,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Obsidian-compatibele afbeeldingen genereren",
+                    obsidianCompatiblePngDesc: "Standaard ingeschakeld. Controleert PNG-decodering in Obsidian; bij mislukking blijft het origineel behouden en wordt een kopie met lagere PPI toegevoegd. Beide namen tonen de PPI. Uit: alleen het gevraagde origineel.",
                     heading: 'Experimentele diagrampijplijn',
                     enableName: 'Spec-first Mermaid-pijplijn inschakelen',
                     enableDesc:
@@ -202,6 +222,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Generuj obrazy zgodne z Obsidian",
+                    obsidianCompatiblePngDesc: "Domyślnie włączone. Sprawdza dekodowanie PNG w Obsidian; w razie błędu zachowuje oryginał i dodaje kopię o niższym PPI. Obie nazwy zawierają PPI. Po wyłączeniu eksportuje tylko żądany oryginał.",
                     heading: 'Eksperymentalny potok diagramów',
                     enableName: 'Włącz potok Mermaid oparty na specyfikacji',
                     enableDesc:
@@ -219,6 +241,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Gerar imagens compatíveis com Obsidian",
+                    obsidianCompatiblePngDesc: "Ativado por padrão. Verifica a descodificação do PNG no Obsidian; se falhar, mantém o original e acrescenta uma cópia com PPI inferior. Ambos os nomes indicam o PPI. Desativado: apenas o original pedido.",
                     heading: 'Pipeline experimental de diagramas',
                     enableName: 'Ativar pipeline Mermaid orientado por especificação',
                     enableDesc:
@@ -236,6 +260,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Gerar imagens compatíveis com Obsidian",
+                    obsidianCompatiblePngDesc: "Ativado por padrão. Verifica a decodificação do PNG no Obsidian; se falhar, mantém o original e adiciona uma cópia com PPI menor. Os dois nomes indicam o PPI. Desativado: somente o original solicitado.",
                     heading: 'Pipeline experimental de diagramas',
                     enableName: 'Ativar pipeline Mermaid orientado por especificação',
                     enableDesc:
@@ -253,6 +279,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Создавать изображения, совместимые с Obsidian",
+                    obsidianCompatiblePngDesc: "Включено по умолчанию. Проверяет декодирование PNG в Obsidian; при ошибке сохраняет оригинал и добавляет копию с меньшим PPI. PPI указан в обоих именах файлов. При отключении экспортируется только запрошенный оригинал.",
                     heading: 'Экспериментальный конвейер диаграмм',
                     enableName: 'Включить spec-first конвейер Mermaid',
                     enableDesc:
@@ -270,6 +298,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "สร้างภาพที่เข้ากันได้กับ Obsidian",
+                    obsidianCompatiblePngDesc: "เปิดโดยค่าเริ่มต้น ตรวจสอบการถอดรหัส PNG ใน Obsidian หากล้มเหลวจะเก็บต้นฉบับและเพิ่มสำเนาที่มี PPI ต่ำกว่า ชื่อไฟล์ทั้งสองระบุ PPI เมื่อปิดจะส่งออกเฉพาะต้นฉบับตามที่ขอ",
                     heading: 'ไปป์ไลน์ไดอะแกรมแบบทดลอง',
                     enableName: 'เปิดใช้ไปป์ไลน์ Mermaid แบบยึดสเปกก่อน',
                     enableDesc:
@@ -287,6 +317,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Obsidian ile uyumlu görseller oluştur",
+                    obsidianCompatiblePngDesc: "Varsayılan olarak açıktır. Obsidian’da PNG çözümlemesini kontrol eder; başarısızsa özgün dosyayı korur ve daha düşük PPI ile bir kopya ekler. İki dosya adı da PPI belirtir. Kapalıysa yalnızca istenen özgün dosya dışa aktarılır.",
                     heading: 'Deneysel diyagram hattı',
                     enableName: 'Spec-first Mermaid hattını etkinleştir',
                     enableDesc:
@@ -304,6 +336,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Створювати зображення, сумісні з Obsidian",
+                    obsidianCompatiblePngDesc: "Увімкнено за замовчуванням. Перевіряє декодування PNG в Obsidian; у разі помилки зберігає оригінал і додає копію з нижчим PPI. Обидві назви файлів містять PPI. Після вимкнення експортує лише запитаний оригінал.",
                     heading: 'Експериментальний конвеєр діаграм',
                     enableName: 'Увімкнути spec-first конвеєр Mermaid',
                     enableDesc:
@@ -321,6 +355,8 @@ export const EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS: Record<string, Dee
         settings: {
             developer: {
                 experimentalDiagramPipeline: {
+                    obsidianCompatiblePngName: "Tạo ảnh tương thích với Obsidian",
+                    obsidianCompatiblePngDesc: "Bật theo mặc định. Kiểm tra giải mã PNG trong Obsidian; nếu thất bại, giữ bản gốc và thêm bản sao có PPI thấp hơn. Cả hai tên tệp đều ghi PPI. Khi tắt, chỉ xuất bản gốc theo yêu cầu.",
                     heading: 'Pipeline sơ đồ thử nghiệm',
                     enableName: 'Bật pipeline Mermaid ưu tiên đặc tả',
                     enableDesc:

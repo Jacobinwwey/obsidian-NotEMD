@@ -13,6 +13,9 @@
 
 Jokaisessa kaavion esikatselussa on oma zoomaus, siirto, sovitus ja todellinen koko. Ctrl/Command + hiiren rulla zoomaa; pelkkä rulla vierittää. Suuret PNG-viennit säilyttävät valitun 72–600 PPI:n (oletus 300). SVG on vektorimuoto; PPI koskee vain rasterivientiä.
 
+
+**Luo Obsidian-yhteensopivia kuvia** — Oletuksena käytössä. Tarkistaa PNG-kuvan dekoodauksen Obsidianissa; epäonnistuessa säilyttää alkuperäisen ja lisää kopion pienemmällä PPI:llä. Molemmat tiedostonimet näyttävät PPI:n. Pois käytöstä: vain pyydetty alkuperäinen. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Aloita tästä
 
 | Lukija | Aloitus | Tavoite |

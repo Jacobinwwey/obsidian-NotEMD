@@ -54,6 +54,7 @@ export type DiagramOperationExecutionMode = 'save-mermaid' | 'save-artifact' | '
 export interface DiagramOperationInput {
     requestedOutputs?: string[];
     exportPpi?: number;
+    obsidianCompatiblePng?: boolean;
     exportFolder?: string;
     exportCacheFolder?: string;
     sourcePath?: string;
@@ -73,7 +74,7 @@ export interface BuildDiagramOperationInputParams {
     sourcePath?: string;
     sourceMarkdown: string;
     executionMode: DiagramOperationExecutionMode;
-    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramTypeId' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions' | 'diagramOutputPreferences'> & Partial<Pick<NotemdSettings, 'diagramPreviewExportPpi' | 'useCustomSummarizeToMermaidSavePath' | 'summarizeToMermaidSavePath' | 'diagramExportCacheFolder'>>;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'preferredDiagramTypeId' | 'preferredDiagramRenderTarget' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage' | 'drawnixExportMermaidCompanions' | 'diagramOutputPreferences'> & Partial<Pick<NotemdSettings, 'diagramPreviewExportPpi' | 'diagramObsidianCompatiblePng' | 'useCustomSummarizeToMermaidSavePath' | 'summarizeToMermaidSavePath' | 'diagramExportCacheFolder'>>;
     targetLanguage?: string;
     requestedIntentOverride?: DiagramIntent;
     requestedTypeIdOverride?: DiagramCatalogTypeId;
@@ -165,6 +166,7 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
     return {
         ...(requestedOutputs !== undefined ? {
             requestedOutputs: [...requestedOutputs], exportPpi: params.settings.diagramPreviewExportPpi ?? 300,
+            obsidianCompatiblePng: params.settings.diagramObsidianCompatiblePng ?? true,
             exportFolder: params.settings.useCustomSummarizeToMermaidSavePath ? params.settings.summarizeToMermaidSavePath : undefined,
             exportCacheFolder: params.settings.diagramExportCacheFolder
         } : {}),

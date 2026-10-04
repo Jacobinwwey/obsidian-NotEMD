@@ -220,6 +220,7 @@ export interface NotemdSettings {
     diagramOutputPreferences?: import('./diagram/diagramOutputPreferences').DiagramOutputPreferences;
     diagramTypeOutputPreferences?: import('./diagram/diagramTypeOutputPreferences').DiagramTypeOutputPreferences;
     diagramPreviewExportPpi: number;
+    diagramObsidianCompatiblePng: boolean;
     diagramExportCacheFolder?: string;
     drawnixExportMermaidCompanions: boolean;
     circuitikzCompilerPreference: 'auto' | 'managed' | 'system' | 'custom';

@@ -243,6 +243,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 exportFormatsName: '可用导出格式',
                 exportFormatsDesc: '可在图形预览中保存源文件，并导出 SVG、PNG 或 PDF。',
                 exportPpiName: '图形图片导出 PPI',
+                obsidianCompatiblePngName: "生成图片兼容 Obsidian",
+                obsidianCompatiblePngDesc: "默认开启。检查 PNG 能否在 Obsidian 中解码；若失败，保留请求 PPI 的原图，并追加较低 PPI 的兼容副本，两份文件名均标注 PPI。关闭时仅导出请求原图。",
                 cacheFolderName: '图形中间文件目录',
                 cacheFolderDesc: '留空使用原文目录下的 notemd_assert；填写 Vault 相对目录可统一存放恢复记录及附件。',
                 cacheFolderPlaceholder: '默认：原文目录/notemd_assert',

@@ -292,7 +292,7 @@ export default class NotemdPlugin extends Plugin {
             removeEntry: id => repository.removeIndexEntry(id),
             recordCompleted: entry => repository.recordCompleted(entry),
             recordArtifactPath: (id, path) => repository.recordArtifactPath(id, path),
-            recordExportPath: (id, kind, path) => repository.recordExportPath(id, kind, path),
+            recordExportPath: (id, kind, path, companionPaths) => repository.recordExportPath(id, kind, path, companionPaths),
             deleteArtifacts: entry => this.deleteDiagramHistoryArtifacts(entry),
             reopenArtifact: entry => this.reopenDiagramHistoryArtifact(entry)
         };
@@ -343,6 +343,7 @@ export default class NotemdPlugin extends Plugin {
             previewTitle: example.title
         });
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
+            obsidianCompatiblePng: this.settings.diagramObsidianCompatiblePng,
             exportPpi: this.settings.diagramPreviewExportPpi
         }).open();
     }
@@ -365,6 +366,7 @@ export default class NotemdPlugin extends Plugin {
             status: 'completed'
         }).catch(error => console.warn('Diagram history persistence failed; preview remains available.', error));
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale, {
+            obsidianCompatiblePng: this.settings.diagramObsidianCompatiblePng,
             exportPpi: this.settings.diagramPreviewExportPpi,
             historyEntryId,
             historyStore,
@@ -378,7 +380,7 @@ export default class NotemdPlugin extends Plugin {
         return {
             exportOutputs: async (file, generation, input, reporter) => {
                 const run = await startDiagramExportRun(this.app, file.path, generation, input.requestedOutputs ?? [], input.exportPpi ?? 300, reporter, undefined,
-                    { outputFolder: input.exportFolder, cacheFolder: input.exportCacheFolder });
+                    { outputFolder: input.exportFolder, cacheFolder: input.exportCacheFolder, obsidianCompatiblePng: input.obsidianCompatiblePng ?? true });
                 try { await this.recordDiagramExportRun(run); }
                 catch (error) { reporter.log(formatI18n(this.getUiStrings().diagramOutputs.historyFailed, { message: error instanceof Error ? error.message : String(error) })); }
                 return run;
@@ -1478,6 +1480,7 @@ export default class NotemdPlugin extends Plugin {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData, { providers: mergedProviders });
         this.settings.diagramOutputPreferences = migrateDiagramOutputPreferences(this.settings);
         this.settings.diagramPreviewExportPpi = resolvePreviewExportPpi(this.settings.diagramPreviewExportPpi);
+        this.settings.diagramObsidianCompatiblePng = typeof this.settings.diagramObsidianCompatiblePng === 'boolean' ? this.settings.diagramObsidianCompatiblePng : true;
         this.settings.globalModelAwareMaxTokensTracking = this.normalizeGlobalModelAwareMaxTokensTracking(
             this.settings.globalModelAwareMaxTokensTracking
         );

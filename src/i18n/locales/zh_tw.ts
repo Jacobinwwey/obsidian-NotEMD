@@ -238,6 +238,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 renderTargetDrawnix: 'Drawnix + SVG 預覽',
                 renderTargetCircuitikz: 'Circuitikz + SVG 預覽',
                 exportPpiName: '圖形圖片匯出 PPI',
+                obsidianCompatiblePngName: "產生與 Obsidian 相容的圖片",
+                obsidianCompatiblePngDesc: "預設開啟。檢查 PNG 能否在 Obsidian 中解碼；若失敗，保留要求 PPI 的原圖，並新增較低 PPI 的相容副本，兩份檔名皆標示 PPI。關閉時僅匯出要求的原圖。",
                 cacheFolderName: '圖形中間檔案目錄',
                 cacheFolderDesc: '留空使用原文目錄下的 notemd_assert；填寫 Vault 相對目錄可統一存放復原記錄及附件。',
                 cacheFolderPlaceholder: '預設：原文目錄/notemd_assert',

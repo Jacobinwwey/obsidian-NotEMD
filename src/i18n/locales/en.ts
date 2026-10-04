@@ -222,6 +222,8 @@ export const STRINGS_EN = {
                 exportFormatsName: 'Available export formats',
                 exportFormatsDesc: 'Source file, SVG, PNG, and PDF are available from diagram preview.',
                 exportPpiName: 'Diagram image export PPI',
+                obsidianCompatiblePngName: "Generate images compatible with Obsidian",
+                obsidianCompatiblePngDesc: "Enabled by default. Check PNG decoding in Obsidian; if it fails, keep the requested original and add a lower-PPI copy. Both filenames show their PPI. Off exports only the requested PNG.",
                 cacheFolderName: 'Diagram intermediate files folder',
                 cacheFolderDesc: 'Leave blank for notemd_assert beside each note, or enter a shared Vault folder for recovery records and attachments.',
                 cacheFolderPlaceholder: 'Default: source folder/notemd_assert',

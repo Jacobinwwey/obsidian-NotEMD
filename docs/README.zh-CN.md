@@ -35,6 +35,8 @@
 - [语言中心](./i18n/README_zh.md)
 - [GitHub Pages 语言与 GEO 工作流](./maintainer/github-pages-language-geo-workflow.zh-CN.md)
 - [GitHub Pages GEO 测量记录](./maintainer/github-pages-geo-measurement-log.zh-CN.md)
+- [Obsidian PNG 兼容性](./maintainer/obsidian-png-compatibility.zh-CN.md)
+- [Obsidian PNG 兼容性验证](./walkthroughs/2026-10-04-obsidian-png-compatibility.zh-CN.md)
 - [Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.zh-CN.md)
 - [draw.io 导出视觉回归 Runbook](./maintainer/drawio-export-visual-regression.zh-CN.md)
 - [Drawnix 导出 Spike](./maintainer/drawnix-export-spike.zh-CN.md)

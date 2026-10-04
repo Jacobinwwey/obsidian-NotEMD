@@ -2837,6 +2837,15 @@ export class NotemdSettingTab extends PluginSettingTab {
                 text.inputEl.step = '1';
             });
 
+        this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.diagramObsidianCompatiblePng' })
+            .setName(experimentalDiagramI18n.obsidianCompatiblePngName)
+            .setDesc(experimentalDiagramI18n.obsidianCompatiblePngDesc)
+            .addToggle(toggle => toggle.setValue(this.plugin.settings.diagramObsidianCompatiblePng ?? true)
+                .onChange(async enabled => {
+                    this.plugin.settings.diagramObsidianCompatiblePng = enabled;
+                    await this.plugin.saveSettings();
+                }));
+
         const cacheSetting = this.createCatalogSetting(containerEl, { id: 'settings.experimentalDiagramPipeline.diagramExportCacheFolder' })
             .setName(experimentalDiagramI18n.cacheFolderName)
             .setDesc(experimentalDiagramI18n.cacheFolderDesc);

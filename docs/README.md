@@ -35,6 +35,8 @@ This directory contains repository-level documentation for maintainers and contr
 - [Language Hub](./i18n/README.md)
 - [GitHub Pages Language And GEO Workflow](./maintainer/github-pages-language-geo-workflow.md)
 - [GitHub Pages GEO Measurement Log](./maintainer/github-pages-geo-measurement-log.md)
+- [Obsidian PNG Compatibility](./maintainer/obsidian-png-compatibility.md)
+- [Obsidian PNG Compatibility Verification](./walkthroughs/2026-10-04-obsidian-png-compatibility.en.md)
 - [Diagram Artifact Export CLI](./maintainer/diagram-artifact-export-cli.md)
 - [Draw.io Export Visual Regression](./maintainer/drawio-export-visual-regression.md)
 - [Drawnix Export Spike](./maintainer/drawnix-export-spike.md)

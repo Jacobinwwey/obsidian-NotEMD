@@ -13,6 +13,9 @@
 
 Każdy podgląd ma niezależne powiększenie, przesuwanie, dopasowanie i rozmiar rzeczywisty. Ctrl/Command + kółko zmienia skalę; samo kółko przewija. Duże eksporty PNG zachowują wybrane 72–600 PPI (domyślnie 300). SVG jest formatem wektorowym; PPI dotyczy tylko eksportów rastrowych.
 
+
+**Generuj obrazy zgodne z Obsidian** — Domyślnie włączone. Sprawdza dekodowanie PNG w Obsidian; w razie błędu zachowuje oryginał i dodaje kopię o niższym PPI. Obie nazwy zawierają PPI. Po wyłączeniu eksportuje tylko żądany oryginał. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Zacznij tutaj
 
 | Czytelnik | Wejście | Cel |

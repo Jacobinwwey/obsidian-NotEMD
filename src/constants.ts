@@ -201,6 +201,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     preferredDiagramTypeId: undefined,
     preferredDiagramRenderTarget: undefined,
     diagramPreviewExportPpi: DEFAULT_PREVIEW_EXPORT_PPI,
+    diagramObsidianCompatiblePng: true,
     diagramExportCacheFolder: '',
     drawnixExportMermaidCompanions: false,
     circuitikzCompilerPreference: 'auto',

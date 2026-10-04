@@ -40,12 +40,106 @@ describe('recoverable diagram multi-format export', () => {
         const deps = {
             renderSvg: jest.fn<Promise<string>, [DiagramGenerationResult['artifact']]>(async () => svg),
             renderPng: jest.fn(async () => new Uint8Array([137,80,78,71,13,10,26,10,1]).buffer),
+            decodePng: jest.fn(async () => true),
             renderPdf: jest.fn(async () => encode('%PDF-1.4\nvalid test document')),
             renderSummary: jest.fn(async () => '<!doctype html><html><body>中文 café</body></html>')
         };
         const reporter = { cancelled: false, log: jest.fn() };
         return { files, folders, app, adapter, generation, deps, reporter };
     }
+
+    test('adds a verified companion while retaining the PPI-labelled original and both receipts', async () => {
+        const test = fixture();
+        test.deps.decodePng.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['png'], 300, test.reporter, test.deps);
+        const output = run.outputs[0];
+        expect(run.status).toBe('completed');
+        expect(output.files.map(file => file.path)).toEqual(['Notes/topic_flowchart_300ppi.png', 'Notes/topic_flowchart_obsidian_299ppi.png']);
+        expect(output.path).toBe(output.files[1].path);
+        expect(JSON.parse(new TextDecoder().decode(test.files.get(run.manifestPath))).obsidianCompatiblePng).toBe(true);
+        await expect(readDiagramExportRun(test.app, run.manifestPath)).resolves.toBeDefined();
+        const retried = await retryDiagramExportRun(test.app, run.manifestPath, test.reporter, test.deps);
+        expect(retried.status).toBe('completed');
+        expect(test.deps.renderPng).toHaveBeenCalledTimes(2);
+    });
+
+    test('compatibility off freezes unchecked single original across retry', async () => {
+        const test = fixture();
+        const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['png'], 300, test.reporter, test.deps, { obsidianCompatiblePng: false });
+        expect(run.outputs[0].path).toBe('Notes/topic_flowchart_300ppi.png');
+        expect(run.outputs[0].files).toHaveLength(1);
+        expect(test.deps.decodePng).not.toHaveBeenCalled();
+        await retryDiagramExportRun(test.app, run.manifestPath, test.reporter, test.deps);
+        expect(test.deps.decodePng).not.toHaveBeenCalled();
+    });
+
+    test('failed compatibility still commits the original and can be retried', async () => {
+        const test = fixture();
+        test.deps.decodePng.mockResolvedValue(false);
+        const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['png'], 300, test.reporter, test.deps);
+        expect(run.status).toBe('partial');
+        expect(run.outputs[0].files.map(file => file.path)).toEqual(['Notes/topic_flowchart_300ppi.png']);
+        expect(run.outputs[0].status).toBe('failed');
+        test.deps.decodePng.mockResolvedValueOnce(false).mockResolvedValue(true);
+        const retried = await retryDiagramExportRun(test.app, run.manifestPath, test.reporter, test.deps);
+        expect(retried.status).toBe('completed');
+        expect(retried.outputs[0].files).toHaveLength(2);
+    });
+
+    test.each(['density', 'snapshot', 'path', 'receipt'])('rejects tampered PNG %s before retry writes', async field => {
+        const test = fixture();
+        test.deps.decodePng.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['png'], 300, test.reporter, test.deps);
+        const manifest = JSON.parse(await test.adapter.read(run.manifestPath));
+        if (field === 'density') manifest.outputs[0].compatiblePpi = 300;
+        if (field === 'snapshot') manifest.obsidianCompatiblePng = false;
+        if (field === 'path') manifest.outputs[0].path = 'outside.png';
+        if (field === 'receipt') manifest.outputs[0].files[1].path = 'outside.png';
+        test.files.set(run.manifestPath, encode(JSON.stringify(manifest)));
+        test.adapter.writeBinary.mockClear();
+        await expect(retryDiagramExportRun(test.app, run.manifestPath, test.reporter, test.deps)).rejects.toThrow();
+        expect(test.adapter.writeBinary).not.toHaveBeenCalled();
+    });
+
+    test('cancellation after the original is committed preserves the frozen companion path on retry', async () => {
+        const test = fixture();
+        test.deps.decodePng.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        const rename = test.adapter.rename.getMockImplementation()!;
+        test.adapter.rename.mockImplementation(async (from, to) => {
+            await rename(from, to);
+            if (to.endsWith('_300ppi.png')) test.reporter.cancelled = true;
+        });
+        const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['png'], 300, test.reporter, test.deps);
+        expect(run.status).toBe('cancelled');
+        expect(run.outputs[0].files).toHaveLength(1);
+        const original = test.files.get(run.outputs[0].files[0].path);
+        test.adapter.rename.mockImplementation(rename);
+        test.reporter.cancelled = false;
+        test.deps.decodePng.mockResolvedValue(true);
+        const retried = await retryDiagramExportRun(test.app, run.manifestPath, test.reporter, test.deps);
+        expect(retried.status).toBe('completed');
+        expect(retried.outputs[0].path).toBe('Notes/topic_flowchart_obsidian_299ppi.png');
+        expect(retried.outputs[0].files).toHaveLength(2);
+        expect(test.files.get(retried.outputs[0].files[0].path)).toEqual(original);
+    });
+
+    test('recovers legacy v3 PNGs without applying current compatibility or renaming files', async () => {
+        const test = fixture();
+        const run = await startDiagramExportRun(test.app, 'Notes/topic.md', test.generation, ['png'], 300, test.reporter, test.deps, { obsidianCompatiblePng: false });
+        const manifest = JSON.parse(await test.adapter.read(run.manifestPath));
+        manifest.version = 3;
+        delete manifest.obsidianCompatiblePng;
+        const legacyPath = 'Notes/topic_flowchart.png';
+        test.files.set(legacyPath, test.files.get(manifest.outputs[0].path)!);
+        manifest.outputs[0].path = legacyPath;
+        manifest.outputs[0].files[0].path = legacyPath;
+        manifest.outputs[0].status = 'failed';
+        test.files.set(run.manifestPath, encode(JSON.stringify(manifest)));
+        const retried = await retryDiagramExportRun(test.app, run.manifestPath, test.reporter, test.deps);
+        expect(retried.status).toBe('completed');
+        expect(retried.outputs[0].path).toBe(legacyPath);
+        expect(test.deps.decodePng).not.toHaveBeenCalled();
+    });
 
     test('writes the requested formats from one shared SVG and preserves Unicode', async () => {
         const test = fixture();

@@ -1,3 +1,4 @@
+import * as pngPreview from '../rendering/preview/pngPreview';
 import { TFile } from 'obsidian';
 import {
     buildDiagramPreviewPdfExportPath,
@@ -34,6 +35,47 @@ describe('diagram preview export helpers', () => {
         (mockApp.vault.getAbstractFileByPath as jest.Mock).mockReturnValue(null);
         (mockApp.vault.create as jest.Mock).mockResolvedValue(undefined);
         (mockApp.vault.modify as jest.Mock).mockResolvedValue(undefined);
+    });
+
+    test('manual PNG export preserves the requested original and records the verified companion', async () => {
+        const raster = jest.spyOn(pngPreview, 'rasterizeSvgToCompatibilityPng').mockImplementation(async (_svg, ppi) => ({
+            data: new Uint8Array([ppi]).buffer, ppi, requestedPpi: ppi, mimeType: 'image/png',
+            sourceWidthCssPx: 200, sourceHeightCssPx: 100, imageWidthPx: Math.ceil(200 * ppi / 96), imageHeightPx: Math.ceil(100 * ppi / 96)
+        }));
+        const decodePng = jest.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        const onPngSaved = jest.fn();
+        try {
+            const path = await saveDiagramPreviewPngToFolder(mockApp, 'Notes/Topic.md', 'Exports', {
+                target: 'html', content: '<html></html>', mimeType: 'text/html', sourceIntent: 'flowchart',
+                previewSvg: { content: '<svg width="200" height="100"></svg>', mimeType: 'image/svg+xml' }
+            }, { ppi: 300, decodePng, onPngSaved });
+            expect(path).toBe('Exports/Topic_preview_obsidian_299ppi.png');
+            expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Exports/Topic_preview_300ppi.png', expect.any(ArrayBuffer));
+            expect(onPngSaved).toHaveBeenLastCalledWith({ path, files: ['Exports/Topic_preview_300ppi.png', path] });
+            expect(decodePng).toHaveBeenCalledTimes(2);
+        } finally { raster.mockRestore(); }
+    });
+
+    test('reserves the whole PNG filename family when the requested PPI changes', async () => {
+        const raster = jest.spyOn(pngPreview, 'rasterizeSvgToCompatibilityPng').mockImplementation(async (_svg, ppi) => ({
+            data: new Uint8Array([ppi]).buffer, ppi, requestedPpi: ppi, mimeType: 'image/png',
+            sourceWidthCssPx: 4772, sourceHeightCssPx: 16749,
+            imageWidthPx: Math.ceil(4772 * ppi / 96), imageHeightPx: Math.ceil(16749 * ppi / 96)
+        }));
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([{ path: 'Exports/Topic_preview_obsidian_87ppi.png' }]);
+        const decodePng = jest.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        try {
+            const path = await saveDiagramPreviewPngToFolder(mockApp, 'Notes/Topic.md', 'Exports', {
+                target: 'html', content: '<html></html>', mimeType: 'text/html', sourceIntent: 'flowchart',
+                previewSvg: { content: '<svg width="4772" height="16749"></svg>', mimeType: 'image/svg+xml' }
+            }, { ppi: 600, decodePng });
+            expect(path).toBe('Exports/Topic_preview-2_obsidian_87ppi.png');
+            expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Exports/Topic_preview-2_600ppi.png', expect.any(ArrayBuffer));
+            expect(mockApp.vault.createBinary).not.toHaveBeenCalledWith('Exports/Topic_preview_obsidian_87ppi.png', expect.anything());
+        } finally {
+            raster.mockRestore();
+            (mockApp.vault.getFiles as jest.Mock).mockReturnValue([]);
+        }
     });
 
     test('builds a stable svg export path beside the source file', () => {
@@ -371,6 +413,7 @@ describe('diagram preview export helpers', () => {
                 parse: jest.fn(),
                 render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"><rect width="40" height="20" /></svg>' })
             },
+            obsidianCompatiblePng: false,
             pngRaster: {
                 createBlob: (parts, options) => new Blob(parts, options),
                 createImage: () => {
@@ -399,8 +442,8 @@ describe('diagram preview export helpers', () => {
             }
         });
 
-        expect(outputPath).toBe('Notes/Topic_preview.png');
-        expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.png', expect.any(ArrayBuffer));
+        expect(outputPath).toBe('Notes/Topic_preview_300ppi.png');
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview_300ppi.png', expect.any(ArrayBuffer));
     });
 
     test('saves a single preview png into a selected vault folder', async () => {
@@ -415,6 +458,7 @@ describe('diagram preview export helpers', () => {
                 parse: jest.fn(),
                 render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"><rect width="40" height="20" /></svg>' })
             },
+            obsidianCompatiblePng: false,
             pngRaster: {
                 createBlob: (parts, options) => new Blob(parts, options),
                 createImage: () => {
@@ -440,7 +484,7 @@ describe('diagram preview export helpers', () => {
             }
         });
 
-        expect(outputPath).toBe('Exports/Topic_preview.png');
+        expect(outputPath).toBe('Exports/Topic_preview_300ppi.png');
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith(outputPath, expect.any(ArrayBuffer));
     });
 
@@ -631,13 +675,13 @@ describe('diagram preview export helpers', () => {
         };
 
         const pngPath = await saveDiagramPreviewPanelPng(mockApp, 'Notes/Topic.md', 'panel-1', artifact, {
-            pngRaster
+            pngRaster, obsidianCompatiblePng: false
         });
         const pdfPath = await saveDiagramPreviewPanelPdf(mockApp, 'Notes/Topic.md', 'panel-1', artifact, {
             svgPdf
         });
 
-        expect(pngPath).toBe('Notes/Topic_preview_panel-1.png');
+        expect(pngPath).toBe('Notes/Topic_preview_panel-1_300ppi.png');
         expect(pdfPath).toBe('Notes/Topic_preview_panel-1.pdf');
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pngPath, expect.any(ArrayBuffer));
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pdfPath, expect.any(ArrayBuffer));
@@ -681,13 +725,13 @@ describe('diagram preview export helpers', () => {
         };
 
         const pngPath = await saveDiagramPreviewPanelPngToFolder(mockApp, 'Notes/Topic.md', 'panel-1', 'Exports', artifact, {
-            pngRaster
+            pngRaster, obsidianCompatiblePng: false
         });
         const pdfPath = await saveDiagramPreviewPanelPdfToFolder(mockApp, 'Notes/Topic.md', 'panel-1', 'Exports', artifact, {
             svgPdf
         });
 
-        expect(pngPath).toBe('Exports/Topic_preview_panel-1.png');
+        expect(pngPath).toBe('Exports/Topic_preview_panel-1_300ppi.png');
         expect(pdfPath).toBe('Exports/Topic_preview_panel-1.pdf');
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pngPath, expect.any(ArrayBuffer));
         expect(mockApp.vault.createBinary).toHaveBeenCalledWith(pdfPath, expect.any(ArrayBuffer));

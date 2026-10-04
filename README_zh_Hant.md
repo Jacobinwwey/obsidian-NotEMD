@@ -13,6 +13,9 @@
 
 每個圖形預覽獨立支援縮放、平移、適應視窗與實際大小。Ctrl/Command＋滾輪縮放，一般滾輪用於捲動。 大型 PNG 保留所選的 72–600 PPI（預設 300）。SVG 是向量格式，PPI 僅適用於點陣圖匯出。
 
+
+**產生與 Obsidian 相容的圖片** — 預設開啟。檢查 PNG 能否在 Obsidian 中解碼；若失敗，保留要求 PPI 的原圖，並新增較低 PPI 的相容副本，兩份檔名皆標示 PPI。關閉時僅匯出要求的原圖。 (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## 從這裡開始
 
 | 讀者 | 入口 | 可完成的任務 |

@@ -13,6 +13,9 @@
 
 Hver diagramvisning har uavhengig zoom, panorering, tilpasning og faktisk størrelse. Ctrl/Command + musehjul zoomer; hjulet alene ruller. Store PNG-eksporter beholder valgt verdi på 72–600 PPI (standard 300). SVG er et vektorformat; PPI gjelder bare rastereksport.
 
+
+**Generer bilder som er kompatible med Obsidian** — Aktivert som standard. Kontrollerer PNG-dekoding i Obsidian; ved feil beholdes originalen, og en kopi med lavere PPI legges til. Begge filnavn viser PPI. Deaktivert: bare den forespurte originalen. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Begynn her
 
 | Leser | Inngang | Mål |

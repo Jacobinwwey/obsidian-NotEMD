@@ -13,6 +13,9 @@
 
 Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích thước thật độc lập. Ctrl/Command + con lăn thu phóng; con lăn thường cuộn. PNG lớn giữ nguyên mức 72–600 PPI đã chọn (mặc định 300). SVG là định dạng véc-tơ; PPI chỉ áp dụng cho xuất ảnh raster.
 
+
+**Tạo ảnh tương thích với Obsidian** — Bật theo mặc định. Kiểm tra giải mã PNG trong Obsidian; nếu thất bại, giữ bản gốc và thêm bản sao có PPI thấp hơn. Cả hai tên tệp đều ghi PPI. Khi tắt, chỉ xuất bản gốc theo yêu cầu. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Bắt đầu tại đây
 
 | Người đọc | Lối vào | Mục tiêu |

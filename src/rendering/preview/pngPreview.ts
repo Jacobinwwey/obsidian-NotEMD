@@ -163,7 +163,7 @@ function hasPngSignature(bytes: Uint8Array): boolean {
 }
 
 function buildPngPhysicalPixelDensityChunk(ppi: number): Uint8Array {
-    const pixelsPerMeter = resolvePngPixelsPerMeter(ppi);
+    const pixelsPerMeter = Math.max(1, Math.round(ppi / METERS_PER_INCH));
     const data = new Uint8Array(9);
     const view = new DataView(data.buffer);
     view.setUint32(0, pixelsPerMeter, false);
@@ -173,6 +173,10 @@ function buildPngPhysicalPixelDensityChunk(ppi: number): Uint8Array {
 }
 
 export function applyPngPhysicalPixelDensity(png: ArrayBuffer, ppi: number): ArrayBuffer {
+    return writePngPhysicalPixelDensity(png, resolvePreviewExportPpi(ppi));
+}
+
+function writePngPhysicalPixelDensity(png: ArrayBuffer, ppi: number): ArrayBuffer {
     const bytes = new Uint8Array(png);
     if (!hasPngSignature(bytes)) {
         return png;
@@ -630,8 +634,23 @@ export async function rasterizeSvgToImageArrayBuffer(
     deps: PreviewPngRasterDeps = createDefaultPngRasterDeps(),
     options: PreviewRasterExportOptions = {}
 ): Promise<RasterizedImageResult> {
+    return rasterizeSvgAtPpi(svg, deps, options, resolvePreviewExportPpi(options.ppi));
+}
+
+/** Compatibility copies can require fewer pixels than the requested export range. */
+export async function rasterizeSvgToCompatibilityPng(
+    svg: string, ppi: number, deps: PreviewPngRasterDeps = createDefaultPngRasterDeps()
+): Promise<RasterizedImageResult> {
+    if (!Number.isInteger(ppi) || ppi < 1 || ppi > MAX_PREVIEW_EXPORT_PPI) {
+        throw new Error('Compatibility PNG PPI must be an integer between 1 and 600.');
+    }
+    return rasterizeSvgAtPpi(svg, deps, { mimeType: 'image/png' }, ppi);
+}
+
+async function rasterizeSvgAtPpi(
+    svg: string, deps: PreviewPngRasterDeps, options: PreviewRasterExportOptions, ppi: number
+): Promise<RasterizedImageResult> {
     const dimensions = resolveSvgDimensions(svg);
-    const ppi = resolvePreviewExportPpi(options.ppi);
     const mimeType = options.mimeType ?? 'image/png';
     const geometry = resolveRasterGeometry(dimensions, ppi);
     const rasterSvg = sanitizeSvgForExport(svg);
@@ -644,7 +663,7 @@ export async function rasterizeSvgToImageArrayBuffer(
             const rasterBlob = await encodeRasterCanvas(image, dimensions, geometry, deps, options);
             if (rasterBlob) {
                 data = await deps.blobToArrayBuffer(rasterBlob);
-                if (mimeType === 'image/png') data = applyPngPhysicalPixelDensity(data, ppi);
+                if (mimeType === 'image/png') data = writePngPhysicalPixelDensity(data, ppi);
             }
         } finally {
             deps.revokeObjectURL(objectUrl);

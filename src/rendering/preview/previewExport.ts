@@ -10,14 +10,25 @@ import {
 import { buildPdfFromSvg, SvgPdfExportDeps } from './pdfPreview';
 import {
     PreviewPngRasterDeps,
-    rasterizeSvgToPngArrayBuffer,
+    rasterizeSvgToCompatibilityPng,
     resolvePreviewExportPpi
 } from './pngPreview';
+
+import { buildRequestedPngPath, buildObsidianPngCompanionPath, decodePngInObsidian, renderRequestedPng, renderObsidianCompatiblePng, ObsidianPngCompatibilityError } from './obsidianPngDelivery';
+
+export interface SavedPreviewPng {
+    path: string;
+    files: string[];
+}
 
 export type PreviewSvgRenderDeps = PreviewTargetAdapterContext;
 
 export interface PreviewPngExportDeps extends PreviewSvgRenderDeps {
     pngRaster?: PreviewPngRasterDeps;
+    obsidianCompatiblePng?: boolean;
+    decodePng?: (data: ArrayBuffer, signal?: AbortSignal) => Promise<boolean>;
+    signal?: AbortSignal;
+    onPngSaved?: (delivery: SavedPreviewPng) => Promise<void>;
     ppi?: number;
 }
 
@@ -339,18 +350,7 @@ export async function saveDiagramPreviewPngToFolder(
 ): Promise<string> {
     const outputPath = buildDiagramPreviewExportPathInFolder(sourcePath, folderPath, 'png');
     const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
-    const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster, {
-        ppi: resolvePreviewExportPpi(deps.ppi)
-    });
-    const existingFile = app.vault.getAbstractFileByPath(outputPath);
-
-    if (existingFile instanceof TFile) {
-        await app.vault.modifyBinary(existingFile, png);
-    } else {
-        await app.vault.createBinary(outputPath, png);
-    }
-
-    return outputPath;
+    return savePreviewPngDelivery(app, outputPath, svg, deps);
 }
 
 export async function saveDiagramPreviewPdf(
@@ -410,16 +410,7 @@ export async function saveDiagramPreviewPanelPng(
 ): Promise<string> {
     const outputPath = buildDiagramPreviewPanelPngExportPath(sourcePath, panelId);
     const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
-    const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster, {
-        ppi: resolvePreviewExportPpi(deps.ppi)
-    });
-    const existingFile = app.vault.getAbstractFileByPath(outputPath);
-    if (existingFile instanceof TFile) {
-        await app.vault.modifyBinary(existingFile, png);
-    } else {
-        await app.vault.createBinary(outputPath, png);
-    }
-    return outputPath;
+    return savePreviewPngDelivery(app, outputPath, svg, deps);
 }
 
 export async function saveDiagramPreviewPanelPngToFolder(
@@ -432,16 +423,7 @@ export async function saveDiagramPreviewPanelPngToFolder(
 ): Promise<string> {
     const outputPath = buildDiagramPreviewPanelPngExportPathInFolder(sourcePath, panelId, folderPath);
     const svg = await renderPreviewArtifactSvgForRasterExport(artifact, deps);
-    const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster, {
-        ppi: resolvePreviewExportPpi(deps.ppi)
-    });
-    const existingFile = app.vault.getAbstractFileByPath(outputPath);
-    if (existingFile instanceof TFile) {
-        await app.vault.modifyBinary(existingFile, png);
-    } else {
-        await app.vault.createBinary(outputPath, png);
-    }
-    return outputPath;
+    return savePreviewPngDelivery(app, outputPath, svg, deps);
 }
 
 export async function saveDiagramPreviewPanelPdf(
@@ -517,4 +499,58 @@ export async function saveDiagramSourceArtifact(
     }
 
     return outputPath;
+}
+
+const activePngPaths = new WeakMap<App['vault'], Set<string>>();
+
+async function savePreviewPngDelivery(app: App, basePath: string, svg: string, deps: PreviewPngExportDeps): Promise<string> {
+    const ppi = resolvePreviewExportPpi(deps.ppi);
+    let reservations = activePngPaths.get(app.vault);
+    if (!reservations) { reservations = new Set(); activePngPaths.set(app.vault, reservations); }
+    const stem = basePath.replace(/\.png$/i, '');
+    const occupiedPngPaths = app.vault.getFiles().map(file => file.path.toLowerCase()).filter(path => path.endsWith('.png'));
+    let reservedBase = basePath;
+    for (let index = 1; ; index++) {
+        reservedBase = index === 1 ? basePath : stem + '-' + index + '.png';
+        const requestedPath = buildRequestedPngPath(reservedBase, ppi);
+        const key = reservedBase.toLowerCase();
+        const familyPrefix = key.slice(0, -4) + '_';
+        // A changed requested PPI can produce the same compatible PPI. Reserve
+        // the complete family so a new export cannot collide with its older copy.
+        if (!reservations.has(key) && !app.vault.getAbstractFileByPath(requestedPath)
+            && !occupiedPngPaths.some(path => path === key || path.startsWith(familyPrefix))) break;
+    }
+    reservations.add(reservedBase.toLowerCase());
+    const saved: string[] = [];
+    const pngDeps = {
+        renderPng: (sourceSvg: string, density: number) => rasterizeSvgToCompatibilityPng(sourceSvg, density, deps.pngRaster),
+        decodePng: deps.decodePng ?? decodePngInObsidian,
+        signal: deps.signal
+    };
+    try {
+        const render = deps.obsidianCompatiblePng === false ? renderRequestedPng : renderObsidianCompatiblePng;
+        let delivery;
+        try { delivery = await render(svg, ppi, pngDeps); }
+        catch (error) {
+            if (error instanceof ObsidianPngCompatibilityError && !deps.signal?.aborted) {
+                const path = buildRequestedPngPath(reservedBase, error.requested.ppi);
+                await app.vault.createBinary(path, error.requested.data);
+                saved.push(path);
+                await deps.onPngSaved?.({ path, files: [...saved] });
+            }
+            throw error;
+        }
+        for (const image of delivery.files) {
+            if (deps.signal?.aborted) { const error = new Error('PNG export cancelled.'); error.name = 'AbortError'; throw error; }
+            const path = image === delivery.requested ? buildRequestedPngPath(reservedBase, image.ppi)
+                : buildObsidianPngCompanionPath(reservedBase, image.ppi);
+            await app.vault.createBinary(path, image.data);
+            saved.push(path);
+            // Record partial saves too: a failed companion write must not orphan the original.
+            await deps.onPngSaved?.({ path, files: [...saved] });
+        }
+        return saved[delivery.preferredIndex];
+    } finally {
+        reservations.delete(reservedBase.toLowerCase());
+    }
 }

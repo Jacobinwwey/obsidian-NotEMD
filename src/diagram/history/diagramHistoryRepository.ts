@@ -43,13 +43,14 @@ export function createDiagramHistoryRepository(load: LoadEntries, save: SaveEntr
             });
             return updated;
         },
-        async recordExportPath(id: string, kind: DiagramHistoryExportKind, exportPath: string): Promise<boolean> {
+        async recordExportPath(id: string, kind: DiagramHistoryExportKind, exportPath: string, companionPaths: readonly string[] = []): Promise<boolean> {
             let updated = false;
             await write(async () => {
                 const entries = await load();
                 const entry = entries.find(candidate => candidate.id === id);
                 if (!entry) return;
                 entry.exportPaths = { ...entry.exportPaths, [kind]: exportPath };
+                entry.companionPaths = [...new Set([...(entry.companionPaths ?? []), ...companionPaths])];
                 updated = true;
                 await save(entries.map(cloneDiagramHistoryEntry));
             });

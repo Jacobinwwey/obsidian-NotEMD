@@ -12,6 +12,9 @@
 
 Each diagram preview has independent zoom, pan, fit and actual-size controls. Ctrl/Command + wheel zooms; ordinary wheel scrolls. Large PNG exports retain the selected 72–600 PPI (default 300). SVG is vector-based; PPI applies only to raster exports.
 
+
+**Generate images compatible with Obsidian** — Enabled by default. Check PNG decoding in Obsidian; if it fails, keep the requested original and add a lower-PPI copy. Both filenames show their PPI. Off exports only the requested PNG. (`note_drawnix_300ppi.png`, `note_drawnix_obsidian_87ppi.png`).
+
 ## Start Here
 
 | Reader | Entry point | Outcome |
