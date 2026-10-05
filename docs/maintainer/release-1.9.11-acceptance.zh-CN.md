@@ -16,6 +16,27 @@
 
 发布提交后确认工作区干净，并要求 main 的 Linux/Windows 验证工作流通过。推送对应标签，由唯一 Release Actions 工作流运行仓库发布器，不同时启动本地发布器。发布器在公开前下载并校验 main.js、manifest.json、styles.css 和 README.md 的哈希。核实公开发布及 chronicle 后续任务，再显式在 main 触发 deploy-docs.yml，检查线上版本和各语言页面。
 
+## 已完成的发布检查
+
+- 候选提交：`473eae05f89310cdcdcb74107164221a20bd1887`，无分歧集成到远端 main。
+- [候选 CI](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/37266034837)与 [main CI](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/37267099683)的 Linux、Windows 均通过。各执行 306 个套件；Linux 2,977 项测试全部通过，Windows 2,976 项通过、1 项平台跳过。21 个文件的 lint 增量检查没有新增问题。
+- 网站完整 34 语言构建与构建审计通过。导航/可访问性检查覆盖 96 个页面，零失败。
+- 干净候选工作区的离线发布预检通过。原生诊断验收使用已安装的 1.9.11 候选版本；之后仅补充欢迎页版本摘要，由版本契约测试与两轮完整 CI 覆盖。
+- Release 工作流首轮已创建草稿，但紧随其后的 API 查询未读到草稿。检查确认来源凭据一致且没有资产；由同一发布器按未变更标签重试，没有替换公开资产。
+
+## 发布结果
+
+[Notemd 1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) 已公开。[Release 工作流](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/runs/37267164141)第二轮完整成功，包含 chronicle 刷新（`a495a0d0`）。独立下载的四个资产均与来源凭据哈希一致：
+
+| 资产 | SHA-256 |
+| --- | --- |
+| main.js | `74bbbdf6f423ebe89e7d581624dc3617efb134fa11b896b14db05c855c5908a7` |
+| manifest.json | `5f2c326586b4b5c3ba8e0f2f5d7f14ba2e6558aa615574bc83152cfe3f986e24` |
+| styles.css | `56c855d9e8f3f2bdbee8b7b75ae90ffeff00001f296bae6dbed345d52ed401ee` |
+| README.md | `0d8fb1b136a413247ad4fd45e4f3348785e221a341146009a039d1b8c187bd31` |
+
+首轮自动 Pages 构建通过，但部署门禁正确拒绝了当时尚未公开的版本。发布后通过 [deploy-docs.yml](https://github.com/Jacobinwwey/obsidian-NotEMD/actions/workflows/deploy-docs.yml)显式部署，线上指南为 [1.9.11](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/releases/1.9.11)。历史 1.9.10 资产没有修改。
+
 ## 保留的限制
 
 原生 Drawnix 箭头重排后仍为静态坐标。布局优化有计算预算，不保证全局最优。日志跨会话内动作和视图重建保留，不跨插件重载保存。超大 PDF 页面等比例缩放。保留现有设置、原文、生成文件、净化规则和导出契约。
