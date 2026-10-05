@@ -26,7 +26,23 @@ Varje diagramförhandsvisning har separat zoom, panorering, anpassning och fakti
 | Utvecklare | [Utvecklarguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/developers/overview) | Bygg, testa och utöka befintliga kontrakt |
 | Agent | [Agentguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/agents/overview) | Hitta fyra stödda exportkommandon |
 
-**Version:** 1.9.10
+**Version:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Tydligare diagram och tillförlitlig PDF-export
+
+Drawnix placerar nära relaterade grenar närmare varandra och minskar överlappande och korsande förbindelser. Alla noder och uttryckliga relationer bevaras. Pilar mellan grenar förblir statiska efter omplacering.
+
+PDF-export hanterar komplexa SVG-selektorer och ärvda stilar efter sanering. Saknade viewBox-attribut återställs; för stora sidor skalas proportionellt med bibehållna vektorer.
+
+Diagnostik grupperas efter etikett och är hopfälld som standard. Öppna en grupp för att läsa alla meddelanden och förslag; antalet per allvarlighetsgrad är fortsatt synligt.
+
+Loggar samlas mellan uppgiftssteg och när förhandsvisningen öppnas igen under pluginsessionen. Använd Rensa logg för att återställa dem; loggen bevaras inte när pluginet laddas om.
+
+Installera main.js, manifest.json och styles.css från samma version 1.9.11 och ladda om. Inställningar och befintliga filer bevaras.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Tydligare diagram och tillförlitlig PDF-export](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -727,7 +743,7 @@ MIT License - Se filen [LICENSE](LICENSE) för detaljer.
 ---
 
 
-*Notemd v1.9.10 - Förbättra din Obsidian-kunskapsgraf med AI.*
+*Notemd v1.9.11 - Förbättra din Obsidian-kunskapsgraf med AI.*
 
 
 <!-- repo-chronicle:start -->

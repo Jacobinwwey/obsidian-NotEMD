@@ -26,7 +26,23 @@ Chaque aperçu dispose de zoom, déplacement, ajustement et taille réelle indé
 | Développeur | [Guide de développement](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/developers/overview) | Compiler, tester et étendre les contrats existants |
 | Agent | [Guide des agents](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/agents/overview) | Découvrir les quatre commandes d’export prises en charge |
 
-**Version:** 1.9.10
+**Version:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Diagrammes plus clairs et export PDF fiable
+
+Drawnix rapproche les branches fortement liées et réduit les chevauchements et croisements des connecteurs, en conservant tous les nœuds et toutes les relations explicites. Les flèches entre branches restent statiques après réorganisation.
+
+L’export PDF traite les sélecteurs SVG complexes et les styles hérités après assainissement. Les viewBox manquants sont rétablis ; les pages trop grandes sont réduites proportionnellement en conservant les éléments vectoriels.
+
+Les diagnostics sont regroupés par étiquette et repliés par défaut. Dépliez un groupe pour lire chaque message et conseil ; les compteurs par gravité restent visibles.
+
+Les journaux s’accumulent entre les étapes et les réouvertures de l’aperçu pendant la session du plugin. Utilisez Effacer le journal pour les réinitialiser ; recharger le plugin efface cet historique.
+
+Installez main.js, manifest.json et styles.css de la même version 1.9.11, puis rechargez. Les paramètres et fichiers existants sont conservés.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Diagrammes plus clairs et export PDF fiable](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -733,7 +749,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 ---
 
 
-*Notemd v1.9.10 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.9.11 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 

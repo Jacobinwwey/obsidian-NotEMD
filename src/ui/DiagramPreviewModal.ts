@@ -663,23 +663,41 @@ export class DiagramPreviewModal extends Modal {
         }
 
         const list = panel.createDiv({ cls: 'notemd-diagram-preview-diagnostics-list' });
+        const groups = new Map<string, typeof diagnostics>();
         for (const diagnostic of diagnostics) {
-            const item = list.createDiv({
-                cls: `notemd-diagram-preview-diagnostic is-${diagnostic.severity}`
+            const group = groups.get(diagnostic.kind);
+            if (group) group.push(diagnostic);
+            else groups.set(diagnostic.kind, [diagnostic]);
+        }
+        for (const [kind, entries] of groups) {
+            // Native disclosures keep all evidence accessible without letting repeated tags crowd out the preview.
+            const group = list.createEl('details', { cls: 'notemd-diagram-preview-diagnostic-group' });
+            const heading = group.createEl('summary', { cls: 'notemd-diagram-preview-diagnostic-group-heading' });
+            heading.createEl('span', { text: kind, cls: 'notemd-diagram-preview-diagnostic-group-tag' });
+            heading.createEl('span', {
+                text: formatRenderArtifactDiagnosticSummary(
+                    summarizeRenderArtifactDiagnostics(entries), i18n.previewModal.diagnosticSummary
+                ),
+                cls: 'notemd-diagram-preview-diagnostic-group-counts'
             });
-            item.createDiv({
-                text: `${diagnostic.severity.toUpperCase()} · ${diagnostic.kind}`,
-                cls: 'notemd-diagram-preview-diagnostic-meta'
-            });
-            item.createDiv({
-                text: diagnostic.message,
-                cls: 'notemd-diagram-preview-diagnostic-message'
-            });
-            if (diagnostic.advice?.trim()) {
-                item.createDiv({
-                    text: formatI18n(i18n.previewModal.diagnosticAdvice, { advice: diagnostic.advice }),
-                    cls: 'notemd-diagram-preview-diagnostic-advice'
+            for (const diagnostic of entries) {
+                const item = group.createDiv({
+                    cls: `notemd-diagram-preview-diagnostic is-${diagnostic.severity}`
                 });
+                item.createDiv({
+                    text: `${diagnostic.severity.toUpperCase()} · ${diagnostic.kind}`,
+                    cls: 'notemd-diagram-preview-diagnostic-meta'
+                });
+                item.createDiv({
+                    text: diagnostic.message,
+                    cls: 'notemd-diagram-preview-diagnostic-message'
+                });
+                if (diagnostic.advice?.trim()) {
+                    item.createDiv({
+                        text: formatI18n(i18n.previewModal.diagnosticAdvice, { advice: diagnostic.advice }),
+                        cls: 'notemd-diagram-preview-diagnostic-advice'
+                    });
+                }
             }
         }
     }

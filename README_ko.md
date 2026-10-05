@@ -26,7 +26,23 @@
 | 개발자 | [개발 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/developers/overview) | 기존 계약에 따라 빌드, 테스트, 확장하기 |
 | 에이전트 | [에이전트 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/agents/overview) | 지원되는 네 가지 내보내기 명령 확인하기 |
 
-**버전:** 1.9.10
+**버전:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — 더 명확한 다이어그램과 안정적인 PDF 내보내기
+
+Drawnix는 밀접하게 관련된 가지를 가까이 배치하고 연결선의 겹침과 교차를 줄입니다. 모든 노드와 명시적 관계는 유지됩니다. 가지 사이의 화살표는 재배치 후에도 고정 좌표를 사용합니다.
+
+PDF 내보내기는 SVG 정제 후 복잡한 선택자와 상속된 스타일을 처리합니다. 누락된 viewBox를 보완하고 너무 큰 페이지를 벡터와 가로세로 비율을 유지하며 축소합니다.
+
+진단은 태그별로 그룹화되며 기본적으로 접혀 있습니다. 그룹을 펼치면 모든 메시지와 제안을 읽을 수 있으며 심각도별 개수는 계속 표시됩니다.
+
+플러그인 세션 동안 작업 단계와 미리보기 다시 열기에 걸쳐 로그가 누적됩니다. 로그 지우기로 초기화할 수 있으며 플러그인을 다시 로드하면 이전 로그는 유지되지 않습니다.
+
+동일한 1.9.11 릴리스의 main.js, manifest.json, styles.css를 설치한 뒤 다시 로드하세요. 기존 설정과 파일은 유지됩니다.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — 더 명확한 다이어그램과 안정적인 PDF 내보내기](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -733,7 +749,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.10 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.11 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 

@@ -125,3 +125,13 @@ Native Umgebung prüfen und verwaltete Laufzeit reparieren oder sicherstellen, d
 ## 1.9.10 — Sichere Vorschauen und Vault-lokale Einstellungen
 
 Importierte SVG-Vorschauen entfernen aktive Inhalte und externe Ressourcen; chinesische Beschriftungen und Panel-Stile bleiben erhalten. Geräteanbieter sind je Vault isoliert. Importieren Sie die alte Liste ausdrücklich in den Einstellungen; vorhandene Konfigurationen und die alte Liste bleiben erhalten. Präsentationsvorschauen nutzen einen Loopback-Server mit Verwaltung gemeinsamer Nutzer. Fehler beim Speichern von Favoriten oder beim Kopieren werden gemeldet; Löschen folgt den Vault-Vorgaben. PNG-Kompatibilität bleibt standardmäßig aktiv: Das Original bleibt erhalten, bei Bedarf kommt eine geprüfte Kopie mit weniger PPI hinzu. Drawnix hat keine feste Beziehungsgrenze; Präsentationsexporte behalten getrennte Einstellungen. Passende Release-Dateien installieren, neu laden und vor Stapelverarbeitung eine Notiz testen.
+
+## 1.9.11 — Übersichtlichere Diagramme und zuverlässiger PDF-Export
+
+Drawnix rückt eng verbundene Zweige näher zusammen und verringert überlappende und sich kreuzende Verbindungen. Alle Knoten und expliziten Beziehungen bleiben erhalten. Zweigübergreifende Pfeile bleiben nach dem Umordnen statisch.
+
+Der PDF-Export verarbeitet nach der SVG-Bereinigung komplexe Selektoren und geerbte Stile. Fehlende viewBox-Angaben werden ergänzt; übergroße Seiten werden proportional skaliert und bleiben vektorbasiert.
+
+Diagnosen werden nach Kennzeichnung gruppiert und standardmäßig eingeklappt. Klappen Sie eine Gruppe auf, um alle Meldungen und Hinweise zu lesen; die Anzahl je Schweregrad bleibt sichtbar.
+
+Protokolle bleiben während der Plugin-Sitzung über Aufgabenschritte und erneut geöffnete Vorschauen hinweg erhalten. Mit Protokoll leeren setzen Sie sie zurück; beim Neuladen des Plugins geht das Protokoll verloren.

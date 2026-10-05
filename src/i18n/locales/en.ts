@@ -929,6 +929,7 @@ export const STRINGS_EN = {
         apiActivityReportHistoryLabel: 'History:',
         quickDeepDebugToggle: 'Deep debug',
         copyLog: 'Copy log',
+        clearLog: 'Clear log',
         copyLogSuccess: 'Log copied!',
         copyLogFailed: 'Failed to copy log.',
         logEmpty: 'Log is empty.',

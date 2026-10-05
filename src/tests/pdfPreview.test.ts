@@ -1,6 +1,15 @@
 import { buildPdfFromSvg } from '../rendering/preview/pdfPreview';
 
 describe('pdf preview exporter', () => {
+    test('fits oversized canvases proportionally inside jsPDF page limits', async () => {
+        const createDocument = jest.fn(() => ({ output: jest.fn(() => new ArrayBuffer(16)) }));
+        const renderSvg = jest.fn();
+        await buildPdfFromSvg('<svg width="40000" height="80000" viewBox="0 0 40000 80000"/>', {
+            parseSvg: jest.fn(() => ({ tagName: 'svg' })), createDocument, renderSvg
+        });
+        expect(createDocument).toHaveBeenCalledWith(7200, 14400, 'portrait');
+        expect(renderSvg.mock.calls[0][2]).toEqual({ x: 0, y: 0, width: 7200, height: 14400 });
+    });
     test('builds PDF through the SVG vector renderer instead of a raster image XObject', async () => {
         const document = {
             output: jest.fn(() => new TextEncoder().encode('%PDF-1.4\n/vector-content\n').buffer)

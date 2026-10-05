@@ -61,6 +61,8 @@ export interface DrawnixReservedRelationLaneRouterInput {
     canvasHeight: number;
     /** Header bounds and labels allocated to other relation lanes. */
     additionalObstacles?: readonly DrawnixCrossRootRouteObstacle[];
+    /** Occupied polylines affect route cost, but are not impassable walls. */
+    previousRoutes?: readonly DrawnixPoint[][];
 }
 
 export interface DrawnixReservedRelationLaneRoute extends DrawnixCrossRootRoute {
@@ -81,6 +83,46 @@ export interface DrawnixCompactRelationRouterInput {
 const ROUTE_CLEARANCE = 28;
 const OUTER_ROUTE_MARGIN = 64;
 const BEND_PENALTY = 160;
+const SHARED_SEGMENT_PENALTY = 12;
+const CROSSING_PENALTY = 60;
+
+function relationRouteCost(points: readonly DrawnixPoint[], previousRoutes: readonly DrawnixPoint[][]): number {
+    let cost = drawnixPolylineLength(points) + Math.max(0, points.length - 2) * BEND_PENALTY;
+    for (let index = 1; index < points.length; index++) {
+        const start = points[index - 1], end = points[index];
+        const horizontal = start[1] === end[1];
+        for (const previous of previousRoutes) for (let segment = 1; segment < previous.length; segment++) {
+            const a = previous[segment - 1], b = previous[segment];
+            if (horizontal === (a[1] === b[1])) {
+                const axis = horizontal ? 0 : 1;
+                if (Math.abs(start[1 - axis] - a[1 - axis]) < 8) {
+                    const overlap = Math.max(0, Math.min(Math.max(start[axis], end[axis]), Math.max(a[axis], b[axis]))
+                        - Math.max(Math.min(start[axis], end[axis]), Math.min(a[axis], b[axis])));
+                    cost += overlap * SHARED_SEGMENT_PENALTY;
+                }
+            } else {
+                const hStart = horizontal ? start : a, hEnd = horizontal ? end : b;
+                const vStart = horizontal ? a : start, vEnd = horizontal ? b : end;
+                if (vStart[0] > Math.min(hStart[0], hEnd[0]) && vStart[0] < Math.max(hStart[0], hEnd[0])
+                    && hStart[1] > Math.min(vStart[1], vEnd[1]) && hStart[1] < Math.max(vStart[1], vEnd[1])) cost += CROSSING_PENALTY;
+            }
+        }
+    }
+    return cost;
+}
+
+function compactRelationPorts(node: DrawnixMindMapPlacedNode): DrawnixPoint[] {
+    return [0.5, 0.25, 0.75].flatMap(fraction => [
+        [node.x, node.y + node.height * fraction], [node.x + node.width, node.y + node.height * fraction],
+        [node.x + node.width * fraction, node.y], [node.x + node.width * fraction, node.y + node.height]
+    ] as DrawnixPoint[]);
+}
+
+function reservedRelationPorts(node: DrawnixMindMapPlacedNode, trackX: number): DrawnixPoint[] {
+    return endpointsTowardTrack(node, trackX).flatMap(([x, y]) => [
+        [x, y], [x, y - node.height / 4], [x, y + node.height / 4]
+    ] as DrawnixPoint[]);
+}
 
 type RouteRect = DrawnixRect;
 
@@ -613,10 +655,6 @@ export function findDrawnixCompactRelationRoute(input: DrawnixCompactRelationRou
     const { source, target, labelSize } = input;
     const obstacles = [...input.nodes.map(node => nodeRectangle(node,
         node.id === source.id || node.id === target.id ? 0 : 12)), ...input.additionalObstacles];
-    const ports = (node: DrawnixMindMapPlacedNode): DrawnixPoint[] => [
-        [node.x, node.y + node.height / 2], [node.x + node.width, node.y + node.height / 2],
-        [node.x + node.width / 2, node.y], [node.x + node.width / 2, node.y + node.height]
-    ];
     const previousSegments = input.previousRoutes.flatMap(points => points.slice(1).map((end, i) => {
         const start = points[i];
         return { x: Math.min(start[0], end[0]) - 4, y: Math.min(start[1], end[1]) - 4,
@@ -624,7 +662,7 @@ export function findDrawnixCompactRelationRoute(input: DrawnixCompactRelationRou
     }));
     const candidates: Array<DrawnixReservedRelationLaneRoute & { labelBounds: DrawnixRect; score: number }> = [];
     const seen = new Set<string>();
-    for (const start of ports(source)) for (const end of ports(target)) {
+    for (const start of compactRelationPorts(source)) for (const end of compactRelationPorts(target)) {
         const xTracks = [(start[0] + end[0]) / 2,
             Math.min(source.x, target.x) - ROUTE_CLEARANCE,
             Math.max(source.x + source.width, target.x + target.width) + ROUTE_CLEARANCE,
@@ -643,8 +681,7 @@ export function findDrawnixCompactRelationRoute(input: DrawnixCompactRelationRou
             if (seen.has(key)) continue;
             seen.add(key);
             if (points.some(([x, y]) => x < 0 || y < 0 || x > input.canvasWidth || y > input.canvasHeight)
-                || !routeSegmentsAreClear(points, obstacles)
-                || !routeSegmentsAreClear(points, previousSegments)) continue;
+                || !routeSegmentsAreClear(points, obstacles)) continue;
             const length = drawnixPolylineLength(points);
             let travelled = 0;
             for (let i = 1; i < points.length; i++) {
@@ -659,7 +696,7 @@ export function findDrawnixCompactRelationRoute(input: DrawnixCompactRelationRou
                     && !obstacles.some(rect => drawnixRectanglesOverlap(bounds, inflateDrawnixRect(rect, 12)))
                     && !previousSegments.some(rect => drawnixRectanglesOverlap(bounds, rect))) {
                     candidates.push({ points, labelBounds: bounds, nativeTextPosition: (travelled + segmentLength * fraction) / length,
-                        strategy: 'local-lane', score: length + (points.length - 2) * BEND_PENALTY });
+                        strategy: 'local-lane', score: relationRouteCost(points, input.previousRoutes) });
                 }
                 }
                 travelled += segmentLength;
@@ -802,7 +839,13 @@ export function findDrawnixDirectReservedLaneRoute(
 
     for (const direction of laneDirections) {
         const targetLanePoint: DrawnixPoint = [direction.targetTrackX, lane.y];
-        for (const start of endpointsTowardTrack(source, direction.sourceTrackX)) {
+        // Endpoint legs depend on the track, not the opposite endpoint. Reuse
+        // them across port pairs instead of repeating dense obstacle searches.
+        const targetLaneLegs = reservedRelationPorts(target, direction.targetTrackX)
+            .map(end => findClearEndpointLaneLeg(end, target, direction.targetTrackX, lane.y,
+                ingressObstacles, input.canvasWidth, input.canvasHeight))
+            .filter((points): points is DrawnixPoint[] => points !== null);
+        for (const start of reservedRelationPorts(source, direction.sourceTrackX)) {
             const sourceLaneLeg = findClearEndpointLaneLeg(
                 start,
                 source,
@@ -816,17 +859,7 @@ export function findDrawnixDirectReservedLaneRoute(
                 continue;
             }
 
-            for (const end of endpointsTowardTrack(target, direction.targetTrackX)) {
-                const targetLaneLeg = findClearEndpointLaneLeg(
-                    end,
-                    target,
-                    direction.targetTrackX,
-                    lane.y,
-                    ingressObstacles,
-                    input.canvasWidth,
-                    input.canvasHeight
-                );
-                if (targetLaneLeg) {
+            for (const targetLaneLeg of targetLaneLegs) {
                     const points = simplify([
                         ...sourceLaneLeg,
                         targetLanePoint,
@@ -838,13 +871,12 @@ export function findDrawnixDirectReservedLaneRoute(
                             candidates.push({ points, nativeTextPosition });
                         }
                     }
-                }
             }
         }
     }
 
     candidates.sort((left, right) => {
-        const lengthDelta = drawnixPolylineLength(left.points) - drawnixPolylineLength(right.points);
+        const lengthDelta = relationRouteCost(left.points, input.previousRoutes ?? []) - relationRouteCost(right.points, input.previousRoutes ?? []);
         return lengthDelta || left.points.length - right.points.length;
     });
     const selected = candidates[0];
@@ -928,7 +960,7 @@ export function routeDrawnixRelationThroughReservedLane(
     }
 
     candidates.sort((left, right) => {
-        const lengthDelta = drawnixPolylineLength(left.points) - drawnixPolylineLength(right.points);
+        const lengthDelta = relationRouteCost(left.points, input.previousRoutes ?? []) - relationRouteCost(right.points, input.previousRoutes ?? []);
         return lengthDelta || left.points.length - right.points.length;
     });
     const selected = candidates[0];

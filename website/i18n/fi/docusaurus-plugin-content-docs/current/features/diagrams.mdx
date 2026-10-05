@@ -115,3 +115,13 @@ Tarkista **CircuitikZ native compile environment**. Korjaa hallittu ympäristö 
 ## 1.9.10 — Turvalliset esikatselut ja Vault-kohtaiset asetukset
 
 Tuodut SVG-esikatselut poistavat aktiivisen sisällön ja ulkoiset resurssit mutta säilyttävät kiinankieliset tekstit ja paneelien tyylit. Paikalliset palveluntarjoajat eristetään Vaultin mukaan; tuo vanha luettelo erikseen asetuksista, säilyttäen alkuperäisen luettelon ja nykyiset määritykset. Esitykset käyttävät loopback-palvelinta, joka hallitsee yhteisiä käyttäjiä. Suosikkien tallennus- ja kopiointivirheet ilmoitetaan; poisto noudattaa Vaultin asetuksia. PNG-yhteensopivuus pysyy käytössä: alkuperäinen säilyy ja tarvittaessa lisätään tarkistettu pienemmän PPI:n kopio. Drawnix-suhteilla ei ole kiinteää rajaa; esityksillä on erilliset asetukset. Asenna saman version tiedostot, lataa uudelleen ja kokeile yhtä muistiinpanoa ennen eräajoa.
+
+## 1.9.11 — Selkeämmät kaaviot ja luotettava PDF-vienti
+
+Drawnix sijoittaa läheisesti liittyvät haarat lähemmäs toisiaan ja vähentää yhdysviivojen päällekkäisyyksiä ja risteyksiä. Kaikki solmut ja eksplisiittiset suhteet säilyvät. Haarojen väliset nuolet pysyvät staattisina uudelleenjärjestelyn jälkeen.
+
+PDF-vienti käsittelee monimutkaiset SVG-valitsimet ja perityt tyylit puhdistuksen jälkeen. Puuttuvat viewBox-määritykset palautetaan; liian suuret sivut skaalataan suhteellisesti vektorit säilyttäen.
+
+Diagnostiikka ryhmitellään tunnisteen mukaan ja ryhmät ovat oletuksena suljettuja. Avaa ryhmä nähdäksesi kaikki viestit ja ehdotukset; vakavuuskohtaiset määrät pysyvät näkyvissä.
+
+Lokit kertyvät tehtävävaiheiden ja esikatselun uudelleenavausten yli lisäosan istunnon aikana. Tyhjennä loki nollaa ne; lisäosan uudelleenlataus ei säilytä lokia.

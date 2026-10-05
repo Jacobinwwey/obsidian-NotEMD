@@ -63,6 +63,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
 
         // Log output
         this.logEl = contentEl.createEl('div', { cls: 'notemd-log-output' });
+        for (const entry of this.logContent) this.renderLogEntry(entry);
 
         // Cancel button
         const buttonContainer = contentEl.createEl('div', { cls: 'notemd-button-container' });
@@ -115,18 +116,22 @@ export class ProgressModal extends Modal implements ProgressReporter {
     }
 
     log(message: string) {
-        if (this.logEl) {
-            const timestamp = `[${formatTimeForLocale(new Date(), this.getResolvedUiLocale())}]`;
-            const fullMessage = `${timestamp} ${message}`;
-            this.logContent.push(fullMessage);
+        const timestamp = `[${formatTimeForLocale(new Date(), this.getResolvedUiLocale())}]`;
+        const fullMessage = `${timestamp} ${message}`;
+        this.logContent.push(fullMessage);
+        this.renderLogEntry(fullMessage);
+    }
 
+    private renderLogEntry(fullMessage: string): void {
+        if (this.logEl) {
+            const timestampEnd = fullMessage.indexOf(']') + 1;
             const entry = this.logEl.createEl('div', { cls: 'notemd-log-entry' });
             entry.createEl('span', {
-                text: `${timestamp} `,
+                text: fullMessage.slice(0, timestampEnd),
                 cls: 'notemd-log-time'
             });
             entry.createEl('span', {
-                text: message,
+                text: fullMessage.slice(timestampEnd),
                 cls: 'notemd-log-message'
             });
             // Auto-scroll to bottom
@@ -162,7 +167,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
 
     clearDisplay() {
         const i18n = this.getStrings();
-        this.logEl?.empty();
+        // Stages share one transcript even when their progress starts over.
         this.updateStatus(i18n.progressModal.starting, 0);
         this.isCancelled = false;
         this.currentAbortController = null; // Clear controller on display clear

@@ -86,6 +86,7 @@ language: {
         titles: { research: 'خطأ في البحث', batchTranslation: 'خطأ في الترجمة الدُفعية' }
     },
     sidebar: {
+        clearLog: "مسح السجل",
         heroTitle: 'مساحة عمل Notemd',
         heroDesc: 'شغّل إجراءات منفردة أو مهام بنقرة واحدة مع تقدم حيّ وسجلات.',
         defaultWorkflowName: 'استخراج بنقرة واحدة',
@@ -199,6 +200,7 @@ language: {
         titles: { research: 'Recherchefehler', batchTranslation: 'Fehler bei Stapelübersetzung' }
     },
     sidebar: {
+        clearLog: "Protokoll leeren",
         heroTitle: 'Notemd-Arbeitsbereich',
         heroDesc: 'Führen Sie Einzelaktionen oder benutzerdefinierte Ein-Klick-Workflows mit Live-Fortschritt und Protokollen aus.',
         defaultWorkflowName: 'Extraktion mit einem Klick',
@@ -312,6 +314,7 @@ language: {
         titles: { research: 'Error de investigación', batchTranslation: 'Error de traducción por lotes' }
     },
     sidebar: {
+        clearLog: "Borrar registro",
         heroTitle: 'Espacio de trabajo de Notemd',
         heroDesc: 'Ejecuta acciones individuales o flujos personalizados de un clic con progreso y registros en vivo.',
         defaultWorkflowName: 'Extracción con un clic',
@@ -425,6 +428,7 @@ language: {
         titles: { research: 'خطای پژوهش', batchTranslation: 'خطای ترجمه دسته‌ای' }
     },
     sidebar: {
+        clearLog: "پاک‌کردن گزارش",
         heroTitle: 'میزکار Notemd',
         heroDesc: 'اقدام‌های تکی یا گردش‌کارهای سفارشی تک‌کلیکی را با پیشرفت زنده و گزارش‌ها اجرا کنید.',
         defaultWorkflowName: 'استخراج تک‌کلیکی',
@@ -538,6 +542,7 @@ language: {
         titles: { research: 'Erreur de recherche', batchTranslation: 'Erreur de traduction par lot' }
     },
     sidebar: {
+        clearLog: "Effacer le journal",
         heroTitle: 'Espace de travail Notemd',
         heroDesc: 'Exécutez des actions simples ou des workflows personnalisés en un clic avec progression et journaux en direct.',
         defaultWorkflowName: 'Extraction en un clic',
@@ -651,6 +656,7 @@ language: {
         titles: { research: 'Kesalahan Riset', batchTranslation: 'Kesalahan Terjemahan Batch' }
     },
     sidebar: {
+        clearLog: "Hapus log",
         heroTitle: 'Ruang kerja Notemd',
         heroDesc: 'Jalankan aksi tunggal atau alur satu klik kustom dengan progres dan log langsung.',
         defaultWorkflowName: 'Ekstraksi Sekali Klik',
@@ -764,6 +770,7 @@ language: {
         titles: { research: 'Errore di ricerca', batchTranslation: 'Errore di traduzione batch' }
     },
     sidebar: {
+        clearLog: "Cancella log",
         heroTitle: 'Area di lavoro Notemd',
         heroDesc: 'Esegui singole azioni o workflow personalizzati con progresso e log in tempo reale.',
         defaultWorkflowName: 'Estrazione con un clic',
@@ -877,6 +884,7 @@ language: {
         titles: { research: '調査エラー', batchTranslation: '一括翻訳エラー' }
     },
     sidebar: {
+        clearLog: "ログを消去",
         heroTitle: 'Notemd ワークベンチ',
         heroDesc: '単体アクションやカスタムのワンクリックワークフローを、進行状況とログ付きで実行します。',
         defaultWorkflowName: 'ワンクリック抽出',
@@ -990,6 +998,7 @@ language: {
         titles: { research: '연구 오류', batchTranslation: '일괄 번역 오류' }
     },
     sidebar: {
+        clearLog: "로그 지우기",
         heroTitle: 'Notemd 워크벤치',
         heroDesc: '실시간 진행 상황과 로그를 보며 단일 작업이나 사용자 정의 원클릭 워크플로를 실행합니다.',
         defaultWorkflowName: '원클릭 추출',
@@ -1103,6 +1112,7 @@ language: {
         titles: { research: 'Onderzoeksfout', batchTranslation: 'Batchvertaalfout' }
     },
     sidebar: {
+        clearLog: "Logboek wissen",
         heroTitle: 'Notemd-werkruimte',
         heroDesc: 'Voer losse acties of aangepaste éénklik-workflows uit met live voortgang en logboeken.',
         defaultWorkflowName: 'Extractie met één klik',
@@ -1216,6 +1226,7 @@ language: {
         titles: { research: 'Błąd badania', batchTranslation: 'Błąd tłumaczenia wsadowego' }
     },
     sidebar: {
+        clearLog: "Wyczyść dziennik",
         heroTitle: 'Panel roboczy Notemd',
         heroDesc: 'Uruchamiaj pojedyncze akcje lub własne workflow jednym kliknięciem z postępem i logami na żywo.',
         defaultWorkflowName: 'Ekstrakcja jednym kliknięciem',
@@ -1329,6 +1340,7 @@ language: {
         titles: { research: 'Erro de pesquisa', batchTranslation: 'Erro de tradução em lote' }
     },
     sidebar: {
+        clearLog: "Limpar registo",
         heroTitle: 'Área de trabalho do Notemd',
         heroDesc: 'Execute ações individuais ou workflows personalizados de um clique com progresso e registos em direto.',
         defaultWorkflowName: 'Extração com um clique',
@@ -1442,6 +1454,7 @@ language: {
         titles: { research: 'Erro de pesquisa', batchTranslation: 'Erro de tradução em lote' }
     },
     sidebar: {
+        clearLog: "Limpar registro",
         heroTitle: 'Área de trabalho do Notemd',
         heroDesc: 'Execute ações individuais ou fluxos personalizados de um clique com progresso e logs em tempo real.',
         defaultWorkflowName: 'Extração com um clique',
@@ -1555,6 +1568,7 @@ language: {
         titles: { research: 'Ошибка исследования', batchTranslation: 'Ошибка пакетного перевода' }
     },
     sidebar: {
+        clearLog: "Очистить журнал",
         heroTitle: 'Рабочее пространство Notemd',
         heroDesc: 'Запускайте отдельные действия или пользовательские workflow в один клик с живым прогрессом и логами.',
         defaultWorkflowName: 'Извлечение в один клик',
@@ -1668,6 +1682,7 @@ language: {
         titles: { research: 'ข้อผิดพลาดในการวิจัย', batchTranslation: 'ข้อผิดพลาดในการแปลแบบกลุ่ม' }
     },
     sidebar: {
+        clearLog: "ล้างบันทึก",
         heroTitle: 'พื้นที่ทำงาน Notemd',
         heroDesc: 'เรียกใช้งานเดี่ยวหรือเวิร์กโฟลว์แบบคลิกเดียวพร้อมความคืบหน้าและบันทึกแบบสด',
         defaultWorkflowName: 'สกัดข้อมูลในคลิกเดียว',
@@ -1781,6 +1796,7 @@ language: {
         titles: { research: 'Araştırma Hatası', batchTranslation: 'Toplu Çeviri Hatası' }
     },
     sidebar: {
+        clearLog: "Günlüğü temizle",
         heroTitle: 'Notemd çalışma alanı',
         heroDesc: 'Canlı ilerleme ve günlüklerle tekil eylemler veya özel tek tıklamalı iş akışları çalıştırın.',
         defaultWorkflowName: 'Tek tıkla çıkarım',
@@ -1894,6 +1910,7 @@ language: {
         titles: { research: 'Помилка дослідження', batchTranslation: 'Помилка пакетного перекладу' }
     },
     sidebar: {
+        clearLog: "Очистити журнал",
         heroTitle: 'Робочий простір Notemd',
         heroDesc: 'Запускайте окремі дії або власні workflow в один клік із живим прогресом і журналами.',
         defaultWorkflowName: 'Витяг одним кліком',
@@ -2007,6 +2024,7 @@ language: {
         titles: { research: 'Lỗi nghiên cứu', batchTranslation: 'Lỗi dịch hàng loạt' }
     },
     sidebar: {
+        clearLog: "Xóa nhật ký",
         heroTitle: 'Không gian làm việc Notemd',
         heroDesc: 'Chạy hành động đơn lẻ hoặc quy trình một chạm tùy chỉnh với tiến độ và nhật ký trực tiếp.',
         defaultWorkflowName: 'Trích xuất một chạm',

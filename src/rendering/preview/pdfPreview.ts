@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import { svg2pdf } from 'svg2pdf.js';
+import { resolvePdfSvgStyles } from './pdfSvgStyles';
 import notoSansScRegularDataUrl from '../../assets/NotoSansSC-Regular.ttf';
 import { resolveSvgDimensions, sanitizeSvgForExport } from './pngPreview';
 import {
@@ -8,6 +9,7 @@ import {
 } from './previewTypography';
 
 const PDF_POINTS_PER_CSS_PIXEL = 72 / 96;
+const PDF_MAX_PAGE_POINTS = 14400;
 const PDF_FONT_FILE_NAME = 'NotoSansSC-Regular.ttf';
 const PDF_FONT_FAMILY = PREVIEW_FONT_FAMILY;
 const PDF_FONT_STYLES = ['normal', 'bold', 'italic', 'bolditalic'] as const;
@@ -40,10 +42,12 @@ function parseSvgDocument(svg: string): Element {
     }
 
     const document = new DOMParser().parseFromString(svg, 'image/svg+xml');
-    const root = document.documentElement;
+    let root: Element = document.documentElement;
     if (!root || root.tagName.toLowerCase() !== 'svg' || root.querySelector('parsererror')) {
         throw new Error('Preview renderer returned malformed SVG markup for PDF export.');
     }
+
+    root = resolvePdfSvgStyles(root);
 
     // Older Drawnix snapshots carry a white text halo. svg2pdf ignores paint-order
     // and paints that stroke over the glyph fill. Boxed labels already have their
@@ -98,7 +102,14 @@ async function renderSvgToPdf(
     document: SvgPdfDocumentLike,
     options: { x: number; y: number; width: number; height: number }
 ): Promise<unknown> {
-    return svg2pdf(element as Element, document as jsPDF, options);
+    const root = element as Element;
+    if (!root.hasAttribute('viewBox')) {
+        // svg2pdf only scales the CSS-pixel drawing into the point viewport when
+        // a viewBox exists; otherwise the right/bottom edges are silently clipped.
+        const dimensions = resolveSvgDimensions(root.outerHTML);
+        root.setAttribute('viewBox', `0 0 ${dimensions.width} ${dimensions.height}`);
+    }
+    return svg2pdf(root, document as jsPDF, options);
 }
 
 const DEFAULT_SVG_PDF_EXPORT_DEPS: SvgPdfExportDeps = {
@@ -117,8 +128,12 @@ export async function buildPdfFromSvg(
     // lay out a second, PDF-specific version of the diagram.
     const pdfSvg = normalizeSvgFontFamilyDeclarations(sanitizeSvgForExport(svg));
     const dimensions = resolveSvgDimensions(pdfSvg);
-    const pageWidthPt = dimensions.width * PDF_POINTS_PER_CSS_PIXEL;
-    const pageHeightPt = dimensions.height * PDF_POINTS_PER_CSS_PIXEL;
+    // jsPDF clamps each oversized page side independently. Scale both sides
+    // together before creating the page so large graphs retain their aspect
+    // ratio and every vector remains inside the printable viewport.
+    const pageScale = Math.min(1, PDF_MAX_PAGE_POINTS / (Math.max(dimensions.width, dimensions.height) * PDF_POINTS_PER_CSS_PIXEL));
+    const pageWidthPt = dimensions.width * PDF_POINTS_PER_CSS_PIXEL * pageScale;
+    const pageHeightPt = dimensions.height * PDF_POINTS_PER_CSS_PIXEL * pageScale;
     const orientation: PdfPageOrientation = pageWidthPt > pageHeightPt ? 'landscape' : 'portrait';
     const document = deps.createDocument(pageWidthPt, pageHeightPt, orientation);
     registerPdfFont(document);

@@ -522,7 +522,8 @@ function createCrossRelations(
             lane,
             canvasWidth,
             canvasHeight,
-            additionalObstacles
+            additionalObstacles,
+            previousRoutes
         });
         if (compact && labelLayout) labelLayout = { ...labelLayout, ...compact.labelBounds };
         if (labelLayout) occupiedLabels.push(labelLayout);
@@ -707,8 +708,7 @@ function packRootLayouts(rootLayouts: RootLayout[]): {
     };
 }
 
-function buildRootLayout(source: DiagramNode): RootLayout {
-    const root = buildTreeNode(source, undefined, 0, -1, source.id.trim());
+function layoutRootTree(root: MindMapTreeNode): RootLayout {
     const directChildren = root.children;
     const rightNodeCount = Math.ceil(directChildren.length / 2);
     directChildren.forEach((child, index) => {
@@ -769,6 +769,66 @@ function buildRootLayout(source: DiagramNode): RootLayout {
     };
 }
 
+function buildRelationshipOrderedLayouts(spec: DiagramSpec): RootLayout[] {
+    const roots = spec.nodes.map(source => buildTreeNode(source, undefined, 0, -1, source.id.trim()));
+    const edges = spec.edges ?? [];
+    let layouts = roots.map(layoutRootTree);
+    if (edges.length === 0) return layouts;
+
+    const relationshipDistance = (candidates: RootLayout[]): number => {
+        const centers = new Map<string, DrawnixPoint>();
+        let y = 0;
+        for (const row of packRootLayouts(candidates).rows) {
+            let x = 0;
+            for (const layout of row.layouts) {
+                for (const node of layout.treeNodes) centers.set(node.id, [x + node.x + node.width / 2, y + node.y + node.height / 2]);
+                x += layout.width + ROOT_LAYOUT_GAP;
+            }
+            y += row.height + ROOT_ROW_GAP;
+        }
+        return edges.reduce((sum, edge) => {
+            const source = centers.get(edge.from.trim())!;
+            const target = centers.get(edge.to.trim())!;
+            return sum + Math.abs(source[0] - target[0]) + Math.abs(source[1] - target[1]);
+        }, 0);
+    };
+
+    // Sibling swaps preserve every parent, label and source reference. Evaluate
+    // physical distances (including subtree sizes and root sides), not input
+    // indices. Multiple relationships between branches naturally add weight.
+    const siblingGroups = [roots, ...roots.flatMap(collectTreeNodes).map(node => node.children)]
+        .filter(siblings => siblings.length > 1);
+    let distance = relationshipDistance(layouts);
+    // This bounds computation, never node/edge coverage. Strict improvement and
+    // source-order tie breaking make the result deterministic and stable.
+    const candidateBudget = 10000;
+    let evaluated = 0;
+    let improved = true;
+    while (improved && evaluated < candidateBudget) {
+        improved = false;
+        for (const siblings of siblingGroups) {
+            for (let left = 0; left < siblings.length - 1 && evaluated < candidateBudget; left++) {
+                for (let right = left + 1; right < siblings.length && evaluated < candidateBudget; right++) {
+                    [siblings[left], siblings[right]] = [siblings[right], siblings[left]];
+                    const candidate = roots.map(layoutRootTree);
+                    const candidateDistance = relationshipDistance(candidate);
+                    evaluated++;
+                    if (candidateDistance < distance - 0.001) {
+                        distance = candidateDistance;
+                        improved = true;
+                    } else {
+                        [siblings[left], siblings[right]] = [siblings[right], siblings[left]];
+                    }
+                }
+            }
+        }
+    }
+    // The last rejected candidate also changed coordinates; reconstruct exactly
+    // once from the accepted sibling order before lane allocation/serialization.
+    layouts = roots.map(layoutRootTree);
+    return layouts;
+}
+
 function shiftRootLayout(layout: RootLayout, offsetX: number, offsetY: number): void {
     layout.treeNodes.forEach(node => {
         node.x += offsetX;
@@ -783,7 +843,7 @@ function shiftRootLayout(layout: RootLayout, offsetX: number, offsetY: number): 
 export function buildDrawnixMindMapProjection(spec: DiagramSpec): DrawnixMindMapProjection {
     assertValidDrawnixMindMapSpec(spec);
 
-    const rootLayouts = spec.nodes.map(buildRootLayout);
+    const rootLayouts = buildRelationshipOrderedLayouts(spec);
     const packedForest = packRootLayouts(rootLayouts);
     const relationLaneRequests = (spec.edges ?? []).map((edge, index) => {
         const sourceId = edge.from.trim();

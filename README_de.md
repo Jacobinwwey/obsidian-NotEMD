@@ -26,7 +26,23 @@ Jede Diagrammvorschau bietet unabhängigen Zoom, Verschieben, Einpassen und Orig
 | Entwickler | [Entwicklerhandbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/developers/overview) | Bestehende Verträge bauen, testen und erweitern |
 | Agent | [Agent-Handbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/agents/overview) | Vier unterstützte Exportbefehle finden |
 
-**Version:** 1.9.10
+**Version:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Übersichtlichere Diagramme und zuverlässiger PDF-Export
+
+Drawnix rückt eng verbundene Zweige näher zusammen und verringert überlappende und sich kreuzende Verbindungen. Alle Knoten und expliziten Beziehungen bleiben erhalten. Zweigübergreifende Pfeile bleiben nach dem Umordnen statisch.
+
+Der PDF-Export verarbeitet nach der SVG-Bereinigung komplexe Selektoren und geerbte Stile. Fehlende viewBox-Angaben werden ergänzt; übergroße Seiten werden proportional skaliert und bleiben vektorbasiert.
+
+Diagnosen werden nach Kennzeichnung gruppiert und standardmäßig eingeklappt. Klappen Sie eine Gruppe auf, um alle Meldungen und Hinweise zu lesen; die Anzahl je Schweregrad bleibt sichtbar.
+
+Protokolle bleiben während der Plugin-Sitzung über Aufgabenschritte und erneut geöffnete Vorschauen hinweg erhalten. Mit Protokoll leeren setzen Sie sie zurück; beim Neuladen des Plugins geht das Protokoll verloren.
+
+Installieren Sie main.js, manifest.json und styles.css aus derselben Version 1.9.11 und laden Sie das Plugin neu. Einstellungen und vorhandene Dateien bleiben erhalten.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Übersichtlichere Diagramme und zuverlässiger PDF-Export](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -733,7 +749,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.9.10 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.9.11 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 

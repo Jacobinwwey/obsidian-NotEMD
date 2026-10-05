@@ -108,3 +108,9 @@ Test præcis udbyder/model med en lille note. Mangler et felt, kontrollér søgn
 ## 1.9.10 — Sikre forhåndsvisninger og Vault-lokale indstillinger
 
 Importerede SVG-visninger fjerner aktivt indhold og eksterne ressourcer, men bevarer kinesiske etiketter og panelstile. Lokale udbydere isoleres pr. Vault; importer den gamle liste eksplicit i indstillingerne, så listen og eksisterende konfigurationer bevares. Præsentationer bruger en loopback-server med styring af fælles brugere. Fejl ved lagring af favoritter og kopiering vises; sletning følger Vault-præferencer. PNG-kompatibilitet forbliver aktiv: originalen bevares, og en kontrolleret kopi med lavere PPI tilføjes kun ved behov. Drawnix har ingen fast relationsgrænse; præsentationer beholder separate indstillinger. Installer filer fra samme version, genindlæs og test en note før massebehandling.
+
+## 1.9.11
+
+Logge samles på tværs af opgavetrin og genåbninger af forhåndsvisningen under pluginsessionen. Brug Ryd log til at nulstille dem; genindlæsning af pluginet bevarer ikke loggen.
+
+Diagnostik grupperes efter etiket og er som standard foldet sammen. Udvid en gruppe for at læse alle beskeder og forslag; antal pr. alvorlighedsgrad forbliver synlige.

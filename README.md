@@ -29,7 +29,23 @@ Each diagram preview has independent zoom, pan, fit and actual-size controls. Ct
 
 Notemd is an **MIT-licensed Obsidian plugin** for file-based knowledge work. It supports cloud providers, gateways and local model servers. Stored outputs stay in the vault; cloud tasks send content to the selected endpoint, and web research uses the network.
 
-**Version:** 1.9.10
+**Version:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Clearer diagrams and reliable PDF export
+
+Drawnix places closely related branches nearer and reduces connector overlap and crossings, preserving every node and explicit relationship. Cross-branch arrows remain static after rearrangement.
+
+PDF export handles complex SVG selectors and inherited styles after sanitization. Missing viewBoxes are restored; oversized pages are scaled proportionally while retaining vectors.
+
+Diagnostics are grouped by tag and collapsed by default. Expand a group to read every message and suggestion; severity counts remain visible.
+
+Logs accumulate across task stages and preview reopening during the plugin session. Use Clear log to reset them; reloading the plugin does not preserve the transcript.
+
+Install matching main.js, manifest.json and styles.css from 1.9.11, then reload. Settings and existing files are preserved.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Clearer diagrams and reliable PDF export](https://jacobinwwey.github.io/obsidian-NotEMD/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -859,7 +875,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.10 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.11 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->

@@ -1,3 +1,25 @@
+## 1.9.11
+
+### English
+
+Drawnix places closely related branches nearer and reduces connector overlap and crossings, preserving every node and explicit relationship. Cross-branch arrows remain static after rearrangement.
+
+PDF export handles complex SVG selectors and inherited styles after sanitization. Missing viewBoxes are restored; oversized pages are scaled proportionally while retaining vectors.
+
+Diagnostics are grouped by tag and collapsed by default. Expand a group to read every message and suggestion; severity counts remain visible.
+
+Logs accumulate across task stages and preview reopening during the plugin session. Use Clear log to reset them; reloading the plugin does not preserve the transcript.
+
+### 中文
+
+Drawnix 将关联紧密的分支放得更近，减少连接线重叠与交叉，同时保留全部节点和明确关系。跨分支箭头重排后仍有静态坐标限制。
+
+PDF 导出在净化 SVG 后正确处理复杂选择器与继承样式，补全缺失的 viewBox，并将超大页面等比例缩放，保留向量图形。
+
+诊断按标签分组并默认收起。展开后可查看每条消息和建议，严重级别计数始终可见。
+
+插件会话内的日志跨任务阶段和预览重开持续累积。使用“清空日志”重置；重新加载插件不会保留此前日志。
+
 ## 1.9.10
 
 ### English
@@ -15,6 +37,7 @@ This document summarizes the major functional and architectural changes implemen
 ---
 
 ## Unreleased
+
 
 - Enable Obsidian PNG compatibility by default: decode the requested original in the host, preserve it, and add a verified lower-PPI copy only when required. Label PNG filenames with actual PPI; freeze multi-file receipts in manifest v4 and include manual/panel companions in history. Disabling the setting exports only the requested original. Older manifest recovery preserves its original behavior.
 - 默认开启 Obsidian PNG 兼容：在宿主中检查请求原图的解码，完整保留原图，必要时追加经验证的较低 PPI 副本。PNG 文件名标注实际 PPI；manifest v4 冻结双文件凭据，手动与面板导出的副本同样纳入历史。关闭时仅输出请求原图；旧版记录保持原有恢复行为。

@@ -26,7 +26,23 @@ Elke diagramweergave heeft onafhankelijke zoom, verschuiving, passend maken en w
 | Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
 | Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
 
-**Versie:** 1.9.10
+**Versie:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Duidelijkere diagrammen en betrouwbare PDF-export
+
+Drawnix plaatst nauw verbonden takken dichter bij elkaar en vermindert overlappende en kruisende verbindingen, met behoud van alle knopen en expliciete relaties. Pijlen tussen takken blijven statisch na herschikking.
+
+PDF-export verwerkt complexe SVG-selectors en overgeërfde stijlen na opschoning. Ontbrekende viewBox-attributen worden aangevuld; te grote pagina’s worden evenredig geschaald met behoud van vectoren.
+
+Diagnostiek wordt per label gegroepeerd en standaard ingeklapt. Klap een groep uit om alle berichten en adviezen te lezen; aantallen per ernst blijven zichtbaar.
+
+Logboeken blijven tijdens de pluginsessie behouden tussen taakfasen en bij het heropenen van het voorbeeld. Gebruik Logboek wissen om opnieuw te beginnen; herladen van de plugin bewaart het logboek niet.
+
+Installeer main.js, manifest.json en styles.css van dezelfde versie 1.9.11 en herlaad de plugin. Instellingen en bestaande bestanden blijven behouden.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Duidelijkere diagrammen en betrouwbare PDF-export](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -727,7 +743,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.10 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.11 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 

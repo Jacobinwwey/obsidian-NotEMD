@@ -26,7 +26,23 @@ Jokaisessa kaavion esikatselussa on oma zoomaus, siirto, sovitus ja todellinen k
 | Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
 | Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
 
-**Versio:** 1.9.10
+**Versio:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Selkeämmät kaaviot ja luotettava PDF-vienti
+
+Drawnix sijoittaa läheisesti liittyvät haarat lähemmäs toisiaan ja vähentää yhdysviivojen päällekkäisyyksiä ja risteyksiä. Kaikki solmut ja eksplisiittiset suhteet säilyvät. Haarojen väliset nuolet pysyvät staattisina uudelleenjärjestelyn jälkeen.
+
+PDF-vienti käsittelee monimutkaiset SVG-valitsimet ja perityt tyylit puhdistuksen jälkeen. Puuttuvat viewBox-määritykset palautetaan; liian suuret sivut skaalataan suhteellisesti vektorit säilyttäen.
+
+Diagnostiikka ryhmitellään tunnisteen mukaan ja ryhmät ovat oletuksena suljettuja. Avaa ryhmä nähdäksesi kaikki viestit ja ehdotukset; vakavuuskohtaiset määrät pysyvät näkyvissä.
+
+Lokit kertyvät tehtävävaiheiden ja esikatselun uudelleenavausten yli lisäosan istunnon aikana. Tyhjennä loki nollaa ne; lisäosan uudelleenlataus ei säilytä lokia.
+
+Asenna main.js, manifest.json ja styles.css samasta versiosta 1.9.11 ja lataa lisäosa uudelleen. Asetukset ja olemassa olevat tiedostot säilyvät.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Selkeämmät kaaviot ja luotettava PDF-vienti](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -727,7 +743,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.10 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.11 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->

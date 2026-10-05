@@ -26,7 +26,23 @@ Ogni anteprima ha controlli indipendenti per zoom, spostamento, adattamento e di
 | Sviluppatore | [Guida per sviluppatori](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/developers/overview) | Compilare, testare ed estendere i contratti esistenti |
 | Agente | [Guida per agenti](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/agents/overview) | Scoprire i quattro comandi di esportazione supportati |
 
-**Versione:** 1.9.10
+**Versione:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Diagrammi più chiari ed esportazione PDF affidabile
+
+Drawnix avvicina i rami strettamente correlati e riduce sovrapposizioni e incroci dei connettori, conservando tutti i nodi e le relazioni esplicite. Le frecce tra rami restano statiche dopo il riordino.
+
+L’esportazione PDF gestisce selettori SVG complessi e stili ereditati dopo la sanificazione. I viewBox mancanti vengono ripristinati; le pagine troppo grandi vengono ridimensionate proporzionalmente mantenendo i vettori.
+
+I messaggi diagnostici sono raggruppati per etichetta e inizialmente compressi. Espandete un gruppo per leggere ogni messaggio e suggerimento; i conteggi per gravità restano visibili.
+
+I log si accumulano tra le fasi e le riaperture dell’anteprima durante la sessione del plugin. Usate Cancella log per azzerarli; ricaricando il plugin la cronologia non viene conservata.
+
+Installate main.js, manifest.json e styles.css della stessa versione 1.9.11, quindi ricaricate. Impostazioni e file esistenti vengono conservati.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Diagrammi più chiari ed esportazione PDF affidabile](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -733,7 +749,7 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 ---
 
 
-*Notemd v1.9.10 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+*Notemd v1.9.11 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
 
 
 

@@ -1,0 +1,29 @@
+---
+id: 1.9.11
+title: "Notemd 1.9.11 — 見やすい図と安定した PDF エクスポート"
+description: "PDF エクスポートは、SVG のサニタイズ後に複雑なセレクターと継承スタイルを処理します。欠けている viewBox を補い、大きすぎるページはベクターを保持して縦横比を変えずに縮小します。 診断はタグ別にまとめ、初期状態では折りたたみます。展開するとすべてのメッセージと提案を読めます。重大度別の件数は常に表示されます。"
+author:
+  '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [Notemd 1.9.11, Drawnix, SVG, PDF]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Notemd 1.9.11 — 見やすい図と安定した PDF エクスポート
+
+<TLDR>
+Drawnix は関係の強い枝を近くに配置し、接続線の重なりや交差を減らします。すべてのノードと明示的な関係を保持します。枝をまたぐ矢印は、再配置後も固定座標のままです。
+</TLDR>
+
+PDF エクスポートは、SVG のサニタイズ後に複雑なセレクターと継承スタイルを処理します。欠けている viewBox を補い、大きすぎるページはベクターを保持して縦横比を変えずに縮小します。
+
+診断はタグ別にまとめ、初期状態では折りたたみます。展開するとすべてのメッセージと提案を読めます。重大度別の件数は常に表示されます。
+
+プラグインのセッション中は、タスクの各段階やプレビューの再表示をまたいでログを蓄積します。「ログを消去」でリセットできます。プラグインを再読み込みすると履歴は残りません。
+
+同じ 1.9.11 リリースの main.js、manifest.json、styles.css をインストールし、再読み込みしてください。既存の設定とファイルは保持されます。
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.10](./1.9.10)
+
+- [SVG / PNG / PDF](../features/diagrams)
+- [Notemd](../getting-started/configuration)

@@ -26,7 +26,23 @@ Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma
 | Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
 | Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
 
-**Sürüm:** 1.9.10
+**Sürüm:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Daha anlaşılır diyagramlar ve güvenilir PDF dışa aktarımı
+
+Drawnix, yakından ilişkili dalları birbirine yaklaştırır; tüm düğümleri ve açık ilişkileri koruyarak bağlantı çizgilerinin örtüşmesini ve kesişmesini azaltır. Dallar arası oklar yeniden düzenlemeden sonra statik kalır.
+
+PDF dışa aktarımı, temizleme sonrasında karmaşık SVG seçicilerini ve devralınan stilleri işler. Eksik viewBox alanları tamamlanır; aşırı büyük sayfalar vektörler korunarak orantılı ölçeklenir.
+
+Tanılama iletileri etikete göre gruplanır ve varsayılan olarak daraltılır. Her iletiyi ve öneriyi okumak için grubu genişletin; önem düzeyi sayıları görünür kalır.
+
+Günlükler eklenti oturumu boyunca görev aşamaları ve önizlemenin yeniden açılması arasında birikir. Sıfırlamak için Günlüğü temizle seçeneğini kullanın; eklentiyi yeniden yüklemek geçmişi korumaz.
+
+Aynı 1.9.11 sürümüne ait main.js, manifest.json ve styles.css dosyalarını yükleyip eklentiyi yeniden başlatın. Ayarlar ve mevcut dosyalar korunur.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Daha anlaşılır diyagramlar ve güvenilir PDF dışa aktarımı](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -727,7 +743,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.10 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.11 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->

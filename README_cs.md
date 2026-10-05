@@ -26,7 +26,23 @@ Každý náhled diagramu má samostatné přiblížení, posun, přizpůsobení 
 | Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
 | Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
 
-**Verze:** 1.9.10
+**Verze:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Přehlednější diagramy a spolehlivý export PDF
+
+Drawnix umisťuje úzce související větve blíže k sobě a omezuje překrývání a křížení spojnic. Všechny uzly a explicitní vztahy zůstávají zachovány. Šipky mezi větvemi zůstávají po přeuspořádání statické.
+
+Export PDF po vyčištění zpracovává složité selektory SVG a zděděné styly. Chybějící atributy viewBox se doplní; příliš velké stránky se úměrně zmenší se zachováním vektorů.
+
+Diagnostika je seskupena podle štítků a ve výchozím stavu sbalená. Rozbalte skupinu a přečtěte si všechny zprávy a rady; počty podle závažnosti zůstávají viditelné.
+
+Protokoly se uchovávají mezi fázemi úkolu i při opětovném otevření náhledu během relace pluginu. Vymazat protokol je vynuluje; opětovné načtení pluginu historii nezachová.
+
+Nainstalujte main.js, manifest.json a styles.css ze stejné verze 1.9.11 a plugin znovu načtěte. Nastavení a existující soubory zůstanou zachovány.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Přehlednější diagramy a spolehlivý export PDF](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -727,7 +743,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.10 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.11 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 

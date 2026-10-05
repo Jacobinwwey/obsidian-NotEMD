@@ -892,6 +892,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         apiActivityReportHistoryLabel: '歷史：',
         quickDeepDebugToggle: '深度調試',
         copyLog: '複製日誌',
+        clearLog: '清空日誌',
         copyLogSuccess: '日誌已複製！',
         copyLogFailed: '複製日誌失敗。',
         logEmpty: '日誌為空。',

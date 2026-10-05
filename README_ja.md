@@ -26,7 +26,23 @@
 | 開発者 | [開発ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/developers/overview) | 既存の契約に沿ってビルド・テスト・拡張 |
 | エージェント | [連携ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/agents/overview) | 対応する四つのエクスポートコマンドを確認 |
 
-**バージョン:** 1.9.10
+**バージョン:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — 見やすい図と安定した PDF エクスポート
+
+Drawnix は関係の強い枝を近くに配置し、接続線の重なりや交差を減らします。すべてのノードと明示的な関係を保持します。枝をまたぐ矢印は、再配置後も固定座標のままです。
+
+PDF エクスポートは、SVG のサニタイズ後に複雑なセレクターと継承スタイルを処理します。欠けている viewBox を補い、大きすぎるページはベクターを保持して縦横比を変えずに縮小します。
+
+診断はタグ別にまとめ、初期状態では折りたたみます。展開するとすべてのメッセージと提案を読めます。重大度別の件数は常に表示されます。
+
+プラグインのセッション中は、タスクの各段階やプレビューの再表示をまたいでログを蓄積します。「ログを消去」でリセットできます。プラグインを再読み込みすると履歴は残りません。
+
+同じ 1.9.11 リリースの main.js、manifest.json、styles.css をインストールし、再読み込みしてください。既存の設定とファイルは保持されます。
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — 見やすい図と安定した PDF エクスポート](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -733,7 +749,7 @@ MIT ライセンス - 詳細は [LICENSE](LICENSE) ファイルを参照して�
 ---
 
 
-*Notemd v1.9.10 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
+*Notemd v1.9.11 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
 
 
 

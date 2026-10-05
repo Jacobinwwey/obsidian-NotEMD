@@ -108,3 +108,9 @@ Testa exakt leverantör/modell med en liten anteckning. Saknas ett fält, kontro
 ## 1.9.10 — Säkra förhandsvisningar och Vault-lokala inställningar
 
 Importerade SVG-förhandsvisningar tar bort aktivt innehåll och externa resurser men behåller kinesiska etiketter och panelstilar. Lokala leverantörer isoleras per Vault; importera den gamla listan uttryckligen i inställningarna utan att ta bort befintliga konfigurationer eller originallistan. Presentationer använder en loopback-server som hanterar gemensamma användare. Fel vid sparande av favoriter och kopiering visas; radering följer Vault-inställningarna. PNG-kompatibilitet är fortsatt aktiv: originalet behålls och en verifierad kopia med lägre PPI läggs bara till vid behov. Drawnix saknar fast relationsgräns; presentationer behåller separata inställningar. Installera filer av samma version, ladda om och testa en anteckning före batchkörning.
+
+## 1.9.11
+
+Loggar samlas mellan uppgiftssteg och när förhandsvisningen öppnas igen under pluginsessionen. Använd Rensa logg för att återställa dem; loggen bevaras inte när pluginet laddas om.
+
+Diagnostik grupperas efter etikett och är hopfälld som standard. Öppna en grupp för att läsa alla meddelanden och förslag; antalet per allvarlighetsgrad är fortsatt synligt.

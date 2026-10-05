@@ -26,7 +26,23 @@ Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích th�
 | Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
 | Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
 
-**Phiên bản:** 1.9.10
+**Phiên bản:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Sơ đồ rõ ràng hơn và xuất PDF đáng tin cậy
+
+Drawnix đặt các nhánh có quan hệ chặt chẽ gần nhau hơn và giảm đường nối chồng lấn, giao nhau, đồng thời giữ mọi nút và quan hệ tường minh. Mũi tên giữa các nhánh vẫn dùng tọa độ cố định sau khi sắp xếp lại.
+
+Xuất PDF xử lý bộ chọn SVG phức tạp và kiểu kế thừa sau khi làm sạch. viewBox bị thiếu được bổ sung; trang quá lớn được thu nhỏ theo tỷ lệ và giữ đồ họa vectơ.
+
+Thông tin chẩn đoán được nhóm theo thẻ và thu gọn mặc định. Mở nhóm để đọc mọi thông báo và gợi ý; số lượng theo mức độ nghiêm trọng luôn hiển thị.
+
+Nhật ký được tích lũy qua các giai đoạn tác vụ và lần mở lại bản xem trước trong phiên plugin. Dùng Xóa nhật ký để đặt lại; tải lại plugin không giữ lịch sử nhật ký.
+
+Cài main.js, manifest.json và styles.css từ cùng phiên bản 1.9.11 rồi tải lại. Cài đặt và tệp hiện có được giữ nguyên.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Sơ đồ rõ ràng hơn và xuất PDF đáng tin cậy](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -728,7 +744,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.10 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.11 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 

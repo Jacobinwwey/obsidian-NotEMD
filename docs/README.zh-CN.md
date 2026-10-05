@@ -11,6 +11,9 @@
 | 开发者 | [构建、测试与贡献](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/developers/overview) |
 | Agent | [发现公开命令契约](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/agents/overview) |
 
+
+- [1.9.11 — 更清晰的图形与更可靠的 PDF 导出](./releases/1.9.11.zh-CN.md)
+
 ## 当前真值与布局入口
 
 - [1.9.9 实施与验收](./maintainer/release-1.9.9-acceptance.zh-CN.md)

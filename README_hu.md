@@ -26,7 +26,23 @@ Minden diagramelőnézet külön nagyítási, mozgatási, illesztési és eredet
 | Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
 | Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
 
-**Verzió:** 1.9.10
+**Verzió:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Áttekinthetőbb diagramok és megbízható PDF-export
+
+A Drawnix közelebb helyezi egymáshoz a szorosan kapcsolódó ágakat, és csökkenti az összekötő vonalak átfedéseit és kereszteződéseit. Minden csomópont és kifejezett kapcsolat megmarad. Az ágak közötti nyilak átrendezés után is statikusak.
+
+A PDF-export a tisztítás után kezeli az összetett SVG-szelektorokat és az örökölt stílusokat. A hiányzó viewBox-attribútumokat pótolja; a túl nagy oldalakat arányosan méretezi át, megőrizve a vektorokat.
+
+A diagnosztikai üzenetek címkénként csoportosítva, alapértelmezetten összecsukva jelennek meg. Nyisson ki egy csoportot az összes üzenet és tanács elolvasásához; a súlyosság szerinti darabszámok láthatók maradnak.
+
+A naplók a bővítmény munkamenete alatt megmaradnak a feladatlépések és az előnézet újranyitásai között. A Napló törlése gomb üríti őket; a bővítmény újratöltése nem őrzi meg az előzményeket.
+
+Telepítse a main.js, manifest.json és styles.css fájlokat ugyanabból az 1.9.11-es kiadásból, majd töltse újra a bővítményt. A beállítások és meglévő fájlok megmaradnak.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Áttekinthetőbb diagramok és megbízható PDF-export](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -724,7 +740,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.10 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.11 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->

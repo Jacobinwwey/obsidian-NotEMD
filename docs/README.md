@@ -11,6 +11,9 @@ This directory contains repository-level documentation for maintainers and contr
 | Developers | [Build, test and contribute](https://jacobinwwey.github.io/obsidian-NotEMD/docs/developers/overview) |
 | Agents | [Discover the public command contract](https://jacobinwwey.github.io/obsidian-NotEMD/docs/agents/overview) |
 
+
+- [1.9.11 — Clearer diagrams and reliable PDF export](./releases/1.9.11.md)
+
 ## Current Truth And Layout
 
 - [Release 1.9.9 Implementation And Acceptance](./maintainer/release-1.9.9-acceptance.md)

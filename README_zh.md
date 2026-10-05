@@ -29,7 +29,23 @@
 
 Notemd 是采用 **MIT 许可证的 Obsidian 插件**，提供文件式知识工作流，支持云端 provider、网关和本地模型服务器。输出保存在库中；云端任务会向选定端点发送内容，Web 研究也会联网。
 
-**版本:** 1.9.10
+**版本:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — 更清晰的图形与更可靠的 PDF 导出
+
+Drawnix 将关联紧密的分支放得更近，减少连接线重叠与交叉，同时保留全部节点和明确关系。跨分支箭头重排后仍有静态坐标限制。
+
+PDF 导出在净化 SVG 后正确处理复杂选择器与继承样式，补全缺失的 viewBox，并将超大页面等比例缩放，保留向量图形。
+
+诊断按标签分组并默认收起。展开后可查看每条消息和建议，严重级别计数始终可见。
+
+插件会话内的日志跨任务阶段和预览重开持续累积。使用“清空日志”重置；重新加载插件不会保留此前日志。
+
+安装 1.9.11 同一版本的 main.js、manifest.json 和 styles.css 后重载。保留现有设置与文件。
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — 更清晰的图形与更可靠的 PDF 导出](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -914,7 +930,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.10 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.11 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史

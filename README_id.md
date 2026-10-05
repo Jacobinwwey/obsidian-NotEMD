@@ -26,7 +26,23 @@ Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang 
 | Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
 | Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
 
-**Versi:** 1.9.10
+**Versi:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Diagram lebih jelas dan ekspor PDF yang andal
+
+Drawnix mendekatkan cabang yang terkait erat dan mengurangi tumpang tindih serta persilangan konektor, sambil mempertahankan semua simpul dan hubungan eksplisit. Panah antarcabang tetap statis setelah penataan ulang.
+
+Ekspor PDF menangani selektor SVG kompleks dan gaya turunan setelah sanitasi. viewBox yang hilang dilengkapi; halaman terlalu besar diskalakan secara proporsional dengan tetap mempertahankan vektor.
+
+Diagnostik dikelompokkan menurut tag dan diciutkan secara bawaan. Buka grup untuk membaca setiap pesan dan saran; jumlah menurut tingkat keparahan tetap terlihat.
+
+Log terakumulasi antar tahap tugas dan saat pratinjau dibuka kembali selama sesi plugin. Gunakan Hapus log untuk meresetnya; memuat ulang plugin tidak mempertahankan riwayat.
+
+Pasang main.js, manifest.json, dan styles.css dari versi 1.9.11 yang sama, lalu muat ulang. Pengaturan dan berkas yang ada tetap dipertahankan.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Diagram lebih jelas dan ekspor PDF yang andal](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -736,7 +752,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.10 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.11 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->

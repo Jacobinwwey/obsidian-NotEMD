@@ -123,3 +123,13 @@ Otevřete **CircuitikZ native compile environment** a zkontrolujte prostředí. 
 ## 1.9.10 — Bezpečné náhledy a místní nastavení Vault
 
 Importované náhledy SVG odstraňují aktivní obsah a externí zdroje, zachovávají však čínské popisky a styly panelů. Místní poskytovatelé jsou odděleni podle Vault; starý seznam výslovně importujte v nastavení se zachováním seznamu a stávajících konfigurací. Prezentace používají loopback server se správou sdílených uživatelů. Chyby ukládání oblíbených a kopírování se zobrazí; mazání respektuje nastavení Vault. Kompatibilita PNG zůstává zapnutá: originál se zachová a ověřená kopie s nižším PPI přibude jen podle potřeby. Drawnix nemá pevný limit vztahů; prezentace mají samostatné nastavení. Nainstalujte soubory stejné verze, načtěte znovu a před dávkou otestujte jednu poznámku.
+
+## 1.9.11 — Přehlednější diagramy a spolehlivý export PDF
+
+Drawnix umisťuje úzce související větve blíže k sobě a omezuje překrývání a křížení spojnic. Všechny uzly a explicitní vztahy zůstávají zachovány. Šipky mezi větvemi zůstávají po přeuspořádání statické.
+
+Export PDF po vyčištění zpracovává složité selektory SVG a zděděné styly. Chybějící atributy viewBox se doplní; příliš velké stránky se úměrně zmenší se zachováním vektorů.
+
+Diagnostika je seskupena podle štítků a ve výchozím stavu sbalená. Rozbalte skupinu a přečtěte si všechny zprávy a rady; počty podle závažnosti zůstávají viditelné.
+
+Protokoly se uchovávají mezi fázemi úkolu i při opětovném otevření náhledu během relace pluginu. Vymazat protokol je vynuluje; opětovné načtení pluginu historii nezachová.

@@ -183,6 +183,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.isCancelled = false;
         this.startTime = Date.now();
         this.updateStatus(initialStatus, 0);
+        this.log(initialStatus);
         this.updateButtonStates();
     }
 
@@ -193,8 +194,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     clearDisplay() {
         const i18n = this.getStrings();
-        this.logContent = [];
-        if (this.logEl) this.logEl.empty();
+        // Progress resets also occur between workflow/export stages. The transcript
+        // belongs to the sidebar session and is cleared only by the log action.
         if (this.statusEl) this.statusEl.setText(i18n.common.ready);
         if (this.progressAreaEl) this.progressAreaEl.addClass('is-idle');
         if (this.progressEl) {
@@ -279,17 +280,19 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     log(message: string) {
-        if (!this.logEl) {
-            return;
-        }
         const timestamp = `[${formatTimeForLocale(new Date(), this.getResolvedUiLocale())}]`;
         const fullMessage = `${timestamp} ${message}`;
         this.logContent.push(fullMessage);
+        this.renderLogEntry(fullMessage);
+    }
 
+    private renderLogEntry(fullMessage: string): void {
+        if (!this.logEl) return;
+        const timestampEnd = fullMessage.indexOf(']') + 1;
         const entry = this.logEl.createEl('div', { cls: 'notemd-log-entry' });
-        entry.createEl('span', { text: timestamp, cls: 'notemd-log-time' });
+        entry.createEl('span', { text: fullMessage.slice(0, timestampEnd), cls: 'notemd-log-time' });
         const messageEl = entry.createEl('span', { cls: 'notemd-log-message' });
-        messageEl.setText(` ${message}`);
+        messageEl.setText(fullMessage.slice(timestampEnd));
         this.logEl.scrollTop = this.logEl.scrollHeight;
     }
 
@@ -792,7 +795,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         }
     }
 
-    private createReporterProxy(clearEnabled = false): ProgressReporter {
+    private createReporterProxy(): ProgressReporter {
         const view = this;
         return {
             log(message: string) {
@@ -805,9 +808,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 view.requestCancel();
             },
             clearDisplay() {
-                if (clearEnabled) {
-                    view.clearDisplay();
-                }
+                // A subtask cannot reset its enclosing workflow's progress/cancellation.
             },
             get cancelled() {
                 return view.cancelled;
@@ -1941,7 +1942,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 new Notice(i18n.sidebar.logEmpty);
             }
         };
+        const clearLogButton = logHeaderActions.createEl('button', { text: i18n.sidebar.clearLog, cls: 'notemd-clear-log-button' });
+        clearLogButton.onclick = () => {
+            this.logContent = [];
+            this.logEl?.empty();
+        };
         this.logEl = logCard.createEl('div', { cls: 'notemd-log-output is-selectable mod-sidebar' });
+        for (const entry of this.logContent) this.renderLogEntry(entry);
         this.clearDisplay();
     }
 

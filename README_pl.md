@@ -26,7 +26,23 @@ Każdy podgląd ma niezależne powiększenie, przesuwanie, dopasowanie i rozmiar
 | Programista | [Przewodnik programisty](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/developers/overview) | Buduj, testuj i rozszerzaj istniejące kontrakty |
 | Agent | [Przewodnik agenta](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/agents/overview) | Poznaj cztery obsługiwane polecenia eksportu |
 
-**Wersja:** 1.9.10
+**Wersja:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Czytelniejsze diagramy i niezawodny eksport PDF
+
+Drawnix zbliża silnie powiązane gałęzie i ogranicza nakładanie oraz przecinanie się łączników, zachowując wszystkie węzły i jawne relacje. Strzałki między gałęziami pozostają statyczne po zmianie układu.
+
+Eksport PDF obsługuje złożone selektory SVG i dziedziczone style po oczyszczeniu. Brakujące atrybuty viewBox są uzupełniane; zbyt duże strony są skalowane proporcjonalnie z zachowaniem wektorów.
+
+Diagnostyka jest grupowana według etykiet i domyślnie zwinięta. Rozwiń grupę, aby przeczytać wszystkie komunikaty i wskazówki; liczniki według poziomu ważności pozostają widoczne.
+
+Dzienniki są zachowywane między etapami zadania i ponownymi otwarciami podglądu w trakcie sesji wtyczki. Użyj Wyczyść dziennik, aby je wyzerować; przeładowanie wtyczki usuwa historię.
+
+Zainstaluj main.js, manifest.json i styles.css z tej samej wersji 1.9.11, a następnie przeładuj wtyczkę. Ustawienia i istniejące pliki zostaną zachowane.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Czytelniejsze diagramy i niezawodny eksport PDF](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -727,7 +743,7 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.10 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.9.11 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 
 <!-- repo-chronicle:start -->

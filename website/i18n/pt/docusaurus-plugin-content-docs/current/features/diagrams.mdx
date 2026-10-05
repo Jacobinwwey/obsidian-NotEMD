@@ -125,3 +125,13 @@ Verificar ambiente nativo e reparar runtime gerido ou acesso ao pacote `circuiti
 ## 1.9.10 — Pré-visualizações seguras e definições locais do Vault
 
 As pré-visualizações SVG importadas removem conteúdo ativo e recursos externos, preservando rótulos chineses e estilos dos painéis. Os fornecedores locais são isolados por Vault; importe explicitamente a lista antiga nas definições, preservando a lista e configurações existentes. As apresentações usam um servidor loopback com gestão de consumidores partilhados. Falhas ao guardar favoritos ou copiar são apresentadas; a eliminação respeita as preferências do Vault. A compatibilidade PNG continua ativa: conserva o original e acrescenta uma cópia verificada com menos PPI apenas quando necessário. Drawnix não tem limite fixo de relações; as apresentações mantêm definições separadas. Instale ficheiros da mesma versão, recarregue e teste uma nota antes de um lote.
+
+## 1.9.11 — Diagramas mais claros e exportação PDF fiável
+
+O Drawnix aproxima os ramos mais relacionados e reduz sobreposições e cruzamentos de conectores, preservando todos os nós e relações explícitas. As setas entre ramos continuam estáticas após a reorganização.
+
+A exportação PDF processa seletores SVG complexos e estilos herdados após a sanitização. Os viewBox em falta são repostos; páginas demasiado grandes são redimensionadas proporcionalmente, preservando os vetores.
+
+Os diagnósticos são agrupados por etiqueta e ficam recolhidos por predefinição. Expanda um grupo para ler todas as mensagens e sugestões; as contagens por gravidade permanecem visíveis.
+
+Os registos acumulam-se entre etapas e ao reabrir a pré-visualização durante a sessão do plugin. Use Limpar registo para os repor; recarregar o plugin não preserva o histórico.

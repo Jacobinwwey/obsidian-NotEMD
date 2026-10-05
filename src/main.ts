@@ -1682,7 +1682,6 @@ export default class NotemdPlugin extends Plugin {
         const view = this.app.workspace.getLeavesOfType(NOTEMD_SIDEBAR_VIEW_TYPE)[0]?.view;
         if (view instanceof NotemdSidebarView) {
             this.app.workspace.revealLeaf(view.leaf); // Ensure sidebar is visible
-            view.clearDisplay(); // Clear previous logs/status in sidebar
             return view;
         } else {
             const modal = new ProgressModal(this.app, this.settings.uiLocale);
@@ -1696,7 +1695,6 @@ export default class NotemdPlugin extends Plugin {
         const view = this.app.workspace.getLeavesOfType(NOTEMD_SIDEBAR_VIEW_TYPE)[0]?.view;
         if (view instanceof NotemdSidebarView) {
             this.app.workspace.revealLeaf(view.leaf);
-            view.clearDisplay();
             return view;
         }
         return this.getReporter();

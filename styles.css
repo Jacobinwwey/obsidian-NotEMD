@@ -558,6 +558,37 @@
     gap: 0.5em;
 }
 
+.notemd-diagram-preview-diagnostic-group {
+    border-radius: 6px;
+    background: var(--background-primary);
+}
+
+.notemd-diagram-preview-diagnostic-group-heading {
+    padding: 0.5em 0.6em;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-preview-diagnostic-group-heading:focus-visible {
+    outline: 2px solid var(--interactive-accent);
+    outline-offset: 2px;
+}
+
+.notemd-diagram-preview-diagnostic-group-tag {
+    font-weight: 600;
+}
+
+.notemd-diagram-preview-diagnostic-group-counts {
+    margin-inline-start: 0.75em;
+    color: var(--text-muted);
+}
+
+.notemd-diagram-preview-diagnostic-group > .notemd-diagram-preview-diagnostic {
+    margin: 0.4em 0.6em;
+}
+
 .notemd-diagram-preview-diagnostic {
     border-left: 3px solid var(--text-muted);
     padding: 0.45em 0.55em;

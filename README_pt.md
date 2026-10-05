@@ -26,7 +26,23 @@ Cada pré-visualização tem zoom, deslocação, ajuste e tamanho real independe
 | Desenvolvedor | [Guia de desenvolvimento](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/developers/overview) | Compilar, testar e ampliar os contratos existentes |
 | Agente | [Guia de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/agents/overview) | Encontrar os quatro comandos de exportação suportados |
 
-**Versão:** 1.9.10
+**Versão:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Diagramas mais claros e exportação PDF fiável
+
+O Drawnix aproxima os ramos mais relacionados e reduz sobreposições e cruzamentos de conectores, preservando todos os nós e relações explícitas. As setas entre ramos continuam estáticas após a reorganização.
+
+A exportação PDF processa seletores SVG complexos e estilos herdados após a sanitização. Os viewBox em falta são repostos; páginas demasiado grandes são redimensionadas proporcionalmente, preservando os vetores.
+
+Os diagnósticos são agrupados por etiqueta e ficam recolhidos por predefinição. Expanda um grupo para ler todas as mensagens e sugestões; as contagens por gravidade permanecem visíveis.
+
+Os registos acumulam-se entre etapas e ao reabrir a pré-visualização durante a sessão do plugin. Use Limpar registo para os repor; recarregar o plugin não preserva o histórico.
+
+Instale main.js, manifest.json e styles.css da mesma versão 1.9.11 e recarregue. As definições e os ficheiros existentes são preservados.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Diagramas mais claros e exportação PDF fiável](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -733,7 +749,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.10 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.11 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 

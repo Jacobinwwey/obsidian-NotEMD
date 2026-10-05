@@ -384,7 +384,7 @@ describe('Drawnix relation routing', () => {
         });
     });
 
-    test('routes dense same-root branches through their allocated relation lane without entering nodes', () => {
+    test('keeps dense same-root relationships local after ordering branches without entering nodes', () => {
         const children = Array.from({ length: 30 }, (_, branchIndex) => ({
             id: `branch-${branchIndex}`,
             label: `Branch ${branchIndex}`,
@@ -415,7 +415,7 @@ describe('Drawnix relation routing', () => {
 
         expect(source).toBeDefined();
         expect(target).toBeDefined();
-        expect(Math.max(...relation.points.map(([, y]) => y))).toBeGreaterThan(
+        expect(Math.max(...relation.points.map(([, y]) => y))).toBeLessThan(
             Math.max(...projection.nodes.map(node => node.y + node.height))
         );
         relation.points.slice(1).forEach((point, index) => {

@@ -26,7 +26,23 @@ Setiap pratonton rajah mempunyai zum, anjakan, muat dan saiz sebenar yang berasi
 | Pembangun | [Panduan pembangun](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/developers/overview) | Bina, uji dan perluaskan kontrak sedia ada |
 | Ejen | [Panduan ejen](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/agents/overview) | Temui empat perintah eksport yang disokong |
 
-**Versi:** 1.9.10
+**Versi:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Rajah lebih jelas dan eksport PDF yang boleh dipercayai
+
+Drawnix mendekatkan cabang yang berkait rapat dan mengurangkan pertindihan serta persilangan penyambung, sambil mengekalkan semua nod dan hubungan eksplisit. Anak panah antara cabang kekal statik selepas penyusunan semula.
+
+Eksport PDF mengendalikan pemilih SVG kompleks dan gaya diwarisi selepas sanitasi. viewBox yang tiada dilengkapkan; halaman terlalu besar diskalakan secara berkadar dengan mengekalkan vektor.
+
+Diagnostik dikumpulkan mengikut tag dan diruntuhkan secara lalai. Kembangkan kumpulan untuk membaca setiap mesej dan cadangan; bilangan mengikut tahap keterukan kekal kelihatan.
+
+Log terkumpul merentas peringkat tugas dan pembukaan semula pratonton sepanjang sesi pemalam. Gunakan Kosongkan log untuk menetapkannya semula; memuat semula pemalam tidak mengekalkan sejarah.
+
+Pasang main.js, manifest.json dan styles.css daripada versi 1.9.11 yang sama, kemudian muat semula. Tetapan dan fail sedia ada dikekalkan.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Rajah lebih jelas dan eksport PDF yang boleh dipercayai](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -727,7 +743,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.10 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.11 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 

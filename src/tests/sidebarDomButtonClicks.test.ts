@@ -126,6 +126,11 @@ class FakeElement {
         this.children = [];
     }
 
+    remove() {
+        if (this.parent) this.parent.children = this.parent.children.filter(child => child !== this);
+        this.parent = null;
+    }
+
     setAttr(_name: string, _value: string) {
         this.attributes[_name] = _value;
         if (_name === 'href') this.href = _value;
@@ -638,6 +643,36 @@ describe('NotemdSidebarView DOM button wiring', () => {
             'https://playwright.dev/docs/intro',
             'https://ffmpeg.org/download.html'
         ]));
+    });
+
+    test('retains the full task transcript across export, preview and sidebar rebuilding until explicitly cleared', async () => {
+        await sidebar.onOpen();
+        sidebar.startProcessing('Generate architecture');
+        sidebar.log('generation: started');
+        sidebar.clearDisplay();
+        sidebar.log('SVG: saved');
+        sidebar.log('PDF: failed');
+        sidebar.finishProcessing();
+        sidebar.startProcessing('Preview architecture');
+        sidebar.log('preview: opened');
+        sidebar.finishProcessing();
+        const transcript = sidebar.getLogs();
+        expect(transcript).toContain('generation: started');
+        expect(transcript).toContain('SVG: saved');
+        expect(transcript).toContain('PDF: failed');
+        expect(transcript).toContain('preview: opened');
+        await sidebar.onClose();
+        sidebar.log('export: completed while view was closed');
+        await sidebar.onOpen();
+        expect(sidebar.getLogs()).toContain(transcript);
+        const visible = contentContainer.findByClass('notemd-log-output')!.textContent();
+        expect(visible).toContain('generation: started');
+        expect(visible).toContain('export: completed while view was closed');
+        await clickButton('Copy log');
+        expect(navigator.clipboard.writeText).toHaveBeenCalledWith(sidebar.getLogs());
+        await clickButton('Clear log');
+        expect(sidebar.getLogs()).toBe('');
+        expect(contentContainer.findByClass('notemd-log-output')!.textContent()).toBe('');
     });
 
     test('updateStatus swaps between active progress and idle standby states', async () => {

@@ -26,7 +26,23 @@
 | 開發者 | [開發指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/developers/overview) | 建置、測試並擴充現有契約 |
 | Agent | [整合指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/agents/overview) | 探索四個受支援的匯出指令 |
 
-**版本:** 1.9.10
+**版本:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — 更清晰的圖形與更可靠的 PDF 匯出
+
+Drawnix 將關聯密切的分支放得更近，減少連接線重疊與交叉，同時保留所有節點和明確關係。跨分支箭頭重新排列後仍有靜態座標限制。
+
+PDF 匯出在淨化 SVG 後正確處理複雜選取器與繼承樣式，補全缺少的 viewBox，並將超大頁面等比例縮放，保留向量圖形。
+
+診斷依標籤分組並預設收合。展開後可查看每則訊息和建議，嚴重程度計數始終可見。
+
+外掛工作階段內的日誌會跨任務階段與預覽重新開啟持續累積。使用「清空日誌」重設；重新載入外掛不會保留先前日誌。
+
+安裝 1.9.11 同一版本的 main.js、manifest.json 和 styles.css 後重新載入。保留現有設定與檔案。
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — 更清晰的圖形與更可靠的 PDF 匯出](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -798,7 +814,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.10 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.11 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->

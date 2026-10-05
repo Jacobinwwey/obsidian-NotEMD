@@ -26,7 +26,23 @@ Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală ind
 | Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
 | Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
 
-**Versiune:** 1.9.10
+**Versiune:** 1.9.11
+
+<!-- notemd-reliability-1.9.11 -->
+
+## 1.9.11 — Diagrame mai clare și export PDF fiabil
+
+Drawnix apropie ramurile strâns legate și reduce suprapunerile și intersecțiile conectorilor, păstrând toate nodurile și relațiile explicite. Săgețile dintre ramuri rămân statice după rearanjare.
+
+Exportul PDF gestionează selectorii SVG complecși și stilurile moștenite după curățare. Atributele viewBox lipsă sunt refăcute; paginile prea mari sunt redimensionate proporțional, păstrând vectorii.
+
+Diagnosticele sunt grupate după etichetă și restrânse implicit. Extindeți un grup pentru a citi fiecare mesaj și sugestie; numărul pe nivel de gravitate rămâne vizibil.
+
+Jurnalele se acumulează între etapele sarcinii și redeschiderile previzualizării pe durata sesiunii extensiei. Folosiți Șterge jurnalul pentru a le reseta; reîncărcarea extensiei nu păstrează istoricul.
+
+Instalați main.js, manifest.json și styles.css din aceeași versiune 1.9.11, apoi reîncărcați. Setările și fișierele existente sunt păstrate.
+
+[1.9.11](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.11) · [1.9.11 — Diagrame mai clare și export PDF fiabil](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/releases/1.9.11)
 
 <!-- notemd-hardening-1.9.10 -->
 
@@ -724,7 +740,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.10 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.11 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->
