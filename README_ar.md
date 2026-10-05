@@ -746,7 +746,7 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ar.svg)
 
-_تم آخر تحديث للإصدار ذي الوسم `1.9.9` في 2026-10-03. تاريخ أحدث التزام: 2026-10-03._
+_تم آخر تحديث للإصدار ذي الوسم `1.9.10` في 2026-10-05. تاريخ أحدث التزام: 2026-10-05._
 <!-- repo-chronicle:end -->
 
 

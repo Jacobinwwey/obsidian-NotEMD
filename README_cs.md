@@ -738,7 +738,7 @@ Tato čtvrtletní kronika zachovává původní vizuální styl [repo-saga](http
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.cs.svg)
 
-_Naposledy obnoveno pro tag vydání `1.9.9` dne 2026-10-03. Datum posledního commitu: 2026-10-03._
+_Naposledy obnoveno pro tag vydání `1.9.10` dne 2026-10-05. Datum posledního commitu: 2026-10-05._
 <!-- repo-chronicle:end -->
 
 
