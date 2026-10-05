@@ -26,7 +26,15 @@ Každý náhled diagramu má samostatné přiblížení, posun, přizpůsobení 
 | Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
 | Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
 
-**Verze:** 1.9.11
+**Verze:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Přehlednější náhled diagnostiky
+
+Pokud nejsou přítomny chyby, celý diagnostický panel je ve výchozím stavu sbalený a viditelný zůstává jen nadpis a počty podle závažnosti. Chyby panel automaticky otevřou. Rozbalte panel a skupiny štítků a přečtěte si všechny zprávy a rady. Žádné diagnostické záznamy se neodstraňují. Automaticky se otevřou pouze skupiny chyb; varování a informace zůstanou sbalené, i když mají stejný štítek.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -743,7 +751,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.11 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.12 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 

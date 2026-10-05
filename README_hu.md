@@ -26,7 +26,15 @@ Minden diagramelőnézet külön nagyítási, mozgatási, illesztési és eredet
 | Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
 | Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
 
-**Verzió:** 1.9.11
+**Verzió:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Áttekinthetőbb diagnosztikai előnézet
+
+Ha nincs hiba, a teljes diagnosztikai panel alapértelmezetten össze van csukva, és csak a cím, valamint a súlyosság szerinti darabszámok láthatók. Hiba esetén a panel automatikusan kinyílik. Nyissa ki a panelt és a címkecsoportokat az összes üzenet és tanács elolvasásához. Egyetlen diagnosztikai bejegyzés sem törlődik. Csak a hibacsoportok nyílnak ki automatikusan; a figyelmeztetések és információk összecsukva maradnak akkor is, ha azonos a címkéjük.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -740,7 +748,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.11 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.12 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->

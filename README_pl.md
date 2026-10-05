@@ -26,7 +26,15 @@ Każdy podgląd ma niezależne powiększenie, przesuwanie, dopasowanie i rozmiar
 | Programista | [Przewodnik programisty](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/developers/overview) | Buduj, testuj i rozszerzaj istniejące kontrakty |
 | Agent | [Przewodnik agenta](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/agents/overview) | Poznaj cztery obsługiwane polecenia eksportu |
 
-**Wersja:** 1.9.11
+**Wersja:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Czytelniejszy podgląd diagnostyki
+
+Jeśli nie ma błędów, cały panel diagnostyczny jest domyślnie zwinięty; widoczne pozostają tylko tytuł i liczniki według ważności. Błędy automatycznie otwierają panel. Rozwiń panel i grupy etykiet, aby przeczytać wszystkie komunikaty i wskazówki. Żaden wpis diagnostyczny nie jest usuwany. Automatycznie otwierają się tylko grupy błędów; ostrzeżenia i informacje pozostają zwinięte, nawet przy wspólnej etykiecie.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -743,7 +751,7 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.11 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.9.12 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 
 <!-- repo-chronicle:start -->

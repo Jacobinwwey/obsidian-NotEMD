@@ -26,7 +26,15 @@
 | 開發者 | [開發指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/developers/overview) | 建置、測試並擴充現有契約 |
 | Agent | [整合指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/agents/overview) | 探索四個受支援的匯出指令 |
 
-**版本:** 1.9.11
+**版本:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — 更清爽的診斷預覽
+
+沒有錯誤時，整個診斷區域預設收合，僅顯示標題與嚴重程度計數；有錯誤時預設展開。展開區域及其中的標籤分組，即可查看每則訊息和建議，不刪除任何診斷記錄。 僅錯誤分組自動展開，警告和資訊分組仍收合；同一標籤下的不同級別也分開顯示。
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -814,7 +822,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.11 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.12 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->

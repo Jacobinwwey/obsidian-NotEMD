@@ -29,7 +29,15 @@
 
 Notemd 是采用 **MIT 许可证的 Obsidian 插件**，提供文件式知识工作流，支持云端 provider、网关和本地模型服务器。输出保存在库中；云端任务会向选定端点发送内容，Web 研究也会联网。
 
-**版本:** 1.9.11
+**版本:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — 更清爽的诊断预览
+
+没有错误时，整个诊断区域默认收起，仅显示标题和严重级别计数；有错误时默认展开。展开区域及其中的标签分组，即可查看每条消息和建议，不删除任何诊断记录。 仅错误分组自动展开，警告和信息分组仍收起；同一标签下的不同级别也分开展示。
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -930,7 +938,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.11 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.12 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史

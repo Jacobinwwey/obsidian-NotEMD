@@ -26,7 +26,15 @@ Setiap pratonton rajah mempunyai zum, anjakan, muat dan saiz sebenar yang berasi
 | Pembangun | [Panduan pembangun](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/developers/overview) | Bina, uji dan perluaskan kontrak sedia ada |
 | Ejen | [Panduan ejen](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/agents/overview) | Temui empat perintah eksport yang disokong |
 
-**Versi:** 1.9.11
+**Versi:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Pratonton diagnostik yang lebih ringkas
+
+Jika tiada ralat, seluruh panel diagnostik diruntuhkan secara lalai dan hanya tajuk serta bilangan mengikut tahap keterukan dipaparkan. Ralat membuka panel secara automatik. Kembangkan panel dan kumpulan tag untuk membaca semua mesej dan cadangan. Tiada rekod diagnostik dipadamkan. Hanya kumpulan ralat dibuka secara automatik; amaran dan maklumat kekal diruntuhkan walaupun berkongsi tag yang sama.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -743,7 +751,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.11 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.12 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 

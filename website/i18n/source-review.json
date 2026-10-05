@@ -33,8 +33,8 @@
         "authoredSha256": "d0602e4914fde80d82ed4d0b5f0db70143faf206a6e3ab527af98645a3cb97ea"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "71e31a005ccb104d08ac0db5eef53e048d9d695bbd9031e401712897bac2dee2"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "701d32efd53b87f8003093d2dab0fb175ab6e4c84ede387cc835aa22533ce599"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -53,8 +53,8 @@
         "authoredSha256": "6cc89be588ece297a0be9e06376ced928dd43af1e552d24d36bc99789e2463cb"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "5821847e0d4c3be27ed5b2a9a04648065cddaebf392889c1489fa49eef77ca5d"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "c9b678b2c3235c30a05fffbdebe4890229d6cfe484bed6893e7d05a67647468e"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -111,6 +111,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "0e099ed6db64aa1ca81cbc940cd77525325e6325d822f581fa05439c1001c281"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "246d290dac79f747df896736094b6868f29a41706a8df9c29ee762a56aa708d0"
       }
     },
     "bn": {
@@ -143,8 +147,8 @@
         "authoredSha256": "027924cb582844292aee1d9d3ea03060733574c09a9c87aea8f9c7178b3fba7c"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "6ca026aabaca8f37456e8f389764b4c6f6445353e01c126d7ca02a91a6e73dd6"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "37df4cf9beec336aec1f0635ac6708e2014ebe23be0fd0b99066b40b77c9b999"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -163,8 +167,8 @@
         "authoredSha256": "9ddec39c4c60d43b90c57e4a5104deacb8cb3928c2b56aaa8834de51656f1bbd"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "10a0e2494a66f054902879cc72b062d160aa7057d1a43c2b49844617b1c5edac"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "21eaf578a73140af3fa63653ed5cf406edb0c028e924e38b010e4808c9af315f"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -221,6 +225,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "dec68e91bcb866147035d48b4f1a9360817e9d85c69a6fc70a4e4a73c27e63ca"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "56a8466cb47494259256e2be8675c3012d27ce637cf0b0f35e4b864db4e8db54"
       }
     },
     "cs": {
@@ -253,8 +261,8 @@
         "authoredSha256": "0b3c5c97e336c5c50f88cfb431dada0cd0adddc74dc338d497f4fa5a63320df6"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "143b21e13ab48ec13dc00bd135ee981368aab5c2db71364c875a5c35ecc4b4a4"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "c1347afed5c1b319271e1a4577f3956e86a72c34bd38c8df2c3fbd06b3af4138"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -273,8 +281,8 @@
         "authoredSha256": "edcede1770e30b23d3bf5659de181498c7eba778c3cc1e055c5f57809837d6e8"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "5e5cbad18803631dfbb1b138bf992d3a135b67fe8c5046ec209dcc8bc534d7bc"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "ffb65a3e1e7d19e75c142b8cde06a81b7030e0136450939a3e82f18805a70c6a"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -331,6 +339,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "65ad9864665ead1759366c4d4511c3daee6b7a2fe92f716fe2eb23c024c0f0a0"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "10ea0902ec71ff4a2d4bf78be4d2a4fbe96fe1ef6177e0822aad91937c522c53"
       }
     },
     "da": {
@@ -363,8 +375,8 @@
         "authoredSha256": "90faf4d589fa04afddc3aa81084639b7e479a4273968a0a9a4aa3adf26bc9ab8"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "ddaad4c753ad72b93ecca10a61efe918899f97ab29d541791d81ff0cf3cd6618"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "51d6c15da41106c1bccc644981e60bebdaa631ea20dfe8ace9a70977a91c8bf4"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -383,8 +395,8 @@
         "authoredSha256": "7d0fbf88e212f74996a740e4e9f94d2cbd88844ceca6afb3f6bab34e29f5a0ba"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "c79236e5d0e2ad19f75c85e660d71f2a2773bcef2419e7274402915dcf84e8e6"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "7d6ab681c469e8957a3426ff60c671e7bc9419902dbbdec075f2cddde2bbc609"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -441,6 +453,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "5cca5f194231f582c8ae7f32ee91eb5d2dea99c61517f525b5caf9fd479fdca9"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "3f81b64ed5d1d6897d600719e78cb3a6f0980fa41fbb1e4c12a2410c6fb9f990"
       }
     },
     "de": {
@@ -473,8 +489,8 @@
         "authoredSha256": "af3b2aef603929d7eeaa29f57bd5d99445fee8cb60e4e746ce1a2831769d8ca3"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "6424d05af715a0f3ebe8fc0b10afa3657597f1bbe4742be7f5752e7a8b813a4d"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "fca5086d4de9d4d5bf536cc20de8fb6355195c038c3ea8b414aea2130bbbaad4"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -493,8 +509,8 @@
         "authoredSha256": "b099219ce94ad3bf0baf6bc9e3d741609886d3d1430cbfc57747a33271b339f3"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "d5a44dde8ef6ce953ac20f482bf75c12eaccb0876a2fb984242bb683b6eb9b94"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "16126a5bbffd9192cde5320d492f60d6f1a67f38a1217b840c8395b80eef0748"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -551,6 +567,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "9ca76d4def937338c5c37c403c13bc4520ce62c9c91e742fbc35a177255e896c"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "b6eb027eabb1f1cd9f3fcbf4088d48200ee8b673e90cf77bfb2e58942d097c2e"
       }
     },
     "el": {
@@ -583,8 +603,8 @@
         "authoredSha256": "e5f50a49fd9df8191061c7a17861d0fab159fd4376d68596655f6324b71a5354"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "64dd6dff4f2a1dfe7005888317ceca3c1d1f0adce9fa3034d1b2272601c35658"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "002de832e174b23679674c790426481e811eb13d08757bba5d0571c83e442973"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -603,8 +623,8 @@
         "authoredSha256": "2ee33759c207c1a65c49339719e94c66401e91a8d3b468de08b49a147d7a8129"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "c31807193c318947379b77e6c78061d9e3531b6b2b4f52ca28b6e4e867b4299d"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "9943d3415ce0e71180e90823d14d3382b6328436bae708a27821bd4d76b1bdb8"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -661,6 +681,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "d26ce41b130f799c15123bf78f9a069d0ef8a753f659781318309e6f40a0c01f"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "73051355572e225d1577ca3111f1432de82f815e4c33901f46195dee1dd6c726"
       }
     },
     "es": {
@@ -693,8 +717,8 @@
         "authoredSha256": "8e86c4b1d73d47669a83c6de21f33c2f9af101fcec2a0c01a7508502eaa6299b"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "4d5e90055e96087ebc6babc61786ab383815b2ee141c16a7b4502a03a0e44e22"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "8b16116635c414f1c52959e7bf39ef9fbb83fc805ea09808c2b605327d24a50f"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -713,8 +737,8 @@
         "authoredSha256": "14c23df9cd930cee5a66bb2113b693d9905c81ba912c7fe9b1bf8189ced053b6"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "cfe5264708fda11fc1da56a60bba2da8c1b4e97af55f8a8d370c0d22e1c70d36"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "1af2ce3c4a9a7950e25e3508ba36f2f8598c054835c2049cb762aabdf2c5ca7e"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -771,6 +795,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "b949990517042093647fe297181bc900ba9bbcf097891bc1ae6d943136d069f9"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "0eca40f8fd3cf40ef87b41b38c1f8e6464aed8804308e1aac5801fed3c908178"
       }
     },
     "fa": {
@@ -803,8 +831,8 @@
         "authoredSha256": "ce57d9eb6741fd17beac8d65095c944dd85655656c4af173aa7ffa7f3b9bbe2d"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "6666aa1bd2e953460f4c885376006058ec6d0fb118bb2c73e882b04915da4fed"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "7e9f8cc126fd84b22e4d1264a411349a4fe1f65e9b4627ac067aa65fa350227b"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -823,8 +851,8 @@
         "authoredSha256": "f9fa0d65307c0599b9d3c1e357923cc8cbfa1d873078123ca1f14e97c41372a8"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "daca6daae6a29e8a2b27ac0e0d32489dcf6f272590562200f44424fae1f58671"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "3f2428b5824ba0dce1603559c3c979b220d2a1aa8c8935c73af5c3eb77bd7251"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -881,6 +909,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "f8f8c74c19dfe3cc8b70fc2930df83a7236e22f8473b8af8c35f24b95973914e"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "a5a5c6039114e289e6d7f7f50e9895792acc3dfa912b4e0cbc7a73c4f39006f0"
       }
     },
     "fi": {
@@ -913,8 +945,8 @@
         "authoredSha256": "7e0a24af02028a816e4672aad27df3bc32871ef831f4fd99d70f8e126e909bae"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "63fc65a1e281843ed20e8bfd546fd9d4926a3c3c59783b97458ca2b5244dc5db"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "c3115e104bfa1ffb389efe659e11b93e11a342095c77e7ce9a6d9691e64e29fc"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -933,8 +965,8 @@
         "authoredSha256": "95d3c35f2ea09e57110079c2c272185e4b71090e0cce7214566ebc4ed4fbbca4"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "f3833e088d9e791d0e0773914961bbce6b69c112f691d42ab459a58e9def21c6"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "3647c6cf1a745bb465cbde2828739246e626346a3994cc320baa04f526b4de74"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -991,6 +1023,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "4947f0077100edfa3765b415b4025d8a8a437e860e11acd92894bb11f0b0c72b"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "f9cf25cbec0f684e08e4cfb80046ec8428b8a9eae68e8aeca2df5c17b7bb19fc"
       }
     },
     "fr": {
@@ -1023,8 +1059,8 @@
         "authoredSha256": "ff8f6ac36c23611de15538a8b86f4cd5496334e56760821072127d96de33eadf"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "a86990e889aee2aa0830abdedb7780c1151909fd6faf4dbd0b6416e20bd147d1"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "20d458ed14a5d6ea29d60d1a4cd783a113ee4508df8b38e5efa4df56a58372cd"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1043,8 +1079,8 @@
         "authoredSha256": "febb69b77e0ef15c91a17373fad3c94fae2e4d622755313715d5144982798bed"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "f83e8c384dd3271fe54cabd42a233cfcc50899eca86089fd9538979f3c2f51de"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "57d303980046d0ebf2e1ef48a6e556dd7ffbf5029128ecb32cfc428ffd464937"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1101,6 +1137,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "e52747e893991978b6ddd1eda956342e1e820af8f1427adff25e4514f97b7822"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "b4c9b2b22590fb5059ebd4e0ffc12132fde1947d7079ee492f39573e5c58abc3"
       }
     },
     "he": {
@@ -1133,8 +1173,8 @@
         "authoredSha256": "a91694c7f7cc080a6d871bdc1bfe143ec379dca4b3f2901c969de15f98d5dcc9"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "acb4362b040aa16f76a1f7155cc2a242901d4101d1cfa4708e1fe897735abf8d"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "8bd173420ba160d96a75d956b9b4d83aba85280501ab5d1871e6c21c9ef196b4"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1153,8 +1193,8 @@
         "authoredSha256": "447982c843c36775a677ac6a2808b07a2231aabeceb410f16b28c42ee6e03e5e"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "b45cc9b8eb33c0e881a6cc50cfa4a17282de7841b72077963e43d3594740e20e"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "f9df7fa53060a28e521b22b4dbd59d9c50c5729e7b81f8a4be63231e46708290"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1211,6 +1251,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "ed1a06d7a500f10daaac549f1c33bca9509e2061b3bea15a111e372da507df85"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "83ca56750b47b1087a55523174169659b638f641b32194c6739b7b0961be27bc"
       }
     },
     "hi": {
@@ -1243,8 +1287,8 @@
         "authoredSha256": "d4aa6f35a734188da0255c26ff4116e2f5a00543312961fcee8134cde7a06db0"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "d388f834ca6c9188fcb94b7840efeb9c10243fdd5baceafe7c528f175f27d908"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "dc108da3ce549e9f90fbe9a3770e5b3079488d05b02b2ededc28bc2d3acdb54e"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1263,8 +1307,8 @@
         "authoredSha256": "b8298ad736338b8eda704767be0994805d92df965dfedd217b386803f53121db"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "e285597b1e665ecd0f25ac84d84f6e985d1af4de640572c10548fe45992fccf6"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "60eea0f8b96e6ad84f88fad1ee528f1c95dd8f282576c352151020d187136e25"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1321,6 +1365,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "d91650eaa227ad29253debc38f0393c20619f595c05c06f8e311a188f814d9e2"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "6c616ebe95aa4de8eec1341283aee3f0f280757f92adcdb6bdd84c64dac08cc3"
       }
     },
     "hu": {
@@ -1353,8 +1401,8 @@
         "authoredSha256": "7395983dbec8ba722bf2bb2b8ba891a6937b4b1383addb54ba82cda17473c570"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "15384ce80dadc2eaa6948252ed143397367ac53b8cde96e45692de2b73dc58fe"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "065ef1672744df4fba273111981f0a299193e1f376b511dabdd70d67476dc988"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1373,8 +1421,8 @@
         "authoredSha256": "d5d95711863f0991fd0aaf135013c6c9b248b4ad0ed725c40b73b1d3a6c1d67a"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "9ad317a13a5d59f111804c7b3fe6a7744bb8221c193b1f4c46cc32b0600f55bd"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "7d87e2a1d2df9d1d7bf50d4587d638fc745904fcdb199b0a49b04f36ef809e2b"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1431,6 +1479,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "18a3d58e5ffd44b234ecd2cb3d00ea1c9603e4019149ac94d5f21a7efd04337a"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "dbaa600f6093caec2b7b55d5409658a2b55f1b65d60ff71f947f02f0e7e440df"
       }
     },
     "it": {
@@ -1463,8 +1515,8 @@
         "authoredSha256": "9dd0de07373b64a3e0ff59b4d1d314811f6b28845df227224bc66d8e70f73a00"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "8d7d24f6d59a29714674a275762e351191b9016286df402c5323135adf9c4237"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "37c4ebc066d27f174f9cb1201b5c914b0670465a818930b35edaa05724b7922d"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1483,8 +1535,8 @@
         "authoredSha256": "b3415c56ce1fc4026759069c764844881123da246cf7d8d8586f9bc4cb2e659e"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "cadbe1f9c85b46f7a96ebe60bd602fce96077f63ce69dcd73bcfd25cf8e392ca"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "fd4ee0748a9ca242ede58cb906759c529b7b8fb3dbb29942f34d8b43703cc4da"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1541,6 +1593,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "f4915703597772d4f1d59770abe47e5c0f9c585a34d0a02646ffd19c14a466d2"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "0e69a8431d57e33dac6a42cca8e1b34de88aa32c3ef10fd268c36141389ebc71"
       }
     },
     "ja": {
@@ -1573,8 +1629,8 @@
         "authoredSha256": "e52da4c922288624c4eba2745b876c97e354ef6a0e8f92519f1433f922a2eeb3"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "152c5f73feaa9c320a4ea5a3b7f6d6bb39118339b47f516ffdb4683f5b9d61aa"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "e6695ecd225a22a715b8ec0474db89841334df6bda3e461006f44748f9b3e63b"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1593,8 +1649,8 @@
         "authoredSha256": "6be30aff5c33d33f22d7085f9ed41c9ffc9a3e63506172e8d2484559e7c1e7d3"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "8fd88eb1e7d352ae153c326bdd222ef2b43d483c07e2086a4d1000bbe4412a06"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "b6632960351a1b1876386767bfafd5c6405a4af13ad080025a6ce00755fe0d8b"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1651,6 +1707,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "65253a6280de7921fe3c47db63bd3105a1e89adca3af8634fc8ba0acfba050bc"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "d97bcda09b3e026fd41e37bb7395bd2a3042d69d422db541f69bdb775083c001"
       }
     },
     "ko": {
@@ -1683,8 +1743,8 @@
         "authoredSha256": "c357881d4788de807015d05315a513dba9de5602590c5082b866c3e899be3b9c"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "dc1755f99fe32f6fb29f0fcc4a9ef49257aad4ee467a9af25a404e69b7364d03"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "e818233c49cea9909e0132ad2fca8fe962337c7a11bd0ca8f232ee03a536f18f"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1703,8 +1763,8 @@
         "authoredSha256": "1dc14c81fc9f0f62df8092c0fe1090ae97003d6523fbb936e533bc6ee79ca617"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "61a4892ac2231711dd183b797cbe4bd562a66c47a98017bc2bacdcc0c3f0b572"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "25bf4c4d6a2816ad2fc111f1fa6bd5e375a8de4bb8523c57d4e7a75bd435409a"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1761,6 +1821,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "49ae882cf5f1548ac71df3f2ad8073d6423a5ff62d7534cb37f0ab2fa56fd0f0"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "685656614d4bb3067f6648d8d2d40175b434185a47d678a898666566bfb43659"
       }
     },
     "nl": {
@@ -1793,8 +1857,8 @@
         "authoredSha256": "a599f52ffec2ea53d08ed18bf232b29158ccb88467016db4e6b3fca66bbad434"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "a9cb3920bce42f8dbc4e1378c8d58e3f8467910dc810fc1a859161ac2c47650d"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "eb35b1eb659a7192d84811c3c5f4ff3f7b80dbf6a234237a71a5b4a42fe99a5b"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1813,8 +1877,8 @@
         "authoredSha256": "8a37199647ef84784d1f4a6bd9bf8c621c6f9b1ff5568521a6a8daf92c609161"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "4a6a579ac4d6b99e0961fe8118d4420bb0fdedeb1106145d19c86c10bff08670"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "7f5f2dc47890b0066e8987e298df3cb1132b109bb37012f5ea2ba6cf4ebb6b70"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1871,6 +1935,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "458a6497d7e9ca6c7d972fa7c5263b0a6aa7b59f53fc6c9c5375b894774c45b2"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "8a0c04c17c7d1cdc5457f6e2da1e954a2bbea1fadec109c1e1e4bfbc22de0b18"
       }
     },
     "no": {
@@ -1903,8 +1971,8 @@
         "authoredSha256": "3ca3cf0bc28f07362ae692b01c860aceb7b2e63205d52535732e2966857989c9"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "0b4f9f0d43471c96987b4b8604d6692a669d74eba4dcf754a24bd2a502de1a73"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "337c3137c42d67aefe58843f481f8de4eddb92f503b0e3dff1a4c421b6d9f7ac"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -1923,8 +1991,8 @@
         "authoredSha256": "63b82f8d132f3ea8683247a0832993e9557619de83976240ddbd8aa282488b91"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "2b1c8a0ea4ffa88d8153c30689bbaecfd9ed3fecb6a14c42bfdc4006c9c89d65"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "656882cfb4b23c9ade997486dfeb0a9fda0bf6135a653a44ccd06055e3de333b"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -1981,6 +2049,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "69b09c1630601568e6fa7a66d0cec43d3d343c4e37b8ad46e2b9f2fe1e41a41a"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "f6e6c5bd39a0e320b1715447e46bc3f573fd1bad2b796482b6ac2ba4cb076ffe"
       }
     },
     "pl": {
@@ -2013,8 +2085,8 @@
         "authoredSha256": "e170d9307aba7487a523e120242fd68347e9eb51e388c58e1be24f9dc68f50f2"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "41ec9dd575ec431ce005a3cdea2e6f176c21c4a9c0bba031ad54f867c6f464aa"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "4c10821d4f073c92b31249692f3ac7fe4669a00d7eea625114991324bc93773f"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2033,8 +2105,8 @@
         "authoredSha256": "d79082894783dd075164d9f969e8990c20abb1b6bd5d9e7a1418cc48915b7692"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "819441927454b23f8df9715a2032a1526bfefb4f3b4df31c830b69f9cc024167"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "e667448f4673c7847c9ef1f031709c8377550c45c38625c6469390662aba4385"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2091,6 +2163,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "6c85694cc30a581a4d900d996013add59e2a258efe2c069239c5aeea68ed53b0"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "cae6d070679fefadc4eb0b3b67c7764971dda7a87dfa123655c7ba3ee8aee644"
       }
     },
     "pt-BR": {
@@ -2123,8 +2199,8 @@
         "authoredSha256": "689f5923482add9a9d629c807a438bd59749ff2c1f73aa18b5d261acfea05b06"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "0c87ea3ddf124332e5ee6aa44ef812c66ba8619230c5a8df61b0f5e89b82add3"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "6bd520fd9cfa853d395bf6d1655a36ad487aa175e26525e47475affd22f62fcf"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2143,8 +2219,8 @@
         "authoredSha256": "b82b1ff075eae9c88151bc37178fa387061a24e2fc19f303f44eea11dc852eb2"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "5df4d23913d6481431003eaa0239063d2ea06e413100307143338ddd7757a623"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "f9ee2f89501c738fd19f41da2499586de400f359b5d3727b88ba69a82329c307"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2201,6 +2277,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "a9c2a1f4f1c2159a0e1a7d603b8d07a053aba50cd178193515ede2dc5a8fbff5"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "04d587512c15aa59a6958d8d47dc7d4ccefdfb78c6a95ddc90821316caa66553"
       }
     },
     "pt": {
@@ -2233,8 +2313,8 @@
         "authoredSha256": "689f5923482add9a9d629c807a438bd59749ff2c1f73aa18b5d261acfea05b06"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "773926b73d8e38632f0c4eb751852449198d83d6aa0c4fa36c4c48cac84151e0"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "fc294d310f44de7a8b6103e6ecd8a46519d1d747a079b14d426d51bb6bb4a618"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2253,8 +2333,8 @@
         "authoredSha256": "7df9c7de23eba84ad4f4e3b58d13cacef58bbcfab176a0d932415cc6cf04e8fd"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "d75acd4e1d1ae53794f5bcebdb17cec62a96d535a053a9fd1cd256f78b70e258"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "cb8d7d906a6c67f60c91399660e287670890df3105f013c2bba21cdcabbc5b2f"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2311,6 +2391,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "7ca9a0ad00642695b3f605c3d03521ccb26e1831be2c33385f131c10ce9532e8"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "a6be19fc56d0ef193013bf997f06fc449d8056bfe65006e90f5fc1721cf55a28"
       }
     },
     "ro": {
@@ -2343,8 +2427,8 @@
         "authoredSha256": "d757460e200ae8eaf7b42f478a950ff73e5f7e24d03da5154643c2650d9187b3"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "7bf1bea5d4dcb89538b2510941e943d6e4ce18c6f6d7a0e04d6d2b26a8af51ca"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "e4c22bb6fb8b911472b9be1ff9d48f2f87659c5836e5145594ca56105596a9c3"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2363,8 +2447,8 @@
         "authoredSha256": "fbd6692c6d95ea547b3db35b942012424e9db388cce7e2da3541a870f3009170"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "45bac95105b79bc020be359983344572813d9a3bd5069f04a1f5a6733e15ef45"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "ca491bbc356f8c87525ef3db342535676edd4322ce142736b13387146d8a7de3"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2421,6 +2505,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "02fd97b9f3e6ead51a4e4df3ccbccba515473ccb0c75b9d1e6237bba796a0b8c"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "5e3e6575819d113c5547cfe5d54fd3553f9bd159a45c2d6405fc93ec8b8a4645"
       }
     },
     "ru": {
@@ -2453,8 +2541,8 @@
         "authoredSha256": "32723a11ae1082af752120298b8606fca4cb602d0e158a994fa7462ee76610cc"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "ac7edaf11aa9fa378a9ef0e1b92f9bc7ef18f27410a88f2e6840c7a4fb63926a"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "e97c29c0927605a2bb8c0b491e54d3cc0b6cb6a5512a3ceac99e2c35b83b98a5"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2473,8 +2561,8 @@
         "authoredSha256": "afcd467e05c1e85bfe1a6a93209145c178bbb5d2b1ac5ea11e0314b3dc596e1d"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "b91a4b97e39c11667db884c30373cb2b478b3576466aa20f8e5c4231f326ec83"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "79866cad7f06cb4594d477c7eaf48de64ba1332a0173d5f365bf4a3d4d70f52d"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2531,6 +2619,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "45ad1c20648a96de396105683972cda97e1ebf23ac1a79d314cb502fb5e3136f"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "be75f554e91cc8341fb0a1f2b0697f4266ac2565e46573759b66e462e7a88d44"
       }
     },
     "sv": {
@@ -2563,8 +2655,8 @@
         "authoredSha256": "736891625f9ed7cdf8645a322ad1fb2f47c7169def250fd663c10d87e2e58667"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "85117501329d28dfd38efa9e76e5ff5ec49aa6379d9ad3d839e5d10f55100435"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "78d20bc15dfb81bee61f72dd130ccb5c6ac52029718c94568ed4187f661d0467"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2583,8 +2675,8 @@
         "authoredSha256": "cd9ee6555f2f1aea42ffaff220dab692d28c7af8e703edd6c1ad6770e8c657ae"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "95a0dbb3763c4e42f3251806f920891252b7a192d89d38a2ea423098a9f16b6a"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "e38b5ae42f1fa8ba1b6baa26b84b77e96fce842a50088e9b601ee428bdb8e2a2"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2641,6 +2733,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "b360a897e7badbb990d719a394bd7388d21340fac05e964e7b386f8ff1cd9813"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "00fa915e2ed1e709558542f29407f719a2faad2d98947e50cf02ea80fa473ac6"
       }
     },
     "th": {
@@ -2673,8 +2769,8 @@
         "authoredSha256": "188ba3ddf251168f7dd268fdaf9c0bcb3227865de72dc9928d5b05d17dd8afcb"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "7d6ed184ea612220e0212fcba6f35ad0b2a6d9fd423d25fbc0ae951e42d74fec"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "7d5deb54ba340a92c8978125e6312e4659c156eb3d34710268830b810e47d462"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2693,8 +2789,8 @@
         "authoredSha256": "57a4426473a15143590f431aa76420d50621fcbe339a00a0cb8e1609e7a7b392"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "f3465fe80bc977c7ae0edb54fad63b09b562bab532dbaf9319f24ef51b7b06c9"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "36fb8b9677e5674cc433a5ff17813c53b5445a82be14208058cdc0ed614d9e08"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2751,6 +2847,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "31b15c33052f0ae4af854887f235e6a1f85287d1f9106a7716c433834daf4620"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "9fd02fcf3be8cbf5b11ba181110a7659c650e6f3fa49da81478223d5929f0580"
       }
     },
     "tr": {
@@ -2783,8 +2883,8 @@
         "authoredSha256": "44c3aa445bebdad2b2d8ee97ddfcb6e09f61b451893e3a17208cc03d8585f865"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "42a2589217cc57381ed42cfb1d408ecfbd562e6b6ec3e89dc3ff3f0bd3da6698"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "1038ee422885be0f4fef4202400eb177f848a5a9696b90edb73727f6d4f7323e"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2803,8 +2903,8 @@
         "authoredSha256": "11a7781b3485155d6870c501d97ed793666cdedf4542a54f1c34cf41b06e2dc5"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "cf91142174f6ee81e990492f2b768af3e2221aca9dbb4d9b151aa5d5f3dc1a2a"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "87dc44fed7970a2ae2269582b47305b22e017793830a1a83b06e94be0d08c44f"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2861,6 +2961,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "c8ca0ba2d97ca9809091e41f2f7ea85f6b98c1ca92eaa10303441be0e021006b"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "3ded0c55205de56cdfa1642e2f21cb16664b5594cf20963dbf0f66ba7f68e71c"
       }
     },
     "zh-CN": {
@@ -2893,8 +2997,8 @@
         "authoredSha256": "d3c2d54551d252663455c51043d02890d265059debe51fd0d843daf89c3c67a0"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "10b11c21f9f05c043835729e113e786158b7db089bfda16e7fef59ff1a3e644c"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "9e43316626c02fb0e6e32f6e8435fb0ab11db7b0ee6c2def5091a6ee87a75fd2"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -2913,8 +3017,8 @@
         "authoredSha256": "7f9d32f192dc791cdcba12fed791e6105945a999e37ba46d83cafbc0bedf6838"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "c4bb82aad5def79c4733195abe981a268a1593f08dbc8d008a3f44c8f2666db8"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "d2c7e36779942fdb93f1bc51652018323bb779332d978f32c55b02ff95de69bd"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -2971,6 +3075,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "d261fdaa3a8bf4bfb28c2931386acbd3028c62b791d3a4809b5c79ae2570d1cd"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "a48da33c86c3def25896dbfe9d302bfc76b2221f2a3f800213c86ba4c96accac"
       }
     },
     "zh-Hant": {
@@ -3003,8 +3111,8 @@
         "authoredSha256": "a880250f15636d0bd596145b87b0fe304a6717fd4278bef02c87cffa48b7ea62"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "4cffed7025071a07720c4887318a885ddb630c95aaf544bd7124b1996528f885"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "3693d975ca54ae0755a26998e9331279d6c4fb965e8c506083b8b2d02649a9a0"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -3023,8 +3131,8 @@
         "authoredSha256": "85a1f2b8a94d07c61141facfd07736921f80453afbe7b707079f7ce6edbb9e0a"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "39bc9928ae10bdb075f3934a41dbf0018c6845f88bad732b24fdcad613ee8c1b"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "9383be122a37552047c4b41483869b2e6149a1c361b404b0e746c2838354bfea"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -3081,6 +3189,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "838dbe27539e5d4921e003226f9558308c842db00e33448007ac2d5bc9d94637"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "0da454f6016b716fd19a820eae77913e941b349ee848990951e08498b4bbcd79"
       }
     },
     "zh-TW": {
@@ -3113,8 +3225,8 @@
         "authoredSha256": "a880250f15636d0bd596145b87b0fe304a6717fd4278bef02c87cffa48b7ea62"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "4cffed7025071a07720c4887318a885ddb630c95aaf544bd7124b1996528f885"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "3693d975ca54ae0755a26998e9331279d6c4fb965e8c506083b8b2d02649a9a0"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -3133,8 +3245,8 @@
         "authoredSha256": "85a1f2b8a94d07c61141facfd07736921f80453afbe7b707079f7ce6edbb9e0a"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "39bc9928ae10bdb075f3934a41dbf0018c6845f88bad732b24fdcad613ee8c1b"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "9383be122a37552047c4b41483869b2e6149a1c361b404b0e746c2838354bfea"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -3191,6 +3303,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "838dbe27539e5d4921e003226f9558308c842db00e33448007ac2d5bc9d94637"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "0da454f6016b716fd19a820eae77913e941b349ee848990951e08498b4bbcd79"
       }
     },
     "uk": {
@@ -3223,8 +3339,8 @@
         "authoredSha256": "9688f280309d83e853b255c9e3bcfedcb72c6d8ec429c25c3a6345ddf33f0493"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "a618f15c103cd26823013b99e98793db4bff65ad9f417d076930f9adf8f21540"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "af7cac57fb634a7ddf1307177c37b5fd997edf7cfc6564beaabb44c14ce45725"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -3243,8 +3359,8 @@
         "authoredSha256": "b072fced11e5380082d0ae90cf594beb1ec4cc7dac11ff2dbdc64bdb8f3f802e"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "a224d8e544776e37a4efa7fda69eb6cb3a972b3f55f2409ac8bc2881df8129f8"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "11f1b99b5fecc8e6cfeeadf689b7fce5bb184c033a2c27321bc4d3e03d566c9e"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -3301,6 +3417,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "8f314baf9a7112264b17b38219cc4f1e596673c4a5c0cb16058045623c11d70d"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "6a0b812b7b7998b599f1abfb0d496b76ea0dcac1da902e0210af31cd8e963a10"
       }
     },
     "vi": {
@@ -3333,8 +3453,8 @@
         "authoredSha256": "a28663bad6f9c6d9424528346eca79db525d1486578c3cc415f9a5b5feaf1502"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "3d3041dcd7183a1bf8a3716315319c45542b3ea1fb7dfe51783de17bffec7f15"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "52766b8b355270def979e79f863cf4e1ce38e37d2eba14bd2c49511252cea757"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -3353,8 +3473,8 @@
         "authoredSha256": "52611a4b2513d09253172136d97e6ccb5a485bc04a42abccc1162376d8548e7b"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "2f672798f2d85594152a086dc73b1dcf3829e240cd130ebb0d53bf6ee2d33b78"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "eb0b8b0a25d0624d9183dc94337cb5d6581b89cb50d5d11d1bcca71734a5108a"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -3411,6 +3531,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "7046cc92bd468756364421962cdbef450a97ca11ee14232a8b16a736ff20906b"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "b185bf51167ce4c7ed20ea68cda87bfcdd1fd9cd4403794c95317ad8b5889f79"
       }
     },
     "id": {
@@ -3443,8 +3567,8 @@
         "authoredSha256": "92a9382d1217f59ec50ccbb390dc129360cf4272ecdf100c4462a8c991239f32"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "bbf08953fbb8c56fd0f169ea0bd3b9e7d957badcb920156e6c8c3384c0b32476"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "8285c1248cdf742faacaa6ab3dec6effc2acda2a27e67137d90ef360632e03e9"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -3463,8 +3587,8 @@
         "authoredSha256": "8e1e624cc9b4da3018894d92a6e1b27c72b4c0166241fe9c08790852b2cacfab"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "c8e47a9fec655747e3b1d284e5fb4cb822643094f2d86738fefd307ca0af9316"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "a5b7f49129947ca1ed1d74d727217112248b3015eb397339837ccaed98123c26"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -3521,6 +3645,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "6e578ea06bba6f76a20d984b46007fecaf46d004224a5a392e3074ae50062cfd"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "97fe45be6cebebd556fe4bde2d861e02816a463a7eb248e1acea102eaa28dd83"
       }
     },
     "ms": {
@@ -3553,8 +3681,8 @@
         "authoredSha256": "cc96e752c72b6ea0869c54acec027dda2cdb03f7d244ce6e727e7ac242fe20aa"
       },
       "features/diagrams.mdx": {
-        "sourceSha256": "f1a441e3369f0f0c79b5a34eb8a66e1386ec715e5e9413726ba1aaa5c0d750c8",
-        "authoredSha256": "4bbff20d24174329032e843514565f5793501daca42e580f29e61d275421f822"
+        "sourceSha256": "5ba02fd019f92bbc9a902b58831ef0fa4943ed81e413a2dc5d1bd990e74efa48",
+        "authoredSha256": "34c4c0eb6352c28aeddedbf097035261ff964cb2b70b5b12254b76680f4d1b53"
       },
       "features/research.mdx": {
         "sourceSha256": "97c14408aa65516a0ac1be99112b20c78e19d3d152e7d6e7ab2ab875e9d7d7d5",
@@ -3573,8 +3701,8 @@
         "authoredSha256": "f8f50687ffb5834ea5754a81a42744527afb73bdc7aa608505bc5974395a05d3"
       },
       "getting-started/configuration.mdx": {
-        "sourceSha256": "4e80c0cac0439ce0c144ab7216455c11cb0ca57426c85ab554b609b207c6ce71",
-        "authoredSha256": "3155e83bd72c143d26ccf21ee028dccb0bcd7df28b3051aeb55254c046be4bad"
+        "sourceSha256": "4c9c7c8b93c5dbf96495c404c623b9b7f1deb4ece75741fa73ba58ff8cfb1513",
+        "authoredSha256": "0258ef6bfe94c7b9fca23af3f3b8ff8741269b39468588b358175fda6919615a"
       },
       "getting-started/installation.mdx": {
         "sourceSha256": "92d2386c1a483203b48168aaf937d98f7b901fff29a06b4ffa24fd6a86fe3751",
@@ -3631,6 +3759,10 @@
       "releases/1.9.11.mdx": {
         "sourceSha256": "af2812ca1e32191a4dcc16490b89d23fb0dc684bb7f12f3d968cd2ac91508690",
         "authoredSha256": "d3897d75ea03f258c7429eebfe420c838eee56a8f5421af9f859889b38836280"
+      },
+      "releases/1.9.12.mdx": {
+        "sourceSha256": "c8fccc11b21c66da384a1a54feaad2db4c9b8fcab3bc73a705f8ccbf2ae87442",
+        "authoredSha256": "328d9bd5ca05cfbb3072a304af589552d2ae7c926bbaef4282e60c8baed4e8ee"
       }
     }
   }

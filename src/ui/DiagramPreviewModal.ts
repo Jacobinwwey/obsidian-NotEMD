@@ -645,33 +645,34 @@ export class DiagramPreviewModal extends Modal {
             return;
         }
 
-        const panel = container.createDiv({ cls: 'notemd-diagram-preview-diagnostics' });
-        panel.createEl('h4', {
+        const diagnosticCounts = summarizeRenderArtifactDiagnostics(diagnostics);
+        const panel = container.createEl('details', { cls: 'notemd-diagram-preview-diagnostics' });
+        // Keep non-blocking evidence out of the preview's way, but expose the diagnostic groups when errors exist.
+        panel.open = diagnosticCounts.hasErrors;
+        const heading = panel.createEl('summary', { cls: 'notemd-diagram-preview-diagnostics-heading' });
+        heading.createEl('span', {
             text: i18n.previewModal.diagnosticsTitle,
             cls: 'notemd-diagram-preview-diagnostics-title'
         });
 
-        const summary = formatRenderArtifactDiagnosticSummary(
-            summarizeRenderArtifactDiagnostics(diagnostics),
-            i18n.previewModal.diagnosticSummary
-        );
-        if (summary) {
-            panel.createDiv({
-                text: summary,
-                cls: 'notemd-diagram-preview-diagnostics-summary'
-            });
-        }
+        heading.createEl('span', {
+            text: formatRenderArtifactDiagnosticSummary(diagnosticCounts, i18n.previewModal.diagnosticSummary),
+            cls: 'notemd-diagram-preview-diagnostics-summary'
+        });
 
         const list = panel.createDiv({ cls: 'notemd-diagram-preview-diagnostics-list' });
         const groups = new Map<string, typeof diagnostics>();
         for (const diagnostic of diagnostics) {
-            const group = groups.get(diagnostic.kind);
+            const key = `${diagnostic.severity}:${diagnostic.kind}`;
+            const group = groups.get(key);
             if (group) group.push(diagnostic);
-            else groups.set(diagnostic.kind, [diagnostic]);
+            else groups.set(key, [diagnostic]);
         }
-        for (const [kind, entries] of groups) {
-            // Native disclosures keep all evidence accessible without letting repeated tags crowd out the preview.
+        for (const entries of groups.values()) {
+            const { kind, severity } = entries[0];
+            // Separate severity even within a tag so opening an error never exposes warnings as if they were errors.
             const group = list.createEl('details', { cls: 'notemd-diagram-preview-diagnostic-group' });
+            group.open = severity === 'error';
             const heading = group.createEl('summary', { cls: 'notemd-diagram-preview-diagnostic-group-heading' });
             heading.createEl('span', { text: kind, cls: 'notemd-diagram-preview-diagnostic-group-tag' });
             heading.createEl('span', {

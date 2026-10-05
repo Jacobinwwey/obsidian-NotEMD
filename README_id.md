@@ -26,7 +26,15 @@ Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang 
 | Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
 | Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
 
-**Versi:** 1.9.11
+**Versi:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Pratinjau diagnostik yang lebih ringkas
+
+Jika tidak ada kesalahan, seluruh panel diagnostik diciutkan secara bawaan sehingga hanya judul dan jumlah menurut tingkat keparahan yang terlihat. Kesalahan membuka panel secara otomatis. Buka panel dan grup tag untuk membaca semua pesan dan saran. Tidak ada catatan diagnostik yang dihapus. Hanya grup kesalahan yang terbuka otomatis; peringatan dan informasi tetap diciutkan meskipun memakai tag yang sama.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -752,7 +760,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.11 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.12 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->

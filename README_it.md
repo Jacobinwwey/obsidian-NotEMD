@@ -26,7 +26,15 @@ Ogni anteprima ha controlli indipendenti per zoom, spostamento, adattamento e di
 | Sviluppatore | [Guida per sviluppatori](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/developers/overview) | Compilare, testare ed estendere i contratti esistenti |
 | Agente | [Guida per agenti](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/agents/overview) | Scoprire i quattro comandi di esportazione supportati |
 
-**Versione:** 1.9.11
+**Versione:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Anteprima diagnostica più essenziale
+
+In assenza di errori, l’intero pannello diagnostico è compresso per impostazione predefinita: restano visibili solo il titolo e i conteggi per gravità. Gli errori aprono automaticamente il pannello. Espandete il pannello e i gruppi di etichette per leggere ogni messaggio e suggerimento. Nessun messaggio diagnostico viene eliminato. Si aprono automaticamente solo i gruppi di errori; avvisi e informazioni restano compressi, anche se condividono la stessa etichetta.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -749,7 +757,7 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 ---
 
 
-*Notemd v1.9.11 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+*Notemd v1.9.12 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
 
 
 

@@ -26,7 +26,15 @@ Jokaisessa kaavion esikatselussa on oma zoomaus, siirto, sovitus ja todellinen k
 | Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
 | Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
 
-**Versio:** 1.9.11
+**Versio:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Selkeämpi diagnostiikan esikatselu
+
+Kun virheitä ei ole, koko diagnostiikkapaneeli on oletuksena suljettu ja vain otsikko sekä vakavuuskohtaiset määrät näkyvät. Virheet avaavat paneelin automaattisesti. Avaa paneeli ja sen tunnisteryhmät lukeaksesi kaikki viestit ja ehdotukset. Diagnostiikkatietueita ei poisteta. Vain virheryhmät avautuvat automaattisesti; varoitukset ja tiedot pysyvät suljettuina, vaikka niillä olisi sama tunniste.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -743,7 +751,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.11 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.12 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->

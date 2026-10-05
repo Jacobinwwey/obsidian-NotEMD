@@ -26,7 +26,15 @@
 | 開発者 | [開発ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/developers/overview) | 既存の契約に沿ってビルド・テスト・拡張 |
 | エージェント | [連携ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/agents/overview) | 対応する四つのエクスポートコマンドを確認 |
 
-**バージョン:** 1.9.11
+**バージョン:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — すっきりした診断プレビュー
+
+エラーがない場合、診断パネル全体を初期状態で折りたたみ、タイトルと重大度別の件数だけを表示します。エラーがある場合は自動で展開します。パネルとタグ別のグループを展開すると、すべてのメッセージと提案を読めます。診断記録は削除しません。 自動で展開するのはエラーのグループだけです。同じタグでも警告と情報は分けて折りたたんだままにします。
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -749,7 +757,7 @@ MIT ライセンス - 詳細は [LICENSE](LICENSE) ファイルを参照して�
 ---
 
 
-*Notemd v1.9.11 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
+*Notemd v1.9.12 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
 
 
 

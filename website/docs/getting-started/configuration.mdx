@@ -126,3 +126,7 @@ Imported SVG previews remove active content and external resources while preserv
 Logs accumulate across task stages and preview reopening during the plugin session. Use Clear log to reset them; reloading the plugin does not preserve the transcript.
 
 Diagnostics are grouped by tag and collapsed by default. Expand a group to read every message and suggestion; severity counts remain visible.
+
+## 1.9.12 — Quieter diagnostic previews
+
+When there are no errors, the entire diagnostic panel is collapsed by default, leaving only its title and severity counts visible. Errors open the panel automatically. Expand the panel and its tag groups to read every message and suggestion. No diagnostic records are removed. Only error groups open automatically; warning and information groups stay collapsed, even when they share a tag.

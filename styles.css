@@ -531,8 +531,14 @@
     background: color-mix(in srgb, var(--background-secondary) 82%, #f8fafc 18%);
 }
 
+.notemd-diagram-preview-diagnostics-heading {
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
 .notemd-diagram-preview-diagnostics-title {
-    margin: 0 0 0.55em;
     font-size: 12px;
     line-height: 1.4;
     letter-spacing: 0.04em;
@@ -541,7 +547,8 @@
 }
 
 .notemd-diagram-preview-diagnostics-summary {
-    margin: 0 0 0.65em;
+    display: inline-block;
+    margin-inline-start: 0.75em;
     padding: 0.35em 0.5em;
     border-radius: 6px;
     background: var(--background-primary);
@@ -553,6 +560,7 @@
 }
 
 .notemd-diagram-preview-diagnostics-list {
+    margin-top: 0.65em;
     display: flex;
     flex-direction: column;
     gap: 0.5em;
@@ -571,6 +579,7 @@
     overflow-wrap: anywhere;
 }
 
+.notemd-diagram-preview-diagnostics-heading:focus-visible,
 .notemd-diagram-preview-diagnostic-group-heading:focus-visible {
     outline: 2px solid var(--interactive-accent);
     outline-offset: 2px;

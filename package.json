@@ -1,6 +1,6 @@
 {
 	"name": "notemd",
-	"version": "1.9.11",
+	"version": "1.9.12",
 	"description": "Build linked knowledge with configurable LLMs: wiki-links, concept notes, web research, file translation, diagrams and reusable Obsidian workflows.",
 	"main": "main.js",
 	"scripts": {

@@ -1,3 +1,13 @@
+## 1.9.12
+
+### English
+
+When there are no errors, the entire diagnostic panel is collapsed by default, leaving only its title and severity counts visible. Errors open the panel automatically. Expand the panel and its tag groups to read every message and suggestion. No diagnostic records are removed. Only error groups open automatically; warning and information groups stay collapsed, even when they share a tag.
+
+### 中文
+
+没有错误时，整个诊断区域默认收起，仅显示标题和严重级别计数；有错误时默认展开。展开区域及其中的标签分组，即可查看每条消息和建议，不删除任何诊断记录。 仅错误分组自动展开，警告和信息分组仍收起；同一标签下的不同级别也分开展示。
+
 ## 1.9.11
 
 ### English

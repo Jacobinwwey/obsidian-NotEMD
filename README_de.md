@@ -26,7 +26,15 @@ Jede Diagrammvorschau bietet unabhängigen Zoom, Verschieben, Einpassen und Orig
 | Entwickler | [Entwicklerhandbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/developers/overview) | Bestehende Verträge bauen, testen und erweitern |
 | Agent | [Agent-Handbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/agents/overview) | Vier unterstützte Exportbefehle finden |
 
-**Version:** 1.9.11
+**Version:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Übersichtlichere Diagnosevorschau
+
+Wenn keine Fehler vorliegen, ist der gesamte Diagnosebereich standardmäßig eingeklappt; nur Titel und Anzahl je Schweregrad bleiben sichtbar. Bei Fehlern öffnet sich der Bereich automatisch. Klappen Sie den Bereich und seine Gruppen auf, um alle Meldungen und Hinweise zu lesen. Es werden keine Diagnoseeinträge entfernt. Nur Fehlergruppen öffnen sich automatisch; Warnungen und Informationen bleiben eingeklappt, auch bei gleicher Kennzeichnung.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -749,7 +757,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.9.11 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.9.12 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 

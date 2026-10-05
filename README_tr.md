@@ -26,7 +26,15 @@ Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma
 | Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
 | Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
 
-**Sürüm:** 1.9.11
+**Sürüm:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Daha sade tanılama önizlemesi
+
+Hata yoksa tanılama panelinin tamamı varsayılan olarak daraltılır; yalnızca başlık ve önem düzeyi sayıları görünür. Hatalar paneli otomatik olarak açar. Tüm iletileri ve önerileri okumak için paneli ve etiket gruplarını genişletin. Hiçbir tanılama kaydı silinmez. Yalnızca hata grupları otomatik açılır; aynı etiketi paylaşsalar bile uyarı ve bilgi grupları daraltılmış kalır.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -743,7 +751,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.11 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.12 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->

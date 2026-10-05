@@ -26,7 +26,15 @@ Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích th�
 | Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
 | Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
 
-**Phiên bản:** 1.9.11
+**Phiên bản:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Bản xem trước chẩn đoán gọn hơn
+
+Khi không có lỗi, toàn bộ bảng chẩn đoán được thu gọn mặc định, chỉ hiển thị tiêu đề và số lượng theo mức độ nghiêm trọng. Khi có lỗi, bảng tự động mở. Mở bảng và các nhóm thẻ để đọc mọi thông báo và gợi ý. Không có bản ghi chẩn đoán nào bị xóa. Chỉ các nhóm lỗi tự động mở; nhóm cảnh báo và thông tin vẫn thu gọn, kể cả khi dùng chung một thẻ.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -744,7 +752,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.11 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.12 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 

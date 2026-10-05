@@ -26,7 +26,15 @@ Chaque aperçu dispose de zoom, déplacement, ajustement et taille réelle indé
 | Développeur | [Guide de développement](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/developers/overview) | Compiler, tester et étendre les contrats existants |
 | Agent | [Guide des agents](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/agents/overview) | Découvrir les quatre commandes d’export prises en charge |
 
-**Version:** 1.9.11
+**Version:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Aperçu des diagnostics allégé
+
+En l’absence d’erreur, tout le panneau de diagnostic est replié par défaut ; seuls son titre et les compteurs par gravité restent visibles. Les erreurs ouvrent automatiquement le panneau. Dépliez le panneau puis ses groupes d’étiquettes pour lire chaque message et conseil. Aucun diagnostic n’est supprimé. Seuls les groupes d’erreurs s’ouvrent automatiquement ; avertissements et informations restent repliés, même sous une étiquette commune.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -749,7 +757,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 ---
 
 
-*Notemd v1.9.11 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.9.12 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 

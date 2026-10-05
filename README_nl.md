@@ -26,7 +26,15 @@ Elke diagramweergave heeft onafhankelijke zoom, verschuiving, passend maken en w
 | Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
 | Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
 
-**Versie:** 1.9.11
+**Versie:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Rustiger diagnosevoorbeeld
+
+Zonder fouten is het hele diagnosepaneel standaard ingeklapt; alleen de titel en aantallen per ernst blijven zichtbaar. Bij fouten opent het paneel automatisch. Klap het paneel en de labelgroepen uit om alle berichten en adviezen te lezen. Er worden geen diagnostische gegevens verwijderd. Alleen foutgroepen openen automatisch; waarschuwingen en informatie blijven ingeklapt, ook als ze hetzelfde label hebben.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -743,7 +751,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.11 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.12 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 

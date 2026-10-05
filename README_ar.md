@@ -26,7 +26,15 @@
 | مطور | [دليل المطور](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/developers/overview) | بناء العقود الحالية واختبارها وتوسيعها |
 | وكيل | [دليل الوكلاء](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/agents/overview) | اكتشاف أوامر التصدير الأربعة المدعومة |
 
-**الإصدار:** 1.9.11
+**الإصدار:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — معاينة تشخيصية أكثر بساطة
+
+عند عدم وجود أخطاء، تُطوى لوحة التشخيص بالكامل افتراضيًا، ولا يظهر سوى العنوان والأعداد حسب درجة الخطورة. تفتح الأخطاء اللوحة تلقائيًا. وسّع اللوحة ومجموعات الوسوم لقراءة كل رسالة واقتراح. لا تُحذف أي سجلات تشخيصية. تُفتح مجموعات الأخطاء فقط تلقائيًا؛ وتبقى التحذيرات والمعلومات مطوية حتى إن اشتركت في الوسم نفسه.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -752,7 +760,7 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
 ---
 
 
-*Notemd v1.9.11 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
+*Notemd v1.9.12 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
 
 
 <!-- repo-chronicle:start -->

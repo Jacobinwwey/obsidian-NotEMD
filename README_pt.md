@@ -26,7 +26,15 @@ Cada pré-visualização tem zoom, deslocação, ajuste e tamanho real independe
 | Desenvolvedor | [Guia de desenvolvimento](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/developers/overview) | Compilar, testar e ampliar os contratos existentes |
 | Agente | [Guia de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/agents/overview) | Encontrar os quatro comandos de exportação suportados |
 
-**Versão:** 1.9.11
+**Versão:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Pré-visualização de diagnósticos mais simples
+
+Quando não há erros, todo o painel de diagnóstico fica recolhido por predefinição, mostrando apenas o título e as contagens por gravidade. Os erros abrem o painel automaticamente. Expanda o painel e os grupos de etiquetas para ler todas as mensagens e sugestões. Nenhum registo de diagnóstico é removido. Só os grupos de erros se abrem automaticamente; os avisos e as informações continuam recolhidos, mesmo quando partilham uma etiqueta.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -749,7 +757,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.11 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.12 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 

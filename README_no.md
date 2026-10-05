@@ -26,7 +26,15 @@ Hver diagramvisning har uavhengig zoom, panorering, tilpasning og faktisk størr
 | Utvikler | [Utviklerveiledning](https://jacobinwwey.github.io/obsidian-NotEMD/no/docs/developers/overview) | Bygg, test og utvid eksisterende kontrakter |
 | Agent | [Agentveiledning](https://jacobinwwey.github.io/obsidian-NotEMD/no/docs/agents/overview) | Finn fire støttede eksportkommandoer |
 
-**Versjon:** 1.9.11
+**Versjon:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Ryddigere diagnostikkvisning
+
+Når det ikke finnes feil, er hele diagnostikkpanelet sammenfoldet som standard, slik at bare tittelen og antall per alvorlighetsgrad vises. Feil åpner panelet automatisk. Utvid panelet og etikettgruppene for å lese alle meldinger og forslag. Ingen diagnostikkoppføringer fjernes. Bare feilgrupper åpnes automatisk; advarsler og informasjon forblir sammenfoldet selv om de deler etikett.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -743,7 +751,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.11 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
+*Notemd v1.9.12 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
 
 
 <!-- repo-chronicle:start -->

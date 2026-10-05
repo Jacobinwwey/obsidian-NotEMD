@@ -1196,35 +1196,57 @@ describe('diagram preview modal', () => {
         expect(text).toContain('Advice: Inspect the renderer before repair.');
     });
 
-    test('groups diagnostic tags in closed native disclosures without losing records or severity counts', async () => {
+    test('separates severity within diagnostic tags and expands only error groups without losing records', async () => {
         const diagnostics = [
             { severity: 'info' as const, kind: 'node-merged', message: 'First node merged.', advice: 'First source id.' },
             { severity: 'warning' as const, kind: 'future-tag', message: 'Future diagnostic.' },
-            { severity: 'error' as const, kind: 'node-merged', message: 'Second node needs attention.', advice: 'Second source id.' }
+            { severity: 'error' as const, kind: 'node-merged', message: 'Second node needs attention.', advice: 'Second source id.' },
+            { severity: 'info' as const, kind: 'node-merged', message: 'Another node merged.' }
         ];
         const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({ diagnostics }), 'en') as any);
         modal.onOpen();
         await flushPromises();
 
         const list = findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics-list') as MockElement;
-        expect(list.children).toHaveLength(2);
-        expect(list.children.map(group => group.tag)).toEqual(['details', 'details']);
-        for (const group of list.children) {
-            expect(group.attributes.open).toBeUndefined();
-            expect((group as MockElement & { open?: boolean }).open).not.toBe(true);
+        expect(list.children).toHaveLength(3);
+        expect(list.children.map(group => group.tag)).toEqual(['details', 'details', 'details']);
+        for (const [index, group] of list.children.entries()) {
+            expect((group as MockElement & { open?: boolean }).open).toBe(index === 2);
             expect(group.children[0].tag).toBe('summary');
         }
         expect(collectText(list.children[0].children[0])).toEqual(expect.arrayContaining([
-            'node-merged', '1 error(s) · 0 warning(s) · 1 info'
+            'node-merged', '0 error(s) · 0 warning(s) · 2 info'
         ]));
         expect(collectText(list.children[1].children[0])).toContain('future-tag');
+        expect(collectText(list.children[2].children[0])).toEqual(expect.arrayContaining([
+            'node-merged', '1 error(s) · 0 warning(s) · 0 info'
+        ]));
+        expect(collectText(list.children[2])).not.toContain('First node merged.');
         const text = collectText(modal.contentEl);
-        expect(text).toContain('1 error(s) · 1 warning(s) · 1 info');
+        expect(text).toContain('1 error(s) · 1 warning(s) · 2 info');
         for (const diagnostic of diagnostics) {
             expect(text).toContain(diagnostic.message);
             if (diagnostic.advice) expect(text).toContain(`Advice: ${diagnostic.advice}`);
         }
-        expect(diagnostics.map(diagnostic => diagnostic.kind)).toEqual(['node-merged', 'future-tag', 'node-merged']);
+        expect(diagnostics.map(diagnostic => diagnostic.kind)).toEqual(['node-merged', 'future-tag', 'node-merged', 'node-merged']);
+    });
+
+    test.each(['info', 'warning', 'error'] as const)('opens the whole diagnostic panel only for errors (%s)', async severity => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{ severity, kind: 'future-tag', message: 'Complete diagnostic evidence.' }]
+        }), 'en') as any);
+        modal.onOpen();
+        await flushPromises();
+
+        const panel = findByClass(modal.contentEl, 'notemd-diagram-preview-diagnostics') as MockElement & { open: boolean };
+        expect(panel.tag).toBe('details');
+        expect(panel.open).toBe(severity === 'error');
+        expect(panel.children[0].tag).toBe('summary');
+        expect(collectText(panel.children[0])).toContain('Artifact diagnostics');
+        expect(collectText(panel.children[0])).toContain(
+            `${severity === 'error' ? 1 : 0} error(s) · ${severity === 'warning' ? 1 : 0} warning(s) · ${severity === 'info' ? 1 : 0} info`
+        );
+        expect(collectText(panel)).toContain('Complete diagnostic evidence.');
     });
 
     test('omits the diagnostic panel when there are no diagnostics', async () => {

@@ -29,7 +29,15 @@ Each diagram preview has independent zoom, pan, fit and actual-size controls. Ct
 
 Notemd is an **MIT-licensed Obsidian plugin** for file-based knowledge work. It supports cloud providers, gateways and local model servers. Stored outputs stay in the vault; cloud tasks send content to the selected endpoint, and web research uses the network.
 
-**Version:** 1.9.11
+**Version:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Quieter diagnostic previews
+
+When there are no errors, the entire diagnostic panel is collapsed by default, leaving only its title and severity counts visible. Errors open the panel automatically. Expand the panel and its tag groups to read every message and suggestion. No diagnostic records are removed. Only error groups open automatically; warning and information groups stay collapsed, even when they share a tag.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -875,7 +883,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.11 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.12 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->

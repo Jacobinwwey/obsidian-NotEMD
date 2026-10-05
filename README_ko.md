@@ -26,7 +26,15 @@
 | 개발자 | [개발 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/developers/overview) | 기존 계약에 따라 빌드, 테스트, 확장하기 |
 | 에이전트 | [에이전트 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/agents/overview) | 지원되는 네 가지 내보내기 명령 확인하기 |
 
-**버전:** 1.9.11
+**버전:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — 더 간결한 진단 미리보기
+
+오류가 없으면 진단 패널 전체가 기본적으로 접히고 제목과 심각도별 개수만 표시됩니다. 오류가 있으면 패널이 자동으로 펼쳐집니다. 패널과 태그 그룹을 펼치면 모든 메시지와 제안을 읽을 수 있습니다. 진단 기록은 삭제되지 않습니다. 오류 그룹만 자동으로 펼쳐집니다. 같은 태그를 사용하더라도 경고와 정보 그룹은 분리되어 접힌 상태를 유지합니다.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -749,7 +757,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.11 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.12 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 

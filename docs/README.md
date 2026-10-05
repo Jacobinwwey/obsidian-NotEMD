@@ -14,6 +14,8 @@ This directory contains repository-level documentation for maintainers and contr
 
 - [1.9.11 — Clearer diagrams and reliable PDF export](./releases/1.9.11.md)
 
+- [1.9.12 — Quieter diagnostic previews](./releases/1.9.12.md)
+
 ## Current Truth And Layout
 
 - [Release 1.9.9 Implementation And Acceptance](./maintainer/release-1.9.9-acceptance.md)

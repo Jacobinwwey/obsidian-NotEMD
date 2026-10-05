@@ -26,7 +26,15 @@ Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală ind
 | Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
 | Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
 
-**Versiune:** 1.9.11
+**Versiune:** 1.9.12
+
+<!-- notemd-diagnostics-1.9.12 -->
+
+## 1.9.12 — Previzualizare diagnostică mai aerisită
+
+Dacă nu există erori, întregul panou de diagnostic este restrâns implicit, lăsând vizibile doar titlul și numărul pe nivel de gravitate. Erorile deschid automat panoul. Extindeți panoul și grupurile de etichete pentru a citi toate mesajele și sugestiile. Nu se șterge nicio înregistrare diagnostică. Se deschid automat numai grupurile de erori; avertismentele și informațiile rămân restrânse, chiar dacă au aceeași etichetă.
+
+[1.9.12](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.12)
 
 <!-- notemd-reliability-1.9.11 -->
 
@@ -740,7 +748,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.11 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.12 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->
