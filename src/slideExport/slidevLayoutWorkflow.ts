@@ -15,7 +15,8 @@ import {
 	type SlidevLayoutAuditConfig,
 	type SlidevLayoutAuditSummary,
 } from './slidevLayoutAudit';
-import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
+import { getVaultBasePath } from './platformUtils';
+import { loadSlideExportChromium } from './playwrightRuntime';
 import { MERMAID_POST_FIT_SCRIPT_SOURCE } from './mermaidFitScript';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource, SlidevHtmlExportOutcome } from './types';
 
@@ -96,7 +97,7 @@ export async function convergeSlidevDeckLayout(
 	const htmlExportHistory = [htmlExport];
 	let exportPath = htmlExport.path;
 	const initialSummary = summarizeLayoutAudits([], 0);
-	const playwright = resolvePlaywrightRuntime();
+	const playwright = loadSlideExportChromium(vaultRoot) as PlaywrightRuntime | null;
 	if (!playwright?.chromium) {
 		const auditSkippedReason = 'Skipping rendered layout audit because the Playwright runtime is unavailable.';
 		onProgress?.('layout-audit', auditSkippedReason);
@@ -173,16 +174,6 @@ export async function convergeSlidevDeckLayout(
 		layoutPatchAttempts,
 		auditSkippedReason: null,
 	};
-}
-
-function resolvePlaywrightRuntime(): PlaywrightRuntime | null {
-	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
-	if (playwrightBrowsersPath && !process.env.PLAYWRIGHT_BROWSERS_PATH) {
-		process.env.PLAYWRIGHT_BROWSERS_PATH = playwrightBrowsersPath;
-	}
-
-	const playwright = safeRequire('playwright') as PlaywrightRuntime | null;
-	return playwright?.chromium ? playwright : null;
 }
 
 async function runPlaywrightLayoutChecks(

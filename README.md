@@ -18,6 +18,10 @@ Each diagram preview has independent zoom, pan, fit and actual-size controls. Ct
 
 ## Start Here
 
+Successful export logs start collapsed. Lock each preview beside the minus button to select SVG/HTML text without moving or zooming it. PNG/PDF open in Obsidian’s native viewer. Presentation export supports multiple formats and requires the Jacobinwwey Slidev fork; official fallback is disabled.
+
+See the [preview and export reliability record](./docs/maintainer/2026-10-06-preview-slidev-reliability.md) for verification status and the required fork provenance.
+
 | Reader | Entry point | Outcome |
 |---|---|---|
 | Newcomer | [Quick start](https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start) | Configure a provider and verify one note |
@@ -29,7 +33,17 @@ Each diagram preview has independent zoom, pan, fit and actual-size controls. Ct
 
 Notemd is an **MIT-licensed Obsidian plugin** for file-based knowledge work. It supports cloud providers, gateways and local model servers. Stored outputs stay in the vault; cloud tasks send content to the selected endpoint, and web research uses the network.
 
-**Version:** 1.9.12
+**Version:** 1.9.13
+
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Preview controls and presentation exports
+
+Successful export logs start collapsed. Lock each preview to select SVG/HTML text without moving or zooming. PNG/PDF previews and multi-format presentation exports are repaired. Windows browser installation verifies launch and allows time for cold starts. Slidev uses the repaired Jacobinwwey fork.
+
+Install matching main.js, manifest.json and styles.css from 1.9.13, then reload. Existing notes and settings are preserved. Replace the older Slidev fork package through the export environment installer.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -883,7 +897,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.12 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.13 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->

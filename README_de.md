@@ -26,7 +26,16 @@ Jede Diagrammvorschau bietet unabhängigen Zoom, Verschieben, Einpassen und Orig
 | Entwickler | [Entwicklerhandbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/developers/overview) | Bestehende Verträge bauen, testen und erweitern |
 | Agent | [Agent-Handbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/agents/overview) | Vier unterstützte Exportbefehle finden |
 
-**Version:** 1.9.12
+**Version:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Vorschausteuerung und Präsentationsexport
+
+Protokolle erfolgreicher Exporte sind zunächst eingeklappt. Sperren Sie jede Vorschau, um SVG/HTML-Text ohne Verschieben oder Zoomen auszuwählen. PNG/PDF-Vorschauen und der Präsentationsexport in mehrere Formate wurden repariert. Unter Windows prüft die Browserinstallation den tatsächlichen Start und berücksichtigt die Zeit für den ersten Start. Slidev verwendet den korrigierten Fork von Jacobinwwey.
+
+Installieren Sie main.js, manifest.json und styles.css aus Version 1.9.13 und laden Sie das Plugin neu. Vorhandene Notizen und Einstellungen bleiben erhalten. Ersetzen Sie das alte Slidev-Fork-Paket über die Installation der Exportumgebung.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -757,7 +766,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.9.12 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.9.13 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 

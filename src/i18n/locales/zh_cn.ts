@@ -1082,6 +1082,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     previewModal: {
         zoomIn: "放大",
         zoomOut: "缩小",
+        zoomLock: "锁定位置与缩放",
+        zoomUnlock: "解锁位置与缩放",
         zoomFit: "适应窗口",
         zoomActual: "实际大小",
         zoomLevel: "缩放比例",

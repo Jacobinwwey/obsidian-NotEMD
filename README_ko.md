@@ -26,7 +26,16 @@
 | 개발자 | [개발 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/developers/overview) | 기존 계약에 따라 빌드, 테스트, 확장하기 |
 | 에이전트 | [에이전트 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/agents/overview) | 지원되는 네 가지 내보내기 명령 확인하기 |
 
-**버전:** 1.9.12
+**버전:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — 미리 보기 제어 및 프레젠테이션 내보내기
+
+성공한 내보내기 로그는 기본적으로 접혀 있습니다. 각 미리 보기를 잠그면 이동하거나 확대·축소하지 않고 SVG/HTML 텍스트를 선택할 수 있습니다. PNG/PDF 미리 보기와 여러 형식의 프레젠테이션 내보내기를 수정했습니다. Windows 브라우저 설치는 실제 실행을 확인하며 첫 실행에 필요한 시간을 확보합니다. Slidev는 수정된 Jacobinwwey 포크를 사용합니다.
+
+1.9.13 버전의 main.js, manifest.json, styles.css를 함께 설치한 뒤 플러그인을 다시 불러오세요. 기존 노트와 설정은 유지됩니다. 내보내기 환경 설치 도구로 이전 Slidev 포크 패키지를 교체하세요.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -757,7 +766,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.12 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.13 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 

@@ -26,7 +26,16 @@ Jokaisessa kaavion esikatselussa on oma zoomaus, siirto, sovitus ja todellinen k
 | Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
 | Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
 
-**Versio:** 1.9.12
+**Versio:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Esikatselun hallinta ja esitysten vienti
+
+Onnistuneiden vientien lokit ovat aluksi supistettuina. Lukitse kukin esikatselu, jotta voit valita SVG/HTML-tekstiä siirtämättä tai zoomaamatta kuvaa. PNG/PDF-esikatselut ja esitysten vienti useisiin muotoihin on korjattu. Windowsin selainasennus tarkistaa todellisen käynnistymisen ja varaa aikaa ensimmäiselle käynnistykselle. Slidev käyttää Jacobinwweyn korjattua haaraa.
+
+Asenna version 1.9.13 yhteensopivat main.js-, manifest.json- ja styles.css-tiedostot ja lataa lisäosa uudelleen. Nykyiset muistiinpanot ja asetukset säilyvät. Korvaa vanha Slidev-haaran paketti vientiympäristön asentimella.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -751,7 +760,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.12 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.13 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->

@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import {
     applySlidevPresentationGuardrails,
@@ -92,6 +93,82 @@ const config: SlideExportConfig = {
 };
 
 describe('slidevSourcePreparer', () => {
+    test('writes managed CSS compatibility config without changing copied Vite setup', async () => {
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-slidev-css-'));
+        try {
+            fs.mkdirSync(path.join(root, 'docs/setup'), { recursive: true });
+            const setup = 'export default () => [{ name: "user-plugin" }];';
+            fs.writeFileSync(path.join(root, 'docs/setup/vite-plugins.ts'), setup);
+            const app = createApp('---\ntheme: default\n---\n# Test');
+            mockGetVaultBasePath.mockReturnValue(root);
+            mockSafeRequire.mockImplementation((name: string) => require(name));
+            await prepareSlidevExportSource(app, createFile('docs/deck.md'), config);
+            const workspace = path.join(root, 'export/_slidev-sources/deck');
+            expect(fs.readFileSync(path.join(workspace, 'setup/vite-plugins.ts'), 'utf8')).toBe(setup);
+            expect(fs.readFileSync(path.join(workspace, 'vite.config.mjs'), 'utf8')).toContain('notemd-slidev-empty-css-rules');
+            expect(fs.existsSync(path.join(root, 'docs/vite.config.mjs'))).toBe(false);
+        } finally {
+            fs.rmSync(root, { recursive: true, force: true });
+        }
+    });
+
+    test('refuses to overwrite an unmanaged config in a generated deck output directory', async () => {
+        const app = createApp('# Document\n\n## Topic\n\nSome content.');
+        app.vault.adapter.exists.mockImplementation(async (name: string) => name.endsWith('vite.config.mjs'));
+        app.vault.adapter.read = jest.fn(async () => 'export default { plugins: [] };');
+        await expect(prepareSlidevExportSource(app, createFile('document.md'), config))
+            .rejects.toThrow('Cannot replace existing Slidev configuration');
+        expect(app.vault.adapter.write).not.toHaveBeenCalledWith(expect.stringContaining('vite.config.mjs'), expect.anything());
+    });
+
+    test('converts Obsidian image embeds into copied assets while preserving code and diagnosing missing embeds', async () => {
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-embeds-'));
+        try {
+            fs.mkdirSync(path.join(root, 'attachments'), { recursive: true });
+            fs.writeFileSync(path.join(root, 'attachments/diagram.png'), 'image bytes');
+            const markdown = '# Architecture\n\n## Images\n\n![[diagram.png|400]]\n\n![[missing.png]]\n\n![[note.md]]\n\n`![[inline.png]]`\n\n````md\n![[fenced.png]]\n```\n![[still-fenced.png]]\n````';
+            const app = createApp(markdown);
+            app.metadataCache = { getFirstLinkpathDest: jest.fn((link: string) => link === 'diagram.png' ? { path: 'attachments/diagram.png' } : null) };
+            mockGetVaultBasePath.mockReturnValue(root);
+            mockSafeRequire.mockImplementation((name: string) => require(name));
+            const progress = jest.fn();
+            await prepareSlidevExportSource(app, createFile('docs/architecture.md'), config, {}, progress);
+            const deck = app.vault.adapter.write.mock.calls.find(([name]: [string]) => name.endsWith('.slidev.md'))[1];
+            expect(deck).toContain('![](./_notemd-embeds/attachments/diagram.png)');
+            expect(fs.readFileSync(path.join(root, 'export/_slidev-sources/_notemd-embeds/attachments/diagram.png'), 'utf8')).toBe('image bytes');
+            expect(deck).toContain('Embed unavailable: missing.png');
+            expect(deck).toContain('Embed unavailable: note.md');
+            expect(deck).toContain('`![[inline.png]]`');
+            expect(deck).toContain('![[still-fenced.png]]');
+            expect(progress).toHaveBeenCalledWith('slidev-source', expect.stringContaining('missing.png'));
+            expect(app.vault.read).toHaveBeenCalledTimes(1);
+        } finally {
+            fs.rmSync(root, { recursive: true, force: true });
+        }
+    });
+
+    test.each(['direct', 'outline'] as const)('resolves filesystem embeds in existing decks through %s export and rejects escaped vault paths', async route => {
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-embed-fallback-'));
+        try {
+            fs.mkdirSync(path.join(root, 'docs'), { recursive: true });
+            fs.writeFileSync(path.join(root, 'docs/local.png'), 'local');
+            fs.writeFileSync(path.join(root, 'root image.png'), 'root');
+            const app = createApp('---\ntheme: default\n---\n# Images\n\n![[local.png]]\n![[root image.png|Root]]\n![[../../outside.png]]');
+            mockGetVaultBasePath.mockReturnValue(root);
+            mockSafeRequire.mockImplementation((name: string) => require(name));
+            const file = createFile('docs/deck.md');
+            if (route === 'direct') await prepareSlidevExportSource(app, file, config);
+            else await prepareSlidevExportSourceFromOutline(app, file, '# Outline', config);
+            const deck = app.vault.adapter.write.mock.calls.find(([name]: [string]) => name.endsWith('.slidev.md'))[1];
+            expect(deck).toContain('![](./_notemd-embeds/docs/local.png)');
+            expect(deck).toContain('![Root](./_notemd-embeds/root%20image.png)');
+            expect(deck).toContain('Embed unavailable: ../../outside.png');
+            expect(fs.readFileSync(path.join(root, 'export/_slidev-sources/deck/_notemd-embeds/root image.png'), 'utf8')).toBe('root');
+        } finally {
+            fs.rmSync(root, { recursive: true, force: true });
+        }
+    });
+
     beforeEach(() => {
         jest.clearAllMocks();
         delete process.env.NOTEMD_SLIDEV_SKILL_DIR;

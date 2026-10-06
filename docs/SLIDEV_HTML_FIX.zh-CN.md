@@ -30,7 +30,7 @@ npm run verify:slidev-export -- --format html --html-mode standalone --require-n
 当前安装命令：
 
 ```bash
-npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-2/slidev-cli-notemd-standalone-v52.16.0-2.tgz @slidev/theme-default
 ```
 
 2026-06-21 已用 `npm pack --dry-run` 和干净 npm 项目的 `npm install` 做过烟测；安装后的 `slidev build --help` 暴露 `--standalone-bundle`。

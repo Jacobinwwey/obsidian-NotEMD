@@ -1,4 +1,5 @@
 import { isDesktopApp } from '../slideExport/platformUtils';
+import { SLIDE_EXPORT_FORMATS, normalizeSlideExportFormats } from '../slideExport/slideExportFormats';
 import { App, ButtonComponent, PluginSettingTab, Setting, Notice, setIcon, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import {
@@ -3945,23 +3946,22 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.display();
                     }));
 
-            this.createCatalogSetting(containerEl)
-                .setName(i18n.slideExport.defaultFormatName)
-                .setDesc(i18n.slideExport.defaultFormatDesc)
-                .addDropdown(dropdown => dropdown
-                    .addOption('html', 'HTML')
-                    .addOption('pdf', 'PDF')
-                    .addOption('png', 'PNG')
-                    .addOption('pptx', 'PPTX')
-                    .addOption('mp4', 'MP4')
-                    .setValue(this.plugin.settings.slideExportDefaultFormat)
-                    .onChange(async (value) => {
-                        this.plugin.settings.slideExportDefaultFormat = value as any;
+            const selectedFormats = normalizeSlideExportFormats(this.plugin.settings.slideExportFormats, this.plugin.settings.slideExportDefaultFormat);
+            for (const format of SLIDE_EXPORT_FORMATS) {
+                this.createCatalogSetting(containerEl)
+                    .setName(`${i18n.slideExport.defaultFormatName}: ${format.toUpperCase()}`)
+                    .setDesc(i18n.slideExport.defaultFormatDesc)
+                    .addToggle(toggle => toggle.setValue(selectedFormats.includes(format)).onChange(async enabled => {
+                        const selection = enabled ? [...selectedFormats, format] : selectedFormats.filter(selected => selected !== format);
+                        const formats = normalizeSlideExportFormats(selection, this.plugin.settings.slideExportDefaultFormat);
+                        this.plugin.settings.slideExportFormats = formats;
+                        this.plugin.settings.slideExportDefaultFormat = formats[0];
                         await this.plugin.saveSettings();
                         this.display();
                     }));
+            }
 
-            if (this.plugin.settings.slideExportDefaultFormat === 'html') {
+            if (selectedFormats.includes('html')) {
                 this.createCatalogSetting(containerEl)
                     .setName(i18n.slideExport.htmlModeName)
                     .setDesc(i18n.slideExport.htmlModeDesc)
@@ -3975,7 +3975,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }));
             }
 
-            if (this.plugin.settings.slideExportDefaultFormat === 'pptx') {
+            if (selectedFormats.includes('pptx')) {
                 this.addPptxFontFaceSetting(
                     containerEl,
                     'slideExportPptxLatinFontFace',

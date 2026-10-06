@@ -10,6 +10,7 @@ type WelcomeReleaseNoteCatalog = Record<string, WelcomeReleaseNoteEntry[]>;
 const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
+    {"version":"1.9.13","highlights":["Successful export logs start collapsed. Lock each preview to select SVG/HTML text without moving or zooming. PNG/PDF previews and multi-format presentation exports are repaired. Windows browser installation verifies launch and allows time for cold starts. Slidev uses the repaired Jacobinwwey fork.","Install matching main.js, manifest.json and styles.css from 1.9.13, then reload. Existing notes and settings are preserved. Replace the older Slidev fork package through the export environment installer."]},
     {"version":"1.9.12","highlights":["When there are no errors, the entire diagnostic panel is collapsed by default, leaving only its title and severity counts visible. Errors open the panel automatically. Expand the panel and its tag groups to read every message and suggestion. No diagnostic records are removed.","Only error groups open automatically; warning and information groups stay collapsed, even when they share a tag."]},
     {"version":"1.9.11","highlights":["Drawnix places closely related branches nearer and reduces connector overlap and crossings, preserving every node and explicit relationship. Cross-branch arrows remain static after rearrangement.","PDF export handles complex SVG selectors and inherited styles after sanitization. Missing viewBoxes are restored; oversized pages are scaled proportionally while retaining vectors.","Diagnostics are grouped by tag and collapsed by default. Expand a group to read every message and suggestion; severity counts remain visible.","Logs accumulate across task stages and preview reopening during the plugin session. Use Clear log to reset them; reloading the plugin does not preserve the transcript."]},
     {"version":"1.9.10","highlights":["Imported SVG previews now strip active content and external resources while preserving vector labels and panel styles. Mobile startup keeps desktop dependencies lazy.","Device-only providers are Vault-scoped. Explicit legacy import preserves the old list and configured providers; storage, favorites and clipboard failures are visible.","Presentation HTML uses a loopback server with shared-consumer lifecycle control. Requested PNGs and verified compatibility companions remain available; Drawnix has no fixed relation quota."]},
@@ -112,6 +113,7 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
+    {"version":"1.9.13","highlights":["成功导出的日志默认收起。锁定各预览后，可选择 SVG／HTML 文字而不移动或缩放图形。修复 PNG／PDF 预览及多格式演示导出。Windows 浏览器安装实际验证启动，并为冷启动预留时间。Slidev 使用修复后的 Jacobinwwey fork。","安装 1.9.13 配套的 main.js、manifest.json 和 styles.css 后重载，保留现有笔记及设置。通过导出环境安装器替换旧 Slidev fork 包。"]},
     {"version":"1.9.12","highlights":["没有错误时，整个诊断区域默认收起，仅显示标题和严重级别计数；有错误时默认展开。展开区域及其中的标签分组，即可查看每条消息和建议，不删除任何诊断记录。","仅错误分组自动展开，警告和信息分组仍收起；同一标签下的不同级别也分开展示。"]},
     {"version":"1.9.11","highlights":["Drawnix 将关联紧密的分支放得更近，减少连接线重叠与交叉，同时保留全部节点和明确关系。跨分支箭头重排后仍有静态坐标限制。","PDF 导出在净化 SVG 后正确处理复杂选择器与继承样式，补全缺失的 viewBox，并将超大页面等比例缩放，保留向量图形。","诊断按标签分组并默认收起。展开后可查看每条消息和建议，严重级别计数始终可见。","插件会话内的日志跨任务阶段和预览重开持续累积。使用“清空日志”重置；重新加载插件不会保留此前日志。"]},
     {"version":"1.9.10","highlights":["导入 SVG 预览移除活动内容与外部资源，保留向量文字和各面板样式；移动端启动不再提前加载桌面依赖。","仅设备 provider 按 Vault 隔离，显式旧版导入保留原列表与已有配置；存储、收藏及剪贴板失败明确报告。","演示 HTML 使用 loopback 服务器并管理共享消费者生命周期；保留请求 PNG 与已验证兼容副本，Drawnix 不设固定关系配额。"]},
@@ -214,6 +216,7 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {"version":"1.9.13","highlights":["成功匯出的紀錄預設收合。鎖定各預覽後，可選取 SVG／HTML 文字而不移動或縮放圖形。修正 PNG／PDF 預覽及多格式簡報匯出。Windows 瀏覽器安裝會實際驗證啟動，並為冷啟動預留時間。Slidev 使用修正後的 Jacobinwwey fork。","安裝 1.9.13 配套的 main.js、manifest.json 和 styles.css 後重新載入，保留現有筆記與設定。透過匯出環境安裝程式替換舊 Slidev fork 套件。"]},
     {"version":"1.9.12","highlights":["沒有錯誤時，整個診斷區域預設收合，僅顯示標題與嚴重程度計數；有錯誤時預設展開。展開區域及其中的標籤分組，即可查看每則訊息和建議，不刪除任何診斷記錄。","僅錯誤分組自動展開，警告和資訊分組仍收合；同一標籤下的不同級別也分開顯示。"]},
     {"version":"1.9.11","highlights":["Drawnix 將關聯密切的分支放得更近，減少連接線重疊與交叉，同時保留所有節點和明確關係。跨分支箭頭重新排列後仍有靜態座標限制。","PDF 匯出在淨化 SVG 後正確處理複雜選取器與繼承樣式，補全缺少的 viewBox，並將超大頁面等比例縮放，保留向量圖形。","診斷依標籤分組並預設收合。展開後可查看每則訊息和建議，嚴重程度計數始終可見。","外掛工作階段內的日誌會跨任務階段與預覽重新開啟持續累積。使用「清空日誌」重設；重新載入外掛不會保留先前日誌。"]},
     {"version":"1.9.10","highlights":["匯入 SVG 預覽移除活動內容與外部資源，保留向量文字和各面板樣式；行動端啟動不再提前載入桌面依賴。","僅裝置 provider 依 Vault 隔離，明確匯入舊版列表並保留原列表與既有設定；儲存、收藏及剪貼簿失敗會顯示錯誤。","簡報 HTML 使用 loopback 伺服器並管理共用使用者生命週期；保留要求的 PNG 與已驗證相容副本，Drawnix 不設固定關係配額。"]},

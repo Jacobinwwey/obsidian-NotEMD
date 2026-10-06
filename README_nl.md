@@ -26,7 +26,16 @@ Elke diagramweergave heeft onafhankelijke zoom, verschuiving, passend maken en w
 | Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
 | Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
 
-**Versie:** 1.9.12
+**Versie:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Voorbeeldbediening en presentatie-export
+
+Logboeken van geslaagde exports zijn standaard ingeklapt. Vergrendel elk voorbeeld om SVG/HTML-tekst te selecteren zonder te verschuiven of te zoomen. PNG/PDF-voorbeelden en presentatie-export naar meerdere formaten zijn hersteld. De browserinstallatie op Windows controleert het daadwerkelijk opstarten en geeft de eerste start voldoende tijd. Slidev gebruikt de herstelde fork van Jacobinwwey.
+
+Installeer main.js, manifest.json en styles.css uit versie 1.9.13 en laad de plug-in opnieuw. Bestaande notities en instellingen blijven behouden. Vervang het oude Slidev-forkpakket via het installatieprogramma voor de exportomgeving.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -751,7 +760,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.12 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.13 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 

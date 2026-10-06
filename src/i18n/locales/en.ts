@@ -1079,6 +1079,8 @@ export const STRINGS_EN = {
     previewModal: {
         zoomIn: "Zoom in",
         zoomOut: "Zoom out",
+        zoomLock: "Lock position and zoom",
+        zoomUnlock: "Unlock position and zoom",
         zoomFit: "Fit",
         zoomActual: "Actual size",
         zoomLevel: "Zoom level",

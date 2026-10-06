@@ -10,7 +10,7 @@ NoteMD 不再把直接运行 `slidev build` 视为 UI 导出按钮已经可用�
 2. 如果当前文件已经是 Slidev deck，先复制到隔离的 prepared workspace，再进行审计和导出，避免修改源文件，同时镜像 sibling Slidev support entries 和显式引用的本地资产。
 3. 加载完整 Slidev skill 目录，包括 `SKILL.md` 与 `references/*.md`。
 4. Deck 生成后应用展示 guardrails，避免大 Mermaid、表格、代码块或密集文本直接挤进单页。
-5. 本地 Slidev fork 存在时优先使用本地 fork。
+5. 必须使用 Jacobinwwey Slidev fork。在已验证的 fork 安装中，本地源码 checkout 优先于 vault／项目中的发布包。
 6. 每次构建前重建输出目录，避免旧 chunk 或旧 deck 污染结果。
 7. HTML 默认尝试原生 standalone；当 sanity check 发现 loader binding 缺失时，才进入 server-script 兼容 fallback。
 8. Playwright 默认审计完整 deck，而不是只抽样几页。
@@ -111,7 +111,7 @@ ffmpeg
 
 ```bash
 node --version
-npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-2/slidev-cli-notemd-standalone-v52.16.0-2.tgz @slidev/theme-default
 npx playwright install chromium
 sudo apt install ffmpeg
 ```
@@ -124,9 +124,10 @@ Slidev 命令解析优先级：
 2. `SLIDEV_CLI_PATH`
 3. `$HOME/slidev/packages/slidev/bin/slidev.mjs`
 4. `<vault-or-project>/node_modules/.bin/slidev`
-5. `npx -y @slidev/cli`
 
-在 Jacob 的工作站上，维护者验证报告应在 `environment.slidev.version` 中显示本地 fork 路径，或显示由 NoteMD fork release 安装出的项目级 binary。`npx -y @slidev/cli` 只是最后兜底探测路径，不是 NoteMD 推荐安装路径。registry 包和 fork 包都会报告 `@slidev/cli@52.16.0`，所以 semver 本身不是有效兼容性信号。环境检测必须运行 `slidev build --help`，并要求同时存在 `--out`、`--format` 和 `--standalone-bundle`；否则 Slidev 对 standalone-required 路径不可用。
+显式环境变量配置具有决定权。只要设置了上述任一环境变量，解析器就只检查配置路径，不会静默改用本地 checkout 或 vault 安装。如果这些路径均无法验证为 fork，应先修正或清除环境变量。安装器会拒绝无法改变实际运行时选择的 vault 安装，避免反复安装仍不可用。
+
+仅允许 Jacobinwwey Slidev fork，不再回退到官方 registry 或隐式 npx 安装。解析时检查本地 npm 安装元数据中的发布来源，或源码 checkout 的 Git origin，再检查所需构建能力。包名、版本号和帮助文字不能单独证明 fork 来源。缺失或无法验证的安装必须通过明确的 fork 发布包安装入口处理，安装后重新探测。
 
 ## Fork release 分发边界
 
@@ -135,13 +136,13 @@ UI 的安装入口必须指向 npm 可安装的 release artifact，而不是 Git
 当前 NoteMD 使用的 fork package 是：
 
 ```text
-https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz
+https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-2/slidev-cli-notemd-standalone-v52.16.0-2.tgz
 ```
 
 侧边栏复制出的安装命令是：
 
 ```bash
-npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-2/slidev-cli-notemd-standalone-v52.16.0-2.tgz @slidev/theme-default
 ```
 
 2026-06-21 的实机烟测已经证明该 release asset 会被 npm 识别为 `@slidev/cli@52.16.0`，能安装到干净 npm 项目，暴露 `slidev` binary，且 `slidev build --help` 包含 `--standalone-bundle`。NoteMD 自身的 `package.json` 必须使用这个 release tarball，而不能使用 npm registry 上的 `^52.16.0`，因为同 semver 的 registry build 不提供 native standalone bundle 选项。
@@ -312,7 +313,7 @@ Stage 13/14 把这类“不应自动修”的边界纳入生产 fixture runner�
 19. Stage 14 默认成功 fixture suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-success-fixtures/`：9 个可收敛生产 fixtures 继续全部通过，三个 expected-failure fixtures 不进入默认成功套件。
 20. Stage 14 真实 `architecture.zh-CN.md` strict standalone 输出归档到 `/home/jacob/slidev-export-review/2026-06-20-stage14-real/`；其中 `architecture.zh-CN.stage14.slidev.md` 是可直接审查的输出 deck，`architecture.zh-CN-slides/index-standalone.html` 是 native standalone 输出。报告为 `ok = true`，使用本地 Slidev fork 与 52 个 skill references，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`。
 21. Stage 15 真实 `architecture.zh-CN.md` strict standalone 输出归档到 `/home/jacob/slidev-export-review/2026-06-21-stage15-final-rerun/`；其中 `architecture.stage15.slidev.zh-CN.md` 是可直接审查的输出 deck，`architecture.zh-CN-slides/index-standalone.html` 是 native standalone 输出。报告为 `ok = true`，使用本地 Slidev fork 与 52 个 skill references，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，且 native standalone 被接受。repo 内保留可审查的 Markdown deck：`docs/slidev/architecture.stage15.slidev.zh-CN.md`；生成 HTML/assets/screenshots 不进入提交。
-22. Slidev fork release asset `slidev-cli-notemd-standalone-v52.16.0-1.tgz` 已在 GitHub release `notemd-standalone-v52.16.0-1` 下发布，并通过 `npm pack --dry-run` 与干净 npm 项目安装烟测；这是 UI 安装命令的稳定分发边界。
+22. Slidev fork release asset `slidev-cli-notemd-standalone-v52.16.0-2.tgz` 已在 GitHub release `notemd-standalone-v52.16.0-2` 下发布，并通过 `npm pack --dry-run` 与干净 npm 项目安装烟测；这是 UI 安装命令的稳定分发边界。
 23. 可编辑 PPTX 导出已经接入 UI 格式选择、环境检测、产品导出命令和维护者 verifier；该路径复用渲染收敛后的 HTML，再生成 PresentationML `.pptx` 和可编辑性报告。
 24. 2026-06-21 的真实 PPTX 验收归档在 `/home/jacob/slidev-export-review/2026-06-21-editable-pptx-real/`，包含 `architecture.zh-CN.pptx`、`architecture.zh-CN.pptx.report.json`、`architecture.zh-CN.slidev.md`、standalone HTML 目录与 `acceptance-summary.json`。
 25. 2026-06-21 的 PPTX/PNG 逐页视觉对比已接入 verifier。真实 `architecture.zh-CN.md` report-mode run 返回 `ok = true`，但 visual quality gate 未通过：`meanRmse = 0.15322961111111114`，`maxRmse = 0.260447`，最差页为 21、19、24、20、16、17、18、10、22、15、13、12。产物位于 `docs/export/test-slidev-pptx-visual-diff/`，由 `.gitignore` 覆盖。

@@ -26,7 +26,16 @@ Minden diagramelőnézet külön nagyítási, mozgatási, illesztési és eredet
 | Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
 | Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
 
-**Verzió:** 1.9.12
+**Verzió:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Előnézeti vezérlők és prezentációexport
+
+A sikeres exportálások naplói alapértelmezés szerint össze vannak csukva. Zárolja az egyes előnézeteket, hogy mozgatás vagy nagyítás nélkül jelölhessen ki SVG/HTML-szöveget. Javítottuk a PNG/PDF-előnézeteket és a többformátumú prezentációexportot. A Windows böngészőtelepítője ellenőrzi a tényleges indítást, és időt hagy az első indulásra. A Slidev a Jacobinwwey javított forkját használja.
+
+Telepítse az 1.9.13 verzióhoz tartozó main.js, manifest.json és styles.css fájlokat, majd töltse újra a bővítményt. A meglévő jegyzetek és beállítások megmaradnak. A régi Slidev-forkcsomagot az exportkörnyezet telepítőjével cserélje le.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -748,7 +757,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.12 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.13 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->

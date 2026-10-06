@@ -21,3 +21,5 @@ export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportS
 export { exportSlidevPptxFromHtml } from './pptxExporter';
 export { convergeSlidevDeckLayout } from './slidevLayoutWorkflow';
 export { exportVideoMp4, getFfmpegInstallInstructions } from './videoExporter';
+export { exportPreparedSlidevFormats } from './slideExportBatch';
+export { normalizeSlideExportFormats } from './slideExportFormats';

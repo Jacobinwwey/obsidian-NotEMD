@@ -26,7 +26,16 @@
 | Προγραμματιστής | [Οδηγός ανάπτυξης](https://jacobinwwey.github.io/obsidian-NotEMD/el/docs/developers/overview) | Μεταγλώττιση, δοκιμή και επέκταση υπαρχόντων συμβολαίων |
 | Πράκτορας | [Οδηγός πρακτόρων](https://jacobinwwey.github.io/obsidian-NotEMD/el/docs/agents/overview) | Εύρεση των τεσσάρων υποστηριζόμενων εντολών εξαγωγής |
 
-**Έκδοση:** 1.9.12
+**Έκδοση:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Έλεγχοι προεπισκόπησης και εξαγωγή παρουσιάσεων
+
+Τα αρχεία καταγραφής επιτυχημένων εξαγωγών εμφανίζονται αρχικά συμπτυγμένα. Κλειδώστε κάθε προεπισκόπηση για να επιλέγετε κείμενο SVG/HTML χωρίς μετακίνηση ή ζουμ. Διορθώθηκαν οι προεπισκοπήσεις PNG/PDF και η εξαγωγή παρουσιάσεων σε πολλές μορφές. Η εγκατάσταση του προγράμματος περιήγησης στα Windows ελέγχει την πραγματική εκκίνηση και προβλέπει χρόνο για την πρώτη εκκίνηση. Το Slidev χρησιμοποιεί το διορθωμένο fork του Jacobinwwey.
+
+Εγκαταστήστε τα αντίστοιχα main.js, manifest.json και styles.css της έκδοσης 1.9.13 και επαναφορτώστε το πρόσθετο. Οι υπάρχουσες σημειώσεις και ρυθμίσεις διατηρούνται. Αντικαταστήστε το παλιό πακέτο του fork Slidev μέσω του προγράμματος εγκατάστασης του περιβάλλοντος εξαγωγής.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -748,7 +757,7 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
 ---
 
 
-*Notemd v1.9.12 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
+*Notemd v1.9.13 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
 
 
 <!-- repo-chronicle:start -->

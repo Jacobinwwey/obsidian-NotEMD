@@ -4,7 +4,10 @@ import * as path from 'path';
 import { convergeSlidevDeckLayout } from '../slideExport/slidevLayoutWorkflow';
 import { exportSlidevHtmlWithOutcome } from '../slideExport/slidevExporter';
 import { startLocalServer, stopLocalServer } from '../slideExport/localServer';
-import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from '../slideExport/platformUtils';
+import { getVaultBasePath } from '../slideExport/platformUtils';
+import { loadSlideExportChromium } from '../slideExport/playwrightRuntime';
+
+jest.mock('../slideExport/playwrightRuntime');
 import {
 	analyzeRenderedSlideMeasurement,
 	countSlideDeckSlides,
@@ -38,8 +41,7 @@ const mockExportSlidevHtmlWithOutcome = exportSlidevHtmlWithOutcome as jest.Mock
 const mockStartLocalServer = startLocalServer as jest.MockedFunction<typeof startLocalServer>;
 const mockStopLocalServer = stopLocalServer as jest.MockedFunction<typeof stopLocalServer>;
 const mockGetVaultBasePath = getVaultBasePath as jest.MockedFunction<typeof getVaultBasePath>;
-const mockResolvePlaywrightBrowsersPath = resolvePlaywrightBrowsersPath as jest.MockedFunction<typeof resolvePlaywrightBrowsersPath>;
-const mockSafeRequire = safeRequire as jest.MockedFunction<typeof safeRequire>;
+const mockLoadChromium = jest.mocked(loadSlideExportChromium);
 const mockAnalyzeRenderedSlideMeasurement = analyzeRenderedSlideMeasurement as jest.MockedFunction<typeof analyzeRenderedSlideMeasurement>;
 const mockCountSlideDeckSlides = countSlideDeckSlides as jest.MockedFunction<typeof countSlideDeckSlides>;
 const mockPatchDeckWithLayoutAudit = patchDeckWithLayoutAudit as jest.MockedFunction<typeof patchDeckWithLayoutAudit>;
@@ -95,7 +97,7 @@ describe('slidevLayoutWorkflow', () => {
 	test('returns the initial HTML export when the Playwright runtime is unavailable', async () => {
 		mockGetVaultBasePath.mockReturnValue('/vault');
 		mockExportSlidevHtmlWithOutcome.mockResolvedValue(createHtmlOutcome('export/demo/index-standalone.html'));
-		mockSafeRequire.mockReturnValue(null);
+		mockLoadChromium.mockReturnValue(null);
 
 		const result = await convergeSlidevDeckLayout(
 			{} as any,
@@ -136,7 +138,6 @@ describe('slidevLayoutWorkflow', () => {
 
 		mockGetVaultBasePath.mockReturnValue(vaultRoot);
 		mockExportSlidevHtmlWithOutcome.mockResolvedValue(createHtmlOutcome('export/demo/index.html', 'server-script-fallback'));
-		mockResolvePlaywrightBrowsersPath.mockReturnValue('/home/user/.cache/ms-playwright');
 		mockCountSlideDeckSlides.mockReturnValue(1);
 		mockStartLocalServer.mockResolvedValue(8765);
 		mockAnalyzeRenderedSlideMeasurement
@@ -202,16 +203,7 @@ describe('slidevLayoutWorkflow', () => {
 			newPage: jest.fn().mockResolvedValue(page),
 			close: jest.fn(),
 		};
-		mockSafeRequire.mockImplementation(moduleName => {
-			if (moduleName === 'playwright') {
-				return {
-					chromium: {
-						launch: jest.fn().mockResolvedValue(browser),
-					},
-				};
-			}
-			return null;
-		});
+		mockLoadChromium.mockReturnValue({ chromium: { launch: jest.fn().mockResolvedValue(browser) } });
 
 		const result = await convergeSlidevDeckLayout(
 			{} as any,
@@ -260,6 +252,7 @@ describe('slidevLayoutWorkflow', () => {
 		expect(page.waitForFunction).toHaveBeenCalled();
 		expect(mockStartLocalServer).toHaveBeenCalled();
 		expect(mockStopLocalServer).toHaveBeenCalled();
-		expect(process.env.PLAYWRIGHT_BROWSERS_PATH).toBe('/home/user/.cache/ms-playwright');
+		expect(mockLoadChromium).toHaveBeenCalledWith(vaultRoot);
+		expect(process.env.PLAYWRIGHT_BROWSERS_PATH).toBeUndefined();
 	});
 });

@@ -26,7 +26,16 @@
 | مطور | [دليل المطور](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/developers/overview) | بناء العقود الحالية واختبارها وتوسيعها |
 | وكيل | [دليل الوكلاء](https://jacobinwwey.github.io/obsidian-NotEMD/ar/docs/agents/overview) | اكتشاف أوامر التصدير الأربعة المدعومة |
 
-**الإصدار:** 1.9.12
+**الإصدار:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — عناصر التحكم في المعاينة وتصدير العروض
+
+تكون سجلات التصدير الناجح مطوية افتراضياً. اقفل كل معاينة لتحديد نص SVG/HTML دون تحريك الرسم أو تكبيره. أُصلحت معاينات PNG/PDF وتصدير العروض إلى عدة صيغ. يتحقق تثبيت المتصفح على Windows من تشغيله فعلياً ويتيح وقتاً لبدء التشغيل الأول. يستخدم Slidev نسخة Jacobinwwey المتفرعة بعد إصلاحها.
+
+ثبّت ملفات main.js وmanifest.json وstyles.css المتطابقة من الإصدار 1.9.13 ثم أعد تحميل الإضافة. تبقى الملاحظات والإعدادات الحالية محفوظة. استبدل حزمة Slidev المتفرعة القديمة عبر مثبّت بيئة التصدير.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -760,7 +769,7 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
 ---
 
 
-*Notemd v1.9.12 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
+*Notemd v1.9.13 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
 
 
 <!-- repo-chronicle:start -->

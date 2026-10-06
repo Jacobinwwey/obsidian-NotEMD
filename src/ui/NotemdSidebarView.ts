@@ -63,7 +63,7 @@ interface ApiActivityRequestRecord {
 const API_ACTIVITY_RECENT_LIMIT = 6;
 const API_ACTIVITY_HISTORY_LIMIT = 20;
 const API_ACTIVITY_VISIBLE_HISTORY_LIMIT = 6;
-const SLIDE_EXPORT_FORMATS: Array<NotemdSettings['slideExportDefaultFormat']> = ['html', 'pdf', 'png', 'pptx', 'mp4'];
+import { SLIDE_EXPORT_FORMATS, normalizeSlideExportFormats } from '../slideExport/slideExportFormats';
 
 const ACTION_CATEGORY_CONFIG: Record<ActionCategory, { openByDefault: boolean }> = {
     core: { openByDefault: true },
@@ -1221,20 +1221,22 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         });
 
         const selector = row.createEl('select', { cls: 'notemd-slide-export-format-select' }) as HTMLSelectElement;
+        selector.multiple = true;
+        selector.size = SLIDE_EXPORT_FORMATS.length;
         selector.title = i18n.slideExport.defaultFormatDesc;
+        selector.setAttribute('aria-label', i18n.slideExport.defaultFormatName);
+        const currentFormats = normalizeSlideExportFormats(this.plugin.settings.slideExportFormats, this.plugin.settings.slideExportDefaultFormat);
         SLIDE_EXPORT_FORMATS.forEach(format => {
             const option = selector.createEl('option', { text: format.toUpperCase() }) as HTMLOptionElement;
             option.value = format;
+            option.selected = currentFormats.includes(format);
         });
 
-        const currentFormat = this.plugin.settings.slideExportDefaultFormat;
-        selector.value = SLIDE_EXPORT_FORMATS.includes(currentFormat) ? currentFormat : 'html';
         selector.onchange = async () => {
-            const selectedFormat = selector.value as NotemdSettings['slideExportDefaultFormat'];
-            if (!SLIDE_EXPORT_FORMATS.includes(selectedFormat)) {
-                return;
-            }
-            this.plugin.settings.slideExportDefaultFormat = selectedFormat;
+            const formats = normalizeSlideExportFormats(Array.from(selector.selectedOptions, option => option.value), this.plugin.settings.slideExportDefaultFormat);
+            this.plugin.settings.slideExportFormats = formats;
+            this.plugin.settings.slideExportDefaultFormat = formats[0];
+            Array.from(selector.options).forEach(option => { option.selected = formats.includes(option.value as NotemdSettings['slideExportDefaultFormat']); });
             await this.plugin.saveSettings();
         };
 
@@ -1640,22 +1642,25 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         try {
             const { installSlidevForVault, autoInstallPlaywright, probeEnvironment, getVaultBasePath } = await import('../slideExport');
             const vaultRoot = getVaultBasePath(this.app);
+            if (!vaultRoot) {
+                throw new Error('Vault filesystem path is unavailable; open a local vault before installing export tools.');
+            }
             let result;
             if (tool === 'slidev') {
-                if (!vaultRoot) {
-                    throw new Error('Vault filesystem path is unavailable; open a local vault before installing the NoteMD Slidev fork.');
-                }
                 result = await installSlidevForVault(vaultRoot, (phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase));
             } else {
-                result = await autoInstallPlaywright((phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase));
+                result = await autoInstallPlaywright((phase, detail) => reporter.log(detail ? `${phase}: ${detail}` : phase), vaultRoot);
             }
             if (result.exitCode !== 0) {
                 throw new Error(result.stderr || result.error?.message || i18n.common.unknownError);
             }
-            reporter.log(i18n.slideExport.installComplete);
             const report = await probeEnvironment(vaultRoot ? [vaultRoot] : []);
             this.renderSlideExportEnvironmentReport(report);
             this.logSlideExportEnvironmentSummary(report);
+            if (!report[tool].installed) {
+                throw new Error(report[tool].error || i18n.common.unknownError);
+            }
+            reporter.log(i18n.slideExport.installComplete);
             this.updateStatus(i18n.slideExport.environmentCheckComplete, 100);
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);

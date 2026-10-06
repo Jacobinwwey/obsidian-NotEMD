@@ -26,7 +26,16 @@ Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích th�
 | Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
 | Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
 
-**Phiên bản:** 1.9.12
+**Phiên bản:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Điều khiển bản xem trước và xuất bài trình chiếu
+
+Nhật ký xuất thành công được thu gọn mặc định. Khóa từng bản xem trước để chọn văn bản SVG/HTML mà không di chuyển hay thu phóng. Đã sửa bản xem trước PNG/PDF và tính năng xuất bài trình chiếu sang nhiều định dạng. Trên Windows, trình cài đặt trình duyệt kiểm tra việc khởi chạy thực tế và dành thời gian cho lần khởi động đầu tiên. Slidev sử dụng bản fork đã sửa của Jacobinwwey.
+
+Cài đặt các tệp main.js, manifest.json và styles.css đồng bộ của phiên bản 1.9.13 rồi tải lại tiện ích. Ghi chú và cài đặt hiện có được giữ nguyên. Thay gói fork Slidev cũ bằng trình cài đặt môi trường xuất.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -752,7 +761,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.12 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.13 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 

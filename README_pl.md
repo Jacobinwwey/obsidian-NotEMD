@@ -26,7 +26,16 @@ Każdy podgląd ma niezależne powiększenie, przesuwanie, dopasowanie i rozmiar
 | Programista | [Przewodnik programisty](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/developers/overview) | Buduj, testuj i rozszerzaj istniejące kontrakty |
 | Agent | [Przewodnik agenta](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/agents/overview) | Poznaj cztery obsługiwane polecenia eksportu |
 
-**Wersja:** 1.9.12
+**Wersja:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Sterowanie podglądem i eksport prezentacji
+
+Dzienniki udanego eksportu są domyślnie zwinięte. Zablokuj każdy podgląd, aby zaznaczać tekst SVG/HTML bez przesuwania i powiększania. Naprawiono podgląd PNG/PDF i eksport prezentacji do wielu formatów. Instalacja przeglądarki w Windows sprawdza jej rzeczywiste uruchomienie i zapewnia czas na pierwszy start. Slidev używa poprawionego forka Jacobinwwey.
+
+Zainstaluj zgodne pliki main.js, manifest.json i styles.css z wersji 1.9.13, a następnie przeładuj wtyczkę. Dotychczasowe notatki i ustawienia zostają zachowane. Zastąp stary pakiet forka Slidev za pomocą instalatora środowiska eksportu.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -751,7 +760,7 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.12 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.9.13 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 
 <!-- repo-chronicle:start -->

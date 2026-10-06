@@ -26,7 +26,16 @@
 | מפתח | [מדריך פיתוח](https://jacobinwwey.github.io/obsidian-NotEMD/he/docs/developers/overview) | בנייה, בדיקה והרחבת החוזים הקיימים |
 | סוכן | [מדריך סוכנים](https://jacobinwwey.github.io/obsidian-NotEMD/he/docs/agents/overview) | גילוי ארבע פקודות הייצוא הנתמכות |
 
-**גרסה:** 1.9.12
+**גרסה:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — פקדי תצוגה מקדימה וייצוא מצגות
+
+יומני ייצוא שהצליח מופיעים מכווצים כברירת מחדל. נעלו כל תצוגה מקדימה כדי לבחור טקסט SVG/HTML בלי להזיז או לשנות את גודל התצוגה. תוקנו תצוגות PNG/PDF וייצוא מצגות לכמה פורמטים. התקנת הדפדפן ב-Windows בודקת הפעלה בפועל ומאפשרת זמן להפעלה הראשונה. Slidev משתמש בפיצול המתוקן של Jacobinwwey.
+
+התקינו את main.js, manifest.json ו-styles.css התואמים לגרסה 1.9.13 וטענו מחדש את התוסף. ההערות וההגדרות הקיימות נשמרות. החליפו את חבילת פיצול Slidev הישנה באמצעות מתקין סביבת הייצוא.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -748,7 +757,7 @@ Notemd מתוחזק באופן עצמאי. אנו מודים לפרויקטים 
 ---
 
 
-*Notemd v1.9.12 - שפרו את גרף הידע שלכם ב-Obsidian בעזרת AI.*
+*Notemd v1.9.13 - שפרו את גרף הידע שלכם ב-Obsidian בעזרת AI.*
 
 
 <!-- repo-chronicle:start -->

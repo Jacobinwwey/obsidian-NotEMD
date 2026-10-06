@@ -277,6 +277,27 @@ async function clickPanelExportMenuItem(modal: any, panelIndex: number, itemInde
 }
 
 describe('diagram preview modal', () => {
+    test.each([
+        ['completed', 'completed', false],
+        ['partial', 'completed', true],
+        ['partial', 'pending', true],
+        ['partial', 'failed', true],
+        ['cancelled', 'cancelled', true]
+    ] as const)('export disclosure for %s run with %s output is open=%s', (status, outputStatus, open) => {
+        const run: exportRuns.DiagramExportRun = {
+            status, sourcePath: 'Notes/Topic.md', manifestPath: 'Notes/run/run.notemd-diagram.json',
+            plan: { typeId: 'flowchart', target: 'mermaid', outputs: ['svg'], inactiveOutputs: [], usedDefaultOutput: false },
+            outputs: [{ id: 'svg', path: 'Notes/run/diagram.svg', status: outputStatus, files: [] }]
+        };
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en', { exportRun: run }));
+        modal.onOpen();
+        const panel = findByClass(modal.contentEl, 'notemd-diagram-export-run')!;
+        expect(panel.tag).toBe('details');
+        expect((panel as unknown as HTMLDetailsElement).open).toBe(open);
+        expect(collectByTag(panel, 'summary')).toHaveLength(1);
+        expect(collectText(panel).join(' ')).toContain(run.manifestPath);
+    });
+
     test('keeps successful exports visible when recording their history fails', async () => {
         const run: exportRuns.DiagramExportRun = {
             status: 'partial', sourcePath: 'Notes/Topic.md', manifestPath: 'Notes/run/run.notemd-diagram.json',
@@ -292,11 +313,26 @@ describe('diagram preview modal', () => {
             modal.onOpen();
             await collectButtons(modal.contentEl).find(button => button.text === 'Retry unfinished exports')!.onclick?.();
             const panel = findByClass(modal.contentEl, 'notemd-diagram-export-run')!;
+            expect((panel as unknown as HTMLDetailsElement).open).toBe(true);
             expect(collectText(panel).join(' ')).toContain('history index unavailable');
             expect(collectText(panel).join(' ')).toContain('1/1');
             expect(collectByTag(panel, 'a').some(link => link.text === saved.outputs[0].path)).toBe(true);
             expect(collectButtons(panel).some(button => button.text === 'Retry unfinished exports')).toBe(false);
         } finally { retry.mockRestore(); }
+    });
+
+    test.each(['warning', 'error'] as const)('completed export disclosure respects %s artifact diagnostics', severity => {
+        const run: exportRuns.DiagramExportRun = {
+            status: 'completed', sourcePath: 'Notes/Topic.md', manifestPath: 'Notes/run/run.notemd-diagram.json',
+            plan: { typeId: 'flowchart', target: 'mermaid', outputs: ['svg'], inactiveOutputs: [], usedDefaultOutput: false },
+            outputs: [{ id: 'svg', path: 'Notes/run/diagram.svg', status: 'completed', files: [] }]
+        };
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            diagnostics: [{ severity, kind: 'render-svg-text-missing', message: 'Diagnostic evidence' }]
+        }), 'en', { exportRun: run }));
+        modal.onOpen();
+        const panel = findByClass(modal.contentEl, 'notemd-diagram-export-run')!;
+        expect((panel as unknown as HTMLDetailsElement).open).toBe(severity === 'error');
     });
 
     test('shows partial delivery and retries the saved run rather than generating another diagram', async () => {
@@ -305,7 +341,7 @@ describe('diagram preview modal', () => {
             plan: { typeId: 'flowchart', target: 'mermaid', outputs: ['svg', 'pdf'], inactiveOutputs: [{ id: 'source:drawnix', reason: 'incompatible-type' }], usedDefaultOutput: false },
             outputs: [{ id: 'svg', path: 'Notes/run/diagram.svg', status: 'completed', files: [] }, { id: 'pdf', path: 'Notes/run/diagram.pdf', status: 'failed', error: 'PDF failed', files: [] }]
         };
-        const saved: exportRuns.DiagramExportRun = { ...run, outputs: run.outputs.map(output => ({ ...output, status: 'completed' })) };
+        const saved: exportRuns.DiagramExportRun = { ...run, status: 'completed', outputs: run.outputs.map(output => ({ ...output, status: 'completed', error: undefined })) };
         const retry = jest.spyOn(exportRuns, 'retryDiagramExportRun').mockResolvedValue(saved);
         const record = jest.fn(async () => undefined);
         const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md'), 'en', { exportRun: run, onExportRunSaved: record }));

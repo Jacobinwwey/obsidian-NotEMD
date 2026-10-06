@@ -218,6 +218,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Slide Export Defaults
     enableSlideExport: false,
     slideExportDefaultFormat: 'html',
+    slideExportFormats: undefined,
     slideExportOutputSubfolder: 'slidev-export',
     slideExportWithClicks: false,
     slideExportFfmpegFps: 1,

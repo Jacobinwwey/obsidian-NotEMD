@@ -1151,6 +1151,27 @@
     user-select: none;
 }
 
+.notemd-diagram-zoom-viewport.is-locked {
+    overflow: hidden;
+    touch-action: none;
+    cursor: text;
+}
+
+.notemd-diagram-zoom-viewport.is-locked .notemd-diagram-zoom-content,
+.notemd-diagram-zoom-viewport.is-locked .notemd-diagram-zoom-content * {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
+.notemd-diagram-zoom-lock[aria-pressed="true"] {
+    background: var(--background-modifier-hover);
+    color: var(--text-accent);
+}
+
+.notemd-diagram-export-run > summary {
+    cursor: pointer;
+}
+
 .notemd-diagram-zoom-stage {
     position: relative;
 }

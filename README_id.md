@@ -26,7 +26,16 @@ Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang 
 | Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
 | Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
 
-**Versi:** 1.9.12
+**Versi:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Kontrol pratinjau dan ekspor presentasi
+
+Log ekspor yang berhasil diciutkan secara bawaan. Kunci setiap pratinjau untuk memilih teks SVG/HTML tanpa menggeser atau memperbesar. Pratinjau PNG/PDF dan ekspor presentasi ke beberapa format telah diperbaiki. Pemasangan peramban di Windows memeriksa peluncuran sebenarnya dan menyediakan waktu untuk peluncuran pertama. Slidev memakai fork Jacobinwwey yang telah diperbaiki.
+
+Pasang main.js, manifest.json, dan styles.css yang sesuai dari versi 1.9.13, lalu muat ulang plugin. Catatan dan pengaturan yang ada tetap tersimpan. Ganti paket fork Slidev lama melalui pemasang lingkungan ekspor.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -760,7 +769,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.12 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.13 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->

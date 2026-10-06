@@ -26,7 +26,16 @@ Setiap pratonton rajah mempunyai zum, anjakan, muat dan saiz sebenar yang berasi
 | Pembangun | [Panduan pembangun](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/developers/overview) | Bina, uji dan perluaskan kontrak sedia ada |
 | Ejen | [Panduan ejen](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/agents/overview) | Temui empat perintah eksport yang disokong |
 
-**Versi:** 1.9.12
+**Versi:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Kawalan pratonton dan eksport pembentangan
+
+Log eksport yang berjaya diruntuhkan secara lalai. Kunci setiap pratonton untuk memilih teks SVG/HTML tanpa mengalih atau mengezum. Pratonton PNG/PDF dan eksport pembentangan dalam pelbagai format telah dibaiki. Pemasangan pelayar pada Windows mengesahkan pelancaran sebenar dan memberi masa untuk pelancaran pertama. Slidev menggunakan fork Jacobinwwey yang telah dibaiki.
+
+Pasang main.js, manifest.json dan styles.css yang sepadan daripada versi 1.9.13, kemudian muat semula pemalam. Nota dan tetapan sedia ada dikekalkan. Gantikan pakej fork Slidev lama melalui pemasang persekitaran eksport.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -751,7 +760,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.12 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.13 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 

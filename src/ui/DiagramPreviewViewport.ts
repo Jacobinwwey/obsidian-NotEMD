@@ -4,7 +4,7 @@ const ZOOM_STEP = 1.25;
 const MAX_ZOOM = 8;
 const MIN_ZOOM = 0.005;
 
-type PreviewZoomCopy = Pick<NotemdEnglishStrings['previewModal'], 'zoomIn' | 'zoomOut' | 'zoomFit' | 'zoomActual' | 'zoomLevel' | 'zoomViewport'>;
+type PreviewZoomCopy = Pick<NotemdEnglishStrings['previewModal'], 'zoomIn' | 'zoomOut' | 'zoomFit' | 'zoomActual' | 'zoomLevel' | 'zoomViewport' | 'zoomLock' | 'zoomUnlock'>;
 
 /** Owns display geometry only. Exporters always receive the original artifact. */
 export class DiagramPreviewViewport {
@@ -15,6 +15,13 @@ export class DiagramPreviewViewport {
     private readonly readout: HTMLOutputElement;
     private readonly zoomInButton: HTMLButtonElement;
     private readonly zoomOutButton: HTMLButtonElement;
+    private readonly lockButton: HTMLButtonElement;
+    private readonly fitButton: HTMLButtonElement;
+    private readonly actualButton: HTMLButtonElement;
+    private readonly cancelDrags: Array<() => void> = [];
+    private locked = false;
+    private lockedLeft = 0;
+    private lockedTop = 0;
     private readonly cleanup: Array<() => void> = [];
     private readonly observers: Array<ResizeObserver | MutationObserver> = [];
     private sourceWidth = 1;
@@ -25,7 +32,7 @@ export class DiagramPreviewViewport {
     private destroyed = false;
     private iframe?: HTMLIFrameElement;
 
-    constructor(container: HTMLElement, copy: PreviewZoomCopy) {
+    constructor(container: HTMLElement, private readonly copy: PreviewZoomCopy) {
         const doc = container.ownerDocument;
         this.controls = doc.createElement('div');
         this.controls.className = 'notemd-diagram-zoom-controls';
@@ -43,13 +50,16 @@ export class DiagramPreviewViewport {
             return element;
         };
         this.zoomOutButton = button('−', copy.zoomOut, () => this.zoom(this.scale / ZOOM_STEP));
+        this.lockButton = button('🔓', copy.zoomLock, () => this.toggleLock());
+        this.lockButton.className = 'notemd-diagram-zoom-lock';
+        this.lockButton.setAttribute('aria-pressed', 'false');
         this.readout = doc.createElement('output');
         this.readout.setAttribute('aria-label', copy.zoomLevel);
         this.readout.setAttribute('aria-live', 'polite');
         this.controls.appendChild(this.readout);
         this.zoomInButton = button('+', copy.zoomIn, () => this.zoom(this.scale * ZOOM_STEP));
-        button(copy.zoomFit, copy.zoomFit, () => this.fit());
-        button('1:1', copy.zoomActual, () => this.zoom(1));
+        this.fitButton = button(copy.zoomFit, copy.zoomFit, () => this.fit());
+        this.actualButton = button('1:1', copy.zoomActual, () => this.zoom(1));
         this.viewport = doc.createElement('div');
         this.viewport.className = 'notemd-diagram-zoom-viewport';
         this.viewport.tabIndex = 0;
@@ -72,7 +82,7 @@ export class DiagramPreviewViewport {
     }
 
     refresh(): void {
-        if (this.destroyed) return;
+        if (this.destroyed || this.locked) return;
         const doc = this.iframe?.contentDocument;
         const svg = (doc ?? this.contentEl).querySelector('svg');
         const viewBox = svg?.getAttribute('viewBox')?.trim().split(/[\s,]+/).map(Number);
@@ -110,6 +120,12 @@ export class DiagramPreviewViewport {
         const doc = iframe.contentDocument;
         if (doc?.body) {
             this.bindNavigation(doc);
+            // Embedded previews have their own cascade; allow selection there as well as in the host SVG.
+            const selectionStyle = doc.createElement('style');
+            selectionStyle.textContent = 'body.notemd-preview-locked, body.notemd-preview-locked * { user-select: text !important; -webkit-user-select: text !important; cursor: text; } body.notemd-preview-locked { overflow: hidden; touch-action: none; }';
+            doc.head.appendChild(selectionStyle);
+            doc.body.classList.toggle('notemd-preview-locked', this.locked);
+            this.cleanup.push(() => { selectionStyle.remove(); doc.body.classList.remove('notemd-preview-locked'); });
             const win = this.contentEl.ownerDocument.defaultView;
             if (win?.MutationObserver) {
                 // Watch renderer replacement, not our own style writes.
@@ -127,6 +143,7 @@ export class DiagramPreviewViewport {
     }
 
     private fit(): void {
+        if (this.locked || this.destroyed) return;
         this.followsFit = true;
         this.refresh();
         this.viewport.scrollLeft = 0;
@@ -134,6 +151,7 @@ export class DiagramPreviewViewport {
     }
 
     private zoom(nextScale: number, anchorX = this.viewport.clientWidth / 2, anchorY = this.viewport.clientHeight / 2): void {
+        if (this.locked || this.destroyed) return;
         const left = this.contentOffsetX();
         const top = this.contentOffsetY();
         const sourceX = (this.viewport.scrollLeft + anchorX - left) / this.scale;
@@ -161,14 +179,45 @@ export class DiagramPreviewViewport {
         this.contentEl.style.transform = `translate(${this.contentOffsetX()}px, ${this.contentOffsetY()}px) scale(${this.scale})`;
         this.readout.textContent = `${Number((this.scale * 100).toFixed(1))}%`;
         this.viewport.setAttribute('data-zoom-scale', String(this.scale));
-        this.zoomInButton.disabled = this.scale >= MAX_ZOOM;
-        this.zoomOutButton.disabled = this.scale <= Math.min(MIN_ZOOM, this.fitScale);
+        this.updateButtons();
+    }
+
+    private toggleLock(): void {
+        if (this.destroyed) return;
+        this.locked = !this.locked;
+        this.cancelDrags.forEach(cancel => cancel());
+        this.lockedLeft = this.viewport.scrollLeft;
+        this.lockedTop = this.viewport.scrollTop;
+        // Unlocking resumes from the exact geometry the user selected, not a new automatic fit.
+        this.followsFit = false;
+        this.viewport.classList.toggle('is-locked', this.locked);
+        this.iframe?.contentDocument?.body.classList.toggle('notemd-preview-locked', this.locked);
+        this.lockButton.textContent = this.locked ? '🔒' : '🔓';
+        const label = this.locked ? this.copy.zoomUnlock : this.copy.zoomLock;
+        this.lockButton.title = label;
+        this.lockButton.setAttribute('aria-label', label);
+        this.lockButton.setAttribute('aria-pressed', String(this.locked));
+        this.updateButtons();
+    }
+
+    private updateButtons(): void {
+        this.zoomInButton.disabled = this.locked || this.scale >= MAX_ZOOM;
+        this.zoomOutButton.disabled = this.locked || this.scale <= Math.min(MIN_ZOOM, this.fitScale);
+        this.fitButton.disabled = this.locked;
+        this.actualButton.disabled = this.locked;
     }
 
     private bindNavigation(target: HTMLElement | Document): void {
-        let drag: { x: number; y: number; left: number; top: number; pointerId: number } | undefined;
+        let drag: { x: number; y: number; left: number; top: number; pointerId: number; capture: Element } | undefined;
         const interactive = (event: Event) => (event.target as Element | null)?.closest?.('button, input, textarea, select, a, [contenteditable="true"]');
         const keydown = (event: KeyboardEvent) => {
+            if (this.locked) {
+                if (!interactive(event) && ['+', '=', '-', '0', '1', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                return;
+            }
             if (interactive(event) || event.altKey || event.ctrlKey || event.metaKey) return;
             if (event.key === '+' || event.key === '=') this.zoom(this.scale * ZOOM_STEP);
             else if (event.key === '-') this.zoom(this.scale / ZOOM_STEP);
@@ -179,6 +228,7 @@ export class DiagramPreviewViewport {
             event.stopPropagation();
         };
         const wheel = (event: WheelEvent) => {
+            if (this.locked) { event.preventDefault(); return; }
             // Keep ordinary wheel scrolling intact; Ctrl/Cmd+wheel zooms at the pointer.
             if (!(event.ctrlKey || event.metaKey) || event.deltaY === 0) return;
             event.preventDefault();
@@ -190,9 +240,9 @@ export class DiagramPreviewViewport {
             this.zoom(this.scale * Math.exp(-event.deltaY * 0.002), x - bounds.left, y - bounds.top);
         };
         const pointerdown = (event: PointerEvent) => {
-            if (event.button !== 0 || interactive(event)) return;
+            if (this.locked || event.button !== 0 || interactive(event)) return;
             drag = { x: event.clientX, y: event.clientY, left: this.viewport.scrollLeft,
-                top: this.viewport.scrollTop, pointerId: event.pointerId };
+                top: this.viewport.scrollTop, pointerId: event.pointerId, capture: event.target as Element };
             this.viewport.classList.add('is-panning');
             (event.target as Element)?.setPointerCapture?.(event.pointerId);
         };
@@ -203,7 +253,18 @@ export class DiagramPreviewViewport {
             this.viewport.scrollLeft = drag.left - (event.clientX - drag.x) * factor;
             this.viewport.scrollTop = drag.top - (event.clientY - drag.y) * factor;
         };
-        const pointerup = () => { drag = undefined; this.viewport.classList.remove('is-panning'); };
+        const pointerup = () => {
+            if (drag?.capture.hasPointerCapture?.(drag.pointerId)) drag.capture.releasePointerCapture(drag.pointerId);
+            drag = undefined;
+            this.viewport.classList.remove('is-panning');
+        };
+        this.cancelDrags.push(pointerup);
+        // Native selection can auto-scroll even with hidden scrollbars; restore the locked viewport.
+        const scroll = () => {
+            if (!this.locked) return;
+            this.viewport.scrollLeft = this.lockedLeft;
+            this.viewport.scrollTop = this.lockedTop;
+        };
         const listen = <K extends keyof DocumentEventMap>(name: K, callback: (event: DocumentEventMap[K]) => void, options?: AddEventListenerOptions) => {
             target.addEventListener(name, callback as EventListener, options);
             this.cleanup.push(() => target.removeEventListener(name, callback as EventListener, options));
@@ -214,11 +275,13 @@ export class DiagramPreviewViewport {
         listen('pointermove', pointermove);
         listen('pointerup', pointerup);
         listen('pointercancel', pointerup);
+        listen('scroll', scroll);
     }
 
     destroy(): void {
         if (this.destroyed) return;
         this.destroyed = true;
+        this.cancelDrags.splice(0).forEach(cancel => cancel());
         this.observers.forEach(observer => observer.disconnect());
         this.cleanup.splice(0).forEach(dispose => dispose());
     }

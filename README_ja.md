@@ -26,7 +26,16 @@
 | 開発者 | [開発ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/developers/overview) | 既存の契約に沿ってビルド・テスト・拡張 |
 | エージェント | [連携ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/agents/overview) | 対応する四つのエクスポートコマンドを確認 |
 
-**バージョン:** 1.9.12
+**バージョン:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — プレビュー操作とプレゼンテーションの書き出し
+
+正常終了した書き出しログは最初から折りたたまれます。各プレビューをロックすると、移動や拡大縮小をせずに SVG／HTML の文字を選択できます。PNG／PDF プレビューと複数形式の書き出しを修正しました。Windows のブラウザーインストールでは実際の起動を確認し、初回起動の時間も確保します。Slidev は修正済みの Jacobinwwey フォークを使用します。
+
+1.9.13 の main.js、manifest.json、styles.css をそろえてインストールし、再読み込みしてください。既存のノートと設定は保持されます。古い Slidev フォークのパッケージは書き出し環境のインストーラーで置き換えてください。
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -757,7 +766,7 @@ MIT ライセンス - 詳細は [LICENSE](LICENSE) ファイルを参照して�
 ---
 
 
-*Notemd v1.9.12 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
+*Notemd v1.9.13 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
 
 
 

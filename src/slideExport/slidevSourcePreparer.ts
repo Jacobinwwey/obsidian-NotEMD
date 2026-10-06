@@ -10,6 +10,7 @@ import type { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../typ
 import { callLLM } from '../llmUtils';
 import { createMermaidPostFitGlobalBottomVue, injectMermaidPostFitIntoVueSfc } from './mermaidFitScript';
 import { decorateComponentHeavySlotZones } from './slidevLayoutAudit';
+import { SLIDEV_CSS_COMPATIBILITY_CONFIG } from './slidevCssCompatibility';
 import { formatSlideLayoutPlanForPrompt, planSlidevMarkdownLayout } from './slidevLayoutPlan';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
 import { getVaultBasePath, resolveWorkspaceHomeCandidates, safeRequire } from './platformUtils';
@@ -49,7 +50,7 @@ export async function prepareSlidevExportSource(
 	options: SlidevSourcePreparationOptions = {},
 	onProgress?: ExportProgressCallback,
 ): Promise<SlidevExportSource> {
-	const sourceMarkdown = await app.vault.read(sourceFile);
+	const sourceMarkdown = normalizeObsidianImageEmbeds(app, sourceFile, await app.vault.read(sourceFile), onProgress);
 	if (isSlidevDeckMarkdown(sourceMarkdown)) {
 		onProgress?.('slidev-source', 'Current file is already a Slidev deck; writing working copy for export verification.');
 		const preparedDeckPath = await writePreparedDeckWorkspace(
@@ -133,7 +134,7 @@ export async function prepareSlidevExportSourceFromOutline(
 	options: SlidevSourcePreparationOptions = {},
 	onProgress?: ExportProgressCallback,
 ): Promise<SlidevExportSource> {
-	const sourceMarkdown = await app.vault.read(sourceFile);
+	const sourceMarkdown = normalizeObsidianImageEmbeds(app, sourceFile, await app.vault.read(sourceFile), onProgress);
 	if (isSlidevDeckMarkdown(sourceMarkdown)) {
 		onProgress?.('slidev-source', 'Current file is already a Slidev deck; outline is not needed for this export.');
 		const preparedDeckPath = await writePreparedDeckWorkspace(
@@ -1223,6 +1224,7 @@ async function ensurePreparedDeckRuntimeSupport(
 	preparedDeckPath: string,
 	onProgress?: ExportProgressCallback,
 ): Promise<void> {
+	await ensurePreparedDeckCssCompatibility(app, preparedDeckPath);
 	const supportPath = normalizeVaultPath(`${dirnameVaultPath(preparedDeckPath)}/global-bottom.vue`);
 	const vaultRoot = getVaultBasePath(app);
 	const fs: any = safeRequire('fs');
@@ -1258,6 +1260,86 @@ async function ensurePreparedDeckRuntimeSupport(
 	}
 	await app.vault.adapter.write(supportPath, next);
 	onProgress?.('slidev-source', `Prepared Mermaid runtime fit support: ${supportPath}`);
+}
+
+async function ensurePreparedDeckCssCompatibility(app: App, preparedDeckPath: string): Promise<void> {
+	const configPath = normalizeVaultPath(`${dirnameVaultPath(preparedDeckPath)}/vite.config.mjs`);
+	const vaultRoot = getVaultBasePath(app);
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	const adapter = app.vault.adapter as any;
+	const absolutePath = vaultRoot && fs?.existsSync && path?.join ? path.join(vaultRoot, configPath) : null;
+	const current = absolutePath
+		? (fs.existsSync(absolutePath) ? fs.readFileSync(absolutePath, 'utf8') : null)
+		: (typeof adapter.exists === 'function' && typeof adapter.read === 'function' && await adapter.exists(configPath)
+			? await adapter.read(configPath) : null);
+	if (current === SLIDEV_CSS_COMPATIBILITY_CONFIG) return;
+	if (current !== null && !current.startsWith('// Notemd managed Slidev CSS compatibility\n')) {
+		throw new Error(`Cannot replace existing Slidev configuration: ${configPath}. Choose a new export output directory.`);
+	}
+	if (absolutePath) {
+		fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+		fs.writeFileSync(absolutePath, SLIDEV_CSS_COMPATIBILITY_CONFIG, 'utf8');
+	} else {
+		await adapter.write(configPath, SLIDEV_CSS_COMPATIBILITY_CONFIG);
+	}
+}
+
+/** Resolve vault syntax before either deck generator sees it; never change source notes. */
+function normalizeObsidianImageEmbeds(app: App, sourceFile: TFile, markdown: string, onProgress?: ExportProgressCallback): string {
+	if (!markdown.includes('![[')) return markdown;
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	const vaultRoot = getVaultBasePath(app);
+	let fence: string | null = null;
+	let inlineMarker = '';
+	return markdown.split(/(\r?\n)/).map(line => {
+		const marker = line.match(/^\s*(`{3,}|~{3,})/)?.[1];
+		if (fence) {
+			if (isClosingFenceLine(line, fence)) fence = null;
+			return line;
+		}
+		if (marker && !inlineMarker) { fence = marker; return line; }
+		return line.replace(/\\.|`+|!\[\[([^\]\r\n]+)\]\]/g, (match, embed: string | undefined) => {
+			if (match.startsWith('\\')) return match;
+			if (match.startsWith('`')) {
+				if (!inlineMarker) inlineMarker = match;
+				else if (inlineMarker === match) inlineMarker = '';
+				return match;
+			}
+			if (inlineMarker || !embed) return match;
+			const [link, alias = ''] = embed.split('|');
+			let reason = 'missing image';
+			let resolved: string | null = null;
+			if (!/\.(png|jpe?g|gif|webp|svg|avif|bmp)$/i.test(link)) {
+				reason = 'unsupported embed type';
+			} else if (vaultRoot && fs?.realpathSync && path?.resolve) {
+				const cached = app.metadataCache?.getFirstLinkpathDest?.(link, sourceFile.path)?.path;
+				const candidates = cached ? [cached] : [path.posix.join(dirnameVaultPath(sourceFile.path), link), link];
+				for (const candidate of candidates) {
+					const absolute = path.resolve(vaultRoot, candidate);
+					if (!isInsideDirectory(path, vaultRoot, absolute)) continue;
+					if (!fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) continue;
+					if (!isInsideDirectory(path, fs.realpathSync(vaultRoot), fs.realpathSync(absolute))) continue;
+					resolved = normalizeVaultPath(path.relative(vaultRoot, absolute));
+					break;
+				}
+			} else {
+				reason = 'local filesystem unavailable';
+			}
+			if (!resolved) {
+				onProgress?.('slidev-source', `Embed unavailable: ${link} (${reason}).`);
+				// Entities keep diagnostic text inert in Markdown and Vue templates.
+				return `Embed unavailable: ${escapeSlidevEmbedText(link)} (${reason})`;
+			}
+			const alt = /^\d+(?:x\d+)?$/.test(alias) ? '' : escapeSlidevEmbedText(alias);
+			return `![${alt}](./_notemd-embeds/${resolved.split('/').map(part => encodeURIComponent(part).replace(/[!'()*]/g, character => '%' + character.charCodeAt(0).toString(16))).join('/')})`;
+		});
+	}).join('');
+}
+
+function escapeSlidevEmbedText(text: string): string {
+	return text.replace(/[&<>[\]{}*_`!\\]/g, character => `&#${character.charCodeAt(0)};`);
 }
 
 function dirnameVaultPath(vaultPath: string): string {
@@ -1351,6 +1433,16 @@ function copyReferencedLocalAssetFilesWithNodeFs(
 	const absoluteSourceDir = path.dirname(absoluteSourcePath);
 	const absoluteTargetDirectory = path.join(vaultRoot, targetDirectoryPath);
 	for (const referencePath of collectLocalAssetReferencesWithDependencies(fs, path, absoluteSourceDir, deckMarkdown)) {
+		if (referencePath.startsWith('_notemd-embeds/')) {
+			const vaultAssetPath = referencePath.slice('_notemd-embeds/'.length);
+			const absoluteAsset = path.resolve(vaultRoot, vaultAssetPath);
+			if (fs.existsSync(absoluteAsset)
+				&& isInsideDirectory(path, fs.realpathSync(vaultRoot), fs.realpathSync(absoluteAsset))
+				&& copyLocalSlidevAssetReference(fs, path, vaultRoot, path.join(absoluteTargetDirectory, '_notemd-embeds'), vaultAssetPath)) {
+				copiedAssets.push(referencePath);
+			}
+			continue;
+		}
 		if (copyLocalSlidevAssetReference(fs, path, absoluteSourceDir, absoluteTargetDirectory, referencePath)) {
 			copiedAssets.push(referencePath);
 		}
@@ -1698,7 +1790,7 @@ function normalizeLocalAssetReference(rawReference: string): string | null {
 
 	let decoded = withoutQuery;
 	try {
-		decoded = decodeURI(withoutQuery);
+		decoded = /^\.\/_notemd-embeds\//.test(withoutQuery) ? decodeURIComponent(withoutQuery) : decodeURI(withoutQuery);
 	} catch {
 		decoded = withoutQuery;
 	}

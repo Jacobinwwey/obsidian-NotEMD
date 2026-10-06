@@ -18,6 +18,8 @@
 
 ## 当前真值与布局入口
 
+- [预览、演示导出与 fork 来源核验 — 10 月 6 日](./maintainer/2026-10-06-preview-slidev-reliability.zh-CN.md)
+
 - [1.9.9 实施与验收](./maintainer/release-1.9.9-acceptance.zh-CN.md)
 - [多图表类型与独立输出](./multiple-diagrams-implementation.zh-CN.md)
 - [1.9.8 文档实施方案（历史）](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.zh-CN.md)

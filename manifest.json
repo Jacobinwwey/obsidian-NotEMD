@@ -1,7 +1,7 @@
 {
 	"id": "notemd",
 	"name": "Notemd",
-	"version": "1.9.12",
+	"version": "1.9.13",
 	"minAppVersion": "0.15.0",
 	"description": "Build linked knowledge with configurable LLMs: wiki-links, concept notes, web research, file translation, diagrams and reusable Obsidian workflows.",
 	"author": "jacob",

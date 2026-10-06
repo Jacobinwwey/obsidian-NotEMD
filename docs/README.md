@@ -18,6 +18,8 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Current Truth And Layout
 
+- [Preview, presentation export and fork provenance — October 6](./maintainer/2026-10-06-preview-slidev-reliability.md)
+
 - [Release 1.9.9 Implementation And Acceptance](./maintainer/release-1.9.9-acceptance.md)
 - [Multiple Diagram Types And Independent Outputs](./multiple-diagrams-implementation.md)
 - [Release 1.9.8 Documentation Plan (historical)](./plans/2026-09-13-001-feat-1-9-8-release-docs-geo-plan.en.md)

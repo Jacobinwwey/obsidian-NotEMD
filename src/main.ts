@@ -1,5 +1,6 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { startDiagramExportRun, readDiagramExportRun, retryDiagramExportRun } from './diagram/diagramExportRun';
+import { normalizeSlideExportFormats } from './slideExport/slideExportFormats';
 import type { DiagramExportRun, DiagramExportRequest } from './diagram/diagramExportRun';
 import { migrateDiagramOutputPreferences } from './diagram/diagramOutputPreferences';
 import {
@@ -397,7 +398,7 @@ export default class NotemdPlugin extends Plugin {
             readBinary: (file) => this.app.vault.readBinary(file),
             openFile: (file) => {
                 const leaf = this.app.workspace.getLeaf('split', 'vertical');
-                leaf.openFile(file);
+                return leaf.openFile(file);
             },
             maybeAutoFixMermaid: (file, reporter, reason) =>
                 this.maybeAutoFixMermaidForFile(file, reporter, reason),
@@ -3147,7 +3148,7 @@ private static readonly slideExportImageClarityScale: Record<'standard' | 'high'
 
     private buildSlideExportConfig(): SlideExportConfig {
         return {
-            format: this.settings.slideExportDefaultFormat,
+            format: normalizeSlideExportFormats(this.settings.slideExportFormats, this.settings.slideExportDefaultFormat)[0],
             withClicks: this.settings.slideExportWithClicks,
             outputSubfolder: this.settings.slideExportOutputSubfolder,
             ffmpegFps: this.settings.slideExportFfmpegFps,
@@ -3277,7 +3278,7 @@ private static readonly slideExportImageClarityScale: Record<'standard' | 'high'
             logSlideExportProgress: (phase: string, detail?: string) => void
         ) => Promise<SlidevExportSource>
     ): Promise<void> {
-        const { probeEnvironment, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportSlidevPptxFromHtml, exportVideoMp4, getVaultBasePath } = await import('./slideExport');
+        const { probeEnvironment, convergeSlidevDeckLayout, exportPreparedSlidevFormats, getVaultBasePath } = await import('./slideExport');
         const uiStrings = this.getUiStrings();
         const config = this.buildSlideExportConfig();
         const activeReporter = reporter ?? await this.getSidebarReporter();
@@ -3296,8 +3297,10 @@ private static readonly slideExportImageClarityScale: Record<'standard' | 'high'
             const vaultRoot = getVaultBasePath(this.app);
             const envReport = await probeEnvironment(vaultRoot ? [vaultRoot] : []);
 
-            if (!envReport.capabilities[config.format]) {
-                throw new Error(uiStrings.slideExport.formatNotSupported.replace('{format}', config.format.toUpperCase()));
+            const formats = normalizeSlideExportFormats(this.settings.slideExportFormats, this.settings.slideExportDefaultFormat);
+            const unavailableFormats = formats.filter(format => !envReport.capabilities[format]);
+            if (unavailableFormats.length) {
+                throw new Error(uiStrings.slideExport.formatNotSupported.replace('{format}', unavailableFormats.join(', ').toUpperCase()));
             }
 
             activeReporter.updateStatus(uiStrings.slideExport.exportingSlides, 22);
@@ -3311,74 +3314,28 @@ private static readonly slideExportImageClarityScale: Record<'standard' | 'high'
             );
             activeReporter.updateStatus(uiStrings.slideExport.exportingSlides, 74);
 
-            if (config.format === 'html') {
-                const outputPath = layoutConvergence.exportPath;
-                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
-                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
-                new Notice(uiStrings.slideExport.exportComplete);
-
-                const requiresLocalServer = outputPath.endsWith('/index.html');
-                if (config.htmlMode === 'server-script' || requiresLocalServer) {
-                    if (requiresLocalServer && config.htmlMode !== 'server-script') {
-                        activeReporter.log('Standalone HTML fallback requires a local server; opening compatible HTML export...');
+            const batch = await exportPreparedSlidevFormats(
+                this.app, slideSource, config, formats, layoutConvergence.exportPath, logSlideExportProgress,
+                () => activeReporter.cancelled
+            );
+            for (const output of batch.outputs) {
+                if (output.status === 'completed') {
+                    activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', output.path));
+                    if (output.reportPath) {
+                        activeReporter.log(formatI18n(uiStrings.slideExport.pptxReportOutputLog, { path: output.reportPath }));
                     }
-                    activeReporter.log('Opening in browser...');
-                    const { openHtmlInBrowser } = await import('./slideExport/localServer');
-                    const vaultRoot = (this.app.vault.adapter as any).basePath;
-                    await openHtmlInBrowser(outputPath, vaultRoot);
                 }
-            } else if (config.format === 'pdf') {
-                const outputPath = await exportSlidevPdf(
-                    this.app,
-                    slideSource,
-                    config,
-                    logSlideExportProgress
-                );
-                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
-                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
-                new Notice(uiStrings.slideExport.exportComplete);
-            } else if (config.format === 'png') {
-                const outputPath = await exportSlidevPng(
-                    this.app,
-                    slideSource,
-                    config,
-                    logSlideExportProgress
-                );
-                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
-                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
-                new Notice(uiStrings.slideExport.exportComplete);
-            } else if (config.format === 'pptx') {
-                const result = await exportSlidevPptxFromHtml(
-                    this.app,
-                    slideSource,
-                    config,
-                    layoutConvergence.exportPath,
-                    logSlideExportProgress
-                );
-                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', result.path));
-                activeReporter.log(formatI18n(uiStrings.slideExport.pptxReportOutputLog, { path: result.reportPath }));
-                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', result.path), 100);
-                new Notice(uiStrings.slideExport.exportComplete);
-            } else if (config.format === 'mp4') {
-                activeReporter.log(uiStrings.slideExport.exportingPngSequence);
-                const pngDir = await exportSlidevPng(
-                    this.app,
-                    slideSource,
-                    config,
-                    logSlideExportProgress
-                );
-                activeReporter.updateStatus(uiStrings.slideExport.convertingToVideo, 88);
-                activeReporter.log(uiStrings.slideExport.convertingToVideo);
-                const outputPath = await exportVideoMp4(
-                    this.app,
-                    pngDir,
-                    slideSource.outputBasename,
-                    config,
-                    logSlideExportProgress
-                );
-                activeReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
-                activeReporter.updateStatus(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath), 100);
-                new Notice(uiStrings.slideExport.exportComplete);
+            }
+            const failures = batch.outputs.filter(output => output.status !== 'completed');
+            if (failures.length) {
+                throw new Error(failures.map(output => output.format.toUpperCase() + ': ' + output.error).join('; '));
+            }
+            activeReporter.updateStatus(uiStrings.slideExport.exportComplete, 100);
+            new Notice(uiStrings.slideExport.exportComplete);
+            const htmlOutput = batch.outputs.find(output => output.format === 'html' && output.status === 'completed');
+            if (vaultRoot && htmlOutput?.status === 'completed' && (config.htmlMode === 'server-script' || htmlOutput.path.endsWith('/index.html'))) {
+                const { openHtmlInBrowser } = await import('./slideExport/localServer');
+                await openHtmlInBrowser(htmlOutput.path, vaultRoot);
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);

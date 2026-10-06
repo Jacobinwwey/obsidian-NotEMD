@@ -26,7 +26,16 @@
 | ডেভেলপার | [ডেভেলপার নির্দেশিকা](https://jacobinwwey.github.io/obsidian-NotEMD/bn/docs/developers/overview) | বর্তমান চুক্তি বিল্ড, পরীক্ষা ও সম্প্রসারণ করুন |
 | এজেন্ট | [এজেন্ট নির্দেশিকা](https://jacobinwwey.github.io/obsidian-NotEMD/bn/docs/agents/overview) | সমর্থিত চারটি রপ্তানি কমান্ড খুঁজুন |
 
-**সংস্করণ:** 1.9.12
+**সংস্করণ:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — প্রিভিউ নিয়ন্ত্রণ ও উপস্থাপনা রপ্তানি
+
+সফল রপ্তানির লগ শুরুতে সংকুচিত থাকে। প্রতিটি প্রিভিউ লক করে ছবি না সরিয়ে বা জুম না করে SVG/HTML লেখা নির্বাচন করুন। PNG/PDF প্রিভিউ এবং একাধিক বিন্যাসে উপস্থাপনা রপ্তানি ঠিক করা হয়েছে। Windows-এ ব্রাউজার ইনস্টলেশন বাস্তবে চালু হওয়া যাচাই করে এবং প্রথমবার চালুর জন্য সময় দেয়। Slidev, Jacobinwwey-এর সংশোধিত ফর্ক ব্যবহার করে।
+
+1.9.13 সংস্করণের মিলযুক্ত main.js, manifest.json ও styles.css ইনস্টল করে প্লাগইন আবার লোড করুন। আগের নোট ও সেটিংস অক্ষুণ্ণ থাকে। রপ্তানি পরিবেশের ইনস্টলার দিয়ে পুরোনো Slidev ফর্ক প্যাকেজ বদলান।
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -748,7 +757,7 @@ MIT লাইসেন্স - বিস্তারিত জানতে [LICE
 ---
 
 
-*Notemd v1.9.12 - AI-এর সাহায্যে আপনার Obsidian knowledge graph আরও উন্নত করুন।*
+*Notemd v1.9.13 - AI-এর সাহায্যে আপনার Obsidian knowledge graph আরও উন্নত করুন।*
 
 
 <!-- repo-chronicle:start -->

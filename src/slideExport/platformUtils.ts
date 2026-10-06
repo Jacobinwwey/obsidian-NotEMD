@@ -7,12 +7,13 @@
 
 import { Platform } from 'obsidian';
 import type { ExecResult } from './types';
+import { NOTEMD_SLIDEV_OFFLINE_ARCHIVE_INTEGRITY, NOTEMD_SLIDEV_UNSUPPORTED_RELEASE_TAG } from './slidevDistribution';
 
 export interface ResolvedSlidevCommand {
 	command: string;
 	argsPrefix: string[];
 	description: string;
-	source: 'configured-path' | 'local-fork' | 'project-bin' | 'npx';
+	source: 'configured-path' | 'local-fork' | 'project-bin';
 }
 
 export interface SlidevCommandSearchOptions {
@@ -93,7 +94,8 @@ export async function execFileAsync(
 	const os: any = safeRequire('os');
 	const isWindows = os?.platform?.() === 'win32';
 	if (isWindows && isWindowsNodeScript(command)) {
-		return execFileOnce(childProcess, process.execPath, [command, ...args], options, {
+		// Obsidian's process.execPath is Electron, not the Node runtime checked by the environment probe.
+		return execFileOnce(childProcess, 'node', [command, ...args], options, {
 			windowsVerbatimArguments: false,
 		});
 	}
@@ -112,7 +114,7 @@ export async function execFileAsync(
 	}
 
 	if (isWindowsNodeScript(commandForBatch)) {
-		return execFileOnce(childProcess, process.execPath, [commandForBatch, ...args], options, {
+		return execFileOnce(childProcess, 'node', [commandForBatch, ...args], options, {
 			windowsVerbatimArguments: false,
 		});
 	}
@@ -348,44 +350,12 @@ export function resolveWorkspaceHomeCandidates(): string[] {
 }
 
 export function resolvePlaywrightBrowsersPath(): string | null {
-	const fs: any = safeRequire('fs');
-	const path: any = safeRequire('path');
-	if (!fs || !path) {
-		return null;
-	}
-
-	for (const home of resolveWorkspaceHomeCandidates()) {
-		for (const candidate of [
-			path.join(home, '.cache', 'ms-playwright'),
-			path.join(home, 'Library', 'Caches', 'ms-playwright'),
-			path.join(home, 'AppData', 'Local', 'ms-playwright'),
-			path.join(home, 'AppData', 'Roaming', 'ms-playwright'),
-		]) {
-			try {
-				if (fs.existsSync(candidate)) {
-					return candidate;
-				}
-			} catch {
-				// Try the next candidate.
-			}
-		}
-	}
-
-	// Windows falls back to the PLAYWRIGHT_BROWSERS_PATH env var if set.
-	if (process.env.PLAYWRIGHT_BROWSERS_PATH) {
-		try {
-			if (fs.existsSync(process.env.PLAYWRIGHT_BROWSERS_PATH)) {
-				return process.env.PLAYWRIGHT_BROWSERS_PATH;
-			}
-		} catch {
-			// Fall through to null.
-		}
-	}
-
-	return null;
+	// Let Playwright choose its native OS cache unless explicitly configured.
+	// "0" means a package-local browser; a new cache need not exist yet.
+	return process.env.PLAYWRIGHT_BROWSERS_PATH || null;
 }
 
-export function resolveSlidevCommand(options: SlidevCommandSearchOptions = {}): ResolvedSlidevCommand {
+export function resolveSlidevCommand(options: SlidevCommandSearchOptions = {}): ResolvedSlidevCommand | null {
 	const fs: any = safeRequire('fs');
 	const path: any = safeRequire('path');
 	const workspaceHomes = resolveWorkspaceHomeCandidates();
@@ -398,57 +368,72 @@ export function resolveSlidevCommand(options: SlidevCommandSearchOptions = {}): 
 	].filter((candidate): candidate is string => typeof candidate === 'string' && candidate.length > 0);
 	const projectBinPaths = resolveSlidevProjectBinCandidates(options.roots ?? [], path);
 
-	for (const candidate of configuredPaths) {
-		try {
-			if (fs?.existsSync?.(candidate)) {
-				return {
-					command: candidate,
-					argsPrefix: [],
-					description: candidate,
-					source: 'configured-path',
-				};
-			}
-		} catch {
-			// Try the next candidate.
-		}
+	// An explicit override is authoritative: never silently substitute another CLI.
+	const candidates: Array<[string, ResolvedSlidevCommand['source']]> = configuredPaths.length
+		? configuredPaths.map(candidate => [candidate, 'configured-path'])
+		: [...localForkPaths.map(candidate => [candidate, 'local-fork'] as [string, 'local-fork']),
+			...projectBinPaths.map(candidate => [candidate, 'project-bin'] as [string, 'project-bin'])];
+	for (const [candidate, source] of candidates) {
+		const command = resolveVerifiedSlidevEntry(candidate, fs, path);
+		if (command) return { command, argsPrefix: [], description: `${command} (Jacobinwwey/slidev)`, source };
 	}
+	return null;
+}
 
-	for (const candidate of localForkPaths) {
-		try {
-			if (fs?.existsSync?.(candidate)) {
-				return {
-					command: candidate,
-					argsPrefix: [],
-					description: candidate,
-					source: 'local-fork',
-				};
+function resolveVerifiedSlidevEntry(candidate: string, fs: any, path: any): string | null {
+	if (!fs || !path) return null;
+	try {
+		// Execute the package entry itself, never an unverified .bin shell shim.
+		const entry = path.basename(path.dirname(candidate)) === '.bin'
+			? path.join(path.dirname(path.dirname(candidate)), '@slidev', 'cli', 'bin', 'slidev.mjs')
+			: candidate;
+		const command = fs.realpathSync(entry);
+		const packageRoot = path.dirname(path.dirname(command));
+		const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+		const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.slidev;
+		if (manifest.name !== '@slidev/cli' || typeof bin !== 'string'
+			|| fs.realpathSync(path.resolve(packageRoot, bin)) !== command) return null;
+		let root = packageRoot;
+		for (;;) {
+			for (const lockName of ['npm-shrinkwrap.json', 'package-lock.json']) {
+				const lockPath = path.join(root, lockName);
+				if (!fs.existsSync(lockPath)) continue;
+				const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+				const key = path.relative(root, packageRoot).split(path.sep).join('/');
+				const installed = lock.packages?.[key];
+				if (installed?.version === manifest.version && typeof installed.integrity === 'string'
+					&& /^https:\/\/github\.com\/Jacobinwwey\/slidev\/releases\/download\/[^/?#]+\/[^/?#]+\.tgz$/.test(installed.resolved)
+					// Do not let the install action accept the known-broken -1 package
+					// merely because its CLI flags match; future fork releases remain eligible.
+					&& !installed.resolved.includes(`/releases/download/${NOTEMD_SLIDEV_UNSUPPORTED_RELEASE_TAG}/`)) return command;
+				if (installed?.version === manifest.version
+					&& installed.integrity === NOTEMD_SLIDEV_OFFLINE_ARCHIVE_INTEGRITY
+					&& typeof installed.resolved === 'string' && installed.resolved.startsWith('file:')) {
+					// npm records local tarballs relative to the lockfile. Check the
+					// actual archive against the pinned release digest before trusting it.
+					const archive = installed.resolved.startsWith('file://')
+						? safeRequire('url').fileURLToPath(installed.resolved)
+						: path.resolve(root, installed.resolved.slice(5));
+					const integrity = 'sha512-' + safeRequire('crypto').createHash('sha512').update(fs.readFileSync(archive)).digest('base64');
+					if (integrity === NOTEMD_SLIDEV_OFFLINE_ARCHIVE_INTEGRITY) return command;
+				}
 			}
-		} catch {
-			// Try the next candidate.
-		}
-	}
-
-	for (const candidate of projectBinPaths) {
-		try {
-			if (fs?.existsSync?.(candidate)) {
-				return {
-					command: candidate,
-					argsPrefix: [],
-					description: candidate,
-					source: 'project-bin',
-				};
+			// Checkout provenance is local Git metadata, not a directory name or upstream package repository field.
+			if (fs.existsSync(path.join(root, '.git')) && !path.relative(root, packageRoot).split(path.sep).includes('node_modules')) {
+				const childProcess = safeRequire('child_process');
+				const remote = childProcess?.execFileSync('git', ['-C', root, 'remote', 'get-url', 'origin'], {
+					encoding: 'utf8', timeout: 5_000, windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'],
+				})?.trim();
+				if (/^(?:https:\/\/github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)Jacobinwwey\/slidev(?:\.git)?\/?$/.test(remote)) return command;
 			}
-		} catch {
-			// Try the next candidate.
+			const parent = path.dirname(root);
+			if (parent === root) break;
+			root = parent;
 		}
+	} catch {
+		// Missing or malformed provenance is not evidence of the required fork.
 	}
-
-	return {
-		command: resolveNpxCommand(),
-		argsPrefix: ['-y', '@slidev/cli'],
-		description: 'npx -y @slidev/cli',
-		source: 'npx',
-	};
+	return null;
 }
 
 function resolveSlidevProjectBinCandidates(roots: string[], path: any): string[] {

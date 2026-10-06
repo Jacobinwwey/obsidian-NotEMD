@@ -12,7 +12,7 @@ The NoteMD workflow must verify all of these steps together:
 
 1. The active Markdown note is converted into a real Slidev deck before export.
 2. The full Slidev skill directory is discovered, including `references/*.md`, not only `SKILL.md`.
-3. The local Slidev fork is preferred when present.
+3. Only the required Jacobinwwey Slidev fork is permitted. Source checkouts and published fork packages are supported; official-registry fallback is forbidden.
 4. Existing Slidev decks are copied into an isolated prepared working workspace before verification so patch/retry never mutates the source note directly and sibling Slidev support entries plus explicitly referenced local assets can be mirrored into the working copy.
 5. The output directory is recreated before each HTML build so stale chunks cannot survive.
 6. Generated deck guardrails normalize theme and slide frontmatter, strip generated Mermaid slide `zoom` so rendered audit owns measured fit, and reject LLM-generated decks that change source Mermaid fences before the prepared deck is written.

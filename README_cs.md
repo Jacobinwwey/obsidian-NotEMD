@@ -26,7 +26,16 @@ Každý náhled diagramu má samostatné přiblížení, posun, přizpůsobení 
 | Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
 | Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
 
-**Verze:** 1.9.12
+**Verze:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Ovládání náhledu a export prezentací
+
+Protokoly úspěšných exportů jsou ve výchozím stavu sbalené. Zamkněte každý náhled, abyste mohli vybírat text SVG/HTML bez posouvání a přibližování. Byly opraveny náhledy PNG/PDF a export prezentací do více formátů. Instalace prohlížeče ve Windows ověřuje skutečné spuštění a ponechává čas na první start. Slidev používá opravený fork Jacobinwwey.
+
+Nainstalujte odpovídající main.js, manifest.json a styles.css z verze 1.9.13 a znovu načtěte doplněk. Stávající poznámky a nastavení zůstanou zachovány. Starý balíček forku Slidev nahraďte pomocí instalátoru prostředí pro export.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -751,7 +760,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.12 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.13 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 

@@ -12,7 +12,7 @@ The maintained workflow is:
 2. Existing Slidev decks are copied into an isolated prepared working workspace before export verification so the verifier can audit and patch without mutating the source note, and so sibling Slidev support entries plus explicitly referenced local assets can be mirrored into the working copy.
 3. The full Slidev skill directory is loaded when available, including `references/*.md`.
 4. Generated decks receive presentation guardrails before export, and large Mermaid guardrails no longer overwrite a slide that already declares `zoom`.
-5. The local Slidev fork is preferred when present.
+5. The Jacobinwwey Slidev fork is required. Among verified fork installations, the local source checkout is preferred over the vault/project release package.
 6. HTML output directories are recreated before build to avoid stale assets.
 7. HTML export attempts native standalone first, records the actual HTML mode, and falls back to server-script-compatible HTML only when native standalone sanity checks find real missing slide loader bindings.
 8. Browser rendering is verified with Playwright across the full deck by default.
@@ -99,9 +99,10 @@ Slidev command resolution prefers:
 2. `SLIDEV_CLI_PATH`
 3. `$HOME/slidev/packages/slidev/bin/slidev.mjs`
 4. `<vault-or-project>/node_modules/.bin/slidev`
-5. `npx -y @slidev/cli`
 
-On Jacob's workstation, the maintained verification path should report either the local fork path or a project binary installed from the NoteMD fork release in `environment.slidev.version`. The `npx -y @slidev/cli` entry is only a last-resort probe fallback; it is not the NoteMD install recommendation. The registry package and the fork package both report `@slidev/cli@52.16.0`, so semver alone is not a valid compatibility signal. Environment probing must run `slidev build --help` and require `--out`, `--format`, and `--standalone-bundle`; otherwise Slidev is unavailable for the standalone-required path.
+An explicit environment override is authoritative. When either override is set, resolution checks only the configured paths; it does not silently continue to the local checkout or vault. If none is a verified fork, correct or clear the override before installing. The installer refuses a vault installation that cannot change the selected runtime.
+
+Only the Jacobinwwey Slidev fork is allowed. There is no official-registry or implicit npx fallback. Resolution checks release provenance in local npm installation metadata or the source checkout Git origin, then checks the required build capabilities. Package name, version and help text alone do not establish fork provenance. Missing or unverified installations must use the explicit fork release installer; installation is followed by a fresh probe.
 
 ## Fork Release Distribution
 
@@ -110,13 +111,13 @@ The UI install path must point at an npm-installable release artifact, not at a 
 Current NoteMD fork package:
 
 ```text
-https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz
+https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-2/slidev-cli-notemd-standalone-v52.16.0-2.tgz
 ```
 
 The sidebar's copied install command is:
 
 ```bash
-npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-2/slidev-cli-notemd-standalone-v52.16.0-2.tgz @slidev/theme-default
 ```
 
 Validation on 2026-06-21 proved that the release asset packs as `@slidev/cli@52.16.0`, installs into a clean npm project, exposes the `slidev` binary, and includes `build --help` support for `--standalone-bundle`. NoteMD's own `package.json` must use this release tarball instead of `^52.16.0` from the npm registry, because the registry build with the same semver does not provide the native standalone bundle option.

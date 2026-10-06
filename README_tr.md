@@ -26,7 +26,16 @@ Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma
 | Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
 | Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
 
-**Sürüm:** 1.9.12
+**Sürüm:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Önizleme denetimleri ve sunum dışa aktarma
+
+Başarılı dışa aktarma günlükleri varsayılan olarak daraltılır. SVG/HTML metnini taşımadan veya yakınlaştırmadan seçmek için her önizlemeyi kilitleyin. PNG/PDF önizlemeleri ve çok biçimli sunum dışa aktarma düzeltildi. Windows tarayıcı kurulumu gerçek başlatmayı doğrular ve ilk açılış için süre tanır. Slidev, Jacobinwwey tarafından düzeltilen çatalı kullanır.
+
+1.9.13 sürümünün birbiriyle eşleşen main.js, manifest.json ve styles.css dosyalarını yükleyip eklentiyi yeniden yükleyin. Mevcut notlar ve ayarlar korunur. Eski Slidev çatal paketini dışa aktarma ortamı yükleyicisiyle değiştirin.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -751,7 +760,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.12 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.13 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->

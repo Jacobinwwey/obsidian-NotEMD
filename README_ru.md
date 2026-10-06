@@ -26,7 +26,16 @@
 | Разработчик | [Руководство разработчика](https://jacobinwwey.github.io/obsidian-NotEMD/ru/docs/developers/overview) | Собрать, проверить и расширить существующие контракты |
 | Агент | [Руководство агента](https://jacobinwwey.github.io/obsidian-NotEMD/ru/docs/agents/overview) | Найти четыре поддерживаемые команды экспорта |
 
-**Версия:** 1.9.12
+**Версия:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Управление предпросмотром и экспорт презентаций
+
+Журналы успешного экспорта по умолчанию свёрнуты. Заблокируйте каждый предпросмотр, чтобы выделять текст SVG/HTML без перемещения и масштабирования. Исправлены предпросмотр PNG/PDF и экспорт презентаций в несколько форматов. В Windows установка браузера проверяет реальный запуск и оставляет время для первого старта. Slidev использует исправленный форк Jacobinwwey.
+
+Установите main.js, manifest.json и styles.css из версии 1.9.13 и перезагрузите плагин. Существующие заметки и настройки сохраняются. Замените старый пакет форка Slidev через установщик среды экспорта.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -760,7 +769,7 @@ MIT License — подробности см. в файле [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.12 — усиливайте граф знаний Obsidian с помощью ИИ.*
+*Notemd v1.9.13 — усиливайте граф знаний Obsidian с помощью ИИ.*
 
 
 <!-- repo-chronicle:start -->

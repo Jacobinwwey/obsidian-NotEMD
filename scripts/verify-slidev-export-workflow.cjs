@@ -76,6 +76,10 @@ function parseArgs(argv) {
 			args.source = argv[++index];
 		} else if (arg === '--format' && argv[index + 1]) {
 			args.format = argv[++index];
+			if (args.format === 'all') {
+				args.allFormats = true;
+				args.format = 'pptx';
+			}
 		} else if (arg === '--html-mode' && argv[index + 1]) {
 			args.htmlMode = argv[++index];
 		} else if (arg === '--output-subfolder' && argv[index + 1]) {
@@ -182,7 +186,7 @@ function printHelp() {
 		'Options:',
 		'  --vault <path>             Vault root, default: docs',
 		'  --source <path>            Vault-relative source Markdown, default: architecture.zh-CN.md',
-		'  --format <html|pdf|png|pptx|mp4> Export format, default: html',
+		'  --format <html|pdf|png|pptx|mp4|all> Export formats, default: html',
 		'  --html-mode <standalone|server-script> HTML mode, default: standalone',
 		'  --output-subfolder <path>  Vault-relative output folder, default: export',
 		'  --theme <name>             Slidev theme, default: default',
@@ -213,7 +217,8 @@ async function bundleSlideExportModules() {
 			contents: [
 					"export { probeEnvironment } from './src/slideExport/environmentProber';",
 					"export { prepareSlidevExportSource } from './src/slideExport/slidevSourcePreparer';",
-					"export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
+					"export { autoInstallPlaywright, exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
+					"export { exportPreparedSlidevFormats } from './src/slideExport/slideExportBatch';",
 					"export { exportSlidevPptxFromHtml, exportSlidevPptxRenderedHtmlReferencePngSequence, exportSlidevVisibleNativePptxExperimentFromHtml } from './src/slideExport/pptxExporter';",
 					"export { convergeSlidevDeckLayout } from './src/slideExport/slidevLayoutWorkflow';",
 					"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
@@ -1232,7 +1237,17 @@ async function main() {
 	let pptxReport = null;
 	let htmlExportPathForPptx = null;
 	let visibleNativeExperimentResult = null;
-	if (args.format === 'pdf') {
+	let batch = null;
+	if (args.allFormats) {
+		if (!exportPath) throw new Error('All-format acceptance requires rendered layout validation.');
+		htmlExportPathForPptx = exportPath;
+		batch = await slideExport.exportPreparedSlidevFormats(app, slideSource, config, ['html', 'pdf', 'png', 'pptx', 'mp4'], exportPath, onProgress);
+		const pptx = batch.outputs.find(output => output.format === 'pptx' && output.status === 'completed');
+		if (!pptx) throw new Error(`PPTX acceptance failed: ${JSON.stringify(batch)}`);
+		exportPath = pptx.path;
+		pptxReportPath = path.join(vaultRoot, pptx.reportPath);
+		pptxReport = JSON.parse(fs.readFileSync(pptxReportPath, 'utf8'));
+	} else if (args.format === 'pdf') {
 		exportPath = await slideExport.exportSlidevPdf(app, slideSource, config, onProgress);
 	} else if (args.format === 'png') {
 		exportPath = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
@@ -1551,6 +1566,7 @@ async function main() {
 
 	const report = {
 			ok: playwrightChecks.every(check => !check.failed)
+				&& (!batch || (batch.status === 'completed' && batch.outputs.every(output => output.status === 'completed' && environment.capabilities[output.format] && fs.existsSync(path.join(vaultRoot, output.path)))))
 				&& environment.capabilities[args.format] === true
 				&& fs.existsSync(absoluteExportPath)
 				&& !gitIgnoreStatus.error
@@ -1589,7 +1605,7 @@ async function main() {
 			skillReferenceCount: slideSource.skillReferencePaths?.length || 0,
 		},
 		output: {
-			format: args.format,
+			format: args.allFormats ? 'all' : args.format,
 			path: absoluteExportPath,
 			bytes: fs.existsSync(absoluteExportPath) && fs.statSync(absoluteExportPath).isFile()
 				? fs.statSync(absoluteExportPath).size
@@ -1598,6 +1614,7 @@ async function main() {
 			pptxReport,
 		},
 		pptxInspection,
+		batch,
 		pptxVisualDiff,
 		pptxVisualGate,
 		pptxRenderedHtmlReference,
@@ -1648,6 +1665,7 @@ if (require.main === module) {
 	});
 } else {
 	module.exports = {
+		bundleSlideExportModules,
 		buildRenderedLayoutGate,
 		buildTableBodyLayoutGate,
 		checkGitIgnoreStatus,

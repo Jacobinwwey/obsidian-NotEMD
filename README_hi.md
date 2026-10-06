@@ -26,7 +26,16 @@
 | डेवलपर | [डेवलपर मार्गदर्शिका](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/developers/overview) | मौजूदा अनुबंधों को बिल्ड, टेस्ट और विस्तारित करें |
 | एजेंट | [एजेंट मार्गदर्शिका](https://jacobinwwey.github.io/obsidian-NotEMD/hi/docs/agents/overview) | चार समर्थित निर्यात कमांड खोजें |
 
-**संस्करण:** 1.9.12
+**संस्करण:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — पूर्वावलोकन नियंत्रण और प्रस्तुति निर्यात
+
+सफल निर्यात के लॉग डिफ़ॉल्ट रूप से संकुचित रहते हैं। हर पूर्वावलोकन को लॉक करके, चित्र को हिलाए या ज़ूम किए बिना SVG/HTML पाठ चुनें। PNG/PDF पूर्वावलोकन और कई प्रारूपों में प्रस्तुति निर्यात की समस्याएँ ठीक की गई हैं। Windows पर ब्राउज़र की स्थापना वास्तविक लॉन्च की जाँच करती है और पहली शुरुआत के लिए समय देती है। Slidev, Jacobinwwey के सुधारे गए फ़ोर्क का उपयोग करता है।
+
+1.9.13 के मेल खाते main.js, manifest.json और styles.css स्थापित करके प्लगइन फिर लोड करें। मौजूदा नोट और सेटिंग सुरक्षित रहते हैं। निर्यात परिवेश के इंस्टॉलर से पुराने Slidev फ़ोर्क पैकेज को बदलें।
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -748,7 +757,7 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 ---
 
 
-*Notemd v1.9.12 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
+*Notemd v1.9.13 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
 
 
 <!-- repo-chronicle:start -->

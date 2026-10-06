@@ -26,7 +26,16 @@
 | 開發者 | [開發指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/developers/overview) | 建置、測試並擴充現有契約 |
 | Agent | [整合指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/agents/overview) | 探索四個受支援的匯出指令 |
 
-**版本:** 1.9.12
+**版本:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — 預覽控制與簡報匯出
+
+成功匯出的日誌預設收合。鎖定各預覽後，可選取 SVG／HTML 文字而不移動或縮放圖形。修正 PNG／PDF 預覽及多格式簡報匯出。Windows 瀏覽器安裝會實際驗證啟動，並為冷啟動預留時間。Slidev 使用修正後的 Jacobinwwey fork。
+
+安裝 1.9.13 配套的 main.js、manifest.json 和 styles.css 後重新載入，保留現有筆記及設定。透過匯出環境安裝程式替換舊 Slidev fork 套件。
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -822,7 +831,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.12 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.13 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->

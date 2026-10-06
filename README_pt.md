@@ -26,7 +26,16 @@ Cada pré-visualização tem zoom, deslocação, ajuste e tamanho real independe
 | Desenvolvedor | [Guia de desenvolvimento](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/developers/overview) | Compilar, testar e ampliar os contratos existentes |
 | Agente | [Guia de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/pt/docs/agents/overview) | Encontrar os quatro comandos de exportação suportados |
 
-**Versão:** 1.9.12
+**Versão:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Controlos de pré-visualização e exportação de apresentações
+
+Os registos de exportações bem-sucedidas aparecem recolhidos. Bloqueie cada pré-visualização para selecionar texto SVG/HTML sem mover nem ampliar o gráfico. Foram corrigidas as pré-visualizações PNG/PDF e a exportação de apresentações em vários formatos. No Windows, a instalação do navegador verifica o arranque e prevê tempo para o primeiro início. O Slidev utiliza o fork corrigido de Jacobinwwey.
+
+Instale main.js, manifest.json e styles.css da versão 1.9.13 e volte a carregar o plugin. As notas e definições existentes são preservadas. Substitua o pacote antigo do fork do Slidev através do instalador do ambiente de exportação.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -757,7 +766,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.9.12 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.13 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 

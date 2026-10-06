@@ -1,3 +1,21 @@
+## 1.9.13 — preview and presentation reliability
+
+### English
+
+Successful export logs collapse automatically; incomplete runs and errors remain visible. Each preview has an independent lock beside zoom-out, preserving position and scale while allowing SVG/HTML text selection. PNG/PDF previews open through Obsidian's native binary viewer.
+
+Presentation exports accept multiple formats, prepare the deck once, and share PNG capture with MP4. Windows Playwright installation and detection use the same package and browser cache, with a real launch check. Only the Jacobinwwey Slidev fork is accepted; invalid explicit CLI paths stop ineffective installation attempts. Obsidian image embeds are preserved through source preparation.
+
+The repaired fork `notemd-standalone-v52.16.0-2` is published and is the new installation target; the known-broken `-1` archive is no longer accepted. A fresh vault with migrated settings completed real API generation and all five exports with 32 slides, retaining all three Mermaid blocks and the full task log. Cold browser probes have separate launch/process budgets and preserve failure causes. See `docs/maintainer/2026-10-06-preview-slidev-reliability.md`.
+
+### 中文
+
+成功导出的完成日志自动收起，未完成任务和错误保持可见。各预览的缩小按钮旁增加独立锁定按钮，冻结位置和比例，同时允许选择 SVG/HTML 文字。PNG/PDF 预览通过 Obsidian 原生二进制查看器打开。
+
+演示导出支持多选格式，只准备一次文档，PNG 与 MP4 共用截图。Windows Playwright 安装与检测使用同一个包及浏览器缓存，并实际启动验证。仅接受 Jacobinwwey Slidev fork；显式 CLI 路径无效时停止无效安装。源准备阶段保留并转换 Obsidian 图片嵌入。
+
+修复后的 fork `notemd-standalone-v52.16.0-2` 已发布并成为新的安装目标，不再接受已确认存在缺陷的 `-1` 压缩包。完整迁移配置的新 vault 已通过真实 API 生成及五格式导出，共 32 页，保留三个 Mermaid 源块和完整任务日志。浏览器冷启动探测分别设置启动与进程预算，并保留失败原因。详见 `docs/maintainer/2026-10-06-preview-slidev-reliability.zh-CN.md`。
+
 ## 1.9.12
 
 ### English

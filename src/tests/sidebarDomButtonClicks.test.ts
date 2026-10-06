@@ -24,6 +24,7 @@ type MockPlugin = {
         customWorkflowErrorStrategy: 'stop_on_error' | 'continue_on_error';
         enableApiErrorDebugMode: boolean;
         slideExportDefaultFormat: 'html' | 'pdf' | 'png' | 'pptx' | 'mp4';
+        slideExportFormats?: Array<'html' | 'pdf' | 'png' | 'pptx' | 'mp4'>;
     };
     saveSettings: jest.Mock<Promise<void>, []>;
     getIsBusy: jest.Mock<boolean, []>;
@@ -73,6 +74,10 @@ class FakeElement {
     value = '';
     type = '';
     checked = false;
+    selected = false;
+    multiple = false;
+    get options() { return this.children.filter(child => child.tag === 'option'); }
+    get selectedOptions() { return this.options.filter(option => option.selected); }
     scrollTop = 0;
     scrollHeight = 100;
     inputEl: any;
@@ -542,18 +547,20 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
     });
 
-    test('renders slide export format selector and saves selected format', async () => {
+    test('renders multiple slide export formats and persists the selection', async () => {
         await sidebar.onOpen();
 
         const selector = contentContainer.findByClass('notemd-slide-export-format-select');
         expect(selector).not.toBeNull();
         expect(selector?.tag).toBe('select');
-        expect(selector?.value).toBe('html');
+        expect(selector?.multiple).toBe(true);
+        expect(selector?.selectedOptions.map(option => option.value)).toEqual(['html']);
 
-        selector!.value = 'pptx';
+        selector!.options.forEach(option => { option.selected = ['pdf', 'pptx'].includes(option.value); });
         await selector!.onchange?.();
 
-        expect(plugin.settings.slideExportDefaultFormat).toBe('pptx');
+        expect(plugin.settings.slideExportDefaultFormat).toBe('pdf');
+        expect(plugin.settings.slideExportFormats).toEqual(['pdf', 'pptx']);
         expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
     });
 

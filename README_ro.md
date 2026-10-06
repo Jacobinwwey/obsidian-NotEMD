@@ -26,7 +26,16 @@ Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală ind
 | Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
 | Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
 
-**Versiune:** 1.9.12
+**Versiune:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Comenzi de previzualizare și exportul prezentărilor
+
+Jurnalele exporturilor reușite sunt restrânse implicit. Blocați fiecare previzualizare pentru a selecta text SVG/HTML fără deplasare sau zoom. Au fost reparate previzualizările PNG/PDF și exportul prezentărilor în mai multe formate. Instalarea browserului în Windows verifică pornirea efectivă și acordă timp primei porniri. Slidev folosește forkul corectat al lui Jacobinwwey.
+
+Instalați fișierele main.js, manifest.json și styles.css corespunzătoare versiunii 1.9.13, apoi reîncărcați extensia. Notele și setările existente se păstrează. Înlocuiți vechiul pachet al forkului Slidev prin programul de instalare a mediului de export.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -748,7 +757,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.12 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.13 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->

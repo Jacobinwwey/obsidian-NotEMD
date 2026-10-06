@@ -38,7 +38,8 @@ import {
 	resolveSlidevPptxFontPolicy,
 } from './pptxFontContract';
 import { writePptxDocument, writeVisibleNativeExperimentPptxDocument } from './pptxWriter';
-import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
+import { getVaultBasePath } from './platformUtils';
+import { loadSlideExportChromium } from './playwrightRuntime';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
 
 const TABLE_CELL_TEXT_INSET_DELTA_THRESHOLD_IN = 0.02;
@@ -100,16 +101,6 @@ type VisibleNativeBackgroundCapture = {
 };
 
 type PptxReportTextPolicy = 'default-emitted-text' | 'all-extracted-text';
-
-function resolvePlaywrightRuntime(): PlaywrightRuntime | null {
-	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
-	if (playwrightBrowsersPath && !process.env.PLAYWRIGHT_BROWSERS_PATH) {
-		process.env.PLAYWRIGHT_BROWSERS_PATH = playwrightBrowsersPath;
-	}
-
-	const playwright = safeRequire('playwright') as PlaywrightRuntime | null;
-	return playwright?.chromium ? playwright : null;
-}
 
 function resolveSlideCount(
 	source: SlidevExportSource,
@@ -740,7 +731,7 @@ async function extractSlidesFromHtml(
 	slides: SlidevPptxSlide[];
 	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary;
 }> {
-	const playwright = resolvePlaywrightRuntime();
+	const playwright = loadSlideExportChromium(dirname(htmlPath)) as PlaywrightRuntime | null;
 	if (!playwright?.chromium) {
 		throw new Error('Playwright runtime is unavailable; PPTX export requires Playwright Chromium.');
 	}
@@ -796,7 +787,7 @@ async function capturePptxRenderedHtmlReferenceImages(
 	config: SlideExportConfig,
 	onProgress?: ExportProgressCallback,
 ): Promise<SlidevPptxImage[]> {
-	const playwright = resolvePlaywrightRuntime();
+	const playwright = loadSlideExportChromium(dirname(htmlPath)) as PlaywrightRuntime | null;
 	if (!playwright?.chromium) {
 		throw new Error('Playwright runtime is unavailable; PPTX rendered-HTML PNG reference requires Playwright Chromium.');
 	}
@@ -849,7 +840,7 @@ async function extractVisibleNativeExperimentSlidesFromHtml(
 	slides: SlidevPptxSlide[];
 	residueSampling: SlidevPptxVisibleNativeResidueSamplingSummary;
 }> {
-	const playwright = resolvePlaywrightRuntime();
+	const playwright = loadSlideExportChromium(dirname(htmlPath)) as PlaywrightRuntime | null;
 	if (!playwright?.chromium) {
 		throw new Error('Playwright runtime is unavailable; PPTX export requires Playwright Chromium.');
 	}

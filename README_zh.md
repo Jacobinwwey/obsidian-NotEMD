@@ -18,6 +18,10 @@
 
 ## 从这里开始
 
+导出全部成功时日志默认收起。点击各预览缩小按钮旁的锁，可冻结移动与缩放并选择 SVG/HTML 文字。PNG/PDF 使用 Obsidian 原生查看器。演示导出支持多选格式，必须使用 Jacobinwwey Slidev fork，不再回退官方包。
+
+验证进度与所要求的 fork 来源见[预览及导出可靠性记录](./docs/maintainer/2026-10-06-preview-slidev-reliability.zh-CN.md)。
+
 | 读者 | 入口 | 可完成的任务 |
 |---|---|---|
 | 新人 | [快速开始](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start) | 配置 provider 并验证一篇笔记 |
@@ -29,7 +33,17 @@
 
 Notemd 是采用 **MIT 许可证的 Obsidian 插件**，提供文件式知识工作流，支持云端 provider、网关和本地模型服务器。输出保存在库中；云端任务会向选定端点发送内容，Web 研究也会联网。
 
-**版本:** 1.9.12
+**版本:** 1.9.13
+
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — 预览控制与演示导出
+
+成功导出的日志默认收起。锁定各预览后，可选择 SVG／HTML 文字而不移动或缩放图形。修复 PNG／PDF 预览及多格式演示导出。Windows 浏览器安装实际验证启动，并为冷启动预留时间。Slidev 使用修复后的 Jacobinwwey fork。
+
+安装 1.9.13 配套的 main.js、manifest.json 和 styles.css 后重载，保留现有笔记及设置。通过导出环境安装器替换旧 Slidev fork 包。
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -938,7 +952,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.12 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.13 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史

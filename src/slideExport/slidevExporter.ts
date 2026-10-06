@@ -8,10 +8,18 @@
 import type { App } from 'obsidian';
 import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource, SlidevHtmlActualMode, SlidevHtmlExportOutcome } from './types';
 import { NOTEMD_SLIDEV_INSTALL_PACKAGES } from './slidevDistribution';
-import { findMissingSlidevBuildOptions, formatSlidevBuildRequirementError } from './slidevCompatibility';
+import { findMissingSlidevBuildOptions, formatSlidevBuildRequirementError, NOTEMD_SLIDEV_MISSING_ERROR } from './slidevCompatibility';
 import { execFileAsync, getVaultBasePath, resolveNpmCommand, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
+import { PLAYWRIGHT_RESOLUTION_SCRIPT, slideExportRuntimeRoots } from './playwrightRuntime';
+import { probePlaywright, probeSlidev } from './environmentProber';
 import { collectLocalAssetReferencesWithDependencies, copyLocalSlidevAssetReference } from './slidevSourcePreparer';
 import { injectMermaidPostFitIntoHtml } from './mermaidFitScript';
+
+function requireSlidevForExport(vaultRoot: string) {
+	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
+	if (!slidev) throw new Error(NOTEMD_SLIDEV_MISSING_ERROR);
+	return slidev;
+}
 
 // In Slidev's one-piece export mode the CLI renders all slides on a single tall
 // page and only waits for one shared `#mermaid-rendering-container`, so later
@@ -227,7 +235,7 @@ async function exportSlidevStandaloneHtml(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides`;
-	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
+	const slidev = requireSlidevForExport(vaultRoot);
 	recreateDirectory(outputDir);
 	const args = [
 		...slidev.argsPrefix,
@@ -315,7 +323,7 @@ async function exportSlidevServerHtml(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides`;
-	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
+	const slidev = requireSlidevForExport(vaultRoot);
 	recreateDirectory(outputDir);
 	const args = [
 		...slidev.argsPrefix,
@@ -368,7 +376,7 @@ export async function exportSlidevPdf(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}`;
-	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
+	const slidev = requireSlidevForExport(vaultRoot);
 	ensureDirectoryExists(outputDir);
 	const outputPath = `${outputDir}/${source.outputBasename}.pdf`;
 	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
@@ -413,7 +421,7 @@ export async function exportSlidevPng(
 
 	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
 	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides-png`;
-	const slidev = resolveSlidevCommand({ roots: [vaultRoot] });
+	const slidev = requireSlidevForExport(vaultRoot);
 	recreateDirectory(outputDir);
 	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
 
@@ -453,7 +461,14 @@ export async function installSlidevForVault(
 	onProgress?: ExportProgressCallback,
 ): Promise<ExecResult> {
 	const slidev = resolveSlidevCommand({ roots: [projectRoot] });
-	if (slidev.source !== 'npx') {
+	if (!slidev && (process.env.NOTEMD_SLIDEV_BIN || process.env.SLIDEV_CLI_PATH)) {
+		// Explicit paths remain authoritative after installation; installing into
+		// the vault cannot repair an invalid override and would repeat indefinitely.
+		const message = 'Cannot verify the configured Jacobinwwey/slidev fork. Correct or clear NOTEMD_SLIDEV_BIN / SLIDEV_CLI_PATH before installing into the vault.';
+		onProgress?.('install-slidev', message);
+		return { exitCode: 1, stdout: '', stderr: message, error: new Error(message) };
+	}
+	if (slidev) {
 		onProgress?.('install-slidev', `Using ${slidev.description}...`);
 		const versionResult = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 120_000 });
 		if (versionResult.exitCode !== 0) {
@@ -487,7 +502,17 @@ export async function installSlidevForVault(
 		cwd: projectRoot,
 		timeout: 300_000,
 	});
-	onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI installed' : 'Slidev CLI install failed');
+	if (result.exitCode !== 0) {
+		onProgress?.('install-slidev', 'Slidev CLI install failed');
+		return result;
+	}
+	const probe = await probeSlidev([projectRoot]);
+	if (!probe.installed) {
+		const message = probe.error || NOTEMD_SLIDEV_MISSING_ERROR;
+		onProgress?.('install-slidev', message);
+		return { exitCode: 1, stdout: result.stdout, stderr: message, error: new Error(message) };
+	}
+	onProgress?.('install-slidev', 'NoteMD Slidev fork installed and verified');
 	return result;
 }
 
@@ -496,11 +521,36 @@ export async function installSlidevForVault(
  */
 export async function autoInstallPlaywright(
 	onProgress?: ExportProgressCallback,
+	projectRoot: string = process.cwd(),
 ): Promise<ExecResult> {
+	const browserPath = resolvePlaywrightBrowsersPath();
+	const env = browserPath ? { PLAYWRIGHT_BROWSERS_PATH: browserPath } : undefined;
+	const resolveScript = `${PLAYWRIGHT_RESOLUTION_SCRIPT}\nconsole.log(require("path").join(require("path").dirname(packagePath), "cli.js"));`;
+	const resolveCli = () => execFileAsync('node', ['-e', resolveScript, ...slideExportRuntimeRoots([projectRoot])], { cwd: projectRoot, timeout: 15_000, env });
+	let resolved = await resolveCli();
+	if (resolved.exitCode !== 0) {
+		onProgress?.('install-playwright', 'Installing the vault Playwright Chromium runtime...');
+		const installed = await execFileAsync(resolveNpmCommand(), ['install', '-D', 'playwright-chromium'], {
+			cwd: projectRoot,
+			timeout: 300_000,
+			env: { ...env, PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' },
+		});
+		if (installed.exitCode !== 0) return installed;
+		resolved = await resolveCli();
+	}
+	if (resolved.exitCode !== 0) return resolved;
+	const cliPath = resolved.stdout.trim();
+	if (!cliPath) return { exitCode: 1, stdout: '', stderr: 'Unable to resolve the vault Playwright Chromium CLI.' };
 	onProgress?.('install-playwright', 'Downloading Playwright Chromium (may take a moment)...');
-	const npx = resolveNpxCommand();
-	const result = await execFileAsync(npx, ['playwright', 'install', 'chromium'], { timeout: 300_000 });
-	onProgress?.('install-playwright', result.exitCode === 0 ? 'Playwright Chromium installed' : 'Playwright install failed');
+	const result = await execFileAsync('node', [cliPath, 'install', 'chromium'], { cwd: projectRoot, timeout: 300_000, env });
+	if (result.exitCode !== 0) return result;
+	const probe = await probePlaywright([projectRoot]);
+	if (!probe.installed) {
+		const message = probe.error || 'Playwright Chromium could not launch after installation.';
+		onProgress?.('install-playwright', message);
+		return { exitCode: 1, stdout: result.stdout, stderr: message, error: new Error(message) };
+	}
+	onProgress?.('install-playwright', 'Playwright Chromium installed');
 	return result;
 }
 

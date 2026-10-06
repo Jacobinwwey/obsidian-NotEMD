@@ -7,6 +7,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "تكبير",
             zoomOut: "تصغير",
+            zoomLock: "قفل الموضع والتكبير",
+            zoomUnlock: "إلغاء قفل الموضع والتكبير",
             zoomFit: "ملاءمة",
             zoomActual: "الحجم الفعلي",
             zoomLevel: "مستوى التكبير",
@@ -39,6 +41,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Vergrößern",
             zoomOut: "Verkleinern",
+            zoomLock: "Position und Zoom sperren",
+            zoomUnlock: "Position und Zoom entsperren",
             zoomFit: "Einpassen",
             zoomActual: "Originalgröße",
             zoomLevel: "Zoomstufe",
@@ -71,6 +75,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Acercar",
             zoomOut: "Alejar",
+            zoomLock: "Bloquear posición y zoom",
+            zoomUnlock: "Desbloquear posición y zoom",
             zoomFit: "Ajustar",
             zoomActual: "Tamaño real",
             zoomLevel: "Nivel de zoom",
@@ -103,6 +109,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "بزرگ‌نمایی",
             zoomOut: "کوچک‌نمایی",
+            zoomLock: "قفل موقعیت و بزرگ‌نمایی",
+            zoomUnlock: "باز کردن قفل موقعیت و بزرگ‌نمایی",
             zoomFit: "جا دادن",
             zoomActual: "اندازهٔ واقعی",
             zoomLevel: "میزان بزرگ‌نمایی",
@@ -135,6 +143,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Agrandir",
             zoomOut: "Réduire",
+            zoomLock: "Verrouiller la position et le zoom",
+            zoomUnlock: "Déverrouiller la position et le zoom",
             zoomFit: "Ajuster",
             zoomActual: "Taille réelle",
             zoomLevel: "Niveau de zoom",
@@ -167,6 +177,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Perbesar",
             zoomOut: "Perkecil",
+            zoomLock: "Kunci posisi dan zoom",
+            zoomUnlock: "Buka kunci posisi dan zoom",
             zoomFit: "Sesuaikan",
             zoomActual: "Ukuran asli",
             zoomLevel: "Tingkat zoom",
@@ -199,6 +211,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Ingrandisci",
             zoomOut: "Riduci",
+            zoomLock: "Blocca posizione e zoom",
+            zoomUnlock: "Sblocca posizione e zoom",
             zoomFit: "Adatta",
             zoomActual: "Dimensioni reali",
             zoomLevel: "Livello di zoom",
@@ -231,6 +245,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "拡大",
             zoomOut: "縮小",
+            zoomLock: "位置とズームをロック",
+            zoomUnlock: "位置とズームのロックを解除",
             zoomFit: "全体表示",
             zoomActual: "実際のサイズ",
             zoomLevel: "ズーム倍率",
@@ -263,6 +279,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "확대",
             zoomOut: "축소",
+            zoomLock: "위치 및 확대/축소 잠금",
+            zoomUnlock: "위치 및 확대/축소 잠금 해제",
             zoomFit: "화면 맞춤",
             zoomActual: "실제 크기",
             zoomLevel: "확대 배율",
@@ -295,6 +313,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Inzoomen",
             zoomOut: "Uitzoomen",
+            zoomLock: "Positie en zoom vergrendelen",
+            zoomUnlock: "Positie en zoom ontgrendelen",
             zoomFit: "Passend",
             zoomActual: "Werkelijke grootte",
             zoomLevel: "Zoomniveau",
@@ -327,6 +347,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Powiększ",
             zoomOut: "Pomniejsz",
+            zoomLock: "Zablokuj pozycję i powiększenie",
+            zoomUnlock: "Odblokuj pozycję i powiększenie",
             zoomFit: "Dopasuj",
             zoomActual: "Rozmiar rzeczywisty",
             zoomLevel: "Poziom powiększenia",
@@ -359,6 +381,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Ampliar",
             zoomOut: "Reduzir",
+            zoomLock: "Bloquear posição e zoom",
+            zoomUnlock: "Desbloquear posição e zoom",
             zoomFit: "Ajustar",
             zoomActual: "Tamanho real",
             zoomLevel: "Nível de zoom",
@@ -391,6 +415,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Ampliar",
             zoomOut: "Reduzir",
+            zoomLock: "Bloquear posição e zoom",
+            zoomUnlock: "Desbloquear posição e zoom",
             zoomFit: "Ajustar",
             zoomActual: "Tamanho real",
             zoomLevel: "Nível de zoom",
@@ -423,6 +449,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Увеличить",
             zoomOut: "Уменьшить",
+            zoomLock: "Заблокировать положение и масштаб",
+            zoomUnlock: "Разблокировать положение и масштаб",
             zoomFit: "Вписать",
             zoomActual: "Исходный размер",
             zoomLevel: "Масштаб",
@@ -455,6 +483,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "ขยาย",
             zoomOut: "ย่อ",
+            zoomLock: "ล็อกตำแหน่งและการซูม",
+            zoomUnlock: "ปลดล็อกตำแหน่งและการซูม",
             zoomFit: "พอดีหน้าต่าง",
             zoomActual: "ขนาดจริง",
             zoomLevel: "ระดับการซูม",
@@ -487,6 +517,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Yakınlaştır",
             zoomOut: "Uzaklaştır",
+            zoomLock: "Konumu ve yakınlaştırmayı kilitle",
+            zoomUnlock: "Konum ve yakınlaştırma kilidini aç",
             zoomFit: "Sığdır",
             zoomActual: "Gerçek boyut",
             zoomLevel: "Yakınlaştırma düzeyi",
@@ -519,6 +551,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Збільшити",
             zoomOut: "Зменшити",
+            zoomLock: "Заблокувати положення й масштаб",
+            zoomUnlock: "Розблокувати положення й масштаб",
             zoomFit: "Умістити",
             zoomActual: "Початковий розмір",
             zoomLevel: "Масштаб",
@@ -551,6 +585,8 @@ export const PREVIEW_MODAL_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdE
         previewModal: {
             zoomIn: "Phóng to",
             zoomOut: "Thu nhỏ",
+            zoomLock: "Khóa vị trí và thu phóng",
+            zoomUnlock: "Mở khóa vị trí và thu phóng",
             zoomFit: "Vừa khung",
             zoomActual: "Kích thước thật",
             zoomLevel: "Mức thu phóng",

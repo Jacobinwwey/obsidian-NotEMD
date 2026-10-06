@@ -212,9 +212,17 @@ export class DiagramPreviewModal extends Modal {
     private renderExportRun(stage: HTMLElement): void {
         if (!this.exportRun && !this.exportRequest) return;
         const copy = getI18nStrings({ uiLocale: this.uiLocale }).diagramOutputs;
-        const panel = stage.createDiv({ cls: 'notemd-diagram-export-run', attr: { 'data-diagram-export-run': '', 'aria-live': 'polite' } });
-        if (this.exportHistoryError) panel.createEl('p', { text: this.exportHistoryError, attr: { role: 'alert' } });
         const run = this.exportRun;
+        const panel = stage.createEl('details', { cls: 'notemd-diagram-export-run', attr: { 'data-diagram-export-run': '', 'aria-live': 'polite' } });
+        // A successful status alone is insufficient when delivery or history still needs attention.
+        panel.open = !(run?.status === 'completed' && run.outputs.length > 0
+            && run.outputs.every(output => output.status === 'completed' && !output.error)
+            && !this.exportHistoryError
+            && !this.session.payload.artifact.diagnostics?.some(diagnostic => diagnostic.severity === 'error'));
+        panel.createEl('summary', { text: run
+            ? formatI18n(copy.runStatus, { status: copy[run.status], count: run.outputs.filter(output => output.status === 'completed').length, total: run.outputs.length })
+            : copy.exportSelected });
+        if (this.exportHistoryError) panel.createEl('p', { text: this.exportHistoryError, attr: { role: 'alert' } });
         if (!run && this.exportRequest) {
             const request = this.exportRequest;
             const typeId = request.generation.plan.catalogTypeId ?? findDefaultDiagramType(request.generation.spec.intent).id;
@@ -223,7 +231,6 @@ export class DiagramPreviewModal extends Modal {
             if (plan.inactiveOutputs.length) panel.createEl('p', { text: formatI18n(copy.inactive, { outputs: plan.inactiveOutputs.map(output => getDiagramOutputLabel(output.id, { uiLocale: this.uiLocale })).join(', ') }) });
         }
         if (run) {
-            panel.createEl('p', { text: formatI18n(copy.runStatus, { status: copy[run.status], count: run.outputs.filter(output => output.status === 'completed').length, total: run.outputs.length }) });
             const list = panel.createEl('ul');
             for (const output of run.outputs) {
                 const item = list.createEl('li');

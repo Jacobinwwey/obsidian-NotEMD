@@ -7,9 +7,14 @@
 
 import type { EnvironmentReport, ExportCapabilities, ProbeResult } from './types';
 import { execFileAsync, getOsPlatform, isDesktopApp, resolvePlaywrightBrowsersPath, resolveSlidevCommand } from './platformUtils';
-import { findMissingSlidevBuildOptions, formatSlidevBuildRequirementError } from './slidevCompatibility';
+import { findMissingSlidevBuildOptions, formatSlidevBuildRequirementError, NOTEMD_SLIDEV_MISSING_ERROR } from './slidevCompatibility';
+import { PLAYWRIGHT_RESOLUTION_SCRIPT, slideExportRuntimeRoots } from './playwrightRuntime';
 
 const MIN_NODE_MAJOR = 20;
+const PLAYWRIGHT_LAUNCH_TIMEOUT_MS = 30_000;
+// A fresh Windows browser installation needs time for module loading and
+// first launch; the process budget also covers graceful browser shutdown.
+const PLAYWRIGHT_PROBE_TIMEOUT_MS = 60_000;
 
 function makeMissingProbe(tool: ProbeResult['tool'], error: string): ProbeResult {
 	return { tool, installed: false, version: null, error };
@@ -34,6 +39,7 @@ export async function probeSlidev(searchRoots: string[] = []): Promise<ProbeResu
 	if (!isDesktopApp()) return makeMissingProbe('slidev', 'Not a desktop app');
 
 	const slidev = resolveSlidevCommand({ roots: searchRoots });
+	if (!slidev) return makeMissingProbe('slidev', NOTEMD_SLIDEV_MISSING_ERROR);
 	const result = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 45_000 });
 	if (result.exitCode === 0) {
 		const version = result.stdout.trim() || 'available';
@@ -58,30 +64,34 @@ export async function probeSlidev(searchRoots: string[] = []): Promise<ProbeResu
 export async function probePlaywright(searchRoots: string[] = []): Promise<ProbeResult> {
 	if (!isDesktopApp()) return makeMissingProbe('playwright', 'Not a desktop app');
 
-	const roots = Array.from(new Set([typeof process !== 'undefined' ? process.cwd() : '', ...searchRoots].filter(Boolean)));
+	const roots = slideExportRuntimeRoots(searchRoots);
 	const script = [
-		'const fs = require("fs");',
-		'const roots = process.argv.slice(1);',
-		'const resolveOptions = roots.length > 0 ? { paths: roots } : undefined;',
-		'const entry = require.resolve("playwright-chromium", resolveOptions);',
-		'const packageJson = require(require.resolve("playwright-chromium/package.json", resolveOptions));',
-		'const runtime = require(entry);',
-		'const executablePath = runtime.chromium?.executablePath?.();',
-		'if (!executablePath || !fs.existsSync(executablePath)) {',
-		'  throw new Error(`playwright-chromium found, but Chromium executable is unavailable: ${executablePath || "unknown"}`);',
-		'}',
-		'console.log(`${packageJson.version} (${executablePath})`);',
+		PLAYWRIGHT_RESOLUTION_SCRIPT,
+		'const runtime = require(require("path").dirname(packagePath));',
+		'(async () => {',
+		`  const browser = await runtime.chromium.launch({ headless: true, timeout: ${PLAYWRIGHT_LAUNCH_TIMEOUT_MS} });`,
+		'  try { console.log(`${require(packagePath).version} (${runtime.chromium.executablePath()})`); }',
+		'  finally { await browser.close(); }',
+		'})().catch(error => { console.error(error); process.exitCode = 1; });',
 	].join('\n');
 	const browserPath = resolvePlaywrightBrowsersPath();
 	const result = await execFileAsync('node', ['-e', script, ...roots], {
-		timeout: 15_000,
+		cwd: searchRoots[0],
+		timeout: PLAYWRIGHT_PROBE_TIMEOUT_MS,
 		env: browserPath ? { PLAYWRIGHT_BROWSERS_PATH: browserPath } : undefined,
 	});
 	if (result.exitCode === 0) {
 		return { tool: 'playwright', installed: true, version: `playwright-chromium ${result.stdout.trim() || 'available'}` };
 	}
 
-	const stderr = `${result.stderr || ''}\n${result.stdout || ''}`.trim();
+	// Spawn failures and killed probes may produce no output; preserve their
+	// cause so a timeout is not misreported as an absent runtime.
+	const processError = result.error as (Error & { killed?: boolean }) | undefined;
+	const stderr = `${result.stderr || ''}\n${result.stdout || ''}`.trim()
+		|| (processError?.killed
+			? `Playwright probe was terminated before completion (${PLAYWRIGHT_PROBE_TIMEOUT_MS} ms process limit).`
+			: processError?.message)
+		|| `Probe process exited with code ${result.exitCode}`;
 	return {
 		tool: 'playwright',
 		installed: false,

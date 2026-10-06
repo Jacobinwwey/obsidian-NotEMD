@@ -12,7 +12,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 
 1. 当前 Markdown 笔记会在导出前转换成真正的 Slidev deck。
 2. 能发现完整 Slidev skill 目录，包括 `references/*.md`，而不是只读 `SKILL.md`。
-3. 本地 Slidev fork 存在时会被优先使用。
+3. 仅允许要求的 Jacobinwwey Slidev fork，支持源码 checkout 与已发布 fork 包，禁止回退到官方 registry。
 4. 现有 Slidev deck 也会先复制到隔离的 prepared working workspace，再进入验证链，避免 patch/retry 直接改写源笔记，同时允许把 sibling Slidev support entries 和显式引用的本地资产一并镜像进 working copy。
 5. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
 6. 生成 deck 的 guardrails 会规范 theme 与逐页 frontmatter，并剥离生成页中的 Mermaid `zoom`，让 rendered audit 拥有实测 fit 决策权；LLM 生成的 deck 如果改变源 Mermaid fence，会在写入 prepared deck 前被拒绝。

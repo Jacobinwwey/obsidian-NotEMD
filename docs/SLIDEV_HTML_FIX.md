@@ -30,7 +30,7 @@ The environment-check UI must use a real npm-installable package URL for the Not
 Current install command:
 
 ```bash
-npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-1/slidev-cli-notemd-standalone-v52.16.0-1.tgz @slidev/theme-default
+npm install -D https://github.com/Jacobinwwey/slidev/releases/download/notemd-standalone-v52.16.0-2/slidev-cli-notemd-standalone-v52.16.0-2.tgz @slidev/theme-default
 ```
 
 This release asset was smoke-tested on 2026-06-21 with `npm pack --dry-run` and a clean-project `npm install`; the installed `slidev build --help` exposes `--standalone-bundle`.

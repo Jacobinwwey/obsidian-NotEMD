@@ -26,7 +26,16 @@ Varje diagramförhandsvisning har separat zoom, panorering, anpassning och fakti
 | Utvecklare | [Utvecklarguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/developers/overview) | Bygg, testa och utöka befintliga kontrakt |
 | Agent | [Agentguide](https://jacobinwwey.github.io/obsidian-NotEMD/sv/docs/agents/overview) | Hitta fyra stödda exportkommandon |
 
-**Version:** 1.9.12
+**Version:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — Förhandsvisningskontroller och presentationsexport
+
+Loggar för lyckade exporter är hopfällda från början. Lås varje förhandsvisning för att markera SVG/HTML-text utan att flytta eller zooma. PNG/PDF-förhandsvisningar och presentationsexport till flera format har rättats. Webbläsarinstallationen i Windows kontrollerar att webbläsaren startar och ger tid för den första starten. Slidev använder Jacobinwweys rättade fork.
+
+Installera main.js, manifest.json och styles.css från version 1.9.13 och ladda om tillägget. Befintliga anteckningar och inställningar bevaras. Ersätt det äldre Slidev-forkpaketet via exportmiljöns installationsprogram.
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -751,7 +760,7 @@ MIT License - Se filen [LICENSE](LICENSE) för detaljer.
 ---
 
 
-*Notemd v1.9.12 - Förbättra din Obsidian-kunskapsgraf med AI.*
+*Notemd v1.9.13 - Förbättra din Obsidian-kunskapsgraf med AI.*
 
 
 <!-- repo-chronicle:start -->

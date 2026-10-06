@@ -26,7 +26,16 @@
 | นักพัฒนา | [คู่มือนักพัฒนา](https://jacobinwwey.github.io/obsidian-NotEMD/th/docs/developers/overview) | สร้าง ทดสอบ และขยายข้อตกลงเดิม |
 | เอเจนต์ | [คู่มือเอเจนต์](https://jacobinwwey.github.io/obsidian-NotEMD/th/docs/agents/overview) | ค้นหาคำสั่งส่งออกที่รองรับทั้งสี่คำสั่ง |
 
-**เวอร์ชัน:** 1.9.12
+**เวอร์ชัน:** 1.9.13
+<!-- notemd-preview-export-1.9.13 -->
+
+## Notemd 1.9.13 — การควบคุมตัวอย่างและการส่งออกงานนำเสนอ
+
+บันทึกการส่งออกที่สำเร็จจะยุบไว้ตามค่าเริ่มต้น ล็อกตัวอย่างแต่ละรายการเพื่อเลือกข้อความ SVG/HTML โดยไม่เลื่อนหรือซูม แก้ไขตัวอย่าง PNG/PDF และการส่งออกงานนำเสนอหลายรูปแบบแล้ว การติดตั้งเบราว์เซอร์บน Windows ตรวจสอบการเปิดใช้งานจริงและเผื่อเวลาสำหรับการเปิดครั้งแรก Slidev ใช้ฟอร์กของ Jacobinwwey ที่แก้ไขแล้ว
+
+ติดตั้ง main.js, manifest.json และ styles.css จากรุ่น 1.9.13 ให้ตรงกัน แล้วโหลดปลั๊กอินใหม่ บันทึกและการตั้งค่าเดิมยังคงอยู่ ใช้ตัวติดตั้งสภาพแวดล้อมการส่งออกเพื่อเปลี่ยนแพ็กเกจฟอร์ก Slidev รุ่นเก่า
+
+[1.9.13](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.13) · [Slidev -2](https://github.com/Jacobinwwey/slidev/releases/tag/notemd-standalone-v52.16.0-2)
 
 <!-- notemd-diagnostics-1.9.12 -->
 
@@ -754,7 +763,7 @@ MIT License - ดูรายละเอียดได้ในไฟล์ [L
 ---
 
 
-*Notemd v1.9.12 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
+*Notemd v1.9.13 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
 
 
 
