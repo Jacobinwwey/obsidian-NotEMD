@@ -767,7 +767,7 @@ One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-me
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.el.svg)
 
-_Τελευταία ανανέωση για την ετικέτα έκδοσης `1.9.12` στις 2026-10-05. Ημερομηνία τελευταίου commit: 2026-10-05._
+_Τελευταία ανανέωση για την ετικέτα έκδοσης `1.9.13` στις 2026-10-06. Ημερομηνία τελευταίου commit: 2026-10-06._
 <!-- repo-chronicle:end -->
 
 
