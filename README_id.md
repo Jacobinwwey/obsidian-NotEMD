@@ -793,7 +793,7 @@ Kronik triwulanan ini mempertahankan gaya visual asli [repo-saga](https://github
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.id.svg)
 
-_Terakhir diperbarui untuk tag rilis `1.9.13` pada 2026-10-06. Tanggal commit terbaru: 2026-10-06._
+_Terakhir diperbarui untuk tag rilis `1.9.14` pada 2026-10-07. Tanggal commit terbaru: 2026-10-07._
 <!-- repo-chronicle:end -->
 
 
