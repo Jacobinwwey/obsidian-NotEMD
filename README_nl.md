@@ -785,7 +785,7 @@ Deze kwartaalchroniek behoudt de oorspronkelijke visuele stijl van [repo-saga](h
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.nl.svg)
 
-_Laatst vernieuwd voor releasetag `1.9.13` op 2026-10-06. Datum van de laatste commit: 2026-10-06._
+_Laatst vernieuwd voor releasetag `1.9.14` op 2026-10-07. Datum van de laatste commit: 2026-10-07._
 <!-- repo-chronicle:end -->
 
 
