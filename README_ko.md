@@ -26,7 +26,21 @@
 | 개발자 | [개발 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/developers/overview) | 기존 계약에 따라 빌드, 테스트, 확장하기 |
 | 에이전트 | [에이전트 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/agents/overview) | 지원되는 네 가지 내보내기 명령 확인하기 |
 
-**버전:** 1.9.13
+**버전:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — 선명한 PDF 미리보기와 여러 형식 내보내기
+
+PNG/PDF가 다이어그램 미리보기 안에서 열리며 PDF 페이지마다 독립적인 조작 기능을 제공합니다. 확대하면 화면 픽셀 밀도에 맞춰 보이는 영역을 다시 그리면서 메모리 사용량을 제한합니다. 포함된 비트맵의 선명도는 원본 해상도의 한계를 유지합니다.
+
+Alt를 누르고 있으면 이동과 확대·축소가 잠겨 SVG/HTML/PDF의 선택 가능한 텍스트를 선택할 수 있습니다. 키를 놓으면 이전 잠금 상태로 돌아갑니다. PNG에는 선택 가능한 텍스트 계층이 없습니다.
+
+SVG, PNG 및/또는 PDF와 저장 폴더를 선택하고 한 번 확인하세요. 전체 내보내기는 모든 패널을, 패널별 내보내기는 해당 패널만 처리합니다. 프레젠테이션 형식은 체크박스로 선택하며 하나 이상을 유지해야 합니다. 진행 상황과 일부 실패가 계속 표시됩니다.
+
+1.9.14의 main.js, manifest.json, styles.css를 함께 설치한 뒤 다시 로드하세요. 기존 노트와 설정은 유지됩니다.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — 미리 보기 제어 및 프레젠테이션 내보내기
@@ -766,7 +780,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.13 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.14 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 

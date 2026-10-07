@@ -26,7 +26,21 @@ Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang 
 | Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
 | Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
 
-**Versi:** 1.9.13
+**Versi:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Pratinjau PDF tajam dan ekspor berbagai format
+
+PNG/PDF terbuka di pratinjau diagram. Setiap halaman PDF memiliki kontrol mandiri. Zoom menggambar ulang area terlihat sesuai kepadatan piksel layar dengan memori terbatas; gambar bitmap tertanam tetap dibatasi resolusi sumber.
+
+Tahan Alt untuk membekukan navigasi saat memilih teks SVG/HTML/PDF yang tersedia. Melepasnya memulihkan status kunci sebelumnya. PNG tidak memiliki lapisan teks yang dapat dipilih.
+
+Pilih SVG, PNG dan/atau PDF serta folder tujuan, lalu konfirmasi sekali. Ekspor utama mencakup semua panel; ekspor panel hanya mencakup panel tersebut. Format presentasi memakai kotak centang dan membutuhkan setidaknya satu pilihan. Kemajuan dan kegagalan sebagian tetap terlihat.
+
+Pasang main.js, manifest.json dan styles.css yang cocok dari 1.9.14 lalu muat ulang plugin. Catatan dan pengaturan yang ada tetap tersimpan.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Kontrol pratinjau dan ekspor presentasi
@@ -769,7 +783,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.13 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.14 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->

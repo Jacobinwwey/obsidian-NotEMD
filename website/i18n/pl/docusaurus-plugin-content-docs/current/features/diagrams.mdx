@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Wybierz wiele typów diagramów w jednym uruchomieniu i osobne zestawy formatów dla każdego typu. Odznaczenie typu zachowuje jego formaty; brak wyboru oznacza automatyczną analizę treści.
 </TLDR>
 
-Po udanym zakończeniu wszystkich eksportów dzienniki są zwinięte. Kłódka obok minusa blokuje przesuwanie i powiększanie, umożliwiając zaznaczanie tekstu SVG/HTML. PNG/PDF otwierają się we wbudowanej przeglądarce Obsidian. Prezentacje obsługują wiele formatów i wymagają forka Slidev od Jacobinwwey; oficjalny pakiet nie jest opcją zastępczą.
+PNG/PDF otwierają się w podglądzie diagramów. Każda strona PDF ma własne sterowanie. Powiększenie ponownie rysuje widoczny obszar zgodnie z gęstością pikseli ekranu i limitem pamięci; osadzone bitmapy pozostają ograniczone rozdzielczością źródła.
+
+Przytrzymaj Alt, aby zablokować nawigację podczas zaznaczania dostępnego tekstu SVG/HTML/PDF. Zwolnienie przywraca poprzedni stan blokady. PNG nie ma warstwy tekstu do zaznaczania.
 
 
 Każdy podgląd ma niezależne powiększenie, przesuwanie, dopasowanie i rozmiar rzeczywisty. Ctrl/Command + kółko zmienia skalę; samo kółko przewija. Duże eksporty PNG zachowują wybrane 72–600 PPI (domyślnie 300). SVG jest formatem wektorowym; PPI dotyczy tylko eksportów rastrowych.
@@ -58,13 +60,13 @@ Obsługiwane formaty są pierwsze, a niezgodne pozostają widoczne i wyłączone
 4. Użyj **Generuj diagram**.
 5. Wybrane pliki są automatycznie eksportowane obok notatki źródłowej lub bezpośrednio do wskazanego folderu. Nazwy zawierają typ, np. `topic_drawnix.pdf` i `topic_flowchart.svg`. Konflikty dodają `-2`, `-3` itd., bez nadpisywania plików.
 6. Sprawdź tablicę i panele Mermaid w kolejności źródłowej w jednej pionowo przewijanej prezentacji. Panele mają rzeczywistą wysokość.
-7. Użyj **Eksportuj SVG**, **Eksportuj PNG** lub **Export PDF** na panel albo wyeksportuj wszystkie u góry. Wybierz folder źródła lub własny względem skarbca. Nazwy są deterministyczne dla paneli, błąd jednego nie zatrzymuje pozostałych. Zachowaj edytowalny plik przez **Zapisz plik źródłowy**.
+7. Wybierz SVG, PNG i/lub PDF oraz folder docelowy, a potem potwierdź raz. Eksport główny obejmuje wszystkie panele, eksport panelu tylko ten panel. Formaty prezentacji wybiera się polami wyboru; wymagany jest co najmniej jeden. Postęp i częściowe błędy pozostają widoczne.
 
 Ustaw wspólny folder pośredni względem Vault albo pozostaw pole puste, aby używać `notemd_assert/` obok każdego źródła. Trafiają tam rekordy odzyskiwania, pamięć podręczna renderowania i opcjonalne załączniki. Zachowaj nadal używane pliki; zmiana dotyczy tylko nowych uruchomień.
 
 Typy są generowane kolejno. Błąd jednego nie blokuje innych; anulowanie zatrzymuje oczekujące typy i zachowuje gotowe pliki. Ponów eksport z podglądu lub historii bez nowego żądania do modelu. Błąd generowania wymaga ponownego wygenerowania typu. Rekordy v1/v2 pozostają czytelne.
 
-Menu eksportu i nagłówki paneli oferują te same trzy działania. **History** pokazuje wyszukiwanie, filtry, ponowne otwieranie i zapisane pliki bez zasłaniania podglądu. Historia jest także w palecie/panelu bez aktywnej notatki.
+Użyj **Zapisz plik źródłowy**, aby zachować edytowalny dokument.
 
 SVG/PDF korzystają z geometrii wektorowej. PDF zachowuje układ SVG i pomiary tekstu zamiast rasteryzować wszystko. PPI dotyczy wyłącznie PNG: 72–600, domyślnie 300.
 

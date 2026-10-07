@@ -26,7 +26,21 @@ Setiap pratonton rajah mempunyai zum, anjakan, muat dan saiz sebenar yang berasi
 | Pembangun | [Panduan pembangun](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/developers/overview) | Bina, uji dan perluaskan kontrak sedia ada |
 | Ejen | [Panduan ejen](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/agents/overview) | Temui empat perintah eksport yang disokong |
 
-**Versi:** 1.9.13
+**Versi:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Pratonton PDF jelas dan eksport pelbagai format
+
+PNG/PDF dibuka dalam pratonton rajah. Setiap halaman PDF mempunyai kawalan sendiri. Zum melukis semula kawasan yang kelihatan mengikut ketumpatan piksel skrin dengan memori terhad; imej bitmap terbenam masih terhad oleh resolusi sumber.
+
+Tahan Alt untuk membekukan navigasi semasa memilih teks SVG/HTML/PDF yang tersedia. Apabila dilepaskan, keadaan kunci sebelumnya dipulihkan. PNG tiada lapisan teks yang boleh dipilih.
+
+Pilih SVG, PNG dan/atau PDF serta folder destinasi, kemudian sahkan sekali. Eksport utama merangkumi semua panel; eksport panel hanya melibatkan panel tersebut. Format pembentangan menggunakan kotak semak dan memerlukan sekurang-kurangnya satu pilihan. Kemajuan dan kegagalan separa kekal dipaparkan.
+
+Pasang main.js, manifest.json dan styles.css yang sepadan daripada 1.9.14, kemudian muat semula pemalam. Nota dan tetapan sedia ada dikekalkan.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Kawalan pratonton dan eksport pembentangan
@@ -760,7 +774,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.13 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.14 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 

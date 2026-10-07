@@ -26,7 +26,21 @@ Jede Diagrammvorschau bietet unabhängigen Zoom, Verschieben, Einpassen und Orig
 | Entwickler | [Entwicklerhandbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/developers/overview) | Bestehende Verträge bauen, testen und erweitern |
 | Agent | [Agent-Handbuch](https://jacobinwwey.github.io/obsidian-NotEMD/de/docs/agents/overview) | Vier unterstützte Exportbefehle finden |
 
-**Version:** 1.9.13
+**Version:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Scharfe PDF-Vorschau und Export mehrerer Formate
+
+PNG/PDF öffnen sich in der Diagrammvorschau. Jede PDF-Seite hat eigene Bedienelemente. Beim Zoomen wird der sichtbare Bereich mit der Pixeldichte des Bildschirms neu gerendert; der Speicherverbrauch bleibt begrenzt. Eingebettete Rasterbilder behalten die Grenzen ihrer Quellauflösung.
+
+Halten Sie Alt gedrückt, um die Navigation anzuhalten und verfügbaren SVG/HTML/PDF-Text auszuwählen. Nach dem Loslassen gilt der vorherige Sperrzustand. PNG hat keine auswählbare Textebene.
+
+Wählen Sie SVG, PNG und/oder PDF sowie einen Zielordner und bestätigen Sie einmal. Der Hauptexport umfasst alle Bereiche, der Export eines Bereichs nur diesen. Präsentationsformate verwenden Kontrollkästchen; mindestens eine Auswahl ist nötig. Fortschritt und teilweise Fehler bleiben sichtbar.
+
+Installieren Sie die zusammengehörigen Dateien main.js, manifest.json und styles.css aus 1.9.14 und laden Sie das Plugin neu. Vorhandene Notizen und Einstellungen bleiben erhalten.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Vorschausteuerung und Präsentationsexport
@@ -766,7 +780,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.9.13 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.9.14 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 

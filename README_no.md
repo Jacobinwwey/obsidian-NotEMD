@@ -26,7 +26,21 @@ Hver diagramvisning har uavhengig zoom, panorering, tilpasning og faktisk størr
 | Utvikler | [Utviklerveiledning](https://jacobinwwey.github.io/obsidian-NotEMD/no/docs/developers/overview) | Bygg, test og utvid eksisterende kontrakter |
 | Agent | [Agentveiledning](https://jacobinwwey.github.io/obsidian-NotEMD/no/docs/agents/overview) | Finn fire støttede eksportkommandoer |
 
-**Versjon:** 1.9.13
+**Versjon:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Skarpe PDF-forhåndsvisninger og eksport i flere formater
+
+PNG/PDF åpnes i diagramforhåndsvisningen. Hver PDF-side har egne kontroller. Ved zoom tegnes det synlige området på nytt med skjermens pikseltetthet og begrenset minnebruk; innebygde rasterbilder er fortsatt begrenset av kildeoppløsningen.
+
+Hold Alt inne for å låse navigasjonen mens du velger tilgjengelig SVG/HTML/PDF-tekst. Når tasten slippes, gjenopprettes forrige låsetilstand. PNG har ikke et tekstlag som kan velges.
+
+Velg SVG, PNG og/eller PDF samt en målmappe, og bekreft én gang. Hovedeksporten omfatter alle paneler; et panels eksport bare det panelet. Presentasjonsformater bruker avkrysningsbokser og krever minst ett valg. Fremdrift og delvise feil forblir synlige.
+
+Installer samsvarende main.js, manifest.json og styles.css fra 1.9.14 og last inn tillegget på nytt. Eksisterende notater og innstillinger beholdes.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Forhåndsvisningskontroller og presentasjonseksport
@@ -760,7 +774,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.13 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
+*Notemd v1.9.14 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
 
 
 <!-- repo-chronicle:start -->

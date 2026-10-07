@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Pilih beberapa jenis diagram dalam satu proses dan beberapa format keluaran secara terpisah untuk tiap jenis. Menghapus centang tetap menyimpan formatnya; tanpa pilihan, isi dianalisis otomatis.
 </TLDR>
 
-Log diciutkan jika semua ekspor berhasil. Kunci di samping tombol minus membekukan gerakan dan zoom agar teks SVG/HTML dapat dipilih. PNG/PDF dibuka di penampil bawaan Obsidian. Presentasi mendukung beberapa format dan wajib memakai fork Slidev Jacobinwwey; paket resmi tidak digunakan sebagai cadangan.
+PNG/PDF terbuka di pratinjau diagram. Setiap halaman PDF memiliki kontrol mandiri. Zoom menggambar ulang area terlihat sesuai kepadatan piksel layar dengan memori terbatas; gambar bitmap tertanam tetap dibatasi resolusi sumber.
+
+Tahan Alt untuk membekukan navigasi saat memilih teks SVG/HTML/PDF yang tersedia. Melepasnya memulihkan status kunci sebelumnya. PNG tidak memiliki lapisan teks yang dapat dipilih.
 
 
 Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang independen. Ctrl/Command + roda mouse memperbesar; roda biasa menggulir. Ekspor PNG besar mempertahankan 72–600 PPI yang dipilih (bawaan 300). SVG berbasis vektor; PPI hanya berlaku untuk ekspor raster.
@@ -58,13 +60,13 @@ Format yang didukung tampil dahulu; pilihan yang tidak kompatibel tetap terlihat
 4. Jalankan **Buat diagram** dari bilah samping/palet.
 5. File terpilih otomatis diekspor di samping catatan sumber atau langsung ke folder keluaran yang ditentukan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Benturan nama menambahkan `-2`, `-3`, dan seterusnya tanpa menimpa file.
 6. Tinjau pratinjau. Hasil multipanel mempertahankan papan Drawnix dan setiap Mermaid dalam urutan sumber pada satu permukaan gulir vertikal; tinggi Mermaid mengikuti hasil render agar tidak terpotong.
-7. Gunakan **Ekspor SVG**, **Ekspor PNG**, atau **Export PDF** per panel, atau ekspor gambar tingkat atas untuk semua panel. Pilih folder sumber/tujuan relatif Vault; satu nama deterministik per panel ditulis dan kegagalan individual tidak menghentikan sisanya. Gunakan **Simpan file sumber** untuk artefak editable.
+7. Pilih SVG, PNG dan/atau PDF serta folder tujuan, lalu konfirmasi sekali. Ekspor utama mencakup semua panel; ekspor panel hanya mencakup panel tersebut. Format presentasi memakai kotak centang dan membutuhkan setidaknya satu pilihan. Kemajuan dan kegagalan sebagian tetap terlihat.
 
 Atur folder perantara bersama relatif terhadap Vault, atau kosongkan untuk memakai `notemd_assert/` di samping tiap sumber. Catatan pemulihan, cache render, dan lampiran opsional disimpan di sana. Pertahankan file yang masih dirujuk; perubahan folder hanya berlaku untuk proses baru.
 
 Jenis dibuat berurutan. Kegagalan satu jenis tidak menghentikan lainnya; pembatalan menghentikan jenis yang menunggu dan mempertahankan file selesai. Ulangi ekspor dari pratinjau atau riwayat tanpa permintaan model baru. Kegagalan pembuatan memerlukan pembuatan ulang jenis tersebut. Catatan v1/v2 tetap dapat dibaca.
 
-Menu Export menyediakan ketiga format untuk visual aktif. Header tiap panel menyediakan tindakan sama bagi satu visual, sehingga pratinjau besar tidak harus menjadi satu gambar yang sulit diolah.
+Gunakan **Simpan berkas sumber** untuk menyimpan dokumen yang dapat diedit.
 
 **History** membuka drawer riwayat Vault tanpa menyembunyikan diagram. Cari/filter diagram selesai, buka pratinjau atau artefak tersimpan. Riwayat juga tersedia melalui palet dan bilah samping tanpa catatan aktif.
 

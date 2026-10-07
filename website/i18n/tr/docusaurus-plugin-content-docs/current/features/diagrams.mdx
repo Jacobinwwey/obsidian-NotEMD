@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Tek çalıştırmada birden çok diyagram türü ve her tür için ayrı ayrı birden çok çıktı biçimi seçin. İşareti kaldırmak türün biçimlerini korur; hiçbir tür seçilmezse içerik otomatik analiz edilir.
 </TLDR>
 
-Tüm dışa aktarmalar başarılıysa günlükler kapalı başlar. Eksi yanındaki kilit, SVG/HTML metni seçmek için hareketi ve yakınlaştırmayı sabitler. PNG/PDF, Obsidian’ın yerleşik görüntüleyicisinde açılır. Sunumlar birden fazla biçimi destekler ve Jacobinwwey Slidev forkunu gerektirir; resmî pakete otomatik geçiş yapılmaz.
+PNG/PDF, diyagram önizlemesinde açılır. Her PDF sayfasının bağımsız denetimleri vardır. Yakınlaştırma, görünür alanı ekranın piksel yoğunluğuna göre sınırlı bellekle yeniden çizer; gömülü raster görüntüler kaynak çözünürlüğüyle sınırlı kalır.
+
+Seçilebilir SVG/HTML/PDF metnini seçerken gezinmeyi dondurmak için Alt tuşunu basılı tutun. Bırakınca önceki kilit durumu geri gelir. PNG'de seçilebilir metin katmanı yoktur.
 
 
 Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma ve gerçek boyut denetimleri vardır. Ctrl/Command + tekerlek yakınlaştırır; normal tekerlek kaydırır. Büyük PNG dışa aktarımları seçilen 72–600 PPI değerini korur (varsayılan 300). SVG vektör biçimidir; PPI yalnızca raster dışa aktarımlarına uygulanır.
@@ -58,13 +60,13 @@ Desteklenen biçimler önce gösterilir; uyumsuz seçenekler görünür fakat de
 4. **Diyagram olustur** çalıştırın.
 5. Seçilen dosyalar otomatik olarak kaynak notun yanına veya doğrudan ayarlanan çıktı klasörüne aktarılır. Adlar `topic_drawnix.pdf` ve `topic_flowchart.svg` gibi türü içerir. Ad çakışmalarında dosyaların üzerine yazılmadan `-2`, `-3` vb. eklenir.
 6. Tahtayı ve Mermaid panellerini kaynak sırasıyla, gerçek panel yüksekliklerini kullanan tek dikey kaydırılabilir önizlemede kontrol edin.
-7. Panel başına **SVG dışa aktar**, **PNG dışa aktar**, **Export PDF** seçin veya üstten hepsini aktarın. Kaynak ya da özel kasa göreli klasör seçin. Adlar panel bazında deterministiktir; bir panelin hatası diğerlerini durdurmaz. Düzenlenebilir dosyayı **Kaynak dosyayı kaydet** ile saklayın.
+7. SVG, PNG ve/veya PDF ile hedef klasörü seçip bir kez onaylayın. Ana dışa aktarma tüm panelleri, panel işlemi yalnızca o paneli kapsar. Sunum biçimleri onay kutularını kullanır ve en az bir seçim gerektirir. İlerleme ve kısmi hatalar görünür kalır.
 
 Ara dosyalar için Vault’a göre ortak bir yol belirleyin ya da her kaynağın yanındaki `notemd_assert/` için alanı boş bırakın. Kurtarma kayıtları, işleme önbelleği ve isteğe bağlı ekler burada saklanır. Hâlâ başvurulan dosyaları koruyun; klasör değişikliği yalnızca yeni çalıştırmaları etkiler.
 
 Türler sırayla oluşturulur. Bir hata diğerlerini engellemez; iptal bekleyen türleri durdurur ve tamamlanan dosyaları korur. Dışa aktarımı önizleme veya geçmişten yeni model isteği olmadan yineleyin. Oluşturma hatası, o türün yeniden oluşturulmasını gerektirir. v1/v2 kayıtları okunabilir kalır.
 
-Dışa aktarma menüsü ve panel başlıkları aynı üç işlemi sunar. **History** önizlemeyi gizlemeden arama, filtre, yeniden açma ve kaydedilmiş dosyalara erişim sağlar. Geçmiş, etkin not olmadan palet/yan panelden de açılır.
+Düzenlenebilir çıktıyı korumak için **Kaynak dosyayı kaydet** seçeneğini kullanın.
 
 SVG/PDF vektör geometrisinden üretilir. PDF her şeyi bitmap’e çevirmek yerine SVG yerleşimini ve metin ölçülerini korur. PPI yalnız PNG için geçerlidir: 72–600, varsayılan 300.
 

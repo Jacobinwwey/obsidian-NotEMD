@@ -26,7 +26,21 @@
 | 開發者 | [開發指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/developers/overview) | 建置、測試並擴充現有契約 |
 | Agent | [整合指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/agents/overview) | 探索四個受支援的匯出指令 |
 
-**版本:** 1.9.13
+**版本:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — 清晰 PDF 預覽與多格式匯出
+
+PNG／PDF 在圖形預覽視窗內開啟，每個 PDF 頁面都有獨立控制。縮放時依螢幕像素密度重繪可見內容，並限制記憶體用量；嵌入點陣圖的清晰度仍受來源解析度限制。
+
+按住 Alt 可暫時凍結移動與縮放，方便選取 SVG／HTML／PDF 中可選的文字；放開後恢復先前的鎖定狀態。PNG 沒有可選取的文字層。
+
+勾選 SVG、PNG 和／或 PDF 並選擇資料夾，一次確認即可匯出。主匯出按鈕處理全部面板，單一面板按鈕只處理該面板。簡報格式改用核取方塊，至少保留一項；進度與部分失敗會明確顯示。
+
+安裝 1.9.14 配套的 main.js、manifest.json 與 styles.css 後重新載入，保留現有筆記與設定。
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — 預覽控制與簡報匯出
@@ -831,7 +845,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.13 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.14 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->

@@ -26,7 +26,21 @@ Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma
 | Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
 | Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
 
-**Sürüm:** 1.9.13
+**Sürüm:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Net PDF önizlemeleri ve çok biçimli dışa aktarma
+
+PNG/PDF, diyagram önizlemesinde açılır. Her PDF sayfasının bağımsız denetimleri vardır. Yakınlaştırma, görünür alanı ekranın piksel yoğunluğuna göre sınırlı bellekle yeniden çizer; gömülü raster görüntüler kaynak çözünürlüğüyle sınırlı kalır.
+
+Seçilebilir SVG/HTML/PDF metnini seçerken gezinmeyi dondurmak için Alt tuşunu basılı tutun. Bırakınca önceki kilit durumu geri gelir. PNG'de seçilebilir metin katmanı yoktur.
+
+SVG, PNG ve/veya PDF ile hedef klasörü seçip bir kez onaylayın. Ana dışa aktarma tüm panelleri, panel işlemi yalnızca o paneli kapsar. Sunum biçimleri onay kutularını kullanır ve en az bir seçim gerektirir. İlerleme ve kısmi hatalar görünür kalır.
+
+1.9.14 sürümünün eşleşen main.js, manifest.json ve styles.css dosyalarını yükleyip eklentiyi yeniden yükleyin. Mevcut notlar ve ayarlar korunur.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Önizleme denetimleri ve sunum dışa aktarma
@@ -760,7 +774,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.13 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.14 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->

@@ -1080,6 +1080,12 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         userRequestedCancellation: '用户请求取消。'
     },
     previewModal: {
+        exportBatchTitle: "导出图形",
+        exportFormatsTitle: "导出格式",
+        exportFormatsDescription: "可选择一种或多种格式。",
+        exportFormatsRequired: "请至少选择一种格式。",
+        exportSelectionSummary: "已选择：{formats}",
+        exportSelectedFormats: "导出所选格式",
         zoomIn: "放大",
         zoomOut: "缩小",
         zoomLock: "锁定位置与缩放",
@@ -1087,7 +1093,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         zoomFit: "适应窗口",
         zoomActual: "实际大小",
         zoomLevel: "缩放比例",
-        zoomViewport: "图形预览。拖动平移；按住 Ctrl 或 Command 滚动鼠标滚轮缩放。",
+        zoomViewport: "图形预览。拖动平移；按住 Ctrl 或 Command 滚动鼠标滚轮缩放。 按住 Alt 临时锁定图形以选中文字，松开恢复。",
         title: '{target} 预览',
         panelTitle: '图形 {index}/{total}',
         exportMenu: '导出',

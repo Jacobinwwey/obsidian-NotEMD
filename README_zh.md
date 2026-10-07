@@ -18,7 +18,11 @@
 
 ## 从这里开始
 
-导出全部成功时日志默认收起。点击各预览缩小按钮旁的锁，可冻结移动与缩放并选择 SVG/HTML 文字。PNG/PDF 使用 Obsidian 原生查看器。演示导出支持多选格式，必须使用 Jacobinwwey Slidev fork，不再回退官方包。
+导出全部成功时日志默认收起。点击各预览缩小按钮旁的锁，或按住 Alt 临时锁定，可冻结移动与缩放并选择 SVG/HTML/PDF 中已有的文字；松开 Alt 恢复之前的锁定状态。PNG/PDF 在图形预览窗口内打开；PNG 本身没有可选择的文字层。演示导出支持多选格式，必须使用 Jacobinwwey Slidev fork，不再回退官方包。
+
+PDF 每页对应独立的预览区，分别提供缩放、适应窗口和锁定控件。滚动切换页面预览区，操作某一页不会改变其他页。
+
+预览中的“导出”会打开一次格式与目录选择：勾选 SVG、PNG 和/或 PDF 后统一确认。顶部按钮导出全部预览图形，每个图形自己的按钮只导出该图形。演示格式改用可见复选框，普通点击即可保留多项选择，无需 Ctrl/Shift；至少保留一种格式。导出期间显示当前格式与进度，最终汇总不会隐藏部分失败。
 
 验证进度与所要求的 fork 来源见[预览及导出可靠性记录](./docs/maintainer/2026-10-06-preview-slidev-reliability.zh-CN.md)。
 
@@ -33,7 +37,20 @@
 
 Notemd 是采用 **MIT 许可证的 Obsidian 插件**，提供文件式知识工作流，支持云端 provider、网关和本地模型服务器。输出保存在库中；云端任务会向选定端点发送内容，Web 研究也会联网。
 
-**版本:** 1.9.13
+**版本:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — 清晰 PDF 预览与多格式导出
+
+PNG／PDF 在图形预览窗口内打开，每个 PDF 页面都有独立控制。缩放时按屏幕像素密度重绘可见内容，并限制内存占用；嵌入位图的清晰度仍受源图分辨率限制。
+
+按住 Alt 可暂时冻结移动和缩放，便于选择 SVG／HTML／PDF 中可选的文字；松开后恢复之前的锁定状态。PNG 没有可选择的文字层。
+
+勾选 SVG、PNG 和／或 PDF 并选择目录，一次确认即可导出。主导出按钮处理全部面板，单个面板按钮仅处理该面板。演示格式改用复选框，至少保留一项；进度与部分失败会明确显示。
+
+安装 1.9.14 配套的 main.js、manifest.json 和 styles.css 后重载，保留现有笔记与设置。
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
 
 <!-- notemd-preview-export-1.9.13 -->
 
@@ -952,7 +969,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.13 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.14 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史

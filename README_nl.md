@@ -26,7 +26,21 @@ Elke diagramweergave heeft onafhankelijke zoom, verschuiving, passend maken en w
 | Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
 | Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
 
-**Versie:** 1.9.13
+**Versie:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Scherpe PDF-voorbeelden en export naar meerdere formaten
+
+PNG/PDF openen in het diagramvoorbeeld. Elke PDF-pagina heeft eigen bediening. Bij zoomen wordt het zichtbare deel opnieuw getekend op de pixeldichtheid van het scherm, met begrensd geheugengebruik; ingebedde rasterafbeeldingen blijven beperkt tot hun bronresolutie.
+
+Houd Alt ingedrukt om navigatie te blokkeren terwijl u beschikbare SVG/HTML/PDF-tekst selecteert. Loslaten herstelt de vorige vergrendeling. PNG heeft geen selecteerbare tekstlaag.
+
+Kies SVG, PNG en/of PDF en een doelmap en bevestig eenmaal. De hoofdexport omvat alle panelen; een paneelexport alleen dat paneel. Presentatieformaten gebruiken selectievakjes en vereisen minstens één keuze. Voortgang en gedeeltelijke fouten blijven zichtbaar.
+
+Installeer de bij elkaar horende main.js, manifest.json en styles.css van 1.9.14 en laad de plug-in opnieuw. Bestaande notities en instellingen blijven behouden.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Voorbeeldbediening en presentatie-export
@@ -760,7 +774,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.13 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.14 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 

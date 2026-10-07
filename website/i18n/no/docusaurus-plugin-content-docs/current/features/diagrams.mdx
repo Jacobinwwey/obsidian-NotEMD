@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Velg flere diagramtyper i samme kjøring og flere utdataformater for hver type. Når du fjerner avkrysningen, beholdes typens formater. Uten valgte typer analyseres innholdet automatisk.
 </TLDR>
 
-Loggpanelet er sammenfoldet når alle eksporter lykkes. Låsen ved minus låser bevegelse og zoom slik at SVG/HTML-tekst kan markeres. PNG/PDF åpnes i Obsidians innebygde viser. Presentasjoner støtter flere formater og krever Jacobinwweys Slidev-fork; den offisielle pakken brukes ikke som reserve.
+PNG/PDF åpnes i diagramforhåndsvisningen. Hver PDF-side har egne kontroller. Ved zoom tegnes det synlige området på nytt med skjermens pikseltetthet og begrenset minnebruk; innebygde rasterbilder er fortsatt begrenset av kildeoppløsningen.
+
+Hold Alt inne for å låse navigasjonen mens du velger tilgjengelig SVG/HTML/PDF-tekst. Når tasten slippes, gjenopprettes forrige låsetilstand. PNG har ikke et tekstlag som kan velges.
 
 
 Hver diagramvisning har uavhengig zoom, panorering, tilpasning og faktisk størrelse. Ctrl/Command + musehjul zoomer; hjulet alene ruller. Store PNG-eksporter beholder valgt verdi på 72–600 PPI (standard 300). SVG er et vektorformat; PPI gjelder bare rastereksport.
@@ -58,13 +60,13 @@ Støttede formater vises først; inkompatible valg forblir synlige og deaktivert
 4. Velg **Generate diagram**.
 5. Valgte filer eksporteres automatisk ved siden av kildenotatet eller rett til den angitte utdatamappen. Navnene inneholder typen, for eksempel `topic_drawnix.pdf` og `topic_flowchart.svg`. Navnekollisjoner får `-2`, `-3` osv. uten å overskrive filer.
 6. Kontroller tavle og Mermaid-paneler i kildeorden i én loddrett rullbar visning med faktisk panelhøyde.
-7. Bruk **Export SVG**, **Export PNG** eller **Export PDF** per panel, eller eksporter alle øverst. Velg kildemappe eller egen hvelvrelativ mappe. Navn er deterministiske per panel, og én panelfeil stopper ikke de andre. Bevar redigerbar fil med **Save source file**.
+7. Velg SVG, PNG og/eller PDF samt en målmappe, og bekreft én gang. Hovedeksporten omfatter alle paneler; et panels eksport bare det panelet. Presentasjonsformater bruker avkrysningsbokser og krever minst ett valg. Fremdrift og delvise feil forblir synlige.
 
 Angi en felles Vault-relativ mappe for mellomfiler, eller la feltet stå tomt for `notemd_assert/` ved hver kilde. Her lagres gjenopprettingsposter, rendringscache og valgfrie vedlegg. Behold filer som fortsatt refereres; endringer gjelder bare nye kjøringer.
 
 Typer genereres etter hverandre. Én feil stopper ikke de andre. Avbryting stopper ventende typer og beholder ferdige filer. Prøv eksport på nytt fra forhåndsvisning eller historikk uten en ny modellforespørsel. Genereringsfeil krever at typen genereres på nytt. v1/v2-poster kan fortsatt leses.
 
-Eksportmeny og paneloverskrifter gir de samme tre handlingene. **History** åpner søk, filtre, gjenåpning og lagrede filer uten å skjule forhåndsvisningen. Historikk finnes også via palett/sidepanel uten aktivt notat.
+Bruk **Lagre kildefil** for å beholde det redigerbare dokumentet.
 
 SVG/PDF kommer fra vektorgeometri. PDF bevarer SVG-layout og tekstmål fremfor å gjøre alt til bitmap. PPI gjelder bare PNG: 72–600, standard 300.
 

@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Välj flera diagramtyper i samma körning och flera utdataformat för varje typ. När en typ avmarkeras sparas dess format; utan val analyseras innehållet automatiskt.
 </TLDR>
 
-Loggarna är hopfällda när alla exporter lyckas. Låset bredvid minus låser förflyttning och zoom så att SVG/HTML-text kan markeras. PNG/PDF öppnas i Obsidians inbyggda visare. Presentationer stöder flera format och kräver Jacobinwweys Slidev-fork; det officiella paketet används inte som reserv.
+PNG/PDF öppnas i diagramförhandsvisningen. Varje PDF-sida har egna kontroller. Vid zoom ritas den synliga delen om med skärmens pixeltäthet och begränsad minnesanvändning; inbäddade rasterbilder begränsas fortfarande av källans upplösning.
+
+Håll Alt nedtryckt för att låsa navigeringen medan du markerar tillgänglig SVG/HTML/PDF-text. När du släpper återställs föregående låsläge. PNG har inget markerbart textlager.
 
 
 Varje diagramförhandsvisning har separat zoom, panorering, anpassning och faktisk storlek. Ctrl/Command + mushjul zoomar; hjulet ensamt rullar. Stora PNG-exporter behåller valda 72–600 PPI (standard 300). SVG är ett vektorformat; PPI gäller bara rasterexporter.
@@ -58,13 +60,13 @@ Format som stöds visas först; inkompatibla alternativ är synliga men inaktive
 4. Kör **Generate diagram**.
 5. Valda filer exporteras automatiskt bredvid källanteckningen eller direkt till den angivna mappen. Namnen innehåller typen, exempelvis `topic_drawnix.pdf` och `topic_flowchart.svg`. Vid namnkonflikter läggs `-2`, `-3` och så vidare till utan överskrivning.
 6. Granska tavla och Mermaid-paneler i källordning i en vertikalt rullbar vy. Paneler använder verklig höjd.
-7. Välj **Export SVG**, **Export PNG** eller **Export PDF** per panel, eller exportera alla ovanifrån. Välj källmapp eller egen valvrelativ mapp. Namn är deterministiska per panel och ett fel stoppar inte övriga paneler. Spara redigerbar fil med **Save source file**.
+7. Välj SVG, PNG och/eller PDF samt en målmapp och bekräfta en gång. Huvudexporten omfattar alla paneler; en panels export endast den panelen. Presentationsformat använder kryssrutor och kräver minst ett val. Förlopp och partiella fel förblir synliga.
 
 Ange en gemensam Vault-relativ mapp för mellanfiler, eller lämna tomt för `notemd_assert/` bredvid varje källa. Där lagras återställningsposter, renderingscache och valfria bilagor. Behåll filer som fortfarande refereras; mappändringar gäller bara nya körningar.
 
 Typer genereras i följd. Ett fel stoppar inte de andra; avbrytning stoppar väntande typer och behåller färdiga filer. Försök exportera igen via förhandsvisning eller historik utan en ny modellförfrågan. Genereringsfel kräver att typen genereras igen. Återställningsposter v1/v2 kan fortfarande läsas.
 
-Exportmeny och panelhuvud erbjuder samma tre åtgärder. **History** visar sökning, filter, återöppning och sparade filer utan att dölja förhandsvisningen. Historik kan även öppnas från palett/sidopanel utan aktiv anteckning.
+Använd **Spara källfil** för att behålla det redigerbara dokumentet.
 
 SVG/PDF bygger på vektorgeometri. PDF bevarar SVG-layout och textmått i stället för att göra allt till bitmap. PPI gäller endast PNG: 72–600, standard 300.
 

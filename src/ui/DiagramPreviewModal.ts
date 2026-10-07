@@ -1,5 +1,5 @@
 import { mountDiagramSvg } from '../rendering/preview/svgHostSanitizer';
-import { App, Menu, Modal, Notice } from 'obsidian';
+import { App, Modal, Notice } from 'obsidian';
 import { DiagramPreviewViewport } from './DiagramPreviewViewport';
 import { formatI18n, getI18nStrings } from '../i18n';
 import {
@@ -42,12 +42,14 @@ import {
     getBundledMermaidPreviewDeps,
     getBundledVegaLitePreviewDeps
 } from '../rendering/webview/bundledPreviewDeps';
-import { selectDiagramPreviewExportFolder } from './DiagramPreviewExportFolderModal';
+import { selectDiagramPreviewExport, type DiagramPreviewExportFormat } from './DiagramPreviewExportFolderModal';
 import { retryDiagramExportRun, startDiagramExportRun } from '../diagram/diagramExportRun';
 import type { DiagramExportRun, DiagramExportRequest } from '../diagram/diagramExportRun';
 import { getDiagramOutputLabel } from './diagramOutputSelector';
 import { resolveDiagramOutputPlan } from '../diagram/diagramOutputPreferences';
 import { findDefaultDiagramType } from '../diagram/diagramTypeCatalog';
+
+type PreviewExportTarget = { id: string } & Record<DiagramPreviewExportFormat, (folderPath: string) => Promise<string>>;
 
 export interface DiagramPreviewModalOptions {
     exportRun?: DiagramExportRun;
@@ -61,6 +63,8 @@ export interface DiagramPreviewModalOptions {
 
 export class DiagramPreviewModal extends Modal {
     private session: RenderPreviewSession;
+    private exporting = false;
+    private readonly exportButtons = new Set<HTMLButtonElement>();
     private currentHistoryEntryId: string | null = null;
     private readonly exportPpi: number;
     private readonly obsidianCompatiblePng: boolean;
@@ -113,6 +117,7 @@ export class DiagramPreviewModal extends Modal {
 
     private renderModal(): void {
         this.destroyPreviewViewports();
+        this.exportButtons.clear();
         const i18n = getI18nStrings({ uiLocale: this.uiLocale });
         const { contentEl } = this;
         contentEl.empty();
@@ -139,9 +144,11 @@ export class DiagramPreviewModal extends Modal {
             const exportMenuButton = actions.createEl('button', {
                 text: i18n.previewModal.exportMenu,
                 cls: 'mod-cta notemd-diagram-preview-export',
-                attr: { 'aria-haspopup': 'menu' }
+                attr: { 'aria-haspopup': 'dialog' }
             });
-            exportMenuButton.onclick = (event: MouseEvent) => this.showExportMenu(event);
+            exportMenuButton.disabled = this.exporting;
+            this.exportButtons.add(exportMenuButton);
+            exportMenuButton.onclick = () => this.exportPreview();
         }
         const copyButton = actions.createEl('button', {
             text: i18n.previewModal.copySource
@@ -289,360 +296,107 @@ export class DiagramPreviewModal extends Modal {
         this.previewViewports.clear();
     }
 
-    private showExportMenu(event: MouseEvent): void {
-        const menu = new Menu();
-        menu.addItem(item => item.setTitle('SVG').setIcon('image').onClick(async () => this.exportSvg()));
-        menu.addItem(item => item.setTitle('PNG').setIcon('image').onClick(async () => this.exportPng()));
-        menu.addItem(item => item.setTitle('PDF').setIcon('file-text').onClick(async () => this.exportPdf()));
-        menu.showAtMouseEvent(event);
-    }
-
-    private showPanelExportMenu(event: MouseEvent, panel: NonNullable<RenderArtifact['previewPanels']>[number]): void {
-        const menu = new Menu();
-        menu.addItem(item => item.setTitle('SVG').setIcon('image').onClick(async () => this.exportPanelSvg(panel)));
-        menu.addItem(item => item.setTitle('PNG').setIcon('image').onClick(async () => this.exportPanelPng(panel)));
-        menu.addItem(item => item.setTitle('PDF').setIcon('file-text').onClick(async () => this.exportPanelPdf(panel)));
-        menu.showAtMouseEvent(event);
-    }
-
-    private async exportSvg(): Promise<void> {
-        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+    private async exportPreview(): Promise<void> {
+        const sourcePath = this.session.payload.sourcePath;
+        if (!sourcePath) return;
         const panels = this.session.payload.artifact.previewPanels;
-        if (panels && panels.length > 1) {
-            await this.exportPreviewPanelsAsSeparateSvgFiles(panels, copy);
-            return;
-        }
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'SVG');
-        if (folderPath === null) {
-            return;
-        }
-        try {
-            const outputPath = await saveDiagramPreviewSvgToFolder(
-                this.app,
-                sourcePath,
-                folderPath,
-                this.session.payload.artifact,
-                this.createBundledPreviewRenderDeps()
-            );
-            await this.recordExportPath('svg', outputPath);
-            new Notice(formatI18n(copy.exportSuccessNotice, { path: outputPath }));
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(formatI18n(copy.exportFailedNotice, { message }));
-            console.error('Failed to export diagram preview SVG:', error);
-        }
+        const targets = panels && panels.length > 1
+            ? panels.map(panel => this.createPanelExportTarget(sourcePath, panel))
+            : [this.createArtifactExportTarget(sourcePath, this.session.payload.artifact)];
+        await this.exportTargets(sourcePath, targets);
     }
 
-    private async exportPreviewPanelsAsSeparateSvgFiles(
-        panels: NonNullable<RenderArtifact['previewPanels']>,
-        copy: ReturnType<typeof getI18nStrings>['previewModal']
-    ): Promise<void> {
+    private async exportPanel(panel: NonNullable<RenderArtifact['previewPanels']>[number]): Promise<void> {
         const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
+        if (!sourcePath) return;
+        await this.exportTargets(sourcePath, [this.createPanelExportTarget(sourcePath, panel)]);
+    }
 
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'SVG');
-        if (folderPath === null) {
-            return;
-        }
+    private createArtifactExportTarget(sourcePath: string, artifact: RenderArtifact): PreviewExportTarget {
+        return {
+            id: sourcePath,
+            SVG: folder => saveDiagramPreviewSvgToFolder(this.app, sourcePath, folder, artifact, this.createBundledPreviewRenderDeps()),
+            PNG: folder => saveDiagramPreviewPngToFolder(this.app, sourcePath, folder, artifact, this.createPngExportDeps()),
+            PDF: folder => saveDiagramPreviewPdfToFolder(this.app, sourcePath, folder, artifact, {
+                ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi
+            })
+        };
+    }
 
-        let successCount = 0;
-        const failures: string[] = [];
-        for (const panel of panels) {
-            try {
-                const outputPath = await saveDiagramPreviewPanelSvgToFolder(
-                    this.app,
-                    sourcePath,
-                    panel.id,
-                    folderPath,
-                    panel.artifact,
-                    this.createBundledPreviewRenderDeps()
-                );
-                await this.recordExportPath('svg', outputPath);
-                successCount += 1;
-            } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
-                failures.push(`${panel.id}: ${message}`);
-                console.error(`Failed to export diagram preview panel SVG (${panel.id}):`, error);
+    private createPanelExportTarget(sourcePath: string, panel: NonNullable<RenderArtifact['previewPanels']>[number]): PreviewExportTarget {
+        return {
+            id: panel.id,
+            SVG: folder => saveDiagramPreviewPanelSvgToFolder(this.app, sourcePath, panel.id, folder, panel.artifact, this.createBundledPreviewRenderDeps()),
+            PNG: folder => saveDiagramPreviewPanelPngToFolder(this.app, sourcePath, panel.id, folder, panel.artifact, this.createPngExportDeps()),
+            PDF: folder => saveDiagramPreviewPanelPdfToFolder(this.app, sourcePath, panel.id, folder, panel.artifact, {
+                ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi
+            })
+        };
+    }
+
+    private createPngExportDeps() {
+        return {
+            ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi,
+            obsidianCompatiblePng: this.obsidianCompatiblePng, signal: this.pngAbort.signal,
+            onPngSaved: (delivery: { path: string; files: string[] }) => this.recordExportPath('png', delivery.path, delivery.files)
+        };
+    }
+
+    private async exportTargets(sourcePath: string, targets: PreviewExportTarget[]): Promise<void> {
+        if (this.exporting || this.pngAbort.signal.aborted) return;
+        this.exporting = true;
+        this.exportButtons.forEach(button => { button.disabled = true; });
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        try {
+            const selection = await selectDiagramPreviewExport(this.app, sourcePath, this.uiLocale);
+            if (!selection || this.pngAbort.signal.aborted) return;
+            let totalSuccess = 0;
+            const batchFailures: string[] = [];
+            const progressLabels = { SVG: copy.exportingSvg, PNG: copy.exportingPng, PDF: copy.exportingPdf };
+            let completedOutputs = 0;
+            for (const format of selection.formats) {
+                let successCount = 0;
+                let lastOutputPath = '';
+                const failures: string[] = [];
+                for (const target of targets) {
+                    if (this.pngAbort.signal.aborted) return;
+                    this.exportButtons.forEach(button => button.setText(`${progressLabels[format]} (${completedOutputs + 1}/${targets.length * selection.formats.length})`));
+                    try {
+                        lastOutputPath = await target[format](selection.folderPath);
+                        await this.recordExportPath(format.toLowerCase() as DiagramHistoryExportKind, lastOutputPath);
+                        successCount += 1;
+                        totalSuccess += 1;
+                    } catch (error) {
+                        const message = error instanceof Error ? error.message : String(error);
+                        failures.push(target.id + ': ' + message);
+                        batchFailures.push(format + ' · ' + target.id + ': ' + message);
+                        console.error('Failed to export diagram preview ' + format + ' (' + target.id + '):', error);
+                    }
+                    completedOutputs += 1;
+                }
+                if (failures.length) {
+                    new Notice(formatI18n(copy.exportFolderBatchPartialNotice, {
+                        success: successCount, total: targets.length, format, failures: failures.join('; ')
+                    }));
+                } else if (targets.length === 1) {
+                    const successNotices = { SVG: copy.exportSuccessNotice, PNG: copy.exportPngSuccessNotice, PDF: copy.exportPdfSuccessNotice };
+                    new Notice(formatI18n(successNotices[format], { path: lastOutputPath }));
+                } else {
+                    new Notice(formatI18n(copy.exportFolderBatchSuccessNotice, {
+                        success: successCount, total: targets.length, format, path: selection.folderPath || '/'
+                    }));
+                }
             }
-        }
-
-        if (failures.length > 0) {
-            new Notice(formatI18n(copy.exportFolderBatchPartialNotice, {
-                success: successCount,
-                total: panels.length,
-                format: 'SVG',
-                failures: failures.join('; ')
-            }));
-            return;
-        }
-
-        new Notice(formatI18n(copy.exportFolderBatchSuccessNotice, {
-            success: successCount,
-            total: panels.length,
-            format: 'SVG',
-            path: folderPath || '/'
-        }));
-    }
-
-    private async exportPng(): Promise<void> {
-        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
-        const panels = this.session.payload.artifact.previewPanels;
-        if (panels && panels.length > 1) {
-            await this.exportPreviewPanelsAsSeparatePngFiles(panels, copy);
-            return;
-        }
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PNG');
-        if (folderPath === null) {
-            return;
-        }
-        try {
-            const outputPath = await saveDiagramPreviewPngToFolder(
-                this.app,
-                sourcePath,
-                folderPath,
-                this.session.payload.artifact,
-                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi,
-                    obsidianCompatiblePng: this.obsidianCompatiblePng, signal: this.pngAbort.signal,
-                    onPngSaved: delivery => this.recordExportPath('png', delivery.path, delivery.files) }
-            );
-            await this.recordExportPath('png', outputPath);
-            new Notice(formatI18n(copy.exportPngSuccessNotice, { path: outputPath }));
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(formatI18n(copy.exportPngFailedNotice, { message }));
-            console.error('Failed to export diagram preview PNG:', error);
-        }
-    }
-
-    private async exportPdf(): Promise<void> {
-        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
-        const panels = this.session.payload.artifact.previewPanels;
-        if (panels && panels.length > 1) {
-            await this.exportPreviewPanelsAsSeparatePdfFiles(panels, copy);
-            return;
-        }
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PDF');
-        if (folderPath === null) {
-            return;
-        }
-        try {
-            const outputPath = await saveDiagramPreviewPdfToFolder(
-                this.app,
-                sourcePath,
-                folderPath,
-                this.session.payload.artifact,
-                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
-            );
-            await this.recordExportPath('pdf', outputPath);
-            new Notice(formatI18n(copy.exportPdfSuccessNotice, { path: outputPath }));
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(formatI18n(copy.exportPdfFailedNotice, { message }));
-            console.error('Failed to export diagram preview PDF:', error);
-        }
-    }
-
-    private async exportPreviewPanelsAsSeparatePngFiles(
-        panels: NonNullable<RenderArtifact['previewPanels']>,
-        copy: ReturnType<typeof getI18nStrings>['previewModal']
-    ): Promise<void> {
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PNG');
-        if (folderPath === null) {
-            return;
-        }
-
-        let successCount = 0;
-        const failures: string[] = [];
-        for (const panel of panels) {
-            try {
-                const outputPath = await saveDiagramPreviewPanelPngToFolder(
-                    this.app,
-                    sourcePath,
-                    panel.id,
-                    folderPath,
-                    panel.artifact,
-                    { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi,
-                    obsidianCompatiblePng: this.obsidianCompatiblePng, signal: this.pngAbort.signal,
-                    onPngSaved: delivery => this.recordExportPath('png', delivery.path, delivery.files) }
-                );
-                await this.recordExportPath('png', outputPath);
-                successCount += 1;
-            } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
-                failures.push(`${panel.id}: ${message}`);
-                console.error(`Failed to export diagram preview panel PNG (${panel.id}):`, error);
+            // The last notice describes the whole selection, so a later success cannot hide an earlier failure.
+            if (selection.formats.length > 1) {
+                new Notice(formatI18n(batchFailures.length ? copy.exportFolderBatchPartialNotice : copy.exportFolderBatchSuccessNotice, {
+                    success: totalSuccess, total: targets.length * selection.formats.length,
+                    format: selection.formats.join(', '), failures: batchFailures.join('; '), path: selection.folderPath || '/'
+                }));
             }
-        }
-
-        this.showPanelBatchExportNotice(copy, 'PNG', successCount, panels.length, folderPath, failures);
-    }
-
-    private async exportPreviewPanelsAsSeparatePdfFiles(
-        panels: NonNullable<RenderArtifact['previewPanels']>,
-        copy: ReturnType<typeof getI18nStrings>['previewModal']
-    ): Promise<void> {
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PDF');
-        if (folderPath === null) {
-            return;
-        }
-
-        let successCount = 0;
-        const failures: string[] = [];
-        for (const panel of panels) {
-            try {
-                const outputPath = await saveDiagramPreviewPanelPdfToFolder(
-                    this.app,
-                    sourcePath,
-                    panel.id,
-                    folderPath,
-                    panel.artifact,
-                    { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
-                );
-                await this.recordExportPath('pdf', outputPath);
-                successCount += 1;
-            } catch (error) {
-                const message = error instanceof Error ? error.message : String(error);
-                failures.push(`${panel.id}: ${message}`);
-                console.error(`Failed to export diagram preview panel PDF (${panel.id}):`, error);
-            }
-        }
-
-        this.showPanelBatchExportNotice(copy, 'PDF', successCount, panels.length, folderPath, failures);
-    }
-
-    private showPanelBatchExportNotice(
-        copy: ReturnType<typeof getI18nStrings>['previewModal'],
-        format: 'PNG' | 'PDF',
-        successCount: number,
-        totalCount: number,
-        folderPath: string,
-        failures: string[]
-    ): void {
-        if (failures.length > 0) {
-            new Notice(formatI18n(copy.exportFolderBatchPartialNotice, {
-                success: successCount,
-                total: totalCount,
-                format,
-                failures: failures.join('; ')
-            }));
-            return;
-        }
-
-        new Notice(formatI18n(copy.exportFolderBatchSuccessNotice, {
-            success: successCount,
-            total: totalCount,
-            format,
-            path: folderPath || '/'
-        }));
-    }
-
-    private async exportPanelSvg(panel: NonNullable<RenderArtifact['previewPanels']>[number]): Promise<void> {
-        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'SVG');
-        if (folderPath === null) {
-            return;
-        }
-        try {
-            const outputPath = await saveDiagramPreviewPanelSvgToFolder(
-                this.app,
-                sourcePath,
-                panel.id,
-                folderPath,
-                panel.artifact,
-                this.createBundledPreviewRenderDeps()
-            );
-            await this.recordExportPath('svg', outputPath);
-            new Notice(formatI18n(copy.exportSuccessNotice, { path: outputPath }));
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(formatI18n(copy.exportFailedNotice, { message }));
-            console.error('Failed to export diagram preview panel SVG:', error);
-        }
-    }
-
-    private async exportPanelPng(panel: NonNullable<RenderArtifact['previewPanels']>[number]): Promise<void> {
-        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PNG');
-        if (folderPath === null) {
-            return;
-        }
-        try {
-            const outputPath = await saveDiagramPreviewPanelPngToFolder(
-                this.app,
-                sourcePath,
-                panel.id,
-                folderPath,
-                panel.artifact,
-                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi,
-                    obsidianCompatiblePng: this.obsidianCompatiblePng, signal: this.pngAbort.signal,
-                    onPngSaved: delivery => this.recordExportPath('png', delivery.path, delivery.files) }
-            );
-            await this.recordExportPath('png', outputPath);
-            new Notice(formatI18n(copy.exportPngSuccessNotice, { path: outputPath }));
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(formatI18n(copy.exportPngFailedNotice, { message }));
-            console.error('Failed to export diagram preview panel PNG:', error);
-        }
-    }
-
-    private async exportPanelPdf(panel: NonNullable<RenderArtifact['previewPanels']>[number]): Promise<void> {
-        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
-        const sourcePath = this.session.payload.sourcePath;
-        if (!sourcePath) {
-            return;
-        }
-        const folderPath = await selectDiagramPreviewExportFolder(this.app, sourcePath, this.uiLocale, 'PDF');
-        if (folderPath === null) {
-            return;
-        }
-        try {
-            const outputPath = await saveDiagramPreviewPanelPdfToFolder(
-                this.app,
-                sourcePath,
-                panel.id,
-                folderPath,
-                panel.artifact,
-                { ...this.createBundledPreviewRenderDeps(), ppi: this.exportPpi }
-            );
-            await this.recordExportPath('pdf', outputPath);
-            new Notice(formatI18n(copy.exportPdfSuccessNotice, { path: outputPath }));
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            new Notice(formatI18n(copy.exportPdfFailedNotice, { message }));
-            console.error('Failed to export diagram preview panel PDF:', error);
+        } finally {
+            this.exporting = false;
+            this.exportButtons.forEach(button => { button.disabled = false; button.setText(copy.exportMenu); });
         }
     }
 
@@ -810,9 +564,11 @@ export class DiagramPreviewModal extends Modal {
                 const panelExportButton = panelHeader.createEl('button', {
                     text: i18n.previewModal.exportMenu,
                     cls: 'notemd-diagram-preview-panel-export',
-                    attr: { 'aria-haspopup': 'menu' }
+                    attr: { 'aria-haspopup': 'dialog' }
                 });
-                panelExportButton.onclick = (event: MouseEvent) => this.showPanelExportMenu(event, panel);
+                panelExportButton.disabled = this.exporting;
+                this.exportButtons.add(panelExportButton);
+                panelExportButton.onclick = () => this.exportPanel(panel);
             }
             const panelBody = panelContainer.createDiv({ cls: 'notemd-diagram-preview-panel-body' });
             await this.renderArtifactPreview(panelBody, panel.artifact);

@@ -1,3 +1,29 @@
+## 1.9.14 — sharp PDF previews and multi-format export
+
+### English
+
+PDF zoom redraws the visible region from the source at zoom × device pixel ratio, preserving stable page/text coordinates. A document-wide detail budget, canvas side limits, stale-task cancellation and offscreen release prevent unbounded allocations. The 36-page architecture PDF's third-page Mermaid was verified at 8× zoom and DPR 1/2 through Obsidian CLI. Embedded bitmaps remain limited by source resolution. See [PDF zoom evidence](docs/maintainer/2026-10-07-pdf-preview-zoom.md).
+
+Diagram preview export now offers SVG/PNG/PDF checkboxes with one folder selection and confirmation, for either all panels or one panel. Presentation format selection uses visible checkboxes instead of a modifier-dependent list. Empty selection is explained, duplicate submissions are blocked, current format/progress is visible, and a batch summary preserves earlier failures. The six new UI strings were directly translated into all existing supported preview locales. See [multi-format UI verification](docs/maintainer/2026-10-07-multiformat-export-ui.md).
+
+PDF pages now use separate preview panels, each with independent zoom, fit, lock and Alt text-selection controls. The dialog scrolls between pages instead of fitting the entire document into one tall viewport. All page viewports and raster resources are released together on close or failure.
+
+PNG and PDF now open inside a diagram preview window with the shared zoom and lock controls. The previous binary route opened a native Obsidian split instead. PDF previews render pages and selectable text layers with bounded raster allocation; snapshot rendering also completes in hidden vault windows. Hold Alt to freeze navigation while selecting available text; releasing Alt restores the persistent lock state. Moving focus into an embedded preview preserves the temporary lock. PNG does not provide OCR or selectable text.
+
+Earlier binary-preview validation: 315 suites passed, 3046 tests passed and one skipped; fresh build, lint regression check and UI/render-host audits passed. Obsidian CLI verified actual PNG/PDF previews in the acceptance vault and 1Knowledge, including `architecture.zh-CN_drawnix-10.pdf` and its PNG. Settings were preserved. The later zoom and multi-format changes have their own verification records. See [verification and limitations](docs/maintainer/2026-10-06-binary-preview-alt-lock.md).
+
+### 中文
+
+PDF 缩放按“倍率 × 设备像素密度”从源文件重绘可见区域，保持页面及文字坐标稳定。整份文档共用高清画布预算，并限制画布单边、取消过时任务和释放离屏画布，防止无限分配。已通过 Obsidian CLI 验证 36 页 architecture PDF 的第三页 Mermaid 在 8 倍缩放和 DPR 1／2 下的效果。嵌入位图仍受源图分辨率限制。详见 [PDF 缩放证据](docs/maintainer/2026-10-07-pdf-preview-zoom.zh-CN.md)。
+
+图形预览导出现在通过 SVG/PNG/PDF 复选框一次选择目录并确认，支持全部图形及单个图形的范围。演示格式从依赖组合键的列表改为可见复选框。界面提示空选择、阻止重复提交、显示当前格式与进度，整批汇总保留此前失败。六条新增界面文案已由主代理直接翻译到现有支持的预览语言。详见[多格式界面验证](docs/maintainer/2026-10-07-multiformat-export-ui.zh-CN.md)。
+
+PDF 现在每页使用独立预览区，各自提供缩放、适应窗口、锁定及 Alt 选字控件。对话框在页面之间滚动，不再把整份文档缩放为一个长视口。关闭窗口或加载失败时统一释放所有页面视口与位图资源。
+
+PNG 和 PDF 现在在图形预览窗口内打开，复用缩放和锁定控件；此前的二进制入口会打开 Obsidian 原生分栏。PDF 在受限的位图内存预算下渲染页面与可选择的文字层，并支持后台 vault 的快照渲染。按住 Alt 可冻结导航以选择已有文字；松开后恢复按钮设置的锁定状态。焦点进入内嵌预览时不会误解除临时锁定。PNG 不提供 OCR 或可选择的文字。
+
+此前二进制预览验证：315 个测试套件通过，3046 项测试通过、1 项跳过；新构建、lint 增量检查、界面字符串和渲染宿主审计通过。Obsidian CLI 已在测试 vault 和 1Knowledge 验证真实 PNG/PDF 预览，包括 `architecture.zh-CN_drawnix-10.pdf` 及其 PNG，配置保持不变。后续缩放与多格式变更具有独立验证记录。详见[验证记录与限制](docs/maintainer/2026-10-06-binary-preview-alt-lock.zh-CN.md)。
+
 ## 1.9.13 — preview and presentation reliability
 
 ### English

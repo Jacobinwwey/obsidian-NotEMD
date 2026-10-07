@@ -4,7 +4,7 @@ import { STRINGS_EN } from '../i18n/locales/en';
 describe('binary diagram previews', () => {
     function setup(extension: string, bytes: number[]) {
         const file = { path: `diagram.${extension}`, name: `diagram.${extension}`, extension } as any;
-        const diagramHost = { readBinary: jest.fn(async () => new Uint8Array(bytes).buffer), openFile: jest.fn(async () => {}), notify: jest.fn() };
+        const diagramHost = { readBinary: jest.fn(async () => new Uint8Array(bytes).buffer), openFile: jest.fn(async () => {}), openBinaryPreview: jest.fn(async () => {}), notify: jest.fn() };
         const reporter = { log: jest.fn(), updateStatus: jest.fn() } as any;
         const host = {
             getUiStrings: () => STRINGS_EN, getSettings: jest.fn(), isBusy: () => false,
@@ -15,13 +15,14 @@ describe('binary diagram previews', () => {
         } as any;
         return { file, diagramHost, reporter, host };
     }
-    test.each([['png', [137,80,78,71,13,10,26,10]], ['pdf', [37,80,68,70,45,49,46,55]]])('opens %s through the native viewer without text decoding', async (extension, bytes) => {
+    test.each([['png', [137,80,78,71,13,10,26,10]], ['pdf', [37,80,68,70,45,49,46,55]]])('opens %s inside the diagram preview without text decoding', async (extension, bytes) => {
         const { file, diagramHost, reporter, host } = setup(extension as string, bytes as number[]);
         expect(isDirectPreviewableDiagramExtension(extension as string)).toBe(true);
         const result = await runPreviewDiagramCommandWithHost(host, file, reporter);
         expect(result?.kind).toBe('binary-preview');
         expect(host.readFile).not.toHaveBeenCalled();
-        expect(diagramHost.openFile).toHaveBeenCalledWith(file);
+        expect(diagramHost.openBinaryPreview).toHaveBeenCalledWith(file, expect.any(Uint8Array));
+        expect(diagramHost.openFile).not.toHaveBeenCalled();
         expect(host.finalizeReporter).toHaveBeenCalled();
     });
     test('rejects invalid binary and propagates viewer failures', async () => {
@@ -29,7 +30,7 @@ describe('binary diagram previews', () => {
         expect((await runPreviewDiagramCommandWithHost(invalid.host, invalid.file, invalid.reporter))?.kind).toBe('error');
         expect(invalid.diagramHost.openFile).not.toHaveBeenCalled();
         const valid = setup('pdf', [37,80,68,70,45]);
-        valid.diagramHost.openFile.mockRejectedValue(new Error('Viewer failed'));
+        valid.diagramHost.openBinaryPreview.mockRejectedValue(new Error('Viewer failed'));
         expect(await runPreviewDiagramCommandWithHost(valid.host, valid.file, valid.reporter)).toMatchObject({ kind: 'error', errorMessage: 'Viewer failed' });
     });
 });

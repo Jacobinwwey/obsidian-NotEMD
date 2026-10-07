@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Sélectionnez plusieurs types de diagramme par exécution et plusieurs formats indépendants pour chacun. Décocher un type conserve ses formats ; sans sélection, le contenu est analysé automatiquement.
 </TLDR>
 
-Les journaux sont repliés lorsque tous les exports réussissent. Le verrou près du bouton moins bloque le déplacement et le zoom pour sélectionner le texte SVG/HTML. PNG/PDF s’ouvrent dans la visionneuse native d’Obsidian. L’export de présentations accepte plusieurs formats et exige le fork Slidev de Jacobinwwey, sans repli vers la version officielle.
+Les PNG/PDF s’ouvrent dans l’aperçu des diagrammes. Chaque page PDF possède ses propres commandes. Le zoom redessine la zone visible selon la densité de pixels de l’écran, avec une mémoire limitée ; les images intégrées restent limitées par leur résolution d’origine.
+
+Maintenez Alt pour bloquer la navigation et sélectionner le texte disponible en SVG/HTML/PDF. Relâcher Alt rétablit le verrouillage précédent. Le PNG n’a pas de couche de texte sélectionnable.
 
 
 Chaque aperçu dispose de zoom, déplacement, ajustement et taille réelle indépendants. Ctrl/Command + molette zoome ; la molette seule fait défiler. Les grands exports PNG conservent les 72–600 PPI choisis (300 par défaut). SVG est vectoriel ; les PPI concernent uniquement les exports matriciels.
@@ -58,13 +60,13 @@ Les formats compatibles apparaissent en premier ; les autres restent visibles et
 4. Lancez **Generer un diagramme**.
 5. Les fichiers choisis sont exportés automatiquement à côté de la note source ou directement dans le dossier configuré. Leur nom indique le type, comme `topic_drawnix.pdf` ou `topic_flowchart.svg` ; les conflits ajoutent `-2`, `-3`, etc., sans écraser les fichiers existants.
 6. Relisez les panneaux dans leur ordre source : un conteneur vertical garde Drawnix et les visuels Mermaid à leur hauteur rendue.
-7. Utilisez **Exporter en SVG**, **Exporter en PNG** ou **Export PDF** par panneau, ou l’export supérieur pour tous. En multipanneau, choisissez dossier source ou dossier relatif au coffre ; un fichier déterministe est écrit par panneau et un échec isolé n’arrête pas les autres. **Enregistrer le fichier source** conserve aussi l’artefact modifiable.
+7. Cochez SVG, PNG et/ou PDF, choisissez un dossier et confirmez une fois. L’export principal traite tous les panneaux ; celui d’un panneau ne traite que ce panneau. Les formats de présentation utilisent des cases à cocher et exigent au moins un choix. La progression et les échecs partiels restent visibles.
 
 Définissez un dossier intermédiaire partagé relatif au Vault, ou laissez le champ vide pour utiliser `notemd_assert/` près de chaque source. Il contient les enregistrements de reprise, rendus en cache et pièces jointes facultatives. Conservez les fichiers encore référencés ; le changement concerne seulement les nouvelles exécutions.
 
 Les types sont générés successivement. Un échec ne bloque pas les autres ; l’annulation arrête les types en attente et conserve les fichiers terminés. Relancez les exports depuis l’aperçu ou l’historique sans nouvelle requête au modèle. Un échec de génération nécessite de régénérer ce type. Les enregistrements v1/v2 restent lisibles.
 
-Le menu Export et l’en-tête de chaque panneau proposent les exports visuels ; il n’est pas nécessaire de fusionner toute la prévisualisation en image opaque.
+Utilisez **Enregistrer le fichier source** pour conserver le document modifiable.
 
 **History** ouvre le tiroir du coffre sans masquer le diagramme. Recherchez, filtrez, rouvrez une prévisualisation ou ses fichiers. L’historique est également accessible sans note active depuis la palette et la barre latérale.
 

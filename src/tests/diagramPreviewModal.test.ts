@@ -1,5 +1,5 @@
 jest.mock('../rendering/preview/svgHostSanitizer', () => ({ mountDiagramSvg: (container: { innerHTML: string }, svg: string) => { container.innerHTML = svg; } }));
-import { Menu, Notice } from 'obsidian';
+import { Notice } from 'obsidian';
 import { DiagramPreviewModal } from '../ui/DiagramPreviewModal';
 import { clearDiagramPreviewHistory } from '../ui/diagramPreviewHistory';
 import { mockApp } from './__mocks__/app';
@@ -65,7 +65,7 @@ jest.mock('../rendering/webview/bundledPreviewDeps', () => ({
 }));
 
 jest.mock('../ui/DiagramPreviewExportFolderModal', () => ({
-    selectDiagramPreviewExportFolder: jest.fn()
+    selectDiagramPreviewExport: jest.fn()
 }));
 
 type MockElement = {
@@ -248,35 +248,105 @@ async function flushPromises(): Promise<void> {
     await new Promise<void>(resolve => setImmediate(resolve));
 }
 
-async function clickExportMenuItem(modal: any, index: number): Promise<void> {
+let selectedExportFormats = ['SVG'];
+
+async function choosePreviewExport(modal: any, index: number): Promise<void> {
+    selectedExportFormats = [['SVG'], ['PNG'], ['PDF']][index];
     const exportButton = collectButtons(modal.contentEl).find(button => button.text === 'Export' || button.text === '导出');
-    exportButton?.onclick?.({} as MouseEvent);
-    const menu = (Menu as unknown as jest.Mock).mock.results.at(-1)?.value;
-    const configure = menu.addItem.mock.calls[index][0];
-    const item = {
-        setTitle: jest.fn().mockReturnThis(),
-        setIcon: jest.fn().mockReturnThis(),
-        onClick: jest.fn().mockReturnThis()
-    };
-    configure(item);
-    await item.onClick.mock.calls[0][0]();
+    await exportButton?.onclick?.();
 }
 
-async function clickPanelExportMenuItem(modal: any, panelIndex: number, itemIndex: number): Promise<void> {
+async function choosePanelExport(modal: any, panelIndex: number, itemIndex: number): Promise<void> {
+    selectedExportFormats = [['SVG'], ['PNG'], ['PDF']][itemIndex];
     const exportButtons = collectButtons(modal.contentEl).filter(button => button.text === 'Export' || button.text === '导出');
-    exportButtons[panelIndex + 1]?.onclick?.({} as MouseEvent);
-    const menu = (Menu as unknown as jest.Mock).mock.results.at(-1)?.value;
-    const configure = menu.addItem.mock.calls[itemIndex][0];
-    const item = {
-        setTitle: jest.fn().mockReturnThis(),
-        setIcon: jest.fn().mockReturnThis(),
-        onClick: jest.fn().mockReturnThis()
-    };
-    configure(item);
-    await item.onClick.mock.calls[0][0]();
+    await exportButtons[panelIndex + 1]?.onclick?.();
 }
 
 describe('diagram preview modal', () => {
+    test('exports selected formats from one folder confirmation without truncating the selection', async () => {
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockResolvedValue({ folderPath: 'Exports', formats: ['SVG', 'PDF'] });
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en'));
+        modal.onOpen();
+        await collectButtons(modal.contentEl).find(button => button.text === 'Export')!.onclick?.();
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledTimes(1);
+        expect(previewExport.saveDiagramPreviewSvgToFolder).toHaveBeenCalled();
+        expect(previewExport.saveDiagramPreviewPdfToFolder).toHaveBeenCalled();
+        expect(previewExport.saveDiagramPreviewPngToFolder).not.toHaveBeenCalled();
+    });
+
+    test('canceling format selection writes no files and releases export controls', async () => {
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockResolvedValue(null);
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en'));
+        modal.onOpen();
+        const button = collectButtons(modal.contentEl).find(button => button.text === 'Export')!;
+        await button.onclick?.();
+        expect(previewExport.saveDiagramPreviewSvgToFolder).not.toHaveBeenCalled();
+        expect(previewExport.saveDiagramPreviewPdfToFolder).not.toHaveBeenCalled();
+        expect(button.disabled).toBe(false);
+    });
+
+    test('shows the active format while exporting and restores the action label', async () => {
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockResolvedValue({ folderPath: 'Exports', formats: ['SVG', 'PDF'] });
+        let finish!: (path: string) => void;
+        (previewExport.saveDiagramPreviewSvgToFolder as jest.Mock).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en'));
+        modal.onOpen();
+        const button = collectButtons(modal.contentEl).find(button => button.text === 'Export')!;
+        const pending = button.onclick?.();
+        await new Promise(resolve => setImmediate(resolve));
+        expect(button.text).toContain('Exporting');
+        expect(button.disabled).toBe(true);
+        finish('Exports/result.svg');
+        await pending;
+        expect(button.text).toBe('Export');
+        expect(button.disabled).toBe(false);
+    });
+
+    test('closing the preview while selecting formats prevents later export writes', async () => {
+        let select!: (selection: exportFolderModal.DiagramPreviewExportSelection) => void;
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(() => new Promise(resolve => { select = resolve; }));
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en'));
+        modal.onOpen();
+        const pending = collectButtons(modal.contentEl).find(button => button.text === 'Export')!.onclick?.();
+        modal.onClose();
+        select({ folderPath: 'Notes', formats: ['SVG', 'PNG', 'PDF'] });
+        await pending;
+        expect(previewExport.saveDiagramPreviewSvgToFolder).not.toHaveBeenCalled();
+        expect(previewExport.saveDiagramPreviewPngToFolder).not.toHaveBeenCalled();
+        expect(previewExport.saveDiagramPreviewPdfToFolder).not.toHaveBeenCalled();
+    });
+
+    test('multi-format PNG export retains compatibility companion paths and configured resolution', async () => {
+        const recordExportPath = jest.fn().mockResolvedValue(undefined);
+        const files = ['Exports/Topic_preview.png', 'Exports/Topic_preview_obsidian.png'];
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockResolvedValue({ folderPath: 'Exports', formats: ['PNG', 'PDF'] });
+        (previewExport.saveDiagramPreviewPngToFolder as jest.Mock).mockImplementationOnce(async (_app, _source, _folder, _artifact, deps) => {
+            expect(deps).toEqual(expect.objectContaining({ ppi: 450, obsidianCompatiblePng: true, signal: expect.any(AbortSignal) }));
+            await deps.onPngSaved({ path: files[0], files });
+            return files[0];
+        });
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en', {
+            exportPpi: 450, historyEntryId: 'one', historyStore: { loadPage: jest.fn(), removeEntry: jest.fn(), recordExportPath }
+        }));
+        modal.onOpen();
+        await collectButtons(modal.contentEl).find(button => button.text === 'Export')!.onclick?.();
+        expect(recordExportPath).toHaveBeenCalledWith('one', 'png', files[0], files);
+        expect(recordExportPath).toHaveBeenCalledWith('one', 'pdf', 'Notes/Topic_preview.pdf');
+    });
+
+    test('a failed format does not prevent another format and repeated clicks do not start duplicate batches', async () => {
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockResolvedValue({ folderPath: 'Exports', formats: ['SVG', 'PDF'] });
+        (previewExport.saveDiagramPreviewSvgToFolder as jest.Mock).mockRejectedValueOnce(new Error('SVG failed'));
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'en'));
+        modal.onOpen();
+        const button = collectButtons(modal.contentEl).find(button => button.text === 'Export')!;
+        await Promise.all([button.onclick?.(), button.onclick?.()]);
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledTimes(1);
+        expect(previewExport.saveDiagramPreviewPdfToFolder).toHaveBeenCalledTimes(1);
+        expect(Notice).toHaveBeenCalledWith(expect.stringContaining('SVG failed'));
+        expect(Notice).toHaveBeenLastCalledWith(expect.stringContaining('SVG failed'));
+    });
+
     test.each([
         ['completed', 'completed', false],
         ['partial', 'completed', true],
@@ -358,9 +428,10 @@ describe('diagram preview modal', () => {
     });
 
     beforeEach(() => {
+        selectedExportFormats = ['SVG'];
         jest.clearAllMocks();
         clearDiagramPreviewHistory();
-        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Notes');
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(async () => ({ folderPath: 'Notes', formats: selectedExportFormats }));
         Object.defineProperty(globalThis, 'navigator', {
             configurable: true,
             value: {
@@ -409,13 +480,12 @@ describe('diagram preview modal', () => {
         expect(exportButton).toBeDefined();
         expect(mermaidPreview.renderMermaidArtifactSvg).not.toHaveBeenCalled();
 
-        await clickExportMenuItem(modal, 0);
+        await choosePreviewExport(modal, 0);
 
-        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
-            'en',
-            'SVG'
+            'en'
         );
         expect(previewExport.saveDiagramPreviewSvgToFolder).toHaveBeenCalledWith(
             mockApp,
@@ -432,7 +502,7 @@ describe('diagram preview modal', () => {
         await expect(exportDeps.vegaLiteDepsLoader()).resolves.toBe(bundledVegaLiteDeps);
         expect(bundledPreviewDeps.getBundledVegaLitePreviewDeps).toHaveBeenCalled();
         expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview.svg');
-        expect((Menu as unknown as jest.Mock).mock.results.at(-1)?.value.addItem).toHaveBeenCalledTimes(3);
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledTimes(1);
         expect(exportButton?.text).toBe('Export');
         expect(exportButton?.disabled).toBe(false);
     });
@@ -447,7 +517,7 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        await clickExportMenuItem(modal, 1);
+        await choosePreviewExport(modal, 1);
 
         expect(previewExport.saveDiagramPreviewPngToFolder).toHaveBeenCalledWith(
             mockApp,
@@ -468,7 +538,7 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        await clickExportMenuItem(modal, 2);
+        await choosePreviewExport(modal, 2);
 
         expect(previewExport.saveDiagramPreviewPdfToFolder).toHaveBeenCalledWith(
             mockApp,
@@ -488,7 +558,7 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        await clickExportMenuItem(modal, 2);
+        await choosePreviewExport(modal, 2);
 
         expect(previewExport.saveDiagramPreviewPdfToFolder).toHaveBeenCalledWith(
             mockApp,
@@ -640,7 +710,7 @@ describe('diagram preview modal', () => {
     });
 
     test('exports an individual preview panel from its own menu', async () => {
-        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(async () => ({ folderPath: 'Exports', formats: selectedExportFormats }));
         (previewExport.saveDiagramPreviewPanelSvgToFolder as jest.Mock)
             .mockResolvedValue('Exports/Topic_preview_mermaid-2.svg');
         const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
@@ -669,13 +739,12 @@ describe('diagram preview modal', () => {
         modal.onOpen();
         await flushPromises();
 
-        await clickPanelExportMenuItem(modal, 1, 0);
+        await choosePanelExport(modal, 1, 0);
 
-        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
-            'en',
-            'SVG'
+            'en'
         );
         expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenCalledWith(
             mockApp,
@@ -693,7 +762,7 @@ describe('diagram preview modal', () => {
         ['PNG', 1, 'saveDiagramPreviewPanelPngToFolder', 'Exports/Topic_preview_mermaid-2.png'],
         ['PDF', 2, 'saveDiagramPreviewPanelPdfToFolder', 'Exports/Topic_preview_mermaid-2.pdf']
     ])('uses the selected folder for an individual %s preview panel export', async (_label, menuIndex, saveMethod, outputPath) => {
-        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(async () => ({ folderPath: 'Exports', formats: selectedExportFormats }));
         const saver = (previewExport as any)[saveMethod] as jest.Mock;
         saver.mockResolvedValue(outputPath);
         const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
@@ -718,13 +787,12 @@ describe('diagram preview modal', () => {
 
         modal.onOpen();
         await flushPromises();
-        await clickPanelExportMenuItem(modal, 1, menuIndex as number);
+        await choosePanelExport(modal, 1, menuIndex as number);
 
-        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
-            'en',
-            _label as string
+            'en'
         );
         expect(saver).toHaveBeenCalledWith(
             mockApp,
@@ -738,7 +806,7 @@ describe('diagram preview modal', () => {
     });
 
     test('prompts for a folder and exports every preview panel as a separate svg', async () => {
-        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(async () => ({ folderPath: 'Exports', formats: selectedExportFormats }));
         (previewExport.saveDiagramPreviewPanelSvgToFolder as jest.Mock)
             .mockResolvedValueOnce('Exports/Topic_preview_mermaid-1.svg')
             .mockResolvedValueOnce('Exports/Topic_preview_mermaid-2.svg');
@@ -771,9 +839,9 @@ describe('diagram preview modal', () => {
 
         modal.onOpen();
         await flushPromises();
-        await clickExportMenuItem(modal, 0);
+        await choosePreviewExport(modal, 0);
 
-        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en', 'SVG');
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en');
         expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenNthCalledWith(
             1,
             mockApp,
@@ -799,7 +867,7 @@ describe('diagram preview modal', () => {
     });
 
     test('continues separate svg export after one panel fails', async () => {
-        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(async () => ({ folderPath: 'Exports', formats: selectedExportFormats }));
         (previewExport.saveDiagramPreviewPanelSvgToFolder as jest.Mock)
             .mockRejectedValueOnce(new Error('first panel failed'))
             .mockResolvedValueOnce('Exports/Topic_preview_mermaid-2.svg');
@@ -828,7 +896,7 @@ describe('diagram preview modal', () => {
 
         modal.onOpen();
         await flushPromises();
-        await clickExportMenuItem(modal, 0);
+        await choosePreviewExport(modal, 0);
 
         expect(previewExport.saveDiagramPreviewPanelSvgToFolder).toHaveBeenCalledTimes(2);
         expect(Notice).toHaveBeenCalledWith('Exported 1 of 2 SVG files. Failed: mermaid-1: first panel failed.');
@@ -838,7 +906,7 @@ describe('diagram preview modal', () => {
         ['PNG', 1, 'saveDiagramPreviewPanelPngToFolder', 'Exports/Topic_preview_mermaid-1.png'],
         ['PDF', 2, 'saveDiagramPreviewPanelPdfToFolder', 'Exports/Topic_preview_mermaid-1.pdf']
     ])('prompts for a folder and exports every preview panel as separate %s files', async (_label, menuIndex, saveMethod, firstOutputPath) => {
-        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(async () => ({ folderPath: 'Exports', formats: selectedExportFormats }));
         const saver = (previewExport as any)[saveMethod] as jest.Mock;
         saver
             .mockResolvedValueOnce(firstOutputPath)
@@ -872,9 +940,9 @@ describe('diagram preview modal', () => {
 
         modal.onOpen();
         await flushPromises();
-        await clickExportMenuItem(modal, menuIndex as number);
+        await choosePreviewExport(modal, menuIndex as number);
 
-        expect(exportFolderModal.selectDiagramPreviewExportFolder).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en', _label as string);
+        expect(exportFolderModal.selectDiagramPreviewExport).toHaveBeenCalledWith(mockApp, 'Notes/Topic.md', 'en');
         expect(saver).toHaveBeenNthCalledWith(
             1,
             mockApp,
@@ -898,7 +966,7 @@ describe('diagram preview modal', () => {
     });
 
     test('continues separate pdf export after one panel fails', async () => {
-        (exportFolderModal.selectDiagramPreviewExportFolder as jest.Mock).mockResolvedValue('Exports');
+        (exportFolderModal.selectDiagramPreviewExport as jest.Mock).mockImplementation(async () => ({ folderPath: 'Exports', formats: selectedExportFormats }));
         (previewExport.saveDiagramPreviewPanelPdfToFolder as jest.Mock)
             .mockRejectedValueOnce(new Error('first pdf failed'))
             .mockResolvedValueOnce('Exports/Topic_preview_mermaid-2.pdf');
@@ -927,7 +995,7 @@ describe('diagram preview modal', () => {
 
         modal.onOpen();
         await flushPromises();
-        await clickExportMenuItem(modal, 2);
+        await choosePreviewExport(modal, 2);
 
         expect(previewExport.saveDiagramPreviewPanelPdfToFolder).toHaveBeenCalledTimes(2);
         expect(Notice).toHaveBeenCalledWith('Exported 1 of 2 PDF files. Failed: mermaid-1: first pdf failed.');

@@ -26,7 +26,21 @@ Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală ind
 | Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
 | Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
 
-**Versiune:** 1.9.13
+**Versiune:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Previzualizări PDF clare și export în mai multe formate
+
+PNG/PDF se deschid în previzualizarea diagramelor. Fiecare pagină PDF are comenzi independente. Zoomul redesenează zona vizibilă la densitatea pixelilor ecranului, cu memorie limitată; imaginile raster încorporate rămân limitate de rezoluția sursei.
+
+Țineți Alt apăsat pentru a bloca navigarea când selectați textul disponibil în SVG/HTML/PDF. Eliberarea restabilește blocarea anterioară. PNG nu are strat de text selectabil.
+
+Alegeți SVG, PNG și/sau PDF și un dosar de destinație, apoi confirmați o dată. Exportul principal include toate panourile; exportul unui panou include doar acel panou. Formatele prezentării folosesc casete de selectare și necesită cel puțin o alegere. Progresul și erorile parțiale rămân vizibile.
+
+Instalați fișierele main.js, manifest.json și styles.css corespunzătoare versiunii 1.9.14, apoi reîncărcați extensia. Notele și setările existente se păstrează.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Comenzi de previzualizare și exportul prezentărilor
@@ -757,7 +771,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.13 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.14 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->

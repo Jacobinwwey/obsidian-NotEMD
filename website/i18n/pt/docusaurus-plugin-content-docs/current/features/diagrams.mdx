@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Selecione vários tipos de diagrama numa execução e vários formatos independentes para cada tipo. Desmarcar um tipo conserva os seus formatos; sem seleção, o conteúdo é analisado automaticamente.
 </TLDR>
 
-Os registos ficam recolhidos quando todas as exportações terminam com êxito. O cadeado junto ao botão menos fixa a posição e o zoom para selecionar texto SVG/HTML. PNG/PDF abrem no visualizador nativo do Obsidian. As apresentações suportam vários formatos e exigem o fork Slidev de Jacobinwwey, sem recurso ao pacote oficial.
+Os PNG/PDF abrem na pré-visualização de diagramas. Cada página PDF tem controlos independentes. O zoom redesenha a área visível à densidade de píxeis do ecrã, com memória limitada; as imagens incorporadas continuam limitadas pela resolução original.
+
+Mantenha Alt premido para bloquear a navegação e selecionar texto disponível em SVG/HTML/PDF. Ao soltar, regressa o estado de bloqueio anterior. O PNG não tem uma camada de texto selecionável.
 
 
 Cada pré-visualização tem zoom, deslocação, ajuste e tamanho real independentes. Ctrl/Command + roda amplia; a roda sozinha desloca. Exportações PNG grandes preservam os 72–600 PPI selecionados (300 por predefinição). SVG é vetorial; os PPI aplicam-se apenas a exportações raster.
@@ -58,13 +60,13 @@ Os formatos suportados aparecem primeiro; os incompatíveis continuam visíveis 
 4. Executar **Gerar diagrama**.
 5. Os ficheiros selecionados são exportados automaticamente junto da nota original ou diretamente para a pasta configurada. Os nomes incluem o tipo, como `topic_drawnix.pdf` e `topic_flowchart.svg`. Em caso de colisão, acrescenta-se `-2`, `-3`, etc., sem substituir ficheiros.
 6. Rever painéis na ordem da fonte, num único espaço vertical; Mermaid usa a altura renderizada sem corte.
-7. Usar **Exportar SVG**, **Exportar PNG** ou **Export PDF** por painel, ou exportação superior para todos. Escolher pasta da origem ou destino relativo ao cofre. Cada painel recebe nome determinista e falha individual não impede os restantes. **Guardar ficheiro fonte** preserva a fonte editável.
+7. Selecione SVG, PNG e/ou PDF e uma pasta, depois confirme uma vez. A exportação principal inclui todos os painéis; a de um painel inclui apenas esse painel. Os formatos de apresentação usam caixas de seleção e exigem pelo menos uma escolha. O progresso e as falhas parciais permanecem visíveis.
 
 Defina uma pasta intermédia partilhada relativa ao Vault, ou deixe o campo vazio para usar `notemd_assert/` junto de cada original. Guarda registos de recuperação, renderizações em cache e anexos opcionais. Conserve ficheiros ainda referenciados; a alteração só afeta novas execuções.
 
 Os tipos são gerados em sequência. Uma falha não bloqueia os restantes; cancelar interrompe os pendentes e preserva os ficheiros concluídos. Repita exportações pela pré-visualização ou histórico sem outro pedido ao modelo. Uma falha de geração exige gerar novamente esse tipo. Os registos v1/v2 continuam legíveis.
 
-Menu e cabeçalho de cada painel permitem exportar uma vista, sem obrigar uma imagem única opaca para resultados grandes.
+Use **Guardar ficheiro de origem** para manter o documento editável.
 
 **History** abre o painel de histórico sem ocultar o diagrama. Pesquisar, filtrar e abrir vistas ou resultados guardados. Também está na paleta e barra lateral sem nota ativa.
 

@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Selecteer meerdere diagramtypen per uitvoering en voor elk type meerdere uitvoerformaten. Uitvinken bewaart de formaten van dat type; zonder selectie wordt de inhoud automatisch geanalyseerd.
 </TLDR>
 
-Bij volledig geslaagde exports zijn de logs ingeklapt. Het slot naast min vergrendelt beweging en zoom om SVG/HTML-tekst te selecteren. PNG/PDF openen in de eigen viewer van Obsidian. Presentaties ondersteunen meerdere formaten en vereisen de Slidev-fork van Jacobinwwey; er is geen terugval op het officiële pakket.
+PNG/PDF openen in het diagramvoorbeeld. Elke PDF-pagina heeft eigen bediening. Bij zoomen wordt het zichtbare deel opnieuw getekend op de pixeldichtheid van het scherm, met begrensd geheugengebruik; ingebedde rasterafbeeldingen blijven beperkt tot hun bronresolutie.
+
+Houd Alt ingedrukt om navigatie te blokkeren terwijl u beschikbare SVG/HTML/PDF-tekst selecteert. Loslaten herstelt de vorige vergrendeling. PNG heeft geen selecteerbare tekstlaag.
 
 
 Elke diagramweergave heeft onafhankelijke zoom, verschuiving, passend maken en werkelijke grootte. Ctrl/Command + muiswiel zoomt; het wiel alleen scrolt. Grote PNG-exports behouden de gekozen 72–600 PPI (standaard 300). SVG is een vectorformaat; PPI geldt alleen voor rasterexports.
@@ -58,13 +60,13 @@ Ondersteunde formaten staan bovenaan; incompatibele opties blijven zichtbaar en 
 4. Kies **Diagram genereren**.
 5. Geselecteerde bestanden worden automatisch naast de bronnotitie of rechtstreeks in de ingestelde uitvoermap opgeslagen. Namen bevatten het type, zoals `topic_drawnix.pdf` en `topic_flowchart.svg`; bij conflicten volgen `-2`, `-3` enzovoort, zonder bestaande bestanden te overschrijven.
 6. Controleer bord en Mermaid-panelen in bronvolgorde binnen één verticaal scrollbare voorvertoning. De panelen gebruiken hun werkelijke hoogte.
-7. Kies **SVG exporteren**, **PNG exporteren** of **Export PDF** per paneel of exporteer bovenaan alle panelen. Kies bronmap of eigen Vault-relatieve map; uitvoernamen zijn deterministisch per paneel en een fout stopt andere panelen niet. Bewaar het bewerkbare bestand via **Bronbestand opslaan**.
+7. Kies SVG, PNG en/of PDF en een doelmap en bevestig eenmaal. De hoofdexport omvat alle panelen; een paneelexport alleen dat paneel. Presentatieformaten gebruiken selectievakjes en vereisen minstens één keuze. Voortgang en gedeeltelijke fouten blijven zichtbaar.
 
 Stel een gedeelde Vault-relatieve map voor tussenbestanden in, of laat het veld leeg voor `notemd_assert/` naast elke bron. Hier staan herstelgegevens, rendercaches en optionele bijlagen. Bewaar bestanden waarnaar nog wordt verwezen; een mapwijziging geldt alleen voor nieuwe uitvoeringen.
 
 Typen worden achtereenvolgens gemaakt. Eén fout blokkeert de overige niet; annuleren stopt wachtende typen en bewaart voltooide bestanden. Herhaal exports vanuit het voorbeeld of de geschiedenis zonder nieuwe modelaanvraag. Na een generatiefout moet dat type opnieuw worden gemaakt. v1/v2-herstelgegevens blijven leesbaar.
 
-Exportmenu en paneelkoppen bieden dezelfde drie acties. **History** opent zoeken, filters, heropenen en opgeslagen bestanden zonder het voorbeeld te verbergen. Geschiedenis is ook via palet/zijbalk beschikbaar zonder actieve notitie.
+Gebruik **Bronbestand opslaan** om het bewerkbare document te bewaren.
 
 SVG/PDF komen uit vectorgeometrie; PDF behoudt SVG-layout en tekstmeting in plaats van alles als bitmap af te beelden. PPI geldt alleen voor PNG: 72–600, standaard 300.
 

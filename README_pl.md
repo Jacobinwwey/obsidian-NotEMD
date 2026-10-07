@@ -26,7 +26,21 @@ Każdy podgląd ma niezależne powiększenie, przesuwanie, dopasowanie i rozmiar
 | Programista | [Przewodnik programisty](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/developers/overview) | Buduj, testuj i rozszerzaj istniejące kontrakty |
 | Agent | [Przewodnik agenta](https://jacobinwwey.github.io/obsidian-NotEMD/pl/docs/agents/overview) | Poznaj cztery obsługiwane polecenia eksportu |
 
-**Wersja:** 1.9.13
+**Wersja:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Ostry podgląd PDF i eksport do wielu formatów
+
+PNG/PDF otwierają się w podglądzie diagramów. Każda strona PDF ma własne sterowanie. Powiększenie ponownie rysuje widoczny obszar zgodnie z gęstością pikseli ekranu i limitem pamięci; osadzone bitmapy pozostają ograniczone rozdzielczością źródła.
+
+Przytrzymaj Alt, aby zablokować nawigację podczas zaznaczania dostępnego tekstu SVG/HTML/PDF. Zwolnienie przywraca poprzedni stan blokady. PNG nie ma warstwy tekstu do zaznaczania.
+
+Wybierz SVG, PNG i/lub PDF oraz folder docelowy, a potem potwierdź raz. Eksport główny obejmuje wszystkie panele, eksport panelu tylko ten panel. Formaty prezentacji wybiera się polami wyboru; wymagany jest co najmniej jeden. Postęp i częściowe błędy pozostają widoczne.
+
+Zainstaluj zgodne pliki main.js, manifest.json i styles.css z 1.9.14 i przeładuj wtyczkę. Dotychczasowe notatki i ustawienia zostaną zachowane.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Sterowanie podglądem i eksport prezentacji
@@ -760,7 +774,7 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.13 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.9.14 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 
 <!-- repo-chronicle:start -->

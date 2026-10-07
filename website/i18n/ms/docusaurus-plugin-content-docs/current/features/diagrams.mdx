@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Pilih beberapa jenis rajah dalam satu pelaksanaan dan beberapa format output secara berasingan bagi setiap jenis. Nyahpilih jenis masih mengekalkan formatnya; tanpa pilihan, kandungan dianalisis secara automatik.
 </TLDR>
 
-Panel log dilipat apabila semua eksport berjaya. Kunci di sebelah butang tolak membekukan gerakan dan zum untuk memilih teks SVG/HTML. PNG/PDF dibuka dalam pemapar asli Obsidian. Pembentangan menyokong pelbagai format dan wajib menggunakan fork Slidev Jacobinwwey; pakej rasmi tidak digunakan sebagai gantian.
+PNG/PDF dibuka dalam pratonton rajah. Setiap halaman PDF mempunyai kawalan sendiri. Zum melukis semula kawasan yang kelihatan mengikut ketumpatan piksel skrin dengan memori terhad; imej bitmap terbenam masih terhad oleh resolusi sumber.
+
+Tahan Alt untuk membekukan navigasi semasa memilih teks SVG/HTML/PDF yang tersedia. Apabila dilepaskan, keadaan kunci sebelumnya dipulihkan. PNG tiada lapisan teks yang boleh dipilih.
 
 
 Setiap pratonton rajah mempunyai zum, anjakan, muat dan saiz sebenar yang berasingan. Ctrl/Command + roda tetikus mengezum; roda biasa menatal. Eksport PNG besar mengekalkan 72–600 PPI yang dipilih (lalai 300). SVG berasaskan vektor; PPI hanya digunakan untuk eksport raster.
@@ -58,13 +60,13 @@ Format yang disokong dipaparkan dahulu; pilihan tidak serasi kekal kelihatan tet
 4. Jalankan **Generate diagram** melalui bar sisi atau palet arahan.
 5. Fail terpilih dieksport secara automatik di sebelah nota sumber atau terus ke folder output yang ditetapkan. Nama menyertakan jenis, seperti `topic_drawnix.pdf` dan `topic_flowchart.svg`. Konflik nama menambah `-2`, `-3` dan seterusnya tanpa menulis ganti fail.
 6. Semak pratonton. Papan Drawnix dan semua panel Mermaid tersusun mengikut sumber dalam satu kawasan tatal menegak; panel Mermaid menggunakan ketinggian terpapar tanpa dipotong.
-7. Pilih **Export SVG**, **Export PNG** atau **Export PDF** pada panel untuk satu visual, atau eksport imej peringkat atas untuk semua panel. Bagi beberapa panel, pilih folder sumber atau folder tersuai relatif kepada Vault. Satu fail deterministik ditulis setiap panel dan proses diteruskan selepas kegagalan individu. Gunakan **Save source file** jika artifak boleh sunting diperlukan.
+7. Pilih SVG, PNG dan/atau PDF serta folder destinasi, kemudian sahkan sekali. Eksport utama merangkumi semua panel; eksport panel hanya melibatkan panel tersebut. Format pembentangan menggunakan kotak semak dan memerlukan sekurang-kurangnya satu pilihan. Kemajuan dan kegagalan separa kekal dipaparkan.
 
 Tetapkan folder perantaraan bersama relatif kepada Vault, atau kosongkan untuk menggunakan `notemd_assert/` di sebelah setiap sumber. Rekod pemulihan, cache pemaparan dan lampiran pilihan disimpan di situ. Kekalkan fail yang masih dirujuk; perubahan folder hanya terpakai pada pelaksanaan baharu.
 
 Jenis dijana mengikut turutan. Kegagalan satu jenis tidak menyekat yang lain; pembatalan menghentikan jenis menunggu dan mengekalkan fail siap. Cuba semula eksport melalui pratonton atau sejarah tanpa permintaan model baharu. Kegagalan penjanaan memerlukan jenis itu dijana semula. Rekod v1/v2 masih boleh dibaca.
 
-Menu Export menawarkan **Export SVG**, **Export PNG** dan **Export PDF** bagi pratonton semasa. Pengepala setiap panel menawarkan tindakan sama untuk satu visual Mermaid/Drawnix, jadi pratonton besar tidak perlu menjadi satu imej yang sukar diubah.
+Gunakan **Simpan fail sumber** untuk menyimpan dokumen yang boleh disunting.
 
 Pilih **History** untuk membuka laci sejarah Vault tanpa menyembunyikan rajah. Cari/tapis rajah selesai, buka semula pratonton atau artifak tersimpan. Sejarah juga tersedia melalui palet arahan dan bar sisi walaupun tiada nota aktif.
 

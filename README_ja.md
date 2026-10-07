@@ -26,7 +26,21 @@
 | 開発者 | [開発ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/developers/overview) | 既存の契約に沿ってビルド・テスト・拡張 |
 | エージェント | [連携ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/agents/overview) | 対応する四つのエクスポートコマンドを確認 |
 
-**バージョン:** 1.9.13
+**バージョン:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — 鮮明な PDF プレビューと複数形式のエクスポート
+
+PNG/PDF は図のプレビュー内で開き、PDF の各ページを個別に操作できます。拡大時には画面の画素密度に合わせて表示領域を再描画し、メモリ使用量を制限します。埋め込み画像の鮮明さは元の解像度に制限されます。
+
+Alt を押している間は移動と拡大縮小が停止し、SVG/HTML/PDF の選択可能な文字を選べます。離すと以前のロック状態に戻ります。PNG には選択可能な文字レイヤーがありません。
+
+SVG、PNG、PDF から複数の形式と保存先を選び、一度だけ確定します。全体のエクスポートは全パネル、パネルの操作はそのパネルだけが対象です。プレゼンテーション形式はチェックボックスで選択し、少なくとも一つを残します。進捗と一部の失敗を表示します。
+
+1.9.14 の対応する main.js、manifest.json、styles.css をインストールして再読み込みしてください。既存のノートと設定は保持されます。
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — プレビュー操作とプレゼンテーションの書き出し
@@ -766,7 +780,7 @@ MIT ライセンス - 詳細は [LICENSE](LICENSE) ファイルを参照して�
 ---
 
 
-*Notemd v1.9.13 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
+*Notemd v1.9.14 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
 
 
 

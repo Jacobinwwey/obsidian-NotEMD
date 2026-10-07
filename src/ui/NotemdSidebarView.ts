@@ -126,7 +126,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private logEl: HTMLElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
-    private slideExportFormatSelector: HTMLSelectElement | null = null;
+    private slideExportFormatSelector: HTMLFieldSetElement | null = null;
     private slideExportOutlineToggleButton: HTMLButtonElement | null = null;
     private slideExportDirectActionsEl: HTMLElement | null = null;
     private slideExportOutlineActionsEl: HTMLElement | null = null;
@@ -1214,32 +1214,37 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     private buildSlideExportFormatSelector(parent: HTMLElement) {
         const i18n = this.getStrings();
-        const row = parent.createDiv({ cls: 'notemd-inline-control notemd-slide-export-format-control' });
-        row.createEl('label', {
-            text: i18n.slideExport.defaultFormatName,
-            cls: 'notemd-inline-label'
-        });
-
-        const selector = row.createEl('select', { cls: 'notemd-slide-export-format-select' }) as HTMLSelectElement;
-        selector.multiple = true;
-        selector.size = SLIDE_EXPORT_FORMATS.length;
-        selector.title = i18n.slideExport.defaultFormatDesc;
-        selector.setAttribute('aria-label', i18n.slideExport.defaultFormatName);
+        const copy = i18n.previewModal;
+        const row = parent.createDiv({ cls: 'notemd-slide-export-format-control' });
+        const selector = row.createEl('fieldset', { cls: 'notemd-export-format-options notemd-slide-export-format-options' });
+        selector.createEl('legend', { text: copy.exportFormatsTitle });
         const currentFormats = normalizeSlideExportFormats(this.plugin.settings.slideExportFormats, this.plugin.settings.slideExportDefaultFormat);
-        SLIDE_EXPORT_FORMATS.forEach(format => {
-            const option = selector.createEl('option', { text: format.toUpperCase() }) as HTMLOptionElement;
-            option.value = format;
-            option.selected = currentFormats.includes(format);
+        const summary = row.createEl('p', {
+            cls: 'notemd-export-format-summary', attr: { 'aria-live': 'polite', 'aria-atomic': 'true' }
         });
-
-        selector.onchange = async () => {
-            const formats = normalizeSlideExportFormats(Array.from(selector.selectedOptions, option => option.value), this.plugin.settings.slideExportDefaultFormat);
-            this.plugin.settings.slideExportFormats = formats;
-            this.plugin.settings.slideExportDefaultFormat = formats[0];
-            Array.from(selector.options).forEach(option => { option.selected = formats.includes(option.value as NotemdSettings['slideExportDefaultFormat']); });
-            await this.plugin.saveSettings();
-        };
-
+        const inputs = new Map<NotemdSettings['slideExportDefaultFormat'], HTMLInputElement>();
+        for (const format of SLIDE_EXPORT_FORMATS) {
+            const label = selector.createEl('label', { cls: 'notemd-export-format-option' });
+            const input = label.createEl('input', { type: 'checkbox' });
+            input.value = format;
+            input.checked = currentFormats.includes(format);
+            label.createSpan({ text: format.toUpperCase() });
+            inputs.set(format, input);
+            input.onchange = async () => {
+                const formats = [...inputs].filter(([, checkbox]) => checkbox.checked).map(([selectedFormat]) => selectedFormat);
+                // Keep the user's final choice instead of silently normalizing an empty selection to another format.
+                if (formats.length === 0) {
+                    input.checked = true;
+                    summary.setText(copy.exportFormatsRequired);
+                    return;
+                }
+                this.plugin.settings.slideExportFormats = formats;
+                this.plugin.settings.slideExportDefaultFormat = formats[0];
+                summary.setText(formatI18n(copy.exportSelectionSummary, { formats: formats.map(selected => selected.toUpperCase()).join(', ') }));
+                await this.plugin.saveSettings();
+            };
+        }
+        summary.setText(formatI18n(copy.exportSelectionSummary, { formats: currentFormats.map(format => format.toUpperCase()).join(', ') }));
         this.slideExportFormatSelector = selector;
     }
 

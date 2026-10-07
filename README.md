@@ -18,7 +18,11 @@ Each diagram preview has independent zoom, pan, fit and actual-size controls. Ct
 
 ## Start Here
 
-Successful export logs start collapsed. Lock each preview beside the minus button to select SVG/HTML text without moving or zooming it. PNG/PDF open in Obsidian’s native viewer. Presentation export supports multiple formats and requires the Jacobinwwey Slidev fork; official fallback is disabled.
+Successful export logs start collapsed. Lock each preview beside the minus button, or hold Alt temporarily, to select available SVG/HTML/PDF text without moving or zooming it. Release Alt to restore the previous lock state. PNG/PDF open inside the diagram preview window; PNG has no selectable text layer. Presentation export supports multiple formats and requires the Jacobinwwey Slidev fork; official fallback is disabled.
+
+Each PDF page has a separate preview panel with its own zoom, fit and lock controls. Scroll between the page panels; adjusting one page leaves the others unchanged.
+
+Preview **Export** opens a single format-and-folder chooser: check SVG, PNG and/or PDF, then confirm once. The main action exports all preview panels; each panel's action exports that panel only. Presentation formats use visible checkboxes, so ordinary clicks retain multiple choices without Ctrl/Shift. At least one format is required. During export, controls show the active format and progress; the final summary preserves any failures.
 
 See the [preview and export reliability record](./docs/maintainer/2026-10-06-preview-slidev-reliability.md) for verification status and the required fork provenance.
 
@@ -33,7 +37,20 @@ See the [preview and export reliability record](./docs/maintainer/2026-10-06-pre
 
 Notemd is an **MIT-licensed Obsidian plugin** for file-based knowledge work. It supports cloud providers, gateways and local model servers. Stored outputs stay in the vault; cloud tasks send content to the selected endpoint, and web research uses the network.
 
-**Version:** 1.9.13
+**Version:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Sharp PDF previews and multi-format export
+
+PNG/PDF open inside diagram previews. Each PDF page has independent controls. Zoom redraws visible PDF content at screen pixel density with bounded memory; embedded bitmap resolution remains limited by its source.
+
+Hold Alt to freeze navigation while selecting available SVG/HTML/PDF text. Releasing Alt restores the previous lock state. PNG has no selectable text layer.
+
+Choose SVG, PNG and/or PDF plus a destination folder, then confirm once. The main Export action includes all panels; a panel action includes only that panel. Presentation formats use checkboxes and require at least one selection. Progress and partial failures remain visible.
+
+Install matching main.js, manifest.json and styles.css from 1.9.14, then reload. Existing notes and settings are preserved.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
 
 <!-- notemd-preview-export-1.9.13 -->
 
@@ -897,7 +914,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.13 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.14 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->

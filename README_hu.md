@@ -26,7 +26,21 @@ Minden diagramelőnézet külön nagyítási, mozgatási, illesztési és eredet
 | Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
 | Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
 
-**Verzió:** 1.9.13
+**Verzió:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Éles PDF-előnézet és export több formátumba
+
+A PNG/PDF a diagramelőnézetben nyílik meg. Minden PDF-oldal önálló vezérlőkkel rendelkezik. Nagyításkor a látható rész a képernyő képpontsűrűségével, korlátozott memóriahasználattal újrarajzolódik; a beágyazott raszterképeket továbbra is a forrásfelbontás korlátozza.
+
+Tartsa lenyomva az Alt billentyűt a navigáció rögzítéséhez, miközben kijelölhető SVG/HTML/PDF-szöveget választ ki. Felengedéskor visszaáll a korábbi zárolás. A PNG nem tartalmaz kijelölhető szövegréteget.
+
+Válasszon SVG, PNG és/vagy PDF formátumot és célmappát, majd egyszer erősítse meg. A fő export minden panelt, a panel saját exportja csak azt a panelt tartalmazza. A prezentációformátumok jelölőnégyzetekkel választhatók ki; legalább egy szükséges. A folyamat és a részleges hibák láthatók maradnak.
+
+Telepítse az 1.9.14-hez tartozó main.js, manifest.json és styles.css fájlokat, majd töltse újra a bővítményt. A meglévő jegyzetek és beállítások megmaradnak.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Előnézeti vezérlők és prezentációexport
@@ -757,7 +771,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.13 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.14 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->

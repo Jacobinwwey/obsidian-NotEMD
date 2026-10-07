@@ -28,17 +28,17 @@ export function normalizeDiagramPreviewExportFolderPath(folderPath: string): str
     return normalized;
 }
 
-interface DiagramPreviewExportFolderModalOptions {
-    app: App;
-    sourcePath: string;
-    uiLocale?: string;
-    resolve: (folderPath: string | null) => void;
+export interface DiagramPreviewExportSelection {
+    folderPath: string;
+    formats: DiagramPreviewExportFormat[];
 }
 
 export class DiagramPreviewExportFolderModal extends Modal {
     private readonly sourceFolder: string;
-    private readonly resolveSelection: (folderPath: string | null) => void;
-    private readonly exportFormat: DiagramPreviewExportFormat;
+    private readonly resolveSelection: (selection: DiagramPreviewExportSelection | null) => void;
+    private readonly formatInputs = new Map<DiagramPreviewExportFormat, HTMLInputElement>();
+    private formatSummary: HTMLElement | null = null;
+    private confirming = false;
     private completed = false;
     private customFolderInput: HTMLInputElement | null = null;
     private customFolderOption: HTMLInputElement | null = null;
@@ -48,26 +48,38 @@ export class DiagramPreviewExportFolderModal extends Modal {
 
     constructor(
         app: App,
-        private readonly sourcePath: string,
+        sourcePath: string,
         private readonly uiLocale = 'auto',
-        resolve: (folderPath: string | null) => void,
-        exportFormat: DiagramPreviewExportFormat = 'SVG'
+        resolve: (selection: DiagramPreviewExportSelection | null) => void
     ) {
         super(app);
         this.sourceFolder = getDiagramPreviewSourceFolder(sourcePath);
         this.resolveSelection = resolve;
-        this.exportFormat = exportFormat;
     }
 
     onOpen(): void {
         const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
-        const formatVariables = { format: this.exportFormat };
-        this.titleEl.setText(formatI18n(copy.exportFolderTitle, formatVariables));
+        this.titleEl.setText(copy.exportBatchTitle);
         this.contentEl.empty();
         this.contentEl.addClass('notemd-diagram-preview-export-folder-modal');
         this.contentEl.createEl('p', {
-            text: formatI18n(copy.exportFolderDescription, formatVariables),
+            text: copy.exportFormatsDescription,
             cls: 'notemd-diagram-preview-export-folder-description'
+        });
+
+        this.formatInputs.clear();
+        const formats = this.contentEl.createEl('fieldset', { cls: 'notemd-export-format-options' });
+        formats.createEl('legend', { text: copy.exportFormatsTitle });
+        for (const format of ['SVG', 'PNG', 'PDF'] as const) {
+            const label = formats.createEl('label', { cls: 'notemd-export-format-option' });
+            const input = label.createEl('input', { type: 'checkbox', attr: { value: format } });
+            input.checked = format === 'SVG';
+            input.addEventListener('change', () => this.updateFormatSelection());
+            label.createSpan({ text: format });
+            this.formatInputs.set(format, input);
+        }
+        this.formatSummary = this.contentEl.createEl('p', {
+            cls: 'notemd-export-format-summary', attr: { 'aria-live': 'polite', 'aria-atomic': 'true' }
         });
 
         const options = this.contentEl.createDiv({ cls: 'notemd-diagram-preview-export-folder-options' });
@@ -102,7 +114,7 @@ export class DiagramPreviewExportFolderModal extends Modal {
         });
 
         this.errorEl = this.contentEl.createDiv({
-            cls: 'notemd-diagram-preview-export-folder-error'
+            cls: 'notemd-diagram-preview-export-folder-error', attr: { role: 'alert' }
         });
         this.errorEl.hidden = true;
 
@@ -110,11 +122,12 @@ export class DiagramPreviewExportFolderModal extends Modal {
         const cancelButton = actions.createEl('button', { text: copy.exportFolderCancel });
         cancelButton.onclick = () => this.complete(null);
         this.confirmButton = actions.createEl('button', {
-            text: formatI18n(copy.exportFolderConfirm, formatVariables),
+            text: copy.exportSelectedFormats,
             cls: 'mod-cta'
         });
         this.confirmButton.onclick = () => void this.confirmSelection();
         this.updateCustomFolderState();
+        this.updateFormatSelection();
     }
 
     onClose(): void {
@@ -171,6 +184,13 @@ export class DiagramPreviewExportFolderModal extends Modal {
     }
 
     private async confirmSelection(): Promise<void> {
+        if (this.confirming || this.completed) return;
+        const formats = this.selectedFormats();
+        if (formats.length === 0) {
+            this.updateFormatSelection();
+            return;
+        }
+        this.confirming = true;
         if (this.confirmButton) {
             this.confirmButton.disabled = true;
         }
@@ -181,17 +201,30 @@ export class DiagramPreviewExportFolderModal extends Modal {
                 ? normalizeDiagramPreviewExportFolderPath(this.customFolderInput?.value ?? '')
                 : this.sourceFolder;
             await this.ensureFolderExists(folderPath);
-            this.complete(folderPath);
+            this.complete({ folderPath, formats });
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             const normalizedMessage = message === 'The export folder must be a Vault-relative path.'
                 ? copy.exportFolderInvalid
                 : formatI18n(copy.exportFolderCreateFailed, { message });
             this.showError(normalizedMessage);
-            if (this.confirmButton) {
-                this.confirmButton.disabled = false;
-            }
+        } finally {
+            this.confirming = false;
+            this.updateFormatSelection();
         }
+    }
+
+    private selectedFormats(): DiagramPreviewExportFormat[] {
+        return [...this.formatInputs].filter(([, input]) => input.checked).map(([format]) => format);
+    }
+
+    private updateFormatSelection(): void {
+        const formats = this.selectedFormats();
+        const copy = getI18nStrings({ uiLocale: this.uiLocale }).previewModal;
+        this.formatSummary?.setText(formats.length
+            ? formatI18n(copy.exportSelectionSummary, { formats: formats.join(', ') })
+            : copy.exportFormatsRequired);
+        if (this.confirmButton) this.confirmButton.disabled = this.confirming || formats.length === 0;
     }
 
     private async ensureFolderExists(folderPath: string): Promise<void> {
@@ -208,23 +241,22 @@ export class DiagramPreviewExportFolderModal extends Modal {
         await this.app.vault.createFolder(folderPath);
     }
 
-    private complete(folderPath: string | null): void {
+    private complete(selection: DiagramPreviewExportSelection | null): void {
         if (this.completed) {
             return;
         }
         this.completed = true;
-        this.resolveSelection(folderPath);
+        this.resolveSelection(selection);
         this.close();
     }
 }
 
-export function selectDiagramPreviewExportFolder(
+export function selectDiagramPreviewExport(
     app: App,
     sourcePath: string,
-    uiLocale = 'auto',
-    exportFormat: DiagramPreviewExportFormat = 'SVG'
-): Promise<string | null> {
+    uiLocale = 'auto'
+): Promise<DiagramPreviewExportSelection | null> {
     return new Promise(resolve => {
-        new DiagramPreviewExportFolderModal(app, sourcePath, uiLocale, resolve, exportFormat).open();
+        new DiagramPreviewExportFolderModal(app, sourcePath, uiLocale, resolve).open();
     });
 }

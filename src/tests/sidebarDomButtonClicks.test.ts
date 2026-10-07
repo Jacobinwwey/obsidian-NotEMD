@@ -550,18 +550,36 @@ describe('NotemdSidebarView DOM button wiring', () => {
     test('renders multiple slide export formats and persists the selection', async () => {
         await sidebar.onOpen();
 
-        const selector = contentContainer.findByClass('notemd-slide-export-format-select');
+        const selector = contentContainer.findByClass('notemd-slide-export-format-options');
         expect(selector).not.toBeNull();
-        expect(selector?.tag).toBe('select');
-        expect(selector?.multiple).toBe(true);
-        expect(selector?.selectedOptions.map(option => option.value)).toEqual(['html']);
+        expect(selector?.tag).toBe('fieldset');
+        const inputs = selector!.children.filter(child => child.tag === 'label').map(label => label.children[0]);
+        expect(inputs.filter(input => input.checked).map(input => input.value)).toEqual(['html']);
+        for (const format of ['pdf', 'pptx']) {
+            const input = inputs.find(input => input.value === format)!;
+            input.checked = true;
+            await input.onchange?.();
+        }
+        expect(plugin.settings.slideExportDefaultFormat).toBe('html');
+        expect(plugin.settings.slideExportFormats).toEqual(['html', 'pdf', 'pptx']);
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(2);
+        const summary = contentContainer.findByClass('notemd-export-format-summary');
+        expect(summary?.text).toContain('HTML, PDF, PPTX');
+    });
 
-        selector!.options.forEach(option => { option.selected = ['pdf', 'pptx'].includes(option.value); });
-        await selector!.onchange?.();
-
-        expect(plugin.settings.slideExportDefaultFormat).toBe('pdf');
-        expect(plugin.settings.slideExportFormats).toEqual(['pdf', 'pptx']);
-        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+    test('preserves the last slide format with visible guidance rather than silently changing it', async () => {
+        plugin.settings.slideExportFormats = ['pdf'];
+        await sidebar.onOpen();
+        const selector = contentContainer.findByClass('notemd-slide-export-format-options')!;
+        const input = selector.children.filter(child => child.tag === 'label').map(label => label.children[0]).find(input => input.value === 'pdf')!;
+        input.checked = false;
+        await input.onchange?.();
+        expect(input.checked).toBe(true);
+        expect(plugin.settings.slideExportFormats).toEqual(['pdf']);
+        expect(plugin.saveSettings).not.toHaveBeenCalled();
+        expect(contentContainer.findByClass('notemd-export-format-summary')?.text).toContain('Select at least one');
+        sidebar.startProcessing('Exporting');
+        expect(selector.disabled).toBe(true);
     });
 
     test('renders slide export controls as one-shot by default and reveals ordered outline steps on demand', async () => {

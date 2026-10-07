@@ -16,23 +16,34 @@ class ViewportElement extends EventTarget {
     scrollHeight = 800;
     scrollLeft = 0;
     scrollTop = 0;
+    clientLeft = 0;
+    clientTop = 0;
+    parentElement?: ViewportElement;
+    left = 0;
+    top = 0;
     textContent = '';
     disabled = false;
     nodeType = 1;
+    capturedPointer?: number;
+    setPointerCapture(pointerId: number) { this.capturedPointer = pointerId; }
+    hasPointerCapture(pointerId: number) { return this.capturedPointer === pointerId; }
+    releasePointerCapture() { this.capturedPointer = undefined; }
     constructor(readonly ownerDocument: ViewportDocument, readonly tag: string) { super(); }
     setAttribute(name: string, value: string) { this.attributes.set(name, value); }
     getAttribute(name: string) { return this.attributes.get(name) ?? null; }
-    appendChild(child: ViewportElement) { this.children.push(child); return child; }
-    append(...children: ViewportElement[]) { this.children.push(...children); }
+    appendChild(child: ViewportElement) { child.parentElement = this; this.children.push(child); return child; }
+    append(...children: ViewportElement[]) { children.forEach(child => this.appendChild(child)); }
     remove() { /* Detached mock style has no observer lifecycle. */ }
     querySelector() { return null; }
     closest() { return null; }
-    getBoundingClientRect() { return { left: 0, top: 0 }; }
+    getBoundingClientRect() { return { left: this.left, top: this.top, right: this.left + this.clientWidth, bottom: this.top + this.clientHeight }; }
 }
 
 class ViewportDocument extends EventTarget {
     nodeType = 9;
-    defaultView = null;
+    activeElement: unknown;
+    defaultView = Object.assign(new EventTarget(), { innerWidth: 1200, innerHeight: 800, devicePixelRatio: 2,
+        getComputedStyle: (element: ViewportElement) => ({ overflowX: element.style.overflowX ?? 'visible', overflowY: element.style.overflowY ?? 'visible' }) });
     body = new ViewportElement(this, 'body');
     head = new ViewportElement(this, 'head');
     createElement(tag: string) { return new ViewportElement(this, tag); }
@@ -118,4 +129,106 @@ test('locking one viewport leaves others and text selection/copy usable, includi
     fire(lockButton(first.controls), 'click');
     expect(first.content.style.transform).toBe(transform);
     second.instance.destroy();
+});
+
+test('Alt temporarily locks on entry, cancels dragging, and preserves persistent lock and geometry', () => {
+    const { instance, controls, viewport, content } = mount();
+    const transform = content.style.transform;
+    fire(viewport, 'pointerdown', { button: 0, pointerId: 1, clientX: 10, clientY: 10 });
+    fire(viewport, 'keydown', { key: 'Alt', altKey: true });
+    expect(viewport.className).toContain('is-locked');
+    expect(viewport.className).not.toContain('is-panning');
+    expect(viewport.capturedPointer).toBeUndefined();
+    expect(lockButton(controls).getAttribute('aria-pressed')).toBe('false');
+    expect(fire(viewport, 'wheel', { deltaY: 20, ctrlKey: true, altKey: true }).defaultPrevented).toBe(true);
+    expect(fire(viewport, 'keydown', { key: 'c', ctrlKey: true, altKey: true }).defaultPrevented).toBe(false);
+    fire(viewport.ownerDocument, 'keyup', { key: 'Alt' });
+    expect(viewport.className).not.toContain('is-locked');
+    expect(content.style.transform).toBe(transform);
+    fire(viewport, 'pointerenter', { altKey: true });
+    expect(viewport.className).toContain('is-locked');
+    fire(viewport.ownerDocument.defaultView, 'blur');
+    expect(viewport.className).not.toContain('is-locked');
+    fire(lockButton(controls), 'click');
+    fire(viewport, 'keydown', { key: 'Alt', altKey: true });
+    fire(viewport.ownerDocument, 'keyup', { key: 'Alt' });
+    expect(viewport.className).toContain('is-locked');
+    expect(lockButton(controls).getAttribute('aria-pressed')).toBe('true');
+    instance.destroy();
+});
+
+test('iframe Alt release and cleanup leave independent panels usable', () => {
+    const first = mount();
+    const second = mount();
+    const frameDoc = new ViewportDocument();
+    first.instance.attachIframe({ contentDocument: frameDoc, style: {} } as unknown as HTMLIFrameElement);
+    fire(frameDoc, 'keydown', { key: 'Alt', altKey: true });
+    expect(first.viewport.className).toContain('is-locked');
+    expect(second.viewport.className).not.toContain('is-locked');
+    expect(frameDoc.body.className).toContain('notemd-preview-locked');
+    fire(frameDoc, 'keyup', { key: 'Alt' });
+    expect(first.viewport.className).not.toContain('is-locked');
+    first.instance.destroy();
+    fire(frameDoc, 'keydown', { key: 'Alt', altKey: true });
+    expect(first.viewport.className).not.toContain('is-locked');
+    second.instance.destroy();
+});
+
+test('focusing an embedded preview preserves Alt until the frame loses window focus', () => {
+    const view = mount();
+    const frameDoc = new ViewportDocument();
+    const frame = { contentDocument: frameDoc, style: {} };
+    view.instance.attachIframe(frame as unknown as HTMLIFrameElement);
+    fire(view.viewport, 'keydown', { key: 'Alt', altKey: true });
+    view.viewport.ownerDocument.activeElement = frame;
+    fire(view.viewport.ownerDocument.defaultView, 'blur');
+    expect(view.viewport.className).toContain('is-locked');
+    fire(frameDoc.defaultView, 'blur');
+    expect(view.viewport.className).not.toContain('is-locked');
+    view.instance.destroy();
+});
+
+test('geometry subscribers receive final zoom anchors, DPR and source crop, then stop after unsubscribe', () => {
+    const { instance, viewport } = mount();
+    instance.setSourceDimensions(1600, 800);
+    const changed = jest.fn();
+    const unsubscribe = instance.subscribeGeometry(changed);
+    expect(changed).toHaveBeenLastCalledWith({ scale: 0.5, pixelRatio: 2, visibleSource: { left: 0, top: 0, width: 1600, height: 800 } });
+    changed.mockClear();
+    fire(viewport, 'keydown', { key: '1' });
+    expect(changed).toHaveBeenCalledTimes(1);
+    expect(changed).toHaveBeenLastCalledWith({ scale: 1, pixelRatio: 2, visibleSource: { left: 400, top: 200, width: 800, height: 400 } });
+    fire(viewport, 'keydown', { key: '0' });
+    expect(changed).toHaveBeenLastCalledWith({ scale: 0.5, pixelRatio: 2, visibleSource: { left: 0, top: 0, width: 1600, height: 800 } });
+    unsubscribe();
+    changed.mockClear();
+    fire(viewport, 'keydown', { key: '+' });
+    expect(changed).not.toHaveBeenCalled();
+    instance.destroy();
+});
+
+test('geometry clips outer scrolling ancestors and window, and updates density while navigation is locked', () => {
+    const { instance, viewport, controls, content } = mount();
+    instance.setSourceDimensions(800, 400);
+    const ancestor = viewport.parentElement!;
+    ancestor.style.overflowY = 'auto';
+    ancestor.top = 100;
+    ancestor.clientHeight = 200;
+    const changed = jest.fn();
+    instance.subscribeGeometry(changed);
+    expect(changed.mock.calls.at(-1)?.[0].visibleSource).toEqual({ left: 0, top: 100, width: 800, height: 200 });
+    viewport.top = 900;
+    fire(viewport.ownerDocument, 'scroll');
+    expect(changed.mock.calls.at(-1)?.[0].visibleSource).toBeNull();
+    viewport.top = 0;
+    fire(lockButton(controls), 'click');
+    const transform = content.style.transform;
+    viewport.ownerDocument.defaultView.devicePixelRatio = 3;
+    fire(viewport.ownerDocument.defaultView, 'resize');
+    expect(changed.mock.calls.at(-1)?.[0].pixelRatio).toBe(3);
+    expect(content.style.transform).toBe(transform);
+    instance.destroy();
+    changed.mockClear();
+    fire(viewport.ownerDocument, 'scroll');
+    expect(changed).not.toHaveBeenCalled();
 });

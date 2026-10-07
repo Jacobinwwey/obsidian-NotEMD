@@ -632,9 +632,9 @@ function auditLegacyDiagramDocs() {
   assertContains(englishDiagrams, 'CircuitikZ', 'English diagrams doc');
   assertContains(englishDiagrams, 'TikZJax', 'English diagrams doc');
   assertContains(englishDiagrams, 'Save source file', 'English diagrams doc');
-  assertContains(englishDiagrams, 'Export SVG', 'English diagrams doc');
-  assertContains(englishDiagrams, 'Export PNG', 'English diagrams doc');
-  assertContains(englishDiagrams, 'Export PDF', 'English diagrams doc');
+  assertContains(englishDiagrams, 'SVG, PNG and/or PDF', 'English diagrams doc');
+  assertContains(englishDiagrams, 'then confirm once', 'English diagrams doc');
+  assertContains(englishDiagrams, 'a panel action includes only that panel', 'English diagrams doc');
   assertNotContains(englishDiagrams, 'preferredDiagramRenderTarget', 'English diagrams doc');
   assertNotContains(englishDiagrams, 'cmos-inverter-v1', 'English diagrams doc');
   assertNotContains(englishDiagrams, '--compile-executable', 'English diagrams doc');
@@ -671,9 +671,9 @@ function auditDiagramDocs() {
     'CircuitikZ',
     'TikZJax',
     'Save source file',
-    'Export SVG',
-    'Export PNG',
-    'Export PDF'
+    'SVG, PNG and/or PDF',
+    'then confirm once',
+    'a panel action includes only that panel'
   ]) {
     assertContains(englishDiagrams, requiredText, 'English diagrams doc');
   }

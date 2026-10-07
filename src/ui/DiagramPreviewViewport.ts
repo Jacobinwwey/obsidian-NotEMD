@@ -6,6 +6,12 @@ const MIN_ZOOM = 0.005;
 
 type PreviewZoomCopy = Pick<NotemdEnglishStrings['previewModal'], 'zoomIn' | 'zoomOut' | 'zoomFit' | 'zoomActual' | 'zoomLevel' | 'zoomViewport' | 'zoomLock' | 'zoomUnlock'>;
 
+export interface DiagramPreviewGeometry {
+    scale: number;
+    pixelRatio: number;
+    visibleSource: { left: number; top: number; width: number; height: number } | null;
+}
+
 /** Owns display geometry only. Exporters always receive the original artifact. */
 export class DiagramPreviewViewport {
     readonly contentEl: HTMLDivElement;
@@ -20,10 +26,13 @@ export class DiagramPreviewViewport {
     private readonly actualButton: HTMLButtonElement;
     private readonly cancelDrags: Array<() => void> = [];
     private locked = false;
+    private persistentLocked = false;
+    private altHeld = false;
     private lockedLeft = 0;
     private lockedTop = 0;
     private readonly cleanup: Array<() => void> = [];
     private readonly observers: Array<ResizeObserver | MutationObserver> = [];
+    private sourceDimensions?: { width: number; height: number };
     private sourceWidth = 1;
     private sourceHeight = 1;
     private scale = 1;
@@ -31,6 +40,7 @@ export class DiagramPreviewViewport {
     private followsFit = true;
     private destroyed = false;
     private iframe?: HTMLIFrameElement;
+    private readonly geometrySubscribers = new Set<(geometry: DiagramPreviewGeometry) => void>();
 
     constructor(container: HTMLElement, private readonly copy: PreviewZoomCopy) {
         const doc = container.ownerDocument;
@@ -60,6 +70,10 @@ export class DiagramPreviewViewport {
         this.zoomInButton = button('+', copy.zoomIn, () => this.zoom(this.scale * ZOOM_STEP));
         this.fitButton = button(copy.zoomFit, copy.zoomFit, () => this.fit());
         this.actualButton = button('1:1', copy.zoomActual, () => this.zoom(1));
+        const hint = doc.createElement('span');
+        hint.className = 'notemd-diagram-zoom-hint';
+        hint.textContent = copy.zoomViewport;
+        this.controls.appendChild(hint);
         this.viewport = doc.createElement('div');
         this.viewport.className = 'notemd-diagram-zoom-viewport';
         this.viewport.tabIndex = 0;
@@ -81,14 +95,96 @@ export class DiagramPreviewViewport {
         }
     }
 
+    setSourceDimensions(width: number, height: number): void {
+        if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) throw new Error('Invalid preview dimensions.');
+        this.sourceDimensions = { width, height };
+        this.refresh();
+    }
+
+    subscribeGeometry(subscriber: (geometry: DiagramPreviewGeometry) => void): () => void {
+        if (this.destroyed) return () => {};
+        this.geometrySubscribers.add(subscriber);
+        const doc = this.contentEl.ownerDocument;
+        const changed = (event: Event) => {
+            // Our own scroll listener first restores a locked position before publishing it.
+            if (event.target !== this.viewport) this.notifyGeometry();
+        };
+        const resized = () => this.refresh();
+        // Scroll does not bubble. Capture also observes clipping ancestors outside this panel.
+        doc.addEventListener('scroll', changed, true);
+        doc.addEventListener('visibilitychange', changed);
+        doc.defaultView?.addEventListener('resize', resized);
+        let subscribed = true;
+        const unsubscribe = () => {
+            if (!subscribed) return;
+            subscribed = false;
+            this.geometrySubscribers.delete(subscriber);
+            doc.removeEventListener('scroll', changed, true);
+            doc.removeEventListener('visibilitychange', changed);
+            doc.defaultView?.removeEventListener('resize', resized);
+        };
+        this.cleanup.push(unsubscribe);
+        subscriber(this.geometry());
+        return unsubscribe;
+    }
+
+    private geometry(): DiagramPreviewGeometry {
+        const doc = this.contentEl.ownerDocument;
+        const win = doc.defaultView;
+        const geometry: DiagramPreviewGeometry = { scale: this.scale, pixelRatio: win?.devicePixelRatio || 1, visibleSource: null };
+        if (!win || doc.hidden || this.viewport.clientWidth <= 0 || this.viewport.clientHeight <= 0) return geometry;
+        const bounds = this.viewport.getBoundingClientRect();
+        const originLeft = bounds.left + this.viewport.clientLeft;
+        const originTop = bounds.top + this.viewport.clientTop;
+        let left = Math.max(0, originLeft);
+        let top = Math.max(0, originTop);
+        let right = Math.min(win.innerWidth, originLeft + this.viewport.clientWidth);
+        let bottom = Math.min(win.innerHeight, originTop + this.viewport.clientHeight);
+        if (right <= left || bottom <= top) return geometry;
+        for (let ancestor = this.viewport.parentElement; ancestor; ancestor = ancestor.parentElement) {
+            const style = win.getComputedStyle(ancestor);
+            const clipX = /^(auto|scroll|hidden|clip)$/.test(style.overflowX);
+            const clipY = /^(auto|scroll|hidden|clip)$/.test(style.overflowY);
+            if (!clipX && !clipY) continue;
+            const clip = ancestor.getBoundingClientRect();
+            if (clipX) {
+                left = Math.max(left, clip.left + ancestor.clientLeft);
+                right = Math.min(right, clip.left + ancestor.clientLeft + ancestor.clientWidth);
+            }
+            if (clipY) {
+                top = Math.max(top, clip.top + ancestor.clientTop);
+                bottom = Math.min(bottom, clip.top + ancestor.clientTop + ancestor.clientHeight);
+            }
+        }
+        if (right <= left || bottom <= top) return geometry;
+        const sourceLeft = Math.max(0, (left - originLeft + this.viewport.scrollLeft - this.contentOffsetX()) / this.scale);
+        const sourceTop = Math.max(0, (top - originTop + this.viewport.scrollTop - this.contentOffsetY()) / this.scale);
+        const sourceRight = Math.min(this.sourceWidth, (right - originLeft + this.viewport.scrollLeft - this.contentOffsetX()) / this.scale);
+        const sourceBottom = Math.min(this.sourceHeight, (bottom - originTop + this.viewport.scrollTop - this.contentOffsetY()) / this.scale);
+        if (sourceRight > sourceLeft && sourceBottom > sourceTop) {
+            geometry.visibleSource = { left: sourceLeft, top: sourceTop, width: sourceRight - sourceLeft, height: sourceBottom - sourceTop };
+        }
+        return geometry;
+    }
+
+    private notifyGeometry(): void {
+        if (this.destroyed || this.geometrySubscribers.size === 0) return;
+        const geometry = this.geometry();
+        this.geometrySubscribers.forEach(subscriber => subscriber(geometry));
+    }
+
     refresh(): void {
-        if (this.destroyed || this.locked) return;
+        if (this.destroyed) return;
+        if (this.locked) { this.notifyGeometry(); return; }
         const doc = this.iframe?.contentDocument;
         const svg = (doc ?? this.contentEl).querySelector('svg');
         const viewBox = svg?.getAttribute('viewBox')?.trim().split(/[\s,]+/).map(Number);
         const width = viewBox?.[2] ?? Number(svg?.getAttribute('width'));
         const height = viewBox?.[3] ?? Number(svg?.getAttribute('height'));
-        if (Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0) {
+        if (this.sourceDimensions) {
+            this.sourceWidth = this.sourceDimensions.width;
+            this.sourceHeight = this.sourceDimensions.height;
+        } else if (Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0) {
             this.sourceWidth = width;
             this.sourceHeight = height;
             (svg as SVGElement).style.width = `${width}px`;
@@ -108,10 +204,11 @@ export class DiagramPreviewViewport {
         const availableWidth = this.viewport.clientWidth;
         const availableHeight = this.viewport.clientHeight;
         // Hidden popouts have no usable geometry. ResizeObserver will retry.
-        if (availableWidth <= 0 || availableHeight <= 0) return;
+        if (availableWidth <= 0 || availableHeight <= 0) { this.notifyGeometry(); return; }
         this.fitScale = Math.min(1, availableWidth / this.sourceWidth, availableHeight / this.sourceHeight);
         if (this.followsFit) this.scale = this.fitScale;
         this.paint();
+        this.notifyGeometry();
     }
 
     attachIframe(iframe: HTMLIFrameElement): void {
@@ -145,9 +242,9 @@ export class DiagramPreviewViewport {
     private fit(): void {
         if (this.locked || this.destroyed) return;
         this.followsFit = true;
-        this.refresh();
         this.viewport.scrollLeft = 0;
         this.viewport.scrollTop = 0;
+        this.refresh();
     }
 
     private zoom(nextScale: number, anchorX = this.viewport.clientWidth / 2, anchorY = this.viewport.clientHeight / 2): void {
@@ -161,6 +258,7 @@ export class DiagramPreviewViewport {
         this.paint();
         this.viewport.scrollLeft = sourceX * this.scale + this.contentOffsetX() - anchorX;
         this.viewport.scrollTop = sourceY * this.scale + this.contentOffsetY() - anchorY;
+        this.notifyGeometry();
     }
 
     private contentOffsetX(): number {
@@ -184,19 +282,33 @@ export class DiagramPreviewViewport {
 
     private toggleLock(): void {
         if (this.destroyed) return;
-        this.locked = !this.locked;
-        this.cancelDrags.forEach(cancel => cancel());
-        this.lockedLeft = this.viewport.scrollLeft;
-        this.lockedTop = this.viewport.scrollTop;
-        // Unlocking resumes from the exact geometry the user selected, not a new automatic fit.
-        this.followsFit = false;
+        this.persistentLocked = !this.persistentLocked;
+        this.updateLock();
+    }
+
+    private setAltHeld(held: boolean): void {
+        if (this.destroyed || this.altHeld === held) return;
+        this.altHeld = held;
+        this.updateLock();
+    }
+
+    private updateLock(): void {
+        const locked = this.persistentLocked || this.altHeld;
+        if (locked !== this.locked) {
+            this.cancelDrags.forEach(cancel => cancel());
+            this.lockedLeft = this.viewport.scrollLeft;
+            this.lockedTop = this.viewport.scrollTop;
+            // Resuming navigation preserves the selected geometry rather than fitting again.
+            this.followsFit = false;
+            this.locked = locked;
+        }
         this.viewport.classList.toggle('is-locked', this.locked);
         this.iframe?.contentDocument?.body.classList.toggle('notemd-preview-locked', this.locked);
-        this.lockButton.textContent = this.locked ? '🔒' : '🔓';
-        const label = this.locked ? this.copy.zoomUnlock : this.copy.zoomLock;
+        this.lockButton.textContent = this.persistentLocked ? '🔒' : '🔓';
+        const label = this.persistentLocked ? this.copy.zoomUnlock : this.copy.zoomLock;
         this.lockButton.title = label;
         this.lockButton.setAttribute('aria-label', label);
-        this.lockButton.setAttribute('aria-pressed', String(this.locked));
+        this.lockButton.setAttribute('aria-pressed', String(this.persistentLocked));
         this.updateButtons();
     }
 
@@ -209,8 +321,10 @@ export class DiagramPreviewViewport {
 
     private bindNavigation(target: HTMLElement | Document): void {
         let drag: { x: number; y: number; left: number; top: number; pointerId: number; capture: Element } | undefined;
+        let pointerInside = false;
         const interactive = (event: Event) => (event.target as Element | null)?.closest?.('button, input, textarea, select, a, [contenteditable="true"]');
         const keydown = (event: KeyboardEvent) => {
+            if (event.key === 'Alt') this.setAltHeld(true);
             if (this.locked) {
                 if (!interactive(event) && ['+', '=', '-', '0', '1', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
                     event.preventDefault();
@@ -228,6 +342,7 @@ export class DiagramPreviewViewport {
             event.stopPropagation();
         };
         const wheel = (event: WheelEvent) => {
+            this.setAltHeld(event.altKey);
             if (this.locked) { event.preventDefault(); return; }
             // Keep ordinary wheel scrolling intact; Ctrl/Cmd+wheel zooms at the pointer.
             if (!(event.ctrlKey || event.metaKey) || event.deltaY === 0) return;
@@ -240,6 +355,7 @@ export class DiagramPreviewViewport {
             this.zoom(this.scale * Math.exp(-event.deltaY * 0.002), x - bounds.left, y - bounds.top);
         };
         const pointerdown = (event: PointerEvent) => {
+            this.setAltHeld(event.altKey);
             if (this.locked || event.button !== 0 || interactive(event)) return;
             drag = { x: event.clientX, y: event.clientY, left: this.viewport.scrollLeft,
                 top: this.viewport.scrollTop, pointerId: event.pointerId, capture: event.target as Element };
@@ -247,6 +363,7 @@ export class DiagramPreviewViewport {
             (event.target as Element)?.setPointerCapture?.(event.pointerId);
         };
         const pointermove = (event: PointerEvent) => {
+            this.setAltHeld(event.altKey);
             if (!drag || drag.pointerId !== event.pointerId) return;
             event.preventDefault();
             const factor = target.nodeType === 9 ? this.scale : 1;
@@ -261,15 +378,39 @@ export class DiagramPreviewViewport {
         this.cancelDrags.push(pointerup);
         // Native selection can auto-scroll even with hidden scrollbars; restore the locked viewport.
         const scroll = () => {
-            if (!this.locked) return;
-            this.viewport.scrollLeft = this.lockedLeft;
-            this.viewport.scrollTop = this.lockedTop;
+            if (this.locked) {
+                this.viewport.scrollLeft = this.lockedLeft;
+                this.viewport.scrollTop = this.lockedTop;
+            }
+            this.notifyGeometry();
         };
         const listen = <K extends keyof DocumentEventMap>(name: K, callback: (event: DocumentEventMap[K]) => void, options?: AddEventListenerOptions) => {
             target.addEventListener(name, callback as EventListener, options);
             this.cleanup.push(() => target.removeEventListener(name, callback as EventListener, options));
         };
         listen('keydown', keydown);
+        listen('pointerenter', event => { pointerInside = true; this.setAltHeld(event.altKey); });
+        listen('pointerleave', () => { pointerInside = false; });
+        const doc = target.nodeType === 9 ? target as Document : target.ownerDocument!;
+        const altDown = (event: KeyboardEvent) => {
+            if (event.key === 'Alt' && pointerInside) this.setAltHeld(true);
+        };
+        const altUp = (event: KeyboardEvent) => { if (event.key === 'Alt' || !event.altKey) this.setAltHeld(false); };
+        const blur = () => {
+            // Entering a same-origin frame blurs the parent window before selection begins.
+            // Its own window listener handles actual focus loss while the frame is active.
+            if (this.iframe && doc === this.contentEl.ownerDocument && doc.activeElement === this.iframe) return;
+            pointerInside = false;
+            this.setAltHeld(false);
+        };
+        doc.addEventListener('keydown', altDown);
+        doc.addEventListener('keyup', altUp);
+        doc.defaultView?.addEventListener('blur', blur);
+        this.cleanup.push(() => {
+            doc.removeEventListener('keydown', altDown);
+            doc.removeEventListener('keyup', altUp);
+            doc.defaultView?.removeEventListener('blur', blur);
+        });
         listen('wheel', wheel, { passive: false });
         listen('pointerdown', pointerdown);
         listen('pointermove', pointermove);

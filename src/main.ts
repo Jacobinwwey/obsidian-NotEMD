@@ -1,3 +1,4 @@
+import { BinaryDiagramPreviewModal } from './ui/BinaryDiagramPreviewModal';
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { startDiagramExportRun, readDiagramExportRun, retryDiagramExportRun } from './diagram/diagramExportRun';
 import { normalizeSlideExportFormats } from './slideExport/slideExportFormats';
@@ -396,6 +397,7 @@ export default class NotemdPlugin extends Plugin {
             },
             readFile: (file) => this.readSupportedTaskInputFile(file),
             readBinary: (file) => this.app.vault.readBinary(file),
+            openBinaryPreview: (file, bytes) => new BinaryDiagramPreviewModal(this.app, file, bytes, this.settings.uiLocale).openPreview(),
             openFile: (file) => {
                 const leaf = this.app.workspace.getLeaf('split', 'vertical');
                 return leaf.openFile(file);

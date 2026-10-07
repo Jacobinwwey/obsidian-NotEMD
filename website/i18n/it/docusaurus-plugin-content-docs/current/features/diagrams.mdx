@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Seleziona più tipi di diagramma in un’esecuzione e più formati indipendenti per ciascun tipo. Deselezionare un tipo conserva i suoi formati; senza selezioni il contenuto viene analizzato automaticamente.
 </TLDR>
 
-I registri si chiudono quando tutte le esportazioni riescono. Il lucchetto accanto al meno blocca spostamento e zoom per selezionare testo SVG/HTML. PNG/PDF si aprono nel visualizzatore nativo di Obsidian. Le presentazioni supportano più formati e richiedono il fork Slidev di Jacobinwwey, senza ripiego sul pacchetto ufficiale.
+PNG/PDF si aprono nell’anteprima dei diagrammi. Ogni pagina PDF ha controlli indipendenti. Lo zoom ridisegna l’area visibile alla densità di pixel dello schermo con memoria limitata; le immagini incorporate restano limitate dalla risoluzione originale.
+
+Tenete premuto Alt per bloccare la navigazione e selezionare il testo disponibile in SVG/HTML/PDF. Rilasciandolo si ripristina il blocco precedente. PNG non dispone di un livello di testo selezionabile.
 
 
 Ogni anteprima ha controlli indipendenti per zoom, spostamento, adattamento e dimensioni reali. Ctrl/Command + rotellina ingrandisce; la rotellina da sola scorre. Le esportazioni PNG grandi mantengono i 72–600 PPI selezionati (300 predefiniti). SVG è vettoriale; i PPI si applicano solo alle esportazioni raster.
@@ -58,13 +60,13 @@ I formati supportati appaiono per primi; quelli incompatibili restano visibili e
 4. Avvia **Genera diagramma** da barra laterale o palette.
 5. I file selezionati vengono esportati automaticamente accanto alla nota originale o direttamente nella cartella configurata. Il nome include il tipo, come `topic_drawnix.pdf` o `topic_flowchart.svg`; le collisioni aggiungono `-2`, `-3` e così via senza sovrascrivere file.
 6. Controlla anteprima: lavagna e pannelli Mermaid sono nell’ordine della fonte in un’area verticale scorrevole, con altezza effettiva.
-7. Usa **Esporta SVG**, **Esporta PNG** o **Export PDF** sul pannello, oppure export superiore per tutti. Per più pannelli scegli cartella fonte o relativa al Vault: un file deterministico per pannello, continuando dopo singoli errori. Usa **Salva file sorgente** per conservare l’artefatto modificabile.
+7. Selezionate SVG, PNG e/o PDF e una cartella, poi confermate una volta. L’esportazione principale include tutti i pannelli; quella di un pannello include solo quel pannello. I formati di presentazione usano caselle di selezione e richiedono almeno una scelta. Avanzamento ed errori parziali restano visibili.
 
 Imposta una cartella intermedia condivisa relativa al Vault, oppure lascia il campo vuoto per usare `notemd_assert/` accanto a ogni originale. Contiene registri di ripristino, rendering in cache e allegati facoltativi. Conserva i file ancora referenziati; la modifica riguarda solo nuove esecuzioni.
 
 I tipi vengono generati in sequenza. Un errore non blocca gli altri; l’annullamento ferma quelli in attesa e conserva i file completati. Ripeti le esportazioni da anteprima o cronologia senza un’altra richiesta al modello. Un errore di generazione richiede di rigenerare quel tipo. I registri v1/v2 restano leggibili.
 
-Il menu Export e le intestazioni dei pannelli offrono le stesse tre azioni. **History** apre la cronologia nel cassetto senza nascondere l’anteprima: ricerca, filtri, riapertura e accesso agli artefatti. Cronologia disponibile anche da palette/barra senza nota attiva.
+Usate **Salva file sorgente** per conservare il documento modificabile.
 
 SVG e PDF derivano da geometria vettoriale; PDF riusa layout e metriche SVG. PPI influenza solo la rasterizzazione PNG: 72–600, valore iniziale 300.
 

@@ -24,6 +24,7 @@ export interface DiagramCommandHostAdapter {
     getFileByPath: (path: string) => TFile | null;
     readFile?: (file: TFile) => Promise<string>;
     readBinary?: (file: TFile) => Promise<ArrayBuffer>;
+    openBinaryPreview?: (file: TFile, bytes: Uint8Array) => Promise<void>;
     openFile: (file: TFile) => void | Promise<void>;
     maybeAutoFixMermaid: (file: TFile, reporter: ProgressReporter, reason: string) => Promise<void>;
     supportsPreview: (artifact: RenderArtifact) => boolean;
@@ -1584,7 +1585,7 @@ export async function runPreviewDiagramCommandWithHost(
     try {
         const extension = (file.extension ?? file.path.split('.').pop() ?? '').toLowerCase();
         if (extension === 'png' || extension === 'pdf') {
-            // Binary exports belong to the host viewer, never the source-code diagram parser.
+            // Keep binary exports in the diagram viewport without passing bytes to text parsers.
             if (!diagramHost.readBinary) throw new Error('Binary preview requires vault binary access.');
             const bytes = new Uint8Array(await diagramHost.readBinary(file));
             const signature = extension === 'png' ? [137, 80, 78, 71, 13, 10, 26, 10] : [37, 80, 68, 70, 45];
@@ -1592,7 +1593,8 @@ export async function runPreviewDiagramCommandWithHost(
                 ? signature.every((byte, index) => bytes[index] === byte)
                 : Array.from(bytes.subarray(0, 1024)).some((_, offset) => signature.every((byte, index) => bytes[offset + index] === byte));
             if (!valid) throw new Error(`Invalid ${extension.toUpperCase()} file: ${file.path}`);
-            await diagramHost.openFile(file);
+            if (!diagramHost.openBinaryPreview) throw new Error('Binary diagram preview is unavailable.');
+            await diagramHost.openBinaryPreview(file, bytes);
             reporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
             reporter.log(`Diagram preview opened for: ${file.path}`);
             return { kind: 'binary-preview', sourcePath: file.path, actionLabel, previewOpened: true };

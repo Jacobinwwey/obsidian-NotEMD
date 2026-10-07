@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Egy futtatásban több diagramtípust és típusonként több kimeneti formátumot választhat. A kijelölés törlése megőrzi a típus formátumait. Ha semmi sincs kijelölve, a tartalom elemzése automatikus.
 </TLDR>
 
-Ha minden export sikeres, a naplók összecsukva jelennek meg. A mínusz melletti lakat rögzíti a mozgatást és nagyítást az SVG/HTML-szöveg kijelöléséhez. A PNG/PDF az Obsidian saját megjelenítőjében nyílik meg. A bemutatók több formátumban exportálhatók, és a Jacobinwwey Slidev fork szükséges; nincs visszatérés a hivatalos csomaghoz.
+A PNG/PDF a diagramelőnézetben nyílik meg. Minden PDF-oldal önálló vezérlőkkel rendelkezik. Nagyításkor a látható rész a képernyő képpontsűrűségével, korlátozott memóriahasználattal újrarajzolódik; a beágyazott raszterképeket továbbra is a forrásfelbontás korlátozza.
+
+Tartsa lenyomva az Alt billentyűt a navigáció rögzítéséhez, miközben kijelölhető SVG/HTML/PDF-szöveget választ ki. Felengedéskor visszaáll a korábbi zárolás. A PNG nem tartalmaz kijelölhető szövegréteget.
 
 
 Minden diagramelőnézet külön nagyítási, mozgatási, illesztési és eredeti méretű vezérlést kap. Ctrl/Command + görgő nagyít; a görgő önmagában görget. A nagy PNG-exportok megőrzik a kiválasztott 72–600 PPI-t (alapérték: 300). Az SVG vektoros; a PPI csak a raszteres exportokra vonatkozik.
@@ -58,13 +60,13 @@ A támogatott formátumok jelennek meg először; az inkompatibilisek láthatók
 4. Indítsa a **Generate diagram** műveletet a panelből vagy palettáról.
 5. A kiválasztott fájlok automatikusan a forrásjegyzet mellé vagy közvetlenül a beállított mappába kerülnek. A név tartalmazza a típust, például `topic_drawnix.pdf` vagy `topic_flowchart.svg`. Ütközéskor `-2`, `-3` stb. kerül hozzá; nincs felülírás.
 6. Nézze át a függőlegesen görgethető közös előnézetet: Drawnix után minden Mermaid-panel a forrás sorrendjében, teljes renderelt magassággal jelenik meg.
-7. Panelenként használja az **Export SVG**, **Export PNG**, **Export PDF** gombot, vagy felül az összes panel képexportját. Több panelnél forrásmappát vagy egyedi vault-relatív mappát válasszon. Panelenként kiszámítható nevű fájl készül; egyedi hibánál a többi folytatódik. A **Save source file** menti a szerkeszthető forrást.
+7. Válasszon SVG, PNG és/vagy PDF formátumot és célmappát, majd egyszer erősítse meg. A fő export minden panelt, a panel saját exportja csak azt a panelt tartalmazza. A prezentációformátumok jelölőnégyzetekkel választhatók ki; legalább egy szükséges. A folyamat és a részleges hibák láthatók maradnak.
 
 Állítson be közös, Vault-relatív mappát a köztes fájloknak, vagy hagyja üresen a mezőt a források melletti `notemd_assert/` használatához. Itt tárolódnak a helyreállítási rekordok, gyorsítótárak és választható mellékletek. A hivatkozott fájlokat őrizze meg; a módosítás csak új futtatásokra érvényes.
 
 A típusok egymás után készülnek. Egy hiba nem állítja le a többit; a megszakítás leállítja a várakozó típusokat és megőrzi a kész fájlokat. Az export az előnézetből vagy előzményekből új modellkérés nélkül ismételhető. Generálási hiba esetén a típust újra kell generálni. A v1/v2 rekordok olvashatók maradnak.
 
-Az Export menü és a panel fejléce azonos SVG/PNG/PDF műveleteket kínál. Nagy előnézetet nem kell egyetlen nehezen kezelhető képpé összevonni.
+A szerkeszthető dokumentum megtartásához használja a **Forrásfájl mentése** lehetőséget.
 
 A **History** a diagram eltakarása nélkül nyitja a vault előzményfiókját. Kereshet, szűrhet, előnézetet vagy mentett fájlt nyithat. Az előzmény a parancspalettáról és oldalsávból aktív jegyzet nélkül is elérhető.
 

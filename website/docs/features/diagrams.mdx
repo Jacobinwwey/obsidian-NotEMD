@@ -16,7 +16,9 @@ import TLDR from '@site/src/components/TLDR';
 Select several chart types in one run and choose multiple output formats independently for each type. Unchecking a type retains its format preferences; leaving every type unchecked uses automatic analysis.
 </TLDR>
 
-Successful export logs start collapsed. Lock each preview beside the minus button to select SVG/HTML text without moving or zooming it. PNG/PDF open in Obsidian’s native viewer. Presentation export supports multiple formats and requires the Jacobinwwey Slidev fork; official fallback is disabled.
+PNG/PDF open inside diagram previews. Each PDF page has independent controls. Zoom redraws visible PDF content at screen pixel density with bounded memory; embedded bitmap resolution remains limited by its source.
+
+Hold Alt to freeze navigation while selecting available SVG/HTML/PDF text. Releasing Alt restores the previous lock state. PNG has no selectable text layer.
 
 
 Each diagram preview has independent zoom, pan, fit and actual-size controls. Ctrl/Command + wheel zooms; ordinary wheel scrolls. Large PNG exports retain the selected 72–600 PPI (default 300). SVG is vector-based; PPI applies only to raster exports.
@@ -54,13 +56,13 @@ Supported formats appear first. Incompatible choices remain visible and disabled
 4. Choose **Generate diagram** from the Notemd sidebar or command palette.
 5. Selected files are exported automatically beside the source note, or directly into the configured output folder. Names include the type, such as `topic_drawnix.pdf` and `topic_flowchart.svg`; collisions add `-2`, `-3` and so on without overwriting existing files.
 6. Review the preview. A multi-panel result keeps the Drawnix board and every Mermaid panel in source order inside one vertically scrollable preview shell; Mermaid panels use their rendered height instead of being clipped.
-7. Choose a panel's **Export SVG**, **Export PNG**, or **Export PDF** action for one visual, or use a top-level image export for all panels. For multiple panels, choose the source folder or a custom Vault-relative folder; Notemd writes one deterministic file per panel and continues after an individual failure. Use **Save source file** when you also need the editable artifact.
+7. Choose SVG, PNG and/or PDF plus a destination folder, then confirm once. The main Export action includes all panels; a panel action includes only that panel. Presentation formats use checkboxes and require at least one selection. Progress and partial failures remain visible.
 
 Set the diagram intermediate-files folder to a shared Vault-relative path, or leave it empty for `notemd_assert/` beside each source. Recovery records, cached renders and optional attachments stay there. Retain files still referenced by existing exports; folder changes affect new runs only.
 
 Types run sequentially. One failure does not block the others; cancellation stops pending types and preserves completed files. Retry failed exports through preview or history without another model request. A generation failure still requires generating that type again. Existing v1/v2 recovery records remain readable.
 
-The Export menu provides **Export SVG**, **Export PNG**, and **Export PDF** actions for the current visual preview. Each panel header exposes the same actions for a single Mermaid or Drawnix visual, so a large preview does not have to be exported as one opaque image.
+Use **Save source file** to keep the editable artifact.
 
 Choose **History** in the preview to open the Vault history drawer without hiding the diagram. You can search and filter completed diagrams, reopen a preview, or open saved artifacts. Diagram history is also available directly from the command palette and Notemd sidebar, even when no note is active.
 

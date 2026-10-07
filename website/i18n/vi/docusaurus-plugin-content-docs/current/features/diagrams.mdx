@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Chọn nhiều loại sơ đồ trong một lần chạy và nhiều định dạng riêng cho từng loại. Bỏ chọn vẫn giữ các định dạng của loại đó; không chọn loại nào thì nội dung được phân tích tự động.
 </TLDR>
 
-Nhật ký được thu gọn khi mọi lần xuất đều thành công. Nút khóa cạnh dấu trừ cố định vị trí và thu phóng để chọn văn bản SVG/HTML. PNG/PDF mở trong trình xem gốc của Obsidian. Bản trình bày hỗ trợ nhiều định dạng và bắt buộc dùng Slidev fork của Jacobinwwey, không tự chuyển sang gói chính thức.
+PNG/PDF mở trong cửa sổ xem trước sơ đồ. Mỗi trang PDF có bộ điều khiển riêng. Khi thu phóng, vùng đang hiển thị được vẽ lại theo mật độ điểm ảnh màn hình với bộ nhớ giới hạn; ảnh bitmap nhúng vẫn bị giới hạn bởi độ phân giải nguồn.
+
+Giữ Alt để khóa điều hướng khi chọn văn bản có thể chọn trong SVG/HTML/PDF. Thả phím sẽ khôi phục trạng thái khóa trước đó. PNG không có lớp văn bản có thể chọn.
 
 
 Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích thước thật độc lập. Ctrl/Command + con lăn thu phóng; con lăn thường cuộn. PNG lớn giữ nguyên mức 72–600 PPI đã chọn (mặc định 300). SVG là định dạng véc-tơ; PPI chỉ áp dụng cho xuất ảnh raster.
@@ -58,13 +60,13 @@ HTML sơ đồ chứa hình có thể thu phóng; HTML tóm tắt có cấu trú
 4. Chạy **Tao so do** từ thanh bên hoặc bảng lệnh.
 5. Tệp đã chọn tự động xuất cạnh ghi chú nguồn hoặc trực tiếp vào thư mục đầu ra đã đặt. Tên chứa loại, chẳng hạn `topic_drawnix.pdf` và `topic_flowchart.svg`. Khi trùng tên, thêm `-2`, `-3`… mà không ghi đè tệp.
 6. Xem kết quả. Nhiều bảng giữ Drawnix và Mermaid theo thứ tự nguồn trong một khung cuộn dọc; bảng Mermaid dùng chiều cao dựng thực tế thay vì bị cắt.
-7. Chọn **Xuất SVG**, **Xuất PNG**, **Export PDF** trên một bảng, hoặc xuất ảnh cấp trên cho tất cả. Với nhiều bảng, chọn thư mục nguồn hoặc đích tương đối với kho; mỗi bảng có tên tệp xác định, lỗi riêng không dừng toàn bộ. Dùng **Lưu tệp nguồn** khi cần sản phẩm chỉnh sửa được.
+7. Chọn SVG, PNG và/hoặc PDF cùng thư mục đích rồi xác nhận một lần. Lệnh xuất chính gồm tất cả các bảng; lệnh của từng bảng chỉ xuất bảng đó. Định dạng trình chiếu dùng hộp kiểm và cần ít nhất một lựa chọn. Tiến độ và lỗi từng phần vẫn hiển thị.
 
 Đặt thư mục trung gian dùng chung bằng đường dẫn tương đối trong Vault, hoặc để trống để dùng `notemd_assert/` cạnh từng nguồn. Nơi này lưu bản ghi khôi phục, bộ nhớ đệm kết xuất và tệp đính kèm tùy chọn. Giữ tệp còn được tham chiếu; đổi thư mục chỉ tác động lần chạy mới.
 
 Các loại được tạo tuần tự. Một loại lỗi không chặn các loại khác; hủy sẽ dừng loại đang chờ và giữ tệp đã hoàn tất. Thử xuất lại từ xem trước hoặc lịch sử mà không gửi yêu cầu mới đến mô hình. Lỗi tạo cần tạo lại loại đó. Bản ghi v1/v2 vẫn đọc được.
 
-Menu Export có **Xuất SVG**, **Xuất PNG**, **Export PDF** cho hình đang xem. Đầu mỗi bảng có cùng hành động cho một hình Mermaid/Drawnix; không cần biến cả bản xem lớn thành một ảnh duy nhất.
+Dùng **Lưu tệp nguồn** để giữ lại tài liệu có thể chỉnh sửa.
 
 Chọn **History** để mở ngăn lịch sử kho mà không che mất sơ đồ. Có thể tìm/lọc sơ đồ hoàn thành, mở lại bản xem hoặc tệp đã lưu. Lịch sử còn mở được từ bảng lệnh và thanh bên ngay cả khi không có ghi chú hiện tại.
 

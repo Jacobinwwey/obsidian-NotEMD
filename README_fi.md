@@ -26,7 +26,21 @@ Jokaisessa kaavion esikatselussa on oma zoomaus, siirto, sovitus ja todellinen k
 | Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
 | Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
 
-**Versio:** 1.9.13
+**Versio:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Tarkat PDF-esikatselut ja vienti useaan muotoon
+
+PNG/PDF avautuvat kaavioiden esikatselussa. Jokaisella PDF-sivulla on omat säätimet. Zoomaus piirtää näkyvän alueen uudelleen näytön pikselitiheydellä ja rajatulla muistinkäytöllä; upotettujen rasterikuvien tarkkuus riippuu edelleen lähteestä.
+
+Pidä Alt painettuna estääksesi siirtymisen, kun valitset käytettävissä olevaa SVG/HTML/PDF-tekstiä. Vapauttaminen palauttaa aiemman lukitustilan. PNG:ssä ei ole valittavaa tekstikerrosta.
+
+Valitse SVG, PNG ja/tai PDF sekä kohdekansio ja vahvista kerran. Päävienti sisältää kaikki paneelit, paneelin vienti vain kyseisen paneelin. Esitysmuodot valitaan valintaruuduilla, ja vähintään yksi valinta tarvitaan. Edistyminen ja osittaiset virheet pysyvät näkyvissä.
+
+Asenna version 1.9.14 yhteensopivat main.js-, manifest.json- ja styles.css-tiedostot ja lataa lisäosa uudelleen. Nykyiset muistiinpanot ja asetukset säilyvät.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Esikatselun hallinta ja esitysten vienti
@@ -760,7 +774,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.13 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.14 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->

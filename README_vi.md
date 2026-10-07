@@ -26,7 +26,21 @@ Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích th�
 | Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
 | Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
 
-**Phiên bản:** 1.9.13
+**Phiên bản:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Xem trước PDF sắc nét và xuất nhiều định dạng
+
+PNG/PDF mở trong cửa sổ xem trước sơ đồ. Mỗi trang PDF có bộ điều khiển riêng. Khi thu phóng, vùng đang hiển thị được vẽ lại theo mật độ điểm ảnh màn hình với bộ nhớ giới hạn; ảnh bitmap nhúng vẫn bị giới hạn bởi độ phân giải nguồn.
+
+Giữ Alt để khóa điều hướng khi chọn văn bản có thể chọn trong SVG/HTML/PDF. Thả phím sẽ khôi phục trạng thái khóa trước đó. PNG không có lớp văn bản có thể chọn.
+
+Chọn SVG, PNG và/hoặc PDF cùng thư mục đích rồi xác nhận một lần. Lệnh xuất chính gồm tất cả các bảng; lệnh của từng bảng chỉ xuất bảng đó. Định dạng trình chiếu dùng hộp kiểm và cần ít nhất một lựa chọn. Tiến độ và lỗi từng phần vẫn hiển thị.
+
+Cài các tệp main.js, manifest.json và styles.css đồng bộ của 1.9.14 rồi tải lại tiện ích. Ghi chú và cài đặt hiện có được giữ nguyên.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Điều khiển bản xem trước và xuất bài trình chiếu
@@ -761,7 +775,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.13 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.14 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 

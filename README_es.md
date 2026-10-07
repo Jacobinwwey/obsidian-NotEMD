@@ -26,7 +26,21 @@ Cada vista previa tiene zoom, desplazamiento, ajuste y tamaño real independient
 | Desarrollador | [Guía de desarrollo](https://jacobinwwey.github.io/obsidian-NotEMD/es/docs/developers/overview) | Compilar, probar y ampliar los contratos existentes |
 | Agente | [Guía de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/es/docs/agents/overview) | Descubrir los cuatro comandos de exportación admitidos |
 
-**Versión:** 1.9.13
+**Versión:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Vistas previas PDF nítidas y exportación multiformato
+
+Los PNG/PDF se abren dentro de la vista previa de diagramas. Cada página PDF tiene controles propios. Al ampliar, se vuelve a dibujar el área visible según la densidad de píxeles de la pantalla, con memoria limitada; las imágenes incrustadas conservan el límite de su resolución original.
+
+Mantenga Alt para detener la navegación y seleccionar texto disponible en SVG/HTML/PDF. Al soltarlo se restaura el bloqueo anterior. PNG no tiene una capa de texto seleccionable.
+
+Marque SVG, PNG y/o PDF, elija una carpeta y confirme una vez. La exportación principal incluye todos los paneles; la de un panel solo incluye ese panel. Los formatos de presentación usan casillas y requieren al menos una selección. El progreso y los fallos parciales permanecen visibles.
+
+Instale los archivos main.js, manifest.json y styles.css de 1.9.14 y recargue el complemento. Se conservan las notas y la configuración existentes.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Controles de vista previa y exportación de presentaciones
@@ -766,7 +780,7 @@ Licencia MIT - Ver el archivo [LICENSE](LICENSE) para más detalles.
 ---
 
 
-*Notemd v1.9.13 - Mejora tu grafo de conocimiento en Obsidian con IA.*
+*Notemd v1.9.14 - Mejora tu grafo de conocimiento en Obsidian con IA.*
 
 
 

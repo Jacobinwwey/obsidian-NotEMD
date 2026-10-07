@@ -26,7 +26,21 @@ Každý náhled diagramu má samostatné přiblížení, posun, přizpůsobení 
 | Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
 | Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
 
-**Verze:** 1.9.13
+**Verze:** 1.9.14
+<!-- notemd-preview-export-1.9.14 -->
+
+## Notemd 1.9.14 — Ostré náhledy PDF a export do více formátů
+
+PNG/PDF se otevírají v náhledu diagramů. Každá stránka PDF má vlastní ovládání. Přiblížení překreslí viditelnou oblast podle hustoty pixelů obrazovky při omezené spotřebě paměti; vložené rastrové obrázky zůstávají omezené původním rozlišením.
+
+Podržením Alt pozastavíte navigaci při výběru dostupného textu SVG/HTML/PDF. Uvolnění obnoví předchozí stav zámku. PNG nemá textovou vrstvu umožňující výběr.
+
+Vyberte SVG, PNG a/nebo PDF a cílovou složku a jednou potvrďte. Hlavní export zahrnuje všechny panely, export panelu pouze daný panel. Formáty prezentace používají zaškrtávací políčka a vyžadují alespoň jednu volbu. Průběh a dílčí chyby zůstávají viditelné.
+
+Nainstalujte odpovídající main.js, manifest.json a styles.css z 1.9.14 a znovu načtěte doplněk. Stávající poznámky a nastavení se zachovají.
+
+[1.9.14](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.14)
+
 <!-- notemd-preview-export-1.9.13 -->
 
 ## Notemd 1.9.13 — Ovládání náhledu a export prezentací
@@ -760,7 +774,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.13 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.14 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 

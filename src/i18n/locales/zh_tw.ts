@@ -1040,6 +1040,12 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         userRequestedCancellation: '使用者要求取消。'
     },
     previewModal: {
+        exportBatchTitle: "匯出圖形",
+        exportFormatsTitle: "匯出格式",
+        exportFormatsDescription: "可選擇一種或多種格式。",
+        exportFormatsRequired: "請至少選擇一種格式。",
+        exportSelectionSummary: "已選擇：{formats}",
+        exportSelectedFormats: "匯出所選格式",
         zoomIn: "放大",
         zoomOut: "縮小",
         zoomLock: "鎖定位置與縮放",
@@ -1047,7 +1053,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         zoomFit: "適應視窗",
         zoomActual: "實際大小",
         zoomLevel: "縮放比例",
-        zoomViewport: "圖形預覽。拖曳平移；按住 Ctrl 或 Command 滾動滑鼠滾輪縮放。",
+        zoomViewport: "圖形預覽。拖曳平移；按住 Ctrl 或 Command 滾動滑鼠滾輪縮放。 按住 Alt 暫時鎖定圖形以選取文字，放開恢復。",
         title: '{target} 預覽',
         copySource: '複製原始碼',
         copySuccessNotice: '圖形原始碼已複製到剪貼簿！',

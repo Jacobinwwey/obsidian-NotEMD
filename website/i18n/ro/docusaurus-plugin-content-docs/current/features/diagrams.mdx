@@ -20,7 +20,9 @@ import TLDR from '@site/src/components/TLDR';
 Selectează mai multe tipuri de diagramă într-o execuție și mai multe formate independente pentru fiecare tip. Debifarea păstrează formatele tipului; fără selecții, conținutul este analizat automat.
 </TLDR>
 
-Jurnalele sunt restrânse când toate exporturile reușesc. Lacătul de lângă minus fixează deplasarea și zoomul pentru selectarea textului SVG/HTML. PNG/PDF se deschid în vizualizatorul nativ Obsidian. Prezentările acceptă mai multe formate și necesită fork-ul Slidev al lui Jacobinwwey, fără revenire la pachetul oficial.
+PNG/PDF se deschid în previzualizarea diagramelor. Fiecare pagină PDF are comenzi independente. Zoomul redesenează zona vizibilă la densitatea pixelilor ecranului, cu memorie limitată; imaginile raster încorporate rămân limitate de rezoluția sursei.
+
+Țineți Alt apăsat pentru a bloca navigarea când selectați textul disponibil în SVG/HTML/PDF. Eliberarea restabilește blocarea anterioară. PNG nu are strat de text selectabil.
 
 
 Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală independente. Ctrl/Command + rotiță mărește; rotița singură derulează. Exporturile PNG mari păstrează cei 72–600 PPI selectați (implicit 300). SVG este vectorial; PPI se aplică doar exporturilor raster.
@@ -58,13 +60,13 @@ Formatele acceptate apar primele; cele incompatibile rămân vizibile și dezact
 4. Rulați **Generate diagram** din panou sau paletă.
 5. Fișierele selectate se exportă automat lângă nota sursă sau direct în dosarul configurat. Numele include tipul, de exemplu `topic_drawnix.pdf` și `topic_flowchart.svg`. Conflictele adaugă `-2`, `-3` etc., fără suprascriere.
 6. Verificați spațiul comun derulabil vertical: Drawnix urmat de toate panourile Mermaid în ordinea sursei, cu înălțimea randată completă.
-7. Folosiți **Export SVG**, **Export PNG** ori **Export PDF** per panou sau exportul de imagini superior pentru toate. La mai multe panouri, alegeți folderul sursei ori unul relativ la vault. Se scrie un fișier cu nume determinist per panou și se continuă după o eroare individuală. **Save source file** păstrează artefactul editabil.
+7. Alegeți SVG, PNG și/sau PDF și un dosar de destinație, apoi confirmați o dată. Exportul principal include toate panourile; exportul unui panou include doar acel panou. Formatele prezentării folosesc casete de selectare și necesită cel puțin o alegere. Progresul și erorile parțiale rămân vizibile.
 
 Configurează un dosar intermediar comun relativ la Vault sau lasă câmpul gol pentru `notemd_assert/` lângă fiecare sursă. Aici se păstrează înregistrări de recuperare, randări în cache și atașamente opționale. Păstrează fișierele încă referite; schimbarea afectează numai execuțiile noi.
 
 Tipurile se generează succesiv. O eroare nu le blochează pe celelalte; anularea oprește tipurile în așteptare și păstrează fișierele finalizate. Reîncearcă exportul din previzualizare sau istoric fără altă cerere către model. Eșecul generării necesită regenerarea acelui tip. Înregistrările v1/v2 rămân lizibile.
 
-Meniul Export și antetul fiecărui panou oferă aceleași acțiuni SVG/PNG/PDF. O previzualizare mare nu trebuie redusă la o singură imagine opacă.
+Folosiți **Salvare fișier sursă** pentru a păstra documentul editabil.
 
 **History** deschide sertarul de istoric fără să ascundă diagrama. Căutați, filtrați, redeschideți previzualizări sau fișiere salvate. Istoricul este disponibil din paletă și panou și fără notă activă.
 
