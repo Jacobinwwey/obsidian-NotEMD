@@ -18,6 +18,8 @@ Base canvases retain approximately 32 million pixels per document. Detail canvas
 
 ## Evidence
 
+The later [visible-window native acceptance](./2026-10-07-pdf-preview-native-acceptance.md) verifies the installed 1.9.14 candidate at the real screen density, without visibility or DPR overrides. The checks below retain the earlier simulated-density evidence.
+
 - New tests first failed for absent adaptive rendering. Relevant implementation suites passed, and the added narrow-page regression first reproduced a 200,000-pixel-wide canvas before the limit was applied.
 - Native Obsidian CLI: 36 independent pages; third-page zoom 8×, simulated DPR 1 and 2; respective tile densities 8 and 16; 807,975 and 3,231,900 pixels; only one detail canvas present in the measured viewport.
 - Independent PDF.js reference comparison: DPR 2 mean absolute channel difference 0.00587 on a 0–255 scale, explained by serialized CSS fractional-coordinate rounding. Acceptance tolerance is 0.05. Old magnified base comparison: 3.43954. Saved canvas images visibly distinguish sharp labels and paths from the blurred base image.
