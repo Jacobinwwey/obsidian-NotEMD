@@ -30,13 +30,17 @@ describe('SVG presentation clearance across display scales', () => {
             const runtime = window as unknown as { SvgSafety: { collectSvgPresentationDiagnostics(root: ParentNode): { kind: string }[] } };
             const root = document.querySelector('#preview')!;
             const clear = runtime.SvgSafety.collectSvgPresentationDiagnostics(root);
+            const bounds = Array.from(svg.querySelectorAll('text')).map(text => ({
+                client: text.getBoundingClientRect().toJSON(),
+                source: { x: text.getBBox().x, y: text.getBBox().y, width: text.getBBox().width, height: text.getBBox().height }
+            }));
             svg.querySelectorAll('text')[1].setAttribute('y', '44');
             const overlap = runtime.SvgSafety.collectSvgPresentationDiagnostics(root);
             svg.insertAdjacentHTML('beforeend', '<rect x="70" y="20" width="200" height="30"/>');
             const occluded = runtime.SvgSafety.collectSvgPresentationDiagnostics(root);
-            return { clear, overlap, occluded };
+            return { clear, overlap, occluded, bounds };
         }, scale);
-        expect(diagnostics.clear).toEqual([]);
+        expect({ clear: diagnostics.clear, bounds: diagnostics.clear.length ? diagnostics.bounds : [] }).toEqual({ clear: [], bounds: [] });
         expect(diagnostics.overlap).toEqual([expect.objectContaining({ kind: 'svg-text-overlap' })]);
         expect(diagnostics.occluded).toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'svg-text-occluded' })]));
     });
