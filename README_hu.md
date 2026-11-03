@@ -795,7 +795,7 @@ Ez a negyedéves krónika megőrzi a [repo-saga](https://github.com/teee32/repo-
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.hu.svg)
 
-_Utoljára a(z) `1.9.14` kiadási címkéhez frissítve: 2026-10-07. A legutóbbi commit dátuma: 2026-10-07._
+_Utoljára a(z) `1.9.15` kiadási címkéhez frissítve: 2026-11-03. A legutóbbi commit dátuma: 2026-11-03._
 <!-- repo-chronicle:end -->
 
 
