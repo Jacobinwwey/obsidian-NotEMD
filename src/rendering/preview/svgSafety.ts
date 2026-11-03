@@ -92,50 +92,50 @@ export function collectSvgPresentationDiagnostics(root: ParentNode): SvgPresenta
     const svg = root.querySelector?.('svg');
     if (!svg) return [];
     const presentationStyle = (svg as SVGSVGElement).style;
-    const previousRendering = presentationStyle?.getPropertyValue('text-rendering');
-    const previousPriority = presentationStyle?.getPropertyPriority('text-rendering');
+    const previousRendering = presentationStyle?.getPropertyValue?.('text-rendering');
+    const previousPriority = presentationStyle?.getPropertyPriority?.('text-rendering');
     // Linux rounds tiny hinted glyphs to whole pixels, even in getBBox. Measure vector geometry without repainting or changing exported source.
-    presentationStyle?.setProperty('text-rendering', 'geometricPrecision', 'important');
+    presentationStyle?.setProperty?.('text-rendering', 'geometricPrecision', 'important');
     try {
-    // DOM rectangles use screen pixels; clearance belongs to the source SVG.
-    // Transform that margin too, so fitting a thumbnail cannot invent overlap.
-    const screenTransform = (svg as SVGSVGElement).getScreenCTM?.();
-    const horizontalScale = screenTransform ? Math.abs(screenTransform.a) + Math.abs(screenTransform.c) : 1;
-    const verticalScale = screenTransform ? Math.abs(screenTransform.b) + Math.abs(screenTransform.d) : 1;
-    const textNodes = Array.from(svg.querySelectorAll?.('text') ?? [])
-        .map(element => ({ element, rect: presentationRect(element), text: (element.textContent ?? '').trim() }))
-        .filter(item => item.rect && item.text && !item.element.closest('title,desc,defs')) as Array<{ element: Element; rect: PresentationRect; text: string }>;
-    const diagnostics: SvgPresentationDiagnostic[] = [];
-    for (let index = 0; index < textNodes.length; index += 1) {
-        for (const other of textNodes.slice(index + 1)) {
-            if (presentationRectsOverlap(textNodes[index].rect, other.rect, 0.5 * horizontalScale, 0.5 * verticalScale)) {
-                diagnostics.push({
-                    kind: 'svg-text-overlap',
-                    message: `Mounted SVG labels overlap: "${textNodes[index].text}" / "${other.text}".`
-                });
+        // DOM rectangles use screen pixels; clearance belongs to the source SVG.
+        // Transform that margin too, so fitting a thumbnail cannot invent overlap.
+        const screenTransform = (svg as SVGSVGElement).getScreenCTM?.();
+        const horizontalScale = screenTransform ? Math.abs(screenTransform.a) + Math.abs(screenTransform.c) : 1;
+        const verticalScale = screenTransform ? Math.abs(screenTransform.b) + Math.abs(screenTransform.d) : 1;
+        const textNodes = Array.from(svg.querySelectorAll?.('text') ?? [])
+            .map(element => ({ element, rect: presentationRect(element), text: (element.textContent ?? '').trim() }))
+            .filter(item => item.rect && item.text && !item.element.closest('title,desc,defs')) as Array<{ element: Element; rect: PresentationRect; text: string }>;
+        const diagnostics: SvgPresentationDiagnostic[] = [];
+        for (let index = 0; index < textNodes.length; index += 1) {
+            for (const other of textNodes.slice(index + 1)) {
+                if (presentationRectsOverlap(textNodes[index].rect, other.rect, 0.5 * horizontalScale, 0.5 * verticalScale)) {
+                    diagnostics.push({
+                        kind: 'svg-text-overlap',
+                        message: `Mounted SVG labels overlap: "${textNodes[index].text}" / "${other.text}".`
+                    });
+                }
             }
         }
-    }
-    const shapes = Array.from(svg.querySelectorAll?.('rect,circle,ellipse,polygon,image') ?? [])
-        .map(element => ({ element, rect: presentationRect(element) }))
-        .filter(item => item.rect && !isPresentationSurface(item.element)) as Array<{ element: Element; rect: PresentationRect }>;
-    for (const text of textNodes) {
-        for (const shape of shapes) {
-            if (text.element.contains(shape.element) || shape.element.contains(text.element)) continue;
-            const relation = text.element.compareDocumentPosition?.(shape.element) ?? 0;
-            const shapePaintedAfterText = (relation & 4) !== 0;
-            if (shapePaintedAfterText && presentationRectsOverlap(text.rect, shape.rect, horizontalScale, verticalScale)) {
-                diagnostics.push({
-                    kind: 'svg-text-occluded',
-                    message: `Mounted SVG shape may occlude label "${text.text}".`
-                });
+        const shapes = Array.from(svg.querySelectorAll?.('rect,circle,ellipse,polygon,image') ?? [])
+            .map(element => ({ element, rect: presentationRect(element) }))
+            .filter(item => item.rect && !isPresentationSurface(item.element)) as Array<{ element: Element; rect: PresentationRect }>;
+        for (const text of textNodes) {
+            for (const shape of shapes) {
+                if (text.element.contains(shape.element) || shape.element.contains(text.element)) continue;
+                const relation = text.element.compareDocumentPosition?.(shape.element) ?? 0;
+                const shapePaintedAfterText = (relation & 4) !== 0;
+                if (shapePaintedAfterText && presentationRectsOverlap(text.rect, shape.rect, horizontalScale, verticalScale)) {
+                    diagnostics.push({
+                        kind: 'svg-text-occluded',
+                        message: `Mounted SVG shape may occlude label "${text.text}".`
+                    });
+                }
             }
         }
-    }
         return diagnostics;
     } finally {
-        if (previousRendering) presentationStyle?.setProperty('text-rendering', previousRendering, previousPriority);
-        else presentationStyle?.removeProperty('text-rendering');
+        if (previousRendering) presentationStyle?.setProperty?.('text-rendering', previousRendering, previousPriority);
+        else presentationStyle?.removeProperty?.('text-rendering');
     }
 }
 

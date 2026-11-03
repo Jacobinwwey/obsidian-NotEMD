@@ -57,6 +57,7 @@ describe('runtime SVG safety contract', () => {
         const first = text('Title', 0);
         const second = text('Summary', 30);
         const svg = {
+            style: {},
             getScreenCTM: first.getScreenCTM,
             querySelectorAll: (query: string) => query === 'text' ? [first, second] : []
         };

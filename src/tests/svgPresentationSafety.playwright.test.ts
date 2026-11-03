@@ -38,10 +38,11 @@ describe('SVG presentation clearance across display scales', () => {
             const overlap = runtime.SvgSafety.collectSvgPresentationDiagnostics(root);
             svg.insertAdjacentHTML('beforeend', '<rect x="70" y="20" width="200" height="30"/>');
             const occluded = runtime.SvgSafety.collectSvgPresentationDiagnostics(root);
-            return { clear, overlap, occluded, bounds };
+            return { clear, overlap, occluded, bounds, renderingAfter: svg.style.getPropertyValue('text-rendering') };
         }, scale);
         expect({ clear: diagnostics.clear, bounds: diagnostics.clear.length ? diagnostics.bounds : [] }).toEqual({ clear: [], bounds: [] });
         expect(diagnostics.overlap).toEqual([expect.objectContaining({ kind: 'svg-text-overlap' })]);
         expect(diagnostics.occluded).toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'svg-text-occluded' })]));
+        expect(diagnostics.renderingAfter).toBe('');
     });
 });
