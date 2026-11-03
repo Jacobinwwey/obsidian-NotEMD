@@ -32,6 +32,25 @@ function isPresentationSurface(element: Element): boolean {
 }
 
 function presentationRect(element: Element): PresentationRect | null {
+    const graphics = element as SVGGraphicsElement;
+    const transform = graphics.getScreenCTM?.();
+    if (transform && typeof graphics.getBBox === 'function') {
+        const bounds = graphics.getBBox();
+        const corners = [
+            [bounds.x, bounds.y], [bounds.x + bounds.width, bounds.y],
+            [bounds.x, bounds.y + bounds.height], [bounds.x + bounds.width, bounds.y + bounds.height]
+        ].map(([horizontal, vertical]) => ({
+            x: transform.a * horizontal + transform.c * vertical + transform.e,
+            y: transform.b * horizontal + transform.d * vertical + transform.f
+        }));
+        const left = Math.min(...corners.map(corner => corner.x));
+        const top = Math.min(...corners.map(corner => corner.y));
+        const width = Math.max(...corners.map(corner => corner.x)) - left;
+        const height = Math.max(...corners.map(corner => corner.y)) - top;
+        if ([left, top, width, height].every(Number.isFinite) && width > 0 && height > 0) {
+            return { x: left, y: top, width, height };
+        }
+    }
     const candidate = element as Element & { getBoundingClientRect?: () => DOMRect };
     if (typeof candidate.getBoundingClientRect !== 'function') return null;
     const rect = candidate.getBoundingClientRect();

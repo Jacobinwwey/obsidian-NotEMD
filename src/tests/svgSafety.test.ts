@@ -46,6 +46,26 @@ describe('runtime SVG safety contract', () => {
         expect(() => assertSvgPresentationSafety(root, 'Runtime')).toThrow(/presentation safety/i);
     });
 
+    test('uses SVG geometry instead of pixel-rounded client bounds for tiny previews', () => {
+        const text = (content: string, top: number) => ({
+            textContent: content,
+            getBoundingClientRect: () => ({ x: 0, y: 0, width: 5, height: 2 }),
+            getBBox: () => ({ x: 0, y: top, width: 100, height: 20 }),
+            getScreenCTM: () => ({ a: 0.05, b: 0, c: 0, d: 0.05, e: 0, f: 0 }),
+            closest: () => null, contains: () => false, compareDocumentPosition: () => 0
+        });
+        const first = text('Title', 0);
+        const second = text('Summary', 30);
+        const svg = {
+            getScreenCTM: first.getScreenCTM,
+            querySelectorAll: (query: string) => query === 'text' ? [first, second] : []
+        };
+        const root = { querySelector: () => svg } as unknown as ParentNode;
+        expect(collectSvgPresentationDiagnostics(root)).toEqual([]);
+        svg.querySelectorAll = (query: string) => query === 'text' ? [first, text('Overlap', 10)] : [];
+        expect(collectSvgPresentationDiagnostics(root)).toEqual([expect.objectContaining({ kind: 'svg-text-overlap' })]);
+    });
+
     test.each([
         { horizontalScale: 0.05, verticalScale: 0.05 },
         { horizontalScale: 0.16, verticalScale: 0.16 },
