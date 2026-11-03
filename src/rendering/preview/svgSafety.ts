@@ -91,6 +91,12 @@ function presentationRectsOverlap(first: PresentationRect, second: PresentationR
 export function collectSvgPresentationDiagnostics(root: ParentNode): SvgPresentationDiagnostic[] {
     const svg = root.querySelector?.('svg');
     if (!svg) return [];
+    const presentationStyle = (svg as SVGSVGElement).style;
+    const previousRendering = presentationStyle?.getPropertyValue('text-rendering');
+    const previousPriority = presentationStyle?.getPropertyPriority('text-rendering');
+    // Linux rounds tiny hinted glyphs to whole pixels, even in getBBox. Measure vector geometry without repainting or changing exported source.
+    presentationStyle?.setProperty('text-rendering', 'geometricPrecision', 'important');
+    try {
     // DOM rectangles use screen pixels; clearance belongs to the source SVG.
     // Transform that margin too, so fitting a thumbnail cannot invent overlap.
     const screenTransform = (svg as SVGSVGElement).getScreenCTM?.();
@@ -126,7 +132,11 @@ export function collectSvgPresentationDiagnostics(root: ParentNode): SvgPresenta
             }
         }
     }
-    return diagnostics;
+        return diagnostics;
+    } finally {
+        if (previousRendering) presentationStyle?.setProperty('text-rendering', previousRendering, previousPriority);
+        else presentationStyle?.removeProperty('text-rendering');
+    }
 }
 
 export function assertSvgPresentationSafety(root: ParentNode, source: string): void {
