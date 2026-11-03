@@ -26,7 +26,21 @@ Her diyagram önizlemesinde bağımsız yakınlaştırma, kaydırma, sığdırma
 | Geliştirici | [Geliştirici kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/developers/overview) | Mevcut sözleşmeleri derlemek, sınamak ve genişletmek |
 | Ajan | [Ajan kılavuzu](https://jacobinwwey.github.io/obsidian-NotEMD/tr/docs/agents/overview) | Desteklenen dört dışa aktarma komutunu bulmak |
 
-**Sürüm:** 1.9.14
+**Sürüm:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Okunabilir diyagramlar ve güvenilir önizlemeler
+
+ER diyagramları alan türlerini, PK/FK/UK anahtarlarını, açıklamaları ve ilişki çokluklarını korur. Ortak tablo ölçümleri HTML/SVG ve Draw.io çıktısını iyileştirir; Mermaid sınıf ve katılımcı kimliklerini ayırır.
+
+Kaydedilmiş .drawnix açılırken önce ana pano, ardından Mermaid ekleri yüklenir. Mermaid başlangıçta diyagramın tamamını sığdırır. Dışa aktarma kayıtlarında metin seçilip kopyalanabilir. Windows Slidev yerel Mermaid bileşenlerini ve eksik diyagramları denetler.
+
+Kurtarılabilir ağaç ve kulvar başvuruları tanılarla görsel çıktı vermeyi sürdürür. Kısa bağlantılar ve sıkı yerleşimler okumayı kolaylaştırır; incelenen sıralama örneği alt katılımcılarla birlikte değişmez. Geçersiz veya güvensiz içerik onarım gerektirebilir.
+
+1.9.15 sürümünün eşleşen main.js, manifest.json ve styles.css dosyalarını yükleyip yeniden başlatın. Notlar ve ayarlar korunur. Drawnix dallar arası okları dışarıda yeniden düzenlemeden sonra statik kalır.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Net PDF önizlemeleri ve çok biçimli dışa aktarma
@@ -774,7 +788,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.14 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.15 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->

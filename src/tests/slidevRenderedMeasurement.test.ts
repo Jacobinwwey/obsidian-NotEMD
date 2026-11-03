@@ -67,7 +67,25 @@ describe('slidev rendered measurement', () => {
 		await browser?.close();
 	});
 
-	test('includes local CSS transform scale in effective font measurements', async () => {
+    test('rejects unresolved Mermaid components and empty shadow hosts instead of reporting an empty success', async () => {
+        if (!browser) throw launchError;
+        const page = await browser.newPage();
+        try {
+            await page.setContent('<div class="slidev-page" style="width:1000px;height:600px"><h1>Diagram</h1><mermaid code-lz="source"></mermaid><div class="mermaid"></div></div>');
+            const missing = await collectRenderedSlideMeasurement(page, 1);
+            expect(missing.errors.join(' ')).toMatch(/Mermaid.*not rendered/i);
+            expect((missing as any).renderedMermaidCount).toBe(0);
+            await page.evaluate(() => {
+                document.querySelector('mermaid')!.remove();
+                document.querySelector('.mermaid')!.attachShadow({ mode: 'open' }).innerHTML = '<svg width="200" height="100"><rect width="200" height="100"/></svg>';
+            });
+            const rendered = await collectRenderedSlideMeasurement(page, 1);
+            expect(rendered.errors).toEqual([]);
+            expect((rendered as any).renderedMermaidCount).toBe(1);
+        } finally { await page.close(); }
+    });
+
+    test('includes local CSS transform scale in effective font measurements', async () => {
 		if (!browser) {
 			console.warn('Skipping Playwright rendered measurement test:', launchError);
 			return;

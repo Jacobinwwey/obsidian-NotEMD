@@ -120,7 +120,7 @@ export const EXECUTABLE_DIAGRAM_TYPES: readonly ExecutableDiagramTypeDefinition[
         family: 'structure',
         semanticPattern: 'Entity cardinality and attributes',
         promptProfileId: 'entity-relationship',
-        payloadKind: 'legacy',
+        payloadKind: 'entity-relationship',
         layoutProfileId: 'mermaid-er',
         rendererOperationId: 'mermaid-er',
         rendererTarget: 'mermaid',

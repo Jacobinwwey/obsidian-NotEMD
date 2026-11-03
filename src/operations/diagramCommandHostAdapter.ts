@@ -13,6 +13,7 @@ import { resolveSourceVisualReferences, scanSourceVisualReferences } from '../di
 import { buildFallbackMermaidSvg } from '../diagram/sourceVisualArtifactBuilder';
 import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 import { DRAWNIX_SOURCE_VISUAL_METADATA_VERSION } from '../diagram/adapters/drawnix/drawnixExporter';
+import { createSavedDrawnixMindMapPreview } from '../rendering/renderers/savedDrawnixPreview';
 import type { DiagramExportRun, DiagramExportRequest } from '../diagram/diagramExportRun';
 import { getDiagramGenerationSelections, getDiagramTypeOutputRequests, type DiagramGenerationSelection } from '../diagram/diagramTypeOutputPreferences';
 import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
@@ -1035,18 +1036,16 @@ async function buildDrawnixSourceVisualPreviewPanels(params: {
     }
 
     const panels: RenderArtifactPreviewPanel[] = [];
-    if (params.artifact.previewSvg?.content?.trim()) {
-        panels.push({
-            id: 'drawnix-primary',
-            artifact: {
-                target: params.artifact.target,
-                content: params.artifact.content,
-                mimeType: params.artifact.mimeType,
-                sourceIntent: params.artifact.sourceIntent,
-                previewSvg: params.artifact.previewSvg
-            }
-        });
-    }
+    panels.push({
+        id: 'drawnix-primary',
+        artifact: {
+            target: params.artifact.target,
+            content: params.artifact.content,
+            mimeType: params.artifact.mimeType,
+            sourceIntent: params.artifact.sourceIntent,
+            previewSvg: params.artifact.previewSvg
+        }
+    });
 
     const normalizeMemoryCompanionPath = (path: string): string =>
         path.trim().replace(/\\/g, '/').replace(/^\/+/, '');
@@ -1176,7 +1175,9 @@ async function attachCompanionSvgPreview(params: {
     const svgPath = `${params.sourcePath}.svg`;
     const svgContent = await readVaultTextFile(params.host, svgPath);
     if (!svgContent || !looksLikeSvgSource(svgContent)) {
-        return params.artifact;
+        return params.artifact.target === 'drawnix'
+            ? { ...params.artifact, ...createSavedDrawnixMindMapPreview(params.artifact.content) }
+            : params.artifact;
     }
 
     return {

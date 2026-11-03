@@ -1,4 +1,6 @@
 import { assertValidDiagramSpec } from '../../diagram/spec';
+import { buildEntityRelationshipScene } from '../../diagram/adapters/er/entityRelationshipLayout';
+import { renderEntityRelationshipHtmlDocument, renderEntityRelationshipSvg } from '../../diagram/adapters/er/entityRelationshipSvg';
 import { DiagramSpec } from '../../diagram/types';
 import { LAYOUT_SAFETY_VERSION, wrapMeasuredText } from '../../diagram/layout/layoutSafety';
 import {
@@ -477,11 +479,19 @@ export class EditableHtmlSvgRenderer implements DiagramRenderer {
 
     supports(spec: DiagramSpec): boolean {
         return (SUPPORTED_EDITABLE_FIGURE_INTENTS.has(spec.intent) && spec.nodes.length > 0)
+            || (spec.intent === 'erDiagram' && spec.payload?.kind === 'entity-relationship')
             || isReferenceLayoutDiagram(spec);
     }
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
         assertValidDiagramSpec(spec);
+
+        if (spec.intent === 'erDiagram') {
+            const scene = buildEntityRelationshipScene(spec);
+            return { target: this.target, content: renderEntityRelationshipHtmlDocument(scene), mimeType: 'text/html', sourceIntent: spec.intent,
+                layoutSafetyVersion: LAYOUT_SAFETY_VERSION,
+                previewSvg: { content: renderEntityRelationshipSvg(scene), mimeType: 'image/svg+xml', layoutSafetyVersion: LAYOUT_SAFETY_VERSION } };
+        }
 
         if (isReferenceLayoutDiagram(spec)) {
             const previewSvg = renderReferenceLayoutSvg(spec);

@@ -26,7 +26,21 @@ Každý náhled diagramu má samostatné přiblížení, posun, přizpůsobení 
 | Vývojář | [Vývojářská příručka](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/developers/overview) | Sestavit, testovat a rozšířit stávající smlouvy |
 | Agent | [Příručka agenta](https://jacobinwwey.github.io/obsidian-NotEMD/cs/docs/agents/overview) | Najít čtyři podporované příkazy exportu |
 
-**Verze:** 1.9.14
+**Verze:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Čitelné diagramy a spolehlivé náhledy
+
+ER diagramy zachovávají typy polí, klíče PK/FK/UK, komentáře a kardinality vztahů. Společné měření tabulek zlepšuje HTML/SVG a Draw.io; Mermaid rozlišuje identifikátory tříd a účastníků.
+
+Otevření uloženého .drawnix obnoví hlavní plochu před přílohami Mermaid. Náhled Mermaid nejprve zobrazí celý diagram. Text záznamů exportu lze označit a kopírovat. Windows Slidev kontroluje nativní komponenty Mermaid a zjišťuje chybějící diagramy.
+
+Obnovitelné odkazy stromů a drah zachovávají grafický výstup s diagnostikou. Krátké spoje a kompaktní uspořádání usnadňují čtení; zkontrolovaný sekvenční příklad zůstává stejný včetně dolních účastníků. Neplatný nebo nebezpečný obsah může vyžadovat opravu.
+
+Nainstalujte odpovídající main.js, manifest.json a styles.css z 1.9.15 a znovu načtěte plugin. Poznámky a nastavení zůstanou zachovány. Šipky Drawnix mezi větvemi jsou po externím přeuspořádání statické.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Ostré náhledy PDF a export do více formátů
@@ -774,7 +788,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.14 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.9.15 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 

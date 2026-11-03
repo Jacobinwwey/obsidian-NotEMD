@@ -141,3 +141,15 @@ Protokoly se uchovávají mezi fázemi úkolu i při opětovném otevření náh
 ## 1.9.12 — Přehlednější náhled diagnostiky
 
 Pokud nejsou přítomny chyby, celý diagnostický panel je ve výchozím stavu sbalený a viditelný zůstává jen nadpis a počty podle závažnosti. Chyby panel automaticky otevřou. Rozbalte panel a skupiny štítků a přečtěte si všechny zprávy a rady. Žádné diagnostické záznamy se neodstraňují. Automaticky se otevřou pouze skupiny chyb; varování a informace zůstanou sbalené, i když mají stejný štítek.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Čitelné diagramy a spolehlivé náhledy
+
+ER diagramy zachovávají typy polí, klíče PK/FK/UK, komentáře a kardinality vztahů. Společné měření tabulek zlepšuje HTML/SVG a Draw.io; Mermaid rozlišuje identifikátory tříd a účastníků.
+
+Otevření uloženého .drawnix obnoví hlavní plochu před přílohami Mermaid. Náhled Mermaid nejprve zobrazí celý diagram. Text záznamů exportu lze označit a kopírovat. Windows Slidev kontroluje nativní komponenty Mermaid a zjišťuje chybějící diagramy.
+
+Obnovitelné odkazy stromů a drah zachovávají grafický výstup s diagnostikou. Krátké spoje a kompaktní uspořádání usnadňují čtení; zkontrolovaný sekvenční příklad zůstává stejný včetně dolních účastníků. Neplatný nebo nebezpečný obsah může vyžadovat opravu.
+
+Nainstalujte odpovídající main.js, manifest.json a styles.css z 1.9.15 a znovu načtěte plugin. Poznámky a nastavení zůstanou zachovány. Šipky Drawnix mezi větvemi jsou po externím přeuspořádání statické.

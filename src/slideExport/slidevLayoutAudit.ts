@@ -69,6 +69,7 @@ export interface SlidevMeasuredSlotZone {
 }
 
 export interface RenderedSlideMeasurement {
+	renderedMermaidCount?: number;
 	slide: number;
 	slideRoot: SlidevRect | null;
 	safeRect: SlidevRect | null;
@@ -493,6 +494,24 @@ export function summarizeLayoutAudits(audits: SlidevLayoutAudit[], retryCount = 
 
 export function countSlideDeckSlides(deckMarkdown: string): number {
 	return splitSlideDeck(deckMarkdown).length;
+}
+
+export function countSlideDeckMermaidBlocks(deckMarkdown: string): number[] {
+	return splitSlideDeck(deckMarkdown).map(slide => {
+		let count = 0;
+		let fence: string | null = null;
+		for (const line of slide.split(/\r?\n/)) {
+			const marker = line.trim().match(/^(`{3,}|~{3,})(.*)$/);
+			if (!marker) continue;
+			if (fence) {
+				if (marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = null;
+			} else {
+				fence = marker[1];
+				if (/^mermaid(?:\s|$)/i.test(marker[2].trim())) count += 1;
+			}
+		}
+		return count;
+	});
 }
 
 export function patchDeckWithLayoutAudit(
@@ -1351,8 +1370,8 @@ function splitSlideDeck(deckMarkdown: string): string[] {
 		const fenceMarker = trimmed.match(/^(```+|~~~+)/)?.[1] ?? null;
 		if (fenceMarker) {
 			if (!fence) {
-				fence = fenceMarker.slice(0, 3);
-			} else if (fenceMarker.startsWith(fence)) {
+				fence = fenceMarker;
+			} else if (fenceMarker.startsWith(fence) && !trimmed.slice(fenceMarker.length).trim()) {
 				fence = null;
 			}
 		}

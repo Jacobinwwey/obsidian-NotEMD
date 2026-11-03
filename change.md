@@ -1,3 +1,45 @@
+## 1.9.15 — readable diagrams and reliable previews
+
+### reading-first corrections for cases 4/6/7
+
+#### English
+
+Keep the reviewed sequence presentation unchanged as requested, align cyclic peers with direct reciprocal arrows, and replace repeated lane warnings with one neutral localized unknown endpoint. Canvas/row sizing follows content without losing source facts. The new focused acceptance compares the exact previously reviewed exports with the revision, with identical input bytes and real geometry measurements. This is not a measured user-comprehension claim.
+
+#### 中文
+
+时序图按用户选择保留此前验收原样；环内节点平级并用短往返箭头；泳道重复告警改为一个中性本地化未知端点。画布／行高按内容收紧，不丢来源事实。专项验收直接对比此前已查看的导出与本次修订，输入逐字节一致且提供真实几何测量；不宣称已测量用户理解效率。
+
+### source-faithful recovery and visual acceptance
+
+#### English
+
+Recoverable cyclic/rootless/forest tree sources retain all nodes and original relationships through finite traversal, with visible notices and dashed cycle edges. Lane edges at declared coordinates retain missing endpoint content as explicitly unprovided placeholders, not invented steps. Warnings remain inside SVG/PNG exports. Seven genuine baseline/current image pairs, source JSON, hashes and an offline bilingual HTML viewer provide reproducible acceptance evidence. Structural/security boundary checks remain; source caveats do not replace diagrams with validation panels.
+
+#### 中文
+
+对可恢复的环／无根环／森林，通过有限遍历保留全部节点与原始关系，以可见说明和虚线标注循环。泳道中已声明坐标的缺失端点内容明确显示为“未提供步骤”，保留交接而不编造内容，说明随 SVG／PNG 导出。新增七组真实基线／当前对比图片、来源 JSON、哈希及离线双语 HTML 查看器供可重复验收。保留结构／安全边界检查；来源问题不再以校验面板替代图表。
+
+### Mermaid exports and native diagram previews
+
+#### English
+
+Repair Windows Slidev Mermaid component discovery with a prepared-workspace native import, preserving user components and source fences. Rendered acceptance now fails on missing/unresolved diagrams, including shadow-root SVGs. Saved Drawnix files reconstruct the supported native mind-map primary when its SVG companion is unavailable, retain attachments separately, and disclose derived layout. Canonical SVG panels share initial fit behavior; export receipts and diagnostics support drag selection outside graph navigation. See [root causes and verification](docs/maintainer/2026-10-18-mermaid-and-native-preview.md). This is not a new release.
+
+#### 中文
+
+通过准备工作区的原生组件导入修复 Windows Slidev Mermaid 组件发现，保留用户组件与源码围栏。渲染验收现在拦截缺失／未解析图形，并检查 shadow root 中的 SVG。已保存 Drawnix 在缺少 SVG companion 时重建受支持的原生思维导图主图、分开保留附件，并说明派生布局。规范 SVG 面板统一初始适配；导出记录和诊断在图形导航区之外支持拖选。详见[根因与验证](docs/maintainer/2026-10-18-mermaid-and-native-preview.zh-CN.md)。本次不是新版本发布。
+
+### scale-aware SVG preview validation
+
+#### English
+
+Mounted SVG collision checks project their source-space clearance through the SVG screen transform. Valid small previews no longer fail solely because they are scaled down; real text overlap and later-painted shape occlusion remain errors. Uniform/non-uniform unit regressions and real-browser scale tests cover the repair. This change is included in 1.9.15; published 1.9.14 assets remain unchanged. See [verification and Archify recommendations](docs/maintainer/2026-10-18-diagram-preview-and-archify.md).
+
+#### 中文
+
+已挂载 SVG 的碰撞检查通过 SVG 屏幕变换换算源坐标中的安全间距。有效的小预览不会仅因缩小而失败；真实文字重叠和后绘制形状的遮挡仍会报错。修复具有等比／非等比单元回归及真实浏览器缩放测试。此修改包含于 1.9.15；已公开的 1.9.14 发布资产保持不变。详见[验证记录与 Archify 建议](docs/maintainer/2026-10-18-diagram-preview-and-archify.zh-CN.md)。
+
 ## 1.9.14 — sharp PDF previews and multi-format export
 
 ### English
@@ -1040,3 +1082,12 @@ New test file `src/tests/liveChainTest.test.ts` (untracked, for manual execution
 - Tests real DeepSeek API calls from the test vault configuration
 - Verifies chat completion, diagram spec generation, and full diagram pipeline
 - All 5 tests pass against live DeepSeek API
+## Unreleased — typed ER and diagram quality
+
+### English
+
+Introduce a canonical ER schema and shared measured table scene. Preserve source fields, SQL types/comments, composite key roles, FK targets and explicit endpoint cardinalities across generation and previews; export native Draw.io tables and lossless Mermaid aliases. Unknown cardinality/identifying status is never guessed for Mermaid. Retain legacy input compatibility and the existing default target. Repair translated class collisions, sanitized sequence participant collisions, disconnected tree cycles, negative sibling gaps and lane-grid handoffs to undeclared cells. [Comparison, implementation and verification](docs/maintainer/2026-10-18-er-and-diagram-quality.md) distinguish implemented changes from the remaining 33-type roadmap. No new release or dependency upgrade.
+
+### 中文
+
+新增规范 ER 结构与共享测量表格场景，生成及预览保留原字段、SQL 类型／注释、复合键角色、FK 目标与明确端点基数，并导出原生 Draw.io 表格及无名称碰撞的 Mermaid 别名；Mermaid 不猜测未知基数／识别关系。保留旧输入与原默认输出。同时修复中文类图合并、时序参与者标识碰撞、树图不连通环／负兄弟间距、lane-grid 指向未声明单元格的交接。[对比、实施与验证](docs/maintainer/2026-10-18-er-and-diagram-quality.zh-CN.md) 区分已落地工作与全部 33 类图表的后续方向。本次不发布新版本、不升级依赖。

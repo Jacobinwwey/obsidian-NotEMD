@@ -16,6 +16,9 @@
 
 - [1.9.12 — 更清爽的诊断预览](./releases/1.9.12.zh-CN.md)
 
+- [1.9.15 — 易读图形与可靠预览](./releases/1.9.15.zh-CN.md)
+- [图形预览与模式手册](./diagram-preview-and-schema-guide.zh-CN.md)
+
 ## 当前真值与布局入口
 
 - [预览、演示导出与 fork 来源核验 — 10 月 6 日](./maintainer/2026-10-06-preview-slidev-reliability.zh-CN.md)

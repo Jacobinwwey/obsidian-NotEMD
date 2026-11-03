@@ -13,6 +13,7 @@
         .ref-node-label { fill: #172033; font: 600 13px "Segoe UI", Arial, sans-serif; }
         .ref-header-label { fill: #ffffff; font: 600 11px "Segoe UI", Arial, sans-serif; }
         .ref-node-sub { fill: #475569; font: 10px Consolas, monospace; }
+        .ref-source-label { fill: #475569; font: 12px "Segoe UI", Arial, sans-serif; }
         .ref-hub-label { fill: #f8fafc; font: 600 13px "Segoe UI", Arial, sans-serif; }
         .ref-hub-sub { fill: #e2e8f0; font: 10px Consolas, monospace; }
         .ref-edge { fill: none; stroke: #475569; stroke-width: 1.5; }

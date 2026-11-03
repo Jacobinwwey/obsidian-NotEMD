@@ -1225,6 +1225,7 @@ async function ensurePreparedDeckRuntimeSupport(
 	onProgress?: ExportProgressCallback,
 ): Promise<void> {
 	await ensurePreparedDeckCssCompatibility(app, preparedDeckPath);
+	await ensurePreparedDeckMermaidComponent(app, preparedDeckPath);
 	const supportPath = normalizeVaultPath(`${dirnameVaultPath(preparedDeckPath)}/global-bottom.vue`);
 	const vaultRoot = getVaultBasePath(app);
 	const fs: any = safeRequire('fs');
@@ -1260,6 +1261,28 @@ async function ensurePreparedDeckRuntimeSupport(
 	}
 	await app.vault.adapter.write(supportPath, next);
 	onProgress?.('slidev-source', `Prepared Mermaid runtime fit support: ${supportPath}`);
+}
+
+async function ensurePreparedDeckMermaidComponent(app: App, preparedDeckPath: string): Promise<void> {
+	const directory = normalizeVaultPath(`${dirnameVaultPath(preparedDeckPath)}/components`);
+	const vaultRoot = getVaultBasePath(app);
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	const absoluteDirectory = vaultRoot && fs?.existsSync && path?.join ? path.join(vaultRoot, directory) : null;
+	const adapter = app.vault.adapter;
+	for (const extension of ['vue', 'md', 'ts', 'js', 'jsx', 'tsx']) {
+		const candidate = `${directory}/Mermaid.${extension}`;
+		if (absoluteDirectory ? fs.existsSync(path.join(absoluteDirectory, `Mermaid.${extension}`)) : await adapter.exists(candidate)) return;
+	}
+	// A local re-export avoids drive-root glob discovery without replacing Slidev's renderer or a user component.
+	const content = "// Notemd managed native Mermaid component import\nexport { default } from '@slidev/client/builtin/Mermaid.vue';\n";
+	if (absoluteDirectory) {
+		fs.mkdirSync(absoluteDirectory, { recursive: true });
+		fs.writeFileSync(path.join(absoluteDirectory, 'Mermaid.ts'), content, 'utf8');
+	} else {
+		await ensureVaultDirectory(app, directory);
+		await adapter.write(`${directory}/Mermaid.ts`, content);
+	}
 }
 
 async function ensurePreparedDeckCssCompatibility(app: App, preparedDeckPath: string): Promise<void> {

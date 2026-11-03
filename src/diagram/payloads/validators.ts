@@ -32,6 +32,7 @@ function unique(values: unknown[], label: string, errors: string[]): void {
 }
 
 const REQUIRED_ARRAY_FIELDS: Partial<Record<DiagramPayloadKind, readonly string[]>> = {
+    'entity-relationship': ['entities', 'relationships'],
     topology: ['zones', 'nodes', 'edges'],
     'lane-grid': ['lanes', 'steps', 'cells', 'edges'],
     'access-matrix': ['roles', 'components', 'cells'],
@@ -233,8 +234,6 @@ function validateTree(payload: DiagramTreePayload, errors: string[]): void {
     if (payload.nodes.length < 2 || payload.nodes.length > 32) errors.push('Tree payload requires 2 to 32 nodes.');
     unique(payload.nodes.map(node => node.id), 'Tree nodes', errors);
     const nodeIds = new Set(payload.nodes.map(node => node.id));
-    const roots = payload.nodes.filter(node => !node.parentId);
-    if (roots.length !== 1) errors.push('Tree payload requires exactly one root.');
     for (const node of payload.nodes) {
         if (node.parentId && !nodeIds.has(node.parentId)) errors.push(`Tree node "${node.id}" references a missing parent.`);
     }
@@ -268,12 +267,16 @@ export function validateCanonicalDiagramPayload(spec: DiagramSpec): string[] {
         return errors;
     }
     if (!payload) return errors;
+    if (payload.kind === 'entity-relationship' && spec.intent !== 'erDiagram') {
+        errors.push('ER payload requires the erDiagram intent.');
+    }
     if (!validatePayloadShape(payload, errors)) {
         return errors;
     }
 
     try {
         switch (payload.kind) {
+            case 'entity-relationship': errors.push(...validateEntityRelationshipPayload(payload)); break;
             case 'topology': validateTopology(payload, errors); break;
             case 'lane-grid': validateLaneGrid(payload, errors); break;
             case 'access-matrix': validateAccessMatrix(payload, errors); break;
@@ -293,3 +296,4 @@ export function validateCanonicalDiagramPayload(spec: DiagramSpec): string[] {
     }
     return errors;
 }
+import { validateEntityRelationshipPayload } from '../adapters/er/entityRelationship';

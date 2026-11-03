@@ -59,9 +59,14 @@ describe('release publisher process boundary', () => {
         const filename = path.join(fixture, '.cache/gh-calls.jsonl');
         return fs.existsSync(filename) ? fs.readFileSync(filename, 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line)) : [];
     };
-    const run = (...args: string[]) => spawnSync(process.execPath, [path.join(fixture, publisherPath), ...args], {
-        cwd: fixture, encoding: 'utf8', env: processEnv, timeout: 20000
-    });
+    const run = (...args: string[]) => {
+        // A full publication launches Git, npm and gh repeatedly; this is not a 20-second performance test.
+        const output = spawnSync(process.execPath, [path.join(fixture, publisherPath), ...args], {
+            cwd: fixture, encoding: 'utf8', env: processEnv, timeout: 120000, windowsHide: true
+        });
+        if (output.error) throw output.error;
+        return output;
+    };
     const mutations = () => calls().filter(args => args[0] === 'release' && ['create', 'upload', 'edit'].includes(args[1]));
 
     beforeEach(() => {
@@ -135,7 +140,7 @@ if (args[0] === 'api') {
         const executablePath = `${path.join(fixture, '.cache/bin')}${path.delimiter}${process.env.Path || process.env.PATH || ''}`;
         processEnv = { ...process.env, PATH: executablePath, Path: executablePath };
     });
-    afterEach(() => fs.rmSync(fixture, { recursive: true, force: true }));
+    afterEach(() => fs.rmSync(fixture, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }));
 
     test('preview is offline and reports local identity without rebuilding', () => {
         processEnv.FAKE_GH_ERROR = 'network unavailable';

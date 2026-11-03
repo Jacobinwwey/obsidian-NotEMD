@@ -143,3 +143,15 @@ Log terakumulasi antar tahap tugas dan saat pratinjau dibuka kembali selama sesi
 ## 1.9.12 — Pratinjau diagnostik yang lebih ringkas
 
 Jika tidak ada kesalahan, seluruh panel diagnostik diciutkan secara bawaan sehingga hanya judul dan jumlah menurut tingkat keparahan yang terlihat. Kesalahan membuka panel secara otomatis. Buka panel dan grup tag untuk membaca semua pesan dan saran. Tidak ada catatan diagnostik yang dihapus. Hanya grup kesalahan yang terbuka otomatis; peringatan dan informasi tetap diciutkan meskipun memakai tag yang sama.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Diagram mudah dibaca dan pratinjau andal
+
+Diagram ER mempertahankan tipe kolom, kunci PK/FK/UK, komentar dan kardinalitas relasi. Pengukuran tabel bersama memperbaiki ekspor HTML/SVG dan Draw.io; Mermaid membedakan pengenal kelas dan peserta.
+
+Membuka .drawnix tersimpan memulihkan papan utama sebelum lampiran Mermaid. Pratinjau Mermaid awalnya menampilkan seluruh diagram. Teks catatan ekspor dapat dipilih dan disalin. Slidev Windows memeriksa komponen Mermaid native dan mendeteksi diagram yang hilang.
+
+Referensi pohon dan lajur yang dapat dipulihkan tetap menghasilkan gambar dengan diagnostik. Koneksi pendek dan tata letak ringkas mengutamakan keterbacaan; contoh urutan yang ditinjau tetap sama, termasuk peserta di bawah. Konten tidak valid atau tidak aman masih mungkin perlu diperbaiki.
+
+Pasang main.js, manifest.json dan styles.css yang sesuai dari 1.9.15, lalu muat ulang. Catatan dan pengaturan dipertahankan. Panah Drawnix antarcabang tetap statis setelah penataan ulang eksternal.

@@ -1,4 +1,7 @@
 import { assertValidDiagramSpec } from '../../diagram/spec';
+import { buildEntityRelationshipScene } from '../../diagram/adapters/er/entityRelationshipLayout';
+import { renderEntityRelationshipHtmlDocument, renderEntityRelationshipSvg } from '../../diagram/adapters/er/entityRelationshipSvg';
+import { LAYOUT_SAFETY_VERSION } from '../../diagram/layout/layoutSafety';
 import { DiagramEdge, DiagramNode, DiagramOrgChartSpec, DiagramRadarSpec, DiagramSpec } from '../../diagram/types';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
@@ -775,6 +778,13 @@ export class HtmlRenderer implements DiagramRenderer {
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
         assertValidDiagramSpec(spec);
+
+        if (spec.intent === 'erDiagram') {
+            const scene = buildEntityRelationshipScene(spec);
+            return { target: this.target, content: renderEntityRelationshipHtmlDocument(scene), mimeType: 'text/html', sourceIntent: spec.intent,
+                layoutSafetyVersion: LAYOUT_SAFETY_VERSION,
+                previewSvg: { content: renderEntityRelationshipSvg(scene), mimeType: 'image/svg+xml', layoutSafetyVersion: LAYOUT_SAFETY_VERSION } };
+        }
 
         return {
             target: this.target,

@@ -133,3 +133,15 @@ Günlükler eklenti oturumu boyunca görev aşamaları ve önizlemenin yeniden a
 ## 1.9.12 — Daha sade tanılama önizlemesi
 
 Hata yoksa tanılama panelinin tamamı varsayılan olarak daraltılır; yalnızca başlık ve önem düzeyi sayıları görünür. Hatalar paneli otomatik olarak açar. Tüm iletileri ve önerileri okumak için paneli ve etiket gruplarını genişletin. Hiçbir tanılama kaydı silinmez. Yalnızca hata grupları otomatik açılır; aynı etiketi paylaşsalar bile uyarı ve bilgi grupları daraltılmış kalır.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Okunabilir diyagramlar ve güvenilir önizlemeler
+
+ER diyagramları alan türlerini, PK/FK/UK anahtarlarını, açıklamaları ve ilişki çokluklarını korur. Ortak tablo ölçümleri HTML/SVG ve Draw.io çıktısını iyileştirir; Mermaid sınıf ve katılımcı kimliklerini ayırır.
+
+Kaydedilmiş .drawnix açılırken önce ana pano, ardından Mermaid ekleri yüklenir. Mermaid başlangıçta diyagramın tamamını sığdırır. Dışa aktarma kayıtlarında metin seçilip kopyalanabilir. Windows Slidev yerel Mermaid bileşenlerini ve eksik diyagramları denetler.
+
+Kurtarılabilir ağaç ve kulvar başvuruları tanılarla görsel çıktı vermeyi sürdürür. Kısa bağlantılar ve sıkı yerleşimler okumayı kolaylaştırır; incelenen sıralama örneği alt katılımcılarla birlikte değişmez. Geçersiz veya güvensiz içerik onarım gerektirebilir.
+
+1.9.15 sürümünün eşleşen main.js, manifest.json ve styles.css dosyalarını yükleyip yeniden başlatın. Notlar ve ayarlar korunur. Drawnix dallar arası okları dışarıda yeniden düzenlemeden sonra statik kalır.

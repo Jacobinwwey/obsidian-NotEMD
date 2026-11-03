@@ -45,4 +45,33 @@ describe('runtime SVG safety contract', () => {
         ]));
         expect(() => assertSvgPresentationSafety(root, 'Runtime')).toThrow(/presentation safety/i);
     });
+
+    test.each([
+        { horizontalScale: 0.05, verticalScale: 0.05 },
+        { horizontalScale: 0.16, verticalScale: 0.16 },
+        { horizontalScale: 0.12, verticalScale: 0.3 },
+        { horizontalScale: 1, verticalScale: 1 },
+        { horizontalScale: 4, verticalScale: 4 }
+    ])('keeps label clearance in SVG units at scale $horizontalScale × $verticalScale', ({ horizontalScale, verticalScale }) => {
+        const text = (content: string, top: number) => ({
+            textContent: content,
+            getBoundingClientRect: () => ({ x: 10 * horizontalScale, y: top * verticalScale,
+                width: 80 * horizontalScale, height: 24 * verticalScale }),
+            closest: () => null,
+            contains: () => false,
+            compareDocumentPosition: () => 0
+        });
+        const first = text('Title', 20);
+        const second = text('Summary', 47);
+        const svg = {
+            getScreenCTM: () => ({ a: horizontalScale, b: 0, c: 0, d: verticalScale }),
+            querySelectorAll: (query: string) => query === 'text' ? [first, second] : []
+        };
+        const root = { querySelector: () => svg } as unknown as ParentNode;
+        expect(collectSvgPresentationDiagnostics(root)).toEqual([]);
+        svg.querySelectorAll = (query: string) => query === 'text' ? [first, text('Overlapping', 43)] : [];
+        expect(collectSvgPresentationDiagnostics(root)).toEqual([
+            expect.objectContaining({ kind: 'svg-text-overlap' })
+        ]);
+    });
 });

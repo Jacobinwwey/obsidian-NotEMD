@@ -26,6 +26,16 @@ PDF 每页对应独立的预览区，分别提供缩放、适应窗口和锁定�
 
 验证进度与所要求的 fork 来源见[预览及导出可靠性记录](./docs/maintainer/2026-10-06-preview-slidev-reliability.zh-CN.md)。
 
+1.9.15 图形兼容性改进（实施证据记录于 2026-10-18）：所选类型的 SVG 预览现在随图形缩放碰撞间距，不再误拒绝有效缩略图。证据、限制及后续图表布局建议见[兼容性验证与 Archify 对照](./docs/maintainer/2026-10-18-diagram-preview-and-archify.zh-CN.md)。
+
+1.9.15 预览／导出修复：准备的 Slidev 工作区显式导入原生 Mermaid 组件，验收检测缺失图形；已保存 Drawnix 思维导图保留主图与附件，规范 SVG 面板默认完整适配，预览导出记录支持拖选。详见[根因与验证记录](./docs/maintainer/2026-10-18-mermaid-and-native-preview.zh-CN.md)。
+
+来源保真恢复使树图的环／森林、泳道缺失步骤继续出图并可导出，在图内明确标注，而非以诊断面板代替图表或编造业务内容。运行 `npm run diagram:acceptance` 可生成七组离线 PNG／SVG 优化前后图片与双语 HTML 验收页。详见[验收与部署计划](./docs/plans/2026-10-18-diagram-acceptance-deployment.zh-CN.md)。
+
+阅读优先修正：时序图按用户选择保留已验收原样；环内节点平级并用短的往返连线，泳道未知端点仅保留一个中性本地化提示且按内容收紧行高。来源事实不变。详见 [case 4／6／7 复核与证据](./docs/maintainer/2026-10-18-diagram-reading-density.zh-CN.md)；可导出本身不代表更好读。
+
+1.9.15 图表质量优化：ER 生成保留类型化字段、原始 SQL 类型／注释、PK／FK／UK、引用和两端独立基数；HTML/SVG、Draw.io 与 Mermaid 共用测量表格预览，不猜测未知语义。同时修复类图／时序图标识碰撞、树图不连通环与宽树重叠、泳道空单元格交接。详见[实施、证据与全部 33 类对比](./docs/maintainer/2026-10-18-er-and-diagram-quality.zh-CN.md)，其中明确列出原生编辑器及布局限制。
+
 | 读者 | 入口 | 可完成的任务 |
 |---|---|---|
 | 新人 | [快速开始](https://jacobinwwey.github.io/obsidian-NotEMD/zh-CN/docs/getting-started/quick-start) | 配置 provider 并验证一篇笔记 |
@@ -37,7 +47,21 @@ PDF 每页对应独立的预览区，分别提供缩放、适应窗口和锁定�
 
 Notemd 是采用 **MIT 许可证的 Obsidian 插件**，提供文件式知识工作流，支持云端 provider、网关和本地模型服务器。输出保存在库中；云端任务会向选定端点发送内容，Web 研究也会联网。
 
-**版本:** 1.9.14
+**版本:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — 易读图形与可靠预览
+
+ER 图保留字段类型、PK/FK/UK 键、注释和关系基数。统一表格测量改善 HTML/SVG 与 Draw.io 导出；Mermaid 保持类和参与者标识互不冲突。
+
+打开已保存的 .drawnix 时先恢复主画布，再显示 Mermaid 附图。Mermaid 预览默认适配完整图形。导出记录支持拖选和复制文本。Windows Slidev 检查原生 Mermaid 组件并检测渲染图形缺失。
+
+可恢复的树结构和泳道引用问题保留图形输出并附诊断。短连线和紧凑布局优先保障阅读；已评审的时序示例保持原样，包括底部参与者。无效或不安全内容仍可能需要修复。
+
+安装 1.9.15 配套的 main.js、manifest.json 和 styles.css 后重载。保留现有笔记与设置。Drawnix 跨分支箭头在外部重排后仍为静态。
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — 清晰 PDF 预览与多格式导出
@@ -969,7 +993,7 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.9.14 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.9.15 - 用AI提升你的Obsidian知识图谱。*
 
 <!-- repo-chronicle:start -->
 ## 发展编年史

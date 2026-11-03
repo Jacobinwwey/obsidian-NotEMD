@@ -26,7 +26,21 @@ Setiap pratonton rajah mempunyai zum, anjakan, muat dan saiz sebenar yang berasi
 | Pembangun | [Panduan pembangun](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/developers/overview) | Bina, uji dan perluaskan kontrak sedia ada |
 | Ejen | [Panduan ejen](https://jacobinwwey.github.io/obsidian-NotEMD/ms/docs/agents/overview) | Temui empat perintah eksport yang disokong |
 
-**Versi:** 1.9.14
+**Versi:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Rajah mudah dibaca dan pratonton yang boleh dipercayai
+
+Rajah ER mengekalkan jenis medan, kekunci PK/FK/UK, komen dan kardinaliti hubungan. Ukuran jadual bersama menambah baik HTML/SVG dan Draw.io; Mermaid membezakan pengecam kelas dan peserta.
+
+Membuka .drawnix tersimpan memulihkan papan utama sebelum lampiran Mermaid. Pratonton Mermaid mula-mula memuatkan seluruh rajah. Teks rekod eksport boleh dipilih dan disalin. Slidev Windows menyemak komponen Mermaid natif dan mengesan rajah yang hilang.
+
+Rujukan pokok dan lorong yang boleh dipulihkan mengekalkan output visual dengan diagnostik. Sambungan pendek dan susun atur padat mengutamakan pembacaan; contoh jujukan yang disemak kekal sama termasuk peserta di bawah. Kandungan tidak sah atau tidak selamat mungkin memerlukan pembaikan.
+
+Pasang main.js, manifest.json dan styles.css yang sepadan daripada 1.9.15, kemudian muat semula. Nota dan tetapan dikekalkan. Anak panah Drawnix antara cabang kekal statik selepas susunan semula luaran.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Pratonton PDF jelas dan eksport pelbagai format
@@ -774,7 +788,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.14 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.15 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 

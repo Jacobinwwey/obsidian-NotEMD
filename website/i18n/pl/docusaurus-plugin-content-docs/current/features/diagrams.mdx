@@ -133,3 +133,15 @@ Dzienniki są zachowywane między etapami zadania i ponownymi otwarciami podglą
 ## 1.9.12 — Czytelniejszy podgląd diagnostyki
 
 Jeśli nie ma błędów, cały panel diagnostyczny jest domyślnie zwinięty; widoczne pozostają tylko tytuł i liczniki według ważności. Błędy automatycznie otwierają panel. Rozwiń panel i grupy etykiet, aby przeczytać wszystkie komunikaty i wskazówki. Żaden wpis diagnostyczny nie jest usuwany. Automatycznie otwierają się tylko grupy błędów; ostrzeżenia i informacje pozostają zwinięte, nawet przy wspólnej etykiecie.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Czytelne diagramy i niezawodny podgląd
+
+Diagramy ER zachowują typy pól, klucze PK/FK/UK, komentarze i liczności relacji. Wspólne pomiary tabel poprawiają HTML/SVG i Draw.io; Mermaid rozróżnia identyfikatory klas i uczestników.
+
+Otwarcie zapisanego .drawnix przywraca główną tablicę przed załącznikami Mermaid. Podgląd Mermaid początkowo mieści cały diagram. Tekst zapisów eksportu można zaznaczać i kopiować. Slidev w Windows sprawdza natywne komponenty Mermaid i wykrywa brakujące diagramy.
+
+Możliwe do odtworzenia odwołania drzew i torów zachowują grafikę z diagnostyką. Krótkie połączenia i zwarte układy ułatwiają czytanie; sprawdzony przykład sekwencji pozostaje bez zmian, także dolni uczestnicy. Nieprawidłowa lub niebezpieczna treść może wymagać naprawy.
+
+Zainstaluj zgodne main.js, manifest.json i styles.css z 1.9.15 i przeładuj wtyczkę. Notatki i ustawienia pozostają. Strzałki Drawnix między gałęziami są statyczne po zewnętrznej zmianie układu.

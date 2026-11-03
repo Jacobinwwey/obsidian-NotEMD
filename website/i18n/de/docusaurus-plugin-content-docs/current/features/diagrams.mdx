@@ -143,3 +143,15 @@ Protokolle bleiben während der Plugin-Sitzung über Aufgabenschritte und erneut
 ## 1.9.12 — Übersichtlichere Diagnosevorschau
 
 Wenn keine Fehler vorliegen, ist der gesamte Diagnosebereich standardmäßig eingeklappt; nur Titel und Anzahl je Schweregrad bleiben sichtbar. Bei Fehlern öffnet sich der Bereich automatisch. Klappen Sie den Bereich und seine Gruppen auf, um alle Meldungen und Hinweise zu lesen. Es werden keine Diagnoseeinträge entfernt. Nur Fehlergruppen öffnen sich automatisch; Warnungen und Informationen bleiben eingeklappt, auch bei gleicher Kennzeichnung.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Lesbare Diagramme und zuverlässige Vorschauen
+
+ER-Diagramme erhalten Feldtypen, PK/FK/UK-Schlüssel, Kommentare und Beziehungskardinalitäten. Gemeinsame Tabellenmaße verbessern HTML/SVG- und Draw.io-Exporte; Mermaid verwendet eindeutige Klassen- und Teilnehmerkennungen.
+
+Gespeicherte .drawnix-Dateien zeigen zuerst die Hauptfläche, danach Mermaid-Anhänge. Mermaid-Vorschauen passen anfangs das ganze Diagramm ein. Exportbelege lassen sich markieren und kopieren. Windows Slidev prüft native Mermaid-Komponenten und erkennt fehlende Diagramme.
+
+Behebbare Baum- und Bahnverweise liefern weiterhin Grafiken mit Diagnosen. Kurze Verbindungen und kompakte Flächen erleichtern das Lesen; das geprüfte Sequenzbeispiel bleibt samt unteren Teilnehmern unverändert. Ungültige oder unsichere Inhalte können Reparaturen erfordern.
+
+Installieren Sie zusammengehörige main.js, manifest.json und styles.css aus 1.9.15 und laden Sie neu. Notizen und Einstellungen bleiben erhalten. Drawnix-Pfeile zwischen Zweigen bleiben nach externem Umordnen statisch.

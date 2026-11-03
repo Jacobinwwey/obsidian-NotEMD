@@ -26,7 +26,21 @@
 | 開発者 | [開発ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/developers/overview) | 既存の契約に沿ってビルド・テスト・拡張 |
 | エージェント | [連携ガイド](https://jacobinwwey.github.io/obsidian-NotEMD/ja/docs/agents/overview) | 対応する四つのエクスポートコマンドを確認 |
 
-**バージョン:** 1.9.14
+**バージョン:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — 読みやすい図と信頼できるプレビュー
+
+ER 図はフィールド型、PK/FK/UK キー、コメント、関係の多重度を保持します。共通の表計測で HTML/SVG と Draw.io 出力を改善し、Mermaid のクラスと参加者には重複しない識別子を使用します。
+
+保存済み .drawnix を開くと、主キャンバスを復元してから Mermaid 添付図を表示します。Mermaid は最初に図全体を表示します。出力記録の文字を選択してコピーできます。Windows の Slidev はネイティブ Mermaid コンポーネントと描画漏れを確認します。
+
+回復可能なツリーやレーンの参照問題では診断とともに図を出力します。短い接続とコンパクトな配置で読みやすさを優先し、確認済みシーケンス例は下部の参加者も含め変更しません。無効または危険な内容には修復が必要な場合があります。
+
+1.9.15 の main.js、manifest.json、styles.css をそろえてインストールし再読み込みしてください。既存のノートと設定は保持されます。Drawnix の分岐間矢印は外部で並べ替えても静的なままです。
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — 鮮明な PDF プレビューと複数形式のエクスポート
@@ -780,7 +794,7 @@ MIT ライセンス - 詳細は [LICENSE](LICENSE) ファイルを参照して�
 ---
 
 
-*Notemd v1.9.14 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
+*Notemd v1.9.15 - AI であなたの Obsidian ナレッジグラフを強化しましょう。*
 
 
 

@@ -26,6 +26,16 @@ Preview **Export** opens a single format-and-folder chooser: check SVG, PNG and/
 
 See the [preview and export reliability record](./docs/maintainer/2026-10-06-preview-slidev-reliability.md) for verification status and the required fork provenance.
 
+Diagram compatibility work included in 1.9.15 (implementation evidence dated 2026-10-18): selected-type SVG previews now scale collision clearances with the diagram instead of rejecting valid thumbnails. See the [compatibility verification and Archify comparison](./docs/maintainer/2026-10-18-diagram-preview-and-archify.md) for evidence, limitations and future diagram-layout recommendations.
+
+1.9.15 preview/export repair: prepared Slidev workspaces explicitly import the native Mermaid component and acceptance checks detect missing diagrams. Saved Drawnix mind maps retain their primary preview alongside attachments; canonical SVG panels open fitted, and preview receipts support drag selection. See the [root causes and verification](./docs/maintainer/2026-10-18-mermaid-and-native-preview.md).
+
+Source-backed recovery keeps tree cycles/forests and missing lane steps exportable with visible caveats, not diagnostic-only panels or invented business content. Run `npm run diagram:acceptance` to generate seven offline before/after PNG/SVG pairs and a bilingual HTML review page. See the [acceptance and deployment plan](./docs/plans/2026-10-18-diagram-acceptance-deployment.en.md).
+
+Reading-first follow-up: keep the reviewed sequence presentation unchanged; cyclic peers use direct reciprocal relations; missing lane endpoints use one neutral localized label and content-sized rows. Source facts remain intact. See the [case 4/6/7 review and evidence](./docs/maintainer/2026-10-18-diagram-reading-density.en.md); exportability alone is not a readability claim.
+
+1.9.15 diagram quality work: ER generation now preserves typed fields, SQL types/comments, PK/FK/UK roles, references and independent endpoint cardinalities. HTML/SVG, Draw.io and Mermaid share a measured table preview; unknown semantics are not guessed. Class/sequence identity collisions, disconnected tree cycles, broad-tree overlap and empty-cell lane handoffs are repaired. See the [implementation, evidence and all-33-type comparison](./docs/maintainer/2026-10-18-er-and-diagram-quality.md), including remaining native-editor and layout limitations.
+
 | Reader | Entry point | Outcome |
 |---|---|---|
 | Newcomer | [Quick start](https://jacobinwwey.github.io/obsidian-NotEMD/docs/getting-started/quick-start) | Configure a provider and verify one note |
@@ -37,7 +47,21 @@ See the [preview and export reliability record](./docs/maintainer/2026-10-06-pre
 
 Notemd is an **MIT-licensed Obsidian plugin** for file-based knowledge work. It supports cloud providers, gateways and local model servers. Stored outputs stay in the vault; cloud tasks send content to the selected endpoint, and web research uses the network.
 
-**Version:** 1.9.14
+**Version:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Readable diagrams and reliable previews
+
+ER diagrams preserve field types, PK/FK/UK keys, comments and relationship cardinalities. Shared table measurements improve HTML/SVG and Draw.io exports; Mermaid keeps distinct class and participant identities.
+
+Opening a saved .drawnix restores the main board before Mermaid attachments. Mermaid previews start fitted to the whole diagram. Export receipts support text selection and copying. Windows Slidev checks native Mermaid components and detects missing rendered diagrams.
+
+Recoverable tree and lane references retain visual output with diagnostics. Short routes and compact layouts prioritize reading; the reviewed sequence example stays unchanged, including bottom actors. Invalid or unsafe content can still need repair.
+
+Install matching main.js, manifest.json and styles.css from 1.9.15, then reload. Existing notes and settings remain. Drawnix cross-branch arrows are static after external rearrangement.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Sharp PDF previews and multi-format export
@@ -914,7 +938,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.14 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.15 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->

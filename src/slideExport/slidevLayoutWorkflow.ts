@@ -7,6 +7,7 @@ import { isSlidevServerHtmlEntryPath } from './htmlExportPaths';
 import {
 	analyzeRenderedSlideMeasurement,
 	countSlideDeckSlides,
+	countSlideDeckMermaidBlocks,
 	NOTEMD_SLOT_ZONE_ATTR,
 	patchDeckWithLayoutAudit,
 	summarizeLayoutAudits,
@@ -134,6 +135,7 @@ export async function convergeSlidevDeckLayout(
 			playwright,
 			resolvedAuditConfig,
 			navigationTimeoutMs,
+			currentDeckMarkdown ? countSlideDeckMermaidBlocks(currentDeckMarkdown) : [],
 		);
 		checks = auditResult.checks;
 		layoutAudits = auditResult.layoutAudits;
@@ -183,6 +185,7 @@ async function runPlaywrightLayoutChecks(
 	playwright: PlaywrightRuntime,
 	auditConfig: SlidevLayoutAuditConfig,
 	navigationTimeoutMs: number,
+	expectedMermaidCounts: readonly number[],
 ): Promise<{ checks: SlidevLayoutCheck[]; layoutAudits: SlidevLayoutAudit[] }> {
 	const browser = await playwright.chromium!.launch({ headless: true });
 	const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
@@ -218,9 +221,28 @@ async function runPlaywrightLayoutChecks(
 			const targetUrl = baseUrl ? `${baseUrl}#/${slide}` : `file://${htmlPath}#/${slide}`;
 			await openSlideForLayoutAudit(page, targetUrl, navigationTimeoutMs);
 			await page.waitForTimeout(1_000);
+			const expectedMermaidCount = expectedMermaidCounts[slide - 1] ?? 0;
+			if (expectedMermaidCount > 0 && typeof page.waitForFunction === 'function') {
+				await page.waitForFunction((expected: number) => {
+					const roots = Array.from(document.querySelectorAll('.slidev-page, .slidev-layout'));
+					return roots.some(root => {
+						const rect = root.getBoundingClientRect();
+						if (rect.width <= 0 || rect.height <= 0 || rect.right <= 0 || rect.left >= innerWidth) return false;
+						return Array.from(root.querySelectorAll('.mermaid')).filter(host => {
+							const svg = (host.shadowRoot ?? host).querySelector('svg');
+							const bounds = svg?.getBoundingClientRect();
+							return svg?.children.length && bounds && bounds.width > 0 && bounds.height > 0;
+						}).length >= expected;
+					});
+				}, expectedMermaidCount, { timeout: Math.min(navigationTimeoutMs, 30_000) }).catch(() => undefined);
+			}
 			await fitMermaidDiagramsBeforeMeasure(page);
 			const text = await page.locator('body').innerText({ timeout: 5_000 }).catch(() => '');
 			const measurement = await collectRenderedSlideMeasurement(page, slide);
+			if ((measurement.renderedMermaidCount ?? 0) < expectedMermaidCount) {
+				measurement.errors.push(`Mermaid diagrams not rendered: expected ${expectedMermaidCount}, found ${measurement.renderedMermaidCount ?? 0}.`);
+			}
+			errors.push(...measurement.errors);
 			const layoutAudit = analyzeRenderedSlideMeasurement(measurement, auditConfig);
 			let screenshotPath: string | null = null;
 			if (writeScreenshots) {
@@ -489,6 +511,14 @@ export async function collectRenderedSlideMeasurement(page: any, slide: number):
 			};
 		}
 
+		const mermaidHosts = Array.from(slideRoot.querySelectorAll('mermaid, .mermaid'));
+		const renderedMermaidCount = mermaidHosts.filter(host => {
+			const svg = (host.shadowRoot ?? host).querySelector('svg');
+			const rect = svg?.getBoundingClientRect();
+			return svg?.children.length && rect && rect.width > 0 && rect.height > 0;
+		}).length;
+		const renderErrors = renderedMermaidCount < mermaidHosts.length
+			? [`Mermaid diagrams not rendered: ${mermaidHosts.length - renderedMermaidCount} unresolved or empty component(s).`] : [];
 		const slideRootRect = toRect(slideRoot.getBoundingClientRect());
 		const safeInsetX = slideRootRect.width * 0.04;
 		const safeInsetY = slideRootRect.height * 0.06;
@@ -685,7 +715,8 @@ export async function collectRenderedSlideMeasurement(page: any, slide: number):
 			contentAreaRatio,
 			elements,
 			slotZones,
-			errors: [],
+			renderedMermaidCount,
+			errors: renderErrors,
 		};
 	}, NOTEMD_SLOT_ZONE_ATTR);
 

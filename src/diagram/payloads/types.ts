@@ -1,4 +1,5 @@
 import type { SupportedVegaLiteChartType } from '../adapters/vega/schema';
+import type { EntityRelationshipPayload } from '../adapters/er/entityRelationship';
 import type {
     DiagramDataSeries,
     DiagramEdge,
@@ -12,6 +13,7 @@ import type {
 
 export const DIAGRAM_PAYLOAD_KINDS = [
     'legacy',
+    'entity-relationship',
     'drawnix-knowledge-map',
     'canvas-map',
     'quantitative',
@@ -284,6 +286,7 @@ export interface QuantitativeDiagramPayload {
 export interface UnsupportedDiagramPayload {
     kind: Exclude<DiagramPayloadKind,
         | 'legacy'
+        | 'entity-relationship'
         | 'quantitative'
         | 'topology'
         | 'lane-grid'
@@ -301,6 +304,7 @@ export interface UnsupportedDiagramPayload {
 
 export type DiagramPayload =
     | LegacyDiagramPayload
+    | EntityRelationshipPayload
     | QuantitativeDiagramPayload
     | DiagramTopologyPayload
     | DiagramLaneGridPayload

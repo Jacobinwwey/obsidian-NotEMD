@@ -8,19 +8,26 @@ import {
     sanitizeMermaidText
 } from './base';
 
-function renderClassName(label: string, id: string): string {
-    return sanitizeMermaidIdentifier(label.trim() || id);
-}
-
 export function renderClassMermaid(spec: DiagramSpec): string {
     assertMermaidSpecIntent(spec, ['classDiagram'], 'ClassMermaidAdapter');
 
     const nodes = flattenNodes(spec.nodes);
-    const classNames = new Map(nodes.map((node) => [node.id, renderClassName(node.label, node.id)]));
+    const classNames = new Map<string, string>();
+    const usedNames = new Set<string>();
+    for (const node of nodes) {
+        const label = node.label.trim();
+        let name = /^[A-Za-z_][A-Za-z0-9_]*$/.test(label) && !/^(class|end|direction|namespace|style)$/i.test(label)
+            ? label : 'class_' + sanitizeMermaidIdentifier(node.id);
+        while (usedNames.has(name)) name += '_';
+        usedNames.add(name);
+        classNames.set(node.id, name);
+    }
     const lines = ['classDiagram'];
 
     nodes.forEach((node) => {
-        lines.push(`${indent(1)}class ${renderClassName(node.label, node.id)}`);
+        const name = classNames.get(node.id)!;
+        const alias = name !== node.label ? '["' + node.label.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/[\r\n]/g, ' ') + '"]' : '';
+        lines.push(`${indent(1)}class ${name}${alias}`);
     });
 
     (spec.edges ?? []).forEach((edge) => {

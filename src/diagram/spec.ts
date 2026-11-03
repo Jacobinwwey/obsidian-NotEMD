@@ -546,6 +546,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     collectNodeIds(spec.nodes ?? [], nodeIds, errors);
 
     const usesSpecializedPayload = spec.intent === 'dataChart'
+        || (spec.intent === 'erDiagram' && spec.payload?.kind === 'entity-relationship')
         || spec.intent === 'radar'
         || spec.intent === 'orgChart'
         || spec.intent === 'circuit'

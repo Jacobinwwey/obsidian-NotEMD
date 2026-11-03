@@ -26,7 +26,21 @@ Hver diagramvisning har uavhengig zoom, panorering, tilpasning og faktisk størr
 | Utvikler | [Utviklerveiledning](https://jacobinwwey.github.io/obsidian-NotEMD/no/docs/developers/overview) | Bygg, test og utvid eksisterende kontrakter |
 | Agent | [Agentveiledning](https://jacobinwwey.github.io/obsidian-NotEMD/no/docs/agents/overview) | Finn fire støttede eksportkommandoer |
 
-**Versjon:** 1.9.14
+**Versjon:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Lesbare diagrammer og pålitelige forhåndsvisninger
+
+ER-diagrammer bevarer felttyper, PK/FK/UK-nøkler, kommentarer og relasjoners kardinalitet. Felles tabellmål forbedrer HTML/SVG og Draw.io; Mermaid skiller klasse- og deltakeridentifikatorer.
+
+En lagret .drawnix gjenoppretter hovedtavlen før Mermaid-vedleggene. Mermaid viser først hele diagrammet. Tekst i eksportkvitteringer kan merkes og kopieres. Windows Slidev kontrollerer innebygde Mermaid-komponenter og oppdager manglende diagrammer.
+
+Gjenopprettbare tre- og banereferanser beholder grafisk utdata med diagnostikk. Korte forbindelser og kompakte oppsett gjør lesingen enklere; det gjennomgåtte sekvenseksemplet endres ikke, inkludert nederste deltakere. Ugyldig eller usikkert innhold kan kreve reparasjon.
+
+Installer samsvarende main.js, manifest.json og styles.css fra 1.9.15 og last inn på nytt. Notater og innstillinger beholdes. Drawnix-piler mellom grener forblir statiske etter ekstern omplassering.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Skarpe PDF-forhåndsvisninger og eksport i flere formater
@@ -774,7 +788,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.14 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
+*Notemd v1.9.15 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
 
 
 <!-- repo-chronicle:start -->

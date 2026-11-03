@@ -365,6 +365,8 @@
 }
 
 .notemd-diagram-preview-modal {
+    user-select: text;
+    -webkit-user-select: text;
     padding: 1em;
     max-width: 100%;
     width: 100%;
@@ -1148,6 +1150,8 @@
 }
 
 .notemd-diagram-zoom-viewport {
+    user-select: none;
+    -webkit-user-select: none;
     height: clamp(260px, 52vh, 560px);
     overflow: auto;
     position: relative;

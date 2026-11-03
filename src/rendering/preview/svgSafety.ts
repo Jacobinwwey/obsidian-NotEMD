@@ -57,11 +57,11 @@ export function assertMountedSvgPresentationSafety(root: ParentNode, source: str
     assertSvgPresentationSafety(root, source);
 }
 
-function presentationRectsOverlap(first: PresentationRect, second: PresentationRect, padding = 0): boolean {
-    return first.x - padding < second.x + second.width
-        && first.x + first.width + padding > second.x
-        && first.y - padding < second.y + second.height
-        && first.y + first.height + padding > second.y;
+function presentationRectsOverlap(first: PresentationRect, second: PresentationRect, horizontalPadding: number, verticalPadding: number): boolean {
+    return first.x - horizontalPadding < second.x + second.width
+        && first.x + first.width + horizontalPadding > second.x
+        && first.y - verticalPadding < second.y + second.height
+        && first.y + first.height + verticalPadding > second.y;
 }
 
 /**
@@ -72,13 +72,18 @@ function presentationRectsOverlap(first: PresentationRect, second: PresentationR
 export function collectSvgPresentationDiagnostics(root: ParentNode): SvgPresentationDiagnostic[] {
     const svg = root.querySelector?.('svg');
     if (!svg) return [];
+    // DOM rectangles use screen pixels; clearance belongs to the source SVG.
+    // Transform that margin too, so fitting a thumbnail cannot invent overlap.
+    const screenTransform = (svg as SVGSVGElement).getScreenCTM?.();
+    const horizontalScale = screenTransform ? Math.abs(screenTransform.a) + Math.abs(screenTransform.c) : 1;
+    const verticalScale = screenTransform ? Math.abs(screenTransform.b) + Math.abs(screenTransform.d) : 1;
     const textNodes = Array.from(svg.querySelectorAll?.('text') ?? [])
         .map(element => ({ element, rect: presentationRect(element), text: (element.textContent ?? '').trim() }))
         .filter(item => item.rect && item.text && !item.element.closest('title,desc,defs')) as Array<{ element: Element; rect: PresentationRect; text: string }>;
     const diagnostics: SvgPresentationDiagnostic[] = [];
     for (let index = 0; index < textNodes.length; index += 1) {
         for (const other of textNodes.slice(index + 1)) {
-            if (presentationRectsOverlap(textNodes[index].rect, other.rect, 0.5)) {
+            if (presentationRectsOverlap(textNodes[index].rect, other.rect, 0.5 * horizontalScale, 0.5 * verticalScale)) {
                 diagnostics.push({
                     kind: 'svg-text-overlap',
                     message: `Mounted SVG labels overlap: "${textNodes[index].text}" / "${other.text}".`
@@ -94,7 +99,7 @@ export function collectSvgPresentationDiagnostics(root: ParentNode): SvgPresenta
             if (text.element.contains(shape.element) || shape.element.contains(text.element)) continue;
             const relation = text.element.compareDocumentPosition?.(shape.element) ?? 0;
             const shapePaintedAfterText = (relation & 4) !== 0;
-            if (shapePaintedAfterText && presentationRectsOverlap(text.rect, shape.rect, 1)) {
+            if (shapePaintedAfterText && presentationRectsOverlap(text.rect, shape.rect, horizontalScale, verticalScale)) {
                 diagnostics.push({
                     kind: 'svg-text-occluded',
                     message: `Mounted SVG shape may occlude label "${text.text}".`

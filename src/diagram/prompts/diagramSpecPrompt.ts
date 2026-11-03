@@ -18,6 +18,8 @@ function buildCanonicalPayloadShapeSection(
     payloadKind: ReturnType<typeof getDiagramPromptProfile>['payloadKind']
 ): string {
     switch (payloadKind) {
+        case 'entity-relationship':
+            return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "entity-relationship", "entities": [{ "id": "customer", "label": "Customer", "attributes": [{ "name": "id", "type": "uuid", "keys": ["PK"], "comment": "Source comment" }] }, { "id": "order", "label": "Order", "attributes": [{ "name": "customer_id", "type": "uuid", "keys": ["FK"], "references": { "entity": "customer", "attribute": "id" } }] }], "relationships": [{ "from": "customer", "to": "order", "fromCardinality": "one", "toCardinality": "zero-or-many", "identifying": false, "label": "places" }] } }. Use stable ids separately from translated labels. Every FK reference must resolve to a declared entity and field. A field may have multiple key roles from PK, FK, UK (including PK+FK). Keep all source fields, original type punctuation, comments, and relationship labels; never drop them for a density budget. Do not invent primary keys, foreign keys, types, cardinalities, or identifying flags. Endpoint cardinalities are one, zero-or-one, one-or-many, zero-or-many, or unspecified when the source is silent. Omit identifying when unknown. Mermaid cannot encode unspecified cardinality: use editable HTML/SVG or Draw.io, or request source clarification; never guess. Do not place attributes in generic nodes.`;
         case 'topology':
             return `Canonical payload shape (required): { "nodes": [], "edges": [], "payload": { "kind": "topology", "zones": [{ "id": "zone", "label": "..." }], "nodes": [{ "id": "node", "label": "...", "zoneId": "zone" }], "edges": [{ "from": "node", "to": "node" }] } }. Keep topology facts inside payload; do not flatten them into generic nodes/edges.`;
         case 'lane-grid':
@@ -67,7 +69,7 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
 - Payload family: ${promptProfile.payloadKind}.
 - Required semantic fields: ${promptProfile.requiredFields.join(', ')}.
 - Hard limits: ${promptProfile.hardLimits.join(' ')}
-- Deterministic density budget: ${JSON.stringify(promptProfile.densityBudget)}. Keep core labels inside this budget; optional subtitles/details may be omitted when needed, but never omit a declared node, edge, role, or relationship silently.
+- Deterministic density budget: ${JSON.stringify(promptProfile.densityBudget)}. ${promptProfile.densityBudget.allowOptionalDetailElision ? 'Keep core labels inside this budget; optional subtitles/details may be omitted when needed, but never omit a declared node, edge, role, or relationship silently.' : 'Preserve every source field and detail. Do not shorten identifiers, types or comments to fit; request explicit focused views if the schema exceeds capacity.'}
 - Semantic rules: ${promptProfile.semanticRules.join(' ')}
 - Target rules: ${promptProfile.targetRules.join(' ')}
 - Invalid outputs: ${promptProfile.invalidExamples.join(' ')}`

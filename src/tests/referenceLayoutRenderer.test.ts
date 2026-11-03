@@ -2,7 +2,7 @@ import { getExecutableDiagramExamples } from '../diagram/examples/diagramExample
 import { getExecutableDiagramType } from '../diagram/diagramTypeCatalog';
 import { validateDiagramSpec } from '../diagram/spec';
 import { renderReferenceLayoutSvg } from '../diagram/adapters/editableSvg/referenceLayoutRenderer';
-import { buildSemanticFigureModel } from '../diagram/adapters/editableSvg/semanticFigureModel';
+import { buildEntityRelationshipScene } from '../diagram/adapters/er/entityRelationshipLayout';
 import { EditableHtmlSvgRenderer } from '../rendering/renderers/editableHtmlSvgRenderer';
 
 const NEW_REFERENCE_TYPE_IDS = [
@@ -213,11 +213,17 @@ describe('diagram-design-inspired production layouts', () => {
         }
     });
 
-    test('routes entity edge labels away from child node labels', () => {
+    test('routes entity edge labels outside their measured table bounds', () => {
         const example = getExecutableDiagramExamples().find(candidate => candidate.typeId === 'entity-relationship')!;
-        const model = buildSemanticFigureModel(example.spec);
-        expect(model.edges[0]?.labelY).toBeLessThan(model.nodes[0].y + model.nodes[0].height);
-        expect(model.edges[0]?.labelY).toBeGreaterThan(model.nodes[0].y - 60);
+        const scene = buildEntityRelationshipScene(example.spec);
+        for (const connection of scene.connections) {
+            expect(connection.labelBox).toBeDefined();
+            for (const table of scene.tables) {
+                const label = connection.labelBox!;
+                expect(label.x < table.x + table.width && label.x + label.width > table.x
+                    && label.y < table.y + table.height && label.y + label.height > table.y).toBe(false);
+            }
+        }
     });
 
     test('keeps topology footer labels inside their background chip', async () => {

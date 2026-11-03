@@ -1,4 +1,5 @@
 import type { DiagramSpec } from '../../types';
+import { describeTreeConnectivity, findMissingLaneEndpointCells } from '../../payloads/sourceStructure';
 import type {
     DiagramAccessMatrixPayload,
     DiagramCyclePayload,
@@ -132,6 +133,7 @@ function commonStyles(): string {
         .ref-node-label { fill: ${COLORS.ink}; font: 600 13px "Segoe UI", Arial, sans-serif; }
         .ref-header-label { fill: ${COLORS.panel}; font: 600 11px "Segoe UI", Arial, sans-serif; }
         .ref-node-sub { fill: ${COLORS.muted}; font: 10px Consolas, monospace; }
+        .ref-source-label { fill: ${COLORS.muted}; font: 12px "Segoe UI", Arial, sans-serif; }
         .ref-hub-label { fill: ${COLORS.paper}; font: 600 13px "Segoe UI", Arial, sans-serif; }
         .ref-hub-sub { fill: ${COLORS.soft}; font: 10px Consolas, monospace; }
         .ref-edge { fill: none; stroke: ${COLORS.muted}; stroke-width: 1.5; }
@@ -474,9 +476,13 @@ function laneGridEdgePath(
 }
 
 function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string {
+    const missingCells = findMissingLaneEndpointCells(payload);
     const labelWidth = 150;
     const stepWidth = 142;
-    const laneHeight = 132;
+    const cellHeight = Math.max(56, ...payload.cells.map(cell =>
+        34 + wrapMeasuredText(cell.title, stepWidth - 36, 2).lines.length * 15
+        + (cell.sub ? 13 : 0) + (cell.tool ? 17 : 0) + (cell.chips ? 17 : 0)));
+    const laneHeight = Math.max(cellHeight + 28, payload.lanes.some(lane => lane.sub) ? 104 : 84);
     const width = labelWidth + payload.steps.length * stepWidth + 40;
     // The step chip is painted 54px above the lane origin. Reserve the full
     // summary-to-chip distance, not only the first drawable row, so a wrapped
@@ -485,14 +491,14 @@ function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string
         LANE_GRID_HEADER_MINIMUM,
         documentSummaryBottom(spec, width) + LANE_GRID_SUMMARY_CLEARANCE
     );
-    const height = headerHeight + payload.lanes.length * laneHeight + 46;
+    const height = headerHeight + payload.lanes.length * laneHeight + 32;
     const cellMap = new Map<string, LaneGridCellBox>();
     payload.lanes.forEach((lane, laneIndex) => payload.steps.forEach((step, stepIndex) => {
         cellMap.set(`${lane.id}:${step.id}`, {
             x: labelWidth + stepIndex * stepWidth + 12,
             y: headerHeight + laneIndex * laneHeight + 14,
             width: stepWidth - 24,
-            height: 96,
+            height: cellHeight,
             laneId: lane.id,
             stepId: step.id
         });
@@ -507,7 +513,7 @@ function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string
         const y = headerHeight + index * laneHeight;
         return `<g id="reference-lane-${escapeXml(lane.id)}"><rect class="ref-zone" x="0" y="${y}" width="${width}" height="${laneHeight}" rx="0" />${textBlock(lane.label.toUpperCase(), 18, y + 38, Math.floor((labelWidth - 30) / 7), 'ref-zone-label', 'start', 2, 14)}${textBlock(lane.sub, 18, y + 70, Math.floor((labelWidth - 30) / 7), 'ref-node-sub', 'start', 2, 14)}</g>`;
     }).join('');
-    const occupiedCellBoxes = payload.cells
+    const occupiedCellBoxes = [...payload.cells, ...missingCells]
         .map(cell => cellMap.get(`${cell.laneId}:${cell.stepId}`))
         .filter((box): box is LaneGridCellBox => Boolean(box));
     const occupiedEdgeLabels: LayoutRectLike[] = [...occupiedCellBoxes];
@@ -567,7 +573,13 @@ function laneGridSvg(spec: DiagramSpec, payload: DiagramLaneGridPayload): string
     // `anon table`) unreadable in the mounted preview and correctly triggered
     // the runtime presentation gate. Keep the z-order owned by this family:
     // canvas/header -> lane/cell surfaces -> connectors -> connector labels.
-    return svgRoot(spec, width, height, `${header}${lanes}${cells}${edgePaths}${edgeLabels}`);
+    const missingLabel = spec.outputLanguage?.toLowerCase().startsWith('zh') ? '未提供步骤' : 'Not provided';
+    const placeholders = missingCells.map(cell => {
+        const box = cellMap.get(`${cell.laneId}:${cell.stepId}`)!;
+        return `<g data-source-missing="true" id="reference-cell-${escapeXml(cell.laneId)}-${escapeXml(cell.stepId)}"><rect x="${box.x}" y="${box.y}" width="${box.width}" height="${box.height}" rx="5" fill="${COLORS.paper}" stroke="${COLORS.rule}" stroke-dasharray="5 4" />${textBlock(missingLabel, box.x + box.width / 2, box.y + box.height / 2 + 4, 16, 'ref-source-label')}</g>`;
+    }).join('');
+    const sourceCaveat = missingCells.length > 0 ? `<g data-source-notice="missing-lane-step">${placeholders}</g>` : '';
+    return svgRoot(spec, width, height, `${header}${lanes}${cells}${sourceCaveat}${edgePaths}${edgeLabels}`);
 }
 
 function accessMatrixSvg(spec: DiagramSpec, payload: DiagramAccessMatrixPayload): string {
@@ -779,38 +791,20 @@ function nestedSvg(spec: DiagramSpec, payload: DiagramNestedPayload): string {
 }
 
 function treeSvg(spec: DiagramSpec, payload: DiagramTreePayload): string {
-    const width = 1040;
-    const maximumDepth = payload.nodes.reduce((maximum, node) => {
-        let depth = 0;
-        let parentId = node.parentId;
-        const seen = new Set<string>();
-        while (parentId && !seen.has(parentId)) {
-            seen.add(parentId);
-            depth += 1;
-            parentId = payload.nodes.find(candidate => candidate.id === parentId)?.parentId;
-        }
-        return Math.max(maximum, depth);
-    }, 0);
-    const height = Math.max(680, documentBodyTop(spec, width, 100) + maximumDepth * 130 + 150);
-    const top = documentBodyTop(spec, width, 100);
+    const { levels, cycleNodeIds, notice } = describeTreeConnectivity(payload);
+    const maximumDepth = Math.max(0, ...levels.values());
     const nodeWidth = 170;
     const nodeHeight = 76;
-    const levels = new Map<string, number>();
-    const children = new Map<string, string[]>();
-    for (const node of payload.nodes) {
-        if (node.parentId) children.set(node.parentId, [...(children.get(node.parentId) ?? []), node.id]);
-    }
-    const root = payload.nodes.find(node => !node.parentId);
-    const assignDepth = (id: string, depth: number): void => {
-        levels.set(id, depth);
-        for (const child of children.get(id) ?? []) assignDepth(child, depth + 1);
-    };
-    if (root) assignDepth(root.id, 0);
     const byDepth = new Map<number, typeof payload.nodes>();
     for (const node of payload.nodes) {
         const depth = levels.get(node.id) ?? 0;
         byDepth.set(depth, [...(byDepth.get(depth) ?? []), node]);
     }
+    const siblingGap = 24;
+    const width = Math.max(640, Math.ceil(measureTextWidth(spec.title) * 1.4) + 80, ...Array.from(byDepth.values(), nodes => nodes.length * nodeWidth + (nodes.length + 1) * siblingGap + 80));
+    const top = documentBodyTop(spec, width, 100);
+    const lastRowBottom = top + maximumDepth * 130 + nodeHeight;
+    let diagramBottom = lastRowBottom;
     const positions = new Map<string, { x: number; y: number }>();
     for (const [depth, nodes] of byDepth) {
         const gap = (width - 80 - nodes.length * nodeWidth) / Math.max(1, nodes.length + 1);
@@ -825,14 +819,35 @@ function treeSvg(spec: DiagramSpec, payload: DiagramTreePayload): string {
         const tx = to.x + nodeWidth / 2;
         const ty = to.y;
         const midY = (sy + ty) / 2;
-        return `<path id="reference-tree-edge-${index}" class="ref-edge" d="M ${sx} ${sy} V ${midY} H ${tx} V ${ty}" marker-end="url(#notemd-reference-arrow)" />`;
+        const cyclic = cycleNodeIds.has(node.id) && cycleNodeIds.has(node.parentId!);
+        let route: string;
+        if (from === to) {
+            route = `M ${from.x + nodeWidth} ${from.y + nodeHeight / 2} H ${from.x + nodeWidth + 18} V ${from.y - 20} H ${tx} V ${ty}`;
+        } else if (from.y === to.y && Math.abs(from.x - to.x) < 2 * (nodeWidth + siblingGap)) {
+            const rightward = to.x > from.x;
+            const y = from.y + nodeHeight / 2 + (rightward ? -9 : 9);
+            route = `M ${from.x + (rightward ? nodeWidth : 0)} ${y} H ${to.x + (rightward ? 0 : nodeWidth)}`;
+        } else if (from.y === to.y) {
+            const corridorY = lastRowBottom + 20 + index * 8;
+            diagramBottom = Math.max(diagramBottom, corridorY);
+            route = `M ${sx} ${sy} V ${corridorY} H ${tx} V ${to.y + nodeHeight}`;
+        } else {
+            route = `M ${sx} ${sy} V ${midY} H ${tx} V ${ty}`;
+        }
+        return `<path id="reference-tree-edge-${index}" class="ref-edge"${cyclic ? ' data-source-cycle="true"' : ''} d="${route}" marker-end="url(#notemd-reference-arrow)" />`;
     }).join('');
     const nodes = payload.nodes.map(node => {
         const position = positions.get(node.id);
         if (!position) return '';
         return `<g id="reference-tree-node-${escapeXml(node.id)}"><rect class="${nodeClass({ focal: node.focal })}" x="${position.x}" y="${position.y}" width="${nodeWidth}" height="${nodeHeight}" rx="6" />${textBlock(node.label, position.x + nodeWidth / 2, position.y + 24, 18, 'ref-node-label', 'middle', 2, 14)}${textBlock(node.sub, position.x + nodeWidth / 2, position.y + 54, 18, 'ref-node-sub', 'middle', 1, 12)}</g>`;
     }).join('');
-    return svgRoot(spec, width, height, `${edges}${nodes}`);
+    const height = diagramBottom + (notice ? 48 : 32);
+    const chinese = spec.outputLanguage?.toLowerCase().startsWith('zh');
+    const noticeLabel = cycleNodeIds.size > 0
+        ? (chinese ? '保留循环关系' : 'Cyclic relationships retained')
+        : (chinese ? '多个独立根节点' : 'Independent source roots');
+    const sourceNotice = notice ? `<g data-source-notice="tree-connectivity">${textBlock(noticeLabel, 40, height - 20, Math.floor((width - 80) / 7), 'ref-source-label', 'start', 1)}</g>` : '';
+    return svgRoot(spec, width, height, `${sourceNotice}${edges}${nodes}`);
 }
 
 export function isReferenceLayoutDiagram(spec: DiagramSpec): boolean {

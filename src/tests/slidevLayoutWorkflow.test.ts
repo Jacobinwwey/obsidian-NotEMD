@@ -31,6 +31,7 @@ jest.mock('../slideExport/platformUtils', () => ({
 }));
 
 jest.mock('../slideExport/slidevLayoutAudit', () => ({
+	countSlideDeckMermaidBlocks: jest.requireActual('../slideExport/slidevLayoutAudit').countSlideDeckMermaidBlocks,
 	analyzeRenderedSlideMeasurement: jest.fn(),
 	countSlideDeckSlides: jest.fn(),
 	patchDeckWithLayoutAudit: jest.fn(),
@@ -88,6 +89,30 @@ function createHtmlOutcome(path: string, actualMode: 'standalone' | 'server-scri
 }
 
 describe('slidevLayoutWorkflow', () => {
+	test('fails acceptance when the source has a Mermaid fence but the DOM silently drops the whole component', async () => {
+		const directory = path.resolve(__dirname, '../../.cache');
+		fs.mkdirSync(directory, { recursive: true });
+		const root = fs.mkdtempSync(path.join(directory, 'mermaid-presence-'));
+		try {
+			fs.writeFileSync(path.join(root, 'deck.md'), '---\ntheme: default\n---\n# Diagram\n```mermaid\nflowchart TD\nA --> B\n```');
+			mockGetVaultBasePath.mockReturnValue(root);
+			mockExportSlidevHtmlWithOutcome.mockResolvedValue(createHtmlOutcome('deck/index-standalone.html'));
+			mockCountSlideDeckSlides.mockReturnValue(1);
+			mockAnalyzeRenderedSlideMeasurement.mockReturnValue({ slide: 1, findings: [], elementKinds: [] } as any);
+			const page = {
+				removeAllListeners: jest.fn(), on: jest.fn(), goto: jest.fn(), waitForTimeout: jest.fn(),
+				locator: jest.fn(() => ({ innerText: jest.fn().mockResolvedValue('1 / 1') })),
+				evaluate: jest.fn().mockImplementation(async () => ({ elements: [], errors: [], renderedMermaidCount: 0 }))
+			};
+			const browser = { newPage: jest.fn().mockResolvedValue(page), close: jest.fn() };
+			mockLoadChromium.mockReturnValue({ chromium: { launch: jest.fn().mockResolvedValue(browser) } });
+			const outcome = await convergeSlidevDeckLayout({} as any, { inputFilePath: 'deck.md', preparedDeckPath: 'deck.md', outputBasename: 'deck', sourceLabel: 'deck' }, { format: 'html', outputSubfolder: 'export', timeoutMs: 120000 } as any, undefined, { auditConfig: { maxAutoPatchPasses: 0 } });
+			expect(outcome.checks[0].failed).toBe(true);
+			expect(outcome.checks[0].errors).toContain('Mermaid diagrams not rendered: expected 1, found 0.');
+			expect(browser.close).toHaveBeenCalled();
+		} finally { fs.rmSync(root, { recursive: true, force: true }); }
+	});
+
 	beforeEach(() => {
 		jest.clearAllMocks();
 		delete process.env.PLAYWRIGHT_BROWSERS_PATH;

@@ -1,5 +1,8 @@
 import { renderClassMermaid } from '../../diagram/adapters/mermaid/classAdapter';
 import { DiagramSpec } from '../../diagram/types';
+import { buildEntityRelationshipScene } from '../../diagram/adapters/er/entityRelationshipLayout';
+import { renderEntityRelationshipSvg } from '../../diagram/adapters/er/entityRelationshipSvg';
+import { LAYOUT_SAFETY_VERSION } from '../../diagram/layout/layoutSafety';
 import { renderErMermaid } from '../../diagram/adapters/mermaid/erAdapter';
 import { renderFlowchartMermaid } from '../../diagram/adapters/mermaid/flowchartAdapter';
 import { renderMindmapMermaid } from '../../diagram/adapters/mermaid/mindmapAdapter';
@@ -43,7 +46,8 @@ export class MermaidRenderer implements DiagramRenderer {
         }
 
         if (spec.intent === 'erDiagram') {
-            return this.buildArtifact(spec, renderErMermaid(spec));
+            const artifact = await this.buildArtifact(spec, renderErMermaid(spec));
+            return { ...artifact, previewSvg: { content: renderEntityRelationshipSvg(buildEntityRelationshipScene(spec)), mimeType: 'image/svg+xml', layoutSafetyVersion: LAYOUT_SAFETY_VERSION } };
         }
 
         if (spec.intent === 'classDiagram') {

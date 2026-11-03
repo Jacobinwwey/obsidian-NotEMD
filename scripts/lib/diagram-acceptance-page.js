@@ -1,0 +1,50 @@
+function escapeHtml(text) {
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function assertAssetPath(assetPath) {
+    if (typeof assetPath !== 'string' || !/^[a-zA-Z0-9_./-]+$/.test(assetPath)
+        || assetPath.startsWith('/') || assetPath.split('/').some(segment => !segment || segment === '.' || segment === '..')) {
+        throw new Error('Acceptance asset path must be a portable relative file path.');
+    }
+}
+
+function renderDiagramAcceptancePage(manifest) {
+    if (!/^[a-f0-9]{40}$/.test(manifest.baselineCommit) || !Array.isArray(manifest.cases) || manifest.cases.length === 0) {
+        throw new Error('Acceptance manifest requires a baseline commit and comparison cases.');
+    }
+    const ids = new Set();
+    for (const entry of manifest.cases) {
+        if (!/^[a-z0-9-]+$/.test(entry.id) || ids.has(entry.id)) throw new Error('Acceptance case ids must be unique portable anchors.');
+        ids.add(entry.id);
+        if (!['identical-input', 'source-equivalent'].includes(entry.comparison)) throw new Error('Unsupported acceptance comparison contract.');
+        for (const specimen of [entry.before, entry.after]) {
+            for (const key of ['png', 'svg', 'source']) assertAssetPath(specimen[key]);
+            if (!/^[a-f0-9]{64}$/.test(specimen.sha256) || specimen.kind !== 'diagram'
+                || !Number.isFinite(specimen.width) || specimen.width <= 0 || !Number.isFinite(specimen.height) || specimen.height <= 0) {
+                throw new Error('Acceptance specimen requires image dimensions, kind and SHA256.');
+            }
+        }
+    }
+    const imagePanel = (specimen, label, title) => '<figure><figcaption><strong>' + label + '</strong><span>'
+        + '真实 PNG 导出 / Actual PNG export</span></figcaption>'
+        + '<button class="image-open" type="button" data-image="' + specimen.png + '" data-title="' + escapeHtml(title + ' · ' + label) + '" aria-label="放大 / Enlarge ' + escapeHtml(title + ' ' + label) + '">'
+        + '<img loading="lazy" src="' + specimen.png + '" width="' + specimen.width + '" height="' + specimen.height + '" alt="' + escapeHtml(title + ' · ' + label) + '"></button>'
+        + '<div class="asset-links"><a href="' + specimen.png + '" target="_blank" rel="noopener">PNG</a><a href="' + specimen.svg + '" target="_blank" rel="noopener">SVG</a><a href="' + specimen.source + '" target="_blank" rel="noopener">输入 JSON / Input</a><span>' + specimen.width + ' × ' + specimen.height + '</span></div></figure>';
+    const cases = manifest.cases.map((entry, index) => '<section id="' + entry.id + '" class="comparison"><header><p class="eyebrow">CASE ' + String(index + 1).padStart(2, '0') + '</p><h2>' + escapeHtml(entry.title) + '</h2><p>' + escapeHtml(entry.explanation) + '</p>'
+        + '<p class="contract">' + (entry.comparison === 'identical-input' ? '同一输入 · 仅替换实现 / Identical input, different implementation' : '等价来源事实 · 旧投影与新语义契约 / Equivalent source facts, different payload contracts') + '</p></header>'
+        + '<div class="pair">' + imagePanel(entry.before, '优化前 / Before', entry.title) + imagePanel(entry.after, '优化后 / After', entry.title) + '</div>'
+        + '<details><summary>测量与来源 / Measurements & provenance</summary><pre>' + escapeHtml(JSON.stringify({ comparison: entry.comparison, measurements: entry.measurements, before: entry.before, after: entry.after }, null, 2)) + '</pre></details></section>').join('');
+    return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        + '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; img-src &#39;self&#39; data:; style-src &#39;unsafe-inline&#39;; script-src &#39;unsafe-inline&#39;; base-uri &#39;none&#39;; form-action &#39;none&#39;">'
+        + '<title>Notemd · 图形修复验收 / Diagram acceptance</title><style>'
+        + '*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:#f5f4ef;color:#20362b;font:16px/1.65 "Segoe UI","Microsoft YaHei",sans-serif}a{color:#235b42;text-underline-offset:4px}a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #b45229;outline-offset:4px}button,summary{font:inherit;cursor:pointer}button{color:inherit}main{max-width:1540px;margin:auto;padding:48px 32px}h1,h2{line-height:1.2;text-wrap:balance}h1{font:clamp(32px,5vw,64px)/1.15 Georgia,"Microsoft YaHei",serif;max-width:1050px;margin:16px 0 24px}h2{font-size:28px;margin:6px 0 16px}.eyebrow{font-size:13px;letter-spacing:.14em;font-weight:700;color:#7a4c31}.intro{max-width:900px}.notice{border-left:3px solid #b45229;padding:12px 20px;background:#eee8dc}.version,pre{font-family:Consolas,monospace;overflow-wrap:anywhere}.version{font-size:13px}main>header a{display:inline-flex;min-height:44px;align-items:center}nav{display:flex;flex-wrap:wrap;gap:8px;margin:30px 0}nav a{display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;background:#e5e9df;text-decoration:none}.comparison{padding:40px 0;border-top:1px solid #bac6ba}.comparison header{max-width:1000px}.contract{font-size:14px;color:#485e4f}.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:24px}figure{margin:0;min-width:0;border:1px solid #bac6ba;background:#fcfcf7}figcaption{padding:16px 20px;border-bottom:1px solid #d1d9cb;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px}figcaption span{font-size:12px;color:#52634f}.image-open{border:0;padding:12px;width:100%;background:#fcfcf7;display:flex;align-items:center;justify-content:center;min-height:280px}.image-open img{display:block;width:100%;height:auto;max-height:460px;object-fit:contain}.asset-links{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:8px 20px;border-top:1px solid #d1d9cb;font-size:14px}.asset-links a{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}.asset-links span{margin-left:auto;color:#52634f}details{margin-top:14px}summary{min-height:44px;padding:10px 0}pre{font-size:13px;white-space:pre-wrap;background:#e9eee4;padding:20px;max-height:480px;overflow:auto}dialog{width:96vw;max-width:none;height:94vh;max-height:none;padding:0;border:1px solid #9fac9d;background:#f5f4ef;color:#20362b}dialog::backdrop{background:#1c3027b8}.viewer-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #bac6ba}.viewer-toolbar strong{flex:1}.viewer-toolbar button{min-height:44px;padding:8px 16px;background:#e5e9df;border:1px solid #9fac9d}.viewer-scroll{height:calc(100% - 92px);overflow:auto;padding:20px}.viewer-scroll img{display:block;max-width:100%;height:auto;margin:auto}.viewer-scroll.native img{max-width:none;width:auto;margin:0}.viewer-note{font-size:12px;margin:0;padding:0 20px}footer{margin:32px 0;color:#52634f}@media(max-width:760px){main{padding:24px 16px}.pair{grid-template-columns:1fr}.comparison{padding:28px 0}figcaption{padding:12px}.image-open{min-height:220px}.viewer-toolbar strong{flex-basis:100%}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}@media print{nav,dialog,.image-open:after{display:none}.comparison{break-inside:avoid}body{background:#fff}}'
+        + '</style></head><body><main><header><p class="eyebrow">NOTEMD / ENGINEERING ACCEPTANCE</p><h1>从语义保真，到完整呈现。<br><span lang="en">Compare the exports, not the promises.</span></h1><p class="intro">'
+        + manifest.cases.length + ' 组优化前后实证。点击图片放大，使用「原始尺寸」检查文字与连线；PNG、SVG 与输入 JSON 均可直接打开。 / Open each pair at native size and inspect its source.</p><p class="notice">' + escapeHtml(manifest.baselineDescription ?? '优化前来自基线源码；不是人为劣化图片。循环与缺失步骤保留在图内并明确标注，不以诊断面板替代图表。未调用真实 LLM，不能据此证明所有供应商的生成质量。 / Baseline source, deterministic fixtures; source caveats remain visible inside diagrams. No live provider claims.') + '</p><p class="version">BEFORE ' + escapeHtml(manifest.baselineLabel ?? manifest.baselineCommit) + '<br>AFTER ' + escapeHtml(manifest.currentLabel ?? 'working tree') + ' · ' + escapeHtml(manifest.generatedAt) + '</p><p><a href="manifest.json">完整证据清单 / Evidence manifest</a> · <a href="README.md">验收说明 / Acceptance notes</a></p></header>'
+        + '<nav aria-label="验收案例 / Acceptance cases">' + manifest.cases.map(entry => '<a href="#' + entry.id + '">' + escapeHtml(entry.title) + '</a>').join('') + '</nav>' + cases
+        + '<footer>目录可离线打开。请结合 PNG 原图、SVG 和测量判断；缩略图不代表原始导出清晰度。<br lang="en">Offline package. Native-size artifacts and measurements are the evidence, not thumbnail appearance.</footer></main>'
+        + '<dialog aria-labelledby="viewer-title"><div class="viewer-toolbar"><strong id="viewer-title"></strong><button type="button" id="viewer-fit">适应窗口 / Fit</button><button type="button" id="viewer-native">原始尺寸 / 1:1</button><button type="button" id="viewer-close">关闭 / Close</button></div><p class="viewer-note">Esc 关闭；原始尺寸可横向滚动。 / Esc closes; native view scrolls.</p><div class="viewer-scroll"><img alt=""></div></dialog>'
+        + '<script>const viewer=document.querySelector("dialog");const viewport=viewer.querySelector(".viewer-scroll");const image=viewport.querySelector("img");let opener;document.querySelectorAll(".image-open").forEach(button=>button.addEventListener("click",()=>{opener=button;image.src=button.dataset.image;image.alt=button.dataset.title;document.getElementById("viewer-title").textContent=button.dataset.title;viewport.classList.remove("native");viewer.showModal();}));document.getElementById("viewer-close").addEventListener("click",()=>viewer.close());document.getElementById("viewer-fit").addEventListener("click",()=>viewport.classList.remove("native"));document.getElementById("viewer-native").addEventListener("click",()=>viewport.classList.add("native"));viewer.addEventListener("close",()=>{image.removeAttribute("src");if(opener)opener.focus();});</script></body></html>';
+}
+
+module.exports = { renderDiagramAcceptancePage };

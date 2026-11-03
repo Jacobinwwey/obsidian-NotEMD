@@ -26,7 +26,21 @@ Minden diagramelőnézet külön nagyítási, mozgatási, illesztési és eredet
 | Fejlesztő | [Fejlesztői útmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/developers/overview) | Meglévő szerződések fordítása, tesztelése és bővítése |
 | Ügynök | [Ügynökútmutató](https://jacobinwwey.github.io/obsidian-NotEMD/hu/docs/agents/overview) | Négy támogatott exportparancs megismerése |
 
-**Verzió:** 1.9.14
+**Verzió:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Olvasható diagramok és megbízható előnézetek
+
+Az ER-diagramok megőrzik a mezőtípusokat, PK/FK/UK-kulcsokat, megjegyzéseket és a kapcsolatok számosságát. Közös táblamérések javítják a HTML/SVG és Draw.io exportot; a Mermaid megkülönbözteti az osztályok és résztvevők azonosítóit.
+
+A mentett .drawnix először a fő táblát állítja vissza, majd a Mermaid-mellékleteket. A Mermaid kezdetben a teljes diagramot mutatja. Az exportnapló szövege kijelölhető és másolható. A Windows Slidev ellenőrzi a natív Mermaid-összetevőket és észleli a hiányzó diagramokat.
+
+A helyreállítható fa- és sávhivatkozások diagnosztikával együtt továbbra is képet adnak. Rövid kapcsolatok és tömör elrendezések segítik az olvasást; az ellenőrzött szekvenciapélda az alsó résztvevőkkel együtt változatlan. Érvénytelen vagy veszélyes tartalom javítást igényelhet.
+
+Telepítse az 1.9.15 összetartozó main.js, manifest.json és styles.css fájljait, majd töltse újra. A jegyzetek és beállítások megmaradnak. A Drawnix ágak közötti nyilai külső átrendezés után statikusak maradnak.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Éles PDF-előnézet és export több formátumba
@@ -771,7 +785,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.14 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.15 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->

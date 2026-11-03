@@ -26,7 +26,21 @@ Elke diagramweergave heeft onafhankelijke zoom, verschuiving, passend maken en w
 | Ontwikkelaar | [Ontwikkelaarsgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/developers/overview) | Bestaande contracten bouwen, testen en uitbreiden |
 | Agent | [Agentgids](https://jacobinwwey.github.io/obsidian-NotEMD/nl/docs/agents/overview) | Vier ondersteunde exportopdrachten vinden |
 
-**Versie:** 1.9.14
+**Versie:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Leesbare diagrammen en betrouwbare voorbeelden
+
+ER-diagrammen behouden veldtypen, PK/FK/UK-sleutels, opmerkingen en relatiekardinaliteiten. Gedeelde tabelmetingen verbeteren HTML/SVG en Draw.io; Mermaid onderscheidt klasse- en deelnemersidentificaties.
+
+Een opgeslagen .drawnix herstelt eerst het hoofdbord en daarna de Mermaid-bijlagen. Mermaid toont aanvankelijk het hele diagram. Tekst in exportbewijzen is selecteerbaar en kopieerbaar. Windows Slidev controleert native Mermaid-componenten en ontbrekende diagrammen.
+
+Herstelbare boom- en baanverwijzingen behouden visuele uitvoer met diagnostiek. Korte verbindingen en compacte indelingen maken lezen eenvoudiger; het beoordeelde sequentievoorbeeld blijft ongewijzigd, inclusief deelnemers onderaan. Ongeldige of onveilige inhoud kan reparatie vereisen.
+
+Installeer bij elkaar horende main.js, manifest.json en styles.css van 1.9.15 en herlaad. Notities en instellingen blijven behouden. Drawnix-pijlen tussen takken blijven statisch na extern herschikken.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Scherpe PDF-voorbeelden en export naar meerdere formaten
@@ -774,7 +788,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.14 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.15 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 

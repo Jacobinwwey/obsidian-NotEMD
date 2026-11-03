@@ -587,6 +587,9 @@ export class DiagramPreviewModal extends Modal {
     }
 
     private async renderArtifactContents(container: HTMLElement, artifact: RenderArtifact, viewport: DiagramPreviewViewport): Promise<void> {
+        if (artifact.previewSvg?.content?.trim() && await this.tryRenderPreviewSvg(container, artifact)) {
+            return;
+        }
         if (supportsInlineMermaidPreview(artifact) || supportsInlineVegaLitePreview(artifact)) {
             this.renderIframePreview(container, artifact, viewport);
             return;

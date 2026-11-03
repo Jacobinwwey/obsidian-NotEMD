@@ -26,7 +26,21 @@
 | 開發者 | [開發指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/developers/overview) | 建置、測試並擴充現有契約 |
 | Agent | [整合指南](https://jacobinwwey.github.io/obsidian-NotEMD/zh-Hant/docs/agents/overview) | 探索四個受支援的匯出指令 |
 
-**版本:** 1.9.14
+**版本:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — 易讀圖形與可靠預覽
+
+ER 圖保留欄位類型、PK/FK/UK 鍵、註解與關係基數。統一表格量測改善 HTML/SVG 與 Draw.io 匯出；Mermaid 保持類別與參與者識別碼互不衝突。
+
+開啟已儲存的 .drawnix 時先還原主畫布，再顯示 Mermaid 附圖。Mermaid 預覽預設適配完整圖形。匯出記錄支援選取與複製文字。Windows Slidev 檢查原生 Mermaid 元件並偵測遺失的渲染圖形。
+
+可恢復的樹狀結構與泳道參照問題保留圖形輸出並附診斷。短連線與緊湊版面優先保障閱讀；已審閱的循序範例保持原樣，包括底部參與者。無效或不安全內容仍可能需要修復。
+
+安裝 1.9.15 配套的 main.js、manifest.json 與 styles.css 後重新載入。保留現有筆記與設定。Drawnix 跨分支箭頭在外部重排後仍為靜態。
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — 清晰 PDF 預覽與多格式匯出
@@ -845,7 +859,7 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 ---
 
 
-*Notemd v1.9.14 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.9.15 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 
 <!-- repo-chronicle:start -->

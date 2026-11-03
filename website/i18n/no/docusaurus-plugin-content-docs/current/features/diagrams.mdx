@@ -133,3 +133,15 @@ Logger samles på tvers av oppgavetrinn og gjenåpninger av forhåndsvisningen u
 ## 1.9.12 — Ryddigere diagnostikkvisning
 
 Når det ikke finnes feil, er hele diagnostikkpanelet sammenfoldet som standard, slik at bare tittelen og antall per alvorlighetsgrad vises. Feil åpner panelet automatisk. Utvid panelet og etikettgruppene for å lese alle meldinger og forslag. Ingen diagnostikkoppføringer fjernes. Bare feilgrupper åpnes automatisk; advarsler og informasjon forblir sammenfoldet selv om de deler etikett.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Lesbare diagrammer og pålitelige forhåndsvisninger
+
+ER-diagrammer bevarer felttyper, PK/FK/UK-nøkler, kommentarer og relasjoners kardinalitet. Felles tabellmål forbedrer HTML/SVG og Draw.io; Mermaid skiller klasse- og deltakeridentifikatorer.
+
+En lagret .drawnix gjenoppretter hovedtavlen før Mermaid-vedleggene. Mermaid viser først hele diagrammet. Tekst i eksportkvitteringer kan merkes og kopieres. Windows Slidev kontrollerer innebygde Mermaid-komponenter og oppdager manglende diagrammer.
+
+Gjenopprettbare tre- og banereferanser beholder grafisk utdata med diagnostikk. Korte forbindelser og kompakte oppsett gjør lesingen enklere; det gjennomgåtte sekvenseksemplet endres ikke, inkludert nederste deltakere. Ugyldig eller usikkert innhold kan kreve reparasjon.
+
+Installer samsvarende main.js, manifest.json og styles.css fra 1.9.15 og last inn på nytt. Notater og innstillinger beholdes. Drawnix-piler mellom grener forblir statiske etter ekstern omplassering.

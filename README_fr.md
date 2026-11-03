@@ -26,7 +26,21 @@ Chaque aperçu dispose de zoom, déplacement, ajustement et taille réelle indé
 | Développeur | [Guide de développement](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/developers/overview) | Compiler, tester et étendre les contrats existants |
 | Agent | [Guide des agents](https://jacobinwwey.github.io/obsidian-NotEMD/fr/docs/agents/overview) | Découvrir les quatre commandes d’export prises en charge |
 
-**Version:** 1.9.14
+**Version:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Diagrammes lisibles et aperçus fiables
+
+Les diagrammes ER conservent les types de champs, clés PK/FK/UK, commentaires et cardinalités. Des mesures communes améliorent les exports HTML/SVG et Draw.io ; Mermaid distingue les identifiants des classes et participants.
+
+Un fichier .drawnix enregistré rétablit le tableau principal avant les pièces Mermaid. Les aperçus Mermaid affichent initialement le diagramme entier. Les reçus d’export permettent la sélection et la copie du texte. Slidev sous Windows vérifie les composants Mermaid natifs et détecte les diagrammes manquants.
+
+Les références récupérables des arbres et couloirs conservent une sortie visuelle avec diagnostics. Des liens courts et une mise en page compacte favorisent la lecture ; l’exemple de séquence validé reste inchangé, participants inférieurs compris. Un contenu invalide ou dangereux peut nécessiter une réparation.
+
+Installez les fichiers assortis main.js, manifest.json et styles.css de 1.9.15, puis rechargez. Notes et réglages sont conservés. Les flèches Drawnix entre branches restent statiques après réorganisation externe.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Aperçus PDF nets et export multiformat
@@ -780,7 +794,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 ---
 
 
-*Notemd v1.9.14 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.9.15 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 

@@ -2,6 +2,11 @@
 
 Repository docs preview for `obsidian-NotEMD`.
 
+- [1.9.15 release notes (EN)](./releases/1.9.15.md)
+- [1.9.15 发布说明（中文）](./releases/1.9.15.zh-CN.md)
+- [Diagram preview and schema guide (EN)](./diagram-preview-and-schema-guide.md)
+- [图形预览与模式手册（中文）](./diagram-preview-and-schema-guide.zh-CN.md)
+
 ## Entry Points
 
 - [Docs Hub (EN)](./README.md)

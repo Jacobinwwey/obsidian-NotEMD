@@ -16,6 +16,9 @@ This directory contains repository-level documentation for maintainers and contr
 
 - [1.9.12 — Quieter diagnostic previews](./releases/1.9.12.md)
 
+- [1.9.15 — Readable diagrams and reliable previews](./releases/1.9.15.md)
+- [Diagram preview and schema guide](./diagram-preview-and-schema-guide.md)
+
 ## Current Truth And Layout
 
 - [Preview, presentation export and fork provenance — October 6](./maintainer/2026-10-06-preview-slidev-reliability.md)

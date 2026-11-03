@@ -26,7 +26,21 @@ Setiap pratinjau diagram memiliki zoom, geser, penyesuaian dan ukuran asli yang 
 | Pengembang | [Panduan pengembang](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/developers/overview) | Bangun, uji, dan perluas kontrak yang ada |
 | Agen | [Panduan agen](https://jacobinwwey.github.io/obsidian-NotEMD/id/docs/agents/overview) | Temukan empat perintah ekspor yang didukung |
 
-**Versi:** 1.9.14
+**Versi:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Diagram mudah dibaca dan pratinjau andal
+
+Diagram ER mempertahankan tipe kolom, kunci PK/FK/UK, komentar dan kardinalitas relasi. Pengukuran tabel bersama memperbaiki ekspor HTML/SVG dan Draw.io; Mermaid membedakan pengenal kelas dan peserta.
+
+Membuka .drawnix tersimpan memulihkan papan utama sebelum lampiran Mermaid. Pratinjau Mermaid awalnya menampilkan seluruh diagram. Teks catatan ekspor dapat dipilih dan disalin. Slidev Windows memeriksa komponen Mermaid native dan mendeteksi diagram yang hilang.
+
+Referensi pohon dan lajur yang dapat dipulihkan tetap menghasilkan gambar dengan diagnostik. Koneksi pendek dan tata letak ringkas mengutamakan keterbacaan; contoh urutan yang ditinjau tetap sama, termasuk peserta di bawah. Konten tidak valid atau tidak aman masih mungkin perlu diperbaiki.
+
+Pasang main.js, manifest.json dan styles.css yang sesuai dari 1.9.15, lalu muat ulang. Catatan dan pengaturan dipertahankan. Panah Drawnix antarcabang tetap statis setelah penataan ulang eksternal.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Pratinjau PDF tajam dan ekspor berbagai format
@@ -783,7 +797,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.14 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.15 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->

@@ -12,6 +12,7 @@ import type {
     DiagramTreePayload
 } from '../payloads/types';
 import { wrapMeasuredText } from './layoutSafety';
+import { describeTreeConnectivity, findMissingLaneEndpointCells } from '../payloads/sourceStructure';
 
 export interface LayoutSafetyDiagnostic {
     severity: 'info' | 'warning' | 'error';
@@ -210,7 +211,7 @@ function treeBudgets(payload: DiagramTreePayload): TextBudget[] {
 }
 
 export function diagnoseDiagramLayout(spec: DiagramSpec): LayoutSafetyDiagnostic[] {
-    const budgets: TextBudget[] = [
+    const budgets: TextBudget[] = spec.intent === 'erDiagram' ? [] : [
         textBudget('title', spec.title, 680, 1, true),
         textBudget('summary', spec.summary, 900, 2)
     ];
@@ -244,6 +245,11 @@ export function diagnoseDiagramLayout(spec: DiagramSpec): LayoutSafetyDiagnostic
     if (spec.intent === 'swimlane') budgets.push(...swimlaneBudgets(spec));
     if (spec.intent === 'quadrant') budgets.push(...quadrantBudgets(spec));
     const diagnostics = textDiagnostics(budgets);
+    const sourceNotice = payload?.kind === 'tree' ? describeTreeConnectivity(payload).notice
+        : payload?.kind === 'lane-grid' && findMissingLaneEndpointCells(payload).length > 0
+            ? 'Referenced steps were not provided; explicitly unknown placeholders retain the original handoffs.'
+            : undefined;
+    if (sourceNotice) diagnostics.push({ severity: 'warning', kind: 'source-structure', message: sourceNotice });
     const payloadSize = payload
         ? Object.values(payload).reduce((count, value) => count + (Array.isArray(value) ? value.length : 0), 0)
         : spec.nodes.length + (spec.edges?.length ?? 0);
@@ -251,7 +257,9 @@ export function diagnoseDiagramLayout(spec: DiagramSpec): LayoutSafetyDiagnostic
         diagnostics.push({
             severity: 'warning',
             kind: 'layout-density-budget',
-            message: `Diagram payload contains ${payloadSize} drawable items; labels may require optional detail elision.`,
+            message: payload?.kind === 'entity-relationship'
+                ? `ER payload contains ${payloadSize} entities and relationships; all fields remain visible in the measured scene.`
+                : `Diagram payload contains ${payloadSize} drawable items; labels may require optional detail elision.`,
             advice: 'Prefer a bounded sub-diagram or a less dense layout when the source contains multiple independent concerns.'
         });
     }

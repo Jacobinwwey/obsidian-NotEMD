@@ -559,6 +559,8 @@ describe('diagram command host adapter', () => {
             })
         });
         const panels = (result as any).artifact.previewPanels as Array<{ id: string; artifact: { previewSvg?: { content: string } } }>;
+        expect(panels[0].id).toBe('drawnix-primary');
+        expect(panels[0].artifact.previewSvg?.content).toContain('Root');
         const mermaidPanel = panels.find(panel => panel.id === 'source-visual-1');
         expect(mermaidPanel?.artifact.previewSvg?.content).not.toContain('<foreignObject');
         expect(diagramHost.openPreview).toHaveBeenCalledTimes(1);
@@ -675,8 +677,8 @@ describe('diagram command host adapter', () => {
         const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
 
         expect((result as any).artifact.previewPanels.map((panel: { id: string }) => panel.id))
-            .toEqual(['duplicate-visual']);
-        expect((result as any).artifact.previewPanels[0].artifact.previewSvg.content)
+            .toEqual(['drawnix-primary', 'duplicate-visual']);
+        expect((result as any).artifact.previewPanels[1].artifact.previewSvg.content)
             .toContain('First');
     });
 

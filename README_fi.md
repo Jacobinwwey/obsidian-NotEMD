@@ -26,7 +26,21 @@ Jokaisessa kaavion esikatselussa on oma zoomaus, siirto, sovitus ja todellinen k
 | Kehittäjä | [Kehittäjän opas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/developers/overview) | Käännä, testaa ja laajenna nykyisiä sopimuksia |
 | Agentti | [Agenttiopas](https://jacobinwwey.github.io/obsidian-NotEMD/fi/docs/agents/overview) | Löydä neljä tuettua vientikomentoa |
 
-**Versio:** 1.9.14
+**Versio:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Luettavat kaaviot ja luotettavat esikatselut
+
+ER-kaaviot säilyttävät kenttätyypit, PK/FK/UK-avaimet, kommentit ja suhteiden kardinaliteetit. Yhteiset taulukkomitat parantavat HTML/SVG- ja Draw.io-vientiä; Mermaid erottaa luokkien ja osallistujien tunnisteet.
+
+Tallennettu .drawnix palauttaa ensin päätaulun ja sitten Mermaid-liitteet. Mermaid sovittaa aluksi koko kaavion näkyviin. Vientitietueiden tekstiä voi valita ja kopioida. Windowsin Slidev tarkistaa natiivit Mermaid-komponentit ja havaitsee puuttuvat kaaviot.
+
+Palautettavat puu- ja rataviittaukset säilyttävät kuvan ja diagnostiikan. Lyhyet yhteydet ja tiivis asettelu helpottavat lukemista; tarkistettu sekvenssiesimerkki säilyy ennallaan myös alaosan osallistujien osalta. Virheellinen tai turvaton sisältö voi vaatia korjausta.
+
+Asenna yhteensopivat main.js, manifest.json ja styles.css versiosta 1.9.15 ja lataa uudelleen. Muistiinpanot ja asetukset säilyvät. Drawnixin haarojen väliset nuolet pysyvät staattisina ulkoisen uudelleenjärjestelyn jälkeen.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Tarkat PDF-esikatselut ja vienti useaan muotoon
@@ -774,7 +788,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.14 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.9.15 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->

@@ -26,7 +26,21 @@ Cada vista previa tiene zoom, desplazamiento, ajuste y tamaño real independient
 | Desarrollador | [Guía de desarrollo](https://jacobinwwey.github.io/obsidian-NotEMD/es/docs/developers/overview) | Compilar, probar y ampliar los contratos existentes |
 | Agente | [Guía de agentes](https://jacobinwwey.github.io/obsidian-NotEMD/es/docs/agents/overview) | Descubrir los cuatro comandos de exportación admitidos |
 
-**Versión:** 1.9.14
+**Versión:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Diagramas legibles y vistas previas fiables
+
+Los diagramas ER conservan tipos de campos, claves PK/FK/UK, comentarios y cardinalidades. Las medidas compartidas mejoran HTML/SVG y Draw.io; Mermaid distingue los identificadores de clases y participantes.
+
+Al abrir un .drawnix guardado se restaura primero el lienzo principal y después los adjuntos Mermaid. La vista inicial de Mermaid encaja el diagrama completo. Los registros de exportación permiten seleccionar y copiar texto. Slidev en Windows comprueba los componentes Mermaid nativos y detecta diagramas ausentes.
+
+Los problemas recuperables de referencias en árboles y carriles mantienen la salida visual con diagnósticos. Las conexiones cortas y los diseños compactos facilitan la lectura; el ejemplo de secuencia revisado no cambia, incluidos los participantes inferiores. El contenido inválido o inseguro puede requerir reparación.
+
+Instala main.js, manifest.json y styles.css de 1.9.15 juntos y recarga. Se conservan notas y ajustes. Las flechas Drawnix entre ramas siguen siendo estáticas tras reorganizarlas externamente.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Vistas previas PDF nítidas y exportación multiformato
@@ -780,7 +794,7 @@ Licencia MIT - Ver el archivo [LICENSE](LICENSE) para más detalles.
 ---
 
 
-*Notemd v1.9.14 - Mejora tu grafo de conocimiento en Obsidian con IA.*
+*Notemd v1.9.15 - Mejora tu grafo de conocimiento en Obsidian con IA.*
 
 
 

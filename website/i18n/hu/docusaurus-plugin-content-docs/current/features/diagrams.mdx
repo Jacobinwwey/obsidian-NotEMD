@@ -141,3 +141,15 @@ A naplók a bővítmény munkamenete alatt megmaradnak a feladatlépések és az
 ## 1.9.12 — Áttekinthetőbb diagnosztikai előnézet
 
 Ha nincs hiba, a teljes diagnosztikai panel alapértelmezetten össze van csukva, és csak a cím, valamint a súlyosság szerinti darabszámok láthatók. Hiba esetén a panel automatikusan kinyílik. Nyissa ki a panelt és a címkecsoportokat az összes üzenet és tanács elolvasásához. Egyetlen diagnosztikai bejegyzés sem törlődik. Csak a hibacsoportok nyílnak ki automatikusan; a figyelmeztetések és információk összecsukva maradnak akkor is, ha azonos a címkéjük.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Olvasható diagramok és megbízható előnézetek
+
+Az ER-diagramok megőrzik a mezőtípusokat, PK/FK/UK-kulcsokat, megjegyzéseket és a kapcsolatok számosságát. Közös táblamérések javítják a HTML/SVG és Draw.io exportot; a Mermaid megkülönbözteti az osztályok és résztvevők azonosítóit.
+
+A mentett .drawnix először a fő táblát állítja vissza, majd a Mermaid-mellékleteket. A Mermaid kezdetben a teljes diagramot mutatja. Az exportnapló szövege kijelölhető és másolható. A Windows Slidev ellenőrzi a natív Mermaid-összetevőket és észleli a hiányzó diagramokat.
+
+A helyreállítható fa- és sávhivatkozások diagnosztikával együtt továbbra is képet adnak. Rövid kapcsolatok és tömör elrendezések segítik az olvasást; az ellenőrzött szekvenciapélda az alsó résztvevőkkel együtt változatlan. Érvénytelen vagy veszélyes tartalom javítást igényelhet.
+
+Telepítse az 1.9.15 összetartozó main.js, manifest.json és styles.css fájljait, majd töltse újra. A jegyzetek és beállítások megmaradnak. A Drawnix ágak közötti nyilai külső átrendezés után statikusak maradnak.

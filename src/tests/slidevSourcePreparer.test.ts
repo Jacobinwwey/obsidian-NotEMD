@@ -121,6 +121,13 @@ describe('slidevSourcePreparer', () => {
         expect(app.vault.adapter.write).not.toHaveBeenCalledWith(expect.stringContaining('vite.config.mjs'), expect.anything());
     });
 
+    test('preserves an existing Mermaid component rather than installing the native import over it', async () => {
+        const app = createApp('# Architecture\n\n```mermaid\nflowchart TB\nA --> B\n```');
+        app.vault.adapter.exists.mockImplementation(async (name: string) => name.endsWith('/components/Mermaid.vue'));
+        await prepareSlidevExportSource(app, createFile('docs/architecture.md'), config);
+        expect(app.vault.adapter.write).not.toHaveBeenCalledWith(expect.stringContaining('/components/Mermaid.'), expect.anything());
+    });
+
     test('converts Obsidian image embeds into copied assets while preserving code and diagnosing missing embeds', async () => {
         const root = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-embeds-'));
         try {
@@ -320,6 +327,10 @@ describe('slidevSourcePreparer', () => {
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
             'export/_slidev-sources/global-bottom.vue',
             expect.stringContaining('querySelectorAll(".mermaid")')
+        );
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/_slidev-sources/components/Mermaid.ts',
+            expect.stringContaining("export { default } from '@slidev/client/builtin/Mermaid.vue'")
         );
     });
 

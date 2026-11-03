@@ -26,7 +26,21 @@ Ogni anteprima ha controlli indipendenti per zoom, spostamento, adattamento e di
 | Sviluppatore | [Guida per sviluppatori](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/developers/overview) | Compilare, testare ed estendere i contratti esistenti |
 | Agente | [Guida per agenti](https://jacobinwwey.github.io/obsidian-NotEMD/it/docs/agents/overview) | Scoprire i quattro comandi di esportazione supportati |
 
-**Versione:** 1.9.14
+**Versione:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Diagrammi leggibili e anteprime affidabili
+
+I diagrammi ER conservano tipi dei campi, chiavi PK/FK/UK, commenti e cardinalità. Misure condivise migliorano HTML/SVG e Draw.io; Mermaid distingue gli identificatori di classi e partecipanti.
+
+Aprendo un .drawnix salvato si ripristina prima la lavagna principale e poi gli allegati Mermaid. Le anteprime Mermaid adattano inizialmente l’intero diagramma. I registri di esportazione consentono selezione e copia del testo. Slidev su Windows verifica i componenti Mermaid nativi e rileva i diagrammi mancanti.
+
+I riferimenti recuperabili di alberi e corsie mantengono un risultato visivo con diagnostica. Collegamenti brevi e layout compatti favoriscono la lettura; l’esempio di sequenza revisionato resta invariato, inclusi i partecipanti inferiori. Contenuti non validi o non sicuri possono richiedere riparazione.
+
+Installa insieme main.js, manifest.json e styles.css di 1.9.15 e ricarica. Note e impostazioni restano. Le frecce Drawnix tra rami rimangono statiche dopo riordini esterni.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Anteprime PDF nitide ed esportazione multiformato
@@ -780,7 +794,7 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 ---
 
 
-*Notemd v1.9.14 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+*Notemd v1.9.15 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
 
 
 

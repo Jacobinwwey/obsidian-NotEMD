@@ -26,7 +26,21 @@ Fiecare previzualizare are zoom, deplasare, încadrare și dimensiune reală ind
 | Dezvoltator | [Ghid de dezvoltare](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/developers/overview) | Compilează, testează și extinde contractele existente |
 | Agent | [Ghid pentru agenți](https://jacobinwwey.github.io/obsidian-NotEMD/ro/docs/agents/overview) | Descoperă cele patru comenzi de export acceptate |
 
-**Versiune:** 1.9.14
+**Versiune:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Diagrame lizibile și previzualizări fiabile
+
+Diagramele ER păstrează tipurile câmpurilor, cheile PK/FK/UK, comentariile și cardinalitățile relațiilor. Măsurile comune ale tabelelor îmbunătățesc HTML/SVG și Draw.io; Mermaid distinge identificatorii claselor și participanților.
+
+Deschiderea unui .drawnix salvat restabilește tabla principală înaintea anexelor Mermaid. Previzualizarea Mermaid încadrează inițial întreaga diagramă. Textul înregistrărilor de export poate fi selectat și copiat. Slidev pe Windows verifică componentele Mermaid native și detectează diagramele lipsă.
+
+Referințele recuperabile din arbori și culoare păstrează ieșirea vizuală cu diagnosticare. Legăturile scurte și aranjamentele compacte ajută lectura; exemplul de secvență verificat rămâne neschimbat, inclusiv participanții de jos. Conținutul invalid sau nesigur poate necesita reparare.
+
+Instalați împreună main.js, manifest.json și styles.css din 1.9.15 și reîncărcați. Notele și setările se păstrează. Săgețile Drawnix între ramuri rămân statice după rearanjarea externă.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Previzualizări PDF clare și export în mai multe formate
@@ -771,7 +785,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.14 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.15 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->

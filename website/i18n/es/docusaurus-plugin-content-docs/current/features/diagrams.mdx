@@ -143,3 +143,15 @@ Los registros se acumulan entre etapas y al reabrir la vista previa durante la s
 ## 1.9.12 — Vista previa de diagnósticos más despejada
 
 Si no hay errores, todo el panel de diagnóstico aparece contraído; solo se ven el título y los recuentos por gravedad. Los errores abren el panel automáticamente. Expanda el panel y sus grupos de etiquetas para leer todos los mensajes y sugerencias. No se elimina ningún registro de diagnóstico. Solo se abren automáticamente los grupos de errores; los de advertencias e información siguen contraídos, aunque compartan etiqueta.
+
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## 1.9.15 — Diagramas legibles y vistas previas fiables
+
+Los diagramas ER conservan tipos de campos, claves PK/FK/UK, comentarios y cardinalidades. Las medidas compartidas mejoran HTML/SVG y Draw.io; Mermaid distingue los identificadores de clases y participantes.
+
+Al abrir un .drawnix guardado se restaura primero el lienzo principal y después los adjuntos Mermaid. La vista inicial de Mermaid encaja el diagrama completo. Los registros de exportación permiten seleccionar y copiar texto. Slidev en Windows comprueba los componentes Mermaid nativos y detecta diagramas ausentes.
+
+Los problemas recuperables de referencias en árboles y carriles mantienen la salida visual con diagnósticos. Las conexiones cortas y los diseños compactos facilitan la lectura; el ejemplo de secuencia revisado no cambia, incluidos los participantes inferiores. El contenido inválido o inseguro puede requerir reparación.
+
+Instala main.js, manifest.json y styles.css de 1.9.15 juntos y recarga. Se conservan notas y ajustes. Las flechas Drawnix entre ramas siguen siendo estáticas tras reorganizarlas externamente.

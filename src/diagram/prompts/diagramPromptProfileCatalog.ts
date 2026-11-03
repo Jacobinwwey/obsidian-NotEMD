@@ -40,7 +40,7 @@ const PROFILE_SEEDS: readonly [string, DiagramIntent, DiagramPayloadKind, string
     ['sequence', 'sequence', 'legacy', 'preserve participant order and request/response direction'],
     ['state', 'stateDiagram', 'legacy', 'use named states and explicit transitions'],
     ['class', 'classDiagram', 'legacy', 'represent type ownership and associations without implementation detail'],
-    ['entity-relationship', 'erDiagram', 'legacy', 'keep entity attributes and cardinality explicit'],
+    ['entity-relationship', 'erDiagram', 'entity-relationship', 'Preserve every physical field, original SQL type and source comment inside its entity table. Use independent endpoint cardinalities, explicit key roles and resolvable FK references. Do not invent primary keys, foreign keys, types, optionality or identifying relationships.'],
     ['canvas-map', 'canvasMap', 'canvas-map', 'group related concepts spatially without inventing coordinates'],
     ['data-chart', 'dataChart', 'quantitative', 'choose a supported chart variant only when source data supports it'],
     ['radar-chart', 'radar', 'radar', 'use one point per declared axis and one shared scale'],
@@ -71,10 +71,10 @@ const PROFILE_SEEDS: readonly [string, DiagramIntent, DiagramPayloadKind, string
 
 export const DIAGRAM_PROMPT_PROFILES: readonly DiagramPromptProfile[] = PROFILE_SEEDS.map(([id, intent, payloadKind, semanticRule]) => ({
     id,
-    version: 1,
+    version: payloadKind === 'entity-relationship' ? 2 : 1,
     intent,
     payloadKind,
-    requiredFields: ['intent', 'title'],
+    requiredFields: payloadKind === 'entity-relationship' ? ['intent', 'title', 'payload.entities[].attributes', 'payload.relationships[].fromCardinality', 'payload.relationships[].toCardinality'] : ['intent', 'title'],
     hardLimits: PROFILE_LIMITS,
     semanticRules: [semanticRule],
     targetRules: ['The renderer owns geometry, styles, coordinates, and serialization.'],
@@ -84,6 +84,8 @@ export const DIAGRAM_PROMPT_PROFILES: readonly DiagramPromptProfile[] = PROFILE_
 
 function densityBudgetForPayload(payloadKind: DiagramPayloadKind): DiagramDensityBudget {
     switch (payloadKind) {
+        case 'entity-relationship':
+            return { maxNodes: 128, maxEdges: 256, maxRows: 128, allowOptionalDetailElision: false };
         case 'topology':
             return { maxNodes: 24, maxEdges: 40, maxZones: 6, maxLabelWidth: 240, maxLabelLines: 2, allowOptionalDetailElision: true };
         case 'lane-grid':

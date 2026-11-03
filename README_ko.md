@@ -26,7 +26,21 @@
 | 개발자 | [개발 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/developers/overview) | 기존 계약에 따라 빌드, 테스트, 확장하기 |
 | 에이전트 | [에이전트 안내](https://jacobinwwey.github.io/obsidian-NotEMD/ko/docs/agents/overview) | 지원되는 네 가지 내보내기 명령 확인하기 |
 
-**버전:** 1.9.14
+**버전:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — 읽기 쉬운 다이어그램과 안정적인 미리보기
+
+ER 다이어그램은 필드 형식, PK/FK/UK 키, 주석과 관계 카디널리티를 보존합니다. 공통 표 측정으로 HTML/SVG 및 Draw.io 내보내기를 개선하고 Mermaid 클래스와 참여자는 서로 다른 식별자를 사용합니다.
+
+저장한 .drawnix를 열면 기본 보드를 먼저 복원한 후 Mermaid 첨부 그림을 표시합니다. Mermaid는 처음에 전체 그림에 맞춰 표시됩니다. 내보내기 기록의 텍스트를 선택하고 복사할 수 있습니다. Windows Slidev는 네이티브 Mermaid 구성 요소와 누락된 그림을 확인합니다.
+
+복구 가능한 트리 및 레인 참조 문제는 진단과 함께 시각 출력을 유지합니다. 짧은 연결과 간결한 배치로 읽기를 우선하며 검토한 시퀀스 예제는 하단 참여자까지 그대로 유지합니다. 유효하지 않거나 안전하지 않은 내용은 수정이 필요할 수 있습니다.
+
+1.9.15의 main.js, manifest.json, styles.css를 함께 설치하고 다시 로드하세요. 기존 노트와 설정은 보존됩니다. Drawnix 분기 간 화살표는 외부 재배치 후에도 정적입니다.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — 선명한 PDF 미리보기와 여러 형식 내보내기
@@ -780,7 +794,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 ---
 
 
-*Notemd v1.9.14 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.9.15 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 

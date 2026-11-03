@@ -594,6 +594,19 @@ describe('diagram preview modal', () => {
         expect(Notice).toHaveBeenCalledWith('Diagram source saved to Notes/Topic_diagram.json');
     });
 
+    test('uses the canonical Mermaid SVG for history and direct previews before creating an iframe', async () => {
+        const previewSvg = { content: '<svg viewBox="0 0 4200 1600"><text>Complete diagram</text></svg>', mimeType: 'image/svg+xml' };
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({ previewSvg }), 'en'));
+        modal.onOpen();
+        await flushPromises();
+        expect(previewExport.renderPreviewArtifactSvg).toHaveBeenCalledWith(
+            expect.objectContaining({ previewSvg }), expect.anything()
+        );
+        expect(findByTag(modal.contentEl, 'iframe')).toBeNull();
+        expect(DiagramPreviewViewport).toHaveBeenCalledTimes(1);
+        modal.onClose();
+    });
+
     test('routes mermaid previews through iframe host instead of plugin-runtime svg rendering', async () => {
         const modal = mountModal(new DiagramPreviewModal(mockApp, {
             ...createSession({}, 'Notes/Topic.md', 'dark'),
@@ -1071,7 +1084,7 @@ describe('diagram preview modal', () => {
         await flushPromises();
 
         expect(findByClass(modal.contentEl, 'is-svg-preview')).not.toBeNull();
-        expect(collectByTag(modal.contentEl, 'iframe')).toHaveLength(1);
+        expect(collectByTag(modal.contentEl, 'iframe')).toHaveLength(0);
     });
 
     test('routes vega-lite previews through iframe host instead of plugin-runtime svg rendering', async () => {
@@ -1137,7 +1150,7 @@ describe('diagram preview modal', () => {
         expect(buttons.filter(button => button.text === 'Export')).toHaveLength(1);
 
         const iframe = findByTag(modal.contentEl, 'iframe');
-        expect(iframe?.sandbox).toBe('allow-same-origin');
+        expect(iframe).toBeNull();
     });
 
     test('renders source-only artifacts without iframe or svg export actions', async () => {

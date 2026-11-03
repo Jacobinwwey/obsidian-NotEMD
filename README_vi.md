@@ -26,7 +26,21 @@ Mỗi khung xem sơ đồ có thu phóng, di chuyển, vừa khung và kích th�
 | Nhà phát triển | [Hướng dẫn phát triển](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/developers/overview) | Biên dịch, kiểm thử và mở rộng hợp đồng hiện có |
 | Tác nhân | [Hướng dẫn tác nhân](https://jacobinwwey.github.io/obsidian-NotEMD/vi/docs/agents/overview) | Tìm bốn lệnh xuất được hỗ trợ |
 
-**Phiên bản:** 1.9.14
+**Phiên bản:** 1.9.15
+<!-- notemd-diagram-recovery-1.9.15 -->
+
+## Notemd 1.9.15 — Sơ đồ dễ đọc và bản xem trước đáng tin cậy
+
+Sơ đồ ER giữ kiểu trường, khóa PK/FK/UK, chú thích và lực lượng quan hệ. Phép đo bảng dùng chung cải thiện xuất HTML/SVG và Draw.io; Mermaid phân biệt mã định danh lớp và đối tượng tham gia.
+
+Mở .drawnix đã lưu sẽ khôi phục bảng chính trước các hình Mermaid đính kèm. Bản xem trước Mermaid ban đầu hiển thị toàn bộ sơ đồ. Có thể chọn và sao chép chữ trong bản ghi xuất. Slidev trên Windows kiểm tra thành phần Mermaid gốc và phát hiện sơ đồ bị thiếu.
+
+Tham chiếu cây và làn có thể phục hồi vẫn tạo hình kèm chẩn đoán. Đường nối ngắn và bố cục gọn ưu tiên khả năng đọc; ví dụ tuần tự đã duyệt giữ nguyên, kể cả đối tượng phía dưới. Nội dung không hợp lệ hoặc không an toàn vẫn có thể cần sửa.
+
+Cài đồng bộ main.js, manifest.json và styles.css của 1.9.15 rồi tải lại. Ghi chú và thiết lập được giữ nguyên. Mũi tên Drawnix giữa các nhánh vẫn tĩnh sau khi sắp xếp lại bên ngoài.
+
+[1.9.15](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/tag/1.9.15)
+
 <!-- notemd-preview-export-1.9.14 -->
 
 ## Notemd 1.9.14 — Xem trước PDF sắc nét và xuất nhiều định dạng
@@ -775,7 +789,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.9.14 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.9.15 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 

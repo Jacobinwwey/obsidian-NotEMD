@@ -431,13 +431,35 @@ const EXECUTABLE_DIAGRAM_EXAMPLES: readonly DiagramExampleDefinition[] = [
         selectionRationale: 'Use when entity attributes and cardinality carry the explanation.',
         sourceIntent: 'erDiagram',
         spec: {
+            schemaVersion: 2,
             intent: 'erDiagram',
             title: 'Artifact schema',
-            nodes: [
-                { id: 'artifact', label: 'Artifact', children: [{ id: 'artifact-id', label: 'id', kind: 'uuid' }] },
-                { id: 'panel', label: 'Panel', children: [{ id: 'panel-id', label: 'id', kind: 'uuid' }] }
-            ],
-            edges: [{ from: 'artifact', to: 'panel', relation: 'one-to-many', label: 'contains' }]
+            summary: 'Source-backed keys, field types and independent relationship endpoints.',
+            nodes: [], edges: [],
+            payload: {
+                kind: 'entity-relationship',
+                entities: [
+                    { id: 'artifact', label: 'Artifact', attributes: [
+                        { name: 'id', type: 'uuid', keys: ['PK'] },
+                        { name: 'source_path', type: 'varchar(255)', keys: ['UK'], comment: 'Vault-relative source path' },
+                        { name: 'created_at', type: 'timestamp', comment: 'Creation time, UTC' }
+                    ] },
+                    { id: 'panel', label: 'Panel', attributes: [
+                        { name: 'artifact_id', type: 'uuid', keys: ['PK', 'FK'], references: { entity: 'artifact', attribute: 'id' } },
+                        { name: 'position', type: 'integer', keys: ['PK'], comment: 'Part of composite primary key' },
+                        { name: 'caption', type: 'varchar(255)' }
+                    ] },
+                    { id: 'delivery', label: 'Delivery receipt', attributes: [
+                        { name: 'id', type: 'uuid', keys: ['PK'] },
+                        { name: 'artifact_id', type: 'uuid', keys: ['FK'], references: { entity: 'artifact', attribute: 'id' } },
+                        { name: 'size_kb', type: 'decimal(12,2)', comment: 'Verified output size' }
+                    ] }
+                ],
+                relationships: [
+                    { from: 'artifact', to: 'panel', label: 'contains', fromCardinality: 'one', toCardinality: 'zero-or-many', identifying: true },
+                    { from: 'artifact', to: 'delivery', label: 'delivered as', fromCardinality: 'one', toCardinality: 'zero-or-many', identifying: false }
+                ]
+            }
         }
     },
     {
